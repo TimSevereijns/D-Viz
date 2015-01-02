@@ -40,6 +40,8 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
 
       TreeNode<T>& operator=(TreeNode<T> other);
 
+      bool operator!() { return other.m_data != nullptr; };
+
       /**
        * @brief PrependChild        Adds a child node as the first child of this node.
        * @param data                The underlying data to be stored in the node.
@@ -68,25 +70,25 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
        * @brief GetFirstChild       Retrieves the first child of this node.
        * @returns A reference to this node's first child.
        */
-      TreeNode<T>& GetFirstChild() const;
+      std::shared_ptr<TreeNode<T>> GetFirstChild() const;
 
       /**
        * @brief GetLastChild        Retrieves the last child of this node.
        * @return A reference to this node's last child.
        */
-      TreeNode<T>& GetLastChild() const;
+      std::shared_ptr<TreeNode<T>> GetLastChild() const;
 
       /**
        * @brief GetNextSibling      Retrieves the node that follows this node.
        * @return A reference to this node's next sibling.
        */
-      TreeNode<T>& GetNextSibling() const;
+      std::shared_ptr<TreeNode<T>> GetNextSibling() const;
 
       /**
        * @brief GetPreviousSibling  Retrieves the node before this node.
        * @returns A refenence to this node's previous sibling.
        */
-      TreeNode<T>& GetPreviousSibling() const;
+      std::shared_ptr<TreeNode<T>> GetPreviousSibling() const;
 
       /**
        * @brief HasChildren         Indicates whether this node has children.
@@ -233,47 +235,27 @@ T TreeNode<T>::GetData() const
 }
 
 template<typename T>
-TreeNode<T>& TreeNode<T>::GetFirstChild() const
+std::shared_ptr<TreeNode<T>> TreeNode<T>::GetFirstChild() const
 {
-   if (!m_firstChild)
-   {
-      throw std::range_error("Node does not appear to have a child!");
-   }
-
-   return *m_firstChild;
+   return m_firstChild;
 }
 
 template<typename T>
-TreeNode<T>& TreeNode<T>::GetLastChild() const
+std::shared_ptr<TreeNode<T>> TreeNode<T>::GetLastChild() const
 {
-   if (!m_lastChild)
-   {
-      throw std::range_error("Node does not appear to have a child!");
-   }
-
-   return *m_lastChild;
+   return m_lastChild;
 }
 
 template<typename T>
-TreeNode<T>& TreeNode<T>::GetNextSibling() const
+std::shared_ptr<TreeNode<T>> TreeNode<T>::GetNextSibling() const
 {
-   if (!m_nextSibling)
-   {
-      throw std::range_error("Next sibling does not appear to exist!");
-   }
-
-   return *m_nextSibling;
+   return m_nextSibling;
 }
 
 template<typename T>
-TreeNode<T>& TreeNode<T>::GetPreviousSibling() const
+std::shared_ptr<TreeNode<T>> TreeNode<T>::GetPreviousSibling() const
 {
-   if (!m_previousSibling)
-   {
-      throw std::range_error("Previous sibling does not appear to exist!");
-   }
-
-   return *m_previousSibling;
+   return m_previousSibling;
 }
 
 template<typename T>
@@ -296,17 +278,17 @@ bool TreeNode<T>::HasChildren() const
 template<typename T>
 class Tree
 {
-   class Iterator;
-   class SiblingIterator;
-   class PostOrderIterator;
-
    public:
+      class Iterator;
+      class SiblingIterator;
+      class PostOrderIterator;
+
       explicit Tree();
       explicit Tree(T data);
       explicit Tree(const Tree<T>& otherTree);
       ~Tree();
 
-      TreeNode<T>& GetHead() const;
+      std::shared_ptr<TreeNode<T>> GetHead() const;
 
       /**
        * @brief The Iterator class
@@ -318,9 +300,9 @@ class Tree
       {
          public:
             explicit Iterator();
-            explicit Iterator(TreeNode<T> node);
+            explicit Iterator(std::shared_ptr<TreeNode<T>> node);
 
-            T& operator*() const;
+            T operator*() const;
             T* operator->() const;
 
             SiblingIterator begin() const;
@@ -329,7 +311,7 @@ class Tree
             bool operator==(const Iterator& iterator) const;
             bool operator!=(const Iterator& iterator) const;
 
-         private:
+         protected:
             std::shared_ptr<TreeNode<T>> m_node;
       };
 
@@ -340,9 +322,9 @@ class Tree
       {
          public:
             explicit SiblingIterator();
-            explicit SiblingIterator(TreeNode<T> node);
-            explicit SiblingIterator(const SiblingIterator& iterator);
-            explicit SiblingIterator(const Iterator& iterator);
+//            explicit SiblingIterator(TreeNode<T> node);
+//            explicit SiblingIterator(const SiblingIterator& iterator);
+//            explicit SiblingIterator(const Iterator& iterator);
 
             SiblingIterator& operator++();
             SiblingIterator& operator--();
@@ -361,11 +343,12 @@ class Tree
       {
          public:
             explicit PostOrderIterator();
-            explicit PostOrderIterator(TreeNode<T> node);
-            explicit PostOrderIterator(const PostOrderIterator& iterator);
-            explicit PostOrderIterator(const Iterator& iterator);
+            explicit PostOrderIterator(std::shared_ptr<TreeNode<T>> node);
+//            explicit PostOrderIterator(const PostOrderIterator& iterator);
+//            explicit PostOrderIterator(const Iterator& iterator);
 
-            PostOrderIterator& operator++();
+            PostOrderIterator operator++(int increment); // post-fix operator
+            PostOrderIterator& operator++();             // pre-fix operator
             PostOrderIterator& operator--();
 
          private:
@@ -419,9 +402,9 @@ Tree<T>::~Tree()
 }
 
 template<typename T>
-TreeNode<T>& Tree<T>::GetHead() const
+std::shared_ptr<TreeNode<T>> Tree<T>::GetHead() const
 {
-   return *m_head;
+   return m_head;
 }
 
 template<typename T>
@@ -447,12 +430,7 @@ typename Tree<T>::SiblingIterator Tree<T>::end(const typename Tree<T>::Iterator&
 template<typename T>
 typename Tree<T>::PostOrderIterator Tree<T>::begin() const
 {
-   if (iterator.m_node->m_firstChild == nullptr)
-   {
-      return end(iterator);
-   }
-
-   return iterator.m_node->m_firstChild;
+   return Tree<T>::PostOrderIterator(m_head);
 }
 
 template<typename T>
@@ -472,7 +450,13 @@ Tree<T>::Iterator::Iterator()
 }
 
 template<typename T>
-T& Tree<T>::Iterator::operator*() const
+Tree<T>::Iterator::Iterator(std::shared_ptr<TreeNode<T>> node)
+   : m_node(node)
+{
+}
+
+template<typename T>
+T Tree<T>::Iterator::operator*() const
 {
    return m_node->GetData();
 }
@@ -561,24 +545,44 @@ Tree<T>::PostOrderIterator::PostOrderIterator()
 }
 
 template<typename T>
+Tree<T>::PostOrderIterator::PostOrderIterator(std::shared_ptr<TreeNode<T>> node)
+   : Iterator(node), m_parent(nullptr)
+{
+}
+
+template<typename T>
+typename Tree<T>::PostOrderIterator Tree<T>::PostOrderIterator::operator++(int increment)
+{
+   auto result = *this;
+   ++(*this);
+
+   return result;
+}
+
+template<typename T>
 typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator++()
 {
    assert(m_node);
 
    // TODO: Add visitation boolean!
 
-   if (!m_node->m_nextSibling)
-   {
-      m_node = m_node->m_parent;
-   }
-   else
-   {
-      m_node = m_node->m_nextSibling;
+//   if (m_node->GetNextSibling() == nullptr)
+//   {
+//      m_node = m_node->GetParent();
+//   }
+//   else
+//   {
+//      m_node = m_node->GetNextSibling();
 
-      while (m_node->m_firstChild)
-      {
-         m_node = m_node->m_firstChild;
-      }
+//      while (m_node->GetFirstChild())
+//      {
+//         m_node = m_node->GetFirstChild();
+//      }
+//   }
+
+   while (m_node->GetFirstChild())
+   {
+      m_node = m_node->GetFirstChild();
    }
 
    return *this;

@@ -13,22 +13,23 @@ int main(int argc, char* argv[])
    mainWindow.show();
 
    std::unique_ptr<Tree<int>> tree(new Tree<int>(99));
-   tree->GetHead().AppendChild(1);
-   tree->GetHead().AppendChild(2);
-   tree->GetHead().PrependChild(0);
-   tree->GetHead().GetFirstChild().AppendChild(3);
+   tree->GetHead()->AppendChild(1);
+   tree->GetHead()->AppendChild(2);
+   tree->GetHead()->PrependChild(0);
+   tree->GetHead()->GetFirstChild()->AppendChild(3);
 
-   std::cout << tree->GetHead().GetData() << std::endl;
-   std::cout << tree->GetHead().GetFirstChild().GetData() << std::endl;
-   std::cout << tree->GetHead().GetFirstChild().GetNextSibling().GetData() << std::endl;
-   std::cout << tree->GetHead().GetFirstChild().GetNextSibling().GetNextSibling().GetData() << std::endl;
-   std::cout << tree->GetHead().GetFirstChild().GetParent()->GetData() << std::endl;
-   std::cout << tree->GetHead().GetLastChild().GetParent()->GetData() << std::endl;
-   std::cout << tree->GetHead().GetFirstChild().GetFirstChild().GetData() << std::endl;
+   std::cout << tree->GetHead()->GetData() << std::endl;
+   std::cout << tree->GetHead()->GetFirstChild()->GetData() << std::endl;
+   std::cout << tree->GetHead()->GetFirstChild()->GetNextSibling()->GetData() << std::endl;
+   std::cout << tree->GetHead()->GetFirstChild()->GetNextSibling()->GetNextSibling()->GetData() << std::endl;
+   std::cout << tree->GetHead()->GetFirstChild()->GetParent()->GetData() << std::endl;
+   std::cout << tree->GetHead()->GetLastChild()->GetParent()->GetData() << std::endl;
+   std::cout << tree->GetHead()->GetFirstChild()->GetFirstChild()->GetData() << std::endl;
 
+   Tree<int>::PostOrderIterator postOrder = tree->begin();
+   postOrder++;
 
-   //Tree<int>::Iterator itr = tree->begin();
-   //auto itr = tree->begin();
+   std::cout << *postOrder << std::endl;
 
    return application.exec();
 }
