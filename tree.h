@@ -41,40 +41,63 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
       TreeNode<T>& operator=(TreeNode<T> other);
 
       /**
-       * @brief PrependChild        Adds a child node as the first child of the node.
+       * @brief PrependChild        Adds a child node as the first child of this node.
        * @param data                The underlying data to be stored in the node.
        */
       void PrependChild(T data);
 
       /**
-       * @brief AppendChild         Adds a child node as the last child of the node.
+       * @brief AppendChild         Adds a child node as the last child of this node.
        * @param data                The underlying data to be stored in the node.
        */
       void AppendChild(T data);
 
       /**
-       * @brief GetData             Retrieves the data stored in the node.
+       * @brief GetData             Retrieves the data stored in this node.
        * @returns The underlying data stored in the node.
        */
       T GetData() const;
 
       /**
-       * @brief GetParent           Retrieves the parent of the node.
-       * @returns A shared_ptr to the parent of the node if it exists; nullptr otherwise.
+       * @brief GetParent           Retrieves the parent of this node.
+       * @returns A shared_ptr to this node's parent, if it exists; nullptr otherwise.
        */
       std::shared_ptr<TreeNode<T>> GetParent() const;
 
       /**
-       * @brief GetFirstChild       Retrieves the first child of the node.
-       * @returns A reference to the first child of the current node.
+       * @brief GetFirstChild       Retrieves the first child of this node.
+       * @returns A reference to this node's first child.
        */
       TreeNode<T>& GetFirstChild() const;
+
+      /**
+       * @brief GetLastChild        Retrieves the last child of this node.
+       * @return A reference to this node's last child.
+       */
       TreeNode<T>& GetLastChild() const;
+
+      /**
+       * @brief GetNextSibling      Retrieves the node that follows this node.
+       * @return A reference to this node's next sibling.
+       */
       TreeNode<T>& GetNextSibling() const;
+
+      /**
+       * @brief GetPreviousSibling  Retrieves the node before this node.
+       * @returns A refenence to this node's previous sibling.
+       */
       TreeNode<T>& GetPreviousSibling() const;
 
+      /**
+       * @brief HasChildren         Indicates whether this node has children.
+       * @returns True if this node has children.
+       */
       bool HasChildren() const;
 
+      /**
+       * @brief GetChildCount       Retrieves the child count of the current node.
+       * @returns The number of children that this node has.
+       */
       unsigned int GetChildCount() const;
 };
 
@@ -287,6 +310,9 @@ class Tree
 
       /**
        * @brief The Iterator class
+       *
+       * This is the base iterator class that all other iterators (sibling, post-, pre-, in-order)
+       * will derive from.
        */
       class Iterator
       {
@@ -339,8 +365,6 @@ class Tree
             explicit PostOrderIterator(const PostOrderIterator& iterator);
             explicit PostOrderIterator(const Iterator& iterator);
 
-            bool operator==(const PostOrderIterator& iterator) const;
-            bool operator!=(const PostOrderIterator& iterator) const;
             PostOrderIterator& operator++();
             PostOrderIterator& operator--();
 
@@ -351,7 +375,16 @@ class Tree
       SiblingIterator begin(const Iterator& iterator) const;
       SiblingIterator end(const Iterator& iterator) const;
 
+      /**
+       * @brief begin               Creates an iterator pointing to the head of the tree.
+       * @returns A post-order iterator that will iterator over all nodes in the tree.
+       */
       PostOrderIterator begin() const;
+
+      /**
+       * @brief end                 Creates an iterator that points to the end of the tree.
+       * @returns A post-order iterator.
+       */
       PostOrderIterator end() const;
 
    private:
