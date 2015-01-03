@@ -52,5 +52,23 @@ int main(int argc, char* argv[])
       std::cout << *postOrder << std::endl; // Should be 1
    }
 
+   postOrder++;
+   if (postOrder != tree->end())
+   {
+      std::cout << *postOrder << std::endl; // Should be 2
+   }
+
+   postOrder++;
+   if (postOrder != tree->end())
+   {
+      std::cout << *postOrder << std::endl; // Should be 99
+   }
+
+   postOrder++;
+   if (postOrder == tree->end())
+   {
+      std::cout << "Reached the end" << std::endl;
+   }
+
    return application.exec();
 }

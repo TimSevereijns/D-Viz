@@ -577,23 +577,16 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator++()
 {
    assert(m_node);
 
-   // TODO: Add visitation boolean!
+   if (m_node->HasChildren() && !m_node->HasNodeBeenVisited())
+   {
+      while (m_node->GetFirstChild())
+      {
+         m_node = m_node->GetFirstChild();
+      }
 
-//   if (!m_node->GetNextSibling())
-//   {
-//      m_node = m_node->GetParent();
-//   }
-//   else
-//   {
-//      m_node = m_node->GetNextSibling();
-
-//      while (m_node->GetFirstChild())
-//      {
-//         m_node = m_node->GetFirstChild();
-//      }
-//   }
-
-   if ((m_node->GetNextSibling() || !m_node->HasChildren()) && !m_node->HasNodeBeenVisited())
+       m_node->SetVisited(true);
+   }
+   else if (m_node->GetNextSibling())
    {
       m_node = m_node->GetNextSibling();
 
@@ -604,20 +597,14 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator++()
 
       m_node->SetVisited(true);
    }
-   else if (m_node->HasChildren() && !m_node->HasNodeBeenVisited())
-   {
-      while (m_node->GetFirstChild())
-      {
-         m_node = m_node->GetFirstChild();
-      }
-
-       m_node->SetVisited(true);
-   }
    else
    {
       m_node = m_node->GetParent();
 
-      m_node->SetVisited(true);
+      if (m_node)
+      {
+         m_node->SetVisited(true);
+      }
    }
 
    return *this;
