@@ -42,9 +42,17 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
 
       TreeNode<T>& operator=(TreeNode<T> other);
 
-      bool HasNodeBeenVisited() { return m_visited; }
+      /**
+       * @brief HasNodeBeenVisited  Retrieve visitation status.
+       * @returns True if the node has already been visited.
+       */
+      bool HasNodeBeenVisited() const;
 
-      void SetVisited(const bool visited) { m_visited = visited; }
+      /**
+       * @brief MarkVisited         Set node visitation status.
+       * @param visited             Whether the node should be marked as having been visited.
+       */
+      void MarkVisited(const bool visited);
 
       /**
        * @brief PrependChild        Adds a child node as the first child of this node.
@@ -162,6 +170,18 @@ TreeNode<T>& TreeNode<T>::operator=(TreeNode<T> other)
 {
    std::swap(other);
    return *this;
+}
+
+template<typename T>
+bool TreeNode<T>::HasNodeBeenVisited() const
+{
+   return m_visited;
+}
+
+template<typename T>
+void TreeNode<T>::MarkVisited(const bool visited)
+{
+   m_visited = visited;
 }
 
 template<typename T>
@@ -303,6 +323,8 @@ class Tree
 
       std::shared_ptr<TreeNode<T>> GetHead() const;
 
+      unsigned int Size() const;
+
       /**
        * @brief The Iterator class
        *
@@ -418,6 +440,13 @@ template<typename T>
 std::shared_ptr<TreeNode<T>> Tree<T>::GetHead() const
 {
    return m_head;
+}
+
+template<typename T>
+unsigned int Tree<T>::Size() const
+{
+   const unsigned int theHeadNode = 1;
+   return m_head->GetChildCount() + theHeadNode;
 }
 
 template<typename T>
@@ -564,7 +593,7 @@ Tree<T>::PostOrderIterator::PostOrderIterator(std::shared_ptr<TreeNode<T>> node)
 }
 
 template<typename T>
-typename Tree<T>::PostOrderIterator Tree<T>::PostOrderIterator::operator++(int increment)
+typename Tree<T>::PostOrderIterator Tree<T>::PostOrderIterator::operator++(int)
 {
    auto result = *this;
    ++(*this);
@@ -584,7 +613,7 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator++()
          m_node = m_node->GetFirstChild();
       }
 
-       m_node->SetVisited(true);
+       m_node->MarkVisited(true);
    }
    else if (m_node->GetNextSibling())
    {
@@ -595,7 +624,7 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator++()
          m_node = m_node->GetFirstChild();
       }
 
-      m_node->SetVisited(true);
+      m_node->MarkVisited(true);
    }
    else
    {
@@ -603,7 +632,7 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator++()
 
       if (m_node)
       {
-         m_node->SetVisited(true);
+         m_node->MarkVisited(true);
       }
    }
 

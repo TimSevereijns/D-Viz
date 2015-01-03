@@ -26,48 +26,9 @@ int main(int argc, char* argv[])
 //   std::cout << tree->GetHead()->GetLastChild()->GetParent()->GetData() << std::endl;
 //   std::cout << tree->GetHead()->GetFirstChild()->GetFirstChild()->GetData() << std::endl;
 
-   Tree<int>::PostOrderIterator postOrder = tree->begin();
-
-   postOrder++;
-   if (postOrder != tree->end())
+   for (Tree<int>::PostOrderIterator itr = tree->begin(); itr != tree->end(); itr++)
    {
-      std::cout << *postOrder << std::endl; // Should be 33
-   }
-
-   postOrder++;
-   if (postOrder != tree->end())
-   {
-      std::cout << *postOrder << std::endl; // Should be 3
-   }
-
-   postOrder++;
-   if (postOrder != tree->end())
-   {
-      std::cout << *postOrder << std::endl; // Should be 0
-   }
-
-   postOrder++;
-   if (postOrder != tree->end())
-   {
-      std::cout << *postOrder << std::endl; // Should be 1
-   }
-
-   postOrder++;
-   if (postOrder != tree->end())
-   {
-      std::cout << *postOrder << std::endl; // Should be 2
-   }
-
-   postOrder++;
-   if (postOrder != tree->end())
-   {
-      std::cout << *postOrder << std::endl; // Should be 99
-   }
-
-   postOrder++;
-   if (postOrder == tree->end())
-   {
-      std::cout << "Reached the end" << std::endl;
+      std::cout << *itr << std::endl;
    }
 
    return application.exec();
