@@ -17,10 +17,10 @@ template<typename T>
 class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
 {
    private:
-      void AddFirstChild(std::shared_ptr<TreeNode<T>> child);
+      std::shared_ptr<TreeNode<T>> AddFirstChild(std::shared_ptr<TreeNode<T>> child);
 
-      void PrependChild(std::shared_ptr<TreeNode<T>> child);
-      void AppendChild(std::shared_ptr<TreeNode<T>> child);
+      std::shared_ptr<TreeNode<T>> PrependChild(std::shared_ptr<TreeNode<T>> child);
+      std::shared_ptr<TreeNode<T>> AppendChild(std::shared_ptr<TreeNode<T>> child);
 
       std::shared_ptr<TreeNode<T>> m_parent;
       std::shared_ptr<TreeNode<T>> m_firstChild;
@@ -29,6 +29,8 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
       std::shared_ptr<TreeNode<T>> m_nextSibling;
 
       unsigned int m_childCount;
+
+      bool m_visited;
 
       T m_data;
 
@@ -40,19 +42,23 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
 
       TreeNode<T>& operator=(TreeNode<T> other);
 
-      bool operator!() { return other.m_data != nullptr; };
+      bool HasNodeBeenVisited() { return m_visited; }
+
+      void SetVisited(const bool visited) { m_visited = visited; }
 
       /**
        * @brief PrependChild        Adds a child node as the first child of this node.
        * @param data                The underlying data to be stored in the node.
+       * @returns TODO
        */
-      void PrependChild(T data);
+      std::shared_ptr<TreeNode<T>> PrependChild(T data);
 
       /**
        * @brief AppendChild         Adds a child node as the last child of this node.
        * @param data                The underlying data to be stored in the node.
+       * @returns TODO
        */
-      void AppendChild(T data);
+      std::shared_ptr<TreeNode<T>> AppendChild(T data);
 
       /**
        * @brief GetData             Retrieves the data stored in this node.
@@ -115,7 +121,8 @@ TreeNode<T>::TreeNode()
      m_previousSibling(nullptr),
      m_nextSibling(nullptr),
      m_data(nullptr),
-     m_childCount(0)
+     m_childCount(0),
+     m_visited(false)
 {
 }
 
@@ -127,7 +134,8 @@ TreeNode<T>::TreeNode(T data)
      m_previousSibling(nullptr),
      m_nextSibling(nullptr),
      m_data(data),
-     m_childCount(0)
+     m_childCount(0),
+     m_visited(false)
 {
 }
 
@@ -139,7 +147,8 @@ TreeNode<T>::TreeNode(const TreeNode<T>& otherTree)
      m_previousSibling(otherTree.m_previousSibling),
      m_nextSibling(otherTree.m_nextSibling),
      m_data(otherTree.m_data),
-     m_childCount(otherTree.m_childCount)
+     m_childCount(otherTree.m_childCount),
+     m_visited(otherTree.m_visited)
 {
 }
 
@@ -162,7 +171,7 @@ std::shared_ptr<TreeNode<T>> TreeNode<T>::GetParent() const
 }
 
 template<typename T>
-void TreeNode<T>::AddFirstChild(std::shared_ptr<TreeNode<T>> child)
+std::shared_ptr<TreeNode<T>> TreeNode<T>::AddFirstChild(std::shared_ptr<TreeNode<T>> child)
 {
    assert(m_childCount == 0);
 
@@ -172,24 +181,25 @@ void TreeNode<T>::AddFirstChild(std::shared_ptr<TreeNode<T>> child)
    m_lastChild = m_firstChild;
 
    m_childCount++;
+
+   return m_firstChild;
 }
 
 template<typename T>
-void TreeNode<T>::PrependChild(T data)
+std::shared_ptr<TreeNode<T>> TreeNode<T>::PrependChild(T data)
 {
    const auto newNode = std::make_shared<TreeNode<T>>(data);
-   PrependChild(newNode);
+   return PrependChild(newNode);
 }
 
 template<typename T>
-void TreeNode<T>::PrependChild(std::shared_ptr<TreeNode<T>> child)
+std::shared_ptr<TreeNode<T>> TreeNode<T>::PrependChild(std::shared_ptr<TreeNode<T>> child)
 {
    child->m_parent = shared_from_this();
 
    if (!m_firstChild)
    {
-      AddFirstChild(child);
-      return;
+      return AddFirstChild(child);
    }
 
    assert(m_firstChild);
@@ -199,24 +209,25 @@ void TreeNode<T>::PrependChild(std::shared_ptr<TreeNode<T>> child)
    m_firstChild = m_firstChild->m_previousSibling;
 
    m_childCount++;
+
+   return m_firstChild;
 }
 
 template<typename T>
-void TreeNode<T>::AppendChild(T data)
+std::shared_ptr<TreeNode<T>> TreeNode<T>::AppendChild(T data)
 {
    const auto newNode = std::make_shared<TreeNode<T>>(data);
-   AppendChild(newNode);
+   return AppendChild(newNode);
 }
 
 template<typename T>
-void TreeNode<T>::AppendChild(std::shared_ptr<TreeNode<T>> child)
+std::shared_ptr<TreeNode<T>> TreeNode<T>::AppendChild(std::shared_ptr<TreeNode<T>> child)
 {
    child->m_parent = shared_from_this();
 
    if (!m_lastChild)
    {
-      AddFirstChild(child);
-      return;
+      return AddFirstChild(child);
    }
 
    assert(m_lastChild);
@@ -226,6 +237,8 @@ void TreeNode<T>::AppendChild(std::shared_ptr<TreeNode<T>> child)
    m_lastChild = m_lastChild->m_nextSibling;
 
    m_childCount++;
+
+   return m_lastChild;
 }
 
 template<typename T>
@@ -566,7 +579,7 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator++()
 
    // TODO: Add visitation boolean!
 
-//   if (m_node->GetNextSibling() == nullptr)
+//   if (!m_node->GetNextSibling())
 //   {
 //      m_node = m_node->GetParent();
 //   }
@@ -580,9 +593,31 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator++()
 //      }
 //   }
 
-   while (m_node->GetFirstChild())
+   if ((m_node->GetNextSibling() || !m_node->HasChildren()) && !m_node->HasNodeBeenVisited())
    {
-      m_node = m_node->GetFirstChild();
+      m_node = m_node->GetNextSibling();
+
+      while (m_node->GetFirstChild())
+      {
+         m_node = m_node->GetFirstChild();
+      }
+
+      m_node->SetVisited(true);
+   }
+   else if (m_node->HasChildren() && !m_node->HasNodeBeenVisited())
+   {
+      while (m_node->GetFirstChild())
+      {
+         m_node = m_node->GetFirstChild();
+      }
+
+       m_node->SetVisited(true);
+   }
+   else
+   {
+      m_node = m_node->GetParent();
+
+      m_node->SetVisited(true);
    }
 
    return *this;
