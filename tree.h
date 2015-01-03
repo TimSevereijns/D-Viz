@@ -334,6 +334,14 @@ class Tree
       class Iterator
       {
          public:
+            // Typedefs needed for STL compliance:
+            typedef T                                    value_type;
+            typedef T*                                   pointer;
+            typedef T&                                   reference;
+            typedef size_t                               size_type;
+            typedef ptrdiff_t                            difference_type;
+            typedef std::bidirectional_iterator_tag      iterator_category;
+
             explicit Iterator();
             explicit Iterator(std::shared_ptr<TreeNode<T>> node);
 
@@ -472,7 +480,8 @@ typename Tree<T>::SiblingIterator Tree<T>::end(const typename Tree<T>::Iterator&
 template<typename T>
 typename Tree<T>::PostOrderIterator Tree<T>::begin() const
 {
-   return Tree<T>::PostOrderIterator(m_head);
+   // Start the iterator at the head of the tree, and then advance it to the left-most node:
+   return ++(Tree<T>::PostOrderIterator(m_head));
 }
 
 template<typename T>
