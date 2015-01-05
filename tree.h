@@ -43,10 +43,10 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
       TreeNode<T>& operator=(TreeNode<T> other);
 
       /**
-       * @brief HasNodeBeenVisited  Retrieve visitation status.
+       * @brief GetVisited          Retrieve visitation status of the node
        * @returns True if the node has already been visited.
        */
-      bool HasNodeBeenVisited() const;
+      bool GetVisited() const;
 
       /**
        * @brief MarkVisited         Set node visitation status.
@@ -55,63 +55,63 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
       void MarkVisited(const bool visited);
 
       /**
-       * @brief PrependChild        Adds a child node as the first child of this node.
+       * @brief PrependChild        Adds a child node as the first child of the node.
        * @param data                The underlying data to be stored in the node.
        * @returns TODO
        */
       std::shared_ptr<TreeNode<T>> PrependChild(T data);
 
       /**
-       * @brief AppendChild         Adds a child node as the last child of this node.
+       * @brief AppendChild         Adds a child node as the last child of the node.
        * @param data                The underlying data to be stored in the node.
        * @returns TODO
        */
       std::shared_ptr<TreeNode<T>> AppendChild(T data);
 
       /**
-       * @brief GetData             Retrieves the data stored in this node.
+       * @brief GetData             Retrieves the data stored in the node.
        * @returns The underlying data stored in the node.
        */
       T GetData() const;
 
       /**
-       * @brief GetParent           Retrieves the parent of this node.
+       * @brief GetParent           Retrieves the parent of the node.
        * @returns A shared_ptr to this node's parent, if it exists; nullptr otherwise.
        */
       std::shared_ptr<TreeNode<T>> GetParent() const;
 
       /**
-       * @brief GetFirstChild       Retrieves the first child of this node.
+       * @brief GetFirstChild       Retrieves the first child of the node.
        * @returns A reference to this node's first child.
        */
       std::shared_ptr<TreeNode<T>> GetFirstChild() const;
 
       /**
-       * @brief GetLastChild        Retrieves the last child of this node.
+       * @brief GetLastChild        Retrieves the last child of the node.
        * @return A reference to this node's last child.
        */
       std::shared_ptr<TreeNode<T>> GetLastChild() const;
 
       /**
-       * @brief GetNextSibling      Retrieves the node that follows this node.
+       * @brief GetNextSibling      Retrieves the node that follows the node.
        * @return A reference to this node's next sibling.
        */
       std::shared_ptr<TreeNode<T>> GetNextSibling() const;
 
       /**
-       * @brief GetPreviousSibling  Retrieves the node before this node.
+       * @brief GetPreviousSibling  Retrieves the node before the node.
        * @returns A refenence to this node's previous sibling.
        */
       std::shared_ptr<TreeNode<T>> GetPreviousSibling() const;
 
       /**
-       * @brief HasChildren         Indicates whether this node has children.
+       * @brief HasChildren         Indicates whether the node has children.
        * @returns True if this node has children.
        */
       bool HasChildren() const;
 
       /**
-       * @brief GetChildCount       Retrieves the child count of the current node.
+       * @brief GetChildCount       Retrieves the child count of the node.
        * @returns The number of children that this node has.
        */
       unsigned int GetChildCount() const;
@@ -173,7 +173,7 @@ TreeNode<T>& TreeNode<T>::operator=(TreeNode<T> other)
 }
 
 template<typename T>
-bool TreeNode<T>::HasNodeBeenVisited() const
+bool TreeNode<T>::GetVisited() const
 {
    return m_visited;
 }
@@ -659,14 +659,12 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator++()
 {
    assert(m_node);
 
-   if (m_node->HasChildren() && !m_node->HasNodeBeenVisited())
+   if (m_node->HasChildren() && !m_node->GetVisited())
    {
       while (m_node->GetFirstChild())
       {
          m_node = m_node->GetFirstChild();
       }
-
-       m_node->MarkVisited(true);
    }
    else if (m_node->GetNextSibling())
    {
@@ -676,11 +674,11 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator++()
       {
          m_node = m_node->GetFirstChild();
       }
-
-      m_node->MarkVisited(true);
    }
    else
    {
+      m_node->MarkVisited(false);
+
       m_node = m_node->GetParent();
 
       if (m_node)
@@ -697,12 +695,37 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator--()
 {
    assert(m_node);
 
-   // TODO!
+   // When the iterator is at the end(), then the next position should be the head:
+   if (!m_node)
+   {
+      m_node = m_head;
+   }
+   else if (m_node->GetLastChild())
+   {
+      m_node = m_node->GetLastChild();
+   }
+   else if (m_node->GetPreviousSibling())
+   {
+      m_node->MarkVisited(false);
+      m_node = m_node->GetPreviousSibling();
+   }
+   else if (m_node->GetParent() && m_node->GetParent()->GetPreviousSibling())
+   {
+      while (m_node->GetParent() && !m_node->GetParent()->GetPreviousSibling())
+      {
+         m_node = m_node->GetParent();
+      }
+
+      m_node->GetParent()->MarkVisited(true);
+      m_node = m_node->GetParent()->GetPreviousSibling();
+   }
+   else // Must be at the end of the traversal, so clean up visitation tracking for the last node:
+   {
+      m_node->MarkVisited(false);
+   }
 
    return *this;
 }
-
-#endif // TREE_H
 
 /***************************************************************************************************
  * Start of Reverse Post-Order Iterator Class Definitions
@@ -749,3 +772,5 @@ typename Tree<T>::ReversePostOrderIterator& Tree<T>::ReversePostOrderIterator::o
 
    return *this;
 }
+
+#endif // TREE_H
