@@ -355,8 +355,11 @@ class Tree
             bool operator==(const Iterator& iterator) const;
             bool operator!=(const Iterator& iterator) const;
 
+            void SetHead(std::shared_ptr<TreeNode<T>> node);
+
          protected:
             std::shared_ptr<TreeNode<T>> m_node;
+            std::shared_ptr<TreeNode<T>> m_head;
       };
 
       /**
@@ -389,6 +392,9 @@ class Tree
             PostOrderIterator operator++(int increment);    // post-fix operator
             PostOrderIterator& operator++();                // pre-fix operator
             PostOrderIterator& operator--();
+
+         private:
+            bool m_haveChildrenBeenVisited;
       };
 
       /**
@@ -507,7 +513,9 @@ typename Tree<T>::PostOrderIterator Tree<T>::begin() const
 template<typename T>
 typename Tree<T>::PostOrderIterator Tree<T>::end() const
 {
-   return Tree<T>::PostOrderIterator();
+   auto iterator = Tree<T>::PostOrderIterator();
+   iterator.SetHead(m_head);
+   return iterator;
 }
 
 /***************************************************************************************************
@@ -516,19 +524,22 @@ typename Tree<T>::PostOrderIterator Tree<T>::end() const
 
 template<typename T>
 Tree<T>::Iterator::Iterator()
-   : m_node(nullptr)
+   : m_node(nullptr),
+     m_head(nullptr)
 {
 }
 
 template<typename T>
 Tree<T>::Iterator::Iterator(const Iterator& other)
-   : m_node(other.m_node)
+   : m_node(other.m_node),
+     m_head(nullptr)
 {
 }
 
 template<typename T>
 Tree<T>::Iterator::Iterator(std::shared_ptr<TreeNode<T>> node)
-   : m_node(node)
+   : m_node(node),
+     m_head(nullptr)
 {
 }
 
@@ -577,6 +588,12 @@ typename Tree<T>::SiblingIterator Tree<T>::Iterator::end() const
    iterator.m_parent = m_node;
 
    return iterator;
+}
+
+template<typename T>
+void Tree<T>::Iterator::SetHead(std::shared_ptr<TreeNode<T>> node)
+{
+   m_head = node;
 }
 
 /***************************************************************************************************
@@ -629,19 +646,22 @@ typename Tree<T>::SiblingIterator& Tree<T>::SiblingIterator::operator--()
 
 template<typename T>
 Tree<T>::PostOrderIterator::PostOrderIterator()
-   : Iterator()
+   : Iterator(),
+     m_haveChildrenBeenVisited(false)
 {
 }
 
 template<typename T>
 Tree<T>::PostOrderIterator::PostOrderIterator(const Iterator& other)
-   : m_node(other.m_node)
+   : m_node(other.m_node),
+     m_haveChildrenBeenVisited(false)
 {
 }
 
 template<typename T>
 Tree<T>::PostOrderIterator::PostOrderIterator(std::shared_ptr<TreeNode<T>> node)
-   : Iterator(node)
+   : Iterator(node),
+     m_haveChildrenBeenVisited(false)
 {
 }
 
@@ -678,12 +698,14 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator++()
    else
    {
       m_node->MarkVisited(false);
+      //m_haveChildrenBeenVisited = false;
 
       m_node = m_node->GetParent();
 
       if (m_node)
       {
          m_node->MarkVisited(true);
+         //m_haveChildrenBeenVisited = true;
       }
    }
 
@@ -698,6 +720,8 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator--()
    // When the iterator is at the end(), then the next position should be the head:
    if (!m_node)
    {
+      assert(m_head);
+
       m_node = m_head;
    }
    else if (m_node->GetLastChild())

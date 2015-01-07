@@ -27,10 +27,16 @@ int main(int argc, char* argv[])
 //   std::cout << tree->GetHead()->GetLastChild()->GetParent()->GetData() << std::endl;
 //   std::cout << tree->GetHead()->GetFirstChild()->GetFirstChild()->GetData() << std::endl;
 
-//   for (Tree<int>::PostOrderIterator itr = tree->begin(); itr != tree->end(); itr++)
-//   {
-//      std::cout << *itr << std::endl;
-//   }
+   for (Tree<int>::PostOrderIterator itr = tree->end(); itr != tree->begin(); --itr)
+   {
+      std::cout << *itr << std::endl;
+   }
+
+   std::for_each(std::begin(*tree), std::end(*tree),
+      [] (int data)
+   {
+      std::cout << data << std::endl;
+   });
 
    std::for_each(std::begin(*tree), std::end(*tree),
       [] (int data)
