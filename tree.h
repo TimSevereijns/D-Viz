@@ -345,6 +345,7 @@ class Tree
             explicit Iterator();
             explicit Iterator(const Iterator& other);
             explicit Iterator(std::shared_ptr<TreeNode<T>> node);
+            explicit Iterator(std::shared_ptr<TreeNode<T>> node, std::shared_ptr<TreeNode<T>> head);
 
             T operator*() const;
             T* operator->() const;
@@ -388,6 +389,8 @@ class Tree
             explicit PostOrderIterator();
             explicit PostOrderIterator(const Iterator& other);
             explicit PostOrderIterator(std::shared_ptr<TreeNode<T>> node);
+            explicit PostOrderIterator(std::shared_ptr<TreeNode<T>> node,
+                                       std::shared_ptr<TreeNode<T>> head);
 
             PostOrderIterator operator++(int increment);    // post-fix operator
             PostOrderIterator& operator++();                // pre-fix operator
@@ -506,8 +509,9 @@ typename Tree<T>::SiblingIterator Tree<T>::end(const typename Tree<T>::Iterator&
 template<typename T>
 typename Tree<T>::PostOrderIterator Tree<T>::begin() const
 {
-   // Start the iterator at the head of the tree, and then advance it to the left-most child node:
-   return ++(Tree<T>::PostOrderIterator(m_head));
+   auto iterator = Tree<T>::PostOrderIterator(m_head);
+   iterator.SetHead(m_head);
+   return ++iterator;
 }
 
 template<typename T>
@@ -540,6 +544,13 @@ template<typename T>
 Tree<T>::Iterator::Iterator(std::shared_ptr<TreeNode<T>> node)
    : m_node(node),
      m_head(nullptr)
+{
+}
+
+template<typename T>
+Tree<T>::Iterator::Iterator(std::shared_ptr<TreeNode<T>> node, std::shared_ptr<TreeNode<T>> head)
+   : m_node(node),
+     m_head(head)
 {
 }
 
@@ -661,6 +672,14 @@ Tree<T>::PostOrderIterator::PostOrderIterator(const Iterator& other)
 template<typename T>
 Tree<T>::PostOrderIterator::PostOrderIterator(std::shared_ptr<TreeNode<T>> node)
    : Iterator(node),
+     m_haveChildrenBeenVisited(false)
+{
+}
+
+template<typename T>
+Tree<T>::PostOrderIterator::PostOrderIterator(std::shared_ptr<TreeNode<T>> node,
+                                              std::shared_ptr<TreeNode<T>> head)
+   : Iterator(node, head),
      m_haveChildrenBeenVisited(false)
 {
 }
