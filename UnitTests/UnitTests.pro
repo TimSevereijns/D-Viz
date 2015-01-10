@@ -8,4 +8,5 @@ TARGET = UnitTests
 INCLUDEPATH += .
 
 # Input
-SOURCES += treetests.cpp
+SOURCES += treetests.cpp \
+   ../tree.h

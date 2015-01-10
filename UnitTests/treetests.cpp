@@ -12,7 +12,19 @@ namespace {
       tree->GetHead()->GetFirstChild()->AppendChild(11);
       tree->GetHead()->GetFirstChild()->AppendChild(12);
 
-      return std::move(tree);
+      return tree;
+   }
+
+   std::unique_ptr<Tree<std::string>> CreateSimpleStringBinaryTree()
+   {
+      std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("F"));
+      tree->GetHead()->AppendChild("B")->AppendChild("A");
+      tree->GetHead()->GetFirstChild()->AppendChild("D")->AppendChild("C");
+      tree->GetHead()->GetFirstChild()->GetLastChild()->AppendChild("E");
+
+      tree->GetHead()->AppendChild("G")->AppendChild("I")->AppendChild("H");
+
+      return tree;
    }
 }
 
@@ -54,10 +66,12 @@ void TreeTests::TreeSize()
 
 void TreeTests::PostOrderIteratorTestOne()
 {
-   std::unique_ptr<Tree<int>> tree = CreateSimpleIntegerBinaryTree();
+   std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
 
-   std::vector<int> iterationOutput;
+   std::vector<std::string> iterationOutput;
    std::copy(std::begin(*tree), std::end(*tree), std::back_inserter(iterationOutput));
+
+   const std::vector<std::string> expectedTraversal { "A", "C", "E", "D", "B", "H", "I", "G", "F" };
 
    QVERIFY(tree->Size() == iterationOutput.size());
 }

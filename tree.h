@@ -195,8 +195,6 @@ std::shared_ptr<TreeNode<T>> TreeNode<T>::AddFirstChild(std::shared_ptr<TreeNode
 {
    assert(m_childCount == 0);
 
-   //child->m_parent = shared_from_this();
-
    m_firstChild = child;
    m_lastChild = m_firstChild;
 
@@ -536,7 +534,7 @@ Tree<T>::Iterator::Iterator()
 template<typename T>
 Tree<T>::Iterator::Iterator(const Iterator& other)
    : m_node(other.m_node),
-     m_head(nullptr)
+     m_head(other.m_head)
 {
 }
 
@@ -619,7 +617,8 @@ Tree<T>::SiblingIterator::SiblingIterator()
 
 template<typename T>
 Tree<T>::SiblingIterator::SiblingIterator(const Iterator& other)
-   : m_node(other.m_node)
+   : m_node(other.m_node),
+     m_head(other.m_head)
 {
 }
 
@@ -665,6 +664,7 @@ Tree<T>::PostOrderIterator::PostOrderIterator()
 template<typename T>
 Tree<T>::PostOrderIterator::PostOrderIterator(const Iterator& other)
    : m_node(other.m_node),
+     m_head(other.m_head),
      m_haveChildrenBeenVisited(false)
 {
 }
@@ -734,8 +734,6 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator++()
 template<typename T>
 typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator--()
 {
-   assert(m_node);
-
    // When the iterator is at the end(), then the next position should be the head:
    if (!m_node)
    {
@@ -782,7 +780,8 @@ Tree<T>::ReversePostOrderIterator::ReversePostOrderIterator()
 
 template<typename T>
 Tree<T>::ReversePostOrderIterator::ReversePostOrderIterator(const Iterator& other)
-   : m_node(other.m_node)
+   : m_node(other.m_node),
+     m_head(other.m_head)
 {
 }
 

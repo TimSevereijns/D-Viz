@@ -13,8 +13,7 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
-    UnitTests/treetests.cpp
+        mainwindow.cpp
 
 HEADERS  += mainwindow.h \
     tree.h \

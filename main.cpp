@@ -19,23 +19,11 @@ int main(int argc, char* argv[])
    tree->GetHead()->PrependChild(0);
    tree->GetHead()->GetFirstChild()->AppendChild(3)->AppendChild(33);
 
-//   std::cout << tree->GetHead()->GetData() << std::endl;
-//   std::cout << tree->GetHead()->GetFirstChild()->GetData() << std::endl;
-//   std::cout << tree->GetHead()->GetFirstChild()->GetNextSibling()->GetData() << std::endl;
-//   std::cout << tree->GetHead()->GetFirstChild()->GetNextSibling()->GetNextSibling()->GetData() << std::endl;
-//   std::cout << tree->GetHead()->GetFirstChild()->GetParent()->GetData() << std::endl;
-//   std::cout << tree->GetHead()->GetLastChild()->GetParent()->GetData() << std::endl;
-//   std::cout << tree->GetHead()->GetFirstChild()->GetFirstChild()->GetData() << std::endl;
-
    Tree<int>::PostOrderIterator itr = tree->end();
 
-   std::cout << *itr << std::endl;
+   --itr;
 
-//   std::for_each(std::begin(*tree), std::end(*tree),
-//      [] (int data)
-//   {
-//      std::cout << data << std::endl;
-//   });
+   std::cout << *itr << std::endl;
 
    return application.exec();
 }
