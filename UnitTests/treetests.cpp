@@ -26,6 +26,18 @@ namespace {
 
       return tree;
    }
+
+   std::unique_ptr<Tree<std::string>> CreateRootNodeWithManyChildren()
+   {
+      std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("root"));
+      tree->GetHead()->AppendChild("A");
+      tree->GetHead()->AppendChild("B");
+      tree->GetHead()->AppendChild("C");
+      tree->GetHead()->AppendChild("D");
+      tree->GetHead()->AppendChild("E");
+
+      return tree;
+   }
 }
 
 /**
@@ -98,6 +110,18 @@ class TreeTests: public QObject
        * pre-decrement operator to traverse the tree from the end to the beginning of the tree.
        */
       void PostOrderTraversalFromEndToBegin();
+
+      /**
+       * @brief SiblingTraversal creates a tree containing a root node with five child nodes, and
+       * then traverses over those five sibling nodes, starting with the first child.
+       */
+      void SiblingTraversal();
+
+      /**
+       * @brief LeafTraversalOfSimpleBinaryTree creates a simple binary tree, and the traverses over
+       * the leaf nodes in that tree.
+       */
+      void LeafTraversalOfSimpleBinaryTree();
 };
 
 void TreeTests::IntegerTreeCreation()
@@ -153,7 +177,7 @@ void TreeTests::CountLeafNodes()
 {
    std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
 
-   QVERIFY(tree->GetHead()->CountLeafNodes() == 8);
+   QVERIFY(tree->CountLeafNodes() == 4);
 }
 
 void TreeTests::PostOrderTraversalOfSimpleBinaryTree()
@@ -219,7 +243,57 @@ void TreeTests::PostOrderTraversalFromEndToBegin()
    int index = 0;
 
    bool traversalError = false;
-   for (auto itr = --(std::end(*tree)); itr != std::begin(*tree); --itr)
+   auto itr = --(std::end(*tree));
+   for (; itr != std::begin(*tree); --itr)
+   {
+      if (*itr != expectedTraversal[index++])
+      {
+         traversalError = true;
+         break;
+      }
+   }
+
+   // Since begin actually points to the first node, and not past it, like end() would, we need
+   // one extra test:
+   if (*itr != expectedTraversal[index])
+   {
+      traversalError = true;
+   }
+
+   QVERIFY(traversalError == false);
+}
+
+void TreeTests::SiblingTraversal()
+{
+   std::unique_ptr<Tree<std::string>> tree = CreateRootNodeWithManyChildren();
+   std::shared_ptr<TreeNode<std::string>> node = tree->GetHead()->GetFirstChild();
+   Tree<std::string>::SiblingIterator itr = tree->beginSibling(node);
+
+   const std::vector<std::string> expectedTraversal { "A", "B", "C", "D", "E" };
+   int index = 0;
+
+   bool traversalError = false;
+   for (auto itr = tree->beginSibling(node); itr != tree->endSibling(node); ++itr)
+   {
+      if (*itr != expectedTraversal[index++])
+      {
+         traversalError = true;
+         break;
+      }
+   }
+
+   QVERIFY(traversalError == false);
+}
+
+void TreeTests::LeafTraversalOfSimpleBinaryTree()
+{
+   std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
+
+   const std::vector<std::string> expectedTraversal { "A", "C", "E", "H" };
+   int index = 0;
+
+   bool traversalError = false;
+   for (auto itr = tree->beginLeaf(); itr != tree->endLeaf(); ++itr)
    {
       if (*itr != expectedTraversal[index++])
       {

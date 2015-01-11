@@ -20,11 +20,11 @@ int main(int argc, char* argv[])
 
 //   tree->GetHead()->AppendChild("G")->AppendChild("I")->AppendChild("H");
 
-//   const std::vector<std::string> expectedTraversal { "F", "G", "I", "H", "B", "D", "E", "C", "A" };
+//   const std::vector<std::string> expectedTraversal { "A", "C", "E", "H" };
 //   int index = 0;
 
 //   bool traversalError = false;
-//   for (auto itr = --(std::end(*tree)); itr != std::begin(*tree); --itr)
+//   for (auto itr = tree->beginLeaf(); itr != tree->endLeaf(); ++itr)
 //   {
 //      if (*itr != expectedTraversal[index++])
 //      {

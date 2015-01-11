@@ -316,11 +316,9 @@ unsigned int TreeNode<T>::GetChildCount() const
 template<typename T>
 unsigned int TreeNode<T>::CountLeafNodes() const
 {
-   // TODO: Create and use the leaf iterator!
-
+   // TODO
    return 0;
 }
-
 
 template<typename T>
 bool TreeNode<T>::HasChildren() const
@@ -349,6 +347,12 @@ class Tree
       std::shared_ptr<TreeNode<T>> GetHead() const;
 
       /**
+       * @brief CountLeafNodes      Traverses the tree, counting all leaf nodes.
+       * @return The total number of leaf nodes belonging to the node.
+       */
+      unsigned int CountLeafNodes() const;
+
+      /**
        * @brief Size                Run-time is linear in the size of the tree.
        * @returns The total number of nodes in the tree (both leaf and non-leaf).
        */
@@ -363,6 +367,9 @@ class Tree
       class Iterator
       {
          public:
+            // So that m_head be set without a public setter.
+            friend class Tree<T>;
+
             // Typedefs needed for STL compliance:
             typedef T                                    value_type;
             typedef T*                                   pointer;
@@ -385,8 +392,6 @@ class Tree
             bool operator==(const Iterator& iterator) const;
             bool operator!=(const Iterator& iterator) const;
 
-            void SetHead(std::shared_ptr<TreeNode<T>> node);
-
          protected:
             std::shared_ptr<TreeNode<T>> m_node;
             std::shared_ptr<TreeNode<T>> m_head;
@@ -398,15 +403,23 @@ class Tree
       class SiblingIterator : public Iterator
       {
          public:
+            // So that m_parent be set without a public setter:
+            friend class Tree<T>;
+
             explicit SiblingIterator();
             explicit SiblingIterator(const Iterator& other);
             explicit SiblingIterator(std::shared_ptr<TreeNode<T>> node);
 
-            SiblingIterator& operator++();
+            SiblingIterator operator++(int);       // post-fix operator; do not return reference!
+            SiblingIterator& operator++();         // pre-fix operator
+            SiblingIterator operator--(int);
             SiblingIterator& operator--();
 
             TreeNode<T>& firstInRange() const;
             TreeNode<T>& lastInRange() const;
+
+         private:
+            std::shared_ptr<TreeNode<T>> m_parent;
       };
 
       /**
@@ -421,8 +434,9 @@ class Tree
             explicit PostOrderIterator(std::shared_ptr<TreeNode<T>> node,
                                        std::shared_ptr<TreeNode<T>> head);
 
-            PostOrderIterator operator++(int increment);    // post-fix operator
-            PostOrderIterator& operator++();                // pre-fix operator
+            PostOrderIterator operator++(int);     // post-fix operator; do not return reference!
+            PostOrderIterator& operator++();       // pre-fix operator
+            PostOrderIterator operator--(int);
             PostOrderIterator& operator--();
 
          private:
@@ -439,13 +453,44 @@ class Tree
             explicit ReversePostOrderIterator(const Iterator& other);
             explicit ReversePostOrderIterator(std::shared_ptr<TreeNode<T>> node);
 
-            ReversePostOrderIterator operator++(int increment);    // post-fix operator
-            ReversePostOrderIterator& operator++();                // pre-fix operator
+            ReversePostOrderIterator operator++(int);    // post-fix operator; do not return ref!
+            ReversePostOrderIterator& operator++();      // pre-fix operator
             ReversePostOrderIterator& operator--();
+      };
+
+      /**
+       * @brief The LeafIterator class
+       */
+      class LeafIterator : public Iterator
+      {
+         public:
+            explicit LeafIterator();
+            explicit LeafIterator(const Iterator& other);
+            explicit LeafIterator(std::shared_ptr<TreeNode<T>> node);
+
+            LeafIterator operator++(int);       // post-fix operator; do not return reference!
+            LeafIterator& operator++();         // pre-fix operator
+            LeafIterator operator--(int);
+            LeafIterator& operator--();
       };
 
       SiblingIterator begin(const Iterator& iterator) const;
       SiblingIterator end(const Iterator& iterator) const;
+
+      /**
+       * @brief beginSibling        Creates a sibling iterator starting at the specified node.
+       * @param node                The starting node.
+       * @returns An iterator that advances over the siblings of the node.
+       */
+      SiblingIterator beginSibling(const std::shared_ptr<TreeNode<T>> node) const;
+
+      /**
+       * @brief endSibling          Creates a sibling iterator that points past the end of the last
+       *                            sibling.
+       * @param node                Any node that is a sibling of the target range.
+       * @returns An iterator past the end of the last sibling.
+       */
+      SiblingIterator endSibling(const std::shared_ptr<TreeNode<T>> node) const;
 
       /**
        * @brief begin               Creates an iterator pointing to the head of the tree.
@@ -470,6 +515,19 @@ class Tree
        * @returns A post-order iterator.
        */
       //ReversePostOrderIterator rend() const;
+
+      /**
+       * @brief beginLeaf           Creates a leaf iterator that starts at the left-most leaf in
+       *                            the tree.
+       * @returns An iterator to the first leaf node.
+       */
+      LeafIterator beginLeaf() const;
+
+      /**
+       * @brief endLeaf             Creates a leaf iterator that points to nullptr.
+       * @return An iterator past the end of the tree.
+       */
+      LeafIterator endLeaf() const;
 
    private:
       std::shared_ptr<TreeNode<T>> m_head;
@@ -509,6 +567,18 @@ std::shared_ptr<TreeNode<T>> Tree<T>::GetHead() const
 }
 
 template<typename T>
+unsigned int Tree<T>::CountLeafNodes() const
+{
+   unsigned int count = 0;
+   for (auto itr = beginLeaf(); itr != endLeaf(); ++itr)
+   {
+      count++;
+   }
+
+   return count;
+}
+
+template<typename T>
 unsigned int Tree<T>::Size() const
 {
    return std::count_if(std::begin(*this), std::end(*this),
@@ -539,10 +609,26 @@ typename Tree<T>::SiblingIterator Tree<T>::end(const typename Tree<T>::Iterator&
 }
 
 template<typename T>
+typename Tree<T>::SiblingIterator Tree<T>::beginSibling(const std::shared_ptr<TreeNode<T>> node) const
+{
+   return Tree<T>::SiblingIterator(node);
+}
+
+template<typename T>
+typename Tree<T>::SiblingIterator Tree<T>::endSibling(const std::shared_ptr<TreeNode<T>> node) const
+{
+   Tree<T>::SiblingIterator siblingIterator(nullptr);
+   siblingIterator.m_parent = node->GetParent();
+
+   return siblingIterator;
+}
+
+template<typename T>
 typename Tree<T>::PostOrderIterator Tree<T>::begin() const
 {
    auto iterator = Tree<T>::PostOrderIterator(m_head);
-   iterator.SetHead(m_head);
+   iterator.m_head = m_head;
+
    return ++iterator;
 }
 
@@ -550,8 +636,24 @@ template<typename T>
 typename Tree<T>::PostOrderIterator Tree<T>::end() const
 {
    auto iterator = Tree<T>::PostOrderIterator();
-   iterator.SetHead(m_head);
+   iterator.m_head = m_head;
+
    return iterator;
+}
+
+template<typename T>
+typename Tree<T>::LeafIterator Tree<T>::beginLeaf() const
+{
+   auto iterator = Tree<T>::LeafIterator(m_head);
+   iterator.m_head = m_head;
+
+   return ++iterator;
+}
+
+template<typename T>
+typename Tree<T>::LeafIterator Tree<T>::endLeaf() const
+{
+   return Tree<T>::LeafIterator(nullptr);
 }
 
 /***************************************************************************************************
@@ -633,12 +735,6 @@ typename Tree<T>::SiblingIterator Tree<T>::Iterator::end() const
    return iterator;
 }
 
-template<typename T>
-void Tree<T>::Iterator::SetHead(std::shared_ptr<TreeNode<T>> node)
-{
-   m_head = node;
-}
-
 /***************************************************************************************************
  * Start of Sibling Iterator Class Definitions
  **************************************************************************************************/
@@ -663,20 +759,51 @@ Tree<T>::SiblingIterator::SiblingIterator(std::shared_ptr<TreeNode<T>> node)
 }
 
 template<typename T>
+typename Tree<T>::SiblingIterator Tree<T>::SiblingIterator::operator++(int)
+{
+   auto result = *this;
+   ++(*this);
+
+   return result;
+}
+
+template<typename T>
 typename Tree<T>::SiblingIterator& Tree<T>::SiblingIterator::operator++()
 {
    if (m_node)
    {
-      m_node = m_node->m_nextSibling;
+      m_node = m_node->GetNextSibling();
    }
 
    return *this;
 }
 
 template<typename T>
+typename Tree<T>::SiblingIterator Tree<T>::SiblingIterator::operator--(int)
+{
+   auto result = *this;
+   --(*this);
+
+   return result;
+}
+
+template<typename T>
 typename Tree<T>::SiblingIterator& Tree<T>::SiblingIterator::operator--()
 {
-   if (m_node)
+   if (!m_node)
+   {
+      if (m_parent)
+      {
+         m_node = m_parent->GetLastChild();
+      }
+      else
+      {
+         // If no parent exists, then the node in question must be the one "past" the head,
+         // so decrementing from there should return the head node:
+         m_node = m_head;
+      }
+   }
+   else
    {
       m_node = m_node->m_previousSibling;
    }
@@ -743,7 +870,7 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator++()
    {
       m_node = m_node->GetNextSibling();
 
-      while (m_node->GetFirstChild())
+      while (m_node->HasChildren())
       {
          m_node = m_node->GetFirstChild();
       }
@@ -802,6 +929,14 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator--()
    return *this;
 }
 
+template<typename T>
+typename Tree<T>::PostOrderIterator Tree<T>::PostOrderIterator::operator--(int)
+{
+   auto result = *this;
+   --(*this);
+
+   return result;
+}
 /***************************************************************************************************
  * Start of Reverse Post-Order Iterator Class Definitions
  **************************************************************************************************/
@@ -837,6 +972,7 @@ typename Tree<T>::ReversePostOrderIterator Tree<T>::ReversePostOrderIterator::op
 template<typename T>
 typename Tree<T>::ReversePostOrderIterator& Tree<T>::ReversePostOrderIterator::operator++()
 {
+   // TODO
 }
 
 template<typename T>
@@ -844,7 +980,103 @@ typename Tree<T>::ReversePostOrderIterator& Tree<T>::ReversePostOrderIterator::o
 {
    assert(m_node);
 
-   // TODO!
+   // TODO
+
+   return *this;
+}
+
+/***************************************************************************************************
+ * Start of Leaf Iterator Class Definitions
+ **************************************************************************************************/
+
+template<typename T>
+Tree<T>::LeafIterator::LeafIterator()
+   : Iterator()
+{
+}
+
+template<typename T>
+Tree<T>::LeafIterator::LeafIterator(const Iterator& other)
+   : m_node(other.m_node),
+     m_head(other.m_head)
+{
+}
+
+template<typename T>
+Tree<T>::LeafIterator::LeafIterator(std::shared_ptr<TreeNode<T>> node)
+   : Iterator(node)
+{
+}
+
+template<typename T>
+typename Tree<T>::LeafIterator Tree<T>::LeafIterator::operator++(int)
+{
+   auto result = *this;
+   ++(*this);
+
+   return result;
+}
+
+template<typename T>
+typename Tree<T>::LeafIterator& Tree<T>::LeafIterator::operator++()
+{
+   assert(m_node);
+
+   if (m_node->HasChildren() && !m_node->GetVisited())
+   {
+      while (m_node->GetFirstChild())
+      {
+         m_node = m_node->GetFirstChild();
+      }
+   }
+   else if (m_node->GetNextSibling())
+   {
+      m_node = m_node->GetNextSibling();
+
+      while (m_node->GetFirstChild())
+      {
+         m_node = m_node->GetFirstChild();
+      }
+   }
+   else if (m_node->GetParent())
+   {
+      while (m_node->GetParent() && !m_node->GetParent()->GetNextSibling())
+      {
+         m_node = m_node->GetParent();
+      }
+
+      if (m_node->GetParent())
+      {
+         m_node = m_node->GetParent()->GetNextSibling();
+      }
+      else // The end of the traversal has been reached:
+      {
+         m_node = nullptr;
+         return *this;
+      }
+
+      while (m_node->HasChildren())
+      {
+         m_node = m_node->GetFirstChild();
+      }
+   }
+
+   return *this;
+}
+
+template<typename T>
+typename Tree<T>::LeafIterator Tree<T>::LeafIterator::operator--(int)
+{
+   auto result = *this;
+   --(*this);
+
+   return result;
+}
+
+template<typename T>
+typename Tree<T>::LeafIterator& Tree<T>::LeafIterator::operator--()
+{
+   // TODO
 
    return *this;
 }
