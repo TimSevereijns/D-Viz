@@ -92,6 +92,12 @@ class TreeTests: public QObject
        * Post Order Iterator is able to traverse the resulting tree correctly.
        */
       void PostOrderTraversalOfRightDegenerateBinaryTree();
+
+      /**
+       * @brief PostOrderTraversalFromEndToBegin creates a simple binary tree, and then uses the
+       * pre-decrement operator to traverse the tree from the end to the beginning of the tree.
+       */
+      void PostOrderTraversalFromEndToBegin();
 };
 
 void TreeTests::IntegerTreeCreation()
@@ -166,8 +172,14 @@ void TreeTests::PostOrderTraversalOfSimpleBinaryTree()
 void TreeTests::PostOrderTraversalOfLeftDegenerateBinaryTree()
 {
    std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("A"));
-   tree->GetHead()->PrependChild("B")->PrependChild("C")->PrependChild("D")->PrependChild("E")->
-         PrependChild("F")->PrependChild("G")->PrependChild("H");
+   tree->GetHead()->
+         PrependChild("B")->
+         PrependChild("C")->
+         PrependChild("D")->
+         PrependChild("E")->
+         PrependChild("F")->
+         PrependChild("G")->
+         PrependChild("H");
 
    const std::vector<std::string> expectedTraversal { "H", "G", "F", "E", "D", "C", "B", "A" };
    std::vector<std::string> setDifference;
@@ -181,8 +193,14 @@ void TreeTests::PostOrderTraversalOfLeftDegenerateBinaryTree()
 void TreeTests::PostOrderTraversalOfRightDegenerateBinaryTree()
 {
    std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("A"));
-   tree->GetHead()->AppendChild("B")->AppendChild("C")->AppendChild("D")->AppendChild("E")->
-         AppendChild("F")->AppendChild("G")->AppendChild("H");
+   tree->GetHead()->
+         AppendChild("B")->
+         AppendChild("C")->
+         AppendChild("D")->
+         AppendChild("E")->
+         AppendChild("F")->
+         AppendChild("G")->
+         AppendChild("H");
 
    const std::vector<std::string> expectedTraversal { "H", "G", "F", "E", "D", "C", "B", "A" };
    std::vector<std::string> setDifference;
@@ -191,6 +209,26 @@ void TreeTests::PostOrderTraversalOfRightDegenerateBinaryTree()
                        std::end(expectedTraversal), std::back_inserter(setDifference));
 
    QVERIFY(setDifference.size() == 0);
+}
+
+void TreeTests::PostOrderTraversalFromEndToBegin()
+{
+   std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
+
+   const std::vector<std::string> expectedTraversal { "F", "G", "I", "H", "B", "D", "E", "C", "A" };
+   int index = 0;
+
+   bool traversalError = false;
+   for (auto itr = --(std::end(*tree)); itr != std::begin(*tree); --itr)
+   {
+      if (*itr != expectedTraversal[index++])
+      {
+         traversalError = true;
+         break;
+      }
+   }
+
+   QVERIFY(traversalError == false);
 }
 
 QTEST_MAIN(TreeTests)

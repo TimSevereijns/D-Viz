@@ -775,7 +775,7 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator--()
 
       m_node = m_head;
    }
-   else if (m_node->GetLastChild())
+   else if (m_node->HasChildren())
    {
       m_node = m_node->GetLastChild();
    }
@@ -784,7 +784,7 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator--()
       m_node->MarkVisited(false);
       m_node = m_node->GetPreviousSibling();
    }
-   else if (m_node->GetParent() && m_node->GetParent()->GetPreviousSibling())
+   else if (m_node->GetParent())
    {
       while (m_node->GetParent() && !m_node->GetParent()->GetPreviousSibling())
       {

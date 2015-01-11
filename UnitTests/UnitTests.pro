@@ -3,10 +3,14 @@
 ######################################################################
 
 QT+=testlib
-TEMPLATE = app
+
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
 TARGET = UnitTests
-INCLUDEPATH += .
+TEMPLATE = app
 
 # Input
 SOURCES += treetests.cpp \
    ../tree.h
+
+INCLUDEPATH += .

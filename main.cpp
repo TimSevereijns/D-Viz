@@ -13,17 +13,25 @@ int main(int argc, char* argv[])
    MainWindow mainWindow;
    mainWindow.show();
 
-   std::unique_ptr<Tree<int>> tree(new Tree<int>(99));
-   tree->GetHead()->AppendChild(1);
-   tree->GetHead()->AppendChild(2);
-   tree->GetHead()->PrependChild(0);
-   tree->GetHead()->GetFirstChild()->AppendChild(3)->AppendChild(33);
+//   std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("F"));
+//   tree->GetHead()->AppendChild("B")->AppendChild("A");
+//   tree->GetHead()->GetFirstChild()->AppendChild("D")->AppendChild("C");
+//   tree->GetHead()->GetFirstChild()->GetLastChild()->AppendChild("E");
 
-   Tree<int>::PostOrderIterator itr = tree->end();
+//   tree->GetHead()->AppendChild("G")->AppendChild("I")->AppendChild("H");
 
-   --itr;
+//   const std::vector<std::string> expectedTraversal { "F", "G", "I", "H", "B", "D", "E", "C", "A" };
+//   int index = 0;
 
-   std::cout << *itr << std::endl;
+//   bool traversalError = false;
+//   for (auto itr = --(std::end(*tree)); itr != std::begin(*tree); --itr)
+//   {
+//      if (*itr != expectedTraversal[index++])
+//      {
+//         traversalError = true;
+//         break;
+//      }
+//   }
 
    return application.exec();
 }
