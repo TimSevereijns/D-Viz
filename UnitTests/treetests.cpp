@@ -28,17 +28,70 @@ namespace {
    }
 }
 
+/**
+ * @brief The TreeTests class provides unit tests for the n-ary Tree class, and its supporting
+ * TreeNode class.
+ */
 class TreeTests: public QObject
 {
    Q_OBJECT
 
    private slots:
+      /**
+       * @brief IntegerTreeCreation creates a tree with an integer value stored in the head, and
+       * verifies that this value can be correctly retrieved from the head node.
+       */
       void IntegerTreeCreation();
+
+      /**
+       * @brief StringTreeCreation creates a tree with standard narrow string stored in the head,
+       * and verifies that this value can be correctly retrieved from the head node.
+       */
       void StringTreeCreation();
 
+      /**
+       * @brief TreeSize creates a simple binary tree, and then verifies that the size of the tree
+       * is correctly computed.
+       */
       void TreeSize();
 
-      void PostOrderIteratorTestOne();
+      /**
+       * @brief GetFirstChild creates a new tree with half a dozen children, and verifies that
+       * the node is able retrieve its first child correctly.
+       */
+      void GetFirstChild();
+
+      /**
+       * @brief GetLastChild creates a new tree with half a dozen children, and verifies that the
+       * node is able to retrieve its last child correctly.
+       */
+      void GetLastChild();
+
+      /**
+       * @brief CountLeafNodes creates a simple binary tree and verifies that the head node is able
+       * to correctly count all of its leaf nodes.
+       */
+      void CountLeafNodes();
+
+      /**
+       * @brief PostOrderIteratorOfSimpleBinaryTree creates a simple binary tree, and the verifies
+       * that the Post Order Iterator is able to traverse the tree correctly.
+       */
+      void PostOrderTraversalOfSimpleBinaryTree();
+
+      /**
+       * @brief PostOrderIteratorTraversalOfLeftDegenerateBinaryTree creates a linked-list by
+       * continually prepending a node to the previously prepended node, and then verifies that the
+       * Post Order Iterator is able to traverse the resulting tree correctly.
+       */
+      void PostOrderTraversalOfLeftDegenerateBinaryTree();
+
+      /**
+       * @brief PostOrderIteratorTraversalOfRightDegenerateBinaryTree creates a linked-list by
+       * continually appending a node to the previously appended node, and then verifies that the
+       * Post Order Iterator is able to traverse the resulting tree correctly.
+       */
+      void PostOrderTraversalOfRightDegenerateBinaryTree();
 };
 
 void TreeTests::IntegerTreeCreation()
@@ -59,21 +112,85 @@ void TreeTests::StringTreeCreation()
 
 void TreeTests::TreeSize()
 {
-   std::unique_ptr<Tree<int>> tree = CreateSimpleIntegerBinaryTree();
+   std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
 
-   QVERIFY(tree->Size() == 5);
+   QVERIFY(tree->Size() == 9);
 }
 
-void TreeTests::PostOrderIteratorTestOne()
+void TreeTests::GetFirstChild()
+{
+   std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("root"));
+   tree->GetHead()->AppendChild("A");
+   tree->GetHead()->AppendChild("B");
+   tree->GetHead()->AppendChild("C");
+   tree->GetHead()->AppendChild("D");
+   tree->GetHead()->AppendChild("E");
+   tree->GetHead()->AppendChild("F");
+
+   QVERIFY(tree->GetHead()->GetFirstChild()->GetData() == "A");
+}
+
+void TreeTests::GetLastChild()
+{
+   std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("root"));
+   tree->GetHead()->AppendChild("A");
+   tree->GetHead()->AppendChild("B");
+   tree->GetHead()->AppendChild("C");
+   tree->GetHead()->AppendChild("D");
+   tree->GetHead()->AppendChild("E");
+   tree->GetHead()->AppendChild("F");
+
+   QVERIFY(tree->GetHead()->GetLastChild()->GetData() == "F");
+}
+
+void TreeTests::CountLeafNodes()
 {
    std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
 
-   std::vector<std::string> iterationOutput;
-   std::copy(std::begin(*tree), std::end(*tree), std::back_inserter(iterationOutput));
+   QVERIFY(tree->GetHead()->CountLeafNodes() == 8);
+}
+
+void TreeTests::PostOrderTraversalOfSimpleBinaryTree()
+{
+   std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
 
    const std::vector<std::string> expectedTraversal { "A", "C", "E", "D", "B", "H", "I", "G", "F" };
+   std::vector<std::string> setDifference;
 
-   QVERIFY(tree->Size() == iterationOutput.size());
+   std::set_difference(std::begin(*tree), std::end(*tree), std::begin(expectedTraversal),
+                       std::end(expectedTraversal), std::back_inserter(setDifference));
+
+   QVERIFY(setDifference.size() == 0);
+}
+
+void TreeTests::PostOrderTraversalOfLeftDegenerateBinaryTree()
+{
+   std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("A"));
+   tree->GetHead()->PrependChild("B")->PrependChild("C")->PrependChild("D")->PrependChild("E")->
+         PrependChild("F")->PrependChild("G")->PrependChild("H");
+
+   const std::vector<std::string> expectedTraversal { "H", "G", "F", "E", "D", "C", "B", "A" };
+   std::vector<std::string> setDifference;
+
+   std::set_difference(std::begin(*tree), std::end(*tree), std::begin(expectedTraversal),
+                       std::end(expectedTraversal), std::back_inserter(setDifference));
+
+   QVERIFY(setDifference.size() == 0);
+}
+
+void TreeTests::PostOrderTraversalOfRightDegenerateBinaryTree()
+{
+   std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("A"));
+   tree->GetHead()->AppendChild("B")->AppendChild("C")->AppendChild("D")->AppendChild("E")->
+         AppendChild("F")->AppendChild("G")->AppendChild("H");
+
+   const std::vector<std::string> expectedTraversal { "H", "G", "F", "E", "D", "C", "B", "A" };
+   std::vector<std::string> setDifference;
+
+   std::set_difference(std::begin(*tree), std::end(*tree), std::begin(expectedTraversal),
+                       std::end(expectedTraversal), std::back_inserter(setDifference));
+
+   QVERIFY(setDifference.size() == 0);
 }
 
 QTEST_MAIN(TreeTests)

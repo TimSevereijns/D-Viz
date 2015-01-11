@@ -69,10 +69,16 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
       std::shared_ptr<TreeNode<T>> AppendChild(T data);
 
       /**
-       * @brief GetData             Retrieves the data stored in the node.
+       * @brief GetData             Retrieves reference to the data stored in the node.
        * @returns The underlying data stored in the node.
        */
-      T GetData() const;
+      T& GetData();
+
+      /**
+       * @brief GetData             Retrieves const-ref to the data stored in the node.
+       * @returns The underlying data stored in the node.
+       */
+      const T& GetData() const;
 
       /**
        * @brief GetParent           Retrieves the parent of the node.
@@ -115,6 +121,12 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
        * @returns The number of children that this node has.
        */
       unsigned int GetChildCount() const;
+
+      /**
+       * @brief CountLeafNodes      Traverses the tree, counting all leaf nodes.
+       * @return The total number of leaf nodes belonging to the node.
+       */
+      unsigned int CountLeafNodes() const;
 };
 
 /***************************************************************************************************
@@ -260,7 +272,13 @@ std::shared_ptr<TreeNode<T>> TreeNode<T>::AppendChild(std::shared_ptr<TreeNode<T
 }
 
 template<typename T>
-T TreeNode<T>::GetData() const
+T& TreeNode<T>::GetData()
+{
+   return m_data;
+}
+
+template<typename T>
+const T& TreeNode<T>::GetData() const
 {
    return m_data;
 }
@@ -296,6 +314,15 @@ unsigned int TreeNode<T>::GetChildCount() const
 }
 
 template<typename T>
+unsigned int TreeNode<T>::CountLeafNodes() const
+{
+   // TODO: Create and use the leaf iterator!
+
+   return 0;
+}
+
+
+template<typename T>
 bool TreeNode<T>::HasChildren() const
 {
    return m_childCount > 0;
@@ -321,6 +348,10 @@ class Tree
 
       std::shared_ptr<TreeNode<T>> GetHead() const;
 
+      /**
+       * @brief Size                Run-time is linear in the size of the tree.
+       * @returns The total number of nodes in the tree (both leaf and non-leaf).
+       */
       unsigned int Size() const;
 
       /**
@@ -345,7 +376,7 @@ class Tree
             explicit Iterator(std::shared_ptr<TreeNode<T>> node);
             explicit Iterator(std::shared_ptr<TreeNode<T>> node, std::shared_ptr<TreeNode<T>> head);
 
-            T operator*() const;
+            T& operator*() const;
             T* operator->() const;
 
             SiblingIterator begin() const;
@@ -480,8 +511,11 @@ std::shared_ptr<TreeNode<T>> Tree<T>::GetHead() const
 template<typename T>
 unsigned int Tree<T>::Size() const
 {
-   const unsigned int theHeadNode = 1;
-   return m_head->GetChildCount() + theHeadNode;
+   return std::count_if(std::begin(*this), std::end(*this),
+      [](const T&)
+   {
+      return true;
+   });
 }
 
 template<typename T>
@@ -553,7 +587,7 @@ Tree<T>::Iterator::Iterator(std::shared_ptr<TreeNode<T>> node, std::shared_ptr<T
 }
 
 template<typename T>
-T Tree<T>::Iterator::operator*() const
+T& Tree<T>::Iterator::operator*() const
 {
    return m_node->GetData();
 }
