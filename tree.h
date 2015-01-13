@@ -344,6 +344,10 @@ class Tree
       explicit Tree(const Tree<T>& otherTree);
       ~Tree();
 
+      /**
+       * @brief GetHead
+       * @return
+       */
       std::shared_ptr<TreeNode<T>> GetHead() const;
 
       /**
@@ -410,8 +414,8 @@ class Tree
             explicit SiblingIterator(const Iterator& other);
             explicit SiblingIterator(std::shared_ptr<TreeNode<T>> node);
 
-            SiblingIterator operator++(int);       // post-fix operator; do not return reference!
-            SiblingIterator& operator++();         // pre-fix operator
+            SiblingIterator operator++(int);             // post-fix operator; do not return ref!
+            SiblingIterator& operator++();               // pre-fix operator
             SiblingIterator operator--(int);
             SiblingIterator& operator--();
 
@@ -420,6 +424,24 @@ class Tree
 
          private:
             std::shared_ptr<TreeNode<T>> m_parent;
+      };
+
+      /**
+       * @brief The PreOrderIterator class
+       */
+      class PreOrderIterator : public Iterator
+      {
+         public:
+            explicit PreOrderIterator();
+            explicit PreOrderIterator(const Iterator& other);
+            explicit PreOrderIterator(std::shared_ptr<TreeNode<T>> node);
+            explicit PreOrderIterator(std::shared_ptr<TreeNode<T>> node,
+                                       std::shared_ptr<TreeNode<T>> head);
+
+            PreOrderIterator operator++(int);           // post-fix operator; do not return ref!
+            PreOrderIterator& operator++();             // pre-fix operator
+            PreOrderIterator operator--(int);
+            PreOrderIterator& operator--();
       };
 
       /**
@@ -434,8 +456,8 @@ class Tree
             explicit PostOrderIterator(std::shared_ptr<TreeNode<T>> node,
                                        std::shared_ptr<TreeNode<T>> head);
 
-            PostOrderIterator operator++(int);     // post-fix operator; do not return reference!
-            PostOrderIterator& operator++();       // pre-fix operator
+            PostOrderIterator operator++(int);           // post-fix operator; do not return ref!
+            PostOrderIterator& operator++();             // pre-fix operator
             PostOrderIterator operator--(int);
             PostOrderIterator& operator--();
 
@@ -453,8 +475,9 @@ class Tree
             explicit ReversePostOrderIterator(const Iterator& other);
             explicit ReversePostOrderIterator(std::shared_ptr<TreeNode<T>> node);
 
-            ReversePostOrderIterator operator++(int);    // post-fix operator; do not return ref!
+            ReversePostOrderIterator operator++(int);    // post-fix; do not return ref!
             ReversePostOrderIterator& operator++();      // pre-fix operator
+            ReversePostOrderIterator operator--(int);
             ReversePostOrderIterator& operator--();
       };
 
@@ -468,8 +491,8 @@ class Tree
             explicit LeafIterator(const Iterator& other);
             explicit LeafIterator(std::shared_ptr<TreeNode<T>> node);
 
-            LeafIterator operator++(int);       // post-fix operator; do not return reference!
-            LeafIterator& operator++();         // pre-fix operator
+            LeafIterator operator++(int);                // post-fix operator; do not return ref!
+            LeafIterator& operator++();                  // pre-fix operator
             LeafIterator operator--(int);
             LeafIterator& operator--();
       };
@@ -626,7 +649,7 @@ typename Tree<T>::SiblingIterator Tree<T>::endSibling(const std::shared_ptr<Tree
 template<typename T>
 typename Tree<T>::PostOrderIterator Tree<T>::begin() const
 {
-   auto iterator = Tree<T>::PostOrderIterator(m_head);
+   Tree<T>::PostOrderIterator iterator = Tree<T>::PostOrderIterator(m_head);
    iterator.m_head = m_head;
 
    return ++iterator;
@@ -937,6 +960,7 @@ typename Tree<T>::PostOrderIterator Tree<T>::PostOrderIterator::operator--(int)
 
    return result;
 }
+
 /***************************************************************************************************
  * Start of Reverse Post-Order Iterator Class Definitions
  **************************************************************************************************/
@@ -973,6 +997,18 @@ template<typename T>
 typename Tree<T>::ReversePostOrderIterator& Tree<T>::ReversePostOrderIterator::operator++()
 {
    // TODO
+
+   return *this;
+}
+
+template<typename T>
+typename Tree<T>::ReversePostOrderIterator Tree<T>::ReversePostOrderIterator::operator--(int)
+{
+   assert(m_node);
+
+   // TODO
+
+   return *this;
 }
 
 template<typename T>

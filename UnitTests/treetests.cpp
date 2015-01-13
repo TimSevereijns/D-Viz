@@ -243,7 +243,9 @@ void TreeTests::PostOrderTraversalFromEndToBegin()
    int index = 0;
 
    bool traversalError = false;
-   auto itr = --(std::end(*tree));
+   Tree<std::string>::PostOrderIterator itr = std::end(*tree);
+   --itr;
+
    for (; itr != std::begin(*tree); --itr)
    {
       if (*itr != expectedTraversal[index++])
