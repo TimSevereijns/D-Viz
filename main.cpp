@@ -13,25 +13,26 @@ int main(int argc, char* argv[])
    MainWindow mainWindow;
    mainWindow.show();
 
-//   std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("F"));
-//   tree->GetHead()->AppendChild("B")->AppendChild("A");
-//   tree->GetHead()->GetFirstChild()->AppendChild("D")->AppendChild("C");
-//   tree->GetHead()->GetFirstChild()->GetLastChild()->AppendChild("E");
+   std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("F"));
+   tree->GetHead()->AppendChild("B")->AppendChild("A");
+   tree->GetHead()->GetFirstChild()->AppendChild("D")->AppendChild("C");
+   tree->GetHead()->GetFirstChild()->GetLastChild()->AppendChild("E");
 
-//   tree->GetHead()->AppendChild("G")->AppendChild("I")->AppendChild("H");
+   tree->GetHead()->AppendChild("G")->AppendChild("I")->AppendChild("H");
 
-//   const std::vector<std::string> expectedTraversal { "A", "C", "E", "H" };
-//   int index = 0;
+   const std::vector<std::string> expectedTraversal { "F", "G", "I", "H", "B", "D", "E", "C", "A" };
 
-//   bool traversalError = false;
-//   for (auto itr = tree->beginLeaf(); itr != tree->endLeaf(); ++itr)
-//   {
-//      if (*itr != expectedTraversal[index++])
-//      {
-//         traversalError = true;
-//         break;
-//      }
-//   }
+   int index = 0;
+   bool traversalError = false;
+
+   for (auto itr = std::rbegin(*tree); itr != std::rend(*tree); ++itr)
+   {
+      if (*itr != expectedTraversal[index++])
+      {
+         traversalError = true;
+         break;
+      }
+   }
 
    return application.exec();
 }

@@ -112,6 +112,12 @@ class TreeTests: public QObject
       void PostOrderTraversalFromEndToBegin();
 
       /**
+       * @brief ReversePostOrderTraversalOfSimpleBinaryTree creates a simple binary tree, and the
+       * verifies that the reverse Post Order Iterator is able to traverse the tree correctly.
+       */
+      void ReversePostOrderTraversalOfSimpleBinaryTree();
+
+      /**
        * @brief SiblingTraversal creates a tree containing a root node with five child nodes, and
        * then traverses over those five sibling nodes, starting with the first child.
        */
@@ -260,6 +266,27 @@ void TreeTests::PostOrderTraversalFromEndToBegin()
    if (*itr != expectedTraversal[index])
    {
       traversalError = true;
+   }
+
+   QVERIFY(traversalError == false);
+}
+
+void TreeTests::ReversePostOrderTraversalOfSimpleBinaryTree()
+{
+   std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
+
+   const std::vector<std::string> expectedTraversal { "F", "G", "I", "H", "B", "D", "E", "C", "A" };
+
+   int index = 0;
+   bool traversalError = false;
+
+   for (auto itr = std::rbegin(*tree); itr != std::rend(*tree); ++itr)
+   {
+      if (*itr != expectedTraversal[index++])
+      {
+         traversalError = true;
+         break;
+      }
    }
 
    QVERIFY(traversalError == false);

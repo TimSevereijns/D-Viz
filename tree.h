@@ -338,6 +338,7 @@ class Tree
       class Iterator;
       class SiblingIterator;
       class PostOrderIterator;
+      class ReversePostOrderIterator;
 
       explicit Tree();
       explicit Tree(T data);
@@ -531,13 +532,13 @@ class Tree
        * @brief end                 Creates an iterator that points to the end of the tree.
        * @returns A post-order iterator.
        */
-      //ReversePostOrderIterator rbegin() const;
+      ReversePostOrderIterator rbegin() const;
 
       /**
        * @brief end                 Creates an iterator that points to the beginning of the tree.
        * @returns A post-order iterator.
        */
-      //ReversePostOrderIterator rend() const;
+      ReversePostOrderIterator rend() const;
 
       /**
        * @brief beginLeaf           Creates a leaf iterator that starts at the left-most leaf in
@@ -659,6 +660,24 @@ template<typename T>
 typename Tree<T>::PostOrderIterator Tree<T>::end() const
 {
    auto iterator = Tree<T>::PostOrderIterator();
+   iterator.m_head = m_head;
+
+   return iterator;
+}
+
+template<typename T>
+typename Tree<T>::ReversePostOrderIterator Tree<T>::rbegin() const
+{
+   auto iterator = Tree<T>::ReversePostOrderIterator(m_head);
+   iterator.m_head = m_head;
+
+   return iterator;
+}
+
+template<typename T>
+typename Tree<T>::ReversePostOrderIterator Tree<T>::rend() const
+{
+   auto iterator = Tree<T>::ReversePostOrderIterator();
    iterator.m_head = m_head;
 
    return iterator;
@@ -931,7 +950,6 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator--()
    }
    else if (m_node->GetPreviousSibling())
    {
-      m_node->MarkVisited(false);
       m_node = m_node->GetPreviousSibling();
    }
    else if (m_node->GetParent())
@@ -941,12 +959,12 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator--()
          m_node = m_node->GetParent();
       }
 
-      m_node->GetParent()->MarkVisited(true);
-      m_node = m_node->GetParent()->GetPreviousSibling();
-   }
-   else // Must be at the end of the traversal, so clean up visitation tracking for the last node:
-   {
-      m_node->MarkVisited(false);
+      m_node = m_node->GetParent();
+
+      if (m_node)
+      {
+         m_node = m_node->GetPreviousSibling();
+      }
    }
 
    return *this;
@@ -996,7 +1014,35 @@ typename Tree<T>::ReversePostOrderIterator Tree<T>::ReversePostOrderIterator::op
 template<typename T>
 typename Tree<T>::ReversePostOrderIterator& Tree<T>::ReversePostOrderIterator::operator++()
 {
-   // TODO
+   // When the iterator is at the end(), then the next position should be the head:
+   if (!m_node)
+   {
+      assert(m_head);
+
+      m_node = m_head;
+   }
+   else if (m_node->HasChildren())
+   {
+      m_node = m_node->GetLastChild();
+   }
+   else if (m_node->GetPreviousSibling())
+   {
+      m_node = m_node->GetPreviousSibling();
+   }
+   else if (m_node->GetParent())
+   {
+      while (m_node->GetParent() && !m_node->GetParent()->GetPreviousSibling())
+      {
+         m_node = m_node->GetParent();
+      }
+
+      m_node = m_node->GetParent();
+
+      if (m_node)
+      {
+         m_node = m_node->GetPreviousSibling();
+      }
+   }
 
    return *this;
 }
@@ -1004,11 +1050,10 @@ typename Tree<T>::ReversePostOrderIterator& Tree<T>::ReversePostOrderIterator::o
 template<typename T>
 typename Tree<T>::ReversePostOrderIterator Tree<T>::ReversePostOrderIterator::operator--(int)
 {
-   assert(m_node);
+   auto result = *this;
+   --(*this);
 
-   // TODO
-
-   return *this;
+   return result;
 }
 
 template<typename T>
@@ -1016,7 +1061,33 @@ typename Tree<T>::ReversePostOrderIterator& Tree<T>::ReversePostOrderIterator::o
 {
    assert(m_node);
 
-   // TODO
+   if (m_node->HasChildren() && !m_node->GetVisited())
+   {
+      while (m_node->GetFirstChild())
+      {
+         m_node = m_node->GetFirstChild();
+      }
+   }
+   else if (m_node->GetNextSibling())
+   {
+      m_node = m_node->GetNextSibling();
+
+      while (m_node->HasChildren())
+      {
+         m_node = m_node->GetFirstChild();
+      }
+   }
+   else
+   {
+      m_node->MarkVisited(false);
+
+      m_node = m_node->GetParent();
+
+      if (m_node)
+      {
+         m_node->MarkVisited(true);
+      }
+   }
 
    return *this;
 }
