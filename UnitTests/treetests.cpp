@@ -171,7 +171,10 @@ void TreeTests::SubTreeSize()
    auto itr = std::begin(*tree);
    itr++; itr++; itr++; itr++;
 
-   //Tree<std::string>::Size(*itr);
+   //const unsigned int size = Tree<std::string>::Size(*itr);
+   const unsigned int size = tree->Size(*itr);
+
+   QVERIFY(size == 3);
 }
 
 void TreeTests::GetFirstChild()
@@ -211,11 +214,39 @@ void TreeTests::PostOrderTraversalOfSimpleBinaryTree()
 {
    std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
 
-   const std::vector<std::string> expectedTraversal { "A", "C", "E", "D", "B", "H", "I", "G", "F" };
-   std::vector<std::string> setDifference;
+//   const std::vector<TreeNode<std::string>> expectedTraversal
+//   {
+//      TreeNode<std::string>("A"),
+//      TreeNode<std::string>("C"),
+//      TreeNode<std::string>("E"),
+//      TreeNode<std::string>("D"),
+//      TreeNode<std::string>("B"),
+//      TreeNode<std::string>("H"),
+//      TreeNode<std::string>("I"),
+//      TreeNode<std::string>("G"),
+//      TreeNode<std::string>("F")
+//   };
+
+   std::vector<TreeNode<std::string>> expectedTraversal;
+   expectedTraversal.reserve(9);
+   expectedTraversal.push_back(TreeNode<std::string>("A"));
+   expectedTraversal.push_back(TreeNode<std::string>("C"));
+   expectedTraversal.push_back(TreeNode<std::string>("E"));
+   expectedTraversal.push_back(TreeNode<std::string>("D"));
+   expectedTraversal.push_back(TreeNode<std::string>("B"));
+   expectedTraversal.push_back(TreeNode<std::string>("H"));
+   expectedTraversal.push_back(TreeNode<std::string>("I"));
+   expectedTraversal.push_back(TreeNode<std::string>("G"));
+   expectedTraversal.push_back(TreeNode<std::string>("F"));
+
+   std::vector<TreeNode<std::string>> setDifference;
 
    std::set_difference(std::begin(*tree), std::end(*tree), std::begin(expectedTraversal),
-                       std::end(expectedTraversal), std::back_inserter(setDifference));
+                       std::end(expectedTraversal), std::back_inserter(setDifference),
+                       [] (TreeNode<std::string>& lhs, TreeNode<std::string>& rhs)
+   {
+      return lhs.GetData() < rhs.GetData();
+   });
 
    QVERIFY(setDifference.size() == 0);
 }
@@ -232,11 +263,25 @@ void TreeTests::PostOrderTraversalOfLeftDegenerateBinaryTree()
          PrependChild("G")->
          PrependChild("H");
 
-   const std::vector<std::string> expectedTraversal { "H", "G", "F", "E", "D", "C", "B", "A" };
-   std::vector<std::string> setDifference;
+   std::vector<TreeNode<std::string>> expectedTraversal;
+   expectedTraversal.reserve(9);
+   expectedTraversal.push_back(TreeNode<std::string>("H"));
+   expectedTraversal.push_back(TreeNode<std::string>("G"));
+   expectedTraversal.push_back(TreeNode<std::string>("F"));
+   expectedTraversal.push_back(TreeNode<std::string>("E"));
+   expectedTraversal.push_back(TreeNode<std::string>("D"));
+   expectedTraversal.push_back(TreeNode<std::string>("C"));
+   expectedTraversal.push_back(TreeNode<std::string>("B"));
+   expectedTraversal.push_back(TreeNode<std::string>("A"));
+
+   std::vector<TreeNode<std::string>> setDifference;
 
    std::set_difference(std::begin(*tree), std::end(*tree), std::begin(expectedTraversal),
-                       std::end(expectedTraversal), std::back_inserter(setDifference));
+                       std::end(expectedTraversal), std::back_inserter(setDifference),
+                       [] (TreeNode<std::string>& lhs, TreeNode<std::string>& rhs)
+   {
+      return lhs.GetData() < rhs.GetData();
+   });
 
    QVERIFY(setDifference.size() == 0);
 }
@@ -253,11 +298,25 @@ void TreeTests::PostOrderTraversalOfRightDegenerateBinaryTree()
          AppendChild("G")->
          AppendChild("H");
 
-   const std::vector<std::string> expectedTraversal { "H", "G", "F", "E", "D", "C", "B", "A" };
-   std::vector<std::string> setDifference;
+   std::vector<TreeNode<std::string>> expectedTraversal;
+   expectedTraversal.reserve(9);
+   expectedTraversal.push_back(TreeNode<std::string>("H"));
+   expectedTraversal.push_back(TreeNode<std::string>("G"));
+   expectedTraversal.push_back(TreeNode<std::string>("F"));
+   expectedTraversal.push_back(TreeNode<std::string>("E"));
+   expectedTraversal.push_back(TreeNode<std::string>("D"));
+   expectedTraversal.push_back(TreeNode<std::string>("C"));
+   expectedTraversal.push_back(TreeNode<std::string>("B"));
+   expectedTraversal.push_back(TreeNode<std::string>("A"));
+
+   std::vector<TreeNode<std::string>> setDifference;
 
    std::set_difference(std::begin(*tree), std::end(*tree), std::begin(expectedTraversal),
-                       std::end(expectedTraversal), std::back_inserter(setDifference));
+                       std::end(expectedTraversal), std::back_inserter(setDifference),
+                       [] (TreeNode<std::string>& lhs, TreeNode<std::string>& rhs)
+   {
+      return lhs.GetData() < rhs.GetData();
+   });
 
    QVERIFY(setDifference.size() == 0);
 }
@@ -275,7 +334,7 @@ void TreeTests::PostOrderTraversalFromEndToBegin()
 
    for (; itr != std::begin(*tree); --itr)
    {
-      if (*itr != expectedTraversal[index++])
+      if (itr->GetData() != expectedTraversal[index++])
       {
          traversalError = true;
          break;
@@ -284,7 +343,7 @@ void TreeTests::PostOrderTraversalFromEndToBegin()
 
    // Since begin() actually points to the first node, and not "past" it, like end() would, we need
    // one extra test:
-   if (*itr != expectedTraversal[index])
+   if (itr->GetData() != expectedTraversal[index])
    {
       traversalError = true;
    }
@@ -303,7 +362,7 @@ void TreeTests::ReversePostOrderTraversalOfSimpleBinaryTree()
 
    for (auto itr = std::rbegin(*tree); itr != std::rend(*tree); ++itr)
    {
-      if (*itr != expectedTraversal[index++])
+      if (itr->GetData() != expectedTraversal[index++])
       {
          traversalError = true;
          break;
@@ -321,33 +380,33 @@ void TreeTests::PostOrderTraversalForwardsAndBackwards()
    itr++;
    itr++;
    itr++;
-   assert(*itr == "D");
+   assert(itr->GetData() == "D");
 
    itr--;
    itr--;
-   assert(*itr == "C");
-
-   itr++;
-   itr++;
-   itr++;
-   assert(*itr == "B");
-
-   itr--;
-   itr--;
-   itr--;
-   itr--;
-   assert(*itr == "A");
+   assert(itr->GetData() == "C");
 
    itr++;
    itr++;
    itr++;
-   itr++;
-   itr++;
-   itr++;
-   assert(*itr == "I");
+   assert(itr->GetData() == "B");
 
    itr--;
-   QVERIFY(*itr == "H");
+   itr--;
+   itr--;
+   itr--;
+   assert(itr->GetData() == "A");
+
+   itr++;
+   itr++;
+   itr++;
+   itr++;
+   itr++;
+   itr++;
+   assert(itr->GetData() == "I");
+
+   itr--;
+   QVERIFY(itr->GetData() == "H");
 }
 
 void TreeTests::SiblingTraversal()
@@ -362,7 +421,7 @@ void TreeTests::SiblingTraversal()
    bool traversalError = false;
    for (auto itr = tree->beginSibling(node); itr != tree->endSibling(node); ++itr)
    {
-      if (*itr != expectedTraversal[index++])
+      if (itr->GetData() != expectedTraversal[index++])
       {
          traversalError = true;
          break;
@@ -382,7 +441,7 @@ void TreeTests::LeafTraversalOfSimpleBinaryTree()
    bool traversalError = false;
    for (auto itr = tree->beginLeaf(); itr != tree->endLeaf(); ++itr)
    {
-      if (*itr != expectedTraversal[index++])
+      if (itr->GetData() != expectedTraversal[index++])
       {
          traversalError = true;
          break;

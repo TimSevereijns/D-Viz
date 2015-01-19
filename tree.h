@@ -37,10 +37,15 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
    public:
       explicit TreeNode();
       explicit TreeNode(T data);
-      explicit TreeNode(const TreeNode<T>& otherTree);
+      TreeNode(const TreeNode<T>& otherTree);
       ~TreeNode();
 
       TreeNode<T>& operator=(TreeNode<T> other);
+
+      bool operator<(const TreeNode<T>& rhs) const;
+      bool operator<=(const TreeNode<T>& rhs) const;
+      bool operator>(const TreeNode<T>& rhs) const;
+      bool operator>=(const TreeNode<T>& rhs) const;
 
       /**
        * @brief GetVisited          Retrieve visitation status of the node
@@ -182,6 +187,30 @@ TreeNode<T>& TreeNode<T>::operator=(TreeNode<T> other)
 {
    std::swap(other);
    return *this;
+}
+
+template<typename T>
+bool TreeNode<T>::operator<(const TreeNode<T>& rhs) const
+{
+   return m_data < rhs.GetData();
+}
+
+template<typename T>
+bool TreeNode<T>::operator<=(const TreeNode<T>& rhs) const
+{
+   return m_data <= rhs.GetData();
+}
+
+template<typename T>
+bool TreeNode<T>::operator>(const TreeNode<T>& rhs) const
+{
+   return m_data > rhs.GetData();
+}
+
+template<typename T>
+bool TreeNode<T>::operator>=(const TreeNode<T>& rhs) const
+{
+   return m_data >= rhs.GetData();
 }
 
 template<typename T>
@@ -369,7 +398,7 @@ class Tree
        * @returns The total number of nodes (both leaf and branching) in the tree, starting at the
        * passed in node.
        */
-      static unsigned int Size(const TreeNode<T> node);
+      unsigned int Size(const TreeNode<T> node);
 
       /**
        * @brief The Iterator class
@@ -396,8 +425,8 @@ class Tree
             explicit Iterator(std::shared_ptr<TreeNode<T>> node);
             explicit Iterator(std::shared_ptr<TreeNode<T>> node, std::shared_ptr<TreeNode<T>> head);
 
-            T& operator*() const;
-            T* operator->() const;
+            TreeNode<T>& operator*() const;
+            TreeNode<T>* operator->() const;
 
             SiblingIterator begin() const;
             SiblingIterator end() const;
@@ -614,7 +643,7 @@ template<typename T>
 unsigned int Tree<T>::Size() const
 {
    return std::count_if(std::begin(*this), std::end(*this),
-      [](const T&)
+      [](const TreeNode<T>&)
    {
       return true;
    });
@@ -624,12 +653,8 @@ template<typename T>
 unsigned int Tree<T>::Size(const TreeNode<T> node)
 {
    unsigned int count = 0;
-   for (auto itr = ++PostOrderIterator(std::make_shared(node));
-        itr != PostOrderIterator(std::make_shared(node));
-        itr++)
-   {
-      count++;
-   }
+
+   //Tree<T>::PostOrderIterator itr = Tree<T>::PostOrderIterator(std::make_shared(node));
 
    return count;
 }
@@ -753,15 +778,16 @@ Tree<T>::Iterator::Iterator(std::shared_ptr<TreeNode<T>> node, std::shared_ptr<T
 }
 
 template<typename T>
-T& Tree<T>::Iterator::operator*() const
+TreeNode<T>& Tree<T>::Iterator::operator*() const
 {
-   return m_node->GetData();
+   //return m_node->GetData();
+   return *m_node;
 }
 
 template<typename T>
-T* Tree<T>::Iterator::operator->() const
+TreeNode<T>* Tree<T>::Iterator::operator->() const
 {
-   return &(m_node->GetData());
+   return &(*m_node);
 }
 
 template<typename T>
