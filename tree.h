@@ -358,10 +358,18 @@ class Tree
       unsigned int CountLeafNodes() const;
 
       /**
-       * @brief Size                Run-time is linear in the size of the tree.
+       * @brief Size                Run-time is linear in the size of the entire tree.
        * @returns The total number of nodes in the tree (both leaf and non-leaf).
        */
       unsigned int Size() const;
+
+      /**
+       * @brief Size                Run-time is linear in the size of the sub-tree.
+       * @param node                The node from which to compute the size of the sub-tree.
+       * @returns The total number of nodes (both leaf and branching) in the tree, starting at the
+       * passed in node.
+       */
+      static unsigned int Size(const TreeNode<T> node);
 
       /**
        * @brief The Iterator class
@@ -610,6 +618,20 @@ unsigned int Tree<T>::Size() const
    {
       return true;
    });
+}
+
+template<typename T>
+unsigned int Tree<T>::Size(const TreeNode<T> node)
+{
+   unsigned int count = 0;
+   for (auto itr = ++PostOrderIterator(std::make_shared(node));
+        itr != PostOrderIterator(std::make_shared(node));
+        itr++)
+   {
+      count++;
+   }
+
+   return count;
 }
 
 template<typename T>
@@ -901,7 +923,7 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator++()
 {
    assert(m_node);
 
-   if (m_node->HasChildren() && !m_node->GetVisited())
+   if (m_node->HasChildren() && !m_haveChildrenBeenVisited)
    {
       while (m_node->GetFirstChild())
       {
@@ -919,16 +941,9 @@ typename Tree<T>::PostOrderIterator& Tree<T>::PostOrderIterator::operator++()
    }
    else
    {
-      m_node->MarkVisited(false);
-      //m_haveChildrenBeenVisited = false;
+      m_haveChildrenBeenVisited = true;
 
       m_node = m_node->GetParent();
-
-      if (m_node)
-      {
-         m_node->MarkVisited(true);
-         //m_haveChildrenBeenVisited = true;
-      }
    }
 
    return *this;
@@ -1061,7 +1076,7 @@ typename Tree<T>::ReversePostOrderIterator& Tree<T>::ReversePostOrderIterator::o
 {
    assert(m_node);
 
-   if (m_node->HasChildren() && !m_node->GetVisited())
+   if (m_node->HasChildren())
    {
       while (m_node->GetFirstChild())
       {
@@ -1079,14 +1094,7 @@ typename Tree<T>::ReversePostOrderIterator& Tree<T>::ReversePostOrderIterator::o
    }
    else
    {
-      m_node->MarkVisited(false);
-
       m_node = m_node->GetParent();
-
-      if (m_node)
-      {
-         m_node->MarkVisited(true);
-      }
    }
 
    return *this;

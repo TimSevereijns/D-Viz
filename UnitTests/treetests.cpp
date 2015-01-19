@@ -68,6 +68,11 @@ class TreeTests: public QObject
       void TreeSize();
 
       /**
+       * @brief SubTreeSize
+       */
+      void SubTreeSize();
+
+      /**
        * @brief GetFirstChild creates a new tree with half a dozen children, and verifies that
        * the node is able retrieve its first child correctly.
        */
@@ -118,6 +123,13 @@ class TreeTests: public QObject
       void ReversePostOrderTraversalOfSimpleBinaryTree();
 
       /**
+       * @brief PostOrderTraversalForwardsAndBackwards creates a simple binary tree, and then
+       * increments and decrements the Post Order Iterator randomly to verify that mixed traversal
+       * works correctly.
+       */
+      void PostOrderTraversalForwardsAndBackwards();
+
+      /**
        * @brief SiblingTraversal creates a tree containing a root node with five child nodes, and
        * then traverses over those five sibling nodes, starting with the first child.
        */
@@ -151,6 +163,15 @@ void TreeTests::TreeSize()
    std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
 
    QVERIFY(tree->Size() == 9);
+}
+
+void TreeTests::SubTreeSize()
+{
+   std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
+   auto itr = std::begin(*tree);
+   itr++; itr++; itr++; itr++;
+
+   //Tree<std::string>::Size(*itr);
 }
 
 void TreeTests::GetFirstChild()
@@ -261,7 +282,7 @@ void TreeTests::PostOrderTraversalFromEndToBegin()
       }
    }
 
-   // Since begin actually points to the first node, and not past it, like end() would, we need
+   // Since begin() actually points to the first node, and not "past" it, like end() would, we need
    // one extra test:
    if (*itr != expectedTraversal[index])
    {
@@ -290,6 +311,43 @@ void TreeTests::ReversePostOrderTraversalOfSimpleBinaryTree()
    }
 
    QVERIFY(traversalError == false);
+}
+
+void TreeTests::PostOrderTraversalForwardsAndBackwards()
+{
+   std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
+   Tree<std::string>::PostOrderIterator itr = std::begin(*tree);
+
+   itr++;
+   itr++;
+   itr++;
+   assert(*itr == "D");
+
+   itr--;
+   itr--;
+   assert(*itr == "C");
+
+   itr++;
+   itr++;
+   itr++;
+   assert(*itr == "B");
+
+   itr--;
+   itr--;
+   itr--;
+   itr--;
+   assert(*itr == "A");
+
+   itr++;
+   itr++;
+   itr++;
+   itr++;
+   itr++;
+   itr++;
+   assert(*itr == "I");
+
+   itr--;
+   QVERIFY(*itr == "H");
 }
 
 void TreeTests::SiblingTraversal()
