@@ -214,39 +214,23 @@ void TreeTests::PostOrderTraversalOfSimpleBinaryTree()
 {
    std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
 
-//   const std::vector<TreeNode<std::string>> expectedTraversal
-//   {
-//      TreeNode<std::string>("A"),
-//      TreeNode<std::string>("C"),
-//      TreeNode<std::string>("E"),
-//      TreeNode<std::string>("D"),
-//      TreeNode<std::string>("B"),
-//      TreeNode<std::string>("H"),
-//      TreeNode<std::string>("I"),
-//      TreeNode<std::string>("G"),
-//      TreeNode<std::string>("F")
-//   };
-
-   std::vector<TreeNode<std::string>> expectedTraversal;
-   expectedTraversal.reserve(9);
-   expectedTraversal.push_back(TreeNode<std::string>("A"));
-   expectedTraversal.push_back(TreeNode<std::string>("C"));
-   expectedTraversal.push_back(TreeNode<std::string>("E"));
-   expectedTraversal.push_back(TreeNode<std::string>("D"));
-   expectedTraversal.push_back(TreeNode<std::string>("B"));
-   expectedTraversal.push_back(TreeNode<std::string>("H"));
-   expectedTraversal.push_back(TreeNode<std::string>("I"));
-   expectedTraversal.push_back(TreeNode<std::string>("G"));
-   expectedTraversal.push_back(TreeNode<std::string>("F"));
+   const std::vector<TreeNode<std::string>> expectedTraversal
+   {
+      TreeNode<std::string>("A"),
+      TreeNode<std::string>("C"),
+      TreeNode<std::string>("E"),
+      TreeNode<std::string>("D"),
+      TreeNode<std::string>("B"),
+      TreeNode<std::string>("H"),
+      TreeNode<std::string>("I"),
+      TreeNode<std::string>("G"),
+      TreeNode<std::string>("F")
+   };
 
    std::vector<TreeNode<std::string>> setDifference;
 
    std::set_difference(std::begin(*tree), std::end(*tree), std::begin(expectedTraversal),
-                       std::end(expectedTraversal), std::back_inserter(setDifference),
-                       [] (TreeNode<std::string>& lhs, TreeNode<std::string>& rhs)
-   {
-      return lhs.GetData() < rhs.GetData();
-   });
+                       std::end(expectedTraversal), std::back_inserter(setDifference));
 
    QVERIFY(setDifference.size() == 0);
 }
@@ -263,25 +247,22 @@ void TreeTests::PostOrderTraversalOfLeftDegenerateBinaryTree()
          PrependChild("G")->
          PrependChild("H");
 
-   std::vector<TreeNode<std::string>> expectedTraversal;
-   expectedTraversal.reserve(9);
-   expectedTraversal.push_back(TreeNode<std::string>("H"));
-   expectedTraversal.push_back(TreeNode<std::string>("G"));
-   expectedTraversal.push_back(TreeNode<std::string>("F"));
-   expectedTraversal.push_back(TreeNode<std::string>("E"));
-   expectedTraversal.push_back(TreeNode<std::string>("D"));
-   expectedTraversal.push_back(TreeNode<std::string>("C"));
-   expectedTraversal.push_back(TreeNode<std::string>("B"));
-   expectedTraversal.push_back(TreeNode<std::string>("A"));
+   const std::vector<TreeNode<std::string>> expectedTraversal
+   {
+      TreeNode<std::string>("H"),
+      TreeNode<std::string>("G"),
+      TreeNode<std::string>("F"),
+      TreeNode<std::string>("E"),
+      TreeNode<std::string>("D"),
+      TreeNode<std::string>("C"),
+      TreeNode<std::string>("B"),
+      TreeNode<std::string>("A")
+   };
 
    std::vector<TreeNode<std::string>> setDifference;
 
    std::set_difference(std::begin(*tree), std::end(*tree), std::begin(expectedTraversal),
-                       std::end(expectedTraversal), std::back_inserter(setDifference),
-                       [] (TreeNode<std::string>& lhs, TreeNode<std::string>& rhs)
-   {
-      return lhs.GetData() < rhs.GetData();
-   });
+                       std::end(expectedTraversal), std::back_inserter(setDifference));
 
    QVERIFY(setDifference.size() == 0);
 }
@@ -298,25 +279,22 @@ void TreeTests::PostOrderTraversalOfRightDegenerateBinaryTree()
          AppendChild("G")->
          AppendChild("H");
 
-   std::vector<TreeNode<std::string>> expectedTraversal;
-   expectedTraversal.reserve(9);
-   expectedTraversal.push_back(TreeNode<std::string>("H"));
-   expectedTraversal.push_back(TreeNode<std::string>("G"));
-   expectedTraversal.push_back(TreeNode<std::string>("F"));
-   expectedTraversal.push_back(TreeNode<std::string>("E"));
-   expectedTraversal.push_back(TreeNode<std::string>("D"));
-   expectedTraversal.push_back(TreeNode<std::string>("C"));
-   expectedTraversal.push_back(TreeNode<std::string>("B"));
-   expectedTraversal.push_back(TreeNode<std::string>("A"));
+   const std::vector<TreeNode<std::string>> expectedTraversal
+   {
+      TreeNode<std::string>("H"),
+      TreeNode<std::string>("G"),
+      TreeNode<std::string>("F"),
+      TreeNode<std::string>("E"),
+      TreeNode<std::string>("D"),
+      TreeNode<std::string>("C"),
+      TreeNode<std::string>("B"),
+      TreeNode<std::string>("A")
+   };
 
    std::vector<TreeNode<std::string>> setDifference;
 
    std::set_difference(std::begin(*tree), std::end(*tree), std::begin(expectedTraversal),
-                       std::end(expectedTraversal), std::back_inserter(setDifference),
-                       [] (TreeNode<std::string>& lhs, TreeNode<std::string>& rhs)
-   {
-      return lhs.GetData() < rhs.GetData();
-   });
+                       std::end(expectedTraversal), std::back_inserter(setDifference));
 
    QVERIFY(setDifference.size() == 0);
 }

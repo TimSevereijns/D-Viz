@@ -185,7 +185,15 @@ TreeNode<T>::~TreeNode()
 template<typename T>
 TreeNode<T>& TreeNode<T>::operator=(TreeNode<T> other)
 {
-   std::swap(other);
+   std::swap(this->m_childCount, other.m_childCount);
+   std::swap(this->m_data, other.m_data);
+   std::swap(this->m_firstChild, other.m_firstChild);
+   std::swap(this->m_lastChild, other.m_lastChild);
+   std::swap(this->m_nextSibling, other.m_nextSibling);
+   std::swap(this->m_parent, other.m_parent);
+   std::swap(this->m_previousSibling, other.m_previousSibling);
+   std::swap(this->m_visited, other.m_visited);
+
    return *this;
 }
 
@@ -654,7 +662,11 @@ unsigned int Tree<T>::Size(const TreeNode<T> node)
 {
    unsigned int count = 0;
 
-   //Tree<T>::PostOrderIterator itr = Tree<T>::PostOrderIterator(std::make_shared(node));
+   Tree<T>::PostOrderIterator itr = Tree<T>::PostOrderIterator(std::make_shared<TreeNode<T>>(node));
+   for (++itr; itr != end(); ++itr)
+   {
+      count++;
+   }
 
    return count;
 }
