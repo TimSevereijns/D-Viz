@@ -123,15 +123,15 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
 
       /**
        * @brief GetChildCount       Retrieves the child count of the node.
-       * @returns The number of children that this node has.
+       * @returns The number of immediate children that this node has.
        */
       unsigned int GetChildCount() const;
 
       /**
-       * @brief CountLeafNodes      Traverses the tree, counting all leaf nodes.
-       * @return The total number of leaf nodes belonging to the node.
+       * @brief CountDescendants      Traverses the tree, counting all descendants.
+       * @return The total number of descendant nodes belonging to the node.
        */
-      unsigned int CountLeafNodes() const;
+      unsigned int CountAllDescendants() const;
 };
 
 /***************************************************************************************************
@@ -351,10 +351,9 @@ unsigned int TreeNode<T>::GetChildCount() const
 }
 
 template<typename T>
-unsigned int TreeNode<T>::CountLeafNodes() const
+unsigned int TreeNode<T>::CountAllDescendants() const
 {
-   // TODO
-   return 0;
+   return Tree<T>::Size(*this) - 1;
 }
 
 template<typename T>
@@ -406,7 +405,7 @@ class Tree
        * @returns The total number of nodes (both leaf and branching) in the tree, starting at the
        * passed in node.
        */
-      unsigned int Size(const TreeNode<T> node);
+      static unsigned int Size(const TreeNode<T>& node);
 
       /**
        * @brief The Iterator class
@@ -658,12 +657,12 @@ unsigned int Tree<T>::Size() const
 }
 
 template<typename T>
-unsigned int Tree<T>::Size(const TreeNode<T> node)
+unsigned int Tree<T>::Size(const TreeNode<T>& node)
 {
    unsigned int count = 0;
 
    Tree<T>::PostOrderIterator itr = Tree<T>::PostOrderIterator(std::make_shared<TreeNode<T>>(node));
-   for (++itr; itr != end(); ++itr)
+   for (++itr; &*itr != &node; ++itr)
    {
       count++;
    }
@@ -754,7 +753,10 @@ typename Tree<T>::LeafIterator Tree<T>::beginLeaf() const
 template<typename T>
 typename Tree<T>::LeafIterator Tree<T>::endLeaf() const
 {
-   return Tree<T>::LeafIterator(nullptr);
+   auto iterator = Tree<T>::LeafIterator();
+   iterator.m_head = m_head;
+
+   return iterator;
 }
 
 /***************************************************************************************************
@@ -792,7 +794,6 @@ Tree<T>::Iterator::Iterator(std::shared_ptr<TreeNode<T>> node, std::shared_ptr<T
 template<typename T>
 TreeNode<T>& Tree<T>::Iterator::operator*() const
 {
-   //return m_node->GetData();
    return *m_node;
 }
 
@@ -1175,7 +1176,7 @@ typename Tree<T>::LeafIterator& Tree<T>::LeafIterator::operator++()
 {
    assert(m_node);
 
-   if (m_node->HasChildren() && !m_node->GetVisited())
+   if (m_node->HasChildren())
    {
       while (m_node->GetFirstChild())
       {
@@ -1201,17 +1202,17 @@ typename Tree<T>::LeafIterator& Tree<T>::LeafIterator::operator++()
       if (m_node->GetParent())
       {
          m_node = m_node->GetParent()->GetNextSibling();
-      }
-      else // The end of the traversal has been reached:
-      {
-         m_node = nullptr;
+
+         while (m_node->HasChildren())
+         {
+            m_node = m_node->GetFirstChild();
+         }
+
          return *this;
       }
 
-      while (m_node->HasChildren())
-      {
-         m_node = m_node->GetFirstChild();
-      }
+      // Otherwise, the traversal is at the end:
+      m_node = nullptr;
    }
 
    return *this;
@@ -1229,7 +1230,50 @@ typename Tree<T>::LeafIterator Tree<T>::LeafIterator::operator--(int)
 template<typename T>
 typename Tree<T>::LeafIterator& Tree<T>::LeafIterator::operator--()
 {
-   // TODO
+   if (!m_node)
+   {
+      m_node = m_head;
+      return --(*this);
+   }
+
+   if (m_node->HasChildren())
+   {
+      while (m_node->GetLastChild())
+      {
+         m_node = m_node->GetLastChild();
+      }
+   }
+   else if (m_node->GetPreviousSibling())
+   {
+      m_node = m_node->GetPreviousSibling();
+
+      while (m_node->GetLastChild())
+      {
+         m_node->GetLastChild();
+      }
+   }
+   else if (m_node->GetParent())
+   {
+      while (m_node->GetParent() && !m_node->GetParent()->GetPreviousSibling())
+      {
+         m_node = m_node->GetParent();
+      }
+
+      if (m_node->GetParent())
+      {
+         m_node = m_node->GetParent()->GetPreviousSibling();
+
+         while (m_node->HasChildren())
+         {
+            m_node = m_node->GetLastChild();
+         }
+
+         return *this;
+      }
+
+      // Otherwise, the traversal is at the end:
+      m_node = nullptr;
+   }
 
    return *this;
 }

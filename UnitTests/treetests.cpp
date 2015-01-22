@@ -21,7 +21,6 @@ namespace {
       tree->GetHead()->AppendChild("B")->AppendChild("A");
       tree->GetHead()->GetFirstChild()->AppendChild("D")->AppendChild("C");
       tree->GetHead()->GetFirstChild()->GetLastChild()->AppendChild("E");
-
       tree->GetHead()->AppendChild("G")->AppendChild("I")->AppendChild("H");
 
       return tree;
@@ -140,6 +139,13 @@ class TreeTests: public QObject
        * the leaf nodes in that tree.
        */
       void LeafTraversalOfSimpleBinaryTree();
+
+      /**
+       * @brief LeafTraversalOfSimpleBinaryTreeFromEndToBegin creates a simple binary tree, and
+       * traverses over the leaf nodes of that tree using the decrement operator of the leaf
+       * iterator.
+       */
+      void LeafTraversalOfSimpleBinaryTreeFromEndToBegin();
 };
 
 void TreeTests::IntegerTreeCreation()
@@ -171,10 +177,9 @@ void TreeTests::SubTreeSize()
    auto itr = std::begin(*tree);
    itr++; itr++; itr++; itr++;
 
-   //const unsigned int size = Tree<std::string>::Size(*itr);
-   const unsigned int size = tree->Size(*itr);
+   const unsigned int size = Tree<std::string>::Size(*itr);
 
-   QVERIFY(size == 3);
+   QVERIFY(size == 4);
 }
 
 void TreeTests::GetFirstChild()
@@ -308,9 +313,8 @@ void TreeTests::PostOrderTraversalFromEndToBegin()
 
    bool traversalError = false;
    Tree<std::string>::PostOrderIterator itr = std::end(*tree);
-   --itr;
 
-   for (; itr != std::begin(*tree); --itr)
+   for (--itr; itr != std::begin(*tree); --itr)
    {
       if (itr->GetData() != expectedTraversal[index++])
       {
@@ -424,6 +428,34 @@ void TreeTests::LeafTraversalOfSimpleBinaryTree()
          traversalError = true;
          break;
       }
+   }
+
+   QVERIFY(traversalError == false);
+}
+
+void TreeTests::LeafTraversalOfSimpleBinaryTreeFromEndToBegin()
+{
+   std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
+
+   const std::vector<std::string> expectedTraversal { "H", "E", "C", "A" };
+   int index = 0;
+
+   bool traversalError = false;
+   Tree<std::string>::LeafIterator itr = tree->endLeaf();
+
+   for (--itr; itr != tree->beginLeaf(); --itr)
+   {
+      if (itr->GetData() != expectedTraversal[index++])
+      {
+         traversalError = true;
+         break;
+      }
+   }
+
+   // Don't forget the last one:
+   if (itr->GetData() != expectedTraversal[index])
+   {
+      traversalError = true;
    }
 
    QVERIFY(traversalError == false);
