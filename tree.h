@@ -561,6 +561,18 @@ class Tree
       SiblingIterator endSibling(const std::shared_ptr<TreeNode<T>> node) const;
 
       /**
+       * @brief beginPreOrder
+       * @return A pre-order iterator that will iterate over all nodes in the tree.
+       */
+      PreOrderIterator beginPreOrder() const;
+
+      /**
+       * @brief endPreOrder
+       * @return A pre-order iterator pointing "past" the end of the tree.
+       */
+      PreOrderIterator endPreOrder() const;
+
+      /**
        * @brief begin               Creates an iterator pointing to the head of the tree.
        * @returns A post-order iterator that will iterator over all nodes in the tree.
        */
@@ -703,6 +715,24 @@ typename Tree<T>::SiblingIterator Tree<T>::endSibling(const std::shared_ptr<Tree
    siblingIterator.m_parent = node->GetParent();
 
    return siblingIterator;
+}
+
+template<typename T>
+typename Tree<T>::PreOrderIterator Tree<T>::beginPreOrder() const
+{
+   Tree<T>::PreOrderIterator iterator = Tree<T>::PreOrderIterator(m_head);
+   iterator.m_head = m_head;
+
+   return iterator;
+}
+
+template<typename T>
+typename Tree<T>::PreOrderIterator Tree<T>::endPreOrder() const
+{
+   auto iterator = Tree<T>::PreOrderIterator();
+   iterator.m_head = m_head;
+
+   return iterator;
 }
 
 template<typename T>
@@ -912,6 +942,120 @@ typename Tree<T>::SiblingIterator& Tree<T>::SiblingIterator::operator--()
    }
 
    return *this;
+}
+
+/***************************************************************************************************
+ * Start of Pre-Order Iterator Class Definitions
+ **************************************************************************************************/
+
+template<typename T>
+Tree<T>::PreOrderIterator::PreOrderIterator()
+   : Iterator()
+{
+}
+
+template<typename T>
+Tree<T>::PreOrderIterator::PreOrderIterator(const Iterator& other)
+   : m_node(other.m_node),
+     m_head(other.m_head)
+{
+}
+
+template<typename T>
+Tree<T>::PreOrderIterator::PreOrderIterator(std::shared_ptr<TreeNode<T>> node)
+   : Iterator(node)
+{
+}
+
+template<typename T>
+Tree<T>::PreOrderIterator::PreOrderIterator(std::shared_ptr<TreeNode<T>> node,
+                                            std::shared_ptr<TreeNode<T>> head)
+   : Iterator(node, head)
+{
+}
+
+template<typename T>
+typename Tree<T>::PreOrderIterator Tree<T>::PreOrderIterator::operator++(int)
+{
+   auto result = *this;
+   ++(*this);
+
+   return result;
+}
+
+template<typename T>
+typename Tree<T>::PreOrderIterator& Tree<T>::PreOrderIterator::operator++()
+{
+   assert(m_node);
+
+   if (m_node->HasChildren())
+   {
+      m_node = m_node->GetFirstChild();
+   }
+   else if (m_node->GetNextSibling())
+   {
+      m_node = m_node->GetNextSibling();
+   }
+   else
+   {
+      while (m_node->GetParent() && !m_node->GetParent()->GetNextSibling())
+      {
+         m_node = m_node->GetParent();
+      }
+
+      if (m_node->GetParent())
+      {
+         m_node = m_node->GetParent()->GetNextSibling();
+      }
+      else
+      {
+         m_node = nullptr;
+      }
+   }
+
+   return *this;
+}
+
+template<typename T>
+typename Tree<T>::PreOrderIterator& Tree<T>::PreOrderIterator::operator--()
+{
+   if (!m_node)
+   {
+      m_node = m_head;
+
+      while (m_node->GetLastChild())
+      {
+         m_node = m_node->GetLastChild();
+      }
+   }
+   else if (m_node->GetPreviousSibling())
+   {
+      m_node = m_node->GetPreviousSibling();
+
+      while (m_node->GetLastChild())
+      {
+         m_node = m_node->GetLastChild();
+      }
+   }
+   else if (m_node->GetParent())
+   {
+      m_node = m_node->GetParent();
+   }
+   else
+   {
+      m_node = nullptr;
+   }
+
+   return *this;
+}
+
+template<typename T>
+typename Tree<T>::PreOrderIterator Tree<T>::PreOrderIterator::operator--(int)
+{
+   auto result = *this;
+   --(*this);
+
+   return result;
 }
 
 /***************************************************************************************************
@@ -1233,7 +1377,6 @@ typename Tree<T>::LeafIterator& Tree<T>::LeafIterator::operator--()
    if (!m_node)
    {
       m_node = m_head;
-      return --(*this);
    }
 
    if (m_node->HasChildren())

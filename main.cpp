@@ -33,13 +33,13 @@ int main(int argc, char* argv[])
    tree->GetHead()->GetFirstChild()->GetLastChild()->AppendChild("E");
    tree->GetHead()->AppendChild("G")->AppendChild("I")->AppendChild("H");
 
-   const std::vector<std::string> expectedTraversal { "H", "E", "C", "A" };
+   const std::vector<std::string> expectedTraversal { "H", "I", "G", "E", "C", "D", "A", "B", "F" };
+
    int index = 0;
-
    bool traversalError = false;
-   Tree<std::string>::LeafIterator itr = tree->endLeaf();
 
-   for (--itr; itr != tree->beginLeaf(); --itr)
+   auto itr = tree->endPreOrder();
+   for (--itr; itr != tree->beginPreOrder(); --itr)
    {
       if (itr->GetData() != expectedTraversal[index++])
       {
@@ -48,7 +48,6 @@ int main(int argc, char* argv[])
       }
    }
 
-   // Don't forget the last one:
    if (itr->GetData() != expectedTraversal[index])
    {
       traversalError = true;

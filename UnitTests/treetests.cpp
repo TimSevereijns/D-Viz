@@ -90,6 +90,19 @@ class TreeTests: public QObject
       void CountLeafNodes();
 
       /**
+       * @brief PreOrderTraversalOfSimpleBinaryTree creates a simple binary tree and verifies that
+       * the Pre Order Iterator is able to traverse the tree correctly.
+       */
+      void PreOrderTraversalOfSimpleBinaryTree();
+
+      /**
+       * @brief PreOrderTraversalOfSimpleBinaryTreeFromEndToBegin creates a simple binary tree and
+       * verifies that the Pre Order Iterator is able to traverse the tree from the end back to the
+       * beginning using the decrement operator.
+       */
+      void PreOrderTraversalOfSimpleBinaryTreeFromEndToBegin();
+
+      /**
        * @brief PostOrderIteratorOfSimpleBinaryTree creates a simple binary tree, and the verifies
        * that the Post Order Iterator is able to traverse the tree correctly.
        */
@@ -213,6 +226,54 @@ void TreeTests::CountLeafNodes()
    std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
 
    QVERIFY(tree->CountLeafNodes() == 4);
+}
+
+void TreeTests::PreOrderTraversalOfSimpleBinaryTree()
+{
+   std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
+
+   const std::vector<std::string> expectedTraversal { "F", "B", "A", "D", "C", "E", "G", "I", "H" };
+
+   int index = 0;
+
+   bool traversalError = false;
+   for (auto itr = tree->beginPreOrder(); itr != tree->endPreOrder(); ++itr)
+   {
+      if (itr->GetData() != expectedTraversal[index++])
+      {
+         traversalError = true;
+         break;
+      }
+   }
+
+   QVERIFY(traversalError == false);
+}
+
+void TreeTests::PreOrderTraversalOfSimpleBinaryTreeFromEndToBegin()
+{
+   std::unique_ptr<Tree<std::string>> tree = CreateSimpleStringBinaryTree();
+
+   const std::vector<std::string> expectedTraversal { "H", "I", "G", "E", "C", "D", "A", "B", "F" };
+
+   int index = 0;
+   bool traversalError = false;
+
+   auto itr = tree->endPreOrder();
+   for (--itr; itr != tree->beginPreOrder(); --itr)
+   {
+      if (itr->GetData() != expectedTraversal[index++])
+      {
+         traversalError = true;
+         break;
+      }
+   }
+
+   if (itr->GetData() != expectedTraversal[index])
+   {
+      traversalError = true;
+   }
+
+   QVERIFY(traversalError == false);
 }
 
 void TreeTests::PostOrderTraversalOfSimpleBinaryTree()
