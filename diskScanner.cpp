@@ -1,5 +1,6 @@
 #include "diskScanner.h"
 
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -16,7 +17,6 @@ DiskScanner::DiskScanner()
 DiskScanner::DiskScanner(const std::wstring& rawPath)
 {
    boost::filesystem::path path(rawPath);
-   Tree<std::wstring> fileTree;
 
    try {
       if (!boost::filesystem::exists(path))
@@ -25,7 +25,7 @@ DiskScanner::DiskScanner(const std::wstring& rawPath)
          return;
       }
 
-      fileTree.SetHead(path.filename().wstring());
+      m_fileTree.SetHead(path.filename().wstring());
 
       if (boost::filesystem::is_directory(path))
       {
@@ -33,7 +33,7 @@ DiskScanner::DiskScanner(const std::wstring& rawPath)
               itr != boost::filesystem::directory_iterator();
               ++itr)
          {
-            fileTree.GetHead()->AppendChild(itr->path().filename().wstring());
+            m_fileTree.GetHead()->AppendChild(itr->path().filename().wstring());
          }
       }
       else if (boost::filesystem::is_regular_file(path))
@@ -52,3 +52,11 @@ DiskScanner::~DiskScanner()
 
 }
 
+void DiskScanner::PrintTree() const
+{
+   std::for_each(std::begin(m_fileTree), std::end(m_fileTree),
+      [] (const TreeNode<std::wstring>& node)
+   {
+      std::wcout << node.GetData() << std::endl;
+   });
+}

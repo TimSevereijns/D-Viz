@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "tree.h"
+
 class DiskScanner
 {
    public:
@@ -10,6 +12,10 @@ class DiskScanner
       explicit DiskScanner(const std::wstring& rawPpath);
       ~DiskScanner();
 
+      void PrintTree() const;
+
+   private:
+      Tree<std::wstring> m_fileTree;
 };
 
 #endif // DISKSCANNER_H
