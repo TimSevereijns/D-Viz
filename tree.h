@@ -388,6 +388,12 @@ class Tree
       std::shared_ptr<TreeNode<T>> GetHead() const;
 
       /**
+       * @brief SetHead             Sets the head.
+       * @param head                The data to be placed in the head node.
+       */
+      void SetHead(const T head);
+
+      /**
        * @brief CountLeafNodes      Traverses the tree, counting all leaf nodes.
        * @return The total number of leaf nodes belonging to the node.
        */
@@ -644,6 +650,13 @@ template<typename T>
 std::shared_ptr<TreeNode<T>> Tree<T>::GetHead() const
 {
    return m_head;
+}
+
+template<typename T>
+void Tree<T>::SetHead(const T data)
+{
+   auto head = std::shared_ptr<TreeNode<T>>(new TreeNode<T>(data));
+   m_head = head;
 }
 
 template<typename T>

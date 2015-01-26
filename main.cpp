@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include <QApplication>
 
+#include "diskScanner.h"
 #include "tree.h"
 
 #include <algorithm>
@@ -19,6 +20,50 @@ namespace {
 
       return count;
    }
+
+   std::unique_ptr<Tree<std::string>> CreateSimpleStringBinaryTree()
+   {
+      std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("F"));
+      tree->GetHead()->AppendChild("B")->AppendChild("A");
+      tree->GetHead()->GetFirstChild()->AppendChild("D")->AppendChild("C");
+      tree->GetHead()->GetFirstChild()->GetLastChild()->AppendChild("E");
+      tree->GetHead()->AppendChild("G")->AppendChild("I")->AppendChild("H");
+
+      return tree;
+   }
+
+   void QuickTreeTest()
+   {
+      auto tree = CreateSimpleStringBinaryTree();
+      const std::vector<std::string> expectedTraversal { "H", "I", "G", "E", "C", "D", "A", "B",
+                                                         "F" };
+
+      int index = 0;
+      bool traversalError = false;
+
+      auto itr = tree->endPreOrder();
+      for (--itr; itr != tree->beginPreOrder(); --itr)
+      {
+         if (itr->GetData() != expectedTraversal[index++])
+         {
+            traversalError = true;
+            break;
+         }
+      }
+
+      if (itr->GetData() != expectedTraversal[index])
+      {
+         traversalError = true;
+      }
+
+      std::cout << (traversalError ? "Error!" : "All O.K.") << std::endl;
+   }
+
+   void QuickDiskTest()
+   {
+      std::wstring path { L"C:\\excluded\\Misc\\Qt\\D-Viz\\D-Viz" };
+      auto scanner = DiskScanner();
+   }
 }
 
 int main(int argc, char* argv[])
@@ -27,31 +72,8 @@ int main(int argc, char* argv[])
    MainWindow mainWindow;
    mainWindow.show();
 
-   std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("F"));
-   tree->GetHead()->AppendChild("B")->AppendChild("A");
-   tree->GetHead()->GetFirstChild()->AppendChild("D")->AppendChild("C");
-   tree->GetHead()->GetFirstChild()->GetLastChild()->AppendChild("E");
-   tree->GetHead()->AppendChild("G")->AppendChild("I")->AppendChild("H");
-
-   const std::vector<std::string> expectedTraversal { "H", "I", "G", "E", "C", "D", "A", "B", "F" };
-
-   int index = 0;
-   bool traversalError = false;
-
-   auto itr = tree->endPreOrder();
-   for (--itr; itr != tree->beginPreOrder(); --itr)
-   {
-      if (itr->GetData() != expectedTraversal[index++])
-      {
-         traversalError = true;
-         break;
-      }
-   }
-
-   if (itr->GetData() != expectedTraversal[index])
-   {
-      traversalError = true;
-   }
+   QuickDiskTest();
+   //QuickTreeTest();
 
    return application.exec();
 }
