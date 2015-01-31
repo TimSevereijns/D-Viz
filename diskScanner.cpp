@@ -15,8 +15,9 @@ DiskScanner::DiskScanner()
 }
 
 DiskScanner::DiskScanner(const std::wstring& rawPath)
+   : m_fileTree(std::make_unique<Tree<std::wstring>>(Tree<std::wstring>(L"Root")))
 {
-   boost::filesystem::path path(rawPath);
+   boost::filesystem::path path {rawPath};
 
    try {
       if (!boost::filesystem::exists(path))
@@ -25,7 +26,7 @@ DiskScanner::DiskScanner(const std::wstring& rawPath)
          return;
       }
 
-      m_fileTree.SetHead(path.filename().wstring());
+      m_fileTree->SetHead(path.filename().wstring());
 
       if (boost::filesystem::is_directory(path))
       {
@@ -33,7 +34,7 @@ DiskScanner::DiskScanner(const std::wstring& rawPath)
               itr != boost::filesystem::directory_iterator();
               ++itr)
          {
-            m_fileTree.GetHead()->AppendChild(itr->path().filename().wstring());
+            m_fileTree->GetHead()->AppendChild(itr->path().filename().wstring());
          }
       }
       else if (boost::filesystem::is_regular_file(path))
@@ -54,7 +55,7 @@ DiskScanner::~DiskScanner()
 
 void DiskScanner::PrintTree() const
 {
-   std::for_each(std::begin(m_fileTree), std::end(m_fileTree),
+   std::for_each(std::begin(*m_fileTree), std::end(*m_fileTree),
       [] (const TreeNode<std::wstring>& node)
    {
       std::wcout << node.GetData() << std::endl;

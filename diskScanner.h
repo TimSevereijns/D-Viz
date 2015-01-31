@@ -1,6 +1,7 @@
 #ifndef DISKSCANNER_H
 #define DISKSCANNER_H
 
+#include <memory>
 #include <string>
 
 #include "tree.h"
@@ -15,7 +16,7 @@ class DiskScanner
       void PrintTree() const;
 
    private:
-      Tree<std::wstring> m_fileTree;
+      std::unique_ptr<Tree<std::wstring>> m_fileTree;
 };
 
 #endif // DISKSCANNER_H
