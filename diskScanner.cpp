@@ -9,38 +9,41 @@
 
 #include "tree.h"
 
+namespace
+{
+   template<typename T>
+   void scanDirectory(const boost::filesystem::path& path, TreeNode<T>& fileNode)
+   {
+      if (boost::filesystem::is_regular_file(path))
+      {
+         fileNode.AppendChild(path.filename().wstring());
+      }
+      else if (boost::filesystem::is_directory(path))
+      {
+         fileNode.AppendChild(path.filename().wstring());
+
+         for (auto itr = boost::filesystem::directory_iterator(path);
+              itr != boost::filesystem::directory_iterator();
+              ++itr)
+         {
+            boost::filesystem::path nextPath = itr->path();
+            scanDirectory(nextPath, *fileNode.GetLastChild());
+         }
+      }
+   }
+}
+
 DiskScanner::DiskScanner()
 {
-
 }
 
 DiskScanner::DiskScanner(const std::wstring& rawPath)
    : m_fileTree(std::make_unique<Tree<std::wstring>>(Tree<std::wstring>(L"Root")))
 {
-   boost::filesystem::path path {rawPath};
+   boost::filesystem::path path{rawPath};
 
    try {
-      if (!boost::filesystem::exists(path))
-      {
-         std::cout << "Path does not exist!" << std::endl;
-         return;
-      }
-
-      m_fileTree->SetHead(path.filename().wstring());
-
-      if (boost::filesystem::is_directory(path))
-      {
-         for (auto itr = boost::filesystem::directory_iterator(path);
-              itr != boost::filesystem::directory_iterator();
-              ++itr)
-         {
-            m_fileTree->GetHead()->AppendChild(itr->path().filename().wstring());
-         }
-      }
-      else if (boost::filesystem::is_regular_file(path))
-      {
-         // Do nothing for now.
-      }
+      scanDirectory(path, *m_fileTree->GetHead());
    }
    catch (const boost::filesystem::filesystem_error& exception)
    {
@@ -50,7 +53,6 @@ DiskScanner::DiskScanner(const std::wstring& rawPath)
 
 DiskScanner::~DiskScanner()
 {
-
 }
 
 void DiskScanner::PrintTree() const

@@ -61,7 +61,7 @@ namespace {
 
    void QuickDiskTest()
    {
-      std::wstring path { L"C:\\excluded\\Misc\\Qt\\D-Viz\\D-Viz" };
+      const std::wstring path {L"C:\\excluded\\Misc\\Qt\\D-Viz\\D-Viz"};
       auto scanner = DiskScanner(path);
 
       scanner.PrintTree();
