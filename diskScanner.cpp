@@ -4,6 +4,9 @@
 #include <iostream>
 #include <locale>
 #include <numeric>
+#include <thread>
+
+std::uintmax_t DiskScanner::SIZE_UNDEFINED = 0;
 
 namespace
 {
@@ -19,11 +22,17 @@ namespace
    {
       if (boost::filesystem::is_regular_file(path))
       {
-         fileNode.AppendChild(path);
+         FileInfo fileInfo(path.filename().wstring(), boost::filesystem::file_size(path),
+            FILE_TYPE::REGULAR);
+
+         fileNode.AppendChild(fileInfo);
       }
       else if (boost::filesystem::is_directory(path))
       {
-         fileNode.AppendChild(path);
+         FileInfo directoryInfo(path.filename().wstring(), DiskScanner::SIZE_UNDEFINED,
+            FILE_TYPE::DIRECTORY);
+
+         fileNode.AppendChild(directoryInfo);
 
          for (auto itr = boost::filesystem::directory_iterator(path);
               itr != boost::filesystem::directory_iterator();
@@ -48,10 +57,10 @@ namespace
       const std::uintmax_t treeSize = std::accumulate(std::begin(fileTree), std::end(fileTree),
          std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<T>& node)
       {
-         const boost::filesystem::path path = node.GetData();
-         if (boost::filesystem::is_regular_file(path))
+         const FileInfo fileInfo = node.GetData();
+         if (fileInfo.m_type == FILE_TYPE::REGULAR)
          {
-            return result + boost::filesystem::file_size(node.GetData());
+            return result + fileInfo.m_size;
          }
 
          return result;
@@ -74,8 +83,9 @@ DiskScanner::DiskScanner(const std::wstring& rawPath)
       throw std::invalid_argument("The provided path does not seem to exist!");
    }
 
-   m_fileTree = std::make_unique<Tree<boost::filesystem::path>>(
-      Tree<boost::filesystem::path>{rawPath});
+   m_fileTree = std::make_unique<Tree<FileInfo>>(Tree<FileInfo>(
+      FileInfo(path.filename().wstring(), DiskScanner::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY)
+   ));
 
    try
    {
@@ -98,13 +108,13 @@ void DiskScanner::PrintTree() const
    std::cout << "=============" << std::endl;
 
    std::for_each(std::begin(*m_fileTree), std::end(*m_fileTree),
-      [] (const TreeNode<boost::filesystem::path>& node)
+      [] (const TreeNode<FileInfo>& node)
    {
-      const auto depth = Tree<boost::filesystem::path>::Depth(node);
+      const auto depth = Tree<FileInfo>::Depth(node);
       const auto tabSize = 2;
       const std::wstring padding((depth * tabSize), ' ');
 
-      std::wcout << padding << node.GetData().filename().wstring() << std::endl;
+      std::wcout << padding << node.GetData().m_name << std::endl;
    });
 }
 
@@ -113,15 +123,14 @@ void DiskScanner::PrintTreeMetadata() const
    const std::uintmax_t sizeInBytes = ComputeFileTreeSizeInBytes(*m_fileTree);
    const double sizeInMegabytes = DiskScanner::ConvertBytesToMegaBytes(sizeInBytes);
 
-   const unsigned int treeSize = Tree<boost::filesystem::path>::Size(*m_fileTree->GetHead());
+   const unsigned int treeSize = Tree<FileInfo>::Size(*m_fileTree->GetHead());
 
    const auto fileCount = std::count_if(std::begin(*m_fileTree), std::end(*m_fileTree),
-    [] (const TreeNode<boost::filesystem::path>& node)
+    [] (const TreeNode<FileInfo>& node)
    {
-      return boost::filesystem::is_regular_file(node.GetData());
+      return node.GetData().m_type == FILE_TYPE::REGULAR;
    });
 
-   // Imbue the global local, as defined by the environment:
    std::cout.imbue(std::locale(""));
 
    std::cout << "=============" << std::endl;

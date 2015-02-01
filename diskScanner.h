@@ -9,9 +9,32 @@
 
 #include "tree.h"
 
+enum class FILE_TYPE
+{
+   REGULAR,
+   DIRECTORY,
+   SYMLINK
+};
+
+struct FileInfo
+{
+   std::wstring m_name;
+   std::uintmax_t m_size;
+   FILE_TYPE m_type;
+
+   FileInfo(std::wstring name, std::uintmax_t size, FILE_TYPE type)
+      : m_name(name),
+        m_size(size),
+        m_type(type)
+   {
+   }
+};
+
 class DiskScanner
 {
    public:
+      static std::uintmax_t SIZE_UNDEFINED;
+
       explicit DiskScanner();
       explicit DiskScanner(const std::wstring& rawPpath);
       ~DiskScanner();
@@ -34,7 +57,7 @@ class DiskScanner
       static double ConvertBytesToGigaBytes(const std::uintmax_t bytes);
 
    private:
-      std::unique_ptr<Tree<boost::filesystem::path>> m_fileTree;
+      std::unique_ptr<Tree<FileInfo>> m_fileTree;
 };
 
 #endif // DISKSCANNER_H
