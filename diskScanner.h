@@ -3,9 +3,12 @@
 
 #include <boost/filesystem.hpp>
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <string>
+#include <thread>
 
 #include "tree.h"
 
@@ -42,6 +45,14 @@ class DiskScanner
       void PrintTree() const;
       void PrintTreeMetadata() const;
 
+      void Scan(std::atomic<std::pair<std::uintmax_t, bool>>* progress);
+
+      std::thread& ScanInNewThread(std::atomic<std::pair<std::uintmax_t, bool>>* progress);
+
+      void JoinScanningThread();
+
+      std::uintmax_t GetNumberOfFilesScanned();
+
       /**
        * @brief ConvertBytesToMegaBytes Converts a size in bytes to megabytes.
        * @param bytes               The value in bytes to be converted.
@@ -57,7 +68,26 @@ class DiskScanner
       static double ConvertBytesToGigaBytes(const std::uintmax_t bytes);
 
    private:
+      template<typename T>
+
+      /**
+       * TODO: Consider replacing this recursive version with an iterative implementation.
+       *
+       * Max path length in Windows is 260 characters, so if that includes slashes, then the maximum
+       * depth of a directory or file is no more than 130, or so. Given that the default stack size
+       * in MSVC is 1MB, and I only pass in references, this recursive version may be fine---maybe!
+       */
+      void ScanRecursively(const boost::filesystem::path& path, TreeNode<T>& fileNode,
+         std::atomic<std::pair<std::uintmax_t, bool>>* progress);
+
       std::unique_ptr<Tree<FileInfo>> m_fileTree;
+
+      boost::filesystem::path m_path;
+
+      std::thread m_scanningThread;
+      std::mutex m_mutex;
+
+      std::uintmax_t m_filesScanned;
 };
 
 #endif // DISKSCANNER_H

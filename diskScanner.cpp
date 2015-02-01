@@ -4,46 +4,11 @@
 #include <iostream>
 #include <locale>
 #include <numeric>
-#include <thread>
 
 std::uintmax_t DiskScanner::SIZE_UNDEFINED = 0;
 
 namespace
 {
-   /**
-    * TODO: Consider replacing this recursive version with an iterative implementation.
-    *
-    * Max path length in Windows is 260 characters, so if that includes slashes, then the maximum
-    * depth of a directory or file is no more than 130, or so. Given that the default stack size
-    * in MSVC is 1MB, and I only pass in references, this recursive version may be fine---maybe...
-    */
-   template<typename T>
-   void scanDirectory(const boost::filesystem::path& path, TreeNode<T>& fileNode)
-   {
-      if (boost::filesystem::is_regular_file(path))
-      {
-         FileInfo fileInfo(path.filename().wstring(), boost::filesystem::file_size(path),
-            FILE_TYPE::REGULAR);
-
-         fileNode.AppendChild(fileInfo);
-      }
-      else if (boost::filesystem::is_directory(path))
-      {
-         FileInfo directoryInfo(path.filename().wstring(), DiskScanner::SIZE_UNDEFINED,
-            FILE_TYPE::DIRECTORY);
-
-         fileNode.AppendChild(directoryInfo);
-
-         for (auto itr = boost::filesystem::directory_iterator(path);
-              itr != boost::filesystem::directory_iterator();
-              ++itr)
-         {
-            boost::filesystem::path nextPath = itr->path();
-            scanDirectory(nextPath, *fileNode.GetLastChild());
-         }
-      }
-   }
-
    /**
     * Traverses the file tree from beginning to end, accumulating the file sizes (in bytes) of all
     * regular (non-directory, or symbolic) files.
@@ -54,7 +19,7 @@ namespace
    template<typename T>
    std::uintmax_t ComputeFileTreeSizeInBytes(const Tree<T>& fileTree)
    {
-      const std::uintmax_t treeSize = std::accumulate(std::begin(fileTree), std::end(fileTree),
+      const std::uintmax_t treeSize = std::accumulate(fileTree.beginLeaf(), fileTree.endLeaf(),
          std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<T>& node)
       {
          const FileInfo fileInfo = node.GetData();
@@ -75,6 +40,8 @@ DiskScanner::DiskScanner()
 }
 
 DiskScanner::DiskScanner(const std::wstring& rawPath)
+   : m_fileTree(nullptr),
+     m_filesScanned(0)
 {
    const boost::filesystem::path path{rawPath};
    const bool isPathValid = boost::filesystem::exists(path);
@@ -83,13 +50,23 @@ DiskScanner::DiskScanner(const std::wstring& rawPath)
       throw std::invalid_argument("The provided path does not seem to exist!");
    }
 
+   m_path = path;
+}
+
+DiskScanner::~DiskScanner()
+{
+}
+
+void DiskScanner::Scan(std::atomic<std::pair<std::uintmax_t, bool>>* progress)
+{
    m_fileTree = std::make_unique<Tree<FileInfo>>(Tree<FileInfo>(
-      FileInfo(path.filename().wstring(), DiskScanner::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY)
+      FileInfo(m_path.filename().wstring(), DiskScanner::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY)
    ));
 
    try
    {
-      scanDirectory(path, *m_fileTree->GetHead());
+      ScanRecursively(m_path, *m_fileTree->GetHead(), progress);
+      progress->store(std::make_pair(m_filesScanned, true));
    }
    catch (const boost::filesystem::filesystem_error& exception)
    {
@@ -97,8 +74,68 @@ DiskScanner::DiskScanner(const std::wstring& rawPath)
    }
 }
 
-DiskScanner::~DiskScanner()
+template<typename T>
+void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<T>& fileNode,
+   std::atomic<std::pair<std::uintmax_t, bool>>* progress)
 {
+//   {
+//      std::lock_guard<std::mutex> guard(m_mutex);
+//      if (m_filesScanned % 1000 == 0)
+//      {
+//         progress->store(std::make_pair(m_filesScanned, false));
+//         //std::cout << "\r" << m_filesScanned << " files scanned as far..." << std::flush;
+//      }
+//   }
+
+   if (boost::filesystem::is_regular_file(path))
+   {
+      FileInfo fileInfo(path.filename().wstring(), boost::filesystem::file_size(path),
+         FILE_TYPE::REGULAR);
+
+      fileNode.AppendChild(fileInfo);
+
+//      {
+//         std::lock_guard<std::mutex> guard(m_mutex);
+//         ++m_filesScanned;
+//      }
+   }
+   else if (boost::filesystem::is_directory(path))
+   {
+      FileInfo directoryInfo(path.filename().wstring(), DiskScanner::SIZE_UNDEFINED,
+         FILE_TYPE::DIRECTORY);
+
+      fileNode.AppendChild(directoryInfo);
+
+//      {
+//         std::lock_guard<std::mutex> guard(m_mutex);
+//         ++m_filesScanned;
+//      }
+
+      for (auto itr = boost::filesystem::directory_iterator(path);
+           itr != boost::filesystem::directory_iterator();
+           ++itr)
+      {
+         boost::filesystem::path nextPath = itr->path();
+         ScanRecursively(nextPath, *fileNode.GetLastChild(), progress);
+      }
+   }
+}
+
+std::thread& DiskScanner::ScanInNewThread(std::atomic<std::pair<std::uintmax_t, bool>>* progress)
+{
+   m_scanningThread = std::thread(&DiskScanner::Scan, this, progress);
+   return m_scanningThread;
+}
+
+void DiskScanner::JoinScanningThread()
+{
+   m_scanningThread.join();
+}
+
+std::uintmax_t DiskScanner::GetNumberOfFilesScanned()
+{
+   std::lock_guard<std::mutex> guard(m_mutex);
+   return m_filesScanned;
 }
 
 void DiskScanner::PrintTree() const
@@ -107,7 +144,7 @@ void DiskScanner::PrintTree() const
    std::cout << "  The Tree!  " << std::endl;
    std::cout << "=============" << std::endl;
 
-   std::for_each(std::begin(*m_fileTree), std::end(*m_fileTree),
+   std::for_each(m_fileTree->beginPreOrder(), m_fileTree->endPreOrder(),
       [] (const TreeNode<FileInfo>& node)
    {
       const auto depth = Tree<FileInfo>::Depth(node);
