@@ -65,6 +65,7 @@ namespace {
       auto scanner = DiskScanner(path);
 
       scanner.PrintTree();
+      scanner.PrintTreeMetadata();
    }
 }
 

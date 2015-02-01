@@ -414,6 +414,14 @@ class Tree
       static unsigned int Size(const TreeNode<T>& node);
 
       /**
+       * @brief Depth               Computes the depth of the node in the tree by counting its
+       *                            ancestors. The root is at depth zero.
+       * @param node                The node whose depth is to be assertained.
+       * @returns The zero-indexed depth of the node in its tree.
+       */
+      static unsigned int Depth(TreeNode<T> node);
+
+      /**
        * @brief The Iterator class
        *
        * This is the base iterator class that all other iterators (sibling, post-, pre-, in-order)
@@ -693,6 +701,21 @@ unsigned int Tree<T>::Size(const TreeNode<T>& node)
    }
 
    return count;
+}
+
+template<typename T>
+unsigned int Tree<T>::Depth(TreeNode<T> node)
+{
+   unsigned int depth = 0;
+
+   TreeNode<T>* nodePtr = &node;
+   while (nodePtr->GetParent())
+   {
+      ++depth;
+      nodePtr = &*nodePtr->GetParent();
+   }
+
+   return depth;
 }
 
 template<typename T>
