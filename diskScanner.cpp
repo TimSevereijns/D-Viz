@@ -1,6 +1,7 @@
 #include "diskScanner.h"
 
 #include <algorithm>
+#include <chrono>
 #include <iostream>
 #include <locale>
 #include <numeric>
@@ -87,7 +88,7 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
 //      }
 //   }
 
-   if (boost::filesystem::is_regular_file(path))
+   if (boost::filesystem::is_regular_file(path) && !boost::filesystem::is_symlink(path))
    {
       FileInfo fileInfo(path.filename().wstring(), boost::filesystem::file_size(path),
          FILE_TYPE::REGULAR);
@@ -99,7 +100,7 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
 //         ++m_filesScanned;
 //      }
    }
-   else if (boost::filesystem::is_directory(path))
+   else if (boost::filesystem::is_directory(path) && !boost::filesystem::is_symlink(path))
    {
       FileInfo directoryInfo(path.filename().wstring(), DiskScanner::SIZE_UNDEFINED,
          FILE_TYPE::DIRECTORY);
@@ -121,10 +122,9 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
    }
 }
 
-std::thread& DiskScanner::ScanInNewThread(std::atomic<std::pair<std::uintmax_t, bool>>* progress)
+void DiskScanner::ScanInNewThread(std::atomic<std::pair<std::uintmax_t, bool>>* progress)
 {
    m_scanningThread = std::thread(&DiskScanner::Scan, this, progress);
-   return m_scanningThread;
 }
 
 void DiskScanner::JoinScanningThread()
@@ -162,11 +162,16 @@ void DiskScanner::PrintTreeMetadata() const
 
    const unsigned int treeSize = Tree<FileInfo>::Size(*m_fileTree->GetHead());
 
+   const auto startTime = std::chrono::high_resolution_clock::now();
    const auto fileCount = std::count_if(std::begin(*m_fileTree), std::end(*m_fileTree),
     [] (const TreeNode<FileInfo>& node)
    {
       return node.GetData().m_type == FILE_TYPE::REGULAR;
    });
+   const auto endTime = std::chrono::high_resolution_clock::now();
+
+   std::chrono::duration<double> traversalTime =
+      std::chrono::duration_cast<std::chrono::duration<double>>(endTime - startTime);
 
    std::cout.imbue(std::locale(""));
 
@@ -185,6 +190,9 @@ void DiskScanner::PrintTreeMetadata() const
 
    std::cout << "Folder Count:" << std::endl;
    std::cout << treeSize - 1 - fileCount << std::endl;
+
+   std::cout << "Tree Traversal Time (in seconds):" << std::endl;
+   std::cout << traversalTime.count() << std::endl;
 }
 
 double DiskScanner::ConvertBytesToMegaBytes(const std::uintmax_t bytes)

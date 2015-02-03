@@ -61,18 +61,16 @@ namespace {
 
    void QuickDiskTest()
    {
-      const std::wstring path {L"C:\\excluded\\Misc\\Qt"};
+      const std::wstring path {L"C:\\excluded"};
+
+//      const auto symPath = boost::filesystem::path(L"C:\\excluded\\source\\build");
+//      const bool answer = (boost::filesystem::is_symlink(symPath));
+//      std::cout << (answer ? "true" : "false") << std::endl;
+
       auto scanner = DiskScanner(path);
 
-      std::atomic<std::pair<std::uintmax_t, bool>> progress(std::make_pair(0, false));
+      std::atomic<std::pair<std::uintmax_t, bool>> progress{std::make_pair(0, false)};
       scanner.ScanInNewThread(&progress);
-
-      // With the following: 24 secs; without: 18 secs!
-//      while (progress.load().second == false)
-//      {
-//         std::cout << progress.load().first << " files scanned!" << std::endl;
-//      }
-
       scanner.JoinScanningThread();
 
       scanner.PrintTree();

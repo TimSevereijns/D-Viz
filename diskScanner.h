@@ -47,7 +47,7 @@ class DiskScanner
 
       void Scan(std::atomic<std::pair<std::uintmax_t, bool>>* progress);
 
-      std::thread& ScanInNewThread(std::atomic<std::pair<std::uintmax_t, bool>>* progress);
+      void ScanInNewThread(std::atomic<std::pair<std::uintmax_t, bool>>* progress);
 
       void JoinScanningThread();
 
@@ -68,8 +68,6 @@ class DiskScanner
       static double ConvertBytesToGigaBytes(const std::uintmax_t bytes);
 
    private:
-      template<typename T>
-
       /**
        * TODO: Consider replacing this recursive version with an iterative implementation.
        *
@@ -77,6 +75,7 @@ class DiskScanner
        * depth of a directory or file is no more than 130, or so. Given that the default stack size
        * in MSVC is 1MB, and I only pass in references, this recursive version may be fine---maybe!
        */
+      template<typename T>
       void ScanRecursively(const boost::filesystem::path& path, TreeNode<T>& fileNode,
          std::atomic<std::pair<std::uintmax_t, bool>>* progress);
 
