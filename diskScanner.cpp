@@ -42,7 +42,8 @@ DiskScanner::DiskScanner()
 
 DiskScanner::DiskScanner(const std::wstring& rawPath)
    : m_fileTree(nullptr),
-     m_filesScanned(0)
+     m_filesScanned(0),
+     m_scanningTime(std::chrono::duration<double>(0))
 {
    const boost::filesystem::path path{rawPath};
    const bool isPathValid = boost::filesystem::exists(path);
@@ -66,8 +67,13 @@ void DiskScanner::Scan(std::atomic<std::pair<std::uintmax_t, bool>>* progress)
 
    try
    {
+      const auto start = std::chrono::high_resolution_clock::now();
       ScanRecursively(m_path, *m_fileTree->GetHead(), progress);
-      progress->store(std::make_pair(m_filesScanned, true));
+      const auto end = std::chrono::high_resolution_clock::now();
+
+      m_scanningTime = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+
+      progress->store(std::make_pair(m_filesScanned, /*isScanningDone =*/ true));
    }
    catch (const boost::filesystem::filesystem_error& exception)
    {
@@ -79,16 +85,12 @@ template<typename T>
 void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<T>& fileNode,
    std::atomic<std::pair<std::uintmax_t, bool>>* progress)
 {
-//   {
-//      std::lock_guard<std::mutex> guard(m_mutex);
-//      if (m_filesScanned % 1000 == 0)
-//      {
-//         progress->store(std::make_pair(m_filesScanned, false));
-//         //std::cout << "\r" << m_filesScanned << " files scanned as far..." << std::flush;
-//      }
-//   }
+   if (boost::filesystem::is_symlink(path))
+   {
+      return;
+   }
 
-   if (boost::filesystem::is_regular_file(path) && !boost::filesystem::is_symlink(path))
+   if (boost::filesystem::is_regular_file(path))
    {
       FileInfo fileInfo(path.filename().wstring(), boost::filesystem::file_size(path),
          FILE_TYPE::REGULAR);
@@ -100,7 +102,7 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
 //         ++m_filesScanned;
 //      }
    }
-   else if (boost::filesystem::is_directory(path) && !boost::filesystem::is_symlink(path))
+   else if (boost::filesystem::is_directory(path))
    {
       FileInfo directoryInfo(path.filename().wstring(), DiskScanner::SIZE_UNDEFINED,
          FILE_TYPE::DIRECTORY);
@@ -190,6 +192,9 @@ void DiskScanner::PrintTreeMetadata() const
 
    std::cout << "Folder Count:" << std::endl;
    std::cout << treeSize - 1 - fileCount << std::endl;
+
+   std::cout << "Scanning Time (in seconds):" << std::endl;
+   std::cout << m_scanningTime.count() << std::endl;
 
    std::cout << "Tree Traversal Time (in seconds):" << std::endl;
    std::cout << traversalTime.count() << std::endl;

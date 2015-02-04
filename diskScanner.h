@@ -4,6 +4,7 @@
 #include <boost/filesystem.hpp>
 
 #include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -87,6 +88,8 @@ class DiskScanner
       std::mutex m_mutex;
 
       std::uintmax_t m_filesScanned;
+
+      std::chrono::duration<double> m_scanningTime;
 };
 
 #endif // DISKSCANNER_H
