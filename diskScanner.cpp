@@ -90,6 +90,8 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
       return;
    }
 
+    progress->store(std::make_pair(m_filesScanned, /*isScanningDone =*/ false));
+
    if (boost::filesystem::is_regular_file(path))
    {
       FileInfo fileInfo(path.filename().wstring(), boost::filesystem::file_size(path),
@@ -99,7 +101,7 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
 
 //      {
 //         std::lock_guard<std::mutex> guard(m_mutex);
-//         ++m_filesScanned;
+         ++m_filesScanned;
 //      }
    }
    else if (boost::filesystem::is_directory(path))
@@ -111,7 +113,7 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
 
 //      {
 //         std::lock_guard<std::mutex> guard(m_mutex);
-//         ++m_filesScanned;
+         ++m_filesScanned;
 //      }
 
       for (auto itr = boost::filesystem::directory_iterator(path);
