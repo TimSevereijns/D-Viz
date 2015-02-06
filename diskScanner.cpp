@@ -272,31 +272,10 @@ void DiskScanner::ToJSON(QJsonObject& json)
 
    std::shared_ptr<TreeNode<FileInfo>> firstNode = m_fileTree->GetHead();
 
-   QJsonArray rootDirectory;
-   SerializeRecursively(rootDirectory, firstNode.get());
+   QJsonArray fileTree;
+   SerializeRecursively(fileTree, firstNode.get());
 
-//   while (childNode)
-//   {
-//      FileInfo& fileInfo = childNode->GetData();
-
-//      if (fileInfo.m_type == FILE_TYPE::REGULAR)
-//      {
-//         QJsonObject file;
-//         file["name"] = QString::fromStdWString(fileInfo.m_name);
-//         file["size"] = QString::fromStdWString(std::to_wstring(fileInfo.m_size));
-//         rootDirectory.append(file);
-//      }
-//      else if (fileInfo.m_type == FILE_TYPE::DIRECTORY)
-//      {
-//         QJsonObject directory;
-//         QJsonArray content;
-//         directory[QString::fromStdWString(fileInfo.m_name)] = content;
-//      }
-
-//      childNode = childNode->GetNextSibling();
-//   }
-
-   json["root"] = rootDirectory;
+   json["root"] = fileTree;
 }
 
 double DiskScanner::ConvertBytesToMegaBytes(const std::uintmax_t bytes)

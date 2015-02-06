@@ -86,18 +86,16 @@ namespace {
       scanner.PrintTree();
       scanner.PrintTreeMetadata();
 
-      QJsonObject json;
-      scanner.ToJSON(json);
-      QJsonDocument doc(json);
+      QJsonObject serializedTree;
+      scanner.ToJSON(serializedTree);
 
-      QByteArray bytes = doc.toJson();
-      qDebug() << bytes;
+      QJsonDocument jsonDocument{serializedTree};
+      QByteArray serializerOutput = jsonDocument.toJson();
 
-      QFile file("C:\\Users\\tsevereijns\\Desktop\\test.txt");
+      QFile file("C:\\Users\\tsevereijns\\Desktop\\serializedTree.txt");
       file.open(QIODevice::WriteOnly);
-      file.write(bytes);
+      file.write(serializerOutput);
       file.close();
-      //std::cout << doc.toJson() << std::endl;
    }
 }
 
