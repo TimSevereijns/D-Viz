@@ -8,6 +8,11 @@
 #include <iostream>
 #include <memory>
 
+#include <QByteArray>
+#include <QDebug>
+#include <QJsonObject>
+#include <QJsonDocument>
+
 namespace {
    template<class T>
    unsigned int Size(const TreeNode<T>& node)
@@ -61,12 +66,7 @@ namespace {
 
    void QuickDiskTest()
    {
-      const std::wstring path {L"C:\\excluded\\Misc"};
-
-//      const auto symPath = boost::filesystem::path(L"C:\\excluded\\source\\build");
-//      const bool answer = (boost::filesystem::is_symlink(symPath));
-//      std::cout << (answer ? "true" : "false") << std::endl;
-
+      const std::wstring path {L"C:\\excluded\\Misc\\Qt\\D-Viz\\D-Viz"};
       auto scanner = DiskScanner(path);
 
       std::atomic<std::pair<std::uintmax_t, bool>> progress{std::make_pair(0, false)};
@@ -83,6 +83,14 @@ namespace {
 
       scanner.PrintTree();
       scanner.PrintTreeMetadata();
+
+      QJsonObject json;
+      scanner.ToJSON(json);
+      QJsonDocument doc(json);
+
+      QByteArray bytes = doc.toJson();
+      qDebug() << bytes;
+      //std::cout << doc.toJson() << std::endl;
    }
 }
 

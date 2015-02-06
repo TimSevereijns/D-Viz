@@ -34,6 +34,8 @@ struct FileInfo
    }
 };
 
+class QJsonObject;
+
 class DiskScanner
 {
    public:
@@ -45,6 +47,8 @@ class DiskScanner
 
       void PrintTree() const;
       void PrintTreeMetadata() const;
+
+      void ToJSON(QJsonObject& json);
 
       void Scan(std::atomic<std::pair<std::uintmax_t, bool>>* progress);
 

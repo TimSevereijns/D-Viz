@@ -1,10 +1,16 @@
 #include "diskScanner.h"
 
 #include <algorithm>
+#include <codecvt>
 #include <chrono>
 #include <iostream>
 #include <locale>
 #include <numeric>
+
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QString>
 
 std::uintmax_t DiskScanner::SIZE_UNDEFINED = 0;
 
@@ -33,6 +39,13 @@ namespace
       });
 
       return treeSize;
+   }
+
+   std::string WideStringToNarrowString(const std::wstring& wide)
+   {
+      typedef std::codecvt_utf8<wchar_t> convertType;
+      std::wstring_convert<convertType, wchar_t> converter;
+      return converter.to_bytes(wide);
    }
 }
 
@@ -200,6 +213,39 @@ void DiskScanner::PrintTreeMetadata() const
 
    std::cout << "Tree Traversal Time (in seconds):" << std::endl;
    std::cout << traversalTime.count() << std::endl;
+}
+
+void DiskScanner::ToJSON(QJsonObject& json)
+{
+   if (!m_fileTree)
+   {
+      return;
+   }
+
+   QJsonArray rootDirectory;
+   auto childNode = m_fileTree->GetHead()->GetFirstChild()->GetFirstChild();
+   while (childNode)
+   {
+      FileInfo& fileInfo = childNode->GetData();
+
+      if (fileInfo.m_type == FILE_TYPE::REGULAR)
+      {
+         QJsonObject file;
+         file["name"] = QString::fromStdWString(fileInfo.m_name);
+         file["size"] = QString::fromStdWString(std::to_wstring(fileInfo.m_size));
+         rootDirectory.append(file);
+      }
+      else if (fileInfo.m_type == FILE_TYPE::DIRECTORY)
+      {
+         QJsonObject directory;
+         QJsonArray content;
+         directory[QString::fromStdWString(fileInfo.m_name)] = content;
+      }
+
+      childNode = childNode->GetNextSibling();
+   }
+
+   json["root"] = rootDirectory;
 }
 
 double DiskScanner::ConvertBytesToMegaBytes(const std::uintmax_t bytes)
