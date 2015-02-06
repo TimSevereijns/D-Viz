@@ -41,11 +41,56 @@ namespace
       return treeSize;
    }
 
+   /**
+    * @brief WideStringToNarrowString
+    * @param wide
+    * @return
+    */
    std::string WideStringToNarrowString(const std::wstring& wide)
    {
       typedef std::codecvt_utf8<wchar_t> convertType;
       std::wstring_convert<convertType, wchar_t> converter;
       return converter.to_bytes(wide);
+   }
+
+   /**
+    * @brief SerializeRecursively
+    * @param jsonObject
+    * @param fileNode
+    */
+   void SerializeRecursively(QJsonArray& jsonArray, TreeNode<FileInfo>* fileNode)
+   {
+      if (!fileNode)
+      {
+         return;
+      }
+
+      FileInfo& fileInfo = fileNode->GetData();
+
+      if (fileInfo.m_type == FILE_TYPE::REGULAR)
+      {
+         QJsonObject file;
+         file["name"] = QString::fromStdWString(fileInfo.m_name);
+         file["size"] = QString::fromStdWString(std::to_wstring(fileInfo.m_size));
+
+         jsonArray.append(file);
+      }
+      else if (fileInfo.m_type == FILE_TYPE::DIRECTORY)
+      {
+         QJsonObject directory;
+         QJsonArray content;
+
+         fileNode = fileNode->GetFirstChild().get();
+         while (fileNode)
+         {
+            SerializeRecursively(content, fileNode);
+
+            fileNode = fileNode->GetNextSibling().get();
+         }
+
+         directory[QString::fromStdWString(fileInfo.m_name)] = content;
+         jsonArray.append(directory);
+      }
    }
 }
 
@@ -103,7 +148,10 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
       return;
    }
 
-    progress->store(std::make_pair(m_filesScanned, /*isScanningDone =*/ false));
+   {
+      std::lock_guard<std::mutex> guard(m_mutex);
+      progress->store(std::make_pair(m_filesScanned, /*isScanningDone =*/ false));
+   }
 
    if (boost::filesystem::is_regular_file(path))
    {
@@ -112,10 +160,10 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
 
       fileNode.AppendChild(fileInfo);
 
-//      {
-//         std::lock_guard<std::mutex> guard(m_mutex);
+      {
+         std::lock_guard<std::mutex> guard(m_mutex);
          ++m_filesScanned;
-//      }
+      }
    }
    else if (boost::filesystem::is_directory(path))
    {
@@ -124,10 +172,10 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
 
       fileNode.AppendChild(directoryInfo);
 
-//      {
-//         std::lock_guard<std::mutex> guard(m_mutex);
+      {
+         std::lock_guard<std::mutex> guard(m_mutex);
          ++m_filesScanned;
-//      }
+      }
 
       for (auto itr = boost::filesystem::directory_iterator(path);
            itr != boost::filesystem::directory_iterator();
@@ -222,28 +270,31 @@ void DiskScanner::ToJSON(QJsonObject& json)
       return;
    }
 
+   std::shared_ptr<TreeNode<FileInfo>> firstNode = m_fileTree->GetHead();
+
    QJsonArray rootDirectory;
-   auto childNode = m_fileTree->GetHead()->GetFirstChild()->GetFirstChild();
-   while (childNode)
-   {
-      FileInfo& fileInfo = childNode->GetData();
+   SerializeRecursively(rootDirectory, firstNode.get());
 
-      if (fileInfo.m_type == FILE_TYPE::REGULAR)
-      {
-         QJsonObject file;
-         file["name"] = QString::fromStdWString(fileInfo.m_name);
-         file["size"] = QString::fromStdWString(std::to_wstring(fileInfo.m_size));
-         rootDirectory.append(file);
-      }
-      else if (fileInfo.m_type == FILE_TYPE::DIRECTORY)
-      {
-         QJsonObject directory;
-         QJsonArray content;
-         directory[QString::fromStdWString(fileInfo.m_name)] = content;
-      }
+//   while (childNode)
+//   {
+//      FileInfo& fileInfo = childNode->GetData();
 
-      childNode = childNode->GetNextSibling();
-   }
+//      if (fileInfo.m_type == FILE_TYPE::REGULAR)
+//      {
+//         QJsonObject file;
+//         file["name"] = QString::fromStdWString(fileInfo.m_name);
+//         file["size"] = QString::fromStdWString(std::to_wstring(fileInfo.m_size));
+//         rootDirectory.append(file);
+//      }
+//      else if (fileInfo.m_type == FILE_TYPE::DIRECTORY)
+//      {
+//         QJsonObject directory;
+//         QJsonArray content;
+//         directory[QString::fromStdWString(fileInfo.m_name)] = content;
+//      }
+
+//      childNode = childNode->GetNextSibling();
+//   }
 
    json["root"] = rootDirectory;
 }

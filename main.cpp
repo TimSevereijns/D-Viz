@@ -10,6 +10,8 @@
 
 #include <QByteArray>
 #include <QDebug>
+#include <QFile>
+#include <QIODevice>
 #include <QJsonObject>
 #include <QJsonDocument>
 
@@ -90,6 +92,11 @@ namespace {
 
       QByteArray bytes = doc.toJson();
       qDebug() << bytes;
+
+      QFile file("C:\\Users\\tsevereijns\\Desktop\\test.txt");
+      file.open(QIODevice::WriteOnly);
+      file.write(bytes);
+      file.close();
       //std::cout << doc.toJson() << std::endl;
    }
 }
