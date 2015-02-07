@@ -48,14 +48,36 @@ class DiskScanner
       void PrintTree() const;
       void PrintTreeMetadata() const;
 
+      /**
+       * @brief ToJSON serializes the scanned tree into a QJsonObject.
+       * @param[out] json           The QJsonObject to parse the file tree into.
+       */
       void ToJSON(QJsonObject& json);
 
+      /**
+       * @brief Scan will perform a recursive scan of the filesystem, starting at the specified
+       * path.
+       * @param[out] progress       An atomic containing the number of files scanned so far, and a
+       *                            boolean that will be set to true once scanning has completed.
+       */
       void Scan(std::atomic<std::pair<std::uintmax_t, bool>>* progress);
 
+      /**
+       * @brief ScanInNewThread kicks off the filesystem scan in a new thread.
+       * @param[out] progress       An atomic containing the number of files scanned so far, and a
+       *                            boolean that will be set to true once scanning has completed.
+       */
       void ScanInNewThread(std::atomic<std::pair<std::uintmax_t, bool>>* progress);
 
+      /**
+       * @brief JoinScanningThread wraps the call to std::thread::join.
+       */
       void JoinScanningThread();
 
+      /**
+       * @brief GetNumberOfFilesScanned reports filesystem scanning progress.
+       * @returns the number of files that have been scanned so far.
+       */
       std::uintmax_t GetNumberOfFilesScanned();
 
       /**
@@ -74,14 +96,11 @@ class DiskScanner
 
    private:
       /**
-       * TODO: Consider replacing this recursive version with an iterative implementation.
-       *
        * Max path length in Windows is 260 characters, so if that includes slashes, then the maximum
        * depth of a directory or file is no more than 130, or so. Given that the default stack size
        * in MSVC is 1MB, and I only pass in references, this recursive version may be fine---maybe!
        */
-      template<typename T>
-      void ScanRecursively(const boost::filesystem::path& path, TreeNode<T>& fileNode,
+      void ScanRecursively(const boost::filesystem::path& path, TreeNode<FileInfo>& fileNode,
          std::atomic<std::pair<std::uintmax_t, bool>>* progress);
 
       std::unique_ptr<Tree<FileInfo>> m_fileTree;

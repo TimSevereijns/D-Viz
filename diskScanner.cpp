@@ -23,11 +23,10 @@ namespace
     * @param[in] fileTree           The tree to be traversed.
     * @returns The size in bytes of all files in the tree.
     */
-   template<typename T>
-   std::uintmax_t ComputeFileTreeSizeInBytes(const Tree<T>& fileTree)
+   std::uintmax_t ComputeFileTreeSizeInBytes(const Tree<FileInfo>& fileTree)
    {
       const std::uintmax_t treeSize = std::accumulate(fileTree.beginLeaf(), fileTree.endLeaf(),
-         std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<T>& node)
+         std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<FileInfo>& node)
       {
          const FileInfo fileInfo = node.GetData();
          if (fileInfo.m_type == FILE_TYPE::REGULAR)
@@ -139,8 +138,7 @@ void DiskScanner::Scan(std::atomic<std::pair<std::uintmax_t, bool>>* progress)
    }
 }
 
-template<typename T>
-void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<T>& fileNode,
+void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<FileInfo>& fileNode,
    std::atomic<std::pair<std::uintmax_t, bool>>* progress)
 {
    if (boost::filesystem::is_symlink(path))
@@ -148,10 +146,7 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
       return;
    }
 
-   {
-      std::lock_guard<std::mutex> guard(m_mutex);
-      progress->store(std::make_pair(m_filesScanned, /*isScanningDone =*/ false));
-   }
+   progress->store(std::make_pair(m_filesScanned, /*isScanningDone =*/ false));
 
    if (boost::filesystem::is_regular_file(path))
    {
@@ -160,10 +155,7 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
 
       fileNode.AppendChild(fileInfo);
 
-      {
-         std::lock_guard<std::mutex> guard(m_mutex);
-         ++m_filesScanned;
-      }
+      ++m_filesScanned;
    }
    else if (boost::filesystem::is_directory(path))
    {
@@ -172,16 +164,13 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
 
       fileNode.AppendChild(directoryInfo);
 
-      {
-         std::lock_guard<std::mutex> guard(m_mutex);
-         ++m_filesScanned;
-      }
+      ++m_filesScanned;
 
       for (auto itr = boost::filesystem::directory_iterator(path);
            itr != boost::filesystem::directory_iterator();
            ++itr)
       {
-         boost::filesystem::path nextPath = itr->path();
+         const boost::filesystem::path nextPath = itr->path();
          ScanRecursively(nextPath, *fileNode.GetLastChild(), progress);
       }
    }
@@ -199,7 +188,6 @@ void DiskScanner::JoinScanningThread()
 
 std::uintmax_t DiskScanner::GetNumberOfFilesScanned()
 {
-   std::lock_guard<std::mutex> guard(m_mutex);
    return m_filesScanned;
 }
 
