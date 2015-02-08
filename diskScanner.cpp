@@ -23,7 +23,7 @@ namespace
     * @param[in] fileTree           The tree to be traversed.
     * @returns The size in bytes of all files in the tree.
     */
-   std::uintmax_t ComputeFileTreeSizeInBytes(const Tree<FileInfo>& fileTree)
+   std::uintmax_t ComputeTopLevelDirectorySizeInBytesViaTraversal(const Tree<FileInfo>& fileTree)
    {
       const std::uintmax_t treeSize = std::accumulate(fileTree.beginLeaf(), fileTree.endLeaf(),
          std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<FileInfo>& node)
@@ -131,6 +131,8 @@ void DiskScanner::Scan(std::atomic<std::pair<std::uintmax_t, bool>>* progress)
       m_scanningTime = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
 
       progress->store(std::make_pair(m_filesScanned, /*isScanningDone =*/ true));
+
+      ComputeDirectorySizes();
    }
    catch (const boost::filesystem::filesystem_error& exception)
    {
@@ -186,6 +188,27 @@ void DiskScanner::JoinScanningThread()
    m_scanningThread.join();
 }
 
+void DiskScanner::ComputeDirectorySizes()
+{
+   assert(m_fileTree);
+
+   std::for_each(std::begin(*m_fileTree), std::end(*m_fileTree),
+      [] (const TreeNode<FileInfo>& node)
+   {
+      const FileInfo fileInfo = node.GetData();
+
+      std::shared_ptr<TreeNode<FileInfo>> parent = node.GetParent();
+      if (parent)
+      {
+         FileInfo& parentInfo = parent->GetData();
+         if (parentInfo.m_type == FILE_TYPE::DIRECTORY)
+         {
+            parentInfo.m_size += fileInfo.m_size;
+         }
+      }
+   });
+}
+
 std::uintmax_t DiskScanner::GetNumberOfFilesScanned()
 {
    return m_filesScanned;
@@ -210,7 +233,7 @@ void DiskScanner::PrintTree() const
 
 void DiskScanner::PrintTreeMetadata() const
 {
-   const std::uintmax_t sizeInBytes = ComputeFileTreeSizeInBytes(*m_fileTree);
+   const std::uintmax_t sizeInBytes = ComputeTopLevelDirectorySizeInBytesViaTraversal(*m_fileTree);
    const double sizeInMegabytes = DiskScanner::ConvertBytesToMegaBytes(sizeInBytes);
 
    const unsigned int treeSize = Tree<FileInfo>::Size(*m_fileTree->GetHead());
@@ -232,8 +255,11 @@ void DiskScanner::PrintTreeMetadata() const
    std::cout << "Tree Metadata" << std::endl;
    std::cout << "=============" << std::endl;
 
-   std::cout << "File Size (Logical):" << std::endl;
+   std::cout << "File Size (Logical), Computed via Traversal:" << std::endl;
    std::cout << sizeInMegabytes << " MB (" << sizeInBytes << " bytes)" << std::endl;
+
+   std::cout << "Top Level Directory Size, via Single Look-up:" << std::endl;
+   std::cout << m_fileTree->GetHead()->GetData().m_size << " bytes" << std::endl;
 
    std::cout << "Total Node Count:" << std::endl;
    std::cout << treeSize << std::endl;

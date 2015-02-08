@@ -75,6 +75,12 @@ class DiskScanner
       void JoinScanningThread();
 
       /**
+       * @brief ComputeDirectorySizes traverses the file-tree and computes the size of each
+       * directory.
+       */
+      void ComputeDirectorySizes();
+
+      /**
        * @brief GetNumberOfFilesScanned reports filesystem scanning progress.
        * @returns the number of files that have been scanned so far.
        */
