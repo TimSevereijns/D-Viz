@@ -2,17 +2,27 @@
 #define GLCANVAS_H
 
 #include <QGLWidget>
+#include <QGLShaderProgram>
 
 class GLCanvas : public QGLWidget
 {
    Q_OBJECT
 
    public:
-      explicit GLCanvas(QWidget *parent = 0);
+      explicit GLCanvas(QWidget* parent = nullptr);
       ~GLCanvas();
 
-   protected:
+      QSize sizeHint() const;
 
+   protected:
+      void initializeGL() override;
+      void resizeGL(int width, int height) override;
+      void paintGL() override;
+
+   private:
+      QMatrix4x4 m_projectionMatrix;
+      QGLShaderProgram m_shader;
+      QVector<QVector3D> m_vertices;
 
    signals:
 

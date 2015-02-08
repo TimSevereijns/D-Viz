@@ -77,3 +77,10 @@ else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../../boost_1_57_0/lib64-msvc-12
 #else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../../boost_1_57_0/lib64-msvc-12.0/liblibboost_system-vc120-mt-1_57.a
 #
 #-------------------------------------------------
+
+DISTFILES += \
+    Shaders/fragmentShader.frag \
+    Shaders/vertexShader.vert
+
+RESOURCES += \
+    resources.qrc
