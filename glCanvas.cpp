@@ -1,13 +1,14 @@
 #include "glCanvas.h"
 
 #include <QGLWidget>
+#include <QtMath>
 #include <QMouseEvent>
 
 GLCanvas::GLCanvas(QWidget *parent)
    : QGLWidget(parent),
      m_alpha(25),
      m_beta(-25),
-     m_distance(2.5)
+     m_distance(0)
 {
 }
 
@@ -23,7 +24,7 @@ QSize GLCanvas::sizeHint() const
 void GLCanvas::initializeGL()
 {
    glEnable(GL_DEPTH_TEST);
-   glEnable(GL_CULL_FACE);
+   //glEnable(GL_CULL_FACE);
 
    qglClearColor(QColor(Qt::gray));
 
