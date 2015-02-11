@@ -15,12 +15,14 @@ TEMPLATE = app
 SOURCES += main.cpp\
     mainwindow.cpp \
     diskScanner.cpp \
-    glCanvas.cpp
+    glCanvas.cpp \
+    camera.cpp
 
 HEADERS  += mainwindow.h \
     tree.h \
     diskScanner.h \
-    glCanvas.h
+    glCanvas.h \
+    camera.h
 
 FORMS    += mainwindow.ui
 

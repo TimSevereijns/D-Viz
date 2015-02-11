@@ -8,7 +8,7 @@ GLCanvas::GLCanvas(QWidget *parent)
    : QGLWidget(parent),
      m_alpha(25),
      m_beta(-25),
-     m_distance(0)
+     m_distance(2.5)
 {
 }
 

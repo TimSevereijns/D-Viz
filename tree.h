@@ -430,7 +430,7 @@ class Tree
       class Iterator
       {
          public:
-            // So that m_head be set without a public setter.
+            // So that m_head can be set without a public setter.
             friend class Tree<T>;
 
             // Typedefs needed for STL compliance:
