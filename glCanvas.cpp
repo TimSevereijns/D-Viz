@@ -1,8 +1,10 @@
 #include "glCanvas.h"
 
+#include "camera.h"
+
 #include <QGLWidget>
-#include <QtMath>
 #include <QMouseEvent>
+#include <QtMath>
 
 GLCanvas::GLCanvas(QWidget *parent)
    : QGLWidget(parent),

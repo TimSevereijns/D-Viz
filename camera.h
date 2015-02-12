@@ -10,28 +10,27 @@ class Camera
       Camera();
       ~Camera();
 
-      QMatrix3x3& GetPosition() const;
-      void SetPosition(const QMatrix3x3 newPosition);
+      QVector3D& GetPosition();
+      void SetPosition(const QVector3D& newPosition);
 
-      void OffsetPosition(QMatrix3x3 offset);
+      QMatrix4x4 GetOrientation() const;
 
-      QMatrix3x3& GetOrientation() const;
+      void LookAt(const QVector3D& position);
 
-      void LookAt(const QMatrix3x3& position);
-
-      QMatrix3x3 Forward() const;
-      QMatrix3x3 Backward() const;
-      QMatrix3x3 Right() const;
-      QMatrix3x3 Left() const;
-      QMatrix3x3 Up() const;
-      QMatrix3x3 Down() const;
+      QVector3D Forward() const;
+      QVector3D Backward() const;
+      QVector3D Right() const;
+      QVector3D Left() const;
+      QVector3D Up() const;
+      QVector3D Down() const;
 
       QMatrix4x4 GetProjection() const;
 
       QMatrix4x4 GetView() const;
 
    private:
-      QMatrix3x3 m_position;
+      QVector3D m_position;
+
       QMatrix4x4 m_projection;
 
       double m_horizontalAngle;
