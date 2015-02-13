@@ -32,7 +32,8 @@ namespace
 
 Camera::Camera()
    : m_verticalAngle(0),
-     m_horizontalAngle(0)
+     m_horizontalAngle(0),
+     m_position(0, 0, 0)
 {
 }
 
@@ -48,6 +49,11 @@ QVector3D& Camera::GetPosition()
 void Camera::SetPosition(const QVector3D& newPosition)
 {
    m_position = newPosition;
+}
+
+void Camera::OffsetPosition(const QVector3D& offset)
+{
+   // TODO
 }
 
 QMatrix4x4 Camera::GetOrientation() const

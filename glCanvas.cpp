@@ -10,7 +10,8 @@ GLCanvas::GLCanvas(QWidget *parent)
    : QGLWidget(parent),
      m_alpha(25),
      m_beta(-25),
-     m_distance(2.5)
+     m_distance(2.5),
+     m_lastFrameTimeStamp(std::chrono::system_clock::now())
 {
 }
 
@@ -77,6 +78,18 @@ void GLCanvas::resizeGL(int width, int height)
    glViewport(0, 0, width, height);
 }
 
+void GLCanvas::keyPressEvent(QKeyEvent* const event)
+{
+   const Qt::Key pressedKey = static_cast<Qt::Key>(event->key());
+   switch (pressedKey)
+   {
+      case Qt::Key_W: m_keyboardManager.UpdateKeyState(pressedKey, *event); break;
+      case Qt::Key_A: m_keyboardManager.UpdateKeyState(pressedKey, *event); break;
+      case Qt::Key_S: m_keyboardManager.UpdateKeyState(pressedKey, *event); break;
+      case Qt::Key_D: m_keyboardManager.UpdateKeyState(pressedKey, *event); break;
+   }
+}
+
 void GLCanvas::mousePressEvent(QMouseEvent* const event)
 {
    m_lastMousePosition = event->pos();
@@ -139,8 +152,37 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    event->accept();
 }
 
+void GLCanvas::HandleCameraMovement()
+{
+   const static double moveSpeed = 0.01;
+
+   const std::chrono::duration<double> secondsElapsed =
+      std::chrono::duration_cast<std::chrono::seconds>(
+      std::chrono::system_clock::now() - m_lastFrameTimeStamp);
+
+   if (m_keyboardManager.IsKeyDown(Qt::Key_W))
+   {
+      m_camera.OffsetPosition(secondsElapsed.count() * moveSpeed * m_camera.Forward());
+   }
+   else if (m_keyboardManager.IsKeyDown(Qt::Key_A))
+   {
+      m_camera.OffsetPosition(secondsElapsed.count() * moveSpeed * m_camera.Left());
+   }
+   else if (m_keyboardManager.IsKeyDown(Qt::Key_S))
+   {
+      m_camera.OffsetPosition(secondsElapsed.count() * moveSpeed * m_camera.Backward());
+   }
+   else if (m_keyboardManager.IsKeyDown(Qt::Key_D))
+   {
+      m_camera.OffsetPosition(secondsElapsed.count() * moveSpeed * m_camera.Right());
+   }
+}
+
 void GLCanvas::paintGL()
 {
+   m_lastFrameTimeStamp = std::chrono::system_clock::now();
+   HandleCameraMovement();
+
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    QMatrix4x4 modelMatrix;

@@ -16,13 +16,15 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     diskScanner.cpp \
     glCanvas.cpp \
-    camera.cpp
+    camera.cpp \
+    keyboardManager.cpp
 
 HEADERS  += mainwindow.h \
     tree.h \
     diskScanner.h \
     glCanvas.h \
-    camera.h
+    camera.h \
+    keyboardManager.h
 
 FORMS    += mainwindow.ui
 
