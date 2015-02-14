@@ -160,19 +160,29 @@ void GLCanvas::HandleCameraMovement()
       std::chrono::duration_cast<std::chrono::seconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp);
 
-   if (m_keyboardManager.IsKeyDown(Qt::Key_W))
+   const bool isKeyWDown = m_keyboardManager.IsKeyDown(Qt::Key_W);
+   const bool isKeyADown = m_keyboardManager.IsKeyDown(Qt::Key_A);
+   const bool isKeySDown = m_keyboardManager.IsKeyDown(Qt::Key_S);
+   const bool isKeyDDown = m_keyboardManager.IsKeyDown(Qt::Key_D);
+
+   if ((isKeyWDown && isKeySDown) || (isKeyADown && isKeyDDown))
+   {
+      return;
+   }
+
+   if (isKeyWDown)
    {
       m_camera.OffsetPosition(secondsElapsed.count() * moveSpeed * m_camera.Forward());
    }
-   else if (m_keyboardManager.IsKeyDown(Qt::Key_A))
+   else if (isKeyADown)
    {
       m_camera.OffsetPosition(secondsElapsed.count() * moveSpeed * m_camera.Left());
    }
-   else if (m_keyboardManager.IsKeyDown(Qt::Key_S))
+   else if (isKeySDown)
    {
       m_camera.OffsetPosition(secondsElapsed.count() * moveSpeed * m_camera.Backward());
    }
-   else if (m_keyboardManager.IsKeyDown(Qt::Key_D))
+   else if (isKeyDDown)
    {
       m_camera.OffsetPosition(secondsElapsed.count() * moveSpeed * m_camera.Right());
    }
