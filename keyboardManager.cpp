@@ -62,4 +62,3 @@ void KeyboardManager::UpdateKeyState(const Qt::Key key, const KEY_STATE state)
       std::cout << "Key up" << std::endl;
    }
 }
-

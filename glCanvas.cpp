@@ -8,12 +8,28 @@
 
 #include <iostream>
 
+namespace
+{
+   inline void keyPressHelper(KeyboardManager& keyboardManager, QKeyEvent& event, KeyboardManager::KEY_STATE state)
+   {
+      const Qt::Key pressedKey = static_cast<Qt::Key>(event.key());
+      switch (pressedKey)
+      {
+         case Qt::Key_W: keyboardManager.UpdateKeyState(pressedKey, state); break;
+         case Qt::Key_A: keyboardManager.UpdateKeyState(pressedKey, state); break;
+         case Qt::Key_S: keyboardManager.UpdateKeyState(pressedKey, state); break;
+         case Qt::Key_D: keyboardManager.UpdateKeyState(pressedKey, state); break;
+      }
+   }
+}
+
 GLCanvas::GLCanvas(QWidget *parent)
    : QGLWidget(parent),
      m_alpha(25),
      m_beta(-25),
      m_distance(2.5),
-     m_lastFrameTimeStamp(std::chrono::system_clock::now())
+     m_lastFrameTimeStamp(std::chrono::system_clock::now()),
+     m_parent(*parent)
 {
    m_camera.SetAspectRatio(780.0f / 580.0f);
    m_camera.SetPosition(QVector3D(0, 0, m_distance));
@@ -76,9 +92,6 @@ void GLCanvas::resizeGL(int width, int height)
       height = 1;
    }
 
-   //m_projectionMatrix.setToIdentity();
-   //m_projectionMatrix.perspective(60.0f, (float) width / (float) height, 0.001f, 1000.0f);
-
    glViewport(0, 0, width, height);
 }
 
@@ -91,16 +104,7 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
       return;
    }
 
-   const KeyboardManager::KEY_STATE state = KeyboardManager::KEY_STATE::DOWN;
-
-   const Qt::Key pressedKey = static_cast<Qt::Key>(event->key());
-   switch (pressedKey)
-   {
-      case Qt::Key_W: m_keyboardManager.UpdateKeyState(pressedKey, state); break;
-      case Qt::Key_A: m_keyboardManager.UpdateKeyState(pressedKey, state); break;
-      case Qt::Key_S: m_keyboardManager.UpdateKeyState(pressedKey, state); break;
-      case Qt::Key_D: m_keyboardManager.UpdateKeyState(pressedKey, state); break;
-   }
+   keyPressHelper(m_keyboardManager, *event, KeyboardManager::KEY_STATE::DOWN);
 
    updateGL();
    event->accept();
@@ -115,16 +119,7 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
       return;
    }
 
-   const KeyboardManager::KEY_STATE state = KeyboardManager::KEY_STATE::UP;
-
-   const Qt::Key pressedKey = static_cast<Qt::Key>(event->key());
-   switch (pressedKey)
-   {
-      case Qt::Key_W: m_keyboardManager.UpdateKeyState(pressedKey, state); break;
-      case Qt::Key_A: m_keyboardManager.UpdateKeyState(pressedKey, state); break;
-      case Qt::Key_S: m_keyboardManager.UpdateKeyState(pressedKey, state); break;
-      case Qt::Key_D: m_keyboardManager.UpdateKeyState(pressedKey, state); break;
-   }
+   keyPressHelper(m_keyboardManager, *event, KeyboardManager::KEY_STATE::UP);
 
    updateGL();
    event->accept();
@@ -194,11 +189,10 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
 void GLCanvas::HandleCameraMovement()
 {
-   const static double moveSpeed = 0.5;
+   const static double moveSpeed = 0.001;
 
-   const std::chrono::duration<double> secondsElapsed =
-      std::chrono::duration_cast<std::chrono::seconds>(
-      std::chrono::system_clock::now() - m_lastFrameTimeStamp);
+   auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - m_lastFrameTimeStamp);
 
    const bool isKeyWDown = m_keyboardManager.IsKeyDown(Qt::Key_W);
    const bool isKeyADown = m_keyboardManager.IsKeyDown(Qt::Key_A);
@@ -212,44 +206,36 @@ void GLCanvas::HandleCameraMovement()
 
    if (isKeyWDown)
    {
-      m_camera.OffsetPosition(secondsElapsed.count() * moveSpeed * m_camera.Forward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * moveSpeed * m_camera.Forward());
    }
    else if (isKeyADown)
    {
-      m_camera.OffsetPosition(secondsElapsed.count() * moveSpeed * m_camera.Left());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * moveSpeed * m_camera.Left());
    }
    else if (isKeySDown)
    {
-      m_camera.OffsetPosition(secondsElapsed.count() * moveSpeed * m_camera.Backward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * moveSpeed * m_camera.Backward());
    }
    else if (isKeyDDown)
    {
-      m_camera.OffsetPosition(secondsElapsed.count() * moveSpeed * m_camera.Right());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * moveSpeed * m_camera.Right());
    }
 }
 
 void GLCanvas::paintGL()
 {
-   m_lastFrameTimeStamp = std::chrono::system_clock::now();
+   const auto currentTime = std::chrono::system_clock::now();
+   auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - m_lastFrameTimeStamp);
+
+   QString windowTitle = QString::fromStdString("D-Viz ") +
+      QString::number((int) (1000.0 / millisecondsElapsed.count())) +
+      QString::fromStdString(" fps [*]");
+   m_parent.setWindowTitle(windowTitle);
+
    HandleCameraMovement();
 
-   std::cout << "Painting..." << std::endl;
-
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-   //QMatrix4x4 modelMatrix;
-   //QMatrix4x4 viewMatrix;
-
-   //QMatrix4x4 cameraTransformation;
-   //cameraTransformation.rotate(m_alpha, 0, 1, 0);
-   //cameraTransformation.rotate(m_beta, 1, 0, 0);
-
-   //const QVector3D cameraPosition = cameraTransformation * QVector3D(0, 0, m_distance);
-   //const QVector3D cameraUpDirection = cameraTransformation * QVector3D(0, 1, 0);
-
-   //viewMatrix.lookAt(cameraPosition, QVector3D(0, 0, 0), cameraUpDirection);
-
-   //m_camera.LookAt(QVector3D(0, 0, 0));
 
    m_shader.bind();
    m_shader.setUniformValue("mvpMatrix", m_camera.GetMatrix());
@@ -266,4 +252,15 @@ void GLCanvas::paintGL()
    m_shader.disableAttributeArray("color");
 
    m_shader.release();
+
+   m_lastFrameTimeStamp = currentTime;
+
+   if (hasFocus())
+   {
+      update();
+   }
+   else
+   {
+      m_parent.setWindowTitle("D-Viz - Drawing Suspended");
+   }
 }

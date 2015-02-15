@@ -34,6 +34,8 @@ class GLCanvas : public QGLWidget
    private:
       void HandleCameraMovement();
 
+      QWidget& m_parent;
+
       Camera m_camera;
 
       KeyboardManager m_keyboardManager;

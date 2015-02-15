@@ -35,9 +35,9 @@ Camera::Camera()
    : m_verticalAngle(0),
      m_horizontalAngle(0),
      m_position(0, 0, 0),
-     m_aspectRatio(1),
-     m_nearPlane(0.001),
-     m_farPlane(1000.0)
+     m_aspectRatio(1.0f),
+     m_nearPlane(0.001f),
+     m_farPlane(1000.0f)
 {
 }
 
@@ -58,7 +58,6 @@ void Camera::SetPosition(const QVector3D& newPosition)
 void Camera::OffsetPosition(const QVector3D& offset)
 {
    m_position += offset;
-   std::cout << "Offsetting camera" << std::endl;
 }
 
 QMatrix4x4 Camera::GetOrientation() const
