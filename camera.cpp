@@ -1,6 +1,7 @@
 #include "camera.h"
 
 #include <assert.h>
+#include <iostream>
 #include <math.h>
 
 // Keep vertical angle less than 90 degrees to avoid gimbal lock:
@@ -56,7 +57,8 @@ void Camera::SetPosition(const QVector3D& newPosition)
 
 void Camera::OffsetPosition(const QVector3D& offset)
 {
-   // TODO
+   m_position += offset;
+   std::cout << "Offsetting camera" << std::endl;
 }
 
 QMatrix4x4 Camera::GetOrientation() const

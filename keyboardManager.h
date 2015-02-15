@@ -23,9 +23,9 @@ class KeyboardManager
       /**
        * @brief UpdateKeyState Records the state of the specified key.
        * @param key[in]                The key to be updated.
-       * @param event[in]              The state of the key.
+       * @param state[in]              The state of the key.
        */
-      void UpdateKeyState(const Qt::Key, const QEvent& event);
+      void UpdateKeyState(const Qt::Key, const KEY_STATE state);
 
    private:
       std::map<Qt::Key, KEY_STATE> m_keyMap;
