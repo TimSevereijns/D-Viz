@@ -33,7 +33,10 @@ namespace
 Camera::Camera()
    : m_verticalAngle(0),
      m_horizontalAngle(0),
-     m_position(0, 0, 0)
+     m_position(0, 0, 0),
+     m_aspectRatio(1),
+     m_nearPlane(0.001),
+     m_farPlane(1000.0)
 {
 }
 
@@ -110,12 +113,26 @@ QVector3D Camera::Down() const
 
 QMatrix4x4 Camera::GetProjection() const
 {
-   // TODO: Implement
+   QMatrix4x4 matrix;
+   matrix.perspective(65.0f, m_aspectRatio, m_nearPlane, m_farPlane);
 
-   return QMatrix4x4();
+   return matrix;
 }
 
 QMatrix4x4 Camera::GetView() const
 {
-   return QMatrix4x4();
+   QMatrix4x4 matrix;
+   matrix.translate(-m_position);
+   return matrix *= GetOrientation();
 }
+
+QMatrix4x4 Camera::GetMatrix() const
+{
+   return GetProjection() * GetView();
+}
+
+void Camera::SetAspectRatio(const float ratio)
+{
+   m_aspectRatio = ratio;
+}
+

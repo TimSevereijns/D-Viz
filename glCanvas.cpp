@@ -13,6 +13,8 @@ GLCanvas::GLCanvas(QWidget *parent)
      m_distance(2.5),
      m_lastFrameTimeStamp(std::chrono::system_clock::now())
 {
+   m_camera.SetAspectRatio(780.0f / 580.0f);
+   m_camera.SetPosition(QVector3D(0, 0, m_distance));
 }
 
 GLCanvas::~GLCanvas()
@@ -202,13 +204,15 @@ void GLCanvas::paintGL()
    cameraTransformation.rotate(m_alpha, 0, 1, 0);
    cameraTransformation.rotate(m_beta, 1, 0, 0);
 
-   const QVector3D cameraPosition = cameraTransformation * QVector3D(0, 0, m_distance);
-   const QVector3D cameraUpDirection = cameraTransformation * QVector3D(0, 1, 0);
+   //const QVector3D cameraPosition = cameraTransformation * QVector3D(0, 0, m_distance);
+   //const QVector3D cameraUpDirection = cameraTransformation * QVector3D(0, 1, 0);
 
-   viewMatrix.lookAt(cameraPosition, QVector3D(0, 0, 0), cameraUpDirection);
+   m_camera.LookAt(QVector3D(0, 0, 0));
+
+   //viewMatrix.lookAt(cameraPosition, QVector3D(0, 0, 0), cameraUpDirection);
 
    m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", m_projectionMatrix * viewMatrix * modelMatrix);
+   m_shader.setUniformValue("mvpMatrix", m_camera.GetMatrix());
 
    m_shader.setAttributeArray("vertex", m_vertices.constData());
    m_shader.enableAttributeArray("vertex");

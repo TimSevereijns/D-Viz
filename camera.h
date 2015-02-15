@@ -26,16 +26,20 @@ class Camera
       QVector3D Down() const;
 
       QMatrix4x4 GetProjection() const;
-
       QMatrix4x4 GetView() const;
+      QMatrix4x4 GetMatrix() const;
+
+      void SetAspectRatio(const float ratio);
 
    private:
       QVector3D m_position;
 
-      QMatrix4x4 m_projection;
-
       double m_horizontalAngle;
       double m_verticalAngle;
+
+      float m_aspectRatio;
+      float m_nearPlane;
+      float m_farPlane;
 };
 
 #endif // CAMERA_H
