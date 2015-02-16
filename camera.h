@@ -11,10 +11,12 @@ class Camera
       ~Camera();
 
       QVector3D& GetPosition();
+
       void SetPosition(const QVector3D& newPosition);
       void OffsetPosition(const QVector3D& offset);
 
       QMatrix4x4 GetOrientation() const;
+      void OffsetOrientation(float verticalAngle, float horizontalAngle);
 
       void LookAt(const QVector3D& position);
 

@@ -68,6 +68,14 @@ QMatrix4x4 Camera::GetOrientation() const
    return orientation;
 }
 
+void Camera::OffsetOrientation(float verticalAngle, float horizontalAngle)
+{
+   m_horizontalAngle += horizontalAngle;
+   m_verticalAngle += verticalAngle;
+
+   NormalizeAngles(m_horizontalAngle, m_verticalAngle);
+}
+
 void Camera::LookAt(const QVector3D& position)
 {
    assert(position != m_position);
@@ -115,16 +123,16 @@ QVector3D Camera::Down() const
 QMatrix4x4 Camera::GetProjection() const
 {
    QMatrix4x4 matrix;
-   matrix.perspective(65.0f, m_aspectRatio, m_nearPlane, m_farPlane);
+   matrix.perspective(40.0f, m_aspectRatio, m_nearPlane, m_farPlane);
 
    return matrix;
 }
 
 QMatrix4x4 Camera::GetView() const
 {
-   QMatrix4x4 matrix;
+   QMatrix4x4 matrix = GetOrientation();
    matrix.translate(-m_position);
-   return matrix *= GetOrientation();
+   return matrix;
 }
 
 QMatrix4x4 Camera::GetMatrix() const

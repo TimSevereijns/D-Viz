@@ -33,6 +33,8 @@ GLCanvas::GLCanvas(QWidget *parent)
 {
    m_camera.SetAspectRatio(780.0f / 580.0f);
    m_camera.SetPosition(QVector3D(0, 0, m_distance));
+
+   setMouseTracking(true);
 }
 
 GLCanvas::~GLCanvas()
@@ -99,14 +101,11 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
 {
    if (event->isAutoRepeat())
    {
-      updateGL();
       event->ignore();
       return;
    }
 
    keyPressHelper(m_keyboardManager, *event, KeyboardManager::KEY_STATE::DOWN);
-
-   updateGL();
    event->accept();
 }
 
@@ -114,55 +113,33 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
 {
    if (event->isAutoRepeat())
    {
-      updateGL();
       event->ignore();
       return;
    }
 
    keyPressHelper(m_keyboardManager, *event, KeyboardManager::KEY_STATE::UP);
-
-   updateGL();
    event->accept();
 }
 
 void GLCanvas::mousePressEvent(QMouseEvent* const event)
 {
    m_lastMousePosition = event->pos();
-
    event->accept();
 }
 
 void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 {
-   const int deltaX = event->x() - m_lastMousePosition.x();
-   const int deltaY = event->y() - m_lastMousePosition.y();
+   const static float mouseSensitivity = 0.5f;
 
-   if (event->buttons() & Qt::LeftButton) {
-      m_alpha -= deltaX;
-      while (m_alpha < 0)
-      {
-         m_alpha += 360;
-      }
-      while (m_alpha >= 360)
-      {
-         m_alpha -= 360;
-      }
+   const float deltaX = event->x() - m_lastMousePosition.x();
+   const float deltaY = event->y() - m_lastMousePosition.y();
 
-      m_beta -= deltaY;
-      if (m_beta < -90)
-      {
-         m_beta = -90;
-      }
-      if (m_beta > 90)
-      {
-         m_beta = 90;
-      }
-
-      updateGL();
+   if (event->buttons() & Qt::LeftButton)
+   {
+      m_camera.OffsetOrientation(mouseSensitivity * deltaY, mouseSensitivity * deltaX);
    }
 
    m_lastMousePosition = event->pos();
-
    event->accept();
 }
 
@@ -192,7 +169,7 @@ void GLCanvas::HandleCameraMovement()
    const static double moveSpeed = 0.001;
 
    auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - m_lastFrameTimeStamp);
+      std::chrono::system_clock::now() - m_lastFrameTimeStamp);
 
    const bool isKeyWDown = m_keyboardManager.IsKeyDown(Qt::Key_W);
    const bool isKeyADown = m_keyboardManager.IsKeyDown(Qt::Key_A);
@@ -225,7 +202,7 @@ void GLCanvas::HandleCameraMovement()
 void GLCanvas::paintGL()
 {
    const auto currentTime = std::chrono::system_clock::now();
-   auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+   const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - m_lastFrameTimeStamp);
 
    QString windowTitle = QString::fromStdString("D-Viz ") +
