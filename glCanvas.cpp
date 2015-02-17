@@ -2,39 +2,50 @@
 
 #include "camera.h"
 
-#include <QGLWidget>
 #include <QMouseEvent>
+#include <QOpenGLShader>
+
+#include <QTimer>
 #include <QtMath>
 
 #include <iostream>
 
 namespace
 {
-   inline void keyPressHelper(KeyboardManager& keyboardManager, QKeyEvent& event, KeyboardManager::KEY_STATE state)
+   inline bool keyPressHelper(KeyboardManager& keyboardManager, QKeyEvent& event,
+                              KeyboardManager::KEY_STATE state)
    {
       const Qt::Key pressedKey = static_cast<Qt::Key>(event.key());
       switch (pressedKey)
       {
-         case Qt::Key_W: keyboardManager.UpdateKeyState(pressedKey, state); break;
-         case Qt::Key_A: keyboardManager.UpdateKeyState(pressedKey, state); break;
-         case Qt::Key_S: keyboardManager.UpdateKeyState(pressedKey, state); break;
-         case Qt::Key_D: keyboardManager.UpdateKeyState(pressedKey, state); break;
+         case Qt::Key_W: keyboardManager.UpdateKeyState(pressedKey, state); return true;
+         case Qt::Key_A: keyboardManager.UpdateKeyState(pressedKey, state); return true;
+         case Qt::Key_S: keyboardManager.UpdateKeyState(pressedKey, state); return true;
+         case Qt::Key_D: keyboardManager.UpdateKeyState(pressedKey, state); return true;
       }
+
+      return false;
    }
 }
 
-GLCanvas::GLCanvas(QWidget *parent)
-   : QGLWidget(parent),
-     m_alpha(25),
-     m_beta(-25),
+GLCanvas::GLCanvas(QWidget* parent)
+   : QOpenGLWidget(parent),
+     m_parent(*parent),
      m_distance(2.5),
-     m_lastFrameTimeStamp(std::chrono::system_clock::now()),
-     m_parent(*parent)
+     m_lastFrameTimeStamp(std::chrono::system_clock::now())
 {
    m_camera.SetAspectRatio(780.0f / 580.0f);
    m_camera.SetPosition(QVector3D(0, 0, m_distance));
 
-   setMouseTracking(true);
+   setFocusPolicy(Qt::StrongFocus);
+
+   QSurfaceFormat format;
+   format.setDepthBufferSize(24);
+   setFormat(format);
+
+   QTimer* timer = new QTimer(this);
+   connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+   timer->start(30);
 }
 
 GLCanvas::~GLCanvas()
@@ -48,13 +59,15 @@ QSize GLCanvas::sizeHint() const
 
 void GLCanvas::initializeGL()
 {
+   initializeOpenGLFunctions();
+
    glEnable(GL_DEPTH_TEST);
    //glEnable(GL_CULL_FACE);
 
-   qglClearColor(QColor(Qt::gray));
+   //glClearColor(QColor(Qt::gray));
 
-   m_shader.addShaderFromSourceFile(QGLShader::Vertex, ":/Shaders/vertexShader.vert");
-   m_shader.addShaderFromSourceFile(QGLShader::Fragment, ":/Shaders/fragmentShader.frag");
+   m_shader.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/Shaders/vertexShader.vert");
+   m_shader.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/Shaders/fragmentShader.frag");
    m_shader.link();
 
    m_vertices
@@ -105,8 +118,16 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
       return;
    }
 
-   keyPressHelper(m_keyboardManager, *event, KeyboardManager::KEY_STATE::DOWN);
-   event->accept();
+   const auto keyState = KeyboardManager::KEY_STATE::DOWN;
+   const bool wasKeyRecognized = keyPressHelper(m_keyboardManager, *event, keyState);
+   if (wasKeyRecognized)
+   {
+      event->accept();
+   }
+   else
+   {
+      QOpenGLWidget::keyPressEvent(event);
+   }
 }
 
 void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
@@ -117,8 +138,16 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
       return;
    }
 
-   keyPressHelper(m_keyboardManager, *event, KeyboardManager::KEY_STATE::UP);
-   event->accept();
+   const auto keyState = KeyboardManager::KEY_STATE::UP;
+   const bool wasKeyRecognized = keyPressHelper(m_keyboardManager, *event, keyState);
+   if (wasKeyRecognized)
+   {
+      event->accept();
+   }
+   else
+   {
+      QOpenGLWidget::keyReleaseEvent(event);
+   }
 }
 
 void GLCanvas::mousePressEvent(QMouseEvent* const event)
@@ -129,6 +158,8 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
 
 void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 {
+   //std::cout << "Mouse moving..." << std::endl;
+
    const static float mouseSensitivity = 0.5f;
 
    const float deltaX = event->x() - m_lastMousePosition.x();
@@ -157,8 +188,6 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
       {
          m_distance *= 0.9;
       }
-
-      updateGL();
    }
 
    event->accept();
@@ -168,7 +197,7 @@ void GLCanvas::HandleCameraMovement()
 {
    const static double moveSpeed = 0.001;
 
-   auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+   const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp);
 
    const bool isKeyWDown = m_keyboardManager.IsKeyDown(Qt::Key_W);
@@ -185,15 +214,18 @@ void GLCanvas::HandleCameraMovement()
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * moveSpeed * m_camera.Forward());
    }
-   else if (isKeyADown)
+
+   if (isKeyADown)
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * moveSpeed * m_camera.Left());
    }
-   else if (isKeySDown)
+
+   if (isKeySDown)
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * moveSpeed * m_camera.Backward());
    }
-   else if (isKeyDDown)
+
+   if (isKeyDDown)
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * moveSpeed * m_camera.Right());
    }
@@ -201,6 +233,8 @@ void GLCanvas::HandleCameraMovement()
 
 void GLCanvas::paintGL()
 {
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
    const auto currentTime = std::chrono::system_clock::now();
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - m_lastFrameTimeStamp);
@@ -211,8 +245,6 @@ void GLCanvas::paintGL()
    m_parent.setWindowTitle(windowTitle);
 
    HandleCameraMovement();
-
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    m_shader.bind();
    m_shader.setUniformValue("mvpMatrix", m_camera.GetMatrix());
@@ -232,12 +264,12 @@ void GLCanvas::paintGL()
 
    m_lastFrameTimeStamp = currentTime;
 
-   if (hasFocus())
-   {
-      update();
-   }
-   else
-   {
-      m_parent.setWindowTitle("D-Viz - Drawing Suspended");
-   }
+//   if (hasFocus())
+//   {
+//      update();
+//   }
+//   else
+//   {
+//      m_parent.setWindowTitle("D-Viz - Drawing Suspended");
+//   }
 }

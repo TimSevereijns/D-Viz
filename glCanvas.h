@@ -6,10 +6,11 @@
 
 #include <chrono>
 
-#include <QGLWidget>
-#include <QGLShaderProgram>
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions>
+#include <QOpenGLShaderProgram>
 
-class GLCanvas : public QGLWidget
+class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 {
    Q_OBJECT
 
@@ -42,13 +43,11 @@ class GLCanvas : public QGLWidget
 
       QMatrix4x4 m_projectionMatrix;
 
-      QGLShaderProgram m_shader;
+      QOpenGLShaderProgram m_shader;
 
       QVector<QVector3D> m_vertices;
       QVector<QVector3D> m_colors;
 
-      double m_alpha;
-      double m_beta;
       double m_distance;
 
       std::chrono::system_clock::time_point m_lastFrameTimeStamp;
