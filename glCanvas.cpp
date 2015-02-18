@@ -45,7 +45,7 @@ GLCanvas::GLCanvas(QWidget* parent)
 
    QTimer* timer = new QTimer(this);
    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-   timer->start(30);
+   timer->start(10);
 }
 
 GLCanvas::~GLCanvas()
@@ -101,6 +101,8 @@ void GLCanvas::initializeGL()
 
 void GLCanvas::resizeGL(int width, int height)
 {
+   std::cout << "(" << width << ", " << height << ")" << std::endl;
+
    // Avoid a divide-by-zero situation:
    if (height == 0)
    {
@@ -153,13 +155,12 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
 void GLCanvas::mousePressEvent(QMouseEvent* const event)
 {
    m_lastMousePosition = event->pos();
+
    event->accept();
 }
 
 void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 {
-   //std::cout << "Mouse moving..." << std::endl;
-
    const static float mouseSensitivity = 0.5f;
 
    const float deltaX = event->x() - m_lastMousePosition.x();
@@ -171,6 +172,7 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
    }
 
    m_lastMousePosition = event->pos();
+
    event->accept();
 }
 
@@ -182,11 +184,11 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    {
       if (delta < 0)
       {
-         m_distance *= 1.1;
+        m_camera.IncreaseFieldOfView();
       }
       else if (delta > 0)
       {
-         m_distance *= 0.9;
+         m_camera.DecreaseFieldOfView();
       }
    }
 
@@ -195,7 +197,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
 void GLCanvas::HandleCameraMovement()
 {
-   const static double moveSpeed = 0.001;
+   const static float moveSpeed = 0.001f;
 
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp);
@@ -237,7 +239,7 @@ void GLCanvas::paintGL()
 
    const auto currentTime = std::chrono::system_clock::now();
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - m_lastFrameTimeStamp);
+      std::chrono::system_clock::now() - m_lastFrameTimeStamp);
 
    QString windowTitle = QString::fromStdString("D-Viz ") +
       QString::number((int) (1000.0 / millisecondsElapsed.count())) +

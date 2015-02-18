@@ -33,12 +33,17 @@ class Camera
 
       void SetAspectRatio(const float ratio);
 
+      void SetFieldOfView(const float angle);
+      void IncreaseFieldOfView();
+      void DecreaseFieldOfView();
+
    private:
       QVector3D m_position;
 
       double m_horizontalAngle;
       double m_verticalAngle;
 
+      float m_fieldOfView;
       float m_aspectRatio;
       float m_nearPlane;
       float m_farPlane;

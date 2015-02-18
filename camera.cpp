@@ -37,7 +37,8 @@ Camera::Camera()
      m_position(0, 0, 0),
      m_aspectRatio(1.0f),
      m_nearPlane(0.001f),
-     m_farPlane(1000.0f)
+     m_farPlane(1000.0f),
+     m_fieldOfView(45.0f)
 {
 }
 
@@ -123,7 +124,7 @@ QVector3D Camera::Down() const
 QMatrix4x4 Camera::GetProjection() const
 {
    QMatrix4x4 matrix;
-   matrix.perspective(40.0f, m_aspectRatio, m_nearPlane, m_farPlane);
+   matrix.perspective(m_fieldOfView, m_aspectRatio, m_nearPlane, m_farPlane);
 
    return matrix;
 }
@@ -145,3 +146,38 @@ void Camera::SetAspectRatio(const float ratio)
    m_aspectRatio = ratio;
 }
 
+void Camera::SetFieldOfView(const float angle)
+{
+   if (angle > 85.0f)
+   {
+      m_fieldOfView = 85.0f;
+   }
+   else if (angle < 5.0f)
+   {
+      m_fieldOfView = 5.0f;
+   }
+   else
+   {
+      m_fieldOfView = angle;
+   }
+}
+
+void Camera::IncreaseFieldOfView()
+{
+   m_fieldOfView *= 1.1f;
+
+   if (m_fieldOfView > 85.0f)
+   {
+      m_fieldOfView = 85.0f;
+   }
+}
+
+void Camera::DecreaseFieldOfView()
+{
+   m_fieldOfView *= 0.9f;
+
+   if (m_fieldOfView < 5.0f)
+   {
+      m_fieldOfView = 5.0f;
+   }
+}
