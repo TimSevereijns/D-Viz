@@ -6,9 +6,11 @@
 
 #include <chrono>
 
-#include <QOpenGLWidget>
+#include <QOpenGLBuffer>
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLWidget>
 
 class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 {
@@ -34,6 +36,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
    private:
       void HandleCameraMovement();
+      void PrepareShaderProgram();
+      void PrepareVertexBuffers();
 
       QWidget& m_parent;
 
@@ -43,7 +47,12 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
       QMatrix4x4 m_projectionMatrix;
 
-      QOpenGLShaderProgram m_shader;
+      QOpenGLShaderProgram m_shaderProgram;
+
+      QOpenGLVertexArrayObject m_VAO;
+
+      QOpenGLBuffer m_vertexPositionBuffer;
+      QOpenGLBuffer m_vertexColorBuffer;
 
       QVector<QVector3D> m_vertices;
       QVector<QVector3D> m_colors;

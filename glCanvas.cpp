@@ -10,6 +10,14 @@
 
 #include <iostream>
 
+/*
+ * AWESOME RESOURCES:
+ * ------------------
+ * https://github.com/advancingu/Qt5OppenGL
+ * www.tomdalling.com/
+ * https://github.com/qtproject/learning-guides/tree/master/openGL_tutorial
+ */
+
 namespace
 {
    inline bool keyPressHelper(KeyboardManager& keyboardManager, QKeyEvent& event,
@@ -32,17 +40,22 @@ GLCanvas::GLCanvas(QWidget* parent)
    : QOpenGLWidget(parent),
      m_parent(*parent),
      m_distance(2.5),
-     m_lastFrameTimeStamp(std::chrono::system_clock::now())
+     m_lastFrameTimeStamp(std::chrono::system_clock::now()),
+     m_vertexColorBuffer(QOpenGLBuffer::VertexBuffer),
+     m_vertexPositionBuffer(QOpenGLBuffer::VertexBuffer)
 {
+   // Set up the camera:
    m_camera.SetAspectRatio(780.0f / 580.0f);
    m_camera.SetPosition(QVector3D(0, 0, m_distance));
 
+   // Set keyboard and mouse focus:
    setFocusPolicy(Qt::StrongFocus);
 
    QSurfaceFormat format;
    format.setDepthBufferSize(24);
    setFormat(format);
 
+   // Set the target frame rate:
    QTimer* timer = new QTimer(this);
    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
    timer->start(10);
@@ -52,24 +65,23 @@ GLCanvas::~GLCanvas()
 {
 }
 
-QSize GLCanvas::sizeHint() const
+void GLCanvas::PrepareShaderProgram()
 {
-   return QSize(780, 580);
+   if (!m_shaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/Shaders/vertexShader.vert"))
+   {
+      std::cout << "Error adding vertex shader!" << std::endl;
+   }
+
+   if (!m_shaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/Shaders/fragmentShader.frag"))
+   {
+      std::cout << "Error adding fragment shader!" << std::endl;
+   }
+
+   m_shaderProgram.link();
 }
 
-void GLCanvas::initializeGL()
+void GLCanvas::PrepareVertexBuffers()
 {
-   initializeOpenGLFunctions();
-
-   glEnable(GL_DEPTH_TEST);
-   //glEnable(GL_CULL_FACE);
-
-   //glClearColor(QColor(Qt::gray));
-
-   m_shader.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/Shaders/vertexShader.vert");
-   m_shader.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/Shaders/fragmentShader.frag");
-   m_shader.link();
-
    m_vertices
      << QVector3D(-0.5, -0.5,  0.5) << QVector3D( 0.5, -0.5,  0.5) << QVector3D( 0.5,  0.5,  0.5) // Front
      << QVector3D( 0.5,  0.5,  0.5) << QVector3D(-0.5,  0.5,  0.5) << QVector3D(-0.5, -0.5,  0.5)
@@ -97,12 +109,56 @@ void GLCanvas::initializeGL()
       << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) << QVector3D(0, 0, 1)
       << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) // Bottom
       << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) << QVector3D(0, 0, 1);
+
+   m_VAO.create();
+   m_VAO.bind();
+
+   m_vertexPositionBuffer.create();
+   m_vertexPositionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+   m_vertexPositionBuffer.bind();
+   m_vertexPositionBuffer.allocate(m_vertices.constData(), m_vertices.size() * 3 * sizeof(GLfloat));
+
+   m_vertexColorBuffer.create();
+   m_vertexColorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+   m_vertexColorBuffer.bind();
+   m_vertexColorBuffer.allocate(m_colors.constData(), m_colors.size() * 3 * sizeof(GLfloat));
+
+   m_shaderProgram.bind();
+
+   m_shaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
+
+   m_vertexPositionBuffer.bind();
+   m_shaderProgram.enableAttributeArray("vertex");
+   m_shaderProgram.setAttributeBuffer("vertex", GL_FLOAT, /* offset = */ 0, /* tupleSize = */ 3);
+
+   m_vertexColorBuffer.bind();
+   m_shaderProgram.enableAttributeArray("color");
+   m_shaderProgram.setAttributeBuffer("color", GL_FLOAT, /* offset = */ 0, /* tupleSize = */ 3);
+
+   m_shaderProgram.release();
+   m_vertexPositionBuffer.release();
+   m_vertexColorBuffer.release();
+   m_VAO.release();
+}
+
+QSize GLCanvas::sizeHint() const
+{
+   return QSize(780, 580);
+}
+
+void GLCanvas::initializeGL()
+{
+   initializeOpenGLFunctions();
+
+   glEnable(GL_DEPTH_TEST);
+   //glEnable(GL_CULL_FACE);
+
+   PrepareShaderProgram();
+   PrepareVertexBuffers();
 }
 
 void GLCanvas::resizeGL(int width, int height)
 {
-   std::cout << "(" << width << ", " << height << ")" << std::endl;
-
    // Avoid a divide-by-zero situation:
    if (height == 0)
    {
@@ -161,14 +217,14 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
 
 void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 {
-   const static float mouseSensitivity = 0.5f;
+   const static float MOUSE_SENSITIVITY = 0.5f;
 
    const float deltaX = event->x() - m_lastMousePosition.x();
    const float deltaY = event->y() - m_lastMousePosition.y();
 
    if (event->buttons() & Qt::LeftButton)
    {
-      m_camera.OffsetOrientation(mouseSensitivity * deltaY, mouseSensitivity * deltaX);
+      m_camera.OffsetOrientation(MOUSE_SENSITIVITY * deltaY, MOUSE_SENSITIVITY * deltaX);
    }
 
    m_lastMousePosition = event->pos();
@@ -197,7 +253,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
 void GLCanvas::HandleCameraMovement()
 {
-   const static float moveSpeed = 0.001f;
+   const static float MOVE_SPEED = 0.001f;
 
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp);
@@ -214,22 +270,22 @@ void GLCanvas::HandleCameraMovement()
 
    if (isKeyWDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * moveSpeed * m_camera.Forward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * MOVE_SPEED * m_camera.Forward());
    }
 
    if (isKeyADown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * moveSpeed * m_camera.Left());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * MOVE_SPEED * m_camera.Left());
    }
 
    if (isKeySDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * moveSpeed * m_camera.Backward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * MOVE_SPEED * m_camera.Backward());
    }
 
    if (isKeyDDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * moveSpeed * m_camera.Right());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * MOVE_SPEED * m_camera.Right());
    }
 }
 
@@ -239,39 +295,22 @@ void GLCanvas::paintGL()
 
    const auto currentTime = std::chrono::system_clock::now();
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::system_clock::now() - m_lastFrameTimeStamp);
+      std::chrono::system_clock::now() - m_lastFrameTimeStamp).count();
 
-   QString windowTitle = QString::fromStdString("D-Viz ") +
-      QString::number((int) (1000.0 / millisecondsElapsed.count())) +
-      QString::fromStdString(" fps [*]");
-   m_parent.setWindowTitle(windowTitle);
+   m_parent.setWindowTitle(QString::fromStdString("D-Viz @ ") +
+      QString::number((int) (1000.0 / millisecondsElapsed)) + QString::fromStdString(" fps [*]"));
 
    HandleCameraMovement();
 
-   m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", m_camera.GetMatrix());
+   m_shaderProgram.bind();
+   m_shaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
 
-   m_shader.setAttributeArray("vertex", m_vertices.constData());
-   m_shader.enableAttributeArray("vertex");
+   m_VAO.bind();
 
-   m_shader.setAttributeArray("color", m_colors.constData());
-   m_shader.enableAttributeArray("color");
+   glDrawArrays(GL_TRIANGLES, /* first = */ 0, /* count = */ m_vertices.size());
 
-   glDrawArrays(GL_TRIANGLES, 0, m_vertices.size());
-
-   m_shader.disableAttributeArray("vertex");
-   m_shader.disableAttributeArray("color");
-
-   m_shader.release();
+   m_shaderProgram.release();
+   m_VAO.release();
 
    m_lastFrameTimeStamp = currentTime;
-
-//   if (hasFocus())
-//   {
-//      update();
-//   }
-//   else
-//   {
-//      m_parent.setWindowTitle("D-Viz - Drawing Suspended");
-//   }
 }
