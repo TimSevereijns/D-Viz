@@ -34,6 +34,32 @@ namespace
 
       return false;
    }
+
+   void CreateBlock(QVector3D& bottomLeft, float width, float height, float depth)
+   {
+      m_vertices
+         // Front:
+         << QVector3D(bottomLeft.x(), bottomLeft.y(), bottomLeft.z())
+         << QVector3D(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
+         << QVector3D(bottomLeft.x() + width, bottomLeft.y(), bottomLeft.z())
+         << QVector3D(bottomLeft.x() + width, bottomLeft.y() + height, bottomLeft.z())
+         << QVector3D(bottomLeft.x() + width, bottomLeft.y(), bottomLeft.z())
+         << QVector3D(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
+         // Back
+         << QVector3D(bottomLeft.x(), bottomLeft.y(), bottomLeft.z() + depth)
+         << QVector3D(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z() + depth)
+         << QVector3D(bottomLeft.x() + width, bottomLeft.y(), bottomLeft.z() + depth)
+         << QVector3D(bottomLeft.x() + width, bottomLeft.y() + height, bottomLeft.z() + depth)
+         << QVector3D(bottomLeft.x() + width, bottomLeft.y(), bottomLeft.z() + depth)
+         << QVector3D(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z() + depth);
+         // Left
+         << QVector3D(bottomLeft.x(), bottomLeft.y(), bottomLeft.z() + depth)
+         << QVector3D(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z() + depth)
+         << QVector3D(bottomLeft.x(), bottomLeft.y(), bottomLeft.z())
+         << QVector3D(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
+         << QVector3D(bottomLeft.x(), bottomLeft.y(), bottomLeft.z())
+         << QVector3D(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z() + depth);
+   }
 }
 
 GLCanvas::GLCanvas(QWidget* parent)
