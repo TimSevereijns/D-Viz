@@ -20,45 +20,146 @@
 
 namespace
 {
-   inline bool keyPressHelper(KeyboardManager& keyboardManager, QKeyEvent& event,
+   /**
+    * @brief keyPressHelper is a helper function to update the press state of a keyboard key.
+    * @param keyboardManager        The keyboard manager on which to update the key state.
+    * @param key                    The QKeyEvent that triggered the call.
+    * @param state                  Whether the key in question is up (released) or down (pressed).
+    * @returns true if the key exists and was updated in the keyboard manager.
+    */
+   inline bool keyPressHelper(KeyboardManager& keyboardManager, Qt::Key key,
                               KeyboardManager::KEY_STATE state)
    {
-      const Qt::Key pressedKey = static_cast<Qt::Key>(event.key());
-      switch (pressedKey)
+      switch (key)
       {
-         case Qt::Key_W: keyboardManager.UpdateKeyState(pressedKey, state); return true;
-         case Qt::Key_A: keyboardManager.UpdateKeyState(pressedKey, state); return true;
-         case Qt::Key_S: keyboardManager.UpdateKeyState(pressedKey, state); return true;
-         case Qt::Key_D: keyboardManager.UpdateKeyState(pressedKey, state); return true;
+         case Qt::Key_W: keyboardManager.UpdateKeyState(key, state); return true;
+         case Qt::Key_A: keyboardManager.UpdateKeyState(key, state); return true;
+         case Qt::Key_S: keyboardManager.UpdateKeyState(key, state); return true;
+         case Qt::Key_D: keyboardManager.UpdateKeyState(key, state); return true;
       }
 
       return false;
    }
 
-   void CreateBlock(QVector3D& bottomLeft, float width, float height, float depth)
+   /**
+    * @brief CreateBlockVertices creates the vertices needed to represent a single block. Each face
+    *        consists of two triangles.
+    * @param bottomLeft             The bottom-left corner of the block under construction.
+    * @param width                  The desired block width; width grows in positive x-axis.
+    * @param height                 The desired block height; height grows in positive y-axis.
+    * @param depth                  The desired block depth; depth grows in the negative z-axis.
+    * @returns a vector of vertices.
+    */
+   QVector<QVector3D> CreateBlockVertices(const QVector3D& bottomLeft, const float width,
+                                  const float height, const float depth)
    {
-      m_vertices
+      const float x = bottomLeft.x();
+      const float y = bottomLeft.y();
+      const float z = bottomLeft.z();
+
+      QVector<QVector3D> blockVertices;
+      blockVertices
          // Front:
-         << QVector3D(bottomLeft.x(), bottomLeft.y(), bottomLeft.z())
-         << QVector3D(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
-         << QVector3D(bottomLeft.x() + width, bottomLeft.y(), bottomLeft.z())
-         << QVector3D(bottomLeft.x() + width, bottomLeft.y() + height, bottomLeft.z())
-         << QVector3D(bottomLeft.x() + width, bottomLeft.y(), bottomLeft.z())
-         << QVector3D(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
-         // Back
-         << QVector3D(bottomLeft.x(), bottomLeft.y(), bottomLeft.z() + depth)
-         << QVector3D(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z() + depth)
-         << QVector3D(bottomLeft.x() + width, bottomLeft.y(), bottomLeft.z() + depth)
-         << QVector3D(bottomLeft.x() + width, bottomLeft.y() + height, bottomLeft.z() + depth)
-         << QVector3D(bottomLeft.x() + width, bottomLeft.y(), bottomLeft.z() + depth)
-         << QVector3D(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z() + depth);
-         // Left
-         << QVector3D(bottomLeft.x(), bottomLeft.y(), bottomLeft.z() + depth)
-         << QVector3D(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z() + depth)
-         << QVector3D(bottomLeft.x(), bottomLeft.y(), bottomLeft.z())
-         << QVector3D(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
-         << QVector3D(bottomLeft.x(), bottomLeft.y(), bottomLeft.z())
-         << QVector3D(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z() + depth);
+         << QVector3D(x           , y            , z           )
+         << QVector3D(x + width   , y            , z           )
+         << QVector3D(x           , y + height   , z           )
+         << QVector3D(x + width   , y + height   , z           )
+         << QVector3D(x           , y + height   , z           )
+         << QVector3D(x + width   , y            , z           )
+         // Right:
+         << QVector3D(x + width   , y            , z           )
+         << QVector3D(x + width   , y            , z - depth   )
+         << QVector3D(x + width   , y + height   , z           )
+         << QVector3D(x + width   , y + height   , z - depth   )
+         << QVector3D(x + width   , y + height   , z           )
+         << QVector3D(x + width   , y            , z - depth   )
+         // Back:
+         << QVector3D(x + width   , y            , z - depth   )
+         << QVector3D(x           , y            , z - depth   )
+         << QVector3D(x + width   , y + height   , z - depth   )
+         << QVector3D(x           , y + height   , z - depth   )
+         << QVector3D(x + width   , y + height   , z - depth   )
+         << QVector3D(x           , y            , z - depth   )
+         // Left:
+         << QVector3D(x           , y            , z - depth   )
+         << QVector3D(x           , y            , z           )
+         << QVector3D(x           , y + height   , z - depth   )
+         << QVector3D(x           , y + height   , z           )
+         << QVector3D(x           , y + height   , z - depth   )
+         << QVector3D(x           , y            , z           )
+         // Bottom:
+         << QVector3D(x           , y            , z - depth   )
+         << QVector3D(x + width   , y            , z - depth   )
+         << QVector3D(x           , y            , z           )
+         << QVector3D(x + width   , y            , z           )
+         << QVector3D(x           , y            , z           )
+         << QVector3D(x + width   , y            , z - depth   )
+         // Top:
+         << QVector3D(x           , y + height   , z           )
+         << QVector3D(x + width   , y + height   , z           )
+         << QVector3D(x           , y + height   , z - depth   )
+         << QVector3D(x + width   , y + height   , z - depth   )
+         << QVector3D(x           , y + height   , z - depth   )
+         << QVector3D(x + width   , y + height   , z           );
+
+      return blockVertices;
+   }
+
+   /**
+    * @brief CreateBlockColors creates the vertex colors needed to color a single block.
+    * @returns a vector of vertex colors.
+    */
+   QVector<QVector3D> CreateBlockColors()
+   {
+      QVector<QVector3D> blockColors;
+      blockColors
+         << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) // Front
+         << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) << QVector3D(1, 0, 0)
+         << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) // Right
+         << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) << QVector3D(0, 1, 0)
+         << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) // Back
+         << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) << QVector3D(1, 0, 0)
+         << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) // Left
+         << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) << QVector3D(0, 1, 0)
+         << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) // Top
+         << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) << QVector3D(0, 0, 1)
+         << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) // Bottom
+         << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) << QVector3D(0, 0, 1);
+
+      return blockColors;
+   }
+
+   /**
+    * @brief CreateOriginMarkerVertices returns the vertices needed to render the coordinate
+    *        system origin marker.
+    * @returns a vector of vertices.
+    */
+   QVector<QVector3D> CreateOriginMarkerVertices()
+   {
+      const float markerAxisLength = 2;
+
+      QVector<QVector3D> marker;
+      marker
+         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(markerAxisLength, 0.0f, 0.0f)   // X-axis
+         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, markerAxisLength, 0.0f)   // Y-axis
+         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 0.0f, -markerAxisLength); // Z-axis
+
+      return marker;
+   }
+
+   /**
+    * @brief CreateOriginMarkerColors returns the vertex colors needed to paint the origin marker.
+    * @returns a vector of vertex colors.
+    */
+   QVector<QVector3D> CreateOriginMarkerColors()
+   {
+      QVector<QVector3D> markerColors;
+      markerColors
+         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 0.0f, 0.0f)  // X-axis (red)
+         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(0.0f, 1.0f, 0.0f)  // Y-axis (green)
+         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f); // Z-axis (blue)
+
+      return markerColors;
    }
 }
 
@@ -67,8 +168,8 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_parent(*parent),
      m_distance(2.5),
      m_lastFrameTimeStamp(std::chrono::system_clock::now()),
-     m_vertexColorBuffer(QOpenGLBuffer::VertexBuffer),
-     m_vertexPositionBuffer(QOpenGLBuffer::VertexBuffer)
+     m_visualizationVertexColorBuffer(QOpenGLBuffer::VertexBuffer),
+     m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer)
 {
    // Set up the camera:
    m_camera.SetAspectRatio(780.0f / 580.0f);
@@ -91,80 +192,124 @@ GLCanvas::~GLCanvas()
 {
 }
 
-void GLCanvas::PrepareShaderProgram()
+void GLCanvas::PrepareOriginMarkerShaderProgram()
 {
-   if (!m_shaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/Shaders/vertexShader.vert"))
+   if (!m_originMarkerShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,
+      ":/Shaders/vertexShader.vert"))
    {
-      std::cout << "Error adding vertex shader!" << std::endl;
+      std::cout << "Error loading origin marker vertex shader!" << std::endl;
    }
 
-   if (!m_shaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/Shaders/fragmentShader.frag"))
+   if (!m_originMarkerShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,
+      ":/Shaders/fragmentShader.frag"))
    {
-      std::cout << "Error adding fragment shader!" << std::endl;
+      std::cout << "Error loading origin marker fragment shader!" << std::endl;
    }
 
-   m_shaderProgram.link();
+   m_originMarkerShaderProgram.link();
 }
 
-void GLCanvas::PrepareVertexBuffers()
+void GLCanvas::PrepareVisualizationShaderProgram()
 {
-   m_vertices
-     << QVector3D(-0.5, -0.5,  0.5) << QVector3D( 0.5, -0.5,  0.5) << QVector3D( 0.5,  0.5,  0.5) // Front
-     << QVector3D( 0.5,  0.5,  0.5) << QVector3D(-0.5,  0.5,  0.5) << QVector3D(-0.5, -0.5,  0.5)
-     << QVector3D( 0.5, -0.5, -0.5) << QVector3D(-0.5, -0.5, -0.5) << QVector3D(-0.5,  0.5, -0.5) // Back
-     << QVector3D(-0.5,  0.5, -0.5) << QVector3D( 0.5,  0.5, -0.5) << QVector3D( 0.5, -0.5, -0.5)
-     << QVector3D(-0.5, -0.5, -0.5) << QVector3D(-0.5, -0.5,  0.5) << QVector3D(-0.5,  0.5,  0.5) // Left
-     << QVector3D(-0.5,  0.5,  0.5) << QVector3D(-0.5,  0.5, -0.5) << QVector3D(-0.5, -0.5, -0.5)
-     << QVector3D( 0.5, -0.5,  0.5) << QVector3D( 0.5, -0.5, -0.5) << QVector3D( 0.5,  0.5, -0.5) // Right
-     << QVector3D( 0.5,  0.5, -0.5) << QVector3D( 0.5,  0.5,  0.5) << QVector3D( 0.5, -0.5,  0.5)
-     << QVector3D(-0.5,  0.5,  0.5) << QVector3D( 0.5,  0.5,  0.5) << QVector3D( 0.5,  0.5, -0.5) // Top
-     << QVector3D( 0.5,  0.5, -0.5) << QVector3D(-0.5,  0.5, -0.5) << QVector3D(-0.5,  0.5,  0.5)
-     << QVector3D(-0.5, -0.5, -0.5) << QVector3D( 0.5, -0.5, -0.5) << QVector3D( 0.5, -0.5,  0.5) // Bottom
-     << QVector3D( 0.5, -0.5,  0.5) << QVector3D(-0.5, -0.5,  0.5) << QVector3D(-0.5, -0.5, -0.5);
+   if (!m_visualizationShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,
+      ":/Shaders/vertexShader.vert"))
+   {
+      std::cout << "Error loading visualization vertex shader!" << std::endl;
+   }
 
-   m_colors
-      << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) // Front
-      << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) << QVector3D(1, 0, 0)
-      << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) // Back
-      << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) << QVector3D(1, 0, 0)
-      << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) // Left
-      << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) << QVector3D(0, 1, 0)
-      << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) // Right
-      << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) << QVector3D(0, 1, 0)
-      << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) // Top
-      << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) << QVector3D(0, 0, 1)
-      << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) // Bottom
-      << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) << QVector3D(0, 0, 1);
+   if (!m_visualizationShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,
+      ":/Shaders/fragmentShader.frag"))
+   {
+      std::cout << "Error loading visualization fragment shader!" << std::endl;
+   }
 
-   m_VAO.create();
-   m_VAO.bind();
+   m_visualizationShaderProgram.link();
+}
 
-   m_vertexPositionBuffer.create();
-   m_vertexPositionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-   m_vertexPositionBuffer.bind();
-   m_vertexPositionBuffer.allocate(m_vertices.constData(), m_vertices.size() * 3 * sizeof(GLfloat));
+void GLCanvas::PrepareOriginMarkerVertexBuffers()
+{
+   m_originMarkerVertices << CreateOriginMarkerVertices();
+   m_originMarkerColors << CreateOriginMarkerColors();
 
-   m_vertexColorBuffer.create();
-   m_vertexColorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-   m_vertexColorBuffer.bind();
-   m_vertexColorBuffer.allocate(m_colors.constData(), m_colors.size() * 3 * sizeof(GLfloat));
+   m_originMarkerVAO.create();
+   m_originMarkerVAO.bind();
 
-   m_shaderProgram.bind();
+   m_originMarkerVertexPositionBuffer.create();
+   m_originMarkerVertexPositionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+   m_originMarkerVertexPositionBuffer.bind();
+   m_originMarkerVertexPositionBuffer.allocate(m_originMarkerVertices.constData(),
+      m_originMarkerVertices.size() * 3 * sizeof(GLfloat));
 
-   m_shaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
+   m_originMarkerVertexColorBuffer.create();
+   m_originMarkerVertexColorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+   m_originMarkerVertexColorBuffer.bind();
+   m_originMarkerVertexColorBuffer.allocate(m_originMarkerColors.constData(),
+      m_originMarkerColors.size() * 3 * sizeof(GLfloat));
 
-   m_vertexPositionBuffer.bind();
-   m_shaderProgram.enableAttributeArray("vertex");
-   m_shaderProgram.setAttributeBuffer("vertex", GL_FLOAT, /* offset = */ 0, /* tupleSize = */ 3);
+   m_originMarkerShaderProgram.bind();
 
-   m_vertexColorBuffer.bind();
-   m_shaderProgram.enableAttributeArray("color");
-   m_shaderProgram.setAttributeBuffer("color", GL_FLOAT, /* offset = */ 0, /* tupleSize = */ 3);
+   m_originMarkerShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
 
-   m_shaderProgram.release();
-   m_vertexPositionBuffer.release();
-   m_vertexColorBuffer.release();
-   m_VAO.release();
+   m_originMarkerVertexPositionBuffer.bind();
+   m_originMarkerShaderProgram.enableAttributeArray("vertex");
+   m_originMarkerShaderProgram.setAttributeBuffer("vertex", GL_FLOAT, /* offset = */ 0,
+      /* tupleSize = */ 3);
+
+   m_originMarkerVertexColorBuffer.bind();
+   m_originMarkerShaderProgram.enableAttributeArray("color");
+   m_originMarkerShaderProgram.setAttributeBuffer("color", GL_FLOAT, /* offset = */ 0,
+      /* tupleSize = */ 3);
+
+   m_originMarkerShaderProgram.release();
+   m_originMarkerVertexPositionBuffer.release();
+   m_originMarkerVertexColorBuffer.release();
+   m_originMarkerVAO.release();
+}
+
+void GLCanvas::PrepareVisualizationVertexBuffers()
+{
+   m_visualizationVertices <<  CreateBlockVertices(QVector3D(0.0f, 0.0f, 0.0f), 1.0f, 1.0f, 1.0f);
+   m_visualizationColors << CreateBlockColors();
+
+   m_visualizationVertices <<  CreateBlockVertices(QVector3D(1.0f, 0.0f, -1.0f), 1.0f, 1.0f, 1.0f);
+   m_visualizationColors << CreateBlockColors();
+
+   m_visualizationVertices <<  CreateBlockVertices(QVector3D(2.0f, 0.0f, -2.0f), 1.0f, 1.0f, 1.0f);
+   m_visualizationColors << CreateBlockColors();
+
+   m_visualizationVAO.create();
+   m_visualizationVAO.bind();
+
+   m_visualizationVertexPositionBuffer.create();
+   m_visualizationVertexPositionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+   m_visualizationVertexPositionBuffer.bind();
+   m_visualizationVertexPositionBuffer.allocate(m_visualizationVertices.constData(),
+      m_visualizationVertices.size() * 3 * sizeof(GLfloat));
+
+   m_visualizationVertexColorBuffer.create();
+   m_visualizationVertexColorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+   m_visualizationVertexColorBuffer.bind();
+   m_visualizationVertexColorBuffer.allocate(m_visualizationColors.constData(),
+      m_visualizationColors.size() * 3 * sizeof(GLfloat));
+
+   m_visualizationShaderProgram.bind();
+
+   m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
+
+   m_visualizationVertexPositionBuffer.bind();
+   m_visualizationShaderProgram.enableAttributeArray("vertex");
+   m_visualizationShaderProgram.setAttributeBuffer("vertex", GL_FLOAT, /* offset = */ 0,
+      /* tupleSize = */ 3);
+
+   m_visualizationVertexColorBuffer.bind();
+   m_visualizationShaderProgram.enableAttributeArray("color");
+   m_visualizationShaderProgram.setAttributeBuffer("color", GL_FLOAT, /* offset = */ 0,
+      /* tupleSize = */ 3);
+
+   m_visualizationShaderProgram.release();
+   m_visualizationVertexPositionBuffer.release();
+   m_visualizationVertexColorBuffer.release();
+   m_visualizationVAO.release();
 }
 
 QSize GLCanvas::sizeHint() const
@@ -177,10 +322,13 @@ void GLCanvas::initializeGL()
    initializeOpenGLFunctions();
 
    glEnable(GL_DEPTH_TEST);
-   //glEnable(GL_CULL_FACE);
+   glEnable(GL_CULL_FACE);
 
-   PrepareShaderProgram();
-   PrepareVertexBuffers();
+   PrepareVisualizationShaderProgram();
+   PrepareOriginMarkerShaderProgram();
+
+   PrepareVisualizationVertexBuffers();
+   PrepareOriginMarkerVertexBuffers();
 }
 
 void GLCanvas::resizeGL(int width, int height)
@@ -203,7 +351,8 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
    }
 
    const auto keyState = KeyboardManager::KEY_STATE::DOWN;
-   const bool wasKeyRecognized = keyPressHelper(m_keyboardManager, *event, keyState);
+   const bool wasKeyRecognized = keyPressHelper(m_keyboardManager,
+      static_cast<Qt::Key>(event->key()), keyState);
    if (wasKeyRecognized)
    {
       event->accept();
@@ -223,7 +372,8 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
    }
 
    const auto keyState = KeyboardManager::KEY_STATE::UP;
-   const bool wasKeyRecognized = keyPressHelper(m_keyboardManager, *event, keyState);
+   const bool wasKeyRecognized = keyPressHelper(m_keyboardManager,
+      static_cast<Qt::Key>(event->key()), keyState);
    if (wasKeyRecognized)
    {
       event->accept();
@@ -328,15 +478,27 @@ void GLCanvas::paintGL()
 
    HandleCameraMovement();
 
-   m_shaderProgram.bind();
-   m_shaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
+   // Draw origin marker:
+   m_originMarkerShaderProgram.bind();
+   m_originMarkerShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
 
-   m_VAO.bind();
+   m_originMarkerVAO.bind();
 
-   glDrawArrays(GL_TRIANGLES, /* first = */ 0, /* count = */ m_vertices.size());
+   glDrawArrays(GL_LINES, /* first = */ 0, /* count = */ m_originMarkerVertices.size());
 
-   m_shaderProgram.release();
-   m_VAO.release();
+   m_originMarkerShaderProgram.release();
+   m_originMarkerVAO.release();
+
+   // Draw visualization:
+   m_visualizationShaderProgram.bind();
+   m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
+
+   m_visualizationVAO.bind();
+
+   glDrawArrays(GL_TRIANGLES, /* first = */ 0, /* count = */ m_visualizationVertices.size());
+
+   m_visualizationShaderProgram.release();
+   m_visualizationVAO.release();
 
    m_lastFrameTimeStamp = currentTime;
 }

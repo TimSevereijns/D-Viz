@@ -36,8 +36,12 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
    private:
       void HandleCameraMovement();
-      void PrepareShaderProgram();
-      void PrepareVertexBuffers();
+
+      void PrepareVisualizationShaderProgram();
+      void PrepareOriginMarkerShaderProgram();
+
+      void PrepareVisualizationVertexBuffers();
+      void PrepareOriginMarkerVertexBuffers();
 
       QWidget& m_parent;
 
@@ -47,15 +51,23 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
       QMatrix4x4 m_projectionMatrix;
 
-      QOpenGLShaderProgram m_shaderProgram;
+      QOpenGLShaderProgram m_originMarkerShaderProgram;
+      QOpenGLShaderProgram m_visualizationShaderProgram;
 
-      QOpenGLVertexArrayObject m_VAO;
+      QOpenGLVertexArrayObject m_visualizationVAO;
+      QOpenGLVertexArrayObject m_originMarkerVAO;
 
-      QOpenGLBuffer m_vertexPositionBuffer;
-      QOpenGLBuffer m_vertexColorBuffer;
+      QOpenGLBuffer m_visualizationVertexPositionBuffer;
+      QOpenGLBuffer m_visualizationVertexColorBuffer;
 
-      QVector<QVector3D> m_vertices;
-      QVector<QVector3D> m_colors;
+      QOpenGLBuffer m_originMarkerVertexPositionBuffer;
+      QOpenGLBuffer m_originMarkerVertexColorBuffer;
+
+      QVector<QVector3D> m_originMarkerVertices;
+      QVector<QVector3D> m_originMarkerColors;
+
+      QVector<QVector3D> m_visualizationVertices;
+      QVector<QVector3D> m_visualizationColors;
 
       double m_distance;
 
