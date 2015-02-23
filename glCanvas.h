@@ -24,13 +24,13 @@ struct Light
    {
    }
 
-   Light(QVector3D lightPosition, QVector3D lightIntensity)
+   Light(const QVector3D& lightPosition, const QVector3D& lightIntensity)
       : position(lightPosition),
         intensity(lightIntensity)
    {
    }
 
-   void SetPosition(QVector3D newPosition)
+   void SetPosition(const QVector3D& newPosition)
    {
       position = newPosition;
    }

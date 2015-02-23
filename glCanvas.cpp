@@ -45,9 +45,9 @@ namespace
     * @brief CreateBlockVertices creates the vertices needed to represent a single block. Each face
     *        consists of two triangles, and each vertex is followed by its corresponding normal.
     * @param bottomLeft             The bottom-left corner of the block under construction.
-    * @param width                  The desired block width; width grows in positive x-axis.
-    * @param height                 The desired block height; height grows in positive y-axis.
-    * @param depth                  The desired block depth; depth grows in the negative z-axis.
+    * @param width                  The desired block width; width grows along positive x-axis.
+    * @param height                 The desired block height; height grows along positive y-axis.
+    * @param depth                  The desired block depth; depth grows along negative z-axis.
     * @returns a vector of vertices.
     */
    QVector<QVector3D> CreateBlockVertices(const QVector3D& bottomLeft, const float width,
@@ -137,13 +137,39 @@ namespace
     */
    QVector<QVector3D> CreateOriginMarkerVertices()
    {
-      const float markerAxisLength = 2;
+      const float markerAxisLength = 3;
 
       QVector<QVector3D> marker;
       marker
          << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(markerAxisLength, 0.0f, 0.0f)   // X-axis
          << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, markerAxisLength, 0.0f)   // Y-axis
-         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 0.0f, -markerAxisLength); // Z-axis
+         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 0.0f, -markerAxisLength)  // Z-axis
+
+         // Grid (Z-axis):
+         << QVector3D( 0.0f, 0.0f, -3.0f) << QVector3D( 0.0f, 0.0f, -10.0f)
+         << QVector3D( 1.0f, 0.0f,  0.0f) << QVector3D( 1.0f, 0.0f, -10.0f)
+         << QVector3D( 2.0f, 0.0f,  0.0f) << QVector3D( 2.0f, 0.0f, -10.0f)
+         << QVector3D( 3.0f, 0.0f,  0.0f) << QVector3D( 3.0f, 0.0f, -10.0f)
+         << QVector3D( 4.0f, 0.0f,  0.0f) << QVector3D( 4.0f, 0.0f, -10.0f)
+         << QVector3D( 5.0f, 0.0f,  0.0f) << QVector3D( 5.0f, 0.0f, -10.0f)
+         << QVector3D( 6.0f, 0.0f,  0.0f) << QVector3D( 6.0f, 0.0f, -10.0f)
+         << QVector3D( 7.0f, 0.0f,  0.0f) << QVector3D( 7.0f, 0.0f, -10.0f)
+         << QVector3D( 8.0f, 0.0f,  0.0f) << QVector3D( 8.0f, 0.0f, -10.0f)
+         << QVector3D( 9.0f, 0.0f,  0.0f) << QVector3D( 9.0f, 0.0f, -10.0f)
+         << QVector3D(10.0f, 0.0f,  0.0f) << QVector3D(10.0f, 0.0f, -10.0f)
+
+         // Grid (X-axis):
+         << QVector3D(3.0f, 0.0f,   0.0f) << QVector3D(10.0f, 0.0f,   0.0f)
+         << QVector3D(0.0f, 0.0f,  -1.0f) << QVector3D(10.0f, 0.0f,  -1.0f)
+         << QVector3D(0.0f, 0.0f,  -2.0f) << QVector3D(10.0f, 0.0f,  -2.0f)
+         << QVector3D(0.0f, 0.0f,  -3.0f) << QVector3D(10.0f, 0.0f,  -3.0f)
+         << QVector3D(0.0f, 0.0f,  -4.0f) << QVector3D(10.0f, 0.0f,  -4.0f)
+         << QVector3D(0.0f, 0.0f,  -5.0f) << QVector3D(10.0f, 0.0f,  -5.0f)
+         << QVector3D(0.0f, 0.0f,  -6.0f) << QVector3D(10.0f, 0.0f,  -6.0f)
+         << QVector3D(0.0f, 0.0f,  -7.0f) << QVector3D(10.0f, 0.0f,  -7.0f)
+         << QVector3D(0.0f, 0.0f,  -8.0f) << QVector3D(10.0f, 0.0f,  -8.0f)
+         << QVector3D(0.0f, 0.0f,  -9.0f) << QVector3D(10.0f, 0.0f,  -9.0f)
+         << QVector3D(0.0f, 0.0f, -10.0f) << QVector3D(10.0f, 0.0f, -10.0f);
 
       return marker;
    }
@@ -158,7 +184,35 @@ namespace
       markerColors
          << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 0.0f, 0.0f)  // X-axis (red)
          << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(0.0f, 1.0f, 0.0f)  // Y-axis (green)
-         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f); // Z-axis (blue)
+         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f)  // Z-axis (blue)
+
+         // Grid (Z-axis):
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+
+         // Grid (X-axis):
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f);
 
       return markerColors;
    }
@@ -437,7 +491,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
 void GLCanvas::HandleCameraMovement()
 {
-   const static float MOVE_SPEED = 0.001f;
+   const static float MOVE_SPEED = 0.002f;
 
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp);
