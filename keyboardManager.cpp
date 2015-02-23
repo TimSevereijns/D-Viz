@@ -54,11 +54,9 @@ void KeyboardManager::UpdateKeyState(const Qt::Key key, const KEY_STATE state)
    if (state == KEY_STATE::DOWN)
    {
       m_keyMap[key] = KeyboardManager::KEY_STATE::DOWN;
-      std::cout << "Key down" << std::endl;
    }
    else if (state == KEY_STATE::UP)
    {
       m_keyMap[key] = KeyboardManager::KEY_STATE::UP;
-      std::cout << "Key up" << std::endl;
    }
 }

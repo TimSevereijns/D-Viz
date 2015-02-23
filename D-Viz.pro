@@ -10,7 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = D-Viz
 TEMPLATE = app
-
+CONFIG += c++11
 
 SOURCES += main.cpp\
     mainwindow.cpp \
@@ -83,8 +83,10 @@ else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../../boost_1_57_0/lib64-msvc-12
 #-------------------------------------------------
 
 DISTFILES += \
-    Shaders/fragmentShader.frag \
-    Shaders/vertexShader.vert
+    Shaders/originMarkerVertexShader.vert \
+    Shaders/originMarkerFragmentShader.frag \
+    Shaders/visualizationFragmentShader.frag \
+    Shaders/visualizationVertexShader.vert
 
 RESOURCES += \
     resources.qrc

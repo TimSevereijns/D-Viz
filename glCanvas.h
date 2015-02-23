@@ -11,6 +11,30 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLWidget>
+#include <QVector3D>
+
+struct Light
+{
+   QVector3D position;
+   QVector3D intensity;
+
+   Light()
+      : position(QVector3D(0, 0, 0)),
+        intensity(QVector3D(1, 1, 1))
+   {
+   }
+
+   Light(QVector3D lightPosition, QVector3D lightIntensity)
+      : position(lightPosition),
+        intensity(lightIntensity)
+   {
+   }
+
+   void SetPosition(QVector3D newPosition)
+   {
+      position = newPosition;
+   }
+};
 
 class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 {
@@ -46,6 +70,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       QWidget& m_parent;
 
       Camera m_camera;
+
+      Light m_light;
 
       KeyboardManager m_keyboardManager;
 

@@ -43,7 +43,7 @@ namespace
 
    /**
     * @brief CreateBlockVertices creates the vertices needed to represent a single block. Each face
-    *        consists of two triangles.
+    *        consists of two triangles, and each vertex is followed by its corresponding normal.
     * @param bottomLeft             The bottom-left corner of the block under construction.
     * @param width                  The desired block width; width grows in positive x-axis.
     * @param height                 The desired block height; height grows in positive y-axis.
@@ -58,49 +58,50 @@ namespace
       const float z = bottomLeft.z();
 
       QVector<QVector3D> blockVertices;
+      blockVertices.reserve(72);
       blockVertices
-         // Front:
-         << QVector3D(x           , y            , z           )
-         << QVector3D(x + width   , y            , z           )
-         << QVector3D(x           , y + height   , z           )
-         << QVector3D(x + width   , y + height   , z           )
-         << QVector3D(x           , y + height   , z           )
-         << QVector3D(x + width   , y            , z           )
+         // Front:                                               // Vertex Normals:
+         << QVector3D(x           , y            , z           ) << QVector3D( 0,  0,  1)
+         << QVector3D(x + width   , y            , z           ) << QVector3D( 0,  0,  1)
+         << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  0,  1)
+         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  0,  1)
+         << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  0,  1)
+         << QVector3D(x + width   , y            , z           ) << QVector3D( 0,  0,  1)
          // Right:
-         << QVector3D(x + width   , y            , z           )
-         << QVector3D(x + width   , y            , z - depth   )
-         << QVector3D(x + width   , y + height   , z           )
-         << QVector3D(x + width   , y + height   , z - depth   )
-         << QVector3D(x + width   , y + height   , z           )
-         << QVector3D(x + width   , y            , z - depth   )
+         << QVector3D(x + width   , y            , z           ) << QVector3D( 1,  0,  0)
+         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 1,  0,  0)
+         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 1,  0,  0)
+         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 1,  0,  0)
+         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 1,  0,  0)
+         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 1,  0,  0)
          // Back:
-         << QVector3D(x + width   , y            , z - depth   )
-         << QVector3D(x           , y            , z - depth   )
-         << QVector3D(x + width   , y + height   , z - depth   )
-         << QVector3D(x           , y + height   , z - depth   )
-         << QVector3D(x + width   , y + height   , z - depth   )
-         << QVector3D(x           , y            , z - depth   )
+         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0,  0, -1)
+         << QVector3D(x           , y            , z - depth   ) << QVector3D( 0,  0, -1)
+         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  0, -1)
+         << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  0, -1)
+         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  0, -1)
+         << QVector3D(x           , y            , z - depth   ) << QVector3D( 0,  0, -1)
          // Left:
-         << QVector3D(x           , y            , z - depth   )
-         << QVector3D(x           , y            , z           )
-         << QVector3D(x           , y + height   , z - depth   )
-         << QVector3D(x           , y + height   , z           )
-         << QVector3D(x           , y + height   , z - depth   )
-         << QVector3D(x           , y            , z           )
+         << QVector3D(x           , y            , z - depth   ) << QVector3D(-1,  0,  0)
+         << QVector3D(x           , y            , z           ) << QVector3D(-1,  0,  0)
+         << QVector3D(x           , y + height   , z - depth   ) << QVector3D(-1,  0,  0)
+         << QVector3D(x           , y + height   , z           ) << QVector3D(-1,  0,  0)
+         << QVector3D(x           , y + height   , z - depth   ) << QVector3D(-1,  0,  0)
+         << QVector3D(x           , y            , z           ) << QVector3D(-1,  0,  0)
          // Bottom:
-         << QVector3D(x           , y            , z - depth   )
-         << QVector3D(x + width   , y            , z - depth   )
-         << QVector3D(x           , y            , z           )
-         << QVector3D(x + width   , y            , z           )
-         << QVector3D(x           , y            , z           )
-         << QVector3D(x + width   , y            , z - depth   )
+         << QVector3D(x           , y            , z - depth   ) << QVector3D( 0, -1,  0)
+         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0, -1,  0)
+         << QVector3D(x           , y            , z           ) << QVector3D( 0, -1,  0)
+         << QVector3D(x + width   , y            , z           ) << QVector3D( 0, -1,  0)
+         << QVector3D(x           , y            , z           ) << QVector3D( 0, -1,  0)
+         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0, -1,  0)
          // Top:
-         << QVector3D(x           , y + height   , z           )
-         << QVector3D(x + width   , y + height   , z           )
-         << QVector3D(x           , y + height   , z - depth   )
-         << QVector3D(x + width   , y + height   , z - depth   )
-         << QVector3D(x           , y + height   , z - depth   )
-         << QVector3D(x + width   , y + height   , z           );
+         << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  1,  0)
+         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0)
+         << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  1,  0)
+         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  1,  0)
+         << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  1,  0)
+         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0);
 
       return blockVertices;
    }
@@ -195,13 +196,13 @@ GLCanvas::~GLCanvas()
 void GLCanvas::PrepareOriginMarkerShaderProgram()
 {
    if (!m_originMarkerShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,
-      ":/Shaders/vertexShader.vert"))
+      ":/Shaders/originMarkerVertexShader.vert"))
    {
       std::cout << "Error loading origin marker vertex shader!" << std::endl;
    }
 
    if (!m_originMarkerShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,
-      ":/Shaders/fragmentShader.frag"))
+      ":/Shaders/originMarkerFragmentShader.frag"))
    {
       std::cout << "Error loading origin marker fragment shader!" << std::endl;
    }
@@ -212,13 +213,13 @@ void GLCanvas::PrepareOriginMarkerShaderProgram()
 void GLCanvas::PrepareVisualizationShaderProgram()
 {
    if (!m_visualizationShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,
-      ":/Shaders/vertexShader.vert"))
+      ":/Shaders/visualizationVertexShader.vert"))
    {
       std::cout << "Error loading visualization vertex shader!" << std::endl;
    }
 
    if (!m_visualizationShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,
-      ":/Shaders/fragmentShader.frag"))
+      ":/Shaders/visualizationFragmentShader.frag"))
    {
       std::cout << "Error loading visualization fragment shader!" << std::endl;
    }
@@ -299,7 +300,12 @@ void GLCanvas::PrepareVisualizationVertexBuffers()
    m_visualizationVertexPositionBuffer.bind();
    m_visualizationShaderProgram.enableAttributeArray("vertex");
    m_visualizationShaderProgram.setAttributeBuffer("vertex", GL_FLOAT, /* offset = */ 0,
-      /* tupleSize = */ 3);
+      /* tupleSize = */ 3, /* stride = */ 6 * sizeof(GLfloat));
+
+   m_visualizationVertexPositionBuffer.bind();
+   m_visualizationShaderProgram.enableAttributeArray("normal");
+   m_visualizationShaderProgram.setAttributeBuffer("normal", GL_FLOAT,
+      /* offset = */ 3 * sizeof(GLfloat), /* tupleSize = */ 3, /* stride = */ 6 * sizeof(GLfloat));
 
    m_visualizationVertexColorBuffer.bind();
    m_visualizationShaderProgram.enableAttributeArray("color");
@@ -329,6 +335,8 @@ void GLCanvas::initializeGL()
 
    PrepareVisualizationVertexBuffers();
    PrepareOriginMarkerVertexBuffers();
+
+   m_light = Light(QVector3D(2, 2, 0), QVector3D(1, 1, 1));
 }
 
 void GLCanvas::resizeGL(int width, int height)
@@ -463,6 +471,8 @@ void GLCanvas::HandleCameraMovement()
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * MOVE_SPEED * m_camera.Right());
    }
+
+   m_light.SetPosition(m_camera.GetPosition());
 }
 
 void GLCanvas::paintGL()
@@ -492,6 +502,8 @@ void GLCanvas::paintGL()
    // Draw visualization:
    m_visualizationShaderProgram.bind();
    m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
+   m_visualizationShaderProgram.setUniformValue("light.position", m_light.position);
+   m_visualizationShaderProgram.setUniformValue("light.intensity", m_light.intensity);
 
    m_visualizationVAO.bind();
 

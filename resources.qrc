@@ -1,6 +1,8 @@
 <RCC>
     <qresource prefix="/">
-        <file>Shaders/fragmentShader.frag</file>
-        <file>Shaders/vertexShader.vert</file>
+        <file>Shaders/originMarkerFragmentShader.frag</file>
+        <file>Shaders/originMarkerVertexShader.vert</file>
+        <file>Shaders/visualizationFragmentShader.frag</file>
+        <file>Shaders/visualizationVertexShader.vert</file>
     </qresource>
 </RCC>
