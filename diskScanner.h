@@ -13,6 +13,9 @@
 
 #include "tree.h"
 
+/**
+ * @brief The FILE_TYPE enum
+ */
 enum class FILE_TYPE
 {
    REGULAR,
@@ -20,13 +23,16 @@ enum class FILE_TYPE
    SYMLINK
 };
 
+/**
+ * @brief The FileInfo struct
+ */
 struct FileInfo
 {
    std::wstring m_name;
    std::uintmax_t m_size;
    FILE_TYPE m_type;
 
-   FileInfo(std::wstring name, std::uintmax_t size, FILE_TYPE type)
+   FileInfo(const std::wstring& name, std::uintmax_t size, FILE_TYPE type)
       : m_name(name),
         m_size(size),
         m_type(type)
@@ -60,7 +66,7 @@ class DiskScanner
        * @param[out] progress       An atomic containing the number of files scanned so far, and a
        *                            boolean that will be set to true once scanning has completed.
        */
-      void Scan(std::atomic<std::pair<std::uintmax_t, bool>>* progress);
+      void StartScanning(std::atomic<std::pair<std::uintmax_t, bool>>* progress);
 
       /**
        * @brief ScanInNewThread kicks off the filesystem scan in a new thread.

@@ -1,6 +1,7 @@
 #include "glCanvas.h"
 
 #include "camera.h"
+#include "treeMap.h"
 
 #include <QMouseEvent>
 #include <QOpenGLShader>
@@ -39,95 +40,6 @@ namespace
       }
 
       return false;
-   }
-
-   /**
-    * @brief CreateBlockVertices creates the vertices needed to represent a single block. Each face
-    *        consists of two triangles, and each vertex is followed by its corresponding normal.
-    * @param bottomLeft             The bottom-left corner of the block under construction.
-    * @param width                  The desired block width; width grows along positive x-axis.
-    * @param height                 The desired block height; height grows along positive y-axis.
-    * @param depth                  The desired block depth; depth grows along negative z-axis.
-    * @returns a vector of vertices.
-    */
-   QVector<QVector3D> CreateBlockVertices(const QVector3D& bottomLeft, const float width,
-                                  const float height, const float depth)
-   {
-      const float x = bottomLeft.x();
-      const float y = bottomLeft.y();
-      const float z = bottomLeft.z();
-
-      QVector<QVector3D> blockVertices;
-      blockVertices.reserve(72);
-      blockVertices
-         // Front:                                               // Vertex Normals:
-         << QVector3D(x           , y            , z           ) << QVector3D( 0,  0,  1)
-         << QVector3D(x + width   , y            , z           ) << QVector3D( 0,  0,  1)
-         << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  0,  1)
-         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  0,  1)
-         << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  0,  1)
-         << QVector3D(x + width   , y            , z           ) << QVector3D( 0,  0,  1)
-         // Right:
-         << QVector3D(x + width   , y            , z           ) << QVector3D( 1,  0,  0)
-         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 1,  0,  0)
-         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 1,  0,  0)
-         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 1,  0,  0)
-         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 1,  0,  0)
-         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 1,  0,  0)
-         // Back:
-         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0,  0, -1)
-         << QVector3D(x           , y            , z - depth   ) << QVector3D( 0,  0, -1)
-         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  0, -1)
-         << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  0, -1)
-         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  0, -1)
-         << QVector3D(x           , y            , z - depth   ) << QVector3D( 0,  0, -1)
-         // Left:
-         << QVector3D(x           , y            , z - depth   ) << QVector3D(-1,  0,  0)
-         << QVector3D(x           , y            , z           ) << QVector3D(-1,  0,  0)
-         << QVector3D(x           , y + height   , z - depth   ) << QVector3D(-1,  0,  0)
-         << QVector3D(x           , y + height   , z           ) << QVector3D(-1,  0,  0)
-         << QVector3D(x           , y + height   , z - depth   ) << QVector3D(-1,  0,  0)
-         << QVector3D(x           , y            , z           ) << QVector3D(-1,  0,  0)
-         // Bottom:
-         << QVector3D(x           , y            , z - depth   ) << QVector3D( 0, -1,  0)
-         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0, -1,  0)
-         << QVector3D(x           , y            , z           ) << QVector3D( 0, -1,  0)
-         << QVector3D(x + width   , y            , z           ) << QVector3D( 0, -1,  0)
-         << QVector3D(x           , y            , z           ) << QVector3D( 0, -1,  0)
-         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0, -1,  0)
-         // Top:
-         << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  1,  0)
-         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0)
-         << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  1,  0)
-         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  1,  0)
-         << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  1,  0)
-         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0);
-
-      return blockVertices;
-   }
-
-   /**
-    * @brief CreateBlockColors creates the vertex colors needed to color a single block.
-    * @returns a vector of vertex colors.
-    */
-   QVector<QVector3D> CreateBlockColors()
-   {
-      QVector<QVector3D> blockColors;
-      blockColors
-         << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) // Front
-         << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) << QVector3D(1, 0, 0)
-         << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) // Right
-         << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) << QVector3D(0, 1, 0)
-         << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) // Back
-         << QVector3D(1, 0, 0) << QVector3D(1, 0, 0) << QVector3D(1, 0, 0)
-         << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) // Left
-         << QVector3D(0, 1, 0) << QVector3D(0, 1, 0) << QVector3D(0, 1, 0)
-         << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) // Top
-         << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) << QVector3D(0, 0, 1)
-         << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) // Bottom
-         << QVector3D(0, 0, 1) << QVector3D(0, 0, 1) << QVector3D(0, 0, 1);
-
-      return blockColors;
    }
 
    /**
@@ -224,7 +136,8 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_distance(2.5),
      m_lastFrameTimeStamp(std::chrono::system_clock::now()),
      m_visualizationVertexColorBuffer(QOpenGLBuffer::VertexBuffer),
-     m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer)
+     m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer),
+     m_treeMap(L"C:\\excluded\\Misc\\Qt\\D-Viz\\D-Viz")
 {
    // Set up the camera:
    m_camera.SetAspectRatio(780.0f / 580.0f);
@@ -323,14 +236,17 @@ void GLCanvas::PrepareOriginMarkerVertexBuffers()
 
 void GLCanvas::PrepareVisualizationVertexBuffers()
 {
-   m_visualizationVertices <<  CreateBlockVertices(QVector3D(0.0f, 0.0f, 0.0f), 1.0f, 1.0f, 1.0f);
-   m_visualizationColors << CreateBlockColors();
+   m_visualizationVertices << m_treeMap.CreateBlockVertices(QVector3D(0.0f, 0.0f, 0.0f),
+      1.0f, 1.0f, 1.0f);
+   m_visualizationColors << m_treeMap.CreateBlockColors();
 
-   m_visualizationVertices <<  CreateBlockVertices(QVector3D(1.0f, 0.0f, -1.0f), 1.0f, 1.0f, 1.0f);
-   m_visualizationColors << CreateBlockColors();
+   m_visualizationVertices << m_treeMap.CreateBlockVertices(QVector3D(1.0f, 0.0f, -1.0f),
+      1.0f, 1.0f, 1.0f);
+   m_visualizationColors << m_treeMap.CreateBlockColors();
 
-   m_visualizationVertices <<  CreateBlockVertices(QVector3D(2.0f, 0.0f, -2.0f), 1.0f, 1.0f, 1.0f);
-   m_visualizationColors << CreateBlockColors();
+   m_visualizationVertices << m_treeMap.CreateBlockVertices(QVector3D(2.0f, 0.0f, -2.0f),
+      1.0f, 1.0f, 1.0f);
+   m_visualizationColors << m_treeMap.CreateBlockColors();
 
    m_visualizationVAO.create();
    m_visualizationVAO.bind();

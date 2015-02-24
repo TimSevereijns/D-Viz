@@ -3,6 +3,7 @@
 
 #include "camera.h"
 #include "keyboardManager.h"
+#include "treeMap.h"
 
 #include <chrono>
 
@@ -66,6 +67,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
       void PrepareVisualizationVertexBuffers();
       void PrepareOriginMarkerVertexBuffers();
+
+      TreeMap m_treeMap;
 
       QWidget& m_parent;
 

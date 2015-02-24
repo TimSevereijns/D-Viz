@@ -116,7 +116,7 @@ DiskScanner::~DiskScanner()
 {
 }
 
-void DiskScanner::Scan(std::atomic<std::pair<std::uintmax_t, bool>>* progress)
+void DiskScanner::StartScanning(std::atomic<std::pair<std::uintmax_t, bool>>* progress)
 {
    m_fileTree = std::make_unique<Tree<FileInfo>>(Tree<FileInfo>(
       FileInfo(m_path.filename().wstring(), DiskScanner::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY)
@@ -180,7 +180,7 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
 
 void DiskScanner::ScanInNewThread(std::atomic<std::pair<std::uintmax_t, bool>>* progress)
 {
-   m_scanningThread = std::thread(&DiskScanner::Scan, this, progress);
+   m_scanningThread = std::thread(&DiskScanner::StartScanning, this, progress);
 }
 
 void DiskScanner::JoinScanningThread()

@@ -82,7 +82,6 @@ namespace {
       }
 
       scanner.JoinScanningThread();
-
       scanner.PrintTreeMetadata();
 
       QJsonObject serializedTree;
