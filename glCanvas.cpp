@@ -236,17 +236,14 @@ void GLCanvas::PrepareOriginMarkerVertexBuffers()
 
 void GLCanvas::PrepareVisualizationVertexBuffers()
 {
-   m_visualizationVertices << m_treeMap.CreateBlockVertices(QVector3D(0.0f, 0.0f, 0.0f),
-      1.0f, 1.0f, 1.0f);
-   m_visualizationColors << m_treeMap.CreateBlockColors();
+   Tree<VizNode>& directoryTree = m_treeMap.GetDirectoryTree();
 
-   m_visualizationVertices << m_treeMap.CreateBlockVertices(QVector3D(1.0f, 0.0f, -1.0f),
-      1.0f, 1.0f, 1.0f);
-   m_visualizationColors << m_treeMap.CreateBlockColors();
-
-   m_visualizationVertices << m_treeMap.CreateBlockVertices(QVector3D(2.0f, 0.0f, -2.0f),
-      1.0f, 1.0f, 1.0f);
-   m_visualizationColors << m_treeMap.CreateBlockColors();
+   std::for_each(directoryTree.beginPreOrder(), directoryTree.endPreOrder(),
+      [&] (const TreeNode<VizNode>& node)
+   {
+      m_visualizationVertices << node.GetData().m_coordinates;
+      m_visualizationColors   << node.GetData().m_colors;
+   });
 
    m_visualizationVAO.create();
    m_visualizationVAO.bind();

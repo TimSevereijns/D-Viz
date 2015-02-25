@@ -21,10 +21,22 @@ TreeMap::TreeMap(const std::wstring& rawRootNodePath)
 
    m_diskScanner.JoinScanningThread();
    m_diskScanner.PrintTreeMetadata();
+
+   ParseDirectoryTree();
 }
 
 TreeMap::~TreeMap()
 {
+}
+
+void TreeMap::ParseDirectoryTree()
+{
+   std::cout << "Parsing raw tree..." << std::endl;
+}
+
+Tree<VizNode>& TreeMap::GetDirectoryTree() const
+{
+   return m_diskScanner.GetDirectoryTree();
 }
 
 QVector<QVector3D> TreeMap::CreateBlockVertices(const QVector3D &bottomLeft, const float width,
@@ -83,7 +95,7 @@ QVector<QVector3D> TreeMap::CreateBlockVertices(const QVector3D &bottomLeft, con
    return blockVertices;
 }
 
-QVector<QVector3D> TreeMap::CreateBlockColors() const
+QVector<QVector3D> TreeMap::CreateBlockColors()
 {
    QVector<QVector3D> blockColors;
    blockColors.reserve(36);

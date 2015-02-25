@@ -1,5 +1,7 @@
 #include "diskScanner.h"
 
+#include "treeMap.h"
+
 #include <algorithm>
 #include <codecvt>
 #include <chrono>
@@ -23,12 +25,12 @@ namespace
     * @param[in] fileTree           The tree to be traversed.
     * @returns The size in bytes of all files in the tree.
     */
-   std::uintmax_t ComputeTopLevelDirectorySizeInBytesViaTraversal(const Tree<FileInfo>& fileTree)
+   std::uintmax_t ComputeTopLevelDirectorySizeInBytesViaTraversal(const Tree<VizNode>& fileTree)
    {
       const std::uintmax_t treeSize = std::accumulate(fileTree.beginLeaf(), fileTree.endLeaf(),
-         std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<FileInfo>& node)
+         std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<VizNode>& node)
       {
-         const FileInfo fileInfo = node.GetData();
+         const FileInfo fileInfo = node.GetData().m_file;
          if (fileInfo.m_type == FILE_TYPE::REGULAR)
          {
             return result + fileInfo.m_size;
@@ -57,14 +59,14 @@ namespace
     * @param jsonObject
     * @param fileNode
     */
-   void SerializeRecursively(QJsonArray& jsonArray, TreeNode<FileInfo>* fileNode)
+   void SerializeRecursively(QJsonArray& jsonArray, TreeNode<VizNode>* fileNode)
    {
       if (!fileNode)
       {
          return;
       }
 
-      FileInfo& fileInfo = fileNode->GetData();
+      FileInfo& fileInfo = fileNode->GetData().m_file;
 
       if (fileInfo.m_type == FILE_TYPE::REGULAR)
       {
@@ -118,9 +120,15 @@ DiskScanner::~DiskScanner()
 
 void DiskScanner::StartScanning(std::atomic<std::pair<std::uintmax_t, bool>>* progress)
 {
-   m_fileTree = std::make_unique<Tree<FileInfo>>(Tree<FileInfo>(
-      FileInfo(m_path.filename().wstring(), DiskScanner::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY)
-   ));
+   FileInfo fileInfo{m_path.filename().wstring(), DiskScanner::SIZE_UNDEFINED,
+      FILE_TYPE::DIRECTORY};
+
+   auto rootNodeCoordinates = TreeMap::CreateBlockVertices(QVector3D(0.0f, 0.0f, 0.0f), 10.0f, 1.0f, 10.0f);
+   auto rootNodeColors = TreeMap::CreateBlockColors();
+
+   VizNode rootNode{fileInfo, rootNodeCoordinates, rootNodeColors};
+
+   m_fileTree = std::make_unique<Tree<VizNode>>(Tree<VizNode>(rootNode));
 
    try
    {
@@ -140,7 +148,7 @@ void DiskScanner::StartScanning(std::atomic<std::pair<std::uintmax_t, bool>>* pr
    }
 }
 
-void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<FileInfo>& fileNode,
+void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<VizNode>& treeNode,
    std::atomic<std::pair<std::uintmax_t, bool>>* progress)
 {
    if (boost::filesystem::is_symlink(path))
@@ -155,7 +163,10 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
       FileInfo fileInfo(path.filename().wstring(), boost::filesystem::file_size(path),
          FILE_TYPE::REGULAR);
 
-      fileNode.AppendChild(fileInfo);
+      auto nodeCoordinates = TreeMap::CreateBlockVertices(QVector3D(0.0f, 0.0f, 0.0f), 10.0f, 1.0f, 10.0f);
+      auto nodeColors = TreeMap::CreateBlockColors();
+
+      treeNode.AppendChild(VizNode(fileInfo, nodeCoordinates, nodeColors));
 
       ++m_filesScanned;
    }
@@ -164,7 +175,10 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
       FileInfo directoryInfo(path.filename().wstring(), DiskScanner::SIZE_UNDEFINED,
          FILE_TYPE::DIRECTORY);
 
-      fileNode.AppendChild(directoryInfo);
+      auto nodeCoordinates = TreeMap::CreateBlockVertices(QVector3D(0.0f, 0.0f, 0.0f), 10.0f, 1.0f, 10.0f);
+      auto nodeColors = TreeMap::CreateBlockColors();
+
+      treeNode.AppendChild(VizNode(directoryInfo, nodeCoordinates, nodeColors));
 
       ++m_filesScanned;
 
@@ -173,7 +187,7 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
            ++itr)
       {
          const boost::filesystem::path nextPath = itr->path();
-         ScanRecursively(nextPath, *fileNode.GetLastChild(), progress);
+         ScanRecursively(nextPath, *treeNode.GetLastChild(), progress);
       }
    }
 }
@@ -193,14 +207,14 @@ void DiskScanner::ComputeDirectorySizes()
    assert(m_fileTree);
 
    std::for_each(std::begin(*m_fileTree), std::end(*m_fileTree),
-      [] (const TreeNode<FileInfo>& node)
+      [] (const TreeNode<VizNode>& node)
    {
-      const FileInfo fileInfo = node.GetData();
+      const FileInfo fileInfo = node.GetData().m_file;
 
-      std::shared_ptr<TreeNode<FileInfo>> parent = node.GetParent();
+      std::shared_ptr<TreeNode<VizNode>> parent = node.GetParent();
       if (parent)
       {
-         FileInfo& parentInfo = parent->GetData();
+         FileInfo& parentInfo = parent->GetData().m_file;
          if (parentInfo.m_type == FILE_TYPE::DIRECTORY)
          {
             parentInfo.m_size += fileInfo.m_size;
@@ -214,6 +228,11 @@ std::uintmax_t DiskScanner::GetNumberOfFilesScanned()
    return m_filesScanned;
 }
 
+Tree<VizNode>& DiskScanner::GetDirectoryTree() const
+{
+   return *m_fileTree.get();
+}
+
 void DiskScanner::PrintTree() const
 {
    std::cout << "=============" << std::endl;
@@ -221,13 +240,13 @@ void DiskScanner::PrintTree() const
    std::cout << "=============" << std::endl;
 
    std::for_each(m_fileTree->beginPreOrder(), m_fileTree->endPreOrder(),
-      [] (const TreeNode<FileInfo>& node)
+      [] (const TreeNode<VizNode>& node)
    {
-      const auto depth = Tree<FileInfo>::Depth(node);
+      const auto depth = Tree<VizNode>::Depth(node);
       const auto tabSize = 2;
       const std::wstring padding((depth * tabSize), ' ');
 
-      std::wcout << padding << node.GetData().m_name << std::endl;
+      std::wcout << padding << node.GetData().m_file.m_name << std::endl;
    });
 }
 
@@ -236,13 +255,13 @@ void DiskScanner::PrintTreeMetadata() const
    const std::uintmax_t sizeInBytes = ComputeTopLevelDirectorySizeInBytesViaTraversal(*m_fileTree);
    const double sizeInMegabytes = DiskScanner::ConvertBytesToMegaBytes(sizeInBytes);
 
-   const unsigned int treeSize = Tree<FileInfo>::Size(*m_fileTree->GetHead());
+   const unsigned int nodeCount = Tree<VizNode>::Size(*m_fileTree->GetHead());
 
    const auto startTime = std::chrono::high_resolution_clock::now();
    const auto fileCount = std::count_if(std::begin(*m_fileTree), std::end(*m_fileTree),
-    [] (const TreeNode<FileInfo>& node)
+    [] (const TreeNode<VizNode>& node)
    {
-      return node.GetData().m_type == FILE_TYPE::REGULAR;
+      return node.GetData().m_file.m_type == FILE_TYPE::REGULAR;
    });
    const auto endTime = std::chrono::high_resolution_clock::now();
 
@@ -259,16 +278,16 @@ void DiskScanner::PrintTreeMetadata() const
    std::cout << sizeInMegabytes << " MB (" << sizeInBytes << " bytes)" << std::endl;
 
    std::cout << "Top Level Directory Size, via Single Look-up:" << std::endl;
-   std::cout << m_fileTree->GetHead()->GetData().m_size << " bytes" << std::endl;
+   std::cout << m_fileTree->GetHead()->GetData().m_file.m_size << " bytes" << std::endl;
 
    std::cout << "Total Node Count:" << std::endl;
-   std::cout << treeSize << std::endl;
+   std::cout << nodeCount << std::endl;
 
    std::cout << "File Count:" << std::endl;
    std::cout << fileCount << std::endl;
 
    std::cout << "Folder Count:" << std::endl;
-   std::cout << treeSize - 1 - fileCount << std::endl;
+   std::cout << nodeCount - 1 - fileCount << std::endl;
 
    std::cout << "Scanning Time (in seconds):" << std::endl;
    std::cout << m_scanningTime.count() << std::endl;
@@ -284,7 +303,7 @@ void DiskScanner::ToJSON(QJsonObject& json)
       return;
    }
 
-   std::shared_ptr<TreeNode<FileInfo>> firstNode = m_fileTree->GetHead();
+   std::shared_ptr<TreeNode<VizNode>> firstNode = m_fileTree->GetHead();
 
    QJsonArray fileTree;
    SerializeRecursively(fileTree, firstNode.get());

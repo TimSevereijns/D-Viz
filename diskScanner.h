@@ -3,6 +3,9 @@
 
 #include <boost/filesystem.hpp>
 
+#include <QVector>
+#include <QVector3D>
+
 #include <atomic>
 #include <chrono>
 #include <cstdint>
@@ -36,6 +39,24 @@ struct FileInfo
       : m_name(name),
         m_size(size),
         m_type(type)
+   {
+   }
+};
+
+/**
+ * @brief The VizNode struct
+ */
+struct VizNode
+{
+   FileInfo m_file;
+   QVector<QVector3D> m_coordinates;
+   QVector<QVector3D> m_colors;
+
+   VizNode(const FileInfo& file, const QVector<QVector3D>& coordinates,
+      const QVector<QVector3D>& colors)
+      : m_file(file),
+        m_coordinates(coordinates),
+        m_colors(colors)
    {
    }
 };
@@ -93,6 +114,12 @@ class DiskScanner
       std::uintmax_t GetNumberOfFilesScanned();
 
       /**
+       * @brief GetDirectoryTree
+       * @return
+       */
+      Tree<VizNode>& GetDirectoryTree() const;
+
+      /**
        * @brief ConvertBytesToMegaBytes Converts a size in bytes to megabytes.
        * @param bytes               The value in bytes to be converted.
        * @returns The converted result.
@@ -112,10 +139,10 @@ class DiskScanner
        * depth of a directory or file is no more than 130, or so. Given that the default stack size
        * in MSVC is 1MB, and I only pass in references, this recursive version may be fine---maybe!
        */
-      void ScanRecursively(const boost::filesystem::path& path, TreeNode<FileInfo>& fileNode,
+      void ScanRecursively(const boost::filesystem::path& path, TreeNode<VizNode>& fileNode,
          std::atomic<std::pair<std::uintmax_t, bool>>* progress);
 
-      std::unique_ptr<Tree<FileInfo>> m_fileTree;
+      std::unique_ptr<Tree<VizNode>> m_fileTree;
 
       boost::filesystem::path m_path;
 
