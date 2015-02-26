@@ -44,19 +44,106 @@ struct FileInfo
 };
 
 /**
+ * @brief The Block struct
+ */
+struct Block
+{
+   QVector<QVector3D> m_vertices;
+   QVector<QVector3D> m_colors;
+   float m_percentCovered;
+   float m_width;
+   float m_height;
+   float m_depth;
+
+   Block()
+      : m_width(0.0f),
+        m_height(0.0f),
+        m_depth(0.0f),
+        m_percentCovered(0.0f)
+   {
+   }
+
+   Block(const QVector3D& bottomLeft, const float width,
+         const float height, const float depth)
+      : m_width(width),
+        m_height(height),
+        m_depth(depth),
+        m_percentCovered(0.0f)
+   {
+      const float x = bottomLeft.x();
+      const float y = bottomLeft.y();
+      const float z = bottomLeft.z();
+
+      m_vertices.reserve(72);
+      m_vertices
+         // Front:                                               // Vertex Normals:
+         << QVector3D(x           , y            , z           ) << QVector3D( 0,  0,  1)
+         << QVector3D(x + width   , y            , z           ) << QVector3D( 0,  0,  1)
+         << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  0,  1)
+         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  0,  1)
+         << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  0,  1)
+         << QVector3D(x + width   , y            , z           ) << QVector3D( 0,  0,  1)
+         // Right:
+         << QVector3D(x + width   , y            , z           ) << QVector3D( 1,  0,  0)
+         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 1,  0,  0)
+         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 1,  0,  0)
+         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 1,  0,  0)
+         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 1,  0,  0)
+         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 1,  0,  0)
+         // Back:
+         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0,  0, -1)
+         << QVector3D(x           , y            , z - depth   ) << QVector3D( 0,  0, -1)
+         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  0, -1)
+         << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  0, -1)
+         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  0, -1)
+         << QVector3D(x           , y            , z - depth   ) << QVector3D( 0,  0, -1)
+         // Left:
+         << QVector3D(x           , y            , z - depth   ) << QVector3D(-1,  0,  0)
+         << QVector3D(x           , y            , z           ) << QVector3D(-1,  0,  0)
+         << QVector3D(x           , y + height   , z - depth   ) << QVector3D(-1,  0,  0)
+         << QVector3D(x           , y + height   , z           ) << QVector3D(-1,  0,  0)
+         << QVector3D(x           , y + height   , z - depth   ) << QVector3D(-1,  0,  0)
+         << QVector3D(x           , y            , z           ) << QVector3D(-1,  0,  0)
+         // Bottom:
+         << QVector3D(x           , y            , z - depth   ) << QVector3D( 0, -1,  0)
+         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0, -1,  0)
+         << QVector3D(x           , y            , z           ) << QVector3D( 0, -1,  0)
+         << QVector3D(x + width   , y            , z           ) << QVector3D( 0, -1,  0)
+         << QVector3D(x           , y            , z           ) << QVector3D( 0, -1,  0)
+         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0, -1,  0)
+         // Top:
+         << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  1,  0)
+         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0)
+         << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  1,  0)
+         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  1,  0)
+         << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  1,  0)
+         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0);
+   }
+
+   bool IsDefined()
+   {
+      return (m_width > 0.0f && m_height > 0.0f && m_depth > 0.0f);
+   }
+};
+
+
+/**
  * @brief The VizNode struct
  */
 struct VizNode
 {
    FileInfo m_file;
-   QVector<QVector3D> m_coordinates;
-   QVector<QVector3D> m_colors;
+   Block m_block;
 
-   VizNode(const FileInfo& file, const QVector<QVector3D>& coordinates,
-      const QVector<QVector3D>& colors)
+   VizNode(const FileInfo& file)
       : m_file(file),
-        m_coordinates(coordinates),
-        m_colors(colors)
+        m_block()
+   {
+   }
+
+   VizNode(const FileInfo& file, const Block& block)
+      : m_file(file),
+        m_block(block)
    {
    }
 };

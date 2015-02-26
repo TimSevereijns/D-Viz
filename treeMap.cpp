@@ -1,5 +1,6 @@
 #include "treeMap.h"
 
+#include <algorithm>
 #include <iostream>
 
 TreeMap::TreeMap()
@@ -21,22 +22,49 @@ TreeMap::TreeMap(const std::wstring& rawRootNodePath)
 
    m_diskScanner.JoinScanningThread();
    m_diskScanner.PrintTreeMetadata();
-
-   ParseDirectoryTree();
 }
 
 TreeMap::~TreeMap()
 {
 }
 
-void TreeMap::ParseDirectoryTree()
+Tree<VizNode>& TreeMap::ParseDirectoryTree()
 {
    std::cout << "Parsing raw tree..." << std::endl;
-}
 
-Tree<VizNode>& TreeMap::GetDirectoryTree() const
-{
-   return m_diskScanner.GetDirectoryTree();
+   auto& tree = m_diskScanner.GetDirectoryTree();
+
+   std::for_each(++tree.beginPreOrder(), tree.endPreOrder(),
+      [&] (TreeNode<VizNode>& node)
+   {
+      VizNode& data = node.GetData();
+      const std::uintmax_t fileSize = data.m_file.m_size;
+
+      if (fileSize == 0 || !node.GetParent())
+      {
+         return;
+      }
+
+      const std::uintmax_t parentSize = node.GetParent()->GetData().m_file.m_size;
+      const float percentageOfParent = static_cast<float>(fileSize) / static_cast<float>(parentSize);
+
+      Block& parentBlock = node.GetParent()->GetData().m_block;
+
+      const auto offset = QVector3D(parentBlock.m_width * parentBlock.m_percentCovered,   // X
+                                    parentBlock.m_height,                                 // Y
+                                    0.0f);                                                // Z
+
+      data.m_block = Block(parentBlock.m_vertices[0] + offset,                            // Corner
+         parentBlock.m_width * percentageOfParent * 0.95f,                                // Width
+         0.25f,                                                                           // Height
+         parentBlock.m_depth * 0.95f);                                                    // Depth
+
+      parentBlock.m_percentCovered += percentageOfParent;
+
+      assert(data.m_block.IsDefined());
+   });
+
+   return tree;
 }
 
 QVector<QVector3D> TreeMap::CreateBlockVertices(const QVector3D &bottomLeft, const float width,

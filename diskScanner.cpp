@@ -123,10 +123,10 @@ void DiskScanner::StartScanning(std::atomic<std::pair<std::uintmax_t, bool>>* pr
    FileInfo fileInfo{m_path.filename().wstring(), DiskScanner::SIZE_UNDEFINED,
       FILE_TYPE::DIRECTORY};
 
-   auto rootNodeCoordinates = TreeMap::CreateBlockVertices(QVector3D(0.0f, 0.0f, 0.0f), 10.0f, 1.0f, 10.0f);
-   auto rootNodeColors = TreeMap::CreateBlockColors();
+   //auto rootNodeCoordinates = TreeMap::CreateBlockVertices(QVector3D(0.0f, 0.0f, 0.0f), 10.0f, 0.1f, 10.0f);
+   //auto rootNodeColors = TreeMap::CreateBlockColors();
 
-   VizNode rootNode{fileInfo, rootNodeCoordinates, rootNodeColors};
+   VizNode rootNode{fileInfo, Block{QVector3D(0.0f, 0.0f, 0.0f), 10.0f, 0.1f, 10.0f}};
 
    m_fileTree = std::make_unique<Tree<VizNode>>(Tree<VizNode>(rootNode));
 
@@ -163,10 +163,7 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
       FileInfo fileInfo(path.filename().wstring(), boost::filesystem::file_size(path),
          FILE_TYPE::REGULAR);
 
-      auto nodeCoordinates = TreeMap::CreateBlockVertices(QVector3D(0.0f, 0.0f, 0.0f), 10.0f, 1.0f, 10.0f);
-      auto nodeColors = TreeMap::CreateBlockColors();
-
-      treeNode.AppendChild(VizNode(fileInfo, nodeCoordinates, nodeColors));
+      treeNode.AppendChild(VizNode(fileInfo));
 
       ++m_filesScanned;
    }
@@ -175,10 +172,10 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
       FileInfo directoryInfo(path.filename().wstring(), DiskScanner::SIZE_UNDEFINED,
          FILE_TYPE::DIRECTORY);
 
-      auto nodeCoordinates = TreeMap::CreateBlockVertices(QVector3D(0.0f, 0.0f, 0.0f), 10.0f, 1.0f, 10.0f);
+      auto nodeCoordinates = QVector<QVector3D>();
       auto nodeColors = TreeMap::CreateBlockColors();
 
-      treeNode.AppendChild(VizNode(directoryInfo, nodeCoordinates, nodeColors));
+      treeNode.AppendChild(VizNode(directoryInfo));
 
       ++m_filesScanned;
 

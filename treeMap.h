@@ -23,13 +23,7 @@ class TreeMap
       /**
        * @brief ParseDirectoryTree
        */
-      void ParseDirectoryTree();
-
-      /**
-       * @brief GetDirectoryTree
-       * @return
-       */
-      Tree<VizNode>& GetDirectoryTree() const;
+      Tree<VizNode>& ParseDirectoryTree();
 
       /**
        * @brief CreateBlockVertices creates the vertices needed to represent a single block. Each

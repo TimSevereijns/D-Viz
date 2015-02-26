@@ -137,7 +137,7 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_lastFrameTimeStamp(std::chrono::system_clock::now()),
      m_visualizationVertexColorBuffer(QOpenGLBuffer::VertexBuffer),
      m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer),
-     m_treeMap(L"C:\\excluded\\Misc\\Qt\\D-Viz\\D-Viz")
+     m_treeMap(L"C:\\excluded\\Misc\\Qt\\D-Viz\\D-Viz\\UnitTests\\release")
 {
    // Set up the camera:
    m_camera.SetAspectRatio(780.0f / 580.0f);
@@ -236,14 +236,16 @@ void GLCanvas::PrepareOriginMarkerVertexBuffers()
 
 void GLCanvas::PrepareVisualizationVertexBuffers()
 {
-   Tree<VizNode>& directoryTree = m_treeMap.GetDirectoryTree();
+   Tree<VizNode>& directoryTree = m_treeMap.ParseDirectoryTree();
 
    std::for_each(directoryTree.beginPreOrder(), directoryTree.endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
    {
-      m_visualizationVertices << node.GetData().m_coordinates;
-      m_visualizationColors   << node.GetData().m_colors;
+      m_visualizationVertices << node.GetData().m_block.m_vertices;
+      m_visualizationColors   << TreeMap::CreateBlockColors();
    });
+
+   std::cout << "Vertex count: " << m_visualizationVertices.size() << std::endl;
 
    m_visualizationVAO.create();
    m_visualizationVAO.bind();
