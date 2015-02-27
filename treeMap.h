@@ -44,6 +44,12 @@ class TreeMap
        */
       static QVector<QVector3D> CreateBlockColors();
 
+      /**
+       * @brief CreateBlockColors creates the vertex colors needed to color a single block.
+       * @returns a vector of vertex colors.
+       */
+      static QVector<QVector3D> CreateDirectoryColors();
+
    private:
       DiskScanner m_diskScanner;
 };
