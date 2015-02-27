@@ -120,13 +120,11 @@ DiskScanner::~DiskScanner()
 
 void DiskScanner::StartScanning(std::atomic<std::pair<std::uintmax_t, bool>>* progress)
 {
-   FileInfo fileInfo{m_path.filename().wstring(), DiskScanner::SIZE_UNDEFINED,
-      FILE_TYPE::DIRECTORY};
+   assert(boost::filesystem::is_directory(m_path));
 
-   //auto rootNodeCoordinates = TreeMap::CreateBlockVertices(QVector3D(0.0f, 0.0f, 0.0f), 10.0f, 0.1f, 10.0f);
-   //auto rootNodeColors = TreeMap::CreateBlockColors();
-
-   VizNode rootNode{fileInfo, Block{QVector3D(0.0f, 0.0f, 0.0f), 10.0f, 0.1f, 10.0f}};
+   // Dummy root node:
+   FileInfo fileInfo{L"Dummy Root Node", DiskScanner::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY};
+   VizNode rootNode{fileInfo, Block{QVector3D(0.0f, 0.0f, 0.0f), 10.0f, 0.025f, 10.0f}};
 
    m_fileTree = std::make_unique<Tree<VizNode>>(Tree<VizNode>(rootNode));
 

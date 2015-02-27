@@ -137,8 +137,9 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_lastFrameTimeStamp(std::chrono::system_clock::now()),
      m_visualizationVertexColorBuffer(QOpenGLBuffer::VertexBuffer),
      m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer),
-     m_treeMap(L"C:\\excluded\\Misc\\Qt\\D-Viz\\D-Viz")
+     //m_treeMap(L"C:\\excluded\\Misc\\Qt\\D-Viz\\D-Viz")
      //m_treeMap(L"C:\\excluded\\mainline\\source")
+     m_treeMap(L"C:\\Users\\tsevereijns\\Desktop\\Scott Snyder 16177215")
 {
    // Set up the camera:
    m_camera.SetAspectRatio(780.0f / 580.0f);
@@ -239,6 +240,13 @@ void GLCanvas::PrepareVisualizationVertexBuffers()
 {
    Tree<VizNode>& directoryTree = m_treeMap.ParseDirectoryTree();
 
+   // While the dummy node's vertices were already added in DiskScanner::StartScanning(...),
+   // we have yet to actually add the dummy node's color information to the scene:
+   //m_visualizationColors << TreeMap::CreateDirectoryColors();
+
+   m_visualizationColors.clear();
+   m_visualizationVertices.clear();
+
    std::for_each(directoryTree.beginPreOrder(), directoryTree.endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
    {
@@ -246,15 +254,17 @@ void GLCanvas::PrepareVisualizationVertexBuffers()
 
       if (node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY)
       {
-         m_visualizationColors   << TreeMap::CreateDirectoryColors();
+         m_visualizationColors << TreeMap::CreateDirectoryColors();
       }
-      else
+      else if (node.GetData().m_file.m_type == FILE_TYPE::REGULAR)
       {
-         m_visualizationColors   << TreeMap::CreateBlockColors();
+         m_visualizationColors << TreeMap::CreateBlockColors();
       }
    });
 
    std::cout << "Vertex count: " << m_visualizationVertices.size() << std::endl;
+   std::cout << "Block count: " << m_visualizationVertices.size() / 72 << std::endl;
+   std::cout << "Color count: " << m_visualizationColors.size() / 32 << std::endl;
 
    m_visualizationVAO.create();
    m_visualizationVAO.bind();

@@ -68,7 +68,7 @@ namespace {
 
    void QuickDiskTest()
    {
-      const std::wstring path {L"C:\\excluded\\Misc\\Qt\\D-Viz\\D-Viz"};
+      const std::wstring path {L"C:\\Users\\tsevereijns\\Desktop\\Scott Snyder 16177215"};
       auto scanner = DiskScanner(path);
 
       std::atomic<std::pair<std::uintmax_t, bool>> progress{std::make_pair(0, false)};
@@ -83,6 +83,7 @@ namespace {
 
       scanner.JoinScanningThread();
       scanner.PrintTreeMetadata();
+      scanner.PrintTree();
 
       QJsonObject serializedTree;
       scanner.ToJSON(serializedTree);

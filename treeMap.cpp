@@ -30,11 +30,13 @@ TreeMap::~TreeMap()
 
 Tree<VizNode>& TreeMap::ParseDirectoryTree()
 {
+   static const float BLOCK_HEIGHT = 0.0625f;
+
    std::cout << "Parsing raw tree..." << std::endl;
 
    auto& tree = m_diskScanner.GetDirectoryTree();
 
-   std::for_each(++tree.beginPreOrder(), tree.endPreOrder(),
+   std::for_each(tree.beginPreOrder(), tree.endPreOrder(),
       [&] (TreeNode<VizNode>& node)
    {
       VizNode& data = node.GetData();
@@ -50,24 +52,51 @@ Tree<VizNode>& TreeMap::ParseDirectoryTree()
 
       Block& parentBlock = node.GetParent()->GetData().m_block;
 
-      // Calculate the appropriate padding for the new block based on space available on top of
-      // the parent block:
-      const auto paddedBlockWidth = parentBlock.m_width * percentageOfParent;
-      const auto actualBlockWidth = paddedBlockWidth * 0.9f;
-      const auto widthPaddingPerSide = (paddedBlockWidth - actualBlockWidth) / 2.0f;
+      // Slice perpendicular to the X-axis:
+      if (parentBlock.m_width > parentBlock.m_depth)
+      {
+         // Calculate the appropriate padding for the new block based on space available on top of
+         // the parent block:
+         const auto paddedBlockWidth = parentBlock.m_width * percentageOfParent;
+         const auto actualBlockWidth = paddedBlockWidth * 0.9f;
+         const auto widthPaddingPerSide = (paddedBlockWidth - actualBlockWidth) / 2.0f;
 
-      const auto actualBlockDepth = parentBlock.m_depth * 0.9f;
-      const auto depthPaddingPerSide = (parentBlock.m_depth - actualBlockDepth) / 2.0f;
+         const auto actualBlockDepth = parentBlock.m_depth * 0.9f;
+         const auto depthPaddingPerSide = (parentBlock.m_depth - actualBlockDepth) / 2.0f;
 
-      const auto offset = QVector3D(
-         (parentBlock.m_width * parentBlock.m_percentCovered) + widthPaddingPerSide,      // X
-         parentBlock.m_height,                                                            // Y
-         -depthPaddingPerSide);                                                           // Z
+         const auto offset = QVector3D(
+            (parentBlock.m_width * parentBlock.m_percentCovered) + widthPaddingPerSide,   // X
+            parentBlock.m_height,                                                         // Y
+            -depthPaddingPerSide                                                          // Z
+         );
 
-      data.m_block = Block(parentBlock.m_vertices[0] + offset,                            // Corner
-         actualBlockWidth,                                                                // Width
-         0.125f,                                                                          // Height
-         actualBlockDepth);                                                               // Depth
+         data.m_block = Block(parentBlock.m_vertices[0] + offset,                         // Origin
+            actualBlockWidth,                                                             // Width
+            BLOCK_HEIGHT,                                                                 // Height
+            actualBlockDepth                                                              // Depth
+         );
+      }
+      else
+      {
+         const auto paddedBlockDepth = parentBlock.m_depth * percentageOfParent;
+         const auto actualBlockDepth = paddedBlockDepth * 0.9f;
+         const auto depthPaddingPerSide = (paddedBlockDepth - actualBlockDepth) / 2.0f;
+
+         const auto actualBlockWidth = parentBlock.m_width * 0.9f;
+         const auto widthPaddingPerSide = (parentBlock.m_width - actualBlockWidth) / 2.0f;
+
+         const auto offset = QVector3D(
+            widthPaddingPerSide,                                                          // X
+            parentBlock.m_height,                                                         // Y
+            -(parentBlock.m_depth * parentBlock.m_percentCovered) - depthPaddingPerSide   // Z
+         );
+
+         data.m_block = Block(parentBlock.m_vertices[0] + offset,                         // Origin
+            actualBlockWidth,                                                             // Width
+            BLOCK_HEIGHT,                                                                 // Height
+            actualBlockDepth                                                              // Depth
+         );
+      }
 
       parentBlock.m_percentCovered += percentageOfParent;
 
@@ -75,62 +104,6 @@ Tree<VizNode>& TreeMap::ParseDirectoryTree()
    });
 
    return tree;
-}
-
-QVector<QVector3D> TreeMap::CreateBlockVertices(const QVector3D &bottomLeft, const float width,
-                                                const float height, const float depth)
-{
-   const float x = bottomLeft.x();
-   const float y = bottomLeft.y();
-   const float z = bottomLeft.z();
-
-   QVector<QVector3D> blockVertices;
-   blockVertices.reserve(72);
-   blockVertices
-      // Front:                                               // Vertex Normals:
-      << QVector3D(x           , y            , z           ) << QVector3D( 0,  0,  1)
-      << QVector3D(x + width   , y            , z           ) << QVector3D( 0,  0,  1)
-      << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  0,  1)
-      << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  0,  1)
-      << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  0,  1)
-      << QVector3D(x + width   , y            , z           ) << QVector3D( 0,  0,  1)
-      // Right:
-      << QVector3D(x + width   , y            , z           ) << QVector3D( 1,  0,  0)
-      << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 1,  0,  0)
-      << QVector3D(x + width   , y + height   , z           ) << QVector3D( 1,  0,  0)
-      << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 1,  0,  0)
-      << QVector3D(x + width   , y + height   , z           ) << QVector3D( 1,  0,  0)
-      << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 1,  0,  0)
-      // Back:
-      << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0,  0, -1)
-      << QVector3D(x           , y            , z - depth   ) << QVector3D( 0,  0, -1)
-      << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  0, -1)
-      << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  0, -1)
-      << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  0, -1)
-      << QVector3D(x           , y            , z - depth   ) << QVector3D( 0,  0, -1)
-      // Left:
-      << QVector3D(x           , y            , z - depth   ) << QVector3D(-1,  0,  0)
-      << QVector3D(x           , y            , z           ) << QVector3D(-1,  0,  0)
-      << QVector3D(x           , y + height   , z - depth   ) << QVector3D(-1,  0,  0)
-      << QVector3D(x           , y + height   , z           ) << QVector3D(-1,  0,  0)
-      << QVector3D(x           , y + height   , z - depth   ) << QVector3D(-1,  0,  0)
-      << QVector3D(x           , y            , z           ) << QVector3D(-1,  0,  0)
-      // Bottom:
-      << QVector3D(x           , y            , z - depth   ) << QVector3D( 0, -1,  0)
-      << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0, -1,  0)
-      << QVector3D(x           , y            , z           ) << QVector3D( 0, -1,  0)
-      << QVector3D(x + width   , y            , z           ) << QVector3D( 0, -1,  0)
-      << QVector3D(x           , y            , z           ) << QVector3D( 0, -1,  0)
-      << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0, -1,  0)
-      // Top:
-      << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  1,  0)
-      << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0)
-      << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  1,  0)
-      << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  1,  0)
-      << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  1,  0)
-      << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0);
-
-   return blockVertices;
 }
 
 QVector<QVector3D> TreeMap::CreateBlockColors()
