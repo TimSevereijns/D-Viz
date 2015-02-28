@@ -9,11 +9,16 @@ MainWindow::MainWindow(QWidget* parent)
 {
    ui->setupUi(this);
 
-   glCanvas = new GLCanvas(this);
-   ui->canvasLayout->addWidget(glCanvas);
+   m_glCanvas = new GLCanvas(this);
+   ui->canvasLayout->addWidget(m_glCanvas);
 }
 
 MainWindow::~MainWindow()
 {
    delete ui;
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event)
+{
+   m_glCanvas->resize(size().width(), size().height());
 }

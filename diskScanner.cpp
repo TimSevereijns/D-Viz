@@ -170,9 +170,6 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
       FileInfo directoryInfo(path.filename().wstring(), DiskScanner::SIZE_UNDEFINED,
          FILE_TYPE::DIRECTORY);
 
-      auto nodeCoordinates = QVector<QVector3D>();
-      auto nodeColors = TreeMap::CreateBlockColors();
-
       treeNode.AppendChild(VizNode(directoryInfo));
 
       ++m_filesScanned;

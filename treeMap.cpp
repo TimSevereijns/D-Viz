@@ -51,6 +51,7 @@ Tree<VizNode>& TreeMap::ParseDirectoryTree()
       const float percentageOfParent = static_cast<float>(fileSize) / static_cast<float>(parentSize);
 
       Block& parentBlock = node.GetParent()->GetData().m_block;
+      const unsigned int siblingCount = node.GetParent()->GetChildCount();
 
       // Slice perpendicular to the X-axis:
       if (parentBlock.m_width > parentBlock.m_depth)

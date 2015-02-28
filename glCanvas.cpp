@@ -138,11 +138,11 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_visualizationVertexColorBuffer(QOpenGLBuffer::VertexBuffer),
      m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer),
      //m_treeMap(L"C:\\excluded\\Misc\\Qt\\D-Viz\\D-Viz")
-     //m_treeMap(L"C:\\excluded\\mainline\\source")
-     m_treeMap(L"C:\\Users\\tsevereijns\\Desktop\\Scott Snyder 16177215")
+     m_treeMap(L"C:\\excluded\\mainline\\source")
+     //m_treeMap(L"C:\\Users\\tsevereijns\\Desktop")
 {
    // Set up the camera:
-   m_camera.SetAspectRatio(780.0f / 580.0f);
+   m_camera.SetAspectRatio(1200.0f / 800.0f);
    m_camera.SetPosition(QVector3D(0, 0, m_distance));
 
    // Set keyboard and mouse focus:
@@ -308,7 +308,9 @@ void GLCanvas::PrepareVisualizationVertexBuffers()
 
 QSize GLCanvas::sizeHint() const
 {
-   return QSize(780, 580);
+   std::cout << m_parent.size().width() <<  m_parent.size().height() << std::endl;
+
+   return QSize(m_parent.size().width(), m_parent.size().height());
 }
 
 void GLCanvas::initializeGL()
@@ -336,6 +338,7 @@ void GLCanvas::resizeGL(int width, int height)
    }
 
    glViewport(0, 0, width, height);
+   m_camera.SetAspectRatio(static_cast<float>(width) / static_cast<float>(height));
 }
 
 void GLCanvas::keyPressEvent(QKeyEvent* const event)

@@ -18,7 +18,9 @@ class MainWindow : public QMainWindow
       ~MainWindow();
 
    protected:
-      GLCanvas* glCanvas;
+      GLCanvas* m_glCanvas;
+
+      void resizeEvent(QResizeEvent* event) override;
 
    private:
       Ui::MainWindow* ui;

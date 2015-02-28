@@ -495,7 +495,7 @@ class Tree
             explicit PreOrderIterator(const Iterator& other);
             explicit PreOrderIterator(std::shared_ptr<TreeNode<T>> node);
             explicit PreOrderIterator(std::shared_ptr<TreeNode<T>> node,
-                                       std::shared_ptr<TreeNode<T>> head);
+                                      std::shared_ptr<TreeNode<T>> head);
 
             PreOrderIterator operator++(int);           // post-fix operator; do not return ref!
             PreOrderIterator& operator++();             // pre-fix operator

@@ -26,7 +26,8 @@ HEADERS  += mainwindow.h \
     glCanvas.h \
     camera.h \
     keyboardManager.h \
-    treeMap.h
+    treeMap.h \
+    Visualizations/visualization.h
 
 FORMS    += mainwindow.ui
 
