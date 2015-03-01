@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     glCanvas.cpp \
     camera.cpp \
     keyboardManager.cpp \
-    treeMap.cpp
+    Visualizations/sliceAndDiceTreemap.cpp \
+    Visualizations/visualization.cpp
 
 HEADERS  += mainwindow.h \
     tree.h \
@@ -26,8 +27,8 @@ HEADERS  += mainwindow.h \
     glCanvas.h \
     camera.h \
     keyboardManager.h \
-    treeMap.h \
-    Visualizations/visualization.h
+    Visualizations/visualization.h \
+    Visualizations/sliceAndDiceTreemap.h
 
 FORMS    += mainwindow.ui
 

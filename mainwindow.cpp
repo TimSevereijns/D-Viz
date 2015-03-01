@@ -18,7 +18,7 @@ MainWindow::~MainWindow()
    delete ui;
 }
 
-void MainWindow::resizeEvent(QResizeEvent* event)
+void MainWindow::resizeEvent(QResizeEvent* /*event*/)
 {
    m_glCanvas->resize(size().width(), size().height());
 }
