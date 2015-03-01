@@ -1,7 +1,5 @@
 #include "diskScanner.h"
 
-#include "treeMap.h"
-
 #include <algorithm>
 #include <codecvt>
 #include <chrono>

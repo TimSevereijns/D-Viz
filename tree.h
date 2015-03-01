@@ -2,6 +2,8 @@
 #define TREE_H
 
 #include <cassert>
+#include <cstdint>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
@@ -21,6 +23,16 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
 
       std::shared_ptr<TreeNode<T>> PrependChild(std::shared_ptr<TreeNode<T>> child);
       std::shared_ptr<TreeNode<T>> AppendChild(std::shared_ptr<TreeNode<T>> child);
+
+      void MergeSort(std::shared_ptr<TreeNode<T>> firstSibling,
+         std::function<bool (TreeNode<T>, TreeNode<T>)> comparator);
+
+      void DivideList(std::shared_ptr<TreeNode<T>> head, std::shared_ptr<TreeNode<T>> lhs,
+         std::shared_ptr<TreeNode<T>> rhs);
+
+      std::shared_ptr<TreeNode<T>> MergeSortedHalves(std::shared_ptr<TreeNode<T>> lhs,
+         std::shared_ptr<TreeNode<T>> rhs,
+         std::function<bool (TreeNode<T>, TreeNode<T>)> comparator);
 
       std::shared_ptr<TreeNode<T>> m_parent;
       std::shared_ptr<TreeNode<T>> m_firstChild;
@@ -62,14 +74,14 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
       /**
        * @brief PrependChild        Adds a child node as the first child of the node.
        * @param data                The underlying data to be stored in the node.
-       * @returns TODO
+       * @returns the prepended node.
        */
       std::shared_ptr<TreeNode<T>> PrependChild(T data);
 
       /**
        * @brief AppendChild         Adds a child node as the last child of the node.
        * @param data                The underlying data to be stored in the node.
-       * @returns TODO
+       * @returns the appended node.
        */
       std::shared_ptr<TreeNode<T>> AppendChild(T data);
 
@@ -132,6 +144,12 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
        * @return The total number of descendant nodes belonging to the node.
        */
       unsigned int CountAllDescendants() const;
+
+      /**
+       * @brief SortChildren        Merge sorts the immediate child nodes.
+       * TODO: Add a predicate parameter in the form of a lambda.
+       */
+      void SortChildren(std::function<bool (TreeNode<T>, TreeNode<T>)> comparator);
 };
 
 /***************************************************************************************************
@@ -360,6 +378,94 @@ template<typename T>
 bool TreeNode<T>::HasChildren() const
 {
    return m_childCount > 0;
+}
+
+template<typename T>
+void TreeNode<T>::SortChildren(std::function<bool (TreeNode<T>, TreeNode<T>)> comparator)
+{
+
+}
+
+template<typename T>
+void TreeNode<T>::DivideList(std::shared_ptr<TreeNode<T>> head,
+   std::shared_ptr<TreeNode<T>> lhs, std::shared_ptr<TreeNode<T>> rhs)
+{
+   if (!head || !head->GetNextSibling())
+   {
+      return;
+   }
+
+   TreeNode<T>* turtle = head;
+   TreeNode<T>* hare = head->GetNextSibling();
+
+   while (hare)
+   {
+      hare = hare->GetNextSibling();
+      if (hare)
+      {
+         turtle = turtle->GetNextSibling();
+         hare = hare->GetNextSibling();
+      }
+   }
+
+   lhs = head;
+   rhs = turtle->GetNextSibling();
+
+   turtle->m_nextSibling = nullptr;
+}
+
+template<typename T>
+void TreeNode<T>::MergeSort(std::shared_ptr<TreeNode<T>> firstSibling,
+   std::function<bool (TreeNode<T>, TreeNode<T>)> comparator)
+{
+   if (!list || !list->GetNextSibling())
+   {
+      return;
+   }
+
+   std::shared_ptr<TreeNode<T>> head = list;
+   std::shared_ptr<TreeNode<T>> lhs = nullptr;
+   std::shared_ptr<TreeNode<T>> rhs = nullptr;
+
+   DivideList(head, lhs, rhs);
+
+   assert(lhs);
+   assert(rhs);
+
+   MergeSort(lhs, comparator);
+   MergeSort(rhs, comparator);
+
+   firstSibling = MergeSortedHalves(lhs, rhs, comparator);
+}
+
+template<typename T>
+std::shared_ptr<TreeNode<T>> MergeSortedHalves(std::shared_ptr<TreeNode<T>> lhs,
+   std::shared_ptr<TreeNode<T>> rhs,
+   std::function<bool (TreeNode<T>, TreeNode<T>)> comparator)
+{
+   if (!lhs)
+   {
+      return rhs;
+   }
+   else if (!rhs)
+   {
+      return lhs;
+   }
+
+   std::shared_ptr<TreeNode<T>> result = nullptr;
+
+   if (comparator(lhs, rhs))
+   {
+      result = lhs;
+      result->GetNextSibling() = MergeSortedHalves(lhs->GetNextSibling(), rhs);
+   }
+   else
+   {
+      result = rhs;
+      result->GetNextSibling() = MergeSortedHalves(lhs, rhs->GetNextSibling());
+   }
+
+   return result;
 }
 
 /**
