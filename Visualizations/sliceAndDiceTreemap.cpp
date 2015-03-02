@@ -72,7 +72,7 @@ namespace
          additionalCoverage = (actualBlockDepth + (2 * depthPaddingPerSide)) / parentBlock.m_depth;
        }
 
-      assert(additionalCoverate != 0.0f);
+      assert(additionalCoverage != 0.0f);
       parentBlock.m_percentCovered += additionalCoverage;
 
       assert(data.m_block.IsDefined());

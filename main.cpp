@@ -39,11 +39,30 @@ namespace {
       return tree;
    }
 
+   std::unique_ptr<Tree<int>> CreateSimpleIntegerBinaryTree()
+   {
+      std::unique_ptr<Tree<int>> tree(new Tree<int>(99));
+      tree->GetHead()->AppendChild(9);
+      tree->GetHead()->AppendChild(8);
+      tree->GetHead()->AppendChild(7);
+      tree->GetHead()->AppendChild(6);
+      tree->GetHead()->AppendChild(5);
+      tree->GetHead()->AppendChild(4);
+      tree->GetHead()->AppendChild(3);
+      tree->GetHead()->AppendChild(2);
+      tree->GetHead()->AppendChild(1);
+
+      return tree;
+   }
+
    void QuickTreeTest()
    {
-      auto tree = CreateSimpleStringBinaryTree();
-      const std::vector<std::string> expectedTraversal { "H", "I", "G", "E", "C", "D", "A", "B",
-                                                         "F" };
+      auto tree = CreateSimpleIntegerBinaryTree();
+      tree->GetHead()->SortChildren([] (TreeNode<int>& lhs, TreeNode<int>& rhs)
+         { return lhs.GetData() < rhs.GetData(); }
+      );
+
+      const std::vector<int> expectedTraversal{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
       int index = 0;
       bool traversalError = false;
@@ -101,10 +120,12 @@ namespace {
 int main(int argc, char* argv[])
 {
    QApplication application(argc, argv);
-   MainWindow mainWindow;
-   mainWindow.show();
+   //MainWindow mainWindow;
+   //mainWindow.show();
 
    //QuickDiskTest();
+
+   QuickTreeTest();
 
    return application.exec();
 }
