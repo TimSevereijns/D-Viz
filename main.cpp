@@ -28,59 +28,46 @@ namespace {
       return count;
    }
 
-   std::unique_ptr<Tree<std::string>> CreateSimpleStringBinaryTree()
-   {
-      std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("F"));
-      tree->GetHead()->AppendChild("B")->AppendChild("A");
-      tree->GetHead()->GetFirstChild()->AppendChild("D")->AppendChild("C");
-      tree->GetHead()->GetFirstChild()->GetLastChild()->AppendChild("E");
-      tree->GetHead()->AppendChild("G")->AppendChild("I")->AppendChild("H");
-
-      return tree;
-   }
-
    std::unique_ptr<Tree<int>> CreateSimpleIntegerBinaryTree()
    {
-      std::unique_ptr<Tree<int>> tree(new Tree<int>(99));
-      tree->GetHead()->AppendChild(9);
-      tree->GetHead()->AppendChild(8);
-      tree->GetHead()->AppendChild(7);
-      tree->GetHead()->AppendChild(6);
-      tree->GetHead()->AppendChild(5);
-      tree->GetHead()->AppendChild(4);
+      std::unique_ptr<Tree<int>> tree = std::make_unique<Tree<int>>(99);
       tree->GetHead()->AppendChild(3);
       tree->GetHead()->AppendChild(2);
+      tree->GetHead()->AppendChild(7);
+      tree->GetHead()->AppendChild(6);
+      tree->GetHead()->AppendChild(4);
+      tree->GetHead()->AppendChild(5);
+      tree->GetHead()->AppendChild(9);
+      tree->GetHead()->AppendChild(8);
       tree->GetHead()->AppendChild(1);
 
       return tree;
    }
 
-   void QuickTreeTest()
+   void QuickTreeSortingTest()
    {
       auto tree = CreateSimpleIntegerBinaryTree();
-      tree->GetHead()->SortChildren([] (TreeNode<int>& lhs, TreeNode<int>& rhs)
-         { return lhs.GetData() < rhs.GetData(); }
-      );
+      tree->GetHead()->SortChildren(
+         [] (TreeNode<int>& lhs, TreeNode<int>& rhs)
+      {
+         return lhs.GetData() < rhs.GetData();
+      });
 
       const std::vector<int> expectedTraversal{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
-      int index = 0;
       bool traversalError = false;
+      auto child = tree->GetHead()->GetFirstChild();
 
-      auto itr = tree->endPreOrder();
-      for (--itr; itr != tree->beginPreOrder(); --itr)
+      std::for_each(std::begin(expectedTraversal), std::end(expectedTraversal),
+         [&] (const int expected)
       {
-         if (itr->GetData() != expectedTraversal[index++])
+         if (child->GetData() != expected)
          {
             traversalError = true;
-            break;
          }
-      }
 
-      if (itr->GetData() != expectedTraversal[index])
-      {
-         traversalError = true;
-      }
+         child = child->GetNextSibling();
+      });
 
       std::cout << (traversalError ? "Error!" : "All O.K.") << std::endl;
    }
@@ -95,8 +82,7 @@ namespace {
 
       while (progress.load().second == false)
       {
-         std::cout << "Files scanned so far: "
-                   << progress.load().first << std::endl;
+         std::cout << "Files scanned so far: " << progress.load().first << std::endl;
          std::this_thread::sleep_for(std::chrono::seconds(1));
       }
 
@@ -125,7 +111,7 @@ int main(int argc, char* argv[])
 
    //QuickDiskTest();
 
-   QuickTreeTest();
+   QuickTreeSortingTest();
 
    return application.exec();
 }
