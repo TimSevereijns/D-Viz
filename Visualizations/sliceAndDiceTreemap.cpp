@@ -90,9 +90,19 @@ SliceAndDiceTreeMap::~SliceAndDiceTreeMap()
 
 void SliceAndDiceTreeMap::ParseScan()
 {
+   auto& tree = m_diskScanner.GetDirectoryTree();
+
+   std::cout << "Sorting raw tree..." << std::endl;
+
+   std::for_each(std::begin(tree), std::end(tree),
+      [] (TreeNode<VizNode>& node)
+   {
+      node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
+         { return lhs.GetData().m_file.m_size < rhs.GetData().m_file.m_size; });
+   });
+
    std::cout << "Parsing raw tree..." << std::endl;
 
-   auto& tree = m_diskScanner.GetDirectoryTree();
    std::for_each(tree.beginPreOrder(), tree.endPreOrder(), ParseNode);
 
    m_hasDataBeenParsed = true;

@@ -1,8 +1,25 @@
 #include <QtTest/QtTest>
 
+#include <iostream>
+
 #include <../tree.h>
 
-namespace {
+namespace
+{
+   template<typename T>
+   void PrintTree(Tree<T>& tree)
+   {
+      std::for_each(tree.beginPreOrder(), tree.endPreOrder(),
+         [] (const TreeNode<int>& node)
+      {
+         const auto depth = Tree<T>::Depth(node);
+         const auto tabSize = 2;
+         const std::string padding((depth * tabSize), ' ');
+
+         std::cout << padding << node.GetData() << std::endl;
+      });
+   }
+
    std::unique_ptr<Tree<int>> CreateSimpleIntegerBinaryTree()
    {
       std::unique_ptr<Tree<int>> tree(new Tree<int>(99));
@@ -34,6 +51,25 @@ namespace {
       tree->GetHead()->AppendChild("C");
       tree->GetHead()->AppendChild("D");
       tree->GetHead()->AppendChild("E");
+
+      return tree;
+   }
+
+   std::unique_ptr<Tree<int>> CreateIntegerTreeOfUnsortedNodes()
+   {
+      std::unique_ptr<Tree<int>> tree(new Tree<int>(999));
+      tree->GetHead()->AppendChild(634);
+      tree->GetHead()->GetFirstChild()->AppendChild(34);
+      tree->GetHead()->GetFirstChild()->AppendChild(13);
+      tree->GetHead()->GetFirstChild()->AppendChild(89);
+      tree->GetHead()->GetFirstChild()->AppendChild(3);
+      tree->GetHead()->GetFirstChild()->AppendChild(1);
+      tree->GetHead()->GetFirstChild()->AppendChild(0);
+      tree->GetHead()->GetFirstChild()->AppendChild(-5);
+
+      tree->GetHead()->AppendChild(375);
+      tree->GetHead()->AppendChild(173);
+      tree->GetHead()->AppendChild(128);
 
       return tree;
    }
@@ -159,6 +195,12 @@ class TreeTests: public QObject
        * iterator.
        */
       void LeafTraversalOfSimpleBinaryTreeFromEndToBegin();
+
+      /**
+       * @brief SortingATreeOfIntegers creates a simple tree and then sorts the each nodes children
+       * if they exist.
+       */
+      void SortingATreeOfIntegers();
 };
 
 void TreeTests::IntegerTreeCreation()
@@ -520,6 +562,48 @@ void TreeTests::LeafTraversalOfSimpleBinaryTreeFromEndToBegin()
    }
 
    QVERIFY(traversalError == false);
+}
+
+void TreeTests::SortingATreeOfIntegers()
+{
+   std::unique_ptr<Tree<int>> tree = CreateIntegerTreeOfUnsortedNodes();
+
+   bool sortingError = false;
+   int lastItem = -999;
+
+   // Sort:
+   std::for_each(std::begin(*tree), std::end(*tree),
+      [] (TreeNode<int>& node)
+   {
+      node.SortChildren([] (const TreeNode<int>& lhs, const TreeNode<int>& rhs)
+         { return lhs.GetData() < rhs.GetData(); });
+   });
+
+   //PrintTree(*tree.get());
+
+   // Verify:
+   std::for_each(std::begin(*tree), std::end(*tree),
+      [&] (TreeNode<int>& node)
+   {
+      if (!node.HasChildren())
+      {
+         return;
+      }
+
+      auto child = node.GetFirstChild();
+      while (child)
+      {
+         if (child->GetData() < lastItem)
+         {
+            sortingError = true;
+            lastItem = child->GetData();
+         }
+
+         child = child->GetNextSibling();
+      }
+   });
+
+   QVERIFY(sortingError == false);
 }
 
 QTEST_MAIN(TreeTests)

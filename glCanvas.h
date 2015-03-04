@@ -98,6 +98,7 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       QVector<QVector3D> m_visualizationColors;
 
       double m_distance;
+      double m_movementSpeed;
 
       std::chrono::system_clock::time_point m_lastFrameTimeStamp;
 

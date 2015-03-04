@@ -74,7 +74,7 @@ namespace {
 
    void QuickDiskTest()
    {
-      const std::wstring path {L"C:\\Users\\tsevereijns\\Desktop\\Scott Snyder 16177215"};
+      const std::wstring path {L"C:\\Users\\tsevereijns\\Desktop"};
       auto scanner = DiskScanner(path);
 
       std::atomic<std::pair<std::uintmax_t, bool>> progress{std::make_pair(0, false)};
@@ -82,6 +82,7 @@ namespace {
 
       while (progress.load().second == false)
       {
+         std::cout.imbue(std::locale(""));
          std::cout << "Files scanned so far: " << progress.load().first << std::endl;
          std::this_thread::sleep_for(std::chrono::seconds(1));
       }
@@ -106,12 +107,11 @@ namespace {
 int main(int argc, char* argv[])
 {
    QApplication application(argc, argv);
-   //MainWindow mainWindow;
-   //mainWindow.show();
+   MainWindow mainWindow;
+   mainWindow.show();
 
    //QuickDiskTest();
-
-   QuickTreeSortingTest();
+   //QuickTreeSortingTest();
 
    return application.exec();
 }

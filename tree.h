@@ -440,8 +440,7 @@ void TreeNode<T>::MergeSort(std::shared_ptr<TreeNode<T>>& list,
 
 template<typename T>
 std::shared_ptr<TreeNode<T>> TreeNode<T>::MergeSortedHalves(std::shared_ptr<TreeNode<T>>& lhs,
-   std::shared_ptr<TreeNode<T>>& rhs,
-   std::function<bool (TreeNode<T>, TreeNode<T>)> comparator)
+   std::shared_ptr<TreeNode<T>>& rhs, std::function<bool (TreeNode<T>, TreeNode<T>)> comparator)
 {
    if (!lhs)
    {
@@ -583,9 +582,6 @@ class Tree
             SiblingIterator& operator++();               // pre-fix operator
             SiblingIterator operator--(int);
             SiblingIterator& operator--();
-
-            TreeNode<T>& firstInRange() const;
-            TreeNode<T>& lastInRange() const;
 
          private:
             std::shared_ptr<TreeNode<T>> m_parent;
