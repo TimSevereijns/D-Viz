@@ -236,7 +236,7 @@ void GLCanvas::PrepareOriginMarkerVertexBuffers()
 
 void GLCanvas::PrepareVisualizationVertexBuffers()
 {
-   SliceAndDiceTreeMap treeMap{L"C:\\excluded\\Misc\\Qt"};
+   SliceAndDiceTreeMap treeMap{L"C:\\excluded\\mainline\\source\\marquee"};
    treeMap.ScanDirectory();
    treeMap.ParseScan();
 

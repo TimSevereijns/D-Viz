@@ -566,10 +566,26 @@ void TreeTests::LeafTraversalOfSimpleBinaryTreeFromEndToBegin()
 
 void TreeTests::SortingATreeOfIntegers()
 {
-   std::unique_ptr<Tree<int>> tree = CreateIntegerTreeOfUnsortedNodes();
+   //std::unique_ptr<Tree<int>> tree = CreateIntegerTreeOfUnsortedNodes();
+
+   std::unique_ptr<Tree<int>> tree(new Tree<int>(999));
+   tree->GetHead()->AppendChild(634);
+   tree->GetHead()->GetFirstChild()->AppendChild(34);
+   tree->GetHead()->GetFirstChild()->AppendChild(13);
+   tree->GetHead()->GetFirstChild()->AppendChild(89);
+   tree->GetHead()->GetFirstChild()->AppendChild(3);
+   tree->GetHead()->GetFirstChild()->AppendChild(1);
+   tree->GetHead()->GetFirstChild()->AppendChild(0);
+   tree->GetHead()->GetFirstChild()->AppendChild(-5);
+
+   tree->GetHead()->AppendChild(375);
+   tree->GetHead()->AppendChild(173);
+   tree->GetHead()->AppendChild(128);
 
    bool sortingError = false;
    int lastItem = -999;
+
+   PrintTree(*tree.get());
 
    // Sort:
    std::for_each(std::begin(*tree), std::end(*tree),
@@ -579,7 +595,7 @@ void TreeTests::SortingATreeOfIntegers()
          { return lhs.GetData() < rhs.GetData(); });
    });
 
-   //PrintTree(*tree.get());
+   PrintTree(*tree.get());
 
    // Verify:
    std::for_each(std::begin(*tree), std::end(*tree),

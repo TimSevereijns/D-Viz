@@ -442,26 +442,74 @@ template<typename T>
 std::shared_ptr<TreeNode<T>> TreeNode<T>::MergeSortedHalves(std::shared_ptr<TreeNode<T>>& lhs,
    std::shared_ptr<TreeNode<T>>& rhs, std::function<bool (TreeNode<T>, TreeNode<T>)> comparator)
 {
-   if (!lhs)
-   {
-      return rhs;
-   }
-   else if (!rhs)
-   {
-      return lhs;
-   }
-
    std::shared_ptr<TreeNode<T>> result = nullptr;
-
    if (comparator(*lhs.get(), *rhs.get()))
    {
-      result = lhs;
-      result->m_nextSibling = MergeSortedHalves(lhs->GetNextSibling(), rhs, comparator);
+      result = std::shared_ptr<TreeNode<T>>(lhs);
+      lhs = lhs->GetNextSibling();
    }
    else
    {
-      result = rhs;
-      result->m_nextSibling = MergeSortedHalves(lhs, rhs->GetNextSibling(), comparator);
+      result = std::shared_ptr<TreeNode<T>>(rhs);
+      rhs = rhs->GetNextSibling();
+   }
+
+   std::shared_ptr<TreeNode<T>> tail = result;
+
+   while (lhs && rhs)
+   {
+      if (comparator(*lhs.get(), *rhs.get()))
+      {
+         tail->m_nextSibling = std::shared_ptr<TreeNode<T>>(lhs);
+         tail = tail->m_nextSibling;
+         tail->m_nextSibling = nullptr;
+
+         lhs = lhs->GetNextSibling();
+
+         if (lhs)
+         {
+            lhs->m_previousSibling = nullptr;
+         }
+      }
+      else
+      {
+         tail->m_nextSibling = std::shared_ptr<TreeNode<T>>(rhs);
+         tail = tail->m_nextSibling;
+         tail->m_nextSibling = nullptr;
+
+         rhs = rhs->GetNextSibling();
+
+         if (rhs)
+         {
+            rhs->m_previousSibling = nullptr;
+         }
+      }
+   }
+
+   while (lhs)
+   {
+      tail->m_nextSibling = std::shared_ptr<TreeNode<T>>(lhs);
+      tail = tail->m_nextSibling;
+
+      lhs = lhs->GetNextSibling();
+
+      if (lhs)
+      {
+         lhs->m_previousSibling = nullptr;
+      }
+   }
+
+   while (rhs)
+   {
+      tail->m_nextSibling = std::shared_ptr<TreeNode<T>>(rhs);
+      tail = tail->m_nextSibling;
+
+      rhs = rhs->GetNextSibling();
+
+      if (rhs)
+      {
+         rhs->m_previousSibling = nullptr;
+      }
    }
 
    return result;
