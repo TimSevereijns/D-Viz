@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstdint>
 #include <functional>
+#include <iostream>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
@@ -462,7 +463,6 @@ std::shared_ptr<TreeNode<T>> TreeNode<T>::MergeSortedHalves(std::shared_ptr<Tree
       {
          tail->m_nextSibling = std::shared_ptr<TreeNode<T>>(lhs);
          tail = tail->m_nextSibling;
-         tail->m_nextSibling = nullptr;
 
          lhs = lhs->GetNextSibling();
 
@@ -475,7 +475,6 @@ std::shared_ptr<TreeNode<T>> TreeNode<T>::MergeSortedHalves(std::shared_ptr<Tree
       {
          tail->m_nextSibling = std::shared_ptr<TreeNode<T>>(rhs);
          tail = tail->m_nextSibling;
-         tail->m_nextSibling = nullptr;
 
          rhs = rhs->GetNextSibling();
 
@@ -573,6 +572,15 @@ class Tree
        * @returns The zero-indexed depth of the node in its tree.
        */
       static unsigned int Depth(TreeNode<T> node);
+
+      /**
+       * @brief Print               Prints the tree starting and ending at the node in question,
+       *                            using a pre-order traversal.
+       * @param node                The starting node.
+       * @param printer             A function (or lambda) that interprets the node's data and
+       *                            returns the data to be printed as a std::wstring.
+       */
+      static void Print(TreeNode<T>& node, std::function<std::wstring (const T&)> printer);
 
       /**
        * @brief The Iterator class
@@ -866,6 +874,27 @@ unsigned int Tree<T>::Depth(TreeNode<T> node)
    }
 
    return depth;
+}
+
+template<typename T>
+void Tree<T>::Print(TreeNode<T>& node, std::function<std::wstring (const T&)> printer)
+{
+   Tree<T>::PreOrderIterator itr = Tree<T>::PreOrderIterator(std::make_shared<TreeNode<T>>(node));
+   while (&*itr != &node)
+   {
+      if (&*itr == nullptr)
+      {
+         break;
+      }
+
+      const auto depth = Tree<T>::Depth(*itr);
+      const auto tabSize = 2;
+      const std::wstring padding((depth * tabSize), ' ');
+
+      std::wcout << padding << printer(itr->GetData()) << std::endl;
+
+      ++itr;
+   }
 }
 
 template<typename T>

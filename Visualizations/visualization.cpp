@@ -28,6 +28,7 @@ void Visualization::ScanDirectory()
 
    m_diskScanner.JoinScanningThread();
    m_diskScanner.PrintTreeMetadata();
+   m_diskScanner.PrintTree();
 }
 
 QVector<QVector3D>& Visualization::GetVertices()

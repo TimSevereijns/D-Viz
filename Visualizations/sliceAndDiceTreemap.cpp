@@ -7,6 +7,7 @@ namespace
    void ParseNode(TreeNode<VizNode>& node)
    {
       static const float BLOCK_HEIGHT = 0.0625f;
+      static const float BLOCK_TO_REAL_ESTATE_RATIO = 0.9f;
 
       VizNode& data = node.GetData();
       const std::uintmax_t fileSize = data.m_file.m_size;
@@ -24,14 +25,13 @@ namespace
 
       float additionalCoverage = 0.0f;
 
-      // Slice perpendicular to the X-axis:
-      if (parentBlock.m_width > parentBlock.m_depth)
+      if (parentBlock.m_width > parentBlock.m_depth)          // Slice perpendicular to the X-axis:
       {
          const auto paddedBlockWidth = parentBlock.m_width * percentageOfParent;
-         const auto actualBlockWidth = paddedBlockWidth * 0.9f;
+         const auto actualBlockWidth = paddedBlockWidth * BLOCK_TO_REAL_ESTATE_RATIO;
          const auto widthPaddingPerSide = ((parentBlock.m_width * 0.1f) / siblingCount) / 2.0f;
 
-         const auto actualBlockDepth = parentBlock.m_depth * 0.9f;
+         const auto actualBlockDepth = parentBlock.m_depth * BLOCK_TO_REAL_ESTATE_RATIO;
          const auto depthPaddingPerSide = (parentBlock.m_depth - actualBlockDepth) / 2.0f;
 
          const auto offset = QVector3D(
@@ -48,13 +48,13 @@ namespace
 
          additionalCoverage = (actualBlockWidth + (2 * widthPaddingPerSide)) / parentBlock.m_width;
       }
-      else
+      else                                                    // Slice perpendicular to the Y-axis:
       {
          const auto paddedBlockDepth = parentBlock.m_depth * percentageOfParent;
-         const auto actualBlockDepth = paddedBlockDepth * 0.9f;
+         const auto actualBlockDepth = paddedBlockDepth * BLOCK_TO_REAL_ESTATE_RATIO;
          const auto depthPaddingPerSide = ((parentBlock.m_depth * 0.1f) / siblingCount) / 2.0f;
 
-         const auto actualBlockWidth = parentBlock.m_width * 0.9f;
+         const auto actualBlockWidth = parentBlock.m_width * BLOCK_TO_REAL_ESTATE_RATIO;
          const auto widthPaddingPerSide = (parentBlock.m_width - actualBlockWidth) / 2.0f;
 
          const auto offset = QVector3D(
@@ -92,7 +92,7 @@ void SliceAndDiceTreeMap::ParseScan()
 {
    auto& tree = m_diskScanner.GetDirectoryTree();
 
-   std::cout << "Sorting raw tree..." << std::endl;
+   const auto startSortTime = std::chrono::high_resolution_clock::now();
 
    std::for_each(std::begin(tree), std::end(tree),
       [] (TreeNode<VizNode>& node)
@@ -101,9 +101,21 @@ void SliceAndDiceTreeMap::ParseScan()
          { return lhs.GetData().m_file.m_size < rhs.GetData().m_file.m_size; });
    });
 
-   std::cout << "Parsing raw tree..." << std::endl;
+   const auto endSortTime = std::chrono::high_resolution_clock::now();
 
+   std::chrono::duration<double> sortingTime =
+      std::chrono::duration_cast<std::chrono::duration<double>>(endSortTime - startSortTime);
+
+   std::cout << "Sort time (in seconds): " << sortingTime.count() << std::endl;
+
+   const auto startParseTime = std::chrono::high_resolution_clock::now();
    std::for_each(tree.beginPreOrder(), tree.endPreOrder(), ParseNode);
+   const auto endParseTime = std::chrono::high_resolution_clock::now();
+
+   std::chrono::duration<double> parsingTime =
+      std::chrono::duration_cast<std::chrono::duration<double>>(endParseTime - startParseTime);
+
+   std::cout << "Parse time (in seconds): " << parsingTime.count() << std::endl;
 
    m_hasDataBeenParsed = true;
 }

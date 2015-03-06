@@ -229,15 +229,8 @@ void DiskScanner::PrintTree() const
    std::cout << "  The Tree!  " << std::endl;
    std::cout << "=============" << std::endl;
 
-   std::for_each(m_fileTree->beginPreOrder(), m_fileTree->endPreOrder(),
-      [] (const TreeNode<VizNode>& node)
-   {
-      const auto depth = Tree<VizNode>::Depth(node);
-      const auto tabSize = 2;
-      const std::wstring padding((depth * tabSize), ' ');
-
-      std::wcout << padding << node.GetData().m_file.m_name << std::endl;
-   });
+   Tree<VizNode>::Print(*m_fileTree->GetHead(),
+      [] (const VizNode& data) { return data.m_file.m_name; } );
 }
 
 void DiskScanner::PrintTreeMetadata() const
