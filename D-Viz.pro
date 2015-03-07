@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     camera.cpp \
     keyboardManager.cpp \
     Visualizations/sliceAndDiceTreemap.cpp \
-    Visualizations/visualization.cpp
+    Visualizations/visualization.cpp \
+    Visualizations/squarifiedTreemap.cpp
 
 HEADERS  += mainwindow.h \
     tree.h \
@@ -28,7 +29,8 @@ HEADERS  += mainwindow.h \
     camera.h \
     keyboardManager.h \
     Visualizations/visualization.h \
-    Visualizations/sliceAndDiceTreemap.h
+    Visualizations/sliceAndDiceTreemap.h \
+    Visualizations/squarifiedTreemap.h
 
 FORMS    += mainwindow.ui
 

@@ -18,7 +18,7 @@ namespace
       }
 
       const std::uintmax_t parentSize = node.GetParent()->GetData().m_file.m_size;
-      const float percentageOfParent = static_cast<float>(fileSize) / static_cast<float>(parentSize);
+      const auto percentageOfParent = static_cast<float>(fileSize) / static_cast<float>(parentSize);
 
       Block& parentBlock = node.GetParent()->GetData().m_block;
       const unsigned int siblingCount = node.GetParent()->GetChildCount() + 1;
