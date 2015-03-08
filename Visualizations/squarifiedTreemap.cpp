@@ -94,6 +94,22 @@ namespace
    }
 
    /**
+    * @brief ComputeWorstAspectRatio
+    * @param row
+    * @return
+    */
+   float ComputeWorstAspectRatio(std::vector<TreeNode<VizNode>>& row)
+   {
+      const auto maxElement = std::max_element(std::begin(row), std::end(row),
+         [] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs) -> bool
+      {
+         return true;
+      });
+
+      return 1.0f;
+   }
+
+   /**
     * @brief Squarify
     *
     * Pseudo:

@@ -6,20 +6,6 @@
 
 namespace
 {
-   template<typename T>
-   void PrintTree(Tree<T>& tree)
-   {
-      std::for_each(tree.beginPreOrder(), tree.endPreOrder(),
-         [] (const TreeNode<int>& node)
-      {
-         const auto depth = Tree<T>::Depth(node);
-         const auto tabSize = 2;
-         const std::string padding((depth * tabSize), ' ');
-
-         std::cout << padding << node.GetData() << std::endl;
-      });
-   }
-
    std::unique_ptr<Tree<int>> CreateSimpleIntegerBinaryTree()
    {
       std::unique_ptr<Tree<int>> tree(new Tree<int>(99));
@@ -51,25 +37,6 @@ namespace
       tree->GetHead()->AppendChild("C");
       tree->GetHead()->AppendChild("D");
       tree->GetHead()->AppendChild("E");
-
-      return tree;
-   }
-
-   std::unique_ptr<Tree<int>> CreateIntegerTreeOfUnsortedNodes()
-   {
-      std::unique_ptr<Tree<int>> tree(new Tree<int>(999));
-      tree->GetHead()->AppendChild(634);
-      tree->GetHead()->GetFirstChild()->AppendChild(34);
-      tree->GetHead()->GetFirstChild()->AppendChild(13);
-      tree->GetHead()->GetFirstChild()->AppendChild(89);
-      tree->GetHead()->GetFirstChild()->AppendChild(3);
-      tree->GetHead()->GetFirstChild()->AppendChild(1);
-      tree->GetHead()->GetFirstChild()->AppendChild(0);
-      tree->GetHead()->GetFirstChild()->AppendChild(-5);
-
-      tree->GetHead()->AppendChild(375);
-      tree->GetHead()->AppendChild(173);
-      tree->GetHead()->AppendChild(128);
 
       return tree;
    }
@@ -347,13 +314,13 @@ void TreeTests::PostOrderTraversalOfLeftDegenerateBinaryTree()
 {
    std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("A"));
    tree->GetHead()->
-         PrependChild("B")->
-         PrependChild("C")->
-         PrependChild("D")->
-         PrependChild("E")->
-         PrependChild("F")->
-         PrependChild("G")->
-         PrependChild("H");
+      PrependChild("B")->
+      PrependChild("C")->
+      PrependChild("D")->
+      PrependChild("E")->
+      PrependChild("F")->
+      PrependChild("G")->
+      PrependChild("H");
 
    const std::vector<TreeNode<std::string>> expectedTraversal
    {
@@ -379,13 +346,13 @@ void TreeTests::PostOrderTraversalOfRightDegenerateBinaryTree()
 {
    std::unique_ptr<Tree<std::string>> tree(new Tree<std::string>("A"));
    tree->GetHead()->
-         AppendChild("B")->
-         AppendChild("C")->
-         AppendChild("D")->
-         AppendChild("E")->
-         AppendChild("F")->
-         AppendChild("G")->
-         AppendChild("H");
+      AppendChild("B")->
+      AppendChild("C")->
+      AppendChild("D")->
+      AppendChild("E")->
+      AppendChild("F")->
+      AppendChild("G")->
+      AppendChild("H");
 
    const std::vector<TreeNode<std::string>> expectedTraversal
    {
@@ -566,8 +533,6 @@ void TreeTests::LeafTraversalOfSimpleBinaryTreeFromEndToBegin()
 
 void TreeTests::SortingATreeOfIntegers()
 {
-   //std::unique_ptr<Tree<int>> tree = CreateIntegerTreeOfUnsortedNodes();
-
    std::unique_ptr<Tree<int>> tree(new Tree<int>(999));
    tree->GetHead()->AppendChild(634);
    tree->GetHead()->GetFirstChild()->AppendChild(34);
@@ -582,10 +547,10 @@ void TreeTests::SortingATreeOfIntegers()
    tree->GetHead()->AppendChild(173);
    tree->GetHead()->AppendChild(128);
 
+   const auto sizeBeforeSort = Tree<int>::Size(*tree->GetHead());
+
    bool sortingError = false;
    int lastItem = -999;
-
-   PrintTree(*tree.get());
 
    // Sort:
    std::for_each(std::begin(*tree), std::end(*tree),
@@ -595,11 +560,11 @@ void TreeTests::SortingATreeOfIntegers()
          { return lhs.GetData() < rhs.GetData(); });
    });
 
-   PrintTree(*tree.get());
+   const auto sizeAfterSort = Tree<int>::Size(*tree->GetHead());
 
    // Verify:
    std::for_each(std::begin(*tree), std::end(*tree),
-      [&] (TreeNode<int>& node)
+      [&] (const TreeNode<int>& node)
    {
       if (!node.HasChildren())
       {
@@ -619,7 +584,7 @@ void TreeTests::SortingATreeOfIntegers()
       }
    });
 
-   QVERIFY(sortingError == false);
+   QVERIFY(sizeBeforeSort == sizeAfterSort && sortingError == false);
 }
 
 QTEST_MAIN(TreeTests)
