@@ -130,7 +130,7 @@ struct Block
          << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0);
    }
 
-   bool IsDefined()
+   bool IsDefined() const
    {
       return (m_width > 0.0f && m_height > 0.0f && m_depth > 0.0f);
    }

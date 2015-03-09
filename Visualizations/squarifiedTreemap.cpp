@@ -12,23 +12,24 @@ namespace
     * @param elevation
     * @param parentFileSize
     */
-   void LayoutStrip(std::vector<TreeNode<VizNode>>& children, const Block& realEstate)
+   void LayoutStrip(std::vector<TreeNode<VizNode>>& row, Block& realEstate)
    {
       static const float BLOCK_HEIGHT = 0.0625f;
       static const float BLOCK_TO_REAL_ESTATE_RATIO = 0.9f;
 
-      if (node.GetChildCount() == 0 || !realEstate.isValid())
+      if (row.size() == 0 || !realEstate.IsDefined())
       {
          return;
       }
 
-      const size_t nodeCount = children.size();
+      const size_t nodeCount = row.size();
       const float percentCovered = 0.0f;
+      const float parentFileSize = row[0].GetParent()->GetData().m_file.m_size;
 
       float additionalCoverage = 0.0f;
 
-      std::for_each(std::begin(children), std::end(children),
-         [&] (const TreeNode<VizNode>& node)
+      std::for_each(std::begin(row), std::end(row),
+         [&] (TreeNode<VizNode>& node)
       {
          VizNode& data = node.GetData();
          const std::uintmax_t fileSize = data.m_file.m_size;
@@ -39,7 +40,7 @@ namespace
             return;
          }
 
-         const auto percentageOfParent = static_cast<float>(fileSize) /
+         const float percentageOfParent = static_cast<float>(fileSize) /
                static_cast<float>(parentFileSize);
 
          if (realEstate.m_width > realEstate.m_depth)
@@ -75,9 +76,9 @@ namespace
             const auto widthPaddingPerSide = (realEstate.m_height - actualBlockWidth) / 2.0f;
 
             const auto offset = QVector3D(
-               widthPaddingPerSide
+               widthPaddingPerSide,
                BLOCK_HEIGHT,
-               -(realEstate.m_depth * percentCovered) - depthPaddingPerSide,
+               -(realEstate.m_depth * percentCovered) - depthPaddingPerSide
             );
 
             data.m_block = Block(realEstate.m_vertices[0] + offset,
@@ -98,45 +99,60 @@ namespace
     * @param row
     * @return
     */
-   float ComputeWorstAspectRatio(std::vector<TreeNode<VizNode>>& row)
+   float ComputeWorstAspectRatio(std::vector<TreeNode<VizNode>>& row,
+      TreeNode<VizNode>& additionalItem, float shortestWidth)
    {
       const auto maxElement = std::max_element(std::begin(row), std::end(row),
          [] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs) -> bool
       {
-         return true;
+         const float lhsRatio = lhs.GetData().m_block.m_width / lhs.GetData().m_block.m_depth;
+         const float rhsRatio = rhs.GetData().m_block.m_width / rhs.GetData().m_block.m_depth;
+
+         return lhsRatio < rhsRatio;
       });
 
-      return 1.0f;
+      return maxElement->GetData().m_block.m_width / maxElement->GetData().m_block.m_depth;
    }
 
    /**
     * @brief Squarify
-    *
-    * Pseudo:
-    *
-    * VizNode& currentNode = head(remainingChildren);
-    *
-    * if ((the worst aspect ratio of all blocks in the row without currentNode) <=
-    *     (the worst aspect ratio of all blocks in the row with currentNode)) then
-    * {
-    *    recurse on the tail(remainingChildren) and the row with the currentNode in it.
-    * }
-    * else
-    * {
-    *    layout the current items in the row.
-    *    recurse on the remaining area with all the children.
-    * }
-    *
     * @param children
     * @param realEstate
     * @param longestSide
     */
-   void Squarify(TreeNode<VizNode>& children, Block& realEstate, float longestSide)
+   void Squarify(TreeNode<VizNode>& children, std::vector<TreeNode<VizNode>>& row,
+                 Block& realEstate, float shortestSide)
    {
-      // Do some stuff...
+      TreeNode<VizNode>& firstChild = children;
+      if (ComputeWorstAspectRatio(row, TreeNode<VizNode>(), shortestSide) <=
+          ComputeWorstAspectRatio(row, firstChild,          shortestSide))
+      {
+         Block remainingRealEstate;
+         // TODO: Compute shortest remaining side.
 
-      auto row = std::vector<TreeNode<VizNode>>();
-      LayoutStrip(row, Block());
+         float shortestRemainingSide = remainingRealEstate.m_width < remainingRealEstate.m_depth
+               ? remainingRealEstate.m_width
+               : remainingRealEstate.m_depth;
+
+         row.emplace_back(firstChild);
+
+         Squarify(*children.GetNextSibling(), row, remainingRealEstate,
+            shortestRemainingSide);
+      }
+      else
+      {
+         LayoutStrip(row, realEstate);
+
+         Block newRealEstate;
+         // TODO: Compute new real estate.
+
+         float shortestRemainingSide = newRealEstate.m_width < newRealEstate.m_depth
+               ? newRealEstate.m_width
+               : newRealEstate.m_depth;
+
+         Squarify(*children.GetNextSibling(), std::vector<TreeNode<VizNode>>(), newRealEstate,
+            shortestRemainingSide);
+      }
    }
 
    /**
@@ -145,9 +161,13 @@ namespace
     */
    void ParseNode(TreeNode<VizNode>& node)
    {
-      Squarify(*node.GetFirstChild(), Block(), 10.0f);
-   }
+      Block parentBlock = node.GetParent()
+         ? node.GetParent()->GetData().m_block
+         : Block(QVector3D(0, 0, 0), 10.0f, 0.125f, 10.0f); // The dummy base node.
 
+      Squarify(*node.GetFirstChild(), std::vector<TreeNode<VizNode>>(), parentBlock,
+         parentBlock.m_width < parentBlock.m_depth ? parentBlock.m_width : parentBlock.m_depth);
+   }
 }
 
 SquarifiedTreeMap::SquarifiedTreeMap(const std::wstring& rawPath)
@@ -157,7 +177,6 @@ SquarifiedTreeMap::SquarifiedTreeMap(const std::wstring& rawPath)
 
 SquarifiedTreeMap::~SquarifiedTreeMap()
 {
-
 }
 
 void SquarifiedTreeMap::ParseScan()

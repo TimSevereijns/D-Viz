@@ -2,6 +2,7 @@
 
 #include "camera.h"
 #include "Visualizations/sliceAndDiceTreemap.h"
+#include "Visualizations/squarifiedTreemap.h"
 
 #include <QMouseEvent>
 #include <QOpenGLShader>
@@ -236,7 +237,8 @@ void GLCanvas::PrepareOriginMarkerVertexBuffers()
 
 void GLCanvas::PrepareVisualizationVertexBuffers()
 {
-   SliceAndDiceTreeMap treeMap{L"C:\\excluded\\mainline\\source\\marquee"};
+   //SliceAndDiceTreeMap treeMap{L"C:\\excluded\\mainline\\source\\marquee"};
+   SquarifiedTreeMap treeMap{L"C:\\excluded\\mainline\\source\\marquee"};
    treeMap.ScanDirectory();
    treeMap.ParseScan();
 
