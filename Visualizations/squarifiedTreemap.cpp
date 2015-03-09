@@ -6,11 +6,9 @@
 namespace
 {
    /**
-    * @brief ParseNode
-    * @param node
-    * @param realEsate
-    * @param elevation
-    * @param parentFileSize
+    * @brief LayoutStrip slices the real estate into file size proportional pieces.
+    * @param[in] row                The items to be placed in the current piece of real estate.
+    * @param[in] realEsate          The space into which the nodes have to be placed.
     */
    void LayoutStrip(std::vector<TreeNode<VizNode>>& row, Block& realEstate)
    {
@@ -90,17 +88,23 @@ namespace
             additionalCoverage = (actualBlockDepth + (2 * depthPaddingPerSide)) / realEstate.m_depth;
          }
 
+         if (additionalCoverage)
+         {
+            assert(!"The new block does not appear to have required dimensions!");
+         }
+
          realEstate.m_percentCovered += additionalCoverage;
       });
    }
 
    /**
     * @brief ComputeWorstAspectRatio
-    * @param row
+    * @param[in] row                The nodes that have been placed in the current real estate.
+    * @param[in] additionalItem     One additional item item to be considered in the same estate.
     * @return
     */
    float ComputeWorstAspectRatio(std::vector<TreeNode<VizNode>>& row,
-      TreeNode<VizNode>& additionalItem, float shortestWidth)
+      TreeNode<VizNode>& additionalItem)
    {
       const auto maxElement = std::max_element(std::begin(row), std::end(row),
          [] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs) -> bool
@@ -115,49 +119,37 @@ namespace
    }
 
    /**
-    * @brief Squarify
-    * @param children
-    * @param realEstate
-    * @param longestSide
+    * @brief Squarify is the main recursive function that drives the creation of the Squarifed map.
+    * @param[in] children           The remaining child nodes that need to be laid out.
+    * @param[in] realEstate         The space available into which the children can be laid out.
     */
    void Squarify(TreeNode<VizNode>& children, std::vector<TreeNode<VizNode>>& row,
-                 Block& realEstate, float shortestSide)
+      Block& realEstate)
    {
       TreeNode<VizNode>& firstChild = children;
-      if (ComputeWorstAspectRatio(row, TreeNode<VizNode>(), shortestSide) <=
-          ComputeWorstAspectRatio(row, firstChild,          shortestSide))
+      if (ComputeWorstAspectRatio(row, TreeNode<VizNode>()) <=
+          ComputeWorstAspectRatio(row, firstChild))
       {
          Block remainingRealEstate;
-         // TODO: Compute shortest remaining side.
-
-         float shortestRemainingSide = remainingRealEstate.m_width < remainingRealEstate.m_depth
-               ? remainingRealEstate.m_width
-               : remainingRealEstate.m_depth;
+         // TODO: Compute remaining real estate.
 
          row.emplace_back(firstChild);
-
-         Squarify(*children.GetNextSibling(), row, remainingRealEstate,
-            shortestRemainingSide);
+         Squarify(*children.GetNextSibling(), row, remainingRealEstate);
       }
       else
       {
          LayoutStrip(row, realEstate);
 
-         Block newRealEstate;
+         Block freshRealEstate;
          // TODO: Compute new real estate.
 
-         float shortestRemainingSide = newRealEstate.m_width < newRealEstate.m_depth
-               ? newRealEstate.m_width
-               : newRealEstate.m_depth;
-
-         Squarify(*children.GetNextSibling(), std::vector<TreeNode<VizNode>>(), newRealEstate,
-            shortestRemainingSide);
+         Squarify(*children.GetNextSibling(), std::vector<TreeNode<VizNode>>(), freshRealEstate);
       }
    }
 
    /**
-    * @brief Squarify
-    * @param node
+    * @brief ParseNode kicks off the squarification of each node.
+    * @param node[in]               The current node being parsed.
     */
    void ParseNode(TreeNode<VizNode>& node)
    {
@@ -165,8 +157,7 @@ namespace
          ? node.GetParent()->GetData().m_block
          : Block(QVector3D(0, 0, 0), 10.0f, 0.125f, 10.0f); // The dummy base node.
 
-      Squarify(*node.GetFirstChild(), std::vector<TreeNode<VizNode>>(), parentBlock,
-         parentBlock.m_width < parentBlock.m_depth ? parentBlock.m_width : parentBlock.m_depth);
+      Squarify(*node.GetFirstChild(), std::vector<TreeNode<VizNode>>(), parentBlock);
    }
 }
 
@@ -192,4 +183,3 @@ void SquarifiedTreeMap::ParseScan()
 
    std::for_each(tree.beginPreOrder(), tree.endPreOrder(), ParseNode);
 }
-
