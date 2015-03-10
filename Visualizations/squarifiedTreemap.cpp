@@ -1,7 +1,9 @@
 #include "squarifiedTreemap.h"
 
+#include <algorithm>
 #include <assert.h>
 #include <iostream>
+#include <numeric>
 
 namespace
 {
@@ -99,23 +101,52 @@ namespace
 
    /**
     * @brief ComputeWorstAspectRatio
-    * @param[in] row                The nodes that have been placed in the current real estate.
-    * @param[in] additionalItem     One additional item item to be considered in the same estate.
+    * @param[in] row                   The nodes that have been placed in the current real estate.
+    * @param[in] additionalItem        One additional item item to be considered in the same estate.
+    * @param[in] lengthOfShortestSide  Length of shortest side of the real estate.
     * @return
     */
    float ComputeWorstAspectRatio(std::vector<TreeNode<VizNode>>& row,
-      TreeNode<VizNode>& additionalItem)
+      TreeNode<VizNode>* additionalItem, const float lengthOfShortestSide)
    {
-      const auto maxElement = std::max_element(std::begin(row), std::end(row),
-         [] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs) -> bool
+      std::uintmax_t sumOfAllArea = std::accumulate(std::begin(row), std::end(row),
+         std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<VizNode>& node)
       {
-         const float lhsRatio = lhs.GetData().m_block.m_width / lhs.GetData().m_block.m_depth;
-         const float rhsRatio = rhs.GetData().m_block.m_width / rhs.GetData().m_block.m_depth;
-
-         return lhsRatio < rhsRatio;
+         return result + node.GetData().m_file.m_size;
       });
 
-      return maxElement->GetData().m_block.m_width / maxElement->GetData().m_block.m_depth;
+      const std::uintmax_t additionalItemSize = additionalItem
+         ? additionalItem->GetData().m_file.m_size : 0;
+
+      sumOfAllArea += additionalItemSize;
+
+      std::uintmax_t largestElement;
+      if (additionalItem)
+      {
+         largestElement = row[0].GetData().m_file.m_size > additionalItemSize
+            ? row[0].GetData().m_file.m_size : additionalItemSize;
+      }
+      else
+      {
+         largestElement = row[0].GetData().m_file.m_size;
+      }
+
+      std::uintmax_t smallestElement;
+      if (additionalItem)
+      {
+         smallestElement = row[row.size() - 1].GetData().m_file.m_size < additionalItemSize
+            ? row[row.size() - 1].GetData().m_file.m_size : additionalItemSize;
+      }
+      else
+      {
+         smallestElement = row[row.size() - 1].GetData().m_file.m_size;
+      }
+
+      const float lengthSquared = lengthOfShortestSide * lengthOfShortestSide;lengthSquared;
+      const float areaSquared = sumOfAllArea * sumOfAllArea;
+
+      return std::max((lengthSquared * largestElement) / (areaSquared),
+         (areaSquared) / (lengthSquared * smallestElement));
    }
 
    /**
@@ -127,8 +158,12 @@ namespace
       Block& realEstate)
    {
       TreeNode<VizNode>& firstChild = children;
-      if (ComputeWorstAspectRatio(row, TreeNode<VizNode>()) <=
-          ComputeWorstAspectRatio(row, firstChild))
+
+      const float shortestSide = std::min(realEstate.m_height, realEstate.m_depth);
+
+      // If worst aspect ratio improves, add block to current row:
+      if (ComputeWorstAspectRatio(row, nullptr, shortestSide) <=
+          ComputeWorstAspectRatio(row, &firstChild, shortestSide))
       {
          Block remainingRealEstate;
          // TODO: Compute remaining real estate.
@@ -136,7 +171,7 @@ namespace
          row.emplace_back(firstChild);
          Squarify(*children.GetNextSibling(), row, remainingRealEstate);
       }
-      else
+      else // if aspect ratio gets worse, create a new row:
       {
          LayoutStrip(row, realEstate);
 

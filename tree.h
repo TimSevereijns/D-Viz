@@ -164,7 +164,7 @@ TreeNode<T>::TreeNode()
      m_lastChild(nullptr),
      m_previousSibling(nullptr),
      m_nextSibling(nullptr),
-     m_data(nullptr),
+     m_data(nullptr),               // TODO: Not all data is in the form of a pointer...
      m_childCount(0),
      m_visited(false)
 {
