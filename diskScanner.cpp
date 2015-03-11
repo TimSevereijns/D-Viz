@@ -201,7 +201,7 @@ void DiskScanner::ComputeDirectorySizes()
    {
       const FileInfo fileInfo = node.GetData().m_file;
 
-      std::shared_ptr<TreeNode<VizNode>> parent = node.GetParent();
+      std::shared_ptr<TreeNode<VizNode>>& parent = node.GetParent();
       if (parent)
       {
          FileInfo& parentInfo = parent->GetData().m_file;

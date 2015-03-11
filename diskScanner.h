@@ -180,7 +180,7 @@ class DiskScanner
 
       /**
        * @brief Scan will perform a recursive scan of the filesystem, starting at the specified
-       * path.
+       * path, and it will then compute and update the size of any directories in the tree.
        * @param[out] progress       An atomic containing the number of files scanned so far, and a
        *                            boolean that will be set to true once scanning has completed.
        */

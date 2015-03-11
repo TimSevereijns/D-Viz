@@ -18,6 +18,7 @@
  * https://github.com/advancingu/Qt5OppenGL
  * www.tomdalling.com/
  * https://github.com/qtproject/learning-guides/tree/master/openGL_tutorial
+ * https://github.com/g-truc/ogl-samples/tree/master/tests
  */
 
 namespace
