@@ -101,6 +101,39 @@ namespace
       });
    }
 
+   float AspectRatio(std::vector<TreeNode<VizNode>*>& row,
+      const TreeNode<VizNode>* additionalItem, const VizNode& parentNode)
+   {
+//      if (row.empty() && !additionalItem)
+//      {
+//         std::cout << "Both row and additional item are empty!" << std::endl;
+//         return std::numeric_limits<float>::max();
+//      }
+
+//      std::uintmax_t sumOfAllSizes = std::accumulate(std::begin(row), std::end(row),
+//         std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<VizNode>* node)
+//      {
+//         return result + node->GetData().m_file.m_size;
+//      });
+
+//      const std::uintmax_t additionalItemSize = additionalItem
+//         ? additionalItem->GetData().m_file.m_size : 0;
+
+//      sumOfAllSizes += additionalItemSize;
+
+//      // Note: Slice perpendicular to the longest edge!
+//      const float longParentEdge = std::max(parentNode.m_block.m_depth, parentNode.m_block.m_width);
+//      const float shortParentEdge = std::min(parentNode.m_block.m_depth, parentNode.m_block.m_width);
+
+//      const float rowWidth = longParentEdge * (sumOfAllSizes / parentNode.m_file.m_size);
+
+//      const float smallestBlockDepth = shortParentEdge * (sumOfAllSizes / row.back().m_file.m_size);
+//      const float largestBlockDepth = shortParentEdge * (sumOfAllSizes / row.front().m_file.m_size);
+
+//      return std::max(rowWidth / )
+      return 0.0f;
+   }
+
    /**
     * @brief ComputeWorstAspectRatio
     * @param[in] row                   The nodes that have been placed in the current real estate.
@@ -109,10 +142,11 @@ namespace
     * @return
     */
    float ComputeWorstAspectRatio(std::vector<TreeNode<VizNode>*>& row,
-      const TreeNode<VizNode>* additionalItem, const float lengthOfShortestSide)
+      const TreeNode<VizNode>* additionalItem, const float shortestSideOfRow)
    {
       if (row.empty() && !additionalItem)
       {
+         std::cout << "Both row and additional item are empty!" << std::endl;
          return std::numeric_limits<float>::max();
       }
 
@@ -157,13 +191,21 @@ namespace
          smallestElement = row.back()->GetData().m_file.m_size;
       }
 
-      const float lengthSquared = lengthOfShortestSide * lengthOfShortestSide;
+      const float lengthSquared = shortestSideOfRow * shortestSideOfRow;
       const float areaSquared = sumOfAllArea * sumOfAllArea;
 
-      return std::max((lengthSquared * largestElement) / (areaSquared),
+      const float worstRatio = std::max((lengthSquared * largestElement) / (areaSquared),
          (areaSquared) / (lengthSquared * smallestElement));
+
+      std::cout << worstRatio << std::endl;
+
+      return worstRatio;
    }
 
+   /**
+    * @brief IterativeSquarify
+    * @param children
+    */
    void IterativeSquarify(TreeNode<VizNode>& children)
    {
       TreeNode<VizNode>* currentChild = &children;
@@ -179,7 +221,7 @@ namespace
                                              parentNode->GetData().m_block.m_depth);
 
          // If worst aspect ratio improves, add block to current row:
-         if (ComputeWorstAspectRatio(currentRow, currentChild, shortestSide) <
+         if (ComputeWorstAspectRatio(currentRow, currentChild, shortestSide) <=
              ComputeWorstAspectRatio(currentRow, nullptr, shortestSide))
          {
             currentRow.emplace_back(currentChild);
@@ -217,7 +259,13 @@ SquarifiedTreeMap::~SquarifiedTreeMap()
 
 void SquarifiedTreeMap::ParseScan()
 {
-   auto& tree = m_diskScanner.GetDirectoryTree();
+   //auto& tree = m_diskScanner.GetDirectoryTree();
+
+   FileInfo fileInfo{L"Dummy Root Node", DiskScanner::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY};
+   VizNode rootNode{fileInfo, Block{QVector3D(0.0f, 0.0f, 0.0f), 10.0f, 0.025f, 10.0f}};
+
+   // TODO: Create tree containing the same data as in the paper:
+   Tree<VizNode> tree(rootNode);
 
    std::for_each(std::begin(tree), std::end(tree), [] (TreeNode<VizNode>& node)
    {
