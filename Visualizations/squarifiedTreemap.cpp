@@ -9,6 +9,38 @@
 namespace
 {
    /**
+    * @brief PrintRow
+    * @param row
+    */
+   void PrintRow(std::vector<TreeNode<VizNode>*>& row)
+   {
+      std::cout << "\tRow: ";
+
+      for (const TreeNode<VizNode>* node : row)
+      {
+         std::wcout << node->GetData().m_file.m_name << " ";
+      }
+
+      std::cout << std::endl;
+   }
+
+   /**
+    * @brief RowSizeInBytes
+    * @param row
+    * @return
+    */
+   std::uintmax_t RowSizeInBytes(std::vector<TreeNode<VizNode>*>& row)
+   {
+      std::uintmax_t sumOfFileSizes = std::accumulate(std::begin(row), std::end(row),
+         std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<VizNode>* node)
+      {
+         return result + node->GetData().m_file.m_size;
+      });
+
+      return sumOfFileSizes;
+   }
+
+   /**
     * @brief LayoutStrip slices the real estate into file size proportional pieces.
     * @param[in] row                The items to be placed in the current piece of real estate.
     * @param[in] realEsate          The space into which the nodes have to be placed.
@@ -24,12 +56,11 @@ namespace
       }
 
       const size_t nodeCount = row.size();
-      const float percentCovered = 0.0f;
       const float parentFileSize = row.front()->GetParent()->GetData().m_file.m_size;
 
       float additionalCoverage = 0.0f;
 
-      std::for_each(std::begin(row), std::end(row), [&] (TreeNode<VizNode>* node)
+      for (TreeNode<VizNode>* node : row)
       {
          VizNode& data = node->GetData();
          const std::uintmax_t fileSize = data.m_file.m_size;
@@ -50,7 +81,7 @@ namespace
             const auto widthPaddingPerSide = ((realEstate.m_width * 0.1f) / nodeCount) / 2.0f;
 
             const auto actualBlockDepth = realEstate.m_depth * BLOCK_TO_REAL_ESTATE_RATIO;
-            const auto depthPaddingPerSide = (realEstate.m_height - actualBlockDepth) / 2.0f;
+            const auto depthPaddingPerSide = (realEstate.m_depth - actualBlockDepth) / 2.0f;
 
             const auto offset = QVector3D(
                (realEstate.m_width * realEstate.m_percentCovered) + widthPaddingPerSide,
@@ -74,7 +105,7 @@ namespace
             const auto depthPaddingPerSide = ((realEstate.m_depth * 0.1f) / nodeCount) / 2.0f;
 
             const auto actualBlockWidth = realEstate.m_width * BLOCK_TO_REAL_ESTATE_RATIO;
-            const auto widthPaddingPerSide = (realEstate.m_height - actualBlockWidth) / 2.0f;
+            const auto widthPaddingPerSide = (realEstate.m_width - actualBlockWidth) / 2.0f;
 
             const auto offset = QVector3D(
                widthPaddingPerSide,
@@ -92,46 +123,12 @@ namespace
                   realEstate.m_depth;
          }
 
-         if (additionalCoverage == 0.0f)
-         {
-            assert(!"The new block does not appear to have required dimensions!");
-         }
+         assert(additionalCoverage > 0.0f && additionalCoverage <= 1.0f);
+         assert(data.m_block.IsDefined());
+         //assert(realEstate.m_percentCovered <= 1.0f);
 
          realEstate.m_percentCovered += additionalCoverage;
-      });
-   }
-
-   float AspectRatio(std::vector<TreeNode<VizNode>*>& row,
-      const TreeNode<VizNode>* additionalItem, const VizNode& parentNode)
-   {
-//      if (row.empty() && !additionalItem)
-//      {
-//         std::cout << "Both row and additional item are empty!" << std::endl;
-//         return std::numeric_limits<float>::max();
-//      }
-
-//      std::uintmax_t sumOfAllSizes = std::accumulate(std::begin(row), std::end(row),
-//         std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<VizNode>* node)
-//      {
-//         return result + node->GetData().m_file.m_size;
-//      });
-
-//      const std::uintmax_t additionalItemSize = additionalItem
-//         ? additionalItem->GetData().m_file.m_size : 0;
-
-//      sumOfAllSizes += additionalItemSize;
-
-//      // Note: Slice perpendicular to the longest edge!
-//      const float longParentEdge = std::max(parentNode.m_block.m_depth, parentNode.m_block.m_width);
-//      const float shortParentEdge = std::min(parentNode.m_block.m_depth, parentNode.m_block.m_width);
-
-//      const float rowWidth = longParentEdge * (sumOfAllSizes / parentNode.m_file.m_size);
-
-//      const float smallestBlockDepth = shortParentEdge * (sumOfAllSizes / row.back().m_file.m_size);
-//      const float largestBlockDepth = shortParentEdge * (sumOfAllSizes / row.front().m_file.m_size);
-
-//      return std::max(rowWidth / )
-      return 0.0f;
+      }
    }
 
    /**
@@ -150,16 +147,12 @@ namespace
          return std::numeric_limits<float>::max();
       }
 
-      std::uintmax_t sumOfAllArea = std::accumulate(std::begin(row), std::end(row),
-         std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<VizNode>* node)
-      {
-         return result + node->GetData().m_file.m_size;
-      });
+      std::uintmax_t sumOfFileSizes = RowSizeInBytes(row);
 
       const std::uintmax_t additionalItemSize = additionalItem
          ? additionalItem->GetData().m_file.m_size : 0;
 
-      sumOfAllArea += additionalItemSize;
+      sumOfFileSizes += additionalItemSize;
 
       std::uintmax_t largestElement;
       if (additionalItem && !row.empty())
@@ -192,12 +185,12 @@ namespace
       }
 
       const float lengthSquared = shortestSideOfRow * shortestSideOfRow;
-      const float areaSquared = sumOfAllArea * sumOfAllArea;
+      const float areaSquared = sumOfFileSizes * sumOfFileSizes;
 
       const float worstRatio = std::max((lengthSquared * largestElement) / (areaSquared),
          (areaSquared) / (lengthSquared * smallestElement));
 
-      std::cout << worstRatio << std::endl;
+      std::cout << "Ratio: " << worstRatio << std::endl;
 
       return worstRatio;
    }
@@ -222,12 +215,13 @@ namespace
 
          // If worst aspect ratio improves, add block to current row:
          if (ComputeWorstAspectRatio(currentRow, currentChild, shortestSide) <=
-             ComputeWorstAspectRatio(currentRow, nullptr, shortestSide))
+             ComputeWorstAspectRatio(currentRow, nullptr,      shortestSide))
          {
             currentRow.emplace_back(currentChild);
          }
-         else // if aspect ratio gets worse, create a new row:
+         else // if aspect ratio gets worse, layout current row and create a new row:
          {
+            PrintRow(currentRow);
             LayoutStrip(currentRow, parentNode->GetData().m_block);
 
             currentRow.clear();
@@ -239,7 +233,12 @@ namespace
 
       currentChild = firstChild;
 
-      // foreach child of currentChild, recurse.
+      if (!currentRow.empty())
+      {
+         PrintRow(currentRow);
+         LayoutStrip(currentRow, currentChild->GetParent()->GetData().m_block);
+      }
+
       while (currentChild)
       {
          IterativeSquarify(*currentChild->GetFirstChild());
@@ -261,23 +260,43 @@ void SquarifiedTreeMap::ParseScan()
 {
    //auto& tree = m_diskScanner.GetDirectoryTree();
 
-   FileInfo fileInfo{L"Dummy Root Node", DiskScanner::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY};
-   VizNode rootNode{fileInfo, Block{QVector3D(0.0f, 0.0f, 0.0f), 10.0f, 0.025f, 10.0f}};
+   FileInfo fileInfo{L"Dummy Root Node", 24, FILE_TYPE::DIRECTORY};
+   VizNode rootNode{fileInfo, Block{QVector3D(0.0f, 0.0f, 0.0f), 6.0f, 0.025f, 4.0f}};
 
    // TODO: Create tree containing the same data as in the paper:
    Tree<VizNode> tree(rootNode);
+   FileInfo dummyInfo6{L"6", 6, FILE_TYPE::REGULAR};
+   tree.GetHead()->AppendChild(VizNode(dummyInfo6));
+   tree.GetHead()->AppendChild(VizNode(dummyInfo6));
 
-   std::for_each(std::begin(tree), std::end(tree), [] (TreeNode<VizNode>& node)
+   FileInfo dummyInfo4{L"4", 4, FILE_TYPE::REGULAR};
+   tree.GetHead()->AppendChild(VizNode(dummyInfo4));
+
+   FileInfo dummyInfo3{L"3", 3, FILE_TYPE::REGULAR};
+   tree.GetHead()->AppendChild(VizNode(dummyInfo3));
+
+   FileInfo dummyInfo2{L"2", 2, FILE_TYPE::REGULAR};
+   tree.GetHead()->AppendChild(VizNode(dummyInfo2));
+   tree.GetHead()->AppendChild(VizNode(dummyInfo2));
+
+   FileInfo dummyInfo1{L"1", 1, FILE_TYPE::REGULAR};
+   tree.GetHead()->AppendChild(VizNode(dummyInfo1));
+
+   for (TreeNode<VizNode>& node : tree)
    {
       node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
-         { return lhs.GetData().m_file.m_size < rhs.GetData().m_file.m_size; });
-   });
+      {
+         return lhs.GetData().m_file.m_size >= rhs.GetData().m_file.m_size;
+      });
+   }
 
    // Set the size of the root visualization:
-   tree.GetHead()->GetFirstChild()->GetData().m_block =
-         Block(QVector3D(0, 0, 0), 10.0f, 0.0625f, 10.0f);
+//   tree.GetHead()->GetFirstChild()->GetData().m_block =
+//         Block(QVector3D(0, 0, 0), 10.0f, 0.0625f, 10.0f);
 
    IterativeSquarify(*tree.GetHead()->GetFirstChild());
 
    m_hasDataBeenParsed = true;
+
+   m_diskScanner.GetDirectoryTree() = tree;
 }
