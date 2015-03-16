@@ -50,6 +50,9 @@ struct Block
 {
    QVector<QVector3D> m_vertices;
    QVector<QVector3D> m_colors;
+
+   QVector3D m_nextChildOrigin;
+
    float m_percentCovered;
    float m_width;
    float m_height;
@@ -78,7 +81,8 @@ struct Block
       : m_width(width),
         m_height(height),
         m_depth(depth),
-        m_percentCovered(0.0f)
+        m_percentCovered(0.0f),
+        m_nextChildOrigin(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
    {
       const float x = bottomLeft.x();
       const float y = bottomLeft.y();
@@ -130,6 +134,14 @@ struct Block
          << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0);
    }
 
+   QVector3D GetOriginPlusHeight() const
+   {
+      QVector3D origin = m_vertices.front();
+      origin += QVector3D(0, m_height, 0);
+
+      return origin;
+   }
+
    bool IsDefined() const
    {
       return (m_width > 0.0f && m_height > 0.0f && m_depth > 0.0f);
@@ -157,8 +169,6 @@ struct VizNode
    {
    }
 };
-
-class QJsonObject;
 
 class DiskScanner
 {

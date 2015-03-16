@@ -45,18 +45,18 @@ namespace
     * @param[in] row                The items to be placed in the current piece of real estate.
     * @param[in] realEsate          The space into which the nodes have to be placed.
     */
-   void LayoutStrip(std::vector<TreeNode<VizNode>*>& row, Block& realEstate)
+   void LayoutHelper(std::vector<TreeNode<VizNode>*>& row, Block& land)
    {
       static const float BLOCK_HEIGHT = 0.0625f;
       static const float BLOCK_TO_REAL_ESTATE_RATIO = 0.9f;
 
-      if (row.size() == 0 || !realEstate.IsDefined())
+      if (row.size() == 0 || !land.IsDefined())
       {
          return;
       }
 
       const size_t nodeCount = row.size();
-      const float parentFileSize = row.front()->GetParent()->GetData().m_file.m_size;
+      const std::uintmax_t rowFileSize = RowSizeInBytes(row);
 
       float additionalCoverage = 0.0f;
 
@@ -72,63 +72,104 @@ namespace
          }
 
          const float percentageOfParent = static_cast<float>(fileSize) /
-               static_cast<float>(parentFileSize);
+            static_cast<float>(rowFileSize);
 
-         if (realEstate.m_width > realEstate.m_depth)
+         if (land.m_width > land.m_depth)
          {
-            const auto paddedBlockWidth = realEstate.m_width * percentageOfParent;
+            const auto paddedBlockWidth = land.m_width * percentageOfParent;
             const auto actualBlockWidth = paddedBlockWidth * BLOCK_TO_REAL_ESTATE_RATIO;
-            const auto widthPaddingPerSide = ((realEstate.m_width * 0.1f) / nodeCount) / 2.0f;
+            const auto widthPaddingPerSide = ((land.m_width * 0.1f) / nodeCount) / 2.0f;
 
-            const auto actualBlockDepth = realEstate.m_depth * BLOCK_TO_REAL_ESTATE_RATIO;
-            const auto depthPaddingPerSide = (realEstate.m_depth - actualBlockDepth) / 2.0f;
+            const auto actualBlockDepth = land.m_depth * BLOCK_TO_REAL_ESTATE_RATIO;
+            const auto depthPaddingPerSide = (land.m_depth - actualBlockDepth) / 2.0f;
 
             const auto offset = QVector3D(
-               (realEstate.m_width * realEstate.m_percentCovered) + widthPaddingPerSide,
+               (land.m_width * land.m_percentCovered) + widthPaddingPerSide,
                BLOCK_HEIGHT,
                -depthPaddingPerSide
             );
 
-            data.m_block = Block(realEstate.m_vertices[0] + offset,
+            data.m_block = Block(land.m_vertices[0] + offset,
                actualBlockWidth,
                BLOCK_HEIGHT,
                actualBlockDepth
             );
 
-            additionalCoverage = (actualBlockWidth + (2 * widthPaddingPerSide)) /
-                  realEstate.m_width;
+            additionalCoverage = (actualBlockWidth + (2 * widthPaddingPerSide)) / land.m_width;
          }
          else
          {
-            const auto paddedBlockDepth = realEstate.m_depth * percentageOfParent;
+            const auto paddedBlockDepth = land.m_depth * percentageOfParent;
             const auto actualBlockDepth = paddedBlockDepth * BLOCK_TO_REAL_ESTATE_RATIO;
-            const auto depthPaddingPerSide = ((realEstate.m_depth * 0.1f) / nodeCount) / 2.0f;
+            const auto depthPaddingPerSide = ((land.m_depth * 0.1f) / nodeCount) / 2.0f;
 
-            const auto actualBlockWidth = realEstate.m_width * BLOCK_TO_REAL_ESTATE_RATIO;
-            const auto widthPaddingPerSide = (realEstate.m_width - actualBlockWidth) / 2.0f;
+            const auto actualBlockWidth = land.m_width * BLOCK_TO_REAL_ESTATE_RATIO;
+            const auto widthPaddingPerSide = (land.m_width - actualBlockWidth) / 2.0f;
 
             const auto offset = QVector3D(
                widthPaddingPerSide,
                BLOCK_HEIGHT,
-               -(realEstate.m_depth * realEstate.m_percentCovered) - depthPaddingPerSide
+               -(land.m_depth * land.m_percentCovered) - depthPaddingPerSide
             );
 
-            data.m_block = Block(realEstate.m_vertices.front() + offset,
+            data.m_block = Block(land.m_vertices.front() + offset,
                actualBlockWidth,
                BLOCK_HEIGHT,
                actualBlockDepth
             );
 
-            additionalCoverage = (actualBlockDepth + (2 * depthPaddingPerSide)) /
-                  realEstate.m_depth;
+            additionalCoverage = (actualBlockDepth + (2 * depthPaddingPerSide)) / land.m_depth;
          }
 
          assert(additionalCoverage > 0.0f && additionalCoverage <= 1.0f);
          assert(data.m_block.IsDefined());
-         //assert(realEstate.m_percentCovered <= 1.0f);
 
-         realEstate.m_percentCovered += additionalCoverage;
+         land.m_percentCovered += additionalCoverage;
       }
+   }
+
+   /**
+    * @brief LayoutRow
+    * @param row
+    */
+   void LayoutRow(std::vector<TreeNode<VizNode>*>& row)
+   {
+      VizNode& parentNode = row.front()->GetParent()->GetData();
+
+      const float parentFileSize = parentNode.m_file.m_size;
+      const float rowToParentRatio = RowSizeInBytes(row) / parentFileSize;
+
+      Block landToBuildOn;
+
+      const QVector3D nearCorner(parentNode.m_block.m_nextChildOrigin.x(),
+                                 parentNode.m_block.m_nextChildOrigin.y(),
+                                 parentNode.m_block.m_nextChildOrigin.z());
+
+      // TODO: Compute location of far corner for the row.
+      //const QVector3D farCorner(parentNode.m_block.m_vertices.front())
+
+      if (parentNode.m_block.m_width > parentNode.m_block.m_depth)
+      {
+         landToBuildOn = Block(QVector3D(parentNode.m_block.m_nextChildOrigin),
+            parentNode.m_block.m_width * rowToParentRatio,
+            1.0f, // This is arbitrary.
+            parentNode.m_block.m_depth);
+
+         parentNode.m_block.m_nextChildOrigin = parentNode.m_block.GetOriginPlusHeight() +
+            QVector3D(landToBuildOn.m_width, 0.0f, 0.0f);
+      }
+      else
+      {
+         landToBuildOn = Block(QVector3D(parentNode.m_block.m_nextChildOrigin),
+            parentNode.m_block.m_width,
+            1.0f, // This is arbitrary.
+            parentNode.m_block.m_depth * rowToParentRatio);
+
+         parentNode.m_block.m_nextChildOrigin = parentNode.m_block.GetOriginPlusHeight() +
+            QVector3D(0.0f, 0.0f, landToBuildOn.m_depth);
+      }
+
+      LayoutHelper(row, landToBuildOn);
    }
 
    /**
@@ -147,6 +188,7 @@ namespace
          return std::numeric_limits<float>::max();
       }
 
+      // TODO: Actually use area, and not file size!
       std::uintmax_t sumOfFileSizes = RowSizeInBytes(row);
 
       const std::uintmax_t additionalItemSize = additionalItem
@@ -222,7 +264,7 @@ namespace
          else // if aspect ratio gets worse, layout current row and create a new row:
          {
             PrintRow(currentRow);
-            LayoutStrip(currentRow, parentNode->GetData().m_block);
+            LayoutRow(currentRow);
 
             currentRow.clear();
             currentRow.emplace_back(currentChild);
@@ -235,8 +277,8 @@ namespace
 
       if (!currentRow.empty())
       {
-         PrintRow(currentRow);
-         LayoutStrip(currentRow, currentChild->GetParent()->GetData().m_block);
+         //PrintRow(currentRow);
+         //LayoutHelper(currentRow, currentChild->GetParent()->GetData().m_block);
       }
 
       while (currentChild)
