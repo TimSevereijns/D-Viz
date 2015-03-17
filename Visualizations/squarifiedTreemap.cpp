@@ -135,41 +135,58 @@ namespace
    void LayoutRow(std::vector<TreeNode<VizNode>*>& row)
    {
       VizNode& parentNode = row.front()->GetParent()->GetData();
+      const Block& parentBlock = parentNode.m_block;
 
-      const float parentFileSize = parentNode.m_file.m_size;
-      const float rowToParentRatio = RowSizeInBytes(row) / parentFileSize;
+      const QVector3D nearCorner(parentBlock.m_nextChildOrigin.x(),
+                                 parentBlock.m_nextChildOrigin.y(),
+                                 parentBlock.m_nextChildOrigin.z());
 
-      Block landToBuildOn;
+      const QVector3D farCorner(parentBlock.GetOriginPlusHeight().x() + parentBlock.m_width,
+                                parentBlock.GetOriginPlusHeight().y(),
+                                parentBlock.GetOriginPlusHeight().z() + parentBlock.m_depth);
 
-      const QVector3D nearCorner(parentNode.m_block.m_nextChildOrigin.x(),
-                                 parentNode.m_block.m_nextChildOrigin.y(),
-                                 parentNode.m_block.m_nextChildOrigin.z());
+      const Block remainingLand(nearCorner,
+                                farCorner.x() - nearCorner.x(),
+                                0.0625f, // <- Block Height
+                                farCorner.z() - nearCorner.z());
 
-      // TODO: Compute location of far corner for the row.
-      //const QVector3D farCorner(parentNode.m_block.m_vertices.front())
+      // Now that we have the remaining land available to build upon, we need to figure out exactly
+      // how much of that land will be taken up by the row that we are currently processing.
 
-      if (parentNode.m_block.m_width > parentNode.m_block.m_depth)
+      const float parentBlockArea = parentBlock.m_width * parentBlock.m_depth;
+      const float remainingLandArea = remainingLand.m_width * remainingLand.m_depth;
+      const float parentBytesToFill = (remainingLandArea / parentBlockArea) * parentNode.m_file.m_size;
+      const float rowToParentRatio = RowSizeInBytes(row) / parentBytesToFill;
+
+      Block rowRealEstate;
+      if (remainingLand.m_width > remainingLand.m_depth)
       {
-         landToBuildOn = Block(QVector3D(parentNode.m_block.m_nextChildOrigin),
-            parentNode.m_block.m_width * rowToParentRatio,
-            1.0f, // This is arbitrary.
-            parentNode.m_block.m_depth);
+         rowRealEstate = Block(QVector3D(nearCorner),
+                               remainingLand.m_width * rowToParentRatio,
+                               remainingLand.m_height,
+                               remainingLand.m_depth);
 
-         parentNode.m_block.m_nextChildOrigin = parentNode.m_block.GetOriginPlusHeight() +
-            QVector3D(landToBuildOn.m_width, 0.0f, 0.0f);
+         parentNode.m_block.m_nextChildOrigin = parentBlock.GetOriginPlusHeight() +
+               QVector3D(rowRealEstate.m_width, 0.0f, 0.0f); // <-- I doubt this will always work!
       }
       else
       {
-         landToBuildOn = Block(QVector3D(parentNode.m_block.m_nextChildOrigin),
-            parentNode.m_block.m_width,
-            1.0f, // This is arbitrary.
-            parentNode.m_block.m_depth * rowToParentRatio);
+         rowRealEstate = Block(QVector3D(nearCorner),
+                               remainingLand.m_width,
+                               remainingLand.m_height,
+                               remainingLand.m_depth * rowToParentRatio);
 
-         parentNode.m_block.m_nextChildOrigin = parentNode.m_block.GetOriginPlusHeight() +
-            QVector3D(0.0f, 0.0f, landToBuildOn.m_depth);
+         parentNode.m_block.m_nextChildOrigin = parentBlock.GetOriginPlusHeight() +
+               QVector3D(rowRealEstate.m_width, 0.0f, -rowRealEstate.m_depth);
       }
 
-      LayoutHelper(row, landToBuildOn);
+      std::cout << "Next starting origin: "
+                << parentNode.m_block.m_nextChildOrigin.x() << ", "
+                << parentNode.m_block.m_nextChildOrigin.y() << ", "
+                << parentNode.m_block.m_nextChildOrigin.z() << ", "
+                << std::endl;
+
+      LayoutHelper(row, rowRealEstate);
    }
 
    /**
@@ -273,13 +290,13 @@ namespace
          currentChild = &*currentChild->GetNextSibling();
       }
 
-      currentChild = firstChild;
-
       if (!currentRow.empty())
       {
-         //PrintRow(currentRow);
-         //LayoutHelper(currentRow, currentChild->GetParent()->GetData().m_block);
+         PrintRow(currentRow);
+         LayoutRow(currentRow);
       }
+
+      currentChild = firstChild;
 
       while (currentChild)
       {
