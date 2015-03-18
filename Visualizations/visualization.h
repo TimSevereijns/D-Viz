@@ -12,6 +12,9 @@ class Visualization
       explicit Visualization(const std::wstring& rawPath);
       virtual ~Visualization();
 
+      static const float BLOCK_HEIGHT;
+      static const float BLOCK_TO_REAL_ESTATE_RATIO;
+
       virtual void ScanDirectory();
       virtual void ParseScan() = 0;
 

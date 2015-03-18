@@ -4,6 +4,9 @@
 #include <iostream>
 #include <string>
 
+const float Visualization::BLOCK_HEIGHT = 0.0625f;
+const float Visualization::BLOCK_TO_REAL_ESTATE_RATIO = 0.9f;
+
 Visualization::Visualization(const std::wstring& rawPath)
    : m_diskScanner(rawPath),
      m_hasDataBeenParsed(false)

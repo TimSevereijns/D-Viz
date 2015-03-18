@@ -4,11 +4,13 @@
 
 namespace
 {
+   /**
+    * @brief ParseNode parses the current tree node and creates the visualizations of the current
+    * node's children on top of the current node's visualized block.
+    * @param[in] node               The current node to visualize.
+    */
    void ParseNode(TreeNode<VizNode>& node)
    {
-      static const float BLOCK_HEIGHT = 0.0625f;
-      static const float BLOCK_TO_REAL_ESTATE_RATIO = 0.9f;
-
       VizNode& data = node.GetData();
       const std::uintmax_t fileSize = data.m_file.m_size;
 
@@ -28,10 +30,10 @@ namespace
       if (parentBlock.m_width > parentBlock.m_depth)          // Slice perpendicular to the X-axis:
       {
          const auto paddedBlockWidth = parentBlock.m_width * percentageOfParent;
-         const auto actualBlockWidth = paddedBlockWidth * BLOCK_TO_REAL_ESTATE_RATIO;
+         const auto actualBlockWidth = paddedBlockWidth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
          const auto widthPaddingPerSide = ((parentBlock.m_width * 0.1f) / siblingCount) / 2.0f;
 
-         const auto actualBlockDepth = parentBlock.m_depth * BLOCK_TO_REAL_ESTATE_RATIO;
+         const auto actualBlockDepth = parentBlock.m_depth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
          const auto depthPaddingPerSide = (parentBlock.m_depth - actualBlockDepth) / 2.0f;
 
          const auto offset = QVector3D(
@@ -42,7 +44,7 @@ namespace
 
          data.m_block = Block(parentBlock.m_vertices[0] + offset,                         // Origin
             actualBlockWidth,                                                             // Width
-            BLOCK_HEIGHT,                                                                 // Height
+            Visualization::BLOCK_HEIGHT,                                                  // Height
             actualBlockDepth                                                              // Depth
          );
 
@@ -51,10 +53,10 @@ namespace
       else                                                    // Slice perpendicular to the Y-axis:
       {
          const auto paddedBlockDepth = parentBlock.m_depth * percentageOfParent;
-         const auto actualBlockDepth = paddedBlockDepth * BLOCK_TO_REAL_ESTATE_RATIO;
+         const auto actualBlockDepth = paddedBlockDepth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
          const auto depthPaddingPerSide = ((parentBlock.m_depth * 0.1f) / siblingCount) / 2.0f;
 
-         const auto actualBlockWidth = parentBlock.m_width * BLOCK_TO_REAL_ESTATE_RATIO;
+         const auto actualBlockWidth = parentBlock.m_width * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
          const auto widthPaddingPerSide = (parentBlock.m_width - actualBlockWidth) / 2.0f;
 
          const auto offset = QVector3D(
@@ -65,7 +67,7 @@ namespace
 
          data.m_block = Block(parentBlock.m_vertices[0] + offset,                         // Origin
             actualBlockWidth,                                                             // Width
-            BLOCK_HEIGHT,                                                                 // Height
+            Visualization::BLOCK_HEIGHT,                                                  // Height
             actualBlockDepth                                                              // Depth
          );
 
