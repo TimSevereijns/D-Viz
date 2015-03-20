@@ -28,10 +28,12 @@ namespace
     * @brief RowSizeInBytes computes the total disk space represented by the nodes in the row.
     *
     * @param[in] row                The nodes in the whose size is to contribute to total row size.
+    * TODO
     *
     * @returns a total row size in bytes of disk space occupied.
     */
-   std::uintmax_t RowSizeInBytes(std::vector<TreeNode<VizNode>*>& row)
+   std::uintmax_t RowSizeInBytes(std::vector<TreeNode<VizNode>*>& row,
+      const TreeNode<VizNode>* candidateItem)
    {
       std::uintmax_t sumOfFileSizes = std::accumulate(std::begin(row), std::end(row),
          std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<VizNode>* node)
@@ -39,7 +41,72 @@ namespace
          return result + node->GetData().m_file.m_size;
       });
 
+      if (candidateItem)
+      {
+         sumOfFileSizes += candidateItem->GetData().m_file.m_size;
+      }
+
       return sumOfFileSizes;
+   }
+
+   /**
+    * @brief SurfaceAreaOfLaidOutRow
+    *
+    * @param row
+    *
+    * @returns
+    */
+   float SurfaceAreaOfLaidOutRow(std::vector<TreeNode<VizNode>*>& row,
+      const TreeNode<VizNode>* candidateItem, const VizNode& parentNode)
+   {
+      // TODO: Refactor!
+
+      const Block& parentBlock = parentNode.m_block;
+
+      const QVector3D nearCorner
+      {
+         parentBlock.m_nextChildOrigin.x(),
+         parentBlock.m_nextChildOrigin.y(),
+         parentBlock.m_nextChildOrigin.z()
+      };
+
+      const QVector3D farCorner
+      {
+         parentBlock.GetOriginPlusHeight().x() + parentBlock.m_width,
+         parentBlock.GetOriginPlusHeight().y(),
+         parentBlock.GetOriginPlusHeight().z() + parentBlock.m_depth
+      };
+
+      const Block remainingLand
+      {
+         nearCorner,
+         farCorner.x() - nearCorner.x(),
+         Visualization::BLOCK_HEIGHT,
+         farCorner.z() - nearCorner.z()
+      };
+
+      const float parentBlockArea = parentBlock.m_width * parentBlock.m_depth;
+      const float remainingLandArea = remainingLand.m_width * remainingLand.m_depth;
+      const float parentBytesToFill = (remainingLandArea / parentBlockArea) * parentNode.m_file.m_size;
+      const float rowToParentRatio = RowSizeInBytes(row, candidateItem) / parentBytesToFill;
+
+      Block rowRealEstate;
+      if (remainingLand.m_width > remainingLand.m_depth)
+      {
+         rowRealEstate = Block(QVector3D(nearCorner),
+            remainingLand.m_width * rowToParentRatio,
+            remainingLand.m_height,
+            remainingLand.m_depth);
+      }
+      else
+      {
+         rowRealEstate = Block(QVector3D(nearCorner),
+            remainingLand.m_width,
+            remainingLand.m_height,
+            remainingLand.m_depth * rowToParentRatio);
+      }
+
+      return rowRealEstate.m_width * rowRealEstate.m_depth;
    }
 
    /**
@@ -83,7 +150,7 @@ namespace
       const float parentBlockArea = parentBlock.m_width * parentBlock.m_depth;
       const float remainingLandArea = remainingLand.m_width * remainingLand.m_depth;
       const float parentBytesToFill = (remainingLandArea / parentBlockArea) * parentNode.m_file.m_size;
-      const float rowToParentRatio = RowSizeInBytes(row) / parentBytesToFill;
+      const float rowToParentRatio = RowSizeInBytes(row, nullptr) / parentBytesToFill;
 
       Block rowRealEstate;
       if (remainingLand.m_width > remainingLand.m_depth)
@@ -133,15 +200,20 @@ namespace
     */
    void LayoutRow(std::vector<TreeNode<VizNode>*>& row)
    {
+      if (row.empty())
+      {
+         return;
+      }
+
       Block& land = CalculateRowBounds(row);
 
-      if (row.size() == 0 || !land.IsDefined())
+      if (!land.IsDefined())
       {
          return;
       }
 
       const size_t nodeCount = row.size();
-      const std::uintmax_t rowFileSize = RowSizeInBytes(row);
+      const std::uintmax_t rowFileSize = RowSizeInBytes(row, nullptr);
 
       float additionalCoverage = 0.0f;
 
@@ -227,7 +299,7 @@ namespace
     * @returns a float representing the aspect ration that farthest from optimal (i.e.: square).
     */
    float ComputeWorstAspectRatio(std::vector<TreeNode<VizNode>*>& row,
-      const TreeNode<VizNode>* candidateItem, const float shortestSideOfRow)
+      const TreeNode<VizNode>* candidateItem, const float shortestSideOfRow, VizNode& parentNode)
    {
       if (row.empty() && !candidateItem)
       {
@@ -235,46 +307,55 @@ namespace
          return std::numeric_limits<float>::max();
       }
 
-      // TODO: Actually use area, and not file size!
-      std::uintmax_t sumOfFileSizes = RowSizeInBytes(row);
+      const float totalRowSurfaceArea = SurfaceAreaOfLaidOutRow(row, candidateItem, parentNode);
+      const std::uintmax_t totalRowSizeInBytes = RowSizeInBytes(row, candidateItem);
 
-      const std::uintmax_t additionalItemSize = candidateItem
-         ? candidateItem->GetData().m_file.m_size : 0;
+      // Find the largest surface area if the row and candidate were laid out:
 
-      sumOfFileSizes += additionalItemSize;
-
-      std::uintmax_t largestElement;
+      std::uintmax_t largestNodeSizeInBytes;
       if (candidateItem && !row.empty())
       {
-         largestElement = std::max(row.front()->GetData().m_file.m_size, additionalItemSize);
+         largestNodeSizeInBytes = std::max(row.front()->GetData().m_file.m_size,
+            candidateItem->GetData().m_file.m_size);
       }
       else if (candidateItem)
       {
-         largestElement = additionalItemSize;
+         largestNodeSizeInBytes = candidateItem->GetData().m_file.m_size;
       }
       else
       {
-         largestElement = row.front()->GetData().m_file.m_size;
+         largestNodeSizeInBytes = row.front()->GetData().m_file.m_size;
       }
+      const double largestSurface =
+         (static_cast<double>(largestNodeSizeInBytes) / static_cast<double>(totalRowSizeInBytes)) *
+         totalRowSurfaceArea;
 
-      std::uintmax_t smallestElement;
+      // Find the smallest surface area if the row and candidate were laid out:
+
+      std::uintmax_t smallestNodeSizeInBytes;
       if (candidateItem && !row.empty())
       {
-         smallestElement = std::min(row.back()->GetData().m_file.m_size, additionalItemSize);
+         smallestNodeSizeInBytes = std::min(row.back()->GetData().m_file.m_size,
+            candidateItem->GetData().m_file.m_size);
       }
       else if (candidateItem)
       {
-         smallestElement = additionalItemSize;
+         smallestNodeSizeInBytes = candidateItem->GetData().m_file.m_size;
       }
       else
       {
-         smallestElement = row.back()->GetData().m_file.m_size;
+         smallestNodeSizeInBytes = row.back()->GetData().m_file.m_size;
       }
+      const double smallestElement =
+         (static_cast<double>(smallestNodeSizeInBytes) / static_cast<double>(totalRowSizeInBytes)) *
+         totalRowSurfaceArea;
+
+      // Now compute the worst aspect ratio between the two choices above:
 
       const float lengthSquared = shortestSideOfRow * shortestSideOfRow;
-      const float areaSquared = sumOfFileSizes * sumOfFileSizes;
+      const float areaSquared = totalRowSurfaceArea * totalRowSurfaceArea;
 
-      const float worstRatio = std::max((lengthSquared * largestElement) / (areaSquared),
+      const float worstRatio = std::max((lengthSquared * largestSurface) / (areaSquared),
          (areaSquared) / (lengthSquared * smallestElement));
 
       std::cout << "Ratio: " << worstRatio << std::endl;
@@ -305,8 +386,8 @@ namespace
             parentNode->GetData().m_block.m_depth);
 
          // If worst aspect ratio improves, add block to current row:
-         if (ComputeWorstAspectRatio(currentRow, currentNode, shortestSide) <=
-            ComputeWorstAspectRatio(currentRow, nullptr, shortestSide))
+         if (ComputeWorstAspectRatio(currentRow, currentNode, shortestSide, parentNode->GetData()) <=
+            ComputeWorstAspectRatio(currentRow, nullptr, shortestSide, parentNode->GetData()))
          {
             currentRow.emplace_back(currentNode);
          }

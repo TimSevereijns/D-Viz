@@ -34,7 +34,8 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui
 
-INCLUDEPATH += C:\excluded\Misc\Qt\boost_1_57_0
+#INCLUDEPATH += C:\excluded\Misc\Qt\boost_1_57_0
+INCLUDEPATH += C:\excluded\Misc\D-Viz\boost_1_57_0
 
 #-------------------------------------------------
 # INCLUDE THIS FOR DEBUG MODE:
