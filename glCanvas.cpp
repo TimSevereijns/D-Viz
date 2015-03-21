@@ -238,7 +238,7 @@ void GLCanvas::PrepareOriginMarkerVertexBuffers()
 
 void GLCanvas::PrepareVisualizationVertexBuffers()
 {
-   //SliceAndDiceTreeMap treeMap{L"C:\\excluded\\mainline\\source\\marquee"};
+   //SliceAndDiceTreeMap treeMap{L"C:\\Users\\Tim"};
    //SquarifiedTreeMap treeMap{L"C:\\Users\\tsevereijns\\Pictures\\OK DST"};
    SquarifiedTreeMap treeMap{L"C:\\Users\\Tim\\Desktop\\PDFs"};
    treeMap.ScanDirectory();

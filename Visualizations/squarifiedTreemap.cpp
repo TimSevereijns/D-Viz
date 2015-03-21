@@ -50,76 +50,19 @@ namespace
    }
 
    /**
-    * @brief SurfaceAreaOfLaidOutRow
-    *
-    * @param row
-    *
-    * @returns
-    */
-   float SurfaceAreaOfLaidOutRow(std::vector<TreeNode<VizNode>*>& row,
-      const TreeNode<VizNode>* candidateItem, const VizNode& parentNode)
-   {
-      // TODO: Refactor!
-
-      const Block& parentBlock = parentNode.m_block;
-
-      const QVector3D nearCorner
-      {
-         parentBlock.m_nextChildOrigin.x(),
-         parentBlock.m_nextChildOrigin.y(),
-         parentBlock.m_nextChildOrigin.z()
-      };
-
-      const QVector3D farCorner
-      {
-         parentBlock.GetOriginPlusHeight().x() + parentBlock.m_width,
-         parentBlock.GetOriginPlusHeight().y(),
-         parentBlock.GetOriginPlusHeight().z() + parentBlock.m_depth
-      };
-
-      const Block remainingLand
-      {
-         nearCorner,
-         farCorner.x() - nearCorner.x(),
-         Visualization::BLOCK_HEIGHT,
-         farCorner.z() - nearCorner.z()
-      };
-
-      const float parentBlockArea = parentBlock.m_width * parentBlock.m_depth;
-      const float remainingLandArea = remainingLand.m_width * remainingLand.m_depth;
-      const float parentBytesToFill = (remainingLandArea / parentBlockArea) * parentNode.m_file.m_size;
-      const float rowToParentRatio = RowSizeInBytes(row, candidateItem) / parentBytesToFill;
-
-      Block rowRealEstate;
-      if (remainingLand.m_width > remainingLand.m_depth)
-      {
-         rowRealEstate = Block(QVector3D(nearCorner),
-            remainingLand.m_width * rowToParentRatio,
-            remainingLand.m_height,
-            remainingLand.m_depth);
-      }
-      else
-      {
-         rowRealEstate = Block(QVector3D(nearCorner),
-            remainingLand.m_width,
-            remainingLand.m_height,
-            remainingLand.m_depth * rowToParentRatio);
-      }
-
-      return rowRealEstate.m_width * rowRealEstate.m_depth;
-   }
-
-   /**
-    * @brief CalculateRowBounds computes the outerbounds (including the necessary boundary padding)
+    * @brief CalculateRowBounds computes the outer bounds (including the necessary boundary padding)
     * needed for the blocks in the row.
     *
     * @param[in] row                The nodes to be laid out as blocks in the current row.
+    * @param[in] candidate
+    * @param[in] parentNode
+    * @param[in] updateOffset
     *
     * @returns a block denoting the outer dimensions of the row boundary.
     */
-   Block CalculateRowBounds(std::vector<TreeNode<VizNode>*>& row)
+   Block CalculateRowBounds(std::vector<TreeNode<VizNode>*>& row,
+      const TreeNode<VizNode>* candidate, VizNode& parentNode, const bool updateOffset)
    {
-      VizNode& parentNode = row.front()->GetParent()->GetData();
       const Block& parentBlock = parentNode.m_block;
 
       const QVector3D nearCorner
@@ -144,13 +87,10 @@ namespace
          farCorner.z() - nearCorner.z()
       };
 
-      // Now that we have the remaining land available to build upon, we need to figure out exactly
-      // how much of that land will be taken up by the row that we are currently processing.
-
       const float parentBlockArea = parentBlock.m_width * parentBlock.m_depth;
       const float remainingLandArea = remainingLand.m_width * remainingLand.m_depth;
       const float parentBytesToFill = (remainingLandArea / parentBlockArea) * parentNode.m_file.m_size;
-      const float rowToParentRatio = RowSizeInBytes(row, nullptr) / parentBytesToFill;
+      const float rowToParentRatio = RowSizeInBytes(row, candidate) / parentBytesToFill;
 
       Block rowRealEstate;
       if (remainingLand.m_width > remainingLand.m_depth)
@@ -160,13 +100,16 @@ namespace
             remainingLand.m_height,
             remainingLand.m_depth);
 
-         const QVector3D nextChildOffset
+         if (updateOffset)
          {
-            rowRealEstate.m_width, 0.0f,
-            rowRealEstate.GetOriginPlusHeight().z() - parentBlock.GetOriginPlusHeight().z()
-         };
+            const QVector3D nextChildOffset
+            {
+               rowRealEstate.m_width, 0.0f,
+               rowRealEstate.GetOriginPlusHeight().z() - parentBlock.GetOriginPlusHeight().z()
+            };
 
-         parentNode.m_block.m_nextChildOrigin = parentBlock.GetOriginPlusHeight() + nextChildOffset;
+            parentNode.m_block.m_nextChildOrigin = parentBlock.GetOriginPlusHeight() + nextChildOffset;
+         }
       }
       else
       {
@@ -175,20 +118,17 @@ namespace
             remainingLand.m_height,
             remainingLand.m_depth * rowToParentRatio);
 
-         const QVector3D nextChildOffset
+         if (updateOffset)
          {
-            nearCorner.x() - parentBlock.GetOriginPlusHeight().x(),
-            0.0f, -rowRealEstate.m_depth
-         };
+            const QVector3D nextChildOffset
+            {
+               nearCorner.x() - parentBlock.GetOriginPlusHeight().x(),
+               0.0f, -rowRealEstate.m_depth
+            };
 
-         parentNode.m_block.m_nextChildOrigin = parentBlock.GetOriginPlusHeight() + nextChildOffset;
+            parentNode.m_block.m_nextChildOrigin = parentBlock.GetOriginPlusHeight() + nextChildOffset;
+         }
       }
-
-      std::cout << "Next starting origin: "
-         << parentNode.m_block.m_nextChildOrigin.x() << ", "
-         << parentNode.m_block.m_nextChildOrigin.y() << ", "
-         << parentNode.m_block.m_nextChildOrigin.z() << ", "
-         << std::endl;
 
       return rowRealEstate;
    }
@@ -205,7 +145,8 @@ namespace
          return;
       }
 
-      Block& land = CalculateRowBounds(row);
+      Block& land = CalculateRowBounds(row, /*candidate =*/ nullptr,
+         row.front()->GetParent()->GetData(), /*updateOffset =*/ true);
 
       if (!land.IsDefined())
       {
@@ -307,7 +248,9 @@ namespace
          return std::numeric_limits<float>::max();
       }
 
-      const float totalRowSurfaceArea = SurfaceAreaOfLaidOutRow(row, candidateItem, parentNode);
+      const Block rowBounds = CalculateRowBounds(row, candidateItem, parentNode,
+         /*updateOffset =*/ false);
+      const float totalRowSurfaceArea = rowBounds.m_width * rowBounds.m_depth;
       const std::uintmax_t totalRowSizeInBytes = RowSizeInBytes(row, candidateItem);
 
       // Find the largest surface area if the row and candidate were laid out:
@@ -387,7 +330,7 @@ namespace
 
          // If worst aspect ratio improves, add block to current row:
          if (ComputeWorstAspectRatio(currentRow, currentNode, shortestSide, parentNode->GetData()) <=
-            ComputeWorstAspectRatio(currentRow, nullptr, shortestSide, parentNode->GetData()))
+             ComputeWorstAspectRatio(currentRow, nullptr,     shortestSide, parentNode->GetData()))
          {
             currentRow.emplace_back(currentNode);
          }
