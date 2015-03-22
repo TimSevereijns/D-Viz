@@ -102,7 +102,9 @@ DiskScanner::DiskScanner(const std::wstring& rawPath)
      m_filesScanned(0),
      m_scanningTime(std::chrono::duration<double>(0))
 {
-   const boost::filesystem::path path{rawPath};
+   boost::filesystem::path path{rawPath};
+   path.make_preferred();
+
    const bool isPathValid = boost::filesystem::exists(path);
    if (!isPathValid)
    {

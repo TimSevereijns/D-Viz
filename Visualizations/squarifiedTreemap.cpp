@@ -154,7 +154,7 @@ namespace
       }
 
       const size_t nodeCount = row.size();
-      const std::uintmax_t rowFileSize = RowSizeInBytes(row, nullptr);
+      const std::uintmax_t rowFileSize = RowSizeInBytes(row, /*candidate =*/ nullptr);
 
       float additionalCoverage = 0.0f;
 
@@ -373,29 +373,29 @@ SquarifiedTreeMap::~SquarifiedTreeMap()
 
 void SquarifiedTreeMap::ParseScan()
 {
-   //auto& tree = m_diskScanner.GetDirectoryTree();
+   auto& tree = m_diskScanner.GetDirectoryTree();
 
-   FileInfo fileInfo{L"Dummy Root Node", 24, FILE_TYPE::DIRECTORY};
-   VizNode rootNode{fileInfo, Block{QVector3D(0.0f, 0.0f, 0.0f), 6.0f, 0.025f, 4.0f}};
+//   FileInfo fileInfo{L"Dummy Root Node", 24, FILE_TYPE::DIRECTORY};
+//   VizNode rootNode{fileInfo, Block{QVector3D(0.0f, 0.0f, 0.0f), 6.0f, 0.025f, 4.0f}};
 
-   // TODO: Create tree containing the same data as in the paper:
-   Tree<VizNode> tree(rootNode);
-   FileInfo dummyInfo6{L"6", 6, FILE_TYPE::REGULAR};
-   tree.GetHead()->AppendChild(VizNode(dummyInfo6));
-   tree.GetHead()->AppendChild(VizNode(dummyInfo6));
+//   // TODO: Create tree containing the same data as in the paper:
+//   Tree<VizNode> tree(rootNode);
+//   FileInfo dummyInfo6{L"6", 6, FILE_TYPE::REGULAR};
+//   tree.GetHead()->AppendChild(VizNode(dummyInfo6));
+//   tree.GetHead()->AppendChild(VizNode(dummyInfo6));
 
-   FileInfo dummyInfo4{L"4", 4, FILE_TYPE::REGULAR};
-   tree.GetHead()->AppendChild(VizNode(dummyInfo4));
+//   FileInfo dummyInfo4{L"4", 4, FILE_TYPE::REGULAR};
+//   tree.GetHead()->AppendChild(VizNode(dummyInfo4));
 
-   FileInfo dummyInfo3{L"3", 3, FILE_TYPE::REGULAR};
-   tree.GetHead()->AppendChild(VizNode(dummyInfo3));
+//   FileInfo dummyInfo3{L"3", 3, FILE_TYPE::REGULAR};
+//   tree.GetHead()->AppendChild(VizNode(dummyInfo3));
 
-   FileInfo dummyInfo2{L"2", 2, FILE_TYPE::REGULAR};
-   tree.GetHead()->AppendChild(VizNode(dummyInfo2));
-   tree.GetHead()->AppendChild(VizNode(dummyInfo2));
+//   FileInfo dummyInfo2{L"2", 2, FILE_TYPE::REGULAR};
+//   tree.GetHead()->AppendChild(VizNode(dummyInfo2));
+//   tree.GetHead()->AppendChild(VizNode(dummyInfo2));
 
-   FileInfo dummyInfo1{L"1", 1, FILE_TYPE::REGULAR};
-   tree.GetHead()->AppendChild(VizNode(dummyInfo1));
+//   FileInfo dummyInfo1{L"1", 1, FILE_TYPE::REGULAR};
+//   tree.GetHead()->AppendChild(VizNode(dummyInfo1));
 
    for (TreeNode<VizNode>& node : tree)
    {
@@ -406,8 +406,8 @@ void SquarifiedTreeMap::ParseScan()
    }
 
    // Set the size of the root visualization:
-//   tree.GetHead()->GetFirstChild()->GetData().m_block =
-//         Block(QVector3D(0, 0, 0), 10.0f, 0.0625f, 10.0f);
+   tree.GetHead()->GetData().m_block = Block(QVector3D(0, 0, 0),
+      10.0f, Visualization::BLOCK_HEIGHT, 10.0f);
 
    Squarify(*tree.GetHead()->GetFirstChild());
 
