@@ -76,7 +76,7 @@ namespace
       {
          parentBlock.GetOriginPlusHeight().x() + parentBlock.m_width,
          parentBlock.GetOriginPlusHeight().y(),
-         parentBlock.GetOriginPlusHeight().z() + parentBlock.m_depth
+         parentBlock.GetOriginPlusHeight().z() - parentBlock.m_depth
       };
 
       const Block remainingLand
@@ -88,23 +88,24 @@ namespace
       };
 
       const float parentBlockArea = parentBlock.m_width * parentBlock.m_depth;
-      const float remainingLandArea = remainingLand.m_width * remainingLand.m_depth;
+      const float remainingLandArea = std::abs(remainingLand.m_width * remainingLand.m_depth);
       const float parentBytesToFill = (remainingLandArea / parentBlockArea) * parentNode.m_file.m_size;
       const float rowToParentRatio = RowSizeInBytes(row, candidate) / parentBytesToFill;
 
       Block rowRealEstate;
-      if (remainingLand.m_width > remainingLand.m_depth)
+      if (remainingLand.m_width > std::abs(remainingLand.m_depth))
       {
          rowRealEstate = Block(QVector3D(nearCorner),
             remainingLand.m_width * rowToParentRatio,
             remainingLand.m_height,
-            remainingLand.m_depth);
+            -remainingLand.m_depth);
 
          if (updateOffset)
          {
             const QVector3D nextChildOffset
             {
-               rowRealEstate.m_width, 0.0f,
+               rowRealEstate.m_width,
+               0.0f, // This value gets ignored anyway...
                rowRealEstate.GetOriginPlusHeight().z() - parentBlock.GetOriginPlusHeight().z()
             };
 
@@ -116,14 +117,15 @@ namespace
          rowRealEstate = Block(QVector3D(nearCorner),
             remainingLand.m_width,
             remainingLand.m_height,
-            remainingLand.m_depth * rowToParentRatio);
+            -remainingLand.m_depth * rowToParentRatio);
 
          if (updateOffset)
          {
             const QVector3D nextChildOffset
             {
                nearCorner.x() - parentBlock.GetOriginPlusHeight().x(),
-               0.0f, -rowRealEstate.m_depth
+               0.0f, // This value gets ignored anyway...
+               -rowRealEstate.m_depth
             };
 
             parentNode.m_block.m_nextChildOrigin = parentBlock.GetOriginPlusHeight() + nextChildOffset;
@@ -172,19 +174,19 @@ namespace
          const float percentageOfParent = static_cast<float>(fileSize) /
             static_cast<float>(rowFileSize);
 
-         if (land.m_width > land.m_depth)
+         if (land.m_width > std::abs(land.m_depth))
          {
             const auto paddedBlockWidth = land.m_width * percentageOfParent;
             const auto actualBlockWidth = paddedBlockWidth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
             const auto widthPaddingPerSide = ((land.m_width * 0.1f) / nodeCount) / 2.0f;
 
-            const auto actualBlockDepth = land.m_depth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
+            const auto actualBlockDepth = std::abs(land.m_depth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO);
             const auto depthPaddingPerSide = (land.m_depth - actualBlockDepth) / 2.0f;
 
             const QVector3D offset
             {
                (land.m_width * land.m_percentCovered) + widthPaddingPerSide,
-               Visualization::BLOCK_HEIGHT,
+               0.0f, // If you want vertical spacing between block, increase this value...
                -depthPaddingPerSide
             };
 
@@ -198,7 +200,7 @@ namespace
          }
          else
          {
-            const auto paddedBlockDepth = land.m_depth * percentageOfParent;
+            const auto paddedBlockDepth = std::abs(land.m_depth * percentageOfParent);
             const auto actualBlockDepth = paddedBlockDepth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
             const auto depthPaddingPerSide = ((land.m_depth * 0.1f) / nodeCount) / 2.0f;
 
@@ -208,7 +210,7 @@ namespace
             const QVector3D offset
             {
                widthPaddingPerSide,
-               Visualization::BLOCK_HEIGHT,
+               0.0f, // If you want vertical spacing between block, increase this value...
                -(land.m_depth * land.m_percentCovered) - depthPaddingPerSide
             };
 
@@ -219,6 +221,7 @@ namespace
             );
 
             additionalCoverage = (actualBlockDepth + (2 * depthPaddingPerSide)) / land.m_depth;
+            assert(additionalCoverage >= 0.0f);
          }
 
          assert(additionalCoverage > 0.0f && additionalCoverage <= 1.0f);
@@ -250,7 +253,7 @@ namespace
 
       const Block rowBounds = CalculateRowBounds(row, candidateItem, parentNode,
          /*updateOffset =*/ false);
-      const float totalRowSurfaceArea = rowBounds.m_width * rowBounds.m_depth;
+      const float totalRowSurfaceArea = std::abs(rowBounds.m_width * rowBounds.m_depth);
       const std::uintmax_t totalRowSizeInBytes = RowSizeInBytes(row, candidateItem);
 
       // Find the largest surface area if the row and candidate were laid out:
@@ -301,7 +304,7 @@ namespace
       const float worstRatio = std::max((lengthSquared * largestSurface) / (areaSquared),
          (areaSquared) / (lengthSquared * smallestElement));
 
-      std::cout << "Ratio: " << worstRatio << std::endl;
+      //std::cout << "Ratio: " << worstRatio << std::endl;
 
       return worstRatio;
    }
@@ -336,7 +339,7 @@ namespace
          }
          else // if aspect ratio gets worse, layout current row and create a new row:
          {
-            PrintRow(currentRow);
+            //PrintRow(currentRow);
             LayoutRow(currentRow);
 
             currentRow.clear();
@@ -348,7 +351,7 @@ namespace
 
       if (!currentRow.empty())
       {
-         PrintRow(currentRow);
+         //PrintRow(currentRow);
          LayoutRow(currentRow);
       }
 
@@ -373,29 +376,37 @@ SquarifiedTreeMap::~SquarifiedTreeMap()
 
 void SquarifiedTreeMap::ParseScan()
 {
-   auto& tree = m_diskScanner.GetDirectoryTree();
+   //auto& tree = m_diskScanner.GetDirectoryTree();
 
-//   FileInfo fileInfo{L"Dummy Root Node", 24, FILE_TYPE::DIRECTORY};
-//   VizNode rootNode{fileInfo, Block{QVector3D(0.0f, 0.0f, 0.0f), 6.0f, 0.025f, 4.0f}};
+   ////
 
-//   // TODO: Create tree containing the same data as in the paper:
-//   Tree<VizNode> tree(rootNode);
-//   FileInfo dummyInfo6{L"6", 6, FILE_TYPE::REGULAR};
-//   tree.GetHead()->AppendChild(VizNode(dummyInfo6));
-//   tree.GetHead()->AppendChild(VizNode(dummyInfo6));
+   FileInfo fileInfo{L"Dummy Root Node", 24, FILE_TYPE::DIRECTORY};
+   VizNode rootNode{fileInfo, Block{QVector3D(0.0f, 0.0f, 0.0f), 4.0f, 0.025f, 6.0f}};
 
-//   FileInfo dummyInfo4{L"4", 4, FILE_TYPE::REGULAR};
-//   tree.GetHead()->AppendChild(VizNode(dummyInfo4));
+   Tree<VizNode> tree(rootNode);
+   FileInfo dummyInfo6{L"6", 6, FILE_TYPE::REGULAR};
+   tree.GetHead()->AppendChild(VizNode(dummyInfo6));
+   tree.GetHead()->AppendChild(VizNode(dummyInfo6));
 
-//   FileInfo dummyInfo3{L"3", 3, FILE_TYPE::REGULAR};
-//   tree.GetHead()->AppendChild(VizNode(dummyInfo3));
+   FileInfo dummyInfo4{L"4", 4, FILE_TYPE::REGULAR};
+   tree.GetHead()->AppendChild(VizNode(dummyInfo4));
 
-//   FileInfo dummyInfo2{L"2", 2, FILE_TYPE::REGULAR};
-//   tree.GetHead()->AppendChild(VizNode(dummyInfo2));
-//   tree.GetHead()->AppendChild(VizNode(dummyInfo2));
+   FileInfo dummyInfo3{L"3", 3, FILE_TYPE::REGULAR};
+   tree.GetHead()->AppendChild(VizNode(dummyInfo3));
 
-//   FileInfo dummyInfo1{L"1", 1, FILE_TYPE::REGULAR};
-//   tree.GetHead()->AppendChild(VizNode(dummyInfo1));
+   FileInfo dummyInfo2{L"2", 2, FILE_TYPE::REGULAR};
+   tree.GetHead()->AppendChild(VizNode(dummyInfo2));
+   tree.GetHead()->AppendChild(VizNode(dummyInfo2));
+
+   FileInfo dummyInfo1{L"1", 1, FILE_TYPE::REGULAR};
+   tree.GetHead()->AppendChild(VizNode(dummyInfo1));
+
+   FileInfo dummyChild1{L"1", 1, FILE_TYPE::REGULAR};
+   tree.GetHead()->GetLastChild()->GetPreviousSibling()->AppendChild(VizNode(dummyChild1));
+   FileInfo dummyChild2{L"1", 1, FILE_TYPE::REGULAR};
+   tree.GetHead()->GetLastChild()->GetPreviousSibling()->AppendChild(VizNode(dummyChild2));
+
+   ////
 
    for (TreeNode<VizNode>& node : tree)
    {
@@ -406,8 +417,8 @@ void SquarifiedTreeMap::ParseScan()
    }
 
    // Set the size of the root visualization:
-   tree.GetHead()->GetData().m_block = Block(QVector3D(0, 0, 0),
-      10.0f, Visualization::BLOCK_HEIGHT, 10.0f);
+   //tree.GetHead()->GetData().m_block = Block(QVector3D(0, 0, 0),
+   //   10.0f, Visualization::BLOCK_HEIGHT, 10.0f);
 
    Squarify(*tree.GetHead()->GetFirstChild());
 

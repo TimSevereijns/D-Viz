@@ -144,7 +144,7 @@ struct Block
 
    bool IsDefined() const
    {
-      return (m_width > 0.0f && m_height > 0.0f && m_depth > 0.0f);
+      return (m_width != 0.0f && m_height != 0.0f && m_depth != 0.0f);
    }
 };
 
