@@ -360,7 +360,7 @@ namespace
       while (currentNode)
       {
          Squarify(*currentNode->GetFirstChild());
-         currentNode = &*currentNode->GetPreviousSibling();
+         currentNode = &*currentNode->GetNextSibling();
       }
    }
 }
@@ -376,10 +376,10 @@ SquarifiedTreeMap::~SquarifiedTreeMap()
 
 void SquarifiedTreeMap::ParseScan()
 {
-   //auto& tree = m_diskScanner.GetDirectoryTree();
+   auto& tree = m_diskScanner.GetDirectoryTree();
 
    ////
-
+/*
    FileInfo fileInfo{L"Dummy Root Node", 24, FILE_TYPE::DIRECTORY};
    VizNode rootNode{fileInfo, Block{QVector3D(0.0f, 0.0f, 0.0f), 4.0f, 0.025f, 6.0f}};
 
@@ -405,7 +405,7 @@ void SquarifiedTreeMap::ParseScan()
    tree.GetHead()->GetLastChild()->GetPreviousSibling()->AppendChild(VizNode(dummyChild1));
    FileInfo dummyChild2{L"1", 1, FILE_TYPE::REGULAR};
    tree.GetHead()->GetLastChild()->GetPreviousSibling()->AppendChild(VizNode(dummyChild2));
-
+*/
    ////
 
    for (TreeNode<VizNode>& node : tree)
@@ -417,8 +417,8 @@ void SquarifiedTreeMap::ParseScan()
    }
 
    // Set the size of the root visualization:
-   //tree.GetHead()->GetData().m_block = Block(QVector3D(0, 0, 0),
-   //   10.0f, Visualization::BLOCK_HEIGHT, 10.0f);
+   tree.GetHead()->GetData().m_block = Block(QVector3D(0, 0, 0),
+      10.0f, Visualization::BLOCK_HEIGHT, 10.0f);
 
    Squarify(*tree.GetHead()->GetFirstChild());
 
