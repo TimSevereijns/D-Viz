@@ -408,6 +408,18 @@ void SquarifiedTreeMap::ParseScan()
 */
    ////
 
+   // Remove empty directories:
+   unsigned int nodesRemoved = 0;
+   for (TreeNode<VizNode>& node : tree)
+   {
+      if (node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY &&
+          node.GetData().m_file.m_size == 0)
+      {
+         node.RemoveFromTree();
+         nodesRemoved++;
+      }
+   }
+
    for (TreeNode<VizNode>& node : tree)
    {
       node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)

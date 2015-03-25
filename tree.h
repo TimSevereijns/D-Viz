@@ -151,6 +151,11 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
        * TODO: Add a predicate parameter in the form of a lambda.
        */
       void SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)> comparator);
+
+      /**
+       * @brief RemoveFromTree
+       */
+      void RemoveFromTree();
 };
 
 /***************************************************************************************************
@@ -379,6 +384,48 @@ template<typename T>
 bool TreeNode<T>::HasChildren() const
 {
    return m_childCount > 0;
+}
+
+template<typename T>
+void TreeNode<T>::RemoveFromTree()
+{
+   // First, remove all references to this node as parent:
+   auto& currentChild = m_firstChild;
+   while (currentChild)
+   {
+      currentChild->m_parent = nullptr;
+      currentChild = currentChild->m_nextSibling;
+   }
+
+   // Now update all sibling and parent relations:
+   if (m_previousSibling && m_nextSibling)
+   {
+      m_previousSibling->m_nextSibling = m_nextSibling;
+      m_nextSibling->m_previousSibling = m_previousSibling;
+   }
+   else if (m_previousSibling && !m_nextSibling)
+   {
+      m_previousSibling->m_nextSibling = nullptr;
+      m_parent->m_lastChild = m_previousSibling;
+   }
+   else if (m_nextSibling && !m_previousSibling)
+   {
+      m_nextSibling->m_previousSibling = nullptr;
+      m_parent->m_firstChild = m_nextSibling;
+   }
+
+   // Nuke references to anything below this node:
+   m_firstChild = nullptr;
+   m_lastChild = nullptr;
+
+   m_parent->m_childCount--;
+
+#ifndef NDEBUG
+//   auto temp = shared_from_this();
+//   auto useCount = temp.use_count();
+//   assert(useCount == 1);
+//   temp.reset();
+#endif
 }
 
 template<typename T>

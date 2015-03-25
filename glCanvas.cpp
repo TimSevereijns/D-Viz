@@ -241,7 +241,7 @@ void GLCanvas::PrepareVisualizationVertexBuffers()
    //SliceAndDiceTreeMap treeMap{L"C:\\Users\\Tim"};
    //SquarifiedTreeMap treeMap{L"C:\\Users\\tsevereijns\\Pictures\\OK DST"};
    //SquarifiedTreeMap treeMap{L"C:\\Users\\Tim\\Documents\\GitHub\\D-Viz\\UnitTests"};
-   SquarifiedTreeMap treeMap{L"C:\\Users\\Tim\\Documents\\Adobe\\Premiere Pro\\4.0"};
+   SquarifiedTreeMap treeMap{L"C:\\Users\\Tim\\Documents\\Adobe\\Premiere Pro\\4.0\\Adobe Premiere Pro Preview Files\\Sendero.PRV"};
    treeMap.ScanDirectory();
    treeMap.ParseScan();
 
