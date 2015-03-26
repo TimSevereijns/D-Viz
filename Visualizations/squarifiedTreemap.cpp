@@ -106,7 +106,7 @@ namespace
             {
                rowRealEstate.m_width,
                0.0f, // This value gets ignored anyway...
-               rowRealEstate.GetOriginPlusHeight().z() - parentBlock.GetOriginPlusHeight().z()
+               nearCorner.z() // why this...
             };
 
             parentNode.m_block.m_nextChildOrigin = parentBlock.GetOriginPlusHeight() + nextChildOffset;
@@ -123,7 +123,7 @@ namespace
          {
             const QVector3D nextChildOffset
             {
-               nearCorner.x() - parentBlock.GetOriginPlusHeight().x(),
+               nearCorner.x() - parentBlock.GetOriginPlusHeight().x(), // ...but not this?!
                0.0f, // This value gets ignored anyway...
                -rowRealEstate.m_depth
             };
@@ -190,7 +190,7 @@ namespace
                -depthPaddingPerSide
             };
 
-            data.m_block = Block(land.m_vertices[0] + offset,
+            data.m_block = Block(land.m_vertices.front() + offset,
                actualBlockWidth,
                Visualization::BLOCK_HEIGHT,
                actualBlockDepth
@@ -419,6 +419,8 @@ void SquarifiedTreeMap::ParseScan()
          nodesRemoved++;
       }
    }
+
+   std::cout << "Nodes removed: " << nodesRemoved << std::endl;
 
    for (TreeNode<VizNode>& node : tree)
    {

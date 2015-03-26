@@ -419,8 +419,6 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
 void GLCanvas::HandleCameraMovement()
 {
-   //const static float MOVE_SPEED = 0.002f;
-
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp);
 

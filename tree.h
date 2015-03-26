@@ -25,6 +25,9 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
       std::shared_ptr<TreeNode<T>> PrependChild(std::shared_ptr<TreeNode<T>> child);
       std::shared_ptr<TreeNode<T>> AppendChild(std::shared_ptr<TreeNode<T>> child);
 
+      // TODO: PrependSibling(...)
+      // TODO: AppendSibling(...)
+
       void MergeSort(std::shared_ptr<TreeNode<T>>& list,
          const std::function<bool (TreeNode<T>, TreeNode<T>)> comparator);
 
@@ -421,10 +424,10 @@ void TreeNode<T>::RemoveFromTree()
    m_parent->m_childCount--;
 
 #ifndef NDEBUG
-//   auto temp = shared_from_this();
-//   auto useCount = temp.use_count();
-//   assert(useCount == 1);
-//   temp.reset();
+   auto temp = shared_from_this();
+   auto useCount = temp.use_count();
+   assert(useCount == 2);
+   temp.reset();
 #endif
 }
 
