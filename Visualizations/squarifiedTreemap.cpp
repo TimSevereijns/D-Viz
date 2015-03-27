@@ -8,6 +8,8 @@
 
 namespace
 {
+   float HEIGHT = 0.25f;
+
    /**
     * @brief PrintRow
     * @param row
@@ -67,9 +69,9 @@ namespace
 
       const QVector3D nearCorner
       {
-         parentBlock.m_nextChildOrigin.x(),
-         parentBlock.m_nextChildOrigin.y(),
-         parentBlock.m_nextChildOrigin.z()
+         parentBlock.m_nextRowOrigin.x(),
+         parentBlock.m_nextRowOrigin.y(),
+         parentBlock.m_nextRowOrigin.z()
       };
 
       const QVector3D farCorner
@@ -106,10 +108,10 @@ namespace
             {
                rowRealEstate.m_width,
                0.0f, // This value gets ignored anyway...
-               nearCorner.z() // why this...
+               0.0f // why this...
             };
 
-            parentNode.m_block.m_nextChildOrigin = parentBlock.GetOriginPlusHeight() + nextChildOffset;
+            parentNode.m_block.m_nextRowOrigin = nearCorner + nextChildOffset;
          }
       }
       else
@@ -123,12 +125,12 @@ namespace
          {
             const QVector3D nextChildOffset
             {
-               nearCorner.x() - parentBlock.GetOriginPlusHeight().x(), // ...but not this?!
+               0.0f,
                0.0f, // This value gets ignored anyway...
                -rowRealEstate.m_depth
             };
 
-            parentNode.m_block.m_nextChildOrigin = parentBlock.GetOriginPlusHeight() + nextChildOffset;
+            parentNode.m_block.m_nextRowOrigin = nearCorner + nextChildOffset;
          }
       }
 
@@ -149,6 +151,8 @@ namespace
 
       Block& land = CalculateRowBounds(row, /*candidate =*/ nullptr,
          row.front()->GetParent()->GetData(), /*updateOffset =*/ true);
+
+      auto temp = land.m_vertices.front();
 
       if (!land.IsDefined())
       {
@@ -196,6 +200,12 @@ namespace
                actualBlockDepth
             );
 
+//            data.m_block = Block(land.m_vertices.front(),
+//               land.m_width,
+//               HEIGHT,
+//               land.m_depth
+//            );
+
             additionalCoverage = (actualBlockWidth + (2 * widthPaddingPerSide)) / land.m_width;
          }
          else
@@ -220,6 +230,12 @@ namespace
                actualBlockDepth
             );
 
+//            data.m_block = Block(land.m_vertices.front(),
+//               land.m_width,
+//               HEIGHT,
+//               land.m_depth
+//            );
+
             additionalCoverage = (actualBlockDepth + (2 * depthPaddingPerSide)) / land.m_depth;
             assert(additionalCoverage >= 0.0f);
          }
@@ -229,6 +245,15 @@ namespace
 
          land.m_percentCovered += additionalCoverage;
       }
+
+
+      HEIGHT += 0.25f;
+
+      std::cout << "Next Row Origin: "
+                << row.front()->GetParent()->GetData().m_block.m_nextRowOrigin.x() << ", "
+                << row.front()->GetParent()->GetData().m_block.m_nextRowOrigin.y() << ", "
+                << row.front()->GetParent()->GetData().m_block.m_nextRowOrigin.z() << ", "
+      << std::endl;
    }
 
    /**

@@ -424,10 +424,10 @@ void TreeNode<T>::RemoveFromTree()
    m_parent->m_childCount--;
 
 #ifndef NDEBUG
-   auto temp = shared_from_this();
-   auto useCount = temp.use_count();
-   assert(useCount == 2);
-   temp.reset();
+//   auto temp = shared_from_this();
+//   auto useCount = temp.use_count();
+//   assert(useCount == 2);
+//   temp.reset();
 #endif
 }
 

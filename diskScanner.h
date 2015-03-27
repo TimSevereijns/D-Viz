@@ -51,7 +51,7 @@ struct Block
    QVector<QVector3D> m_vertices;
    QVector<QVector3D> m_colors;
 
-   QVector3D m_nextChildOrigin;
+   QVector3D m_nextRowOrigin;
 
    float m_percentCovered;
    float m_width;
@@ -82,7 +82,7 @@ struct Block
         m_height(height),
         m_depth(depth),
         m_percentCovered(0.0f),
-        m_nextChildOrigin(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
+        m_nextRowOrigin(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
    {
       const float x = bottomLeft.x();
       const float y = bottomLeft.y();
