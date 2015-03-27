@@ -241,7 +241,7 @@ void GLCanvas::PrepareVisualizationVertexBuffers()
    //SliceAndDiceTreeMap treeMap{L"C:\\Users\\Tim"};
    //SquarifiedTreeMap treeMap{L"C:\\Users\\tsevereijns\\Pictures\\OK DST"};
    //SquarifiedTreeMap treeMap{L"C:\\Users\\Tim\\Documents\\GitHub\\D-Viz\\UnitTests"};
-   SquarifiedTreeMap treeMap{L"C:\\Users\\Tim\\Pictures\\Miscellaneous\\Misc"};
+   SquarifiedTreeMap treeMap{L"C:\\Users\\Tim"};
    treeMap.ScanDirectory();
    treeMap.ParseScan();
 

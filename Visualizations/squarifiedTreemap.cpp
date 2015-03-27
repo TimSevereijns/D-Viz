@@ -8,8 +8,6 @@
 
 namespace
 {
-   float HEIGHT = 0.25f;
-
    /**
     * @brief PrintRow
     * @param row
@@ -67,6 +65,11 @@ namespace
    {
       const Block& parentBlock = parentNode.m_block;
 
+      if (!parentBlock.IsDefined())
+      {
+         assert(!"Parent block is not defined!");
+      }
+
       const QVector3D nearCorner
       {
          parentBlock.m_nextRowOrigin.x(),
@@ -107,8 +110,8 @@ namespace
             const QVector3D nextChildOffset
             {
                rowRealEstate.m_width,
-               0.0f, // This value gets ignored anyway...
-               0.0f // why this...
+               0.0f, // Height
+               0.0f  // Depth
             };
 
             parentNode.m_block.m_nextRowOrigin = nearCorner + nextChildOffset;
@@ -125,13 +128,20 @@ namespace
          {
             const QVector3D nextChildOffset
             {
-               0.0f,
-               0.0f, // This value gets ignored anyway...
+               0.0f, // Width
+               0.0f, // Height
                -rowRealEstate.m_depth
             };
 
             parentNode.m_block.m_nextRowOrigin = nearCorner + nextChildOffset;
          }
+      }
+
+      // TODO: Add assert to catch the rare block that exceeds its bounds.
+
+      if (!rowRealEstate.IsDefined())
+      {
+         assert(!"No real estate created!");
       }
 
       return rowRealEstate;
@@ -146,16 +156,16 @@ namespace
    {
       if (row.empty())
       {
+         assert(!"The row to be laid out is nonexistent!");
          return;
       }
 
       Block& land = CalculateRowBounds(row, /*candidate =*/ nullptr,
          row.front()->GetParent()->GetData(), /*updateOffset =*/ true);
 
-      auto temp = land.m_vertices.front();
-
       if (!land.IsDefined())
       {
+         assert(!"No land to build upon!");
          return;
       }
 
@@ -200,12 +210,6 @@ namespace
                actualBlockDepth
             );
 
-//            data.m_block = Block(land.m_vertices.front(),
-//               land.m_width,
-//               HEIGHT,
-//               land.m_depth
-//            );
-
             additionalCoverage = (actualBlockWidth + (2 * widthPaddingPerSide)) / land.m_width;
          }
          else
@@ -230,30 +234,20 @@ namespace
                actualBlockDepth
             );
 
-//            data.m_block = Block(land.m_vertices.front(),
-//               land.m_width,
-//               HEIGHT,
-//               land.m_depth
-//            );
-
             additionalCoverage = (actualBlockDepth + (2 * depthPaddingPerSide)) / land.m_depth;
-            assert(additionalCoverage >= 0.0f);
+            if (additionalCoverage == 0.0f)
+            {
+               assert(!"Node provided no additional coverage!");
+            }
          }
 
-         assert(additionalCoverage > 0.0f && additionalCoverage <= 1.0f);
-         assert(data.m_block.IsDefined());
+         if (!data.m_block.IsDefined())
+         {
+            assert(!"Block is not defined!");
+         }
 
          land.m_percentCovered += additionalCoverage;
       }
-
-
-      HEIGHT += 0.25f;
-
-      std::cout << "Next Row Origin: "
-                << row.front()->GetParent()->GetData().m_block.m_nextRowOrigin.x() << ", "
-                << row.front()->GetParent()->GetData().m_block.m_nextRowOrigin.y() << ", "
-                << row.front()->GetParent()->GetData().m_block.m_nextRowOrigin.z() << ", "
-      << std::endl;
    }
 
    /**
@@ -437,8 +431,7 @@ void SquarifiedTreeMap::ParseScan()
    unsigned int nodesRemoved = 0;
    for (TreeNode<VizNode>& node : tree)
    {
-      if (node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY &&
-          node.GetData().m_file.m_size == 0)
+      if (node.GetData().m_file.m_size == 0)
       {
          node.RemoveFromTree();
          nodesRemoved++;

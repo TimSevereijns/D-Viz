@@ -118,13 +118,6 @@ struct Block
          << QVector3D(x           , y + height   , z           ) << QVector3D(-1,  0,  0)
          << QVector3D(x           , y + height   , z - depth   ) << QVector3D(-1,  0,  0)
          << QVector3D(x           , y            , z           ) << QVector3D(-1,  0,  0)
-         // Bottom:
-//         << QVector3D(x           , y            , z - depth   ) << QVector3D( 0, -1,  0)
-//         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0, -1,  0)
-//         << QVector3D(x           , y            , z           ) << QVector3D( 0, -1,  0)
-//         << QVector3D(x + width   , y            , z           ) << QVector3D( 0, -1,  0)
-//         << QVector3D(x           , y            , z           ) << QVector3D( 0, -1,  0)
-//         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0, -1,  0)
          // Top:
          << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  1,  0)
          << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0)
