@@ -238,8 +238,10 @@ void GLCanvas::PrepareOriginMarkerVertexBuffers()
 
 void GLCanvas::PrepareVisualizationVertexBuffers()
 {
-   //SliceAndDiceTreeMap treeMap{L"C:\\excluded\\mainline\\source\\marquee"};
-   SquarifiedTreeMap treeMap{L"C:\\Users\\tsevereijns\\Pictures\\OK DST"};
+   //SliceAndDiceTreeMap treeMap{L"C:\\Users\\Tim"};
+   //SquarifiedTreeMap treeMap{L"C:\\Users\\tsevereijns\\Pictures\\OK DST"};
+   //SquarifiedTreeMap treeMap{L"C:\\Users\\Tim\\Documents\\GitHub\\D-Viz\\UnitTests"};
+   SquarifiedTreeMap treeMap{L"C:\\Users\\Tim"};
    treeMap.ScanDirectory();
    treeMap.ParseScan();
 
@@ -417,8 +419,6 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
 void GLCanvas::HandleCameraMovement()
 {
-   //const static float MOVE_SPEED = 0.002f;
-
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp);
 

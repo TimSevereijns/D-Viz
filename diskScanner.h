@@ -51,7 +51,7 @@ struct Block
    QVector<QVector3D> m_vertices;
    QVector<QVector3D> m_colors;
 
-   QVector3D m_nextChildOrigin;
+   QVector3D m_nextRowOrigin;
 
    float m_percentCovered;
    float m_width;
@@ -82,7 +82,7 @@ struct Block
         m_height(height),
         m_depth(depth),
         m_percentCovered(0.0f),
-        m_nextChildOrigin(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
+        m_nextRowOrigin(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
    {
       const float x = bottomLeft.x();
       const float y = bottomLeft.y();
@@ -118,13 +118,6 @@ struct Block
          << QVector3D(x           , y + height   , z           ) << QVector3D(-1,  0,  0)
          << QVector3D(x           , y + height   , z - depth   ) << QVector3D(-1,  0,  0)
          << QVector3D(x           , y            , z           ) << QVector3D(-1,  0,  0)
-         // Bottom:
-//         << QVector3D(x           , y            , z - depth   ) << QVector3D( 0, -1,  0)
-//         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0, -1,  0)
-//         << QVector3D(x           , y            , z           ) << QVector3D( 0, -1,  0)
-//         << QVector3D(x + width   , y            , z           ) << QVector3D( 0, -1,  0)
-//         << QVector3D(x           , y            , z           ) << QVector3D( 0, -1,  0)
-//         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0, -1,  0)
          // Top:
          << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  1,  0)
          << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0)
@@ -144,7 +137,7 @@ struct Block
 
    bool IsDefined() const
    {
-      return (m_width > 0.0f && m_height > 0.0f && m_depth > 0.0f);
+      return (m_width != 0.0f && m_height != 0.0f && m_depth != 0.0f);
    }
 };
 

@@ -40,6 +40,8 @@ class Visualization
 
       QVector<QVector3D> m_visualizationVertices;
       QVector<QVector3D> m_visualizationColors;
+
+      QVector<QVector3D> m_boundingBoxVertices;
 };
 
 #endif // VISUALIZATION_H

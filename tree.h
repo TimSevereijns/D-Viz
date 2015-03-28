@@ -25,6 +25,9 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
       std::shared_ptr<TreeNode<T>> PrependChild(std::shared_ptr<TreeNode<T>> child);
       std::shared_ptr<TreeNode<T>> AppendChild(std::shared_ptr<TreeNode<T>> child);
 
+      // TODO: PrependSibling(...)
+      // TODO: AppendSibling(...)
+
       void MergeSort(std::shared_ptr<TreeNode<T>>& list,
          const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator);
 
@@ -151,6 +154,11 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
        * TODO: Add a predicate parameter in the form of a lambda.
        */
       void SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator);
+
+      /**
+       * @brief RemoveFromTree
+       */
+      void RemoveFromTree();
 };
 
 /***************************************************************************************************
@@ -382,6 +390,48 @@ bool TreeNode<T>::HasChildren() const
 }
 
 template<typename T>
+void TreeNode<T>::RemoveFromTree()
+{
+   // First, remove all references to this node as parent:
+   auto& currentChild = m_firstChild;
+   while (currentChild)
+   {
+      currentChild->m_parent = nullptr;
+      currentChild = currentChild->m_nextSibling;
+   }
+
+   // Now update all sibling and parent relations:
+   if (m_previousSibling && m_nextSibling)
+   {
+      m_previousSibling->m_nextSibling = m_nextSibling;
+      m_nextSibling->m_previousSibling = m_previousSibling;
+   }
+   else if (m_previousSibling && !m_nextSibling)
+   {
+      m_previousSibling->m_nextSibling = nullptr;
+      m_parent->m_lastChild = m_previousSibling;
+   }
+   else if (m_nextSibling && !m_previousSibling)
+   {
+      m_nextSibling->m_previousSibling = nullptr;
+      m_parent->m_firstChild = m_nextSibling;
+   }
+
+   // Nuke references to anything below this node:
+   m_firstChild = nullptr;
+   m_lastChild = nullptr;
+
+   m_parent->m_childCount--;
+
+#ifndef NDEBUG
+//   auto temp = shared_from_this();
+//   auto useCount = temp.use_count();
+//   assert(useCount == 2);
+//   temp.reset();
+#endif
+}
+
+template<typename T>
 void TreeNode<T>::SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator)
 {
    MergeSort(m_firstChild, comparator);
@@ -581,7 +631,7 @@ class Tree
        * @param printer             A function (or lambda) that interprets the node's data and
        *                            returns the data to be printed as a std::wstring.
        */
-      static void Print(TreeNode<T>& node, std::function<std::wstring (const T&)> printer);
+      static void Print(TreeNode<T>& node, std::function<std::wstring (const T&)>& printer);
 
       /**
        * @brief The Iterator class
@@ -878,7 +928,7 @@ unsigned int Tree<T>::Depth(TreeNode<T> node)
 }
 
 template<typename T>
-void Tree<T>::Print(TreeNode<T>& node, std::function<std::wstring (const T&)> printer)
+void Tree<T>::Print(TreeNode<T>& node, std::function<std::wstring (const T&)>& printer)
 {
    Tree<T>::PreOrderIterator itr = Tree<T>::PreOrderIterator(std::make_shared<TreeNode<T>>(node));
    while (&*itr != &node)

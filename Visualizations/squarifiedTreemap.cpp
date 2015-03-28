@@ -28,10 +28,12 @@ namespace
     * @brief RowSizeInBytes computes the total disk space represented by the nodes in the row.
     *
     * @param[in] row                The nodes in the whose size is to contribute to total row size.
+    * TODO
     *
     * @returns a total row size in bytes of disk space occupied.
     */
-   std::uintmax_t RowSizeInBytes(std::vector<TreeNode<VizNode>*>& row)
+   std::uintmax_t RowSizeInBytes(std::vector<TreeNode<VizNode>*>& row,
+      const TreeNode<VizNode>* candidateItem)
    {
       std::uintmax_t sumOfFileSizes = std::accumulate(std::begin(row), std::end(row),
          std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<VizNode>* node)
@@ -39,34 +41,47 @@ namespace
          return result + node->GetData().m_file.m_size;
       });
 
+      if (candidateItem)
+      {
+         sumOfFileSizes += candidateItem->GetData().m_file.m_size;
+      }
+
       return sumOfFileSizes;
    }
 
    /**
-    * @brief CalculateRowBounds computes the outerbounds (including the necessary boundary padding)
+    * @brief CalculateRowBounds computes the outer bounds (including the necessary boundary padding)
     * needed for the blocks in the row.
     *
     * @param[in] row                The nodes to be laid out as blocks in the current row.
+    * @param[in] candidate
+    * @param[in] parentNode
+    * @param[in] updateOffset
     *
     * @returns a block denoting the outer dimensions of the row boundary.
     */
-   Block CalculateRowBounds(std::vector<TreeNode<VizNode>*>& row)
+   Block CalculateRowBounds(std::vector<TreeNode<VizNode>*>& row,
+      const TreeNode<VizNode>* candidate, VizNode& parentNode, const bool updateOffset)
    {
-      VizNode& parentNode = row.front()->GetParent()->GetData();
       const Block& parentBlock = parentNode.m_block;
+
+      if (!parentBlock.IsDefined())
+      {
+         assert(!"Parent block is not defined!");
+      }
 
       const QVector3D nearCorner
       {
-         parentBlock.m_nextChildOrigin.x(),
-         parentBlock.m_nextChildOrigin.y(),
-         parentBlock.m_nextChildOrigin.z()
+         parentBlock.m_nextRowOrigin.x(),
+         parentBlock.m_nextRowOrigin.y(),
+         parentBlock.m_nextRowOrigin.z()
       };
 
       const QVector3D farCorner
       {
          parentBlock.GetOriginPlusHeight().x() + parentBlock.m_width,
          parentBlock.GetOriginPlusHeight().y(),
-         parentBlock.GetOriginPlusHeight().z() + parentBlock.m_depth
+         parentBlock.GetOriginPlusHeight().z() - parentBlock.m_depth
       };
 
       const Block remainingLand
@@ -77,51 +92,57 @@ namespace
          farCorner.z() - nearCorner.z()
       };
 
-      // Now that we have the remaining land available to build upon, we need to figure out exactly
-      // how much of that land will be taken up by the row that we are currently processing.
-
       const float parentBlockArea = parentBlock.m_width * parentBlock.m_depth;
-      const float remainingLandArea = remainingLand.m_width * remainingLand.m_depth;
+      const float remainingLandArea = std::abs(remainingLand.m_width * remainingLand.m_depth);
       const float parentBytesToFill = (remainingLandArea / parentBlockArea) * parentNode.m_file.m_size;
-      const float rowToParentRatio = RowSizeInBytes(row) / parentBytesToFill;
+      const float rowToParentRatio = RowSizeInBytes(row, candidate) / parentBytesToFill;
 
       Block rowRealEstate;
-      if (remainingLand.m_width > remainingLand.m_depth)
+      if (remainingLand.m_width > std::abs(remainingLand.m_depth))
       {
          rowRealEstate = Block(QVector3D(nearCorner),
             remainingLand.m_width * rowToParentRatio,
             remainingLand.m_height,
-            remainingLand.m_depth);
+            -remainingLand.m_depth);
 
-         const QVector3D nextChildOffset
+         if (updateOffset)
          {
-            rowRealEstate.m_width, 0.0f,
-            rowRealEstate.GetOriginPlusHeight().z() - parentBlock.GetOriginPlusHeight().z()
-         };
+            const QVector3D nextChildOffset
+            {
+               rowRealEstate.m_width,
+               0.0f, // Height
+               0.0f  // Depth
+            };
 
-         parentNode.m_block.m_nextChildOrigin = parentBlock.GetOriginPlusHeight() + nextChildOffset;
+            parentNode.m_block.m_nextRowOrigin = nearCorner + nextChildOffset;
+         }
       }
       else
       {
          rowRealEstate = Block(QVector3D(nearCorner),
             remainingLand.m_width,
             remainingLand.m_height,
-            remainingLand.m_depth * rowToParentRatio);
+            -remainingLand.m_depth * rowToParentRatio);
 
-         const QVector3D nextChildOffset
+         if (updateOffset)
          {
-            nearCorner.x() - parentBlock.GetOriginPlusHeight().x(),
-            0.0f, -rowRealEstate.m_depth
-         };
+            const QVector3D nextChildOffset
+            {
+               0.0f, // Width
+               0.0f, // Height
+               -rowRealEstate.m_depth
+            };
 
-         parentNode.m_block.m_nextChildOrigin = parentBlock.GetOriginPlusHeight() + nextChildOffset;
+            parentNode.m_block.m_nextRowOrigin = nearCorner + nextChildOffset;
+         }
       }
 
-      std::cout << "Next starting origin: "
-         << parentNode.m_block.m_nextChildOrigin.x() << ", "
-         << parentNode.m_block.m_nextChildOrigin.y() << ", "
-         << parentNode.m_block.m_nextChildOrigin.z() << ", "
-         << std::endl;
+      // TODO: Add assert to catch the rare block that exceeds its bounds.
+
+      if (!rowRealEstate.IsDefined())
+      {
+         assert(!"No real estate created!");
+      }
 
       return rowRealEstate;
    }
@@ -133,15 +154,23 @@ namespace
     */
    void LayoutRow(std::vector<TreeNode<VizNode>*>& row)
    {
-      Block& land = CalculateRowBounds(row);
-
-      if (row.size() == 0 || !land.IsDefined())
+      if (row.empty())
       {
+         assert(!"The row to be laid out is nonexistent!");
+         return;
+      }
+
+      Block& land = CalculateRowBounds(row, /*candidate =*/ nullptr,
+         row.front()->GetParent()->GetData(), /*updateOffset =*/ true);
+
+      if (!land.IsDefined())
+      {
+         assert(!"No land to build upon!");
          return;
       }
 
       const size_t nodeCount = row.size();
-      const std::uintmax_t rowFileSize = RowSizeInBytes(row);
+      const std::uintmax_t rowFileSize = RowSizeInBytes(row, /*candidate =*/ nullptr);
 
       float additionalCoverage = 0.0f;
 
@@ -159,23 +188,23 @@ namespace
          const float percentageOfParent = static_cast<float>(fileSize) /
             static_cast<float>(rowFileSize);
 
-         if (land.m_width > land.m_depth)
+         if (land.m_width > std::abs(land.m_depth))
          {
             const auto paddedBlockWidth = land.m_width * percentageOfParent;
             const auto actualBlockWidth = paddedBlockWidth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
             const auto widthPaddingPerSide = ((land.m_width * 0.1f) / nodeCount) / 2.0f;
 
-            const auto actualBlockDepth = land.m_depth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
+            const auto actualBlockDepth = std::abs(land.m_depth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO);
             const auto depthPaddingPerSide = (land.m_depth - actualBlockDepth) / 2.0f;
 
             const QVector3D offset
             {
                (land.m_width * land.m_percentCovered) + widthPaddingPerSide,
-               Visualization::BLOCK_HEIGHT,
+               0.0f, // If you want vertical spacing between block, increase this value...
                -depthPaddingPerSide
             };
 
-            data.m_block = Block(land.m_vertices[0] + offset,
+            data.m_block = Block(land.m_vertices.front() + offset,
                actualBlockWidth,
                Visualization::BLOCK_HEIGHT,
                actualBlockDepth
@@ -185,7 +214,7 @@ namespace
          }
          else
          {
-            const auto paddedBlockDepth = land.m_depth * percentageOfParent;
+            const auto paddedBlockDepth = std::abs(land.m_depth * percentageOfParent);
             const auto actualBlockDepth = paddedBlockDepth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
             const auto depthPaddingPerSide = ((land.m_depth * 0.1f) / nodeCount) / 2.0f;
 
@@ -195,7 +224,7 @@ namespace
             const QVector3D offset
             {
                widthPaddingPerSide,
-               Visualization::BLOCK_HEIGHT,
+               0.0f, // If you want vertical spacing between block, increase this value...
                -(land.m_depth * land.m_percentCovered) - depthPaddingPerSide
             };
 
@@ -206,10 +235,16 @@ namespace
             );
 
             additionalCoverage = (actualBlockDepth + (2 * depthPaddingPerSide)) / land.m_depth;
+            if (additionalCoverage == 0.0f)
+            {
+               assert(!"Node provided no additional coverage!");
+            }
          }
 
-         assert(additionalCoverage > 0.0f && additionalCoverage <= 1.0f);
-         assert(data.m_block.IsDefined());
+         if (!data.m_block.IsDefined())
+         {
+            assert(!"Block is not defined!");
+         }
 
          land.m_percentCovered += additionalCoverage;
       }
@@ -227,7 +262,7 @@ namespace
     * @returns a float representing the aspect ration that farthest from optimal (i.e.: square).
     */
    float ComputeWorstAspectRatio(std::vector<TreeNode<VizNode>*>& row,
-      const TreeNode<VizNode>* candidateItem, const float shortestSideOfRow)
+      const TreeNode<VizNode>* candidateItem, const float shortestSideOfRow, VizNode& parentNode)
    {
       if (row.empty() && !candidateItem)
       {
@@ -235,49 +270,60 @@ namespace
          return std::numeric_limits<float>::max();
       }
 
-      // TODO: Actually use area, and not file size!
-      std::uintmax_t sumOfFileSizes = RowSizeInBytes(row);
+      const Block rowBounds = CalculateRowBounds(row, candidateItem, parentNode,
+         /*updateOffset =*/ false);
+      const float totalRowSurfaceArea = std::abs(rowBounds.m_width * rowBounds.m_depth);
+      const std::uintmax_t totalRowSizeInBytes = RowSizeInBytes(row, candidateItem);
 
-      const std::uintmax_t additionalItemSize = candidateItem
-         ? candidateItem->GetData().m_file.m_size : 0;
+      // Find the largest surface area if the row and candidate were laid out:
 
-      sumOfFileSizes += additionalItemSize;
-
-      std::uintmax_t largestElement;
+      std::uintmax_t largestNodeSizeInBytes;
       if (candidateItem && !row.empty())
       {
-         largestElement = std::max(row.front()->GetData().m_file.m_size, additionalItemSize);
+         largestNodeSizeInBytes = std::max(row.front()->GetData().m_file.m_size,
+            candidateItem->GetData().m_file.m_size);
       }
       else if (candidateItem)
       {
-         largestElement = additionalItemSize;
+         largestNodeSizeInBytes = candidateItem->GetData().m_file.m_size;
       }
       else
       {
-         largestElement = row.front()->GetData().m_file.m_size;
+         largestNodeSizeInBytes = row.front()->GetData().m_file.m_size;
       }
+      const double largestSurface =
+         (static_cast<double>(largestNodeSizeInBytes) / static_cast<double>(totalRowSizeInBytes)) *
+         totalRowSurfaceArea;
 
-      std::uintmax_t smallestElement;
+      // Find the smallest surface area if the row and candidate were laid out:
+
+      std::uintmax_t smallestNodeSizeInBytes;
       if (candidateItem && !row.empty())
       {
-         smallestElement = std::min(row.back()->GetData().m_file.m_size, additionalItemSize);
+         smallestNodeSizeInBytes = std::min(row.back()->GetData().m_file.m_size,
+            candidateItem->GetData().m_file.m_size);
       }
       else if (candidateItem)
       {
-         smallestElement = additionalItemSize;
+         smallestNodeSizeInBytes = candidateItem->GetData().m_file.m_size;
       }
       else
       {
-         smallestElement = row.back()->GetData().m_file.m_size;
+         smallestNodeSizeInBytes = row.back()->GetData().m_file.m_size;
       }
+      const double smallestElement =
+         (static_cast<double>(smallestNodeSizeInBytes) / static_cast<double>(totalRowSizeInBytes)) *
+         totalRowSurfaceArea;
+
+      // Now compute the worst aspect ratio between the two choices above:
 
       const float lengthSquared = shortestSideOfRow * shortestSideOfRow;
-      const float areaSquared = sumOfFileSizes * sumOfFileSizes;
+      const float areaSquared = totalRowSurfaceArea * totalRowSurfaceArea;
 
-      const float worstRatio = std::max((lengthSquared * largestElement) / (areaSquared),
+      const float worstRatio = std::max((lengthSquared * largestSurface) / (areaSquared),
          (areaSquared) / (lengthSquared * smallestElement));
 
-      std::cout << "Ratio: " << worstRatio << std::endl;
+      //std::cout << "Ratio: " << worstRatio << std::endl;
 
       return worstRatio;
    }
@@ -305,14 +351,14 @@ namespace
             parentNode->GetData().m_block.m_depth);
 
          // If worst aspect ratio improves, add block to current row:
-         if (ComputeWorstAspectRatio(currentRow, currentNode, shortestSide) <=
-            ComputeWorstAspectRatio(currentRow, nullptr, shortestSide))
+         if (ComputeWorstAspectRatio(currentRow, currentNode, shortestSide, parentNode->GetData()) <=
+             ComputeWorstAspectRatio(currentRow, nullptr,     shortestSide, parentNode->GetData()))
          {
             currentRow.emplace_back(currentNode);
          }
          else // if aspect ratio gets worse, layout current row and create a new row:
          {
-            PrintRow(currentRow);
+            //PrintRow(currentRow);
             LayoutRow(currentRow);
 
             currentRow.clear();
@@ -324,7 +370,7 @@ namespace
 
       if (!currentRow.empty())
       {
-         PrintRow(currentRow);
+         //PrintRow(currentRow);
          LayoutRow(currentRow);
       }
 
@@ -333,7 +379,7 @@ namespace
       while (currentNode)
       {
          Squarify(*currentNode->GetFirstChild());
-         currentNode = &*currentNode->GetPreviousSibling();
+         currentNode = &*currentNode->GetNextSibling();
       }
    }
 }
@@ -349,12 +395,13 @@ SquarifiedTreeMap::~SquarifiedTreeMap()
 
 void SquarifiedTreeMap::ParseScan()
 {
-   //auto& tree = m_diskScanner.GetDirectoryTree();
+   auto& tree = m_diskScanner.GetDirectoryTree();
 
+   ////
+/*
    FileInfo fileInfo{L"Dummy Root Node", 24, FILE_TYPE::DIRECTORY};
-   VizNode rootNode{fileInfo, Block{QVector3D(0.0f, 0.0f, 0.0f), 6.0f, 0.025f, 4.0f}};
+   VizNode rootNode{fileInfo, Block{QVector3D(0.0f, 0.0f, 0.0f), 4.0f, 0.025f, 6.0f}};
 
-   // TODO: Create tree containing the same data as in the paper:
    Tree<VizNode> tree(rootNode);
    FileInfo dummyInfo6{L"6", 6, FILE_TYPE::REGULAR};
    tree.GetHead()->AppendChild(VizNode(dummyInfo6));
@@ -373,6 +420,26 @@ void SquarifiedTreeMap::ParseScan()
    FileInfo dummyInfo1{L"1", 1, FILE_TYPE::REGULAR};
    tree.GetHead()->AppendChild(VizNode(dummyInfo1));
 
+   FileInfo dummyChild1{L"1", 1, FILE_TYPE::REGULAR};
+   tree.GetHead()->GetLastChild()->GetPreviousSibling()->AppendChild(VizNode(dummyChild1));
+   FileInfo dummyChild2{L"1", 1, FILE_TYPE::REGULAR};
+   tree.GetHead()->GetLastChild()->GetPreviousSibling()->AppendChild(VizNode(dummyChild2));
+*/
+   ////
+
+   // Remove empty directories:
+   unsigned int nodesRemoved = 0;
+   for (TreeNode<VizNode>& node : tree)
+   {
+      if (node.GetData().m_file.m_size == 0)
+      {
+         node.RemoveFromTree();
+         nodesRemoved++;
+      }
+   }
+
+   std::cout << "Nodes removed: " << nodesRemoved << std::endl;
+
    for (TreeNode<VizNode>& node : tree)
    {
       node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
@@ -382,8 +449,8 @@ void SquarifiedTreeMap::ParseScan()
    }
 
    // Set the size of the root visualization:
-//   tree.GetHead()->GetFirstChild()->GetData().m_block =
-//         Block(QVector3D(0, 0, 0), 10.0f, 0.0625f, 10.0f);
+   tree.GetHead()->GetData().m_block = Block(QVector3D(0, 0, 0),
+      10.0f, Visualization::BLOCK_HEIGHT, 10.0f);
 
    Squarify(*tree.GetHead()->GetFirstChild());
 
