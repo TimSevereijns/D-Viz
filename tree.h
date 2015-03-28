@@ -26,14 +26,14 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
       std::shared_ptr<TreeNode<T>> AppendChild(std::shared_ptr<TreeNode<T>> child);
 
       void MergeSort(std::shared_ptr<TreeNode<T>>& list,
-         const std::function<bool (TreeNode<T>, TreeNode<T>)> comparator);
+         const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator);
 
       void DivideList(std::shared_ptr<TreeNode<T>> head, std::shared_ptr<TreeNode<T>>& lhs,
          std::shared_ptr<TreeNode<T>>& rhs);
 
       std::shared_ptr<TreeNode<T>> MergeSortedHalves(std::shared_ptr<TreeNode<T>>& lhs,
          std::shared_ptr<TreeNode<T>>& rhs,
-         const std::function<bool (TreeNode<T>, TreeNode<T>)> comparator);
+         const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator);
 
       std::shared_ptr<TreeNode<T>> m_parent;
       std::shared_ptr<TreeNode<T>> m_firstChild;
@@ -41,11 +41,11 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
       std::shared_ptr<TreeNode<T>> m_previousSibling;
       std::shared_ptr<TreeNode<T>> m_nextSibling;
 
+      T m_data;
+
       unsigned int m_childCount;
 
       bool m_visited;
-
-      T m_data;
 
    public:
       explicit TreeNode();
@@ -150,7 +150,7 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
        * @brief SortChildren        Merge sorts the immediate child nodes.
        * TODO: Add a predicate parameter in the form of a lambda.
        */
-      void SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)> comparator);
+      void SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator);
 };
 
 /***************************************************************************************************
@@ -382,7 +382,7 @@ bool TreeNode<T>::HasChildren() const
 }
 
 template<typename T>
-void TreeNode<T>::SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)> comparator)
+void TreeNode<T>::SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator)
 {
    MergeSort(m_firstChild, comparator);
 }
@@ -417,7 +417,7 @@ void TreeNode<T>::DivideList(std::shared_ptr<TreeNode<T>> head,
 
 template<typename T>
 void TreeNode<T>::MergeSort(std::shared_ptr<TreeNode<T>>& list,
-   const std::function<bool (TreeNode<T>, TreeNode<T>)> comparator)
+   const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator)
 {
    if (!list || !list->m_nextSibling)
    {
@@ -442,7 +442,7 @@ void TreeNode<T>::MergeSort(std::shared_ptr<TreeNode<T>>& list,
 template<typename T>
 std::shared_ptr<TreeNode<T>> TreeNode<T>::MergeSortedHalves(std::shared_ptr<TreeNode<T>>& lhs,
    std::shared_ptr<TreeNode<T>>& rhs,
-   const std::function<bool (TreeNode<T>, TreeNode<T>)> comparator)
+   const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator)
 {
    std::shared_ptr<TreeNode<T>> result = nullptr;
    if (comparator(*lhs.get(), *rhs.get()))
