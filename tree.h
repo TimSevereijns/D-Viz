@@ -151,7 +151,7 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
 
       /**
        * @brief SortChildren        Merge sorts the immediate child nodes.
-       * TODO: Add a predicate parameter in the form of a lambda.
+       * @param comparator          The function to be used as the basis for the sorting comparison.
        */
       void SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator);
 
@@ -409,19 +409,30 @@ void TreeNode<T>::RemoveFromTree()
    else if (m_previousSibling && !m_nextSibling)
    {
       m_previousSibling->m_nextSibling = nullptr;
-      m_parent->m_lastChild = m_previousSibling;
+
+      if (m_parent)
+      {
+         m_parent->m_lastChild = m_previousSibling;
+      }
    }
    else if (m_nextSibling && !m_previousSibling)
    {
       m_nextSibling->m_previousSibling = nullptr;
-      m_parent->m_firstChild = m_nextSibling;
+
+      if (m_parent)
+      {
+         m_parent->m_firstChild = m_nextSibling;
+      }
    }
 
    // Nuke references to anything below this node:
    m_firstChild = nullptr;
    m_lastChild = nullptr;
 
-   m_parent->m_childCount--;
+   if (m_parent)
+   {
+      m_parent->m_childCount--;
+   }
 
 #ifndef NDEBUG
 //   auto temp = shared_from_this();
