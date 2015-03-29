@@ -20,10 +20,10 @@ template<typename T>
 class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
 {
    private:
-      std::shared_ptr<TreeNode<T>> AddFirstChild(std::shared_ptr<TreeNode<T>> child);
+      std::shared_ptr<TreeNode<T>> AddFirstChild(std::shared_ptr<TreeNode<T>>& child);
 
-      std::shared_ptr<TreeNode<T>> PrependChild(std::shared_ptr<TreeNode<T>> child);
-      std::shared_ptr<TreeNode<T>> AppendChild(std::shared_ptr<TreeNode<T>> child);
+      std::shared_ptr<TreeNode<T>> PrependChild(std::shared_ptr<TreeNode<T>>& child);
+      std::shared_ptr<TreeNode<T>> AppendChild(std::shared_ptr<TreeNode<T>>& child);
 
       // TODO: PrependSibling(...)
       // TODO: AppendSibling(...)
@@ -153,10 +153,10 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
        * @brief SortChildren        Merge sorts the immediate child nodes.
        * @param comparator          The function to be used as the basis for the sorting comparison.
        */
-      void SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator);
+      void SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)> comparator);
 
       /**
-       * @brief RemoveFromTree
+       * @brief RemoveFromTree removes the node from the tree that it is in.
        */
       void RemoveFromTree();
 };
@@ -267,7 +267,7 @@ std::shared_ptr<TreeNode<T>> TreeNode<T>::GetParent() const
 }
 
 template<typename T>
-std::shared_ptr<TreeNode<T>> TreeNode<T>::AddFirstChild(std::shared_ptr<TreeNode<T>> child)
+std::shared_ptr<TreeNode<T>> TreeNode<T>::AddFirstChild(std::shared_ptr<TreeNode<T>>& child)
 {
    assert(m_childCount == 0);
 
@@ -287,7 +287,7 @@ std::shared_ptr<TreeNode<T>> TreeNode<T>::PrependChild(T data)
 }
 
 template<typename T>
-std::shared_ptr<TreeNode<T>> TreeNode<T>::PrependChild(std::shared_ptr<TreeNode<T>> child)
+std::shared_ptr<TreeNode<T>> TreeNode<T>::PrependChild(std::shared_ptr<TreeNode<T>>& child)
 {
    child->m_parent = shared_from_this();
 
@@ -310,12 +310,12 @@ std::shared_ptr<TreeNode<T>> TreeNode<T>::PrependChild(std::shared_ptr<TreeNode<
 template<typename T>
 std::shared_ptr<TreeNode<T>> TreeNode<T>::AppendChild(T data)
 {
-   const auto newNode = std::make_shared<TreeNode<T>>(data);
+   auto newNode = std::make_shared<TreeNode<T>>(data);
    return AppendChild(newNode);
 }
 
 template<typename T>
-std::shared_ptr<TreeNode<T>> TreeNode<T>::AppendChild(std::shared_ptr<TreeNode<T>> child)
+std::shared_ptr<TreeNode<T>> TreeNode<T>::AppendChild(std::shared_ptr<TreeNode<T>>& child)
 {
    child->m_parent = shared_from_this();
 
@@ -443,9 +443,33 @@ void TreeNode<T>::RemoveFromTree()
 }
 
 template<typename T>
-void TreeNode<T>::SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator)
+void TreeNode<T>::SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)> comparator)
 {
    MergeSort(m_firstChild, comparator);
+}
+
+template<typename T>
+void TreeNode<T>::MergeSort(std::shared_ptr<TreeNode<T>>& list,
+   const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator)
+{
+   if (!list || !list->m_nextSibling)
+   {
+      return;
+   }
+
+   std::shared_ptr<TreeNode<T>> head = list;
+   std::shared_ptr<TreeNode<T>> lhs = nullptr;
+   std::shared_ptr<TreeNode<T>> rhs = nullptr;
+
+   DivideList(head, lhs, rhs);
+
+   assert(lhs);
+   assert(rhs);
+
+   MergeSort(lhs, comparator);
+   MergeSort(rhs, comparator);
+
+   list = MergeSortedHalves(lhs, rhs, comparator);
 }
 
 template<typename T>
@@ -474,30 +498,6 @@ void TreeNode<T>::DivideList(std::shared_ptr<TreeNode<T>> head,
    rhs = tortoise->m_nextSibling;
 
    tortoise->m_nextSibling = nullptr;
-}
-
-template<typename T>
-void TreeNode<T>::MergeSort(std::shared_ptr<TreeNode<T>>& list,
-   const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator)
-{
-   if (!list || !list->m_nextSibling)
-   {
-      return;
-   }
-
-   std::shared_ptr<TreeNode<T>> head = list;
-   std::shared_ptr<TreeNode<T>> lhs = nullptr;
-   std::shared_ptr<TreeNode<T>> rhs = nullptr;
-
-   DivideList(head, lhs, rhs);
-
-   assert(lhs);
-   assert(rhs);
-
-   MergeSort(lhs, comparator);
-   MergeSort(rhs, comparator);
-
-   list = MergeSortedHalves(lhs, rhs, comparator);
 }
 
 template<typename T>
@@ -642,7 +642,7 @@ class Tree
        * @param printer             A function (or lambda) that interprets the node's data and
        *                            returns the data to be printed as a std::wstring.
        */
-      static void Print(TreeNode<T>& node, std::function<std::wstring (const T&)>& printer);
+      static void Print(TreeNode<T>& node, std::function<std::wstring (const T&)> printer);
 
       /**
        * @brief The Iterator class
@@ -939,7 +939,7 @@ unsigned int Tree<T>::Depth(TreeNode<T> node)
 }
 
 template<typename T>
-void Tree<T>::Print(TreeNode<T>& node, std::function<std::wstring (const T&)>& printer)
+void Tree<T>::Print(TreeNode<T>& node, std::function<std::wstring (const T&)> printer)
 {
    Tree<T>::PreOrderIterator itr = Tree<T>::PreOrderIterator(std::make_shared<TreeNode<T>>(node));
    while (&*itr != &node)

@@ -332,12 +332,10 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
    if (event->key() == Qt::Key_Up)
    {
       m_movementSpeed *= 1.25f;
-      std::cout << "Increasing move speed by 25%, now: " << m_movementSpeed << std::endl;
    }
    else if (event->key() == Qt::Key_Down)
    {
       m_movementSpeed *= 0.75f;
-      std::cout << "Decreasing move speed by 25%, now: " << m_movementSpeed << std::endl;
    }
 
    const auto keyState = KeyboardManager::KEY_STATE::DOWN;

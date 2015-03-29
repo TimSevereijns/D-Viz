@@ -266,7 +266,6 @@ namespace
    {
       if (row.empty() && !candidateItem)
       {
-         std::cout << "Both row and additional item are empty!" << std::endl;
          return std::numeric_limits<float>::max();
       }
 
@@ -395,37 +394,7 @@ SquarifiedTreeMap::~SquarifiedTreeMap()
 
 void SquarifiedTreeMap::ParseScan()
 {
-   auto& tree = m_diskScanner.GetDirectoryTree();
-
-   ////
-/*
-   FileInfo fileInfo{L"Dummy Root Node", 24, FILE_TYPE::DIRECTORY};
-   VizNode rootNode{fileInfo, Block{QVector3D(0.0f, 0.0f, 0.0f), 4.0f, 0.025f, 6.0f}};
-
-   Tree<VizNode> tree(rootNode);
-   FileInfo dummyInfo6{L"6", 6, FILE_TYPE::REGULAR};
-   tree.GetHead()->AppendChild(VizNode(dummyInfo6));
-   tree.GetHead()->AppendChild(VizNode(dummyInfo6));
-
-   FileInfo dummyInfo4{L"4", 4, FILE_TYPE::REGULAR};
-   tree.GetHead()->AppendChild(VizNode(dummyInfo4));
-
-   FileInfo dummyInfo3{L"3", 3, FILE_TYPE::REGULAR};
-   tree.GetHead()->AppendChild(VizNode(dummyInfo3));
-
-   FileInfo dummyInfo2{L"2", 2, FILE_TYPE::REGULAR};
-   tree.GetHead()->AppendChild(VizNode(dummyInfo2));
-   tree.GetHead()->AppendChild(VizNode(dummyInfo2));
-
-   FileInfo dummyInfo1{L"1", 1, FILE_TYPE::REGULAR};
-   tree.GetHead()->AppendChild(VizNode(dummyInfo1));
-
-   FileInfo dummyChild1{L"1", 1, FILE_TYPE::REGULAR};
-   tree.GetHead()->GetLastChild()->GetPreviousSibling()->AppendChild(VizNode(dummyChild1));
-   FileInfo dummyChild2{L"1", 1, FILE_TYPE::REGULAR};
-   tree.GetHead()->GetLastChild()->GetPreviousSibling()->AppendChild(VizNode(dummyChild2));
-*/
-   ////
+   Tree<VizNode>& tree = m_diskScanner.GetDirectoryTree();
 
    // Remove empty directories:
    unsigned int nodesRemoved = 0;
@@ -443,18 +412,21 @@ void SquarifiedTreeMap::ParseScan()
    for (TreeNode<VizNode>& node : tree)
    {
       node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
-      {
-         return lhs.GetData().m_file.m_size >= rhs.GetData().m_file.m_size;
-      });
+         { return lhs.GetData().m_file.m_size >= rhs.GetData().m_file.m_size; });
    }
 
    // Set the size of the root visualization:
    tree.GetHead()->GetData().m_block = Block(QVector3D(0, 0, 0),
-      10.0f, Visualization::BLOCK_HEIGHT, 10.0f);
+      1000.0f, Visualization::BLOCK_HEIGHT, 1000.0f);
 
+   const auto startParseTime = std::chrono::high_resolution_clock::now();
    Squarify(*tree.GetHead()->GetFirstChild());
+   const auto endParseTime = std::chrono::high_resolution_clock::now();
+
+   auto parsingTime =
+      std::chrono::duration_cast<std::chrono::duration<double>>(endParseTime - startParseTime);
+
+   std::cout << "Parse time (in seconds): " << parsingTime.count() << std::endl;
 
    m_hasDataBeenParsed = true;
-
-   m_diskScanner.GetDirectoryTree() = tree;
 }
