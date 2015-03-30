@@ -67,8 +67,6 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       void PrepareVisualizationVertexBuffers();
       void PrepareOriginMarkerVertexBuffers();
 
-      //TreeMap m_treeMap;
-
       QWidget& m_parent;
 
       Camera m_camera;

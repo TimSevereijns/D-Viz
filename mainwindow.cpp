@@ -3,9 +3,10 @@
 
 #include "glCanvas.h"
 
-MainWindow::MainWindow(QWidget* parent)
+MainWindow::MainWindow(QWidget* parent /*= 0*/, std::wstring path /*= L"C:"*/)
    : QMainWindow(parent),
-   ui(new Ui::MainWindow)
+     m_launchArgPath(path),
+     ui(new Ui::MainWindow)
 {
    ui->setupUi(this);
 
@@ -21,4 +22,9 @@ MainWindow::~MainWindow()
 void MainWindow::resizeEvent(QResizeEvent* /*event*/)
 {
    m_glCanvas->resize(size().width(), size().height());
+}
+
+std::wstring MainWindow::GetLaunchArgPath() const
+{
+   return m_launchArgPath;
 }

@@ -5,8 +5,11 @@
 #include "tree.h"
 
 #include <algorithm>
+#include <codecvt>
 #include <iostream>
+#include <locale>
 #include <memory>
+#include <string>
 
 #include <QByteArray>
 #include <QDebug>
@@ -44,34 +47,6 @@ namespace {
       return tree;
    }
 
-   void QuickTreeSortingTest()
-   {
-      auto tree = CreateSimpleIntegerBinaryTree();
-      tree->GetHead()->SortChildren(
-         [] (TreeNode<int>& lhs, TreeNode<int>& rhs)
-      {
-         return lhs.GetData() < rhs.GetData();
-      });
-
-      const std::vector<int> expectedTraversal{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-
-      bool traversalError = false;
-      auto child = tree->GetHead()->GetFirstChild();
-
-      std::for_each(std::begin(expectedTraversal), std::end(expectedTraversal),
-         [&] (const int expected)
-      {
-         if (child->GetData() != expected)
-         {
-            traversalError = true;
-         }
-
-         child = child->GetNextSibling();
-      });
-
-      std::cout << (traversalError ? "Error!" : "All O.K.") << std::endl;
-   }
-
    void QuickDiskTest()
    {
       const std::wstring path {L"C:\\Users\\tsevereijns\\Desktop"};
@@ -103,75 +78,35 @@ namespace {
       file.close();
    }
 
-   template<typename T>
-   void PrintTree(Tree<T>& tree)
+   /**
+    * @brief NarrowStringToWideString
+    * @param narrow
+    * @return
+    */
+   std::wstring NarrowStringToWideString(const std::string& narrow)
    {
-      std::for_each(tree.beginPreOrder(), tree.endPreOrder(),
-         [] (const TreeNode<T>& node)
-      {
-         const auto depth = Tree<T>::Depth(node);
-         const auto tabSize = 2;
-         const std::wstring padding((depth * tabSize), ' ');
-
-         std::wcout << padding << node.GetData() << std::endl;
-      });
-   }
-
-   void QuickSortingTest()
-   {
-      std::unique_ptr<Tree<int>> tree(new Tree<int>(999));
-      tree->GetHead()->AppendChild(99);
-      tree->GetHead()->GetFirstChild()->AppendChild(7);
-      tree->GetHead()->GetFirstChild()->AppendChild(6);
-      tree->GetHead()->GetFirstChild()->AppendChild(5);
-      tree->GetHead()->GetFirstChild()->AppendChild(4);
-      tree->GetHead()->GetFirstChild()->AppendChild(3);
-      tree->GetHead()->GetFirstChild()->AppendChild(2);
-      tree->GetHead()->GetFirstChild()->AppendChild(1);
-
-      bool sortingError = false;
-      int lastItem = -999;
-
-      Tree<int>::Print(*tree->GetHead(), [] (const int data) { return std::to_wstring(data); });
-
-      // Sort:
-      std::for_each(std::begin(*tree), std::end(*tree),
-         [] (TreeNode<int>& node)
-      {
-         node.SortChildren([] (const TreeNode<int>& lhs, const TreeNode<int>& rhs)
-            { return lhs.GetData() < rhs.GetData(); });
-      });
-
-      Tree<int>::Print(*tree->GetHead(), [] (const int data) { return std::to_wstring(data); });
-
-      // Verify:
-      std::for_each(std::begin(*tree), std::end(*tree),
-         [&] (TreeNode<int>& node)
-      {
-         if (!node.HasChildren())
-         {
-            return;
-         }
-
-         auto child = node.GetFirstChild();
-         while (child)
-         {
-            if (child->GetData() < lastItem)
-            {
-               sortingError = true;
-               lastItem = child->GetData();
-            }
-
-            child = child->GetNextSibling();
-         }
-      });
+       typedef std::codecvt_utf8<wchar_t> convertType;
+       std::wstring_convert<convertType, wchar_t> converter;
+       return converter.from_bytes(narrow);
    }
 }
 
 int main(int argc, char* argv[])
 {
+   std::wstring filePath;
+
+   if (argc == 1)
+   {
+      filePath = L"C:\\";
+   }
+   else
+   {
+      filePath = NarrowStringToWideString(argv[1]);
+      std::wcout << "Visualizing: " << filePath << L"..." << std::endl;
+   }
+
    QApplication application(argc, argv);
-   MainWindow mainWindow;
+   MainWindow mainWindow{/* parent =*/ 0, /* path =*/ filePath};
    mainWindow.show();
 
    //QuickSortingTest();

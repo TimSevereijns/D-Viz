@@ -52,6 +52,13 @@ namespace
       return converter.to_bytes(wide);
    }
 
+   std::wstring NarrowStringToWideString(const std::string& narrow)
+   {
+       typedef std::codecvt_utf8<wchar_t> convertType;
+       std::wstring_convert<convertType, wchar_t> converter;
+       return converter.from_bytes(narrow);
+   }
+
    /**
     * @brief SerializeRecursively
     * @param jsonObject

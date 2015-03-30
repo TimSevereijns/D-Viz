@@ -1,6 +1,7 @@
 #include "glCanvas.h"
 
 #include "camera.h"
+#include "mainwindow.h"
 #include "Visualizations/sliceAndDiceTreemap.h"
 #include "Visualizations/squarifiedTreemap.h"
 
@@ -241,7 +242,11 @@ void GLCanvas::PrepareVisualizationVertexBuffers()
    //SliceAndDiceTreeMap treeMap{L"C:\\Users\\Tim"};
    //SquarifiedTreeMap treeMap{L"C:\\Users\\tsevereijns\\Pictures\\OK DST"};
    //SquarifiedTreeMap treeMap{L"C:\\Users\\Tim\\Documents\\GitHub\\D-Viz\\UnitTests"};
-   SquarifiedTreeMap treeMap{L"C:\\Users\\Tim"};
+   //SquarifiedTreeMap treeMap{L"C:\\Users\\Tim"};
+
+   const std::wstring path = reinterpret_cast<MainWindow*>(&m_parent)->GetLaunchArgPath();
+   SquarifiedTreeMap treeMap{path};
+
    treeMap.ScanDirectory();
    treeMap.ParseScan();
 
