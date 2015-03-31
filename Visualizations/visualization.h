@@ -14,6 +14,7 @@ class Visualization
 
       static const float BLOCK_HEIGHT;
       static const float BLOCK_TO_REAL_ESTATE_RATIO;
+      static const float DEFAULT_PADDING;
 
       virtual void ScanDirectory();
       virtual void ParseScan() = 0;

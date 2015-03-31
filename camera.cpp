@@ -37,7 +37,7 @@ Camera::Camera()
      m_position(0, 0, 0),
      m_aspectRatio(1.0f),
      m_nearPlane(1.0f),
-     m_farPlane(1000.0f),
+     m_farPlane(2000.0f),
      m_fieldOfView(45.0f)
 {
 }

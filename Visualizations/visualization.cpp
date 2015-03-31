@@ -6,6 +6,7 @@
 
 const float Visualization::BLOCK_HEIGHT = 2.0f;
 const float Visualization::BLOCK_TO_REAL_ESTATE_RATIO = 0.9f;
+const float Visualization::DEFAULT_PADDING = 0.75f;
 
 Visualization::Visualization(const std::wstring& rawPath)
    : m_diskScanner(rawPath),

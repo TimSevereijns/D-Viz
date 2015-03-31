@@ -191,11 +191,30 @@ namespace
          if (land.m_width > std::abs(land.m_depth))
          {
             const auto paddedBlockWidth = land.m_width * percentageOfParent;
-            const auto actualBlockWidth = paddedBlockWidth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
-            const auto widthPaddingPerSide = ((land.m_width * 0.1f) / nodeCount) / 2.0f;
 
-            const auto actualBlockDepth = std::abs(land.m_depth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO);
-            const auto depthPaddingPerSide = (land.m_depth - actualBlockDepth) / 2.0f;
+            auto actualBlockWidth = paddedBlockWidth - (2.0f * Visualization::DEFAULT_PADDING);
+            if (actualBlockWidth <= 0.0f)
+            {
+               actualBlockWidth = paddedBlockWidth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
+            }
+
+            auto widthPaddingPerSide = Visualization::DEFAULT_PADDING;
+            if (widthPaddingPerSide * 2.0f >= actualBlockWidth)
+            {
+               widthPaddingPerSide = ((land.m_width * 0.1f) / nodeCount) / 2.0f;
+            }
+
+            auto actualBlockDepth = land.m_depth - (2.0f * Visualization::DEFAULT_PADDING);
+            if (actualBlockDepth <= 0.0f)
+            {
+               actualBlockDepth = std::abs(land.m_depth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO);
+            }
+
+            auto depthPaddingPerSide = Visualization::DEFAULT_PADDING;
+            if (depthPaddingPerSide * 2.0f >= actualBlockDepth)
+            {
+               depthPaddingPerSide = (land.m_depth - actualBlockDepth) / 2.0f;
+            }
 
             const QVector3D offset
             {
@@ -215,11 +234,30 @@ namespace
          else
          {
             const auto paddedBlockDepth = std::abs(land.m_depth * percentageOfParent);
-            const auto actualBlockDepth = paddedBlockDepth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
-            const auto depthPaddingPerSide = ((land.m_depth * 0.1f) / nodeCount) / 2.0f;
 
-            const auto actualBlockWidth = land.m_width * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
-            const auto widthPaddingPerSide = (land.m_width - actualBlockWidth) / 2.0f;
+            auto actualBlockDepth = paddedBlockDepth - (2.0f * Visualization::DEFAULT_PADDING);
+            if (actualBlockDepth <= 0.0f)
+            {
+               actualBlockDepth = paddedBlockDepth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
+            }
+
+            auto depthPaddingPerSide = Visualization::DEFAULT_PADDING;
+            if (depthPaddingPerSide * 2.0f >= actualBlockDepth)
+            {
+               depthPaddingPerSide = ((land.m_depth * 0.1f) / nodeCount) / 2.0f;
+            }
+
+            auto actualBlockWidth = land.m_width - (2.0f * Visualization::DEFAULT_PADDING);
+            if (actualBlockWidth <= 0.0f)
+            {
+               actualBlockWidth = land.m_width * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
+            }
+
+            auto widthPaddingPerSide = Visualization::DEFAULT_PADDING;
+            if (widthPaddingPerSide * 2.0f >= actualBlockWidth)
+            {
+               widthPaddingPerSide = (land.m_width - actualBlockWidth) / 2.0f;
+            }
 
             const QVector3D offset
             {
