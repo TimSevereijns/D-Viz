@@ -1,5 +1,7 @@
 #include "diskScanner.h"
 
+#include "Visualizations/visualization.h"
+
 #include <algorithm>
 #include <codecvt>
 #include <chrono>
@@ -129,9 +131,17 @@ void DiskScanner::StartScanning(std::atomic<std::pair<std::uintmax_t, bool>>* pr
 {
    assert(boost::filesystem::is_directory(m_path));
 
+   const Block rootBlock
+   {
+      QVector3D(0, 0, 0),
+      Visualization::ROOT_BLOCK_WIDTH,
+      Visualization::BLOCK_HEIGHT,
+      Visualization::ROOT_BLOCK_DEPTH
+   };
+
    // Dummy root node:
    FileInfo fileInfo{L"Dummy Root Node", DiskScanner::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY};
-   VizNode rootNode{fileInfo, Block{QVector3D(0.0f, 0.0f, 0.0f), 10.0f, 0.025f, 10.0f}};
+   VizNode rootNode{fileInfo, rootBlock};
 
    m_fileTree = std::make_unique<Tree<VizNode>>(Tree<VizNode>(rootNode));
 

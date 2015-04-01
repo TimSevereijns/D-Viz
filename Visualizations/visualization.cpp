@@ -5,8 +5,10 @@
 #include <string>
 
 const float Visualization::BLOCK_HEIGHT = 2.0f;
-const float Visualization::BLOCK_TO_REAL_ESTATE_RATIO = 0.9f;
-const float Visualization::DEFAULT_PADDING = 0.75f;
+const float Visualization::PADDING_RATIO = 0.9f;
+const float Visualization::MAX_PADDING = 0.75f;
+const float Visualization::ROOT_BLOCK_WIDTH = 1000.0f;
+const float Visualization::ROOT_BLOCK_DEPTH = 1000.0f;
 
 Visualization::Visualization(const std::wstring& rawPath)
    : m_diskScanner(rawPath),

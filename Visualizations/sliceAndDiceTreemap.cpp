@@ -30,10 +30,10 @@ namespace
       if (parentBlock.m_width > parentBlock.m_depth)          // Slice perpendicular to the X-axis:
       {
          const auto paddedBlockWidth = parentBlock.m_width * percentageOfParent;
-         const auto actualBlockWidth = paddedBlockWidth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
+         const auto actualBlockWidth = paddedBlockWidth * Visualization::PADDING_RATIO;
          const auto widthPaddingPerSide = ((parentBlock.m_width * 0.1f) / siblingCount) / 2.0f;
 
-         const auto actualBlockDepth = parentBlock.m_depth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
+         const auto actualBlockDepth = parentBlock.m_depth * Visualization::PADDING_RATIO;
          const auto depthPaddingPerSide = (parentBlock.m_depth - actualBlockDepth) / 2.0f;
 
          const auto offset = QVector3D(
@@ -53,10 +53,10 @@ namespace
       else                                                    // Slice perpendicular to the Y-axis:
       {
          const auto paddedBlockDepth = parentBlock.m_depth * percentageOfParent;
-         const auto actualBlockDepth = paddedBlockDepth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
+         const auto actualBlockDepth = paddedBlockDepth * Visualization::PADDING_RATIO;
          const auto depthPaddingPerSide = ((parentBlock.m_depth * 0.1f) / siblingCount) / 2.0f;
 
-         const auto actualBlockWidth = parentBlock.m_width * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
+         const auto actualBlockWidth = parentBlock.m_width * Visualization::PADDING_RATIO;
          const auto widthPaddingPerSide = (parentBlock.m_width - actualBlockWidth) / 2.0f;
 
          const auto offset = QVector3D(

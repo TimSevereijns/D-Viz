@@ -13,8 +13,10 @@ class Visualization
       virtual ~Visualization();
 
       static const float BLOCK_HEIGHT;
-      static const float BLOCK_TO_REAL_ESTATE_RATIO;
-      static const float DEFAULT_PADDING;
+      static const float PADDING_RATIO;
+      static const float MAX_PADDING;
+      static const float ROOT_BLOCK_WIDTH;
+      static const float ROOT_BLOCK_DEPTH;
 
       virtual void ScanDirectory();
       virtual void ParseScan() = 0;

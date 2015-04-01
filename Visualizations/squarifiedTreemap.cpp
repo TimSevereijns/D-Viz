@@ -54,9 +54,11 @@ namespace
     * needed for the blocks in the row.
     *
     * @param[in] row                The nodes to be laid out as blocks in the current row.
-    * @param[in] candidate
-    * @param[in] parentNode
-    * @param[in] updateOffset
+    * @param[in] candidate          The latest candidate to be considered for inclusion in the row.
+    * @param[in] parentNode         The node on top of which the new row is to be placed.
+    * @param[in] updateOffset       Whether the origin of the next row should be computed. This
+    *                               should only be set to true only when the row bounds are computed
+    *                               for the last time as part of row layout.
     *
     * @returns a block denoting the outer dimensions of the row boundary.
     */
@@ -107,14 +109,14 @@ namespace
 
          if (updateOffset)
          {
-            const QVector3D nextChildOffset
+            const QVector3D nextRowOffset
             {
                rowRealEstate.m_width,
                0.0f, // Height
                0.0f  // Depth
             };
 
-            parentNode.m_block.m_nextRowOrigin = nearCorner + nextChildOffset;
+            parentNode.m_block.m_nextRowOrigin = nearCorner + nextRowOffset;
          }
       }
       else
@@ -126,18 +128,16 @@ namespace
 
          if (updateOffset)
          {
-            const QVector3D nextChildOffset
+            const QVector3D nextRowOffset
             {
                0.0f, // Width
                0.0f, // Height
                -rowRealEstate.m_depth
             };
 
-            parentNode.m_block.m_nextRowOrigin = nearCorner + nextChildOffset;
+            parentNode.m_block.m_nextRowOrigin = nearCorner + nextRowOffset;
          }
       }
-
-      // TODO: Add assert to catch the rare block that exceeds its bounds.
 
       if (!rowRealEstate.IsDefined())
       {
@@ -185,36 +185,23 @@ namespace
             return;
          }
 
-         const float percentageOfParent = static_cast<float>(fileSize) /
-            static_cast<float>(rowFileSize);
+         const float percentageOfParent =
+            static_cast<float>(fileSize) / static_cast<float>(rowFileSize);
 
          if (land.m_width > std::abs(land.m_depth))
          {
-            const auto paddedBlockWidth = land.m_width * percentageOfParent;
+            const auto blockWidthPlusPadding = land.m_width * percentageOfParent;
+            const auto ratioBasedPadding = (land.m_width * 0.1f) / nodeCount / 2.0f;
+            const auto widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
+            const auto finalBlockWidth = blockWidthPlusPadding - (2.0f * widthPaddingPerSide);
 
-            auto actualBlockWidth = paddedBlockWidth - (2.0f * Visualization::DEFAULT_PADDING);
-            if (actualBlockWidth <= 0.0f)
-            {
-               actualBlockWidth = paddedBlockWidth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
-            }
+            const auto ratioBasedBlockDepth = std::abs(land.m_depth * Visualization::PADDING_RATIO);
+            const auto depthPaddingPerSide = std::min((land.m_depth - ratioBasedBlockDepth) / 2.0f,
+               Visualization::MAX_PADDING);
 
-            auto widthPaddingPerSide = Visualization::DEFAULT_PADDING;
-            if (widthPaddingPerSide * 2.0f >= actualBlockWidth)
-            {
-               widthPaddingPerSide = ((land.m_width * 0.1f) / nodeCount) / 2.0f;
-            }
-
-            auto actualBlockDepth = land.m_depth - (2.0f * Visualization::DEFAULT_PADDING);
-            if (actualBlockDepth <= 0.0f)
-            {
-               actualBlockDepth = std::abs(land.m_depth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO);
-            }
-
-            auto depthPaddingPerSide = Visualization::DEFAULT_PADDING;
-            if (depthPaddingPerSide * 2.0f >= actualBlockDepth)
-            {
-               depthPaddingPerSide = (land.m_depth - actualBlockDepth) / 2.0f;
-            }
+            const float finalBlockDepth = (depthPaddingPerSide == Visualization::MAX_PADDING)
+               ? std::abs(land.m_depth) - (2.0f * Visualization::MAX_PADDING)
+               : ratioBasedBlockDepth;
 
             const QVector3D offset
             {
@@ -224,40 +211,27 @@ namespace
             };
 
             data.m_block = Block(land.m_vertices.front() + offset,
-               actualBlockWidth,
+               finalBlockWidth,
                Visualization::BLOCK_HEIGHT,
-               actualBlockDepth
+               finalBlockDepth
             );
 
-            additionalCoverage = (actualBlockWidth + (2 * widthPaddingPerSide)) / land.m_width;
+            additionalCoverage = blockWidthPlusPadding / land.m_width;
          }
          else
          {
-            const auto paddedBlockDepth = std::abs(land.m_depth * percentageOfParent);
+            const auto blockDepthPlusPadding = std::abs(land.m_depth * percentageOfParent);
+            const auto ratioBasedPadding = (land.m_depth * 0.1f) / nodeCount / 2.0f;
+            const auto depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
+            const auto finalBlockDepth = blockDepthPlusPadding - (2.0f * depthPaddingPerSide);
 
-            auto actualBlockDepth = paddedBlockDepth - (2.0f * Visualization::DEFAULT_PADDING);
-            if (actualBlockDepth <= 0.0f)
-            {
-               actualBlockDepth = paddedBlockDepth * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
-            }
+            const auto ratioBasedWidth = land.m_width * Visualization::PADDING_RATIO;
+            const auto widthPaddingPerSide = std::min((land.m_width - ratioBasedWidth) / 2.0f,
+               Visualization::MAX_PADDING);
 
-            auto depthPaddingPerSide = Visualization::DEFAULT_PADDING;
-            if (depthPaddingPerSide * 2.0f >= actualBlockDepth)
-            {
-               depthPaddingPerSide = ((land.m_depth * 0.1f) / nodeCount) / 2.0f;
-            }
-
-            auto actualBlockWidth = land.m_width - (2.0f * Visualization::DEFAULT_PADDING);
-            if (actualBlockWidth <= 0.0f)
-            {
-               actualBlockWidth = land.m_width * Visualization::BLOCK_TO_REAL_ESTATE_RATIO;
-            }
-
-            auto widthPaddingPerSide = Visualization::DEFAULT_PADDING;
-            if (widthPaddingPerSide * 2.0f >= actualBlockWidth)
-            {
-               widthPaddingPerSide = (land.m_width - actualBlockWidth) / 2.0f;
-            }
+            const float finalBlockWidth = (widthPaddingPerSide == Visualization::MAX_PADDING)
+               ? land.m_width - (2.0f * Visualization::MAX_PADDING)
+               : ratioBasedWidth;
 
             const QVector3D offset
             {
@@ -267,12 +241,12 @@ namespace
             };
 
             data.m_block = Block(land.m_vertices.front() + offset,
-               actualBlockWidth,
+               finalBlockWidth,
                Visualization::BLOCK_HEIGHT,
-               actualBlockDepth
+               finalBlockDepth
             );
 
-            additionalCoverage = (actualBlockDepth + (2 * depthPaddingPerSide)) / land.m_depth;
+            additionalCoverage = blockDepthPlusPadding / land.m_depth;
             if (additionalCoverage == 0.0f)
             {
                assert(!"Node provided no additional coverage!");
@@ -360,8 +334,6 @@ namespace
       const float worstRatio = std::max((lengthSquared * largestSurface) / (areaSquared),
          (areaSquared) / (lengthSquared * smallestElement));
 
-      //std::cout << "Ratio: " << worstRatio << std::endl;
-
       return worstRatio;
    }
 
@@ -434,7 +406,7 @@ void SquarifiedTreeMap::ParseScan()
 {
    Tree<VizNode>& tree = m_diskScanner.GetDirectoryTree();
 
-   // Remove empty directories:
+   // Remove sizeless files:
    unsigned int nodesRemoved = 0;
    for (TreeNode<VizNode>& node : tree)
    {
@@ -453,9 +425,15 @@ void SquarifiedTreeMap::ParseScan()
          { return lhs.GetData().m_file.m_size >= rhs.GetData().m_file.m_size; });
    }
 
-   // Set the size of the root visualization:
-   tree.GetHead()->GetData().m_block = Block(QVector3D(0, 0, 0),
-      1000.0f, Visualization::BLOCK_HEIGHT, 1000.0f);
+   const Block rootBlock
+   {
+      QVector3D(0, 0, 0),
+      Visualization::ROOT_BLOCK_WIDTH,
+      Visualization::BLOCK_HEIGHT,
+      Visualization::ROOT_BLOCK_WIDTH
+   };
+
+   tree.GetHead()->GetData().m_block = rootBlock;
 
    const auto startParseTime = std::chrono::high_resolution_clock::now();
    Squarify(*tree.GetHead()->GetFirstChild());

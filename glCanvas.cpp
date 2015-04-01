@@ -137,7 +137,7 @@ GLCanvas::GLCanvas(QWidget* parent)
    : QOpenGLWidget(parent),
      m_parent(*parent),
      m_distance(2.5),
-     m_movementSpeed(0.002f),
+     m_movementSpeed(0.2f),
      m_lastFrameTimeStamp(std::chrono::system_clock::now()),
      m_visualizationVertexColorBuffer(QOpenGLBuffer::VertexBuffer),
      m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer)
@@ -244,7 +244,13 @@ void GLCanvas::PrepareVisualizationVertexBuffers()
    //SquarifiedTreeMap treeMap{L"C:\\Users\\Tim\\Documents\\GitHub\\D-Viz\\UnitTests"};
    //SquarifiedTreeMap treeMap{L"C:\\Users\\Tim"};
 
-   const std::wstring path = reinterpret_cast<MainWindow*>(&m_parent)->GetLaunchArgPath();
+   const MainWindow* const mainWindow = reinterpret_cast<MainWindow*>(&m_parent);
+   if (!mainWindow)
+   {
+      assert(!"The canvas's parent is not what I expected it to be!");
+   }
+
+   const std::wstring path = mainWindow->GetLaunchArgPath();
    SquarifiedTreeMap treeMap{path};
 
    treeMap.ScanDirectory();
