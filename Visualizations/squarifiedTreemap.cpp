@@ -163,6 +163,8 @@ namespace
       Block& land = CalculateRowBounds(row, /*candidate =*/ nullptr,
          row.front()->GetParent()->GetData(), /*updateOffset =*/ true);
 
+      assert(land.m_depth > 0.0f);
+
       if (!land.IsDefined())
       {
          assert(!"No land to build upon!");
@@ -203,6 +205,8 @@ namespace
                ? std::abs(land.m_depth) - (2.0f * Visualization::MAX_PADDING)
                : ratioBasedBlockDepth;
 
+            assert(widthPaddingPerSide > 0.0f);
+
             const QVector3D offset
             {
                (land.m_width * land.m_percentCovered) + widthPaddingPerSide,
@@ -213,7 +217,7 @@ namespace
             data.m_block = Block(land.m_vertices.front() + offset,
                finalBlockWidth,
                Visualization::BLOCK_HEIGHT,
-               finalBlockDepth
+               std::abs(finalBlockDepth) // Making this absolute has no effect.
             );
 
             additionalCoverage = blockWidthPlusPadding / land.m_width;
@@ -225,6 +229,8 @@ namespace
             const auto depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
             const auto finalBlockDepth = blockDepthPlusPadding - (2.0f * depthPaddingPerSide);
 
+            std::cout << "Final Block Depth: " << finalBlockDepth << std::endl;
+
             const auto ratioBasedWidth = land.m_width * Visualization::PADDING_RATIO;
             const auto widthPaddingPerSide = std::min((land.m_width - ratioBasedWidth) / 2.0f,
                Visualization::MAX_PADDING);
@@ -232,6 +238,8 @@ namespace
             const float finalBlockWidth = (widthPaddingPerSide == Visualization::MAX_PADDING)
                ? land.m_width - (2.0f * Visualization::MAX_PADDING)
                : ratioBasedWidth;
+
+            assert(depthPaddingPerSide > 0.0f);
 
             const QVector3D offset
             {
@@ -243,7 +251,7 @@ namespace
             data.m_block = Block(land.m_vertices.front() + offset,
                finalBlockWidth,
                Visualization::BLOCK_HEIGHT,
-               finalBlockDepth
+               std::abs(finalBlockDepth)
             );
 
             additionalCoverage = blockDepthPlusPadding / land.m_depth;
@@ -256,6 +264,17 @@ namespace
          if (!data.m_block.IsDefined())
          {
             assert(!"Block is not defined!");
+         }
+
+         if (data.m_block.GetOriginPlusHeight().z() - data.m_block.m_depth <
+             row.front()->GetParent()->GetData().m_block.GetOriginPlusHeight().z() -
+             row.front()->GetParent()->GetData().m_block.m_depth)
+         {
+            float temp1 = data.m_block.GetOriginPlusHeight().z() - data.m_block.m_depth;
+            float temp2 = (row.front()->GetParent()->GetData().m_block.GetOriginPlusHeight().z() -
+                  row.front()->GetParent()->GetData().m_block.m_depth);
+
+            //assert(!"Somethings wrong!");
          }
 
          land.m_percentCovered += additionalCoverage;
@@ -430,7 +449,7 @@ void SquarifiedTreeMap::ParseScan()
       QVector3D(0, 0, 0),
       Visualization::ROOT_BLOCK_WIDTH,
       Visualization::BLOCK_HEIGHT,
-      Visualization::ROOT_BLOCK_WIDTH
+      Visualization::ROOT_BLOCK_DEPTH
    };
 
    tree.GetHead()->GetData().m_block = rootBlock;
