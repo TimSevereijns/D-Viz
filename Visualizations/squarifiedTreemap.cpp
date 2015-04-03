@@ -423,8 +423,8 @@ namespace
       }
 
       // If worst aspect ratio improves, add block to current row:
-      if (ComputeWorstAspectRatio(currentRow, nullptr, shortestSide, node->GetParent()->GetData()) <=
-          ComputeWorstAspectRatio(currentRow, node,    shortestSide, node->GetParent()->GetData()))
+      if (ComputeWorstAspectRatio(currentRow, node, shortestSide, node->GetParent()->GetData()) <=
+          ComputeWorstAspectRatio(currentRow, nullptr, shortestSide, node->GetParent()->GetData()))
       {
          currentRow.emplace_back(node);
          SquarifyProper(&*node->GetNextSibling(), currentRow, shortestSide);
@@ -483,6 +483,9 @@ void SquarifiedTreeMap::ParseScan()
       node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
          { return lhs.GetData().m_file.m_size >= rhs.GetData().m_file.m_size; });
    }
+
+   Tree<VizNode>::Print(*tree.GetHead(),
+      [] (const VizNode& data) { return data.m_file.m_name; } );
 
    const Block rootBlock
    {
