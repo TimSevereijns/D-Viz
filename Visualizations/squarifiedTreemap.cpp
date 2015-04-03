@@ -81,9 +81,9 @@ namespace
 
       const QVector3D farCorner
       {
-         parentBlock.GetOriginPlusHeight().x() + parentBlock.m_width,
+         parentBlock.GetOriginPlusHeight().x() + static_cast<float>(parentBlock.m_width),
          parentBlock.GetOriginPlusHeight().y(),
-         parentBlock.GetOriginPlusHeight().z() - parentBlock.m_depth
+         parentBlock.GetOriginPlusHeight().z() - static_cast<float>(parentBlock.m_depth)
       };
 
       const Block remainingLand
@@ -94,10 +94,10 @@ namespace
          farCorner.z() - nearCorner.z()
       };
 
-      const float parentBlockArea = parentBlock.m_width * parentBlock.m_depth;
-      const float remainingLandArea = std::abs(remainingLand.m_width * remainingLand.m_depth);
-      const float parentBytesToFill = (remainingLandArea / parentBlockArea) * parentNode.m_file.m_size;
-      const float rowToParentRatio = RowSizeInBytes(row, candidate) / parentBytesToFill;
+      const double parentBlockArea = parentBlock.m_width * parentBlock.m_depth;
+      const double remainingLandArea = std::abs(remainingLand.m_width * remainingLand.m_depth);
+      const double parentBytesToFill = (remainingLandArea / parentBlockArea) * parentNode.m_file.m_size;
+      const double rowToParentRatio = RowSizeInBytes(row, candidate) / parentBytesToFill;
 
       Block rowRealEstate;
       if (remainingLand.m_width > std::abs(remainingLand.m_depth))
@@ -111,9 +111,9 @@ namespace
          {
             const QVector3D nextRowOffset
             {
-               rowRealEstate.m_width,
-               0.0f, // Height
-               0.0f  // Depth
+               static_cast<float>(rowRealEstate.m_width),
+               0.0, // Height
+               0.0  // Depth
             };
 
             parentNode.m_block.m_nextRowOrigin = nearCorner + nextRowOffset;
@@ -130,9 +130,9 @@ namespace
          {
             const QVector3D nextRowOffset
             {
-               0.0f, // Width
-               0.0f, // Height
-               -rowRealEstate.m_depth
+               0.0, // Width
+               0.0, // Height
+               static_cast<float>(-rowRealEstate.m_depth)
             };
 
             parentNode.m_block.m_nextRowOrigin = nearCorner + nextRowOffset;
@@ -163,7 +163,7 @@ namespace
       Block& land = CalculateRowBounds(row, /*candidate =*/ nullptr,
          row.front()->GetParent()->GetData(), /*updateOffset =*/ true);
 
-      assert(land.m_depth > 0.0f);
+      //assert(land.m_depth > 0.0f);
 
       if (!land.IsDefined())
       {
@@ -174,7 +174,7 @@ namespace
       const size_t nodeCount = row.size();
       const std::uintmax_t rowFileSize = RowSizeInBytes(row, /*candidate =*/ nullptr);
 
-      float additionalCoverage = 0.0f;
+      double additionalCoverage = 0.0;
 
       for (TreeNode<VizNode>* node : row)
       {
@@ -187,65 +187,63 @@ namespace
             return;
          }
 
-         const float percentageOfParent =
+         const double percentageOfParent =
             static_cast<float>(fileSize) / static_cast<float>(rowFileSize);
 
          if (land.m_width > std::abs(land.m_depth))
          {
-            const auto blockWidthPlusPadding = land.m_width * percentageOfParent;
-            const auto ratioBasedPadding = (land.m_width * 0.1f) / nodeCount / 2.0f;
-            const auto widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
-            const auto finalBlockWidth = blockWidthPlusPadding - (2.0f * widthPaddingPerSide);
+            const double blockWidthPlusPadding = land.m_width * percentageOfParent;
+            const double ratioBasedPadding = (land.m_width * 0.1) / nodeCount / 2.0;
+            const double widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
+            const double finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPaddingPerSide);
 
-            const auto ratioBasedBlockDepth = std::abs(land.m_depth * Visualization::PADDING_RATIO);
-            const auto depthPaddingPerSide = std::min((land.m_depth - ratioBasedBlockDepth) / 2.0f,
+            const double ratioBasedBlockDepth = std::abs(land.m_depth * Visualization::PADDING_RATIO);
+            const double depthPaddingPerSide = std::min((land.m_depth - ratioBasedBlockDepth) / 2.0,
                Visualization::MAX_PADDING);
 
-            const float finalBlockDepth = (depthPaddingPerSide == Visualization::MAX_PADDING)
-               ? std::abs(land.m_depth) - (2.0f * Visualization::MAX_PADDING)
+            const double finalBlockDepth = (depthPaddingPerSide == Visualization::MAX_PADDING)
+               ? std::abs(land.m_depth) - (2.0 * Visualization::MAX_PADDING)
                : ratioBasedBlockDepth;
-
-            assert(widthPaddingPerSide > 0.0f);
 
             const QVector3D offset
             {
-               (land.m_width * land.m_percentCovered) + widthPaddingPerSide,
-               0.0f, // If you want vertical spacing between block, increase this value...
-               -depthPaddingPerSide
+               static_cast<float>((land.m_width * land.m_percentCovered) + widthPaddingPerSide),
+               0.0, // If you want vertical spacing between block, increase this value...
+               static_cast<float>(-depthPaddingPerSide)
             };
 
             data.m_block = Block(land.m_vertices.front() + offset,
                finalBlockWidth,
                Visualization::BLOCK_HEIGHT,
-               std::abs(finalBlockDepth) // Making this absolute has no effect.
+               finalBlockDepth
             );
 
             additionalCoverage = blockWidthPlusPadding / land.m_width;
          }
          else
          {
-            const auto blockDepthPlusPadding = std::abs(land.m_depth * percentageOfParent);
-            const auto ratioBasedPadding = (land.m_depth * 0.1f) / nodeCount / 2.0f;
-            const auto depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
-            const auto finalBlockDepth = blockDepthPlusPadding - (2.0f * depthPaddingPerSide);
+            const double blockDepthPlusPadding = std::abs(land.m_depth * percentageOfParent);
+            const double ratioBasedPadding = (land.m_depth * 0.1) / nodeCount / 2.0;
+            const double depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
+            const double finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPaddingPerSide);
 
             std::cout << "Final Block Depth: " << finalBlockDepth << std::endl;
 
-            const auto ratioBasedWidth = land.m_width * Visualization::PADDING_RATIO;
-            const auto widthPaddingPerSide = std::min((land.m_width - ratioBasedWidth) / 2.0f,
+            const double ratioBasedWidth = land.m_width * Visualization::PADDING_RATIO;
+            const double widthPaddingPerSide = std::min((land.m_width - ratioBasedWidth) / 2.0,
                Visualization::MAX_PADDING);
 
-            const float finalBlockWidth = (widthPaddingPerSide == Visualization::MAX_PADDING)
-               ? land.m_width - (2.0f * Visualization::MAX_PADDING)
+            const double finalBlockWidth = (widthPaddingPerSide == Visualization::MAX_PADDING)
+               ? land.m_width - (2.0 * Visualization::MAX_PADDING)
                : ratioBasedWidth;
 
-            assert(depthPaddingPerSide > 0.0f);
+            //assert(depthPaddingPerSide > 0.0f);
 
             const QVector3D offset
             {
-               widthPaddingPerSide,
-               0.0f, // If you want vertical spacing between block, increase this value...
-               -(land.m_depth * land.m_percentCovered) - depthPaddingPerSide
+               static_cast<float>(widthPaddingPerSide),
+               0.0, // If you want vertical spacing between block, increase this value...
+               static_cast<float>(-(land.m_depth * land.m_percentCovered) - depthPaddingPerSide)
             };
 
             data.m_block = Block(land.m_vertices.front() + offset,
@@ -255,7 +253,7 @@ namespace
             );
 
             additionalCoverage = blockDepthPlusPadding / land.m_depth;
-            if (additionalCoverage == 0.0f)
+            if (additionalCoverage == 0.0)
             {
                assert(!"Node provided no additional coverage!");
             }
@@ -270,8 +268,8 @@ namespace
              row.front()->GetParent()->GetData().m_block.GetOriginPlusHeight().z() -
              row.front()->GetParent()->GetData().m_block.m_depth)
          {
-            float temp1 = data.m_block.GetOriginPlusHeight().z() - data.m_block.m_depth;
-            float temp2 = (row.front()->GetParent()->GetData().m_block.GetOriginPlusHeight().z() -
+            double temp1 = data.m_block.GetOriginPlusHeight().z() - data.m_block.m_depth;
+            double temp2 = (row.front()->GetParent()->GetData().m_block.GetOriginPlusHeight().z() -
                   row.front()->GetParent()->GetData().m_block.m_depth);
 
             //assert(!"Somethings wrong!");
@@ -357,16 +355,15 @@ namespace
    }
 
    /**
-    * @brief Squarify is the main function that drives the parsing and creation of the squarified
-    * tree map, as described in the paper "Squarified Treemaps," by Mark Bruls, Kees Huizing, and
-    * Jarke J. van Wijk. Bedankt jongens!
+    * @brief Squarify is the main function that drives the parsing and creation of a simplified
+    * squarified tree map.
     *
     * @param[in] nodes              The first node in the tree to be laid out. This node must have
     *                               a parent; this parent can be a dummy node to kick things off.
     */
-   void Squarify(TreeNode<VizNode>& nodes)
+   void Squarify(TreeNode<VizNode>& node)
    {
-      TreeNode<VizNode>* currentNode = &nodes;
+      TreeNode<VizNode>* currentNode = &node;
       TreeNode<VizNode>* firstChild = currentNode;
       std::vector<TreeNode<VizNode>*> currentRow;
 
@@ -375,7 +372,7 @@ namespace
          TreeNode<VizNode>* parentNode = &*currentNode->GetParent();
          assert(parentNode);
 
-         const float shortestSide = std::min(parentNode->GetData().m_block.m_width,
+         const double shortestSide = std::min(parentNode->GetData().m_block.m_width,
             parentNode->GetData().m_block.m_depth);
 
          // If worst aspect ratio improves, add block to current row:
@@ -408,6 +405,49 @@ namespace
       {
          Squarify(*currentNode->GetFirstChild());
          currentNode = &*currentNode->GetNextSibling();
+      }
+   }
+
+   /**
+    * @brief SquarifyProper
+    * @param node
+    * @param currentRow
+    * @param shortestSide
+    */
+   void SquarifyProper(TreeNode<VizNode>* node, std::vector<TreeNode<VizNode>*> currentRow,
+      const double shortestSide)
+   {
+      if (!node)
+      {
+         return;
+      }
+
+      // If worst aspect ratio improves, add block to current row:
+      if (ComputeWorstAspectRatio(currentRow, nullptr, shortestSide, node->GetParent()->GetData()) <=
+          ComputeWorstAspectRatio(currentRow, node,    shortestSide, node->GetParent()->GetData()))
+      {
+         currentRow.emplace_back(node);
+         SquarifyProper(&*node->GetNextSibling(), currentRow, shortestSide);
+      }
+      else
+      {
+         if (!currentRow.empty())
+         {
+            LayoutRow(currentRow);
+         }
+
+         TreeNode<VizNode>* parentNode = &*node->GetParent();
+         if (parentNode)
+         {
+            return;
+         }
+
+         const double newShortestSide = std::min(parentNode->GetData().m_block.m_width,
+            parentNode->GetData().m_block.m_depth);
+
+         auto emptyRow = std::vector<TreeNode<VizNode>*>();
+
+         SquarifyProper(node, emptyRow, newShortestSide);
       }
    }
 }
@@ -455,7 +495,14 @@ void SquarifiedTreeMap::ParseScan()
    tree.GetHead()->GetData().m_block = rootBlock;
 
    const auto startParseTime = std::chrono::high_resolution_clock::now();
+
    Squarify(*tree.GetHead()->GetFirstChild());
+
+//   const double shortestSide = std::min(tree.GetHead()->GetData().m_block.m_width,
+//      tree.GetHead()->GetData().m_block.m_depth);
+
+//   SquarifyProper(&*tree.GetHead()->GetFirstChild(), std::vector<TreeNode<VizNode>*>(), shortestSide);
+
    const auto endParseTime = std::chrono::high_resolution_clock::now();
 
    auto parsingTime =

@@ -53,16 +53,16 @@ struct Block
 
    QVector3D m_nextRowOrigin;
 
-   float m_percentCovered;
-   float m_width;
-   float m_height;
-   float m_depth;
+   double m_percentCovered;
+   double m_width;
+   double m_height;
+   double m_depth;
 
    Block()
-      : m_width(0.0f),
-        m_height(0.0f),
-        m_depth(0.0f),
-        m_percentCovered(0.0f)
+      : m_width(0.0),
+        m_height(0.0),
+        m_depth(0.0),
+        m_percentCovered(0.0)
    {
    }
 
@@ -76,12 +76,12 @@ struct Block
     * @param depth                  The desired block depth; depth grows along negative z-axis.
     * @returns a vector of vertices.
     */
-   Block(const QVector3D& bottomLeft, const float width,
-         const float height, const float depth)
+   Block(const QVector3D& bottomLeft, const double width,
+         const double height, const double depth)
       : m_width(width),
         m_height(height),
         m_depth(depth),
-        m_percentCovered(0.0f),
+        m_percentCovered(0.0),
         m_nextRowOrigin(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
    {
       const float x = bottomLeft.x();
@@ -137,7 +137,7 @@ struct Block
 
    bool IsDefined() const
    {
-      return (m_width != 0.0f && m_height != 0.0f && m_depth != 0.0f);
+      return (m_width != 0.0 && m_height != 0.0 && m_depth != 0.0);
    }
 };
 

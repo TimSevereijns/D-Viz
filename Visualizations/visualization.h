@@ -12,11 +12,11 @@ class Visualization
       explicit Visualization(const std::wstring& rawPath);
       virtual ~Visualization();
 
-      static const float BLOCK_HEIGHT;
-      static const float PADDING_RATIO;
-      static const float MAX_PADDING;
-      static const float ROOT_BLOCK_WIDTH;
-      static const float ROOT_BLOCK_DEPTH;
+      static const double BLOCK_HEIGHT;
+      static const double PADDING_RATIO;
+      static const double MAX_PADDING;
+      static const double ROOT_BLOCK_WIDTH;
+      static const double ROOT_BLOCK_DEPTH;
 
       virtual void ScanDirectory();
       virtual void ParseScan() = 0;
