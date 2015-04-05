@@ -9,10 +9,11 @@
 namespace
 {
    /**
-    * @brief PrintRow
-    * @param row
+    * @brief PrintRow prints the items in the current row.
+    *
+    * @param[in] row                The row to be printed.
     */
-   void PrintRow(std::vector<TreeNode<VizNode>*>& row)
+   void PrintRow(const std::vector<TreeNode<VizNode>*>& row)
    {
       std::cout << "\tRow: ";
 
@@ -25,14 +26,52 @@ namespace
    }
 
    /**
+    * @brief PruneNodes removes nodes whose corresponding file or directory size is zero.
+    *
+    * @param[in/out] tree           The tree to be pruned.
+    */
+   void PruneNodes(Tree<VizNode>& tree)
+   {
+      std::cout << "Nodes before pruning: " << tree.Size(*tree.GetHead()) << std::endl;
+
+      unsigned int nodesRemoved = 0;
+      for (TreeNode<VizNode>& node : tree)
+      {
+         if (node.GetData().m_file.m_size == 0)
+         {
+            node.RemoveFromTree();
+            nodesRemoved++;
+         }
+      }
+
+      std::cout << "Nodes removed: " << nodesRemoved << std::endl;
+      std::cout << "Nodes after pruning: " << tree.Size(*tree.GetHead()) << std::endl;
+   }
+
+   /**
+    * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each node
+    * by their respective file sizes.
+    *
+    * @param[in/out] tree           Th tree to be sorted.
+    */
+   void SortNodes(Tree<VizNode>& tree)
+   {
+      for (TreeNode<VizNode>& node : tree)
+      {
+         node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
+            { return lhs.GetData().m_file.m_size >= rhs.GetData().m_file.m_size; });
+      }
+   }
+
+   /**
     * @brief RowSizeInBytes computes the total disk space represented by the nodes in the row.
     *
     * @param[in] row                The nodes in the whose size is to contribute to total row size.
-    * TODO
+    * @param[in] candidateItem      An optional additional item to be included in the row.
     *
     * @returns a total row size in bytes of disk space occupied.
     */
-   std::uintmax_t RowSizeInBytes(std::vector<TreeNode<VizNode>*>& row,
+   std::uintmax_t RowSizeInBytes(const std::vector<TreeNode<VizNode>*>& row,
       const TreeNode<VizNode>* candidateItem)
    {
       std::uintmax_t sumOfFileSizes = std::accumulate(std::begin(row), std::end(row),
@@ -62,7 +101,7 @@ namespace
     *
     * @returns a block denoting the outer dimensions of the row boundary.
     */
-   Block CalculateRowBounds(std::vector<TreeNode<VizNode>*>& row,
+   Block CalculateRowBounds(const std::vector<TreeNode<VizNode>*>& row,
       const TreeNode<VizNode>* candidate, VizNode& parentNode, const bool updateOffset)
    {
       const Block& parentBlock = parentNode.m_block;
@@ -157,7 +196,7 @@ namespace
    {
       if (row.empty())
       {
-         assert(!"The row to be laid out is nonexistent!");
+         assert(!"The row to be laid out is non-existent!");
          return;
       }
 
@@ -300,7 +339,7 @@ namespace
     *
     * @returns a float representing the aspect ration that farthest from optimal (i.e.: square).
     */
-   double ComputeWorstAspectRatio(std::vector<TreeNode<VizNode>*>& row,
+   double ComputeWorstAspectRatio(const std::vector<TreeNode<VizNode>*>& row,
       const TreeNode<VizNode>* candidateItem, const float shortestSideOfRow, VizNode& parentNode)
    {
       if (row.empty() && !candidateItem)
@@ -473,27 +512,8 @@ void SquarifiedTreeMap::ParseScan()
 {
    Tree<VizNode>& tree = m_diskScanner.GetDirectoryTree();
 
-   std::cout << "Nodes before pruning: " << tree.Size(*tree.GetHead()) << std::endl;
-
-   // Remove sizeless files:
-   unsigned int nodesRemoved = 0;
-   for (TreeNode<VizNode>& node : tree)
-   {
-      if (node.GetData().m_file.m_size == 0)
-      {
-         node.RemoveFromTree();
-         nodesRemoved++;
-      }
-   }
-
-   std::cout << "Nodes removed: " << nodesRemoved << std::endl;
-   std::cout << "Nodes after pruning: " << tree.Size(*tree.GetHead()) << std::endl;
-
-   for (TreeNode<VizNode>& node : tree)
-   {
-      node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
-         { return lhs.GetData().m_file.m_size >= rhs.GetData().m_file.m_size; });
-   }
+   PruneNodes(tree);
+   SortNodes(tree);
 
    const Block rootBlock
    {
