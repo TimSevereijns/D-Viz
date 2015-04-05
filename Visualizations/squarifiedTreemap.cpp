@@ -97,7 +97,8 @@ namespace
       const double parentBlockArea = parentBlock.m_width * parentBlock.m_depth;
       const double remainingLandArea = std::abs(remainingLand.m_width * remainingLand.m_depth);
       const double parentBytesToFill = (remainingLandArea / parentBlockArea) * parentNode.m_file.m_size;
-      const double rowToParentRatio = RowSizeInBytes(row, candidate) / parentBytesToFill;
+      const std::uintmax_t rowSizeInBytes = RowSizeInBytes(row, candidate);
+      const double rowToParentRatio = rowSizeInBytes / parentBytesToFill;
 
       Block rowRealEstate;
       if (remainingLand.m_width > std::abs(remainingLand.m_depth))
@@ -163,8 +164,6 @@ namespace
       Block& land = CalculateRowBounds(row, /*candidate =*/ nullptr,
          row.front()->GetParent()->GetData(), /*updateOffset =*/ true);
 
-      //assert(land.m_depth > 0.0f);
-
       if (!land.IsDefined())
       {
          assert(!"No land to build upon!");
@@ -175,6 +174,9 @@ namespace
       const std::uintmax_t rowFileSize = RowSizeInBytes(row, /*candidate =*/ nullptr);
 
       double additionalCoverage = 0.0;
+
+      double debug_consumedWidth = 0.0;
+      double debug_consumedDepth = 0.0;
 
       for (TreeNode<VizNode>* node : row)
       {
@@ -193,9 +195,11 @@ namespace
          if (land.m_width > std::abs(land.m_depth))
          {
             const double blockWidthPlusPadding = land.m_width * percentageOfParent;
-            const double ratioBasedPadding = (land.m_width * 0.1) / nodeCount / 2.0;
+            const double ratioBasedPadding = ((land.m_width * 0.1) / nodeCount) / 2.0;
             const double widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
-            const double finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPaddingPerSide);
+            const double finalBlockWidth = (blockWidthPlusPadding - (2.0 * widthPaddingPerSide) > 0)
+               ? blockWidthPlusPadding - (2.0 * widthPaddingPerSide)
+               : (widthPaddingPerSide / 3.0); // <-- padding before, block itself, padding after = 3
 
             const double ratioBasedBlockDepth = std::abs(land.m_depth * Visualization::PADDING_RATIO);
             const double depthPaddingPerSide = std::min((land.m_depth - ratioBasedBlockDepth) / 2.0,
@@ -218,16 +222,28 @@ namespace
                finalBlockDepth
             );
 
+            if (!data.m_block.Validate())
+            {
+               int i = 0;
+               i++;
+            }
+
             additionalCoverage = blockWidthPlusPadding / land.m_width;
+
+            debug_consumedWidth += blockWidthPlusPadding;
+            if (debug_consumedWidth > land.m_width * 1.001) // For rounding errors greater than 0.1%
+            {
+               assert(!"Found a ridiculous rounding error!");
+            }
          }
          else
          {
             const double blockDepthPlusPadding = std::abs(land.m_depth * percentageOfParent);
             const double ratioBasedPadding = (land.m_depth * 0.1) / nodeCount / 2.0;
             const double depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
-            const double finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPaddingPerSide);
-
-            std::cout << "Final Block Depth: " << finalBlockDepth << std::endl;
+            const double finalBlockDepth = (blockDepthPlusPadding - (2.0 * depthPaddingPerSide) > 0)
+               ? blockDepthPlusPadding - (2.0 * depthPaddingPerSide)
+               : (depthPaddingPerSide / 3.0); // <-- padding before, block itself, padding after = 3
 
             const double ratioBasedWidth = land.m_width * Visualization::PADDING_RATIO;
             const double widthPaddingPerSide = std::min((land.m_width - ratioBasedWidth) / 2.0,
@@ -236,8 +252,6 @@ namespace
             const double finalBlockWidth = (widthPaddingPerSide == Visualization::MAX_PADDING)
                ? land.m_width - (2.0 * Visualization::MAX_PADDING)
                : ratioBasedWidth;
-
-            //assert(depthPaddingPerSide > 0.0f);
 
             const QVector3D offset
             {
@@ -253,6 +267,13 @@ namespace
             );
 
             additionalCoverage = blockDepthPlusPadding / land.m_depth;
+
+            debug_consumedDepth += blockDepthPlusPadding;
+            if (debug_consumedDepth > land.m_depth * 1.001) // For rounding errors greater than 0.1%
+            {
+               assert(!"Found a ridiculous rounding error!");
+            }
+
             if (additionalCoverage == 0.0)
             {
                assert(!"Node provided no additional coverage!");
@@ -262,17 +283,6 @@ namespace
          if (!data.m_block.IsDefined())
          {
             assert(!"Block is not defined!");
-         }
-
-         if (data.m_block.GetOriginPlusHeight().z() - data.m_block.m_depth <
-             row.front()->GetParent()->GetData().m_block.GetOriginPlusHeight().z() -
-             row.front()->GetParent()->GetData().m_block.m_depth)
-         {
-            double temp1 = data.m_block.GetOriginPlusHeight().z() - data.m_block.m_depth;
-            double temp2 = (row.front()->GetParent()->GetData().m_block.GetOriginPlusHeight().z() -
-                  row.front()->GetParent()->GetData().m_block.m_depth);
-
-            //assert(!"Somethings wrong!");
          }
 
          land.m_percentCovered += additionalCoverage;
@@ -290,17 +300,17 @@ namespace
     *
     * @returns a float representing the aspect ration that farthest from optimal (i.e.: square).
     */
-   float ComputeWorstAspectRatio(std::vector<TreeNode<VizNode>*>& row,
+   double ComputeWorstAspectRatio(std::vector<TreeNode<VizNode>*>& row,
       const TreeNode<VizNode>* candidateItem, const float shortestSideOfRow, VizNode& parentNode)
    {
       if (row.empty() && !candidateItem)
       {
-         return std::numeric_limits<float>::max();
+         return std::numeric_limits<double>::max();
       }
 
       const Block rowBounds = CalculateRowBounds(row, candidateItem, parentNode,
          /*updateOffset =*/ false);
-      const float totalRowSurfaceArea = std::abs(rowBounds.m_width * rowBounds.m_depth);
+      const double totalRowSurfaceArea = std::abs(rowBounds.m_width * rowBounds.m_depth);
       const std::uintmax_t totalRowSizeInBytes = RowSizeInBytes(row, candidateItem);
 
       // Find the largest surface area if the row and candidate were laid out:
@@ -345,10 +355,10 @@ namespace
 
       // Now compute the worst aspect ratio between the two choices above:
 
-      const float lengthSquared = shortestSideOfRow * shortestSideOfRow;
-      const float areaSquared = totalRowSurfaceArea * totalRowSurfaceArea;
+      const double lengthSquared = shortestSideOfRow * shortestSideOfRow;
+      const double areaSquared = totalRowSurfaceArea * totalRowSurfaceArea;
 
-      const float worstRatio = std::max((lengthSquared * largestSurface) / (areaSquared),
+      const double worstRatio = std::max((lengthSquared * largestSurface) / (areaSquared),
          (areaSquared) / (lengthSquared * smallestElement));
 
       return worstRatio;
@@ -383,7 +393,6 @@ namespace
          }
          else // if aspect ratio gets worse, layout current row and create a new row:
          {
-            //PrintRow(currentRow);
             LayoutRow(currentRow);
 
             currentRow.clear();
@@ -395,7 +404,6 @@ namespace
 
       if (!currentRow.empty())
       {
-         //PrintRow(currentRow);
          LayoutRow(currentRow);
       }
 
@@ -465,6 +473,8 @@ void SquarifiedTreeMap::ParseScan()
 {
    Tree<VizNode>& tree = m_diskScanner.GetDirectoryTree();
 
+   std::cout << "Nodes before pruning: " << tree.Size(*tree.GetHead()) << std::endl;
+
    // Remove sizeless files:
    unsigned int nodesRemoved = 0;
    for (TreeNode<VizNode>& node : tree)
@@ -477,15 +487,13 @@ void SquarifiedTreeMap::ParseScan()
    }
 
    std::cout << "Nodes removed: " << nodesRemoved << std::endl;
+   std::cout << "Nodes after pruning: " << tree.Size(*tree.GetHead()) << std::endl;
 
    for (TreeNode<VizNode>& node : tree)
    {
       node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
          { return lhs.GetData().m_file.m_size >= rhs.GetData().m_file.m_size; });
    }
-
-   Tree<VizNode>::Print(*tree.GetHead(),
-      [] (const VizNode& data) { return data.m_file.m_name; } );
 
    const Block rootBlock
    {
@@ -498,14 +506,7 @@ void SquarifiedTreeMap::ParseScan()
    tree.GetHead()->GetData().m_block = rootBlock;
 
    const auto startParseTime = std::chrono::high_resolution_clock::now();
-
    Squarify(*tree.GetHead()->GetFirstChild());
-
-//   const double shortestSide = std::min(tree.GetHead()->GetData().m_block.m_width,
-//      tree.GetHead()->GetData().m_block.m_depth);
-
-//   SquarifyProper(&*tree.GetHead()->GetFirstChild(), std::vector<TreeNode<VizNode>*>(), shortestSide);
-
    const auto endParseTime = std::chrono::high_resolution_clock::now();
 
    auto parsingTime =

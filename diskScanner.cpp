@@ -173,20 +173,18 @@ void DiskScanner::ScanRecursively(const boost::filesystem::path& path, TreeNode<
 
    progress->store(std::make_pair(m_filesScanned, /*isScanningDone =*/ false));
 
-   if (boost::filesystem::is_regular_file(path))
+   if (boost::filesystem::is_regular_file(path) && boost::filesystem::file_size(path) > 0)
    {
       FileInfo fileInfo(path.filename().wstring(), boost::filesystem::file_size(path),
          FILE_TYPE::REGULAR);
-
       treeNode.AppendChild(VizNode(fileInfo));
 
       ++m_filesScanned;
    }
-   else if (boost::filesystem::is_directory(path))
+   else if (boost::filesystem::is_directory(path) && !boost::filesystem::is_empty(path))
    {
       FileInfo directoryInfo(path.filename().wstring(), DiskScanner::SIZE_UNDEFINED,
          FILE_TYPE::DIRECTORY);
-
       treeNode.AppendChild(VizNode(directoryInfo));
 
       ++m_filesScanned;

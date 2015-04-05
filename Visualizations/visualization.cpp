@@ -4,11 +4,11 @@
 #include <iostream>
 #include <string>
 
-const double Visualization::BLOCK_HEIGHT = 2.0f;
-const double Visualization::PADDING_RATIO = 0.9f;
-const double Visualization::MAX_PADDING = 0.75f;
-const double Visualization::ROOT_BLOCK_WIDTH = 1000.0f;
-const double Visualization::ROOT_BLOCK_DEPTH = 1000.0f;
+const double Visualization::BLOCK_HEIGHT = 2.0;
+const double Visualization::PADDING_RATIO = 0.9;
+const double Visualization::MAX_PADDING = 0.75;
+const double Visualization::ROOT_BLOCK_WIDTH = 1000.0;
+const double Visualization::ROOT_BLOCK_DEPTH = 1000.0;
 
 Visualization::Visualization(const std::wstring& rawPath)
    : m_diskScanner(rawPath),

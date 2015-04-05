@@ -91,40 +91,46 @@ struct Block
       m_vertices.reserve(60);
       m_vertices
          // Front:                                               // Vertex Normals:
-         << QVector3D(x           , y            , z           ) << QVector3D( 0,  0,  1)
-         << QVector3D(x + width   , y            , z           ) << QVector3D( 0,  0,  1)
-         << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  0,  1)
-         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  0,  1)
-         << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  0,  1)
-         << QVector3D(x + width   , y            , z           ) << QVector3D( 0,  0,  1)
+         << QVector3D(x           , y            , z           ) << QVector3D( 0,  0,  1)  // 0
+         << QVector3D(x + width   , y            , z           ) << QVector3D( 0,  0,  1)  // 2
+         << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  0,  1)  // 4
+         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  0,  1)  // 6
+         << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  0,  1)  // 8
+         << QVector3D(x + width   , y            , z           ) << QVector3D( 0,  0,  1)  // 10
          // Right:
-         << QVector3D(x + width   , y            , z           ) << QVector3D( 1,  0,  0)
-         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 1,  0,  0)
-         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 1,  0,  0)
-         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 1,  0,  0)
-         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 1,  0,  0)
-         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 1,  0,  0)
+         << QVector3D(x + width   , y            , z           ) << QVector3D( 1,  0,  0)  // 12
+         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 1,  0,  0)  // 14
+         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 1,  0,  0)  // 16
+         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 1,  0,  0)  // 18
+         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 1,  0,  0)  // 20
+         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 1,  0,  0)  // 22
          // Back:
-         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0,  0, -1)
-         << QVector3D(x           , y            , z - depth   ) << QVector3D( 0,  0, -1)
-         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  0, -1)
-         << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  0, -1)
-         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  0, -1)
-         << QVector3D(x           , y            , z - depth   ) << QVector3D( 0,  0, -1)
+         << QVector3D(x + width   , y            , z - depth   ) << QVector3D( 0,  0, -1)  // 24
+         << QVector3D(x           , y            , z - depth   ) << QVector3D( 0,  0, -1)  // 26
+         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  0, -1)  // 28
+         << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  0, -1)  // 30
+         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  0, -1)  // 32
+         << QVector3D(x           , y            , z - depth   ) << QVector3D( 0,  0, -1)  // 34
          // Left:
-         << QVector3D(x           , y            , z - depth   ) << QVector3D(-1,  0,  0)
-         << QVector3D(x           , y            , z           ) << QVector3D(-1,  0,  0)
-         << QVector3D(x           , y + height   , z - depth   ) << QVector3D(-1,  0,  0)
-         << QVector3D(x           , y + height   , z           ) << QVector3D(-1,  0,  0)
-         << QVector3D(x           , y + height   , z - depth   ) << QVector3D(-1,  0,  0)
-         << QVector3D(x           , y            , z           ) << QVector3D(-1,  0,  0)
+         << QVector3D(x           , y            , z - depth   ) << QVector3D(-1,  0,  0)  // 36
+         << QVector3D(x           , y            , z           ) << QVector3D(-1,  0,  0)  // 38
+         << QVector3D(x           , y + height   , z - depth   ) << QVector3D(-1,  0,  0)  // 40
+         << QVector3D(x           , y + height   , z           ) << QVector3D(-1,  0,  0)  // 42
+         << QVector3D(x           , y + height   , z - depth   ) << QVector3D(-1,  0,  0)  // 44
+         << QVector3D(x           , y            , z           ) << QVector3D(-1,  0,  0)  // 46
          // Top:
-         << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  1,  0)
-         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0)
-         << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  1,  0)
-         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  1,  0)
-         << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  1,  0)
-         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0);
+         << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  1,  0)  // 48
+         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0)  // 50
+         << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  1,  0)  // 52
+         << QVector3D(x + width   , y + height   , z - depth   ) << QVector3D( 0,  1,  0)  // 54
+         << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  1,  0)  // 56
+         << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0); // 58
+   }
+
+   bool Validate() const
+   {
+      // Is the left face to the left of the right face?
+      return m_vertices[36].x() < m_vertices[12].x();
    }
 
    QVector3D GetOriginPlusHeight() const
