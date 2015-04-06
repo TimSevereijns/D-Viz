@@ -44,7 +44,7 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       explicit GLCanvas(QWidget* parent = nullptr);
       ~GLCanvas();
 
-      QSize sizeHint() const;
+      QSize sizeHint() const override;
 
    protected:
       void initializeGL() override;

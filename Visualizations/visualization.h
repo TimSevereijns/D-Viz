@@ -21,8 +21,25 @@ class Visualization
       virtual void ScanDirectory();
       virtual void ParseScan() = 0;
 
-      QVector<QVector3D>& GetVertices();
-      QVector<QVector3D>& GetColors();
+      /**
+       * @brief GetVertices
+       * @return
+       */
+      QVector<QVector3D>& PopulateVertexBuffer();
+
+      /**
+       * @brief GetColors
+       * @return
+       */
+      QVector<QVector3D>& PopulateColorBuffer();
+
+      /**
+       * @brief GetVertexCount returns the number of vertices currently in the model's vertex
+       * buffer.
+       *
+       * @returns the number of vertices.
+       */
+      unsigned int GetVertexCount() const;
 
       /**
        * @brief CreateBlockColors creates the vertex colors needed to color a single block.

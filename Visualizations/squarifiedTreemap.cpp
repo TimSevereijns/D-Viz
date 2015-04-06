@@ -235,10 +235,14 @@ namespace
          {
             const double blockWidthPlusPadding = land.m_width * percentageOfParent;
             const double ratioBasedPadding = ((land.m_width * 0.1) / nodeCount) / 2.0;
-            const double widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
-            const double finalBlockWidth = (blockWidthPlusPadding - (2.0 * widthPaddingPerSide) > 0)
-               ? blockWidthPlusPadding - (2.0 * widthPaddingPerSide)
-               : (widthPaddingPerSide / 3.0); // <-- padding before, block itself, padding after = 3
+
+            double widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
+            double finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPaddingPerSide);
+            if (finalBlockWidth < 0)
+            {
+               finalBlockWidth = blockWidthPlusPadding * Visualization::PADDING_RATIO;
+               widthPaddingPerSide = (blockWidthPlusPadding * (1.0 - Visualization::PADDING_RATIO)) / 2.0;
+            }
 
             const double ratioBasedBlockDepth = std::abs(land.m_depth * Visualization::PADDING_RATIO);
             const double depthPaddingPerSide = std::min((land.m_depth - ratioBasedBlockDepth) / 2.0,
@@ -261,7 +265,7 @@ namespace
                finalBlockDepth
             );
 
-            if (!data.m_block.Validate())
+            if (!data.m_block.IsValid())
             {
                int i = 0;
                i++;
@@ -279,10 +283,14 @@ namespace
          {
             const double blockDepthPlusPadding = std::abs(land.m_depth * percentageOfParent);
             const double ratioBasedPadding = (land.m_depth * 0.1) / nodeCount / 2.0;
-            const double depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
-            const double finalBlockDepth = (blockDepthPlusPadding - (2.0 * depthPaddingPerSide) > 0)
-               ? blockDepthPlusPadding - (2.0 * depthPaddingPerSide)
-               : (depthPaddingPerSide / 3.0); // <-- padding before, block itself, padding after = 3
+
+            double depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
+            double finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPaddingPerSide);
+            if (finalBlockDepth < 0)
+            {
+               finalBlockDepth = blockDepthPlusPadding * Visualization::PADDING_RATIO;
+               depthPaddingPerSide = (blockDepthPlusPadding * (1.0 - Visualization::PADDING_RATIO)) / 2.0;
+            }
 
             const double ratioBasedWidth = land.m_width * Visualization::PADDING_RATIO;
             const double widthPaddingPerSide = std::min((land.m_width - ratioBasedWidth) / 2.0,

@@ -25,8 +25,6 @@ class MainWindow : public QMainWindow
    protected:
       GLCanvas* m_glCanvas;
 
-      void resizeEvent(QResizeEvent* event) override;
-
    private:
       Ui::MainWindow* ui;
       std::wstring m_launchArgPath;

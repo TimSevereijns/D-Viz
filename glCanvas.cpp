@@ -8,8 +8,8 @@
 #include <QMouseEvent>
 #include <QOpenGLShader>
 
+#include <QStatusBar>
 #include <QTimer>
-#include <QtMath>
 
 #include <iostream>
 
@@ -131,6 +131,14 @@ namespace
 
       return markerColors;
    }
+
+   void SetStatusBarMessage(const MainWindow* const mainWindow, const unsigned int vertexCount)
+   {
+      QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
+      auto statusBarMessage = QString("Vertex Count: %L1").arg(vertexCount);
+
+      mainWindow->statusBar()->showMessage(statusBarMessage);
+   }
 }
 
 GLCanvas::GLCanvas(QWidget* parent)
@@ -143,7 +151,7 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer)
 {
    // Set up the camera:
-   m_camera.SetAspectRatio(1200.0f / 800.0f);
+   m_camera.SetAspectRatio(3.0f / 2.0f);
    m_camera.SetPosition(QVector3D(0, 0, m_distance));
 
    // Set keyboard and mouse focus:
@@ -239,11 +247,6 @@ void GLCanvas::PrepareOriginMarkerVertexBuffers()
 
 void GLCanvas::PrepareVisualizationVertexBuffers()
 {
-   //SliceAndDiceTreeMap treeMap{L"C:\\Users\\Tim"};
-   //SquarifiedTreeMap treeMap{L"C:\\Users\\tsevereijns\\Pictures\\OK DST"};
-   //SquarifiedTreeMap treeMap{L"C:\\Users\\Tim\\Documents\\GitHub\\D-Viz\\UnitTests"};
-   //SquarifiedTreeMap treeMap{L"C:\\Users\\Tim"};
-
    const MainWindow* const mainWindow = reinterpret_cast<MainWindow*>(&m_parent);
    if (!mainWindow)
    {
@@ -256,8 +259,12 @@ void GLCanvas::PrepareVisualizationVertexBuffers()
    treeMap.ScanDirectory();
    treeMap.ParseScan();
 
-   m_visualizationVertices = treeMap.GetVertices();
-   m_visualizationColors = treeMap.GetColors();
+   // At this point, the visualization should be ready to render.
+
+   m_visualizationVertices = treeMap.PopulateVertexBuffer();
+   m_visualizationColors = treeMap.PopulateColorBuffer();
+
+   SetStatusBarMessage(mainWindow, treeMap.GetVertexCount());
 
    m_visualizationVAO.create();
    m_visualizationVAO.bind();

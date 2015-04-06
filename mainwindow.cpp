@@ -17,11 +17,7 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/, std::wstring path /*= L"C:"*/)
 MainWindow::~MainWindow()
 {
    delete ui;
-}
-
-void MainWindow::resizeEvent(QResizeEvent* /*event*/)
-{
-   m_glCanvas->resize(size().width(), size().height());
+   delete m_glCanvas;
 }
 
 std::wstring MainWindow::GetLaunchArgPath() const

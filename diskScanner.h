@@ -51,7 +51,7 @@ struct Block
    QVector<QVector3D> m_vertices;
    QVector<QVector3D> m_colors;
 
-   QVector3D m_nextRowOrigin;
+   QVector3D m_nextRowOrigin; // Specific to the Squarified Treemap.
 
    double m_percentCovered;
    double m_width;
@@ -69,15 +69,17 @@ struct Block
    /**
     * @brief Block creates the vertices needed to represent a single block. Each
     *        face consists of two triangles, and each vertex is followed by its corresponding
-    *        normal.
+    *        normal. Since we are unlikely to see the bottom faces of the block, no vertices (or
+    *        normals) wil be dedicated to visualizing it.
+    *
     * @param bottomLeft             The bottom-left corner of the block under construction.
     * @param width                  The desired block width; width grows along positive x-axis.
     * @param height                 The desired block height; height grows along positive y-axis.
     * @param depth                  The desired block depth; depth grows along negative z-axis.
+    *
     * @returns a vector of vertices.
     */
-   Block(const QVector3D& bottomLeft, const double width,
-         const double height, const double depth)
+   Block(const QVector3D& bottomLeft, const double width, const double height, const double depth)
       : m_width(width),
         m_height(height),
         m_depth(depth),
@@ -90,7 +92,7 @@ struct Block
 
       m_vertices.reserve(60);
       m_vertices
-         // Front:                                               // Vertex Normals:
+         // Front:                                               // Vertex Normals:        // Index:
          << QVector3D(x           , y            , z           ) << QVector3D( 0,  0,  1)  // 0
          << QVector3D(x + width   , y            , z           ) << QVector3D( 0,  0,  1)  // 2
          << QVector3D(x           , y + height   , z           ) << QVector3D( 0,  0,  1)  // 4
@@ -127,23 +129,46 @@ struct Block
          << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0); // 58
    }
 
-   bool Validate() const
+   /**
+    * @brief IsDefined checks if width, height, and depth are all non-zero. It does not check
+    * to see if the block is inverted (with respect to where the normals of opposing faces point);
+    * call IsValid() to perform that check.
+    *
+    * @returns true if the block is properly defined.
+    */
+   bool IsDefined() const
    {
-      // Is the left face to the left of the right face?
+      return (m_width != 0.0 && m_height != 0.0 && m_depth != 0.0);
+   }
+
+   /**
+    * @brief IsValid performs a quick check of Cartesian X-axis coordinates to determine if the
+    * block is in a valid state.
+    *
+    * @returns true if the block is defined and the left face is indeed to the left of the right
+    * face; false otherwise.
+    */
+   bool IsValid() const
+   {
+      if (IsDefined())
+      {
+         return false;
+      }
+
+      // The indices used are keyed off of the vertex order used in the constructor above.
       return m_vertices[36].x() < m_vertices[12].x();
    }
 
+   /**
+    * @brief GetOriginPlusHeight
+    * @returns the coordinates of the block's origin offset by the height of the block.
+    */
    QVector3D GetOriginPlusHeight() const
    {
       QVector3D origin = m_vertices.front();
       origin += QVector3D(0, m_height, 0);
 
       return origin;
-   }
-
-   bool IsDefined() const
-   {
-      return (m_width != 0.0 && m_height != 0.0 && m_depth != 0.0);
    }
 };
 

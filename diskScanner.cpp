@@ -54,6 +54,11 @@ namespace
       return converter.to_bytes(wide);
    }
 
+   /**
+    * @brief NarrowStringToWideString
+    * @param narrow
+    * @return
+    */
    std::wstring NarrowStringToWideString(const std::string& narrow)
    {
        typedef std::codecvt_utf8<wchar_t> convertType;

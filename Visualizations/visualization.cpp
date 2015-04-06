@@ -34,10 +34,9 @@ void Visualization::ScanDirectory()
 
    m_diskScanner.JoinScanningThread();
    m_diskScanner.PrintTreeMetadata();
-   //m_diskScanner.PrintTree();
 }
 
-QVector<QVector3D>& Visualization::GetVertices()
+QVector<QVector3D>& Visualization::PopulateVertexBuffer()
 {
    assert(m_hasDataBeenParsed);
 
@@ -61,7 +60,12 @@ QVector<QVector3D>& Visualization::GetVertices()
    return m_visualizationVertices;
 }
 
-QVector<QVector3D>& Visualization::GetColors()
+unsigned int Visualization::GetVertexCount() const
+{
+   return m_visualizationVertices.size();
+}
+
+QVector<QVector3D>& Visualization::PopulateColorBuffer()
 {
    assert(m_hasDataBeenParsed);
 
