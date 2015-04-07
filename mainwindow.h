@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMenu>
 
 #include <string>
 
@@ -26,7 +27,12 @@ class MainWindow : public QMainWindow
       GLCanvas* m_glCanvas;
 
    private:
+      void CreateMenus();
+
+      QMenu* fileMenu;
+
       Ui::MainWindow* ui;
+
       std::wstring m_launchArgPath;
 };
 

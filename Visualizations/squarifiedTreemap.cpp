@@ -265,12 +265,6 @@ namespace
                finalBlockDepth
             );
 
-            if (!data.m_block.IsValid())
-            {
-               int i = 0;
-               i++;
-            }
-
             additionalCoverage = blockWidthPlusPadding / land.m_width;
 
             debug_consumedWidth += blockWidthPlusPadding;
@@ -320,16 +314,16 @@ namespace
             {
                assert(!"Found a ridiculous rounding error!");
             }
-
-            if (additionalCoverage == 0.0)
-            {
-               assert(!"Node provided no additional coverage!");
-            }
          }
 
          if (!data.m_block.IsDefined())
          {
             assert(!"Block is not defined!");
+         }
+
+         if (additionalCoverage == 0.0)
+         {
+            assert(!"Node provided no additional coverage!");
          }
 
          land.m_percentCovered += additionalCoverage;

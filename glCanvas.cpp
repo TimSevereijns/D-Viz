@@ -132,12 +132,17 @@ namespace
       return markerColors;
    }
 
-   void SetStatusBarMessage(const MainWindow* const mainWindow, const unsigned int vertexCount)
+   /**
+    * @brief SetStatusBarMessage displays the vertex count in the status bar.
+    * @param mainWindow
+    * @param vertexCount
+    */
+   void SetStatusBarMessage(const MainWindow& mainWindow, const unsigned int vertexCount)
    {
       QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
       auto statusBarMessage = QString("Vertex Count: %L1").arg(vertexCount);
 
-      mainWindow->statusBar()->showMessage(statusBarMessage);
+      mainWindow.statusBar()->showMessage(statusBarMessage);
    }
 }
 
@@ -264,7 +269,7 @@ void GLCanvas::PrepareVisualizationVertexBuffers()
    m_visualizationVertices = treeMap.PopulateVertexBuffer();
    m_visualizationColors = treeMap.PopulateColorBuffer();
 
-   SetStatusBarMessage(mainWindow, treeMap.GetVertexCount());
+   SetStatusBarMessage(*mainWindow, treeMap.GetVertexCount());
 
    m_visualizationVAO.create();
    m_visualizationVAO.bind();
