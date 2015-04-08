@@ -150,11 +150,6 @@ struct Block
     */
    bool IsValid() const
    {
-      if (IsDefined())
-      {
-         return false;
-      }
-
       // The indices used are keyed off of the vertex order used in the constructor above.
       return m_vertices[36].x() < m_vertices[12].x();
    }

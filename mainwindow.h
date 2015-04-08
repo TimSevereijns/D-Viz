@@ -1,9 +1,11 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QAction>
 #include <QMainWindow>
 #include <QMenu>
 
+#include <memory>
 #include <string>
 
 namespace Ui {
@@ -24,14 +26,18 @@ class MainWindow : public QMainWindow
       std::wstring GetLaunchArgPath() const;
 
    protected:
-      GLCanvas* m_glCanvas;
+      std::unique_ptr<GLCanvas> m_glCanvas;
 
    private:
       void CreateMenus();
 
-      QMenu* fileMenu;
+      std::unique_ptr<QMenu> m_fileMenu;
 
-      Ui::MainWindow* ui;
+      std::unique_ptr<QAction> m_fileMenuNewScan;
+      std::unique_ptr<QAction> m_fileMenuPreferences;
+      std::unique_ptr<QAction> m_fileMenuExit;
+
+      Ui::MainWindow* ui; // Unfortunately it would appear as if this has to remain a raw pointer.
 
       std::wstring m_launchArgPath;
 };
