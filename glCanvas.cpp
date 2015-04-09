@@ -258,7 +258,7 @@ void GLCanvas::PrepareVisualizationVertexBuffers()
       assert(!"The canvas's parent is not what I expected it to be!");
    }
 
-   const std::wstring path = mainWindow->GetLaunchArgPath();
+   const std::wstring path = mainWindow->GetDirectoryToVisualize();
    SquarifiedTreeMap treeMap{path};
 
    treeMap.ScanDirectory();

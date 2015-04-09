@@ -72,5 +72,5 @@ void MainWindow::HandleFileMenuNewScan()
       m_directoryToVisualize = selectedDirectory.toStdWString();
    }
 
-   m_glCanvas->RunVisualization(m_directoryToVisualize);
+   //m_glCanvas->RunVisualization(m_directoryToVisualize);
 }
