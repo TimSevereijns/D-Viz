@@ -8,7 +8,8 @@
 #include <memory>
 #include <string>
 
-namespace Ui {
+namespace Ui
+{
    class MainWindow;
 }
 
@@ -19,14 +20,14 @@ class MainWindow : public QMainWindow
    Q_OBJECT
 
    public:
-      explicit MainWindow(QWidget* parent = 0, std::wstring path = L"C:\\Users\\Tim");
+      explicit MainWindow(QWidget* parent = 0, std::wstring path = L"");
 
       ~MainWindow();
 
-      std::wstring GetLaunchArgPath() const;
+      std::wstring GetDirectoryToVisualize() const;
 
-   protected:
-      std::unique_ptr<GLCanvas> m_glCanvas;
+   private slots:
+      void HandleFileMenuNewScan();
 
    private:
       void CreateMenus();
@@ -37,9 +38,11 @@ class MainWindow : public QMainWindow
       std::unique_ptr<QAction> m_fileMenuPreferences;
       std::unique_ptr<QAction> m_fileMenuExit;
 
+      std::unique_ptr<GLCanvas> m_glCanvas;
+
       Ui::MainWindow* ui; // Unfortunately it would appear as if this has to remain a raw pointer.
 
-      std::wstring m_launchArgPath;
+      std::wstring m_directoryToVisualize;
 };
 
 #endif // MAINWINDOW_H

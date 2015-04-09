@@ -41,3 +41,19 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+build-UnitTests-Desktop_Qt_5_4_0_MSVC2013_OpenGL_64bit-Release/Makefile.Release
+build-UnitTests-Desktop_Qt_5_4_0_MSVC2013_OpenGL_64bit-Debug/debug/treetests.moc
+*.obj
+build-UnitTests-Desktop_Qt_5_4_0_MSVC2013_OpenGL_64bit-Debug/debug/unittests.pdb
+*.Release
+build-UnitTests-Desktop_Qt_5_4_0_MSVC2013_OpenGL_64bit-Release/Makefile.Debug
+build-UnitTests-Desktop_Qt_5_4_0_MSVC2013_OpenGL_64bit-Debug/debug/UnitTests.exe
+build-UnitTests-Desktop_Qt_5_4_0_MSVC2013_OpenGL_64bit-Release/Makefile
+*.Debug
+build-UnitTests-Desktop_Qt_5_4_0_MSVC2013_OpenGL_64bit-Debug/Makefile
+*.ilk
+UnitTests/UnitTests.pro.user.73ce7cb
+*.user
+UnitTests/UnitTests.pro.user
+D-Viz.pro.user.73ce7cb
+*.user
