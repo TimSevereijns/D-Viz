@@ -20,14 +20,15 @@ Visualization::~Visualization()
 {
 }
 
+void Visualization::ScanDirectory(std::function<void (const std::uintmax_t)> progressCallback)
 {
    std::atomic<std::pair<std::uintmax_t, bool>> progress{std::make_pair(0, false)};
    m_diskScanner.ScanInNewThread(&progress);
 
    while (progress.load().second == false)
    {
-      std::cout << "Files scanned so far: "
-                << progress.load().first << std::endl;
+      progressCallback(progress.load().first);
+
       std::this_thread::sleep_for(std::chrono::seconds(1));
    }
 
