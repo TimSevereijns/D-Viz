@@ -20,7 +20,6 @@ Visualization::~Visualization()
 {
 }
 
-void Visualization::ScanDirectory()
 {
    std::atomic<std::pair<std::uintmax_t, bool>> progress{std::make_pair(0, false)};
    m_diskScanner.ScanInNewThread(&progress);

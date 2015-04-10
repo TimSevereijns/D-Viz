@@ -12,6 +12,8 @@
 #include <QTimer>
 
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
 
 /*
  * AWESOME RESOURCES:
@@ -26,9 +28,11 @@ namespace
 {
    /**
     * @brief keyPressHelper is a helper function to update the press state of a keyboard key.
+    *
     * @param keyboardManager        The keyboard manager on which to update the key state.
     * @param key                    The QKeyEvent that triggered the call.
     * @param state                  Whether the key in question is up (released) or down (pressed).
+    *
     * @returns true if the key exists and was updated in the keyboard manager.
     */
    inline bool keyPressHelper(KeyboardManager& keyboardManager, Qt::Key key,
@@ -47,7 +51,8 @@ namespace
 
    /**
     * @brief CreateOriginMarkerVertices returns the vertices needed to render the coordinate
-    *        system origin marker.
+    * system origin marker.
+    *
     * @returns a vector of vertices.
     */
    QVector<QVector3D> CreateOriginMarkerVertices()
@@ -91,6 +96,7 @@ namespace
 
    /**
     * @brief CreateOriginMarkerColors returns the vertex colors needed to paint the origin marker.
+    *
     * @returns a vector of vertex colors.
     */
    QVector<QVector3D> CreateOriginMarkerColors()
@@ -134,27 +140,32 @@ namespace
 
    /**
     * @brief SetStatusBarMessage displays the vertex count in the status bar.
-    * @param mainWindow
-    * @param vertexCount
+    *
+    * @param[in] mainWindow         The window which contains the status bar to be updated.
+    * @param[in] message            The message to be set on the status bar.
     */
-   void SetStatusBarMessage(const MainWindow& mainWindow, const unsigned int vertexCount)
+   void SetStatusBarMessage(const MainWindow& mainWindow, const std::wstring& message)
    {
-      QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
-      auto statusBarMessage = QString("Vertex Count: %L1").arg(vertexCount);
-
-      mainWindow.statusBar()->showMessage(statusBarMessage);
+      mainWindow.statusBar()->showMessage(QString::fromStdWString(message));
    }
 }
 
 GLCanvas::GLCanvas(QWidget* parent)
    : QOpenGLWidget(parent),
-     m_parent(*parent),
+     m_isPaintingSuspended(false),
+     m_isVisualizationLoaded(false),
+     m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
      m_distance(2.5),
      m_movementSpeed(0.2f),
      m_lastFrameTimeStamp(std::chrono::system_clock::now()),
      m_visualizationVertexColorBuffer(QOpenGLBuffer::VertexBuffer),
      m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer)
 {
+   if (!m_mainWindow)
+   {
+      throw std::invalid_argument("Parent couldn't be interpreted as a MainWindow instance.");
+   }
+
    // Set up the camera:
    m_camera.SetAspectRatio(3.0f / 2.0f);
    m_camera.SetPosition(QVector3D(0, 0, m_distance));
@@ -174,6 +185,48 @@ GLCanvas::GLCanvas(QWidget* parent)
 
 GLCanvas::~GLCanvas()
 {
+}
+
+void GLCanvas::ParseVisualization(const std::wstring& path)
+{
+   if (path.empty())
+   {
+      return;
+   }
+
+   m_isPaintingSuspended = true;
+
+   m_visualizedDirectory = path;
+
+   SquarifiedTreeMap treeMap{m_visualizedDirectory};
+
+   const auto statusBarUpdater = [&] (const std::uintmax_t numberOfFilesScanned)
+   {
+      std::wstringstream message;
+      message.imbue(std::locale(""));
+      message << std::fixed << L"Files Scanned: " << numberOfFilesScanned;
+      SetStatusBarMessage(*m_mainWindow, message.str());
+   };
+
+   treeMap.ScanDirectory(statusBarUpdater);
+   treeMap.ParseScan();
+
+   m_visualizationVertices = treeMap.PopulateVertexBuffer();
+   m_visualizationColors = treeMap.PopulateColorBuffer();
+
+   m_visualizationShaderProgram.removeAllShaders();
+
+   PrepareVisualizationVertexBuffers();
+   PrepareVisualizationShaderProgram();
+
+   std::wstringstream message;
+   message.imbue(std::locale(""));
+   message << std::fixed << treeMap.GetVertexCount() << L" vertices in "
+      << (treeMap.GetVertexCount() / 60) << L" blocks";
+   SetStatusBarMessage(*m_mainWindow, message.str());
+
+   m_isPaintingSuspended = false;
+   m_isVisualizationLoaded = true;
 }
 
 void GLCanvas::PrepareOriginMarkerShaderProgram()
@@ -252,25 +305,6 @@ void GLCanvas::PrepareOriginMarkerVertexBuffers()
 
 void GLCanvas::PrepareVisualizationVertexBuffers()
 {
-   const MainWindow* const mainWindow = reinterpret_cast<MainWindow*>(&m_parent);
-   if (!mainWindow)
-   {
-      assert(!"The canvas's parent is not what I expected it to be!");
-   }
-
-   const std::wstring path = mainWindow->GetDirectoryToVisualize();
-   SquarifiedTreeMap treeMap{path};
-
-   treeMap.ScanDirectory();
-   treeMap.ParseScan();
-
-   // At this point, the visualization should be ready to render.
-
-   m_visualizationVertices = treeMap.PopulateVertexBuffer();
-   m_visualizationColors = treeMap.PopulateColorBuffer();
-
-   SetStatusBarMessage(*mainWindow, treeMap.GetVertexCount());
-
    m_visualizationVAO.create();
    m_visualizationVAO.bind();
 
@@ -313,7 +347,7 @@ void GLCanvas::PrepareVisualizationVertexBuffers()
 
 QSize GLCanvas::sizeHint() const
 {
-   return QSize(m_parent.size().width(), m_parent.size().height());
+   return QSize(m_mainWindow->size().width(), m_mainWindow->size().height());
 }
 
 void GLCanvas::initializeGL()
@@ -478,14 +512,22 @@ void GLCanvas::HandleCameraMovement()
 
 void GLCanvas::paintGL()
 {
+   if (m_isPaintingSuspended)
+   {
+      return;
+   }
+
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    const auto currentTime = std::chrono::system_clock::now();
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp).count();
 
-   m_parent.setWindowTitle(QString::fromStdString("D-Viz @ ") +
-      QString::number((int) (1000.0 / millisecondsElapsed)) + QString::fromStdString(" fps [*]"));
+   if (m_mainWindow)
+   {
+      m_mainWindow->setWindowTitle(QString::fromStdString("D-Viz @ ") +
+         QString::number((1000 / millisecondsElapsed)) + QString::fromStdString(" fps [*]"));
+   }
 
    HandleCameraMovement();
 
@@ -500,18 +542,21 @@ void GLCanvas::paintGL()
    m_originMarkerShaderProgram.release();
    m_originMarkerVAO.release();
 
-   // Draw visualization:
-   m_visualizationShaderProgram.bind();
-   m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
-   m_visualizationShaderProgram.setUniformValue("light.position", m_light.position);
-   m_visualizationShaderProgram.setUniformValue("light.intensity", m_light.intensity);
+   if (m_isVisualizationLoaded)
+   {
+      // Draw visualization:
+      m_visualizationShaderProgram.bind();
+      m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
+      m_visualizationShaderProgram.setUniformValue("light.position", m_light.position);
+      m_visualizationShaderProgram.setUniformValue("light.intensity", m_light.intensity);
 
-   m_visualizationVAO.bind();
+      m_visualizationVAO.bind();
 
-   glDrawArrays(GL_TRIANGLES, /* first = */ 0, /* count = */ m_visualizationVertices.size());
+      glDrawArrays(GL_TRIANGLES, /* first = */ 0, /* count = */ m_visualizationVertices.size());
 
-   m_visualizationShaderProgram.release();
-   m_visualizationVAO.release();
+      m_visualizationShaderProgram.release();
+      m_visualizationVAO.release();
+   }
 
    m_lastFrameTimeStamp = currentTime;
 }

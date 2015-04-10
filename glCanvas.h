@@ -3,6 +3,7 @@
 
 #include "camera.h"
 #include "keyboardManager.h"
+#include "mainwindow.h"
 
 #include <chrono>
 
@@ -46,6 +47,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
       QSize sizeHint() const override;
 
+      void ParseVisualization(const std::wstring& path);
+
    protected:
       void initializeGL() override;
       void resizeGL(int width, int height) override;
@@ -67,7 +70,15 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       void PrepareVisualizationVertexBuffers();
       void PrepareOriginMarkerVertexBuffers();
 
-      QWidget& m_parent;
+      bool m_isPaintingSuspended;
+      bool m_isVisualizationLoaded;
+
+      double m_distance;
+      double m_movementSpeed;
+
+      std::wstring m_visualizedDirectory;
+
+      MainWindow* m_mainWindow;
 
       Camera m_camera;
 
@@ -94,9 +105,6 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
       QVector<QVector3D> m_visualizationVertices;
       QVector<QVector3D> m_visualizationColors;
-
-      double m_distance;
-      double m_movementSpeed;
 
       std::chrono::system_clock::time_point m_lastFrameTimeStamp;
 

@@ -18,7 +18,7 @@ class Visualization
       static const double ROOT_BLOCK_WIDTH;
       static const double ROOT_BLOCK_DEPTH;
 
-      virtual void ScanDirectory();
+      virtual void ScanDirectory(std::function<void (const std::uintmax_t)> statusBarUpdater);
       virtual void ParseScan() = 0;
 
       /**
