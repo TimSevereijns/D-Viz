@@ -1,5 +1,7 @@
 #include "visualization.h"
 
+#include "../diskScanner.h"
+
 #include <algorithm>
 #include <iostream>
 #include <string>
@@ -27,6 +29,9 @@ void Visualization::ScanDirectory(std::function<void (const std::uintmax_t)> pro
 
    while (progress.load().second == false)
    {
+      std::cout << "Files scanned so far: "
+                << progress.load().first << std::endl;
+
       progressCallback(progress.load().first);
 
       std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -55,7 +60,7 @@ QVector<QVector3D>& Visualization::PopulateVertexBuffer()
    });
 
    std::cout << "Vertex count: " << m_visualizationVertices.size() << std::endl;
-   std::cout << "Block count: " << m_visualizationVertices.size() / 60 << std::endl;
+   std::cout << "Block count: " << m_visualizationVertices.size() / Block::VERTICES_PER_BLOCK << std::endl;
 
    return m_visualizationVertices;
 }

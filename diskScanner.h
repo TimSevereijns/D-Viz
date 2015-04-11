@@ -48,6 +48,8 @@ struct FileInfo
  */
 struct Block
 {
+   const static int VERTICES_PER_BLOCK = 60;
+
    QVector<QVector3D> m_vertices;
    QVector<QVector3D> m_colors;
 
@@ -90,7 +92,7 @@ struct Block
       const float y = bottomLeft.y();
       const float z = bottomLeft.z();
 
-      m_vertices.reserve(60);
+      m_vertices.reserve(VERTICES_PER_BLOCK);
       m_vertices
          // Front:                                               // Vertex Normals:        // Index:
          << QVector3D(x           , y            , z           ) << QVector3D( 0,  0,  1)  // 0

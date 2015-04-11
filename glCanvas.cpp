@@ -215,6 +215,7 @@ void GLCanvas::ParseVisualization(const std::wstring& path)
    m_visualizationColors = treeMap.PopulateColorBuffer();
 
    m_visualizationShaderProgram.removeAllShaders();
+   m_visualizationVAO.destroy();
 
    PrepareVisualizationVertexBuffers();
    PrepareVisualizationShaderProgram();
@@ -222,7 +223,7 @@ void GLCanvas::ParseVisualization(const std::wstring& path)
    std::wstringstream message;
    message.imbue(std::locale(""));
    message << std::fixed << treeMap.GetVertexCount() << L" vertices in "
-      << (treeMap.GetVertexCount() / 60) << L" blocks";
+      << (treeMap.GetVertexCount() / Block::VERTICES_PER_BLOCK) << L" blocks";
    SetStatusBarMessage(*m_mainWindow, message.str());
 
    m_isPaintingSuspended = false;
