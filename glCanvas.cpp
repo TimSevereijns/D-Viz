@@ -521,8 +521,13 @@ void GLCanvas::paintGL()
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    const auto currentTime = std::chrono::system_clock::now();
-   const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+   auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp).count();
+
+   if (millisecondsElapsed == 0)
+   {
+      millisecondsElapsed = 1;
+   }
 
    if (m_mainWindow)
    {

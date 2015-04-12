@@ -31,6 +31,8 @@ class MainWindow : public QMainWindow
 
    private:
       void CreateMenus();
+      void CreateFileMenu();
+      void CreateWindowMenu();
 
       std::unique_ptr<QMenu> m_fileMenu;
 

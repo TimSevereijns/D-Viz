@@ -10,6 +10,25 @@
 #include <QFileDialog>
 #include <QMenuBar>
 
+/**
+ * @brief SideBarSetupHelper performs all tasks necessary to setup the sidebar.
+ *
+ * @param[in/out] ui                The UI on which all the controls exist.
+ */
+void SideBarSetupHelper(Ui::MainWindow& ui)
+{
+   ui.comboBox->addItem("Show All");
+   ui.comboBox->addItem("< 1 MB");
+   ui.comboBox->addItem("< 10 MB");
+   ui.comboBox->addItem("< 50 MB");
+   ui.comboBox->addItem("< 100 MB");
+   ui.comboBox->addItem("< 250 MB");
+   ui.comboBox->addItem("< 500 MB");
+   ui.comboBox->addItem("< 1 GB");
+   ui.comboBox->addItem("< 5 GB");
+   ui.comboBox->addItem("< 10 GB");
+}
+
 MainWindow::MainWindow(QWidget* parent /*= 0*/, std::wstring path /*= L""*/)
    : QMainWindow(parent),
      m_glCanvas(nullptr),
@@ -26,6 +45,8 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/, std::wstring path /*= L""*/)
 
    m_glCanvas.reset(new GLCanvas(this));
    ui->canvasLayout->addWidget(m_glCanvas.get());
+
+   SideBarSetupHelper(*ui);
 }
 
 MainWindow::~MainWindow()
@@ -39,6 +60,11 @@ std::wstring MainWindow::GetDirectoryToVisualize() const
 }
 
 void MainWindow::CreateMenus()
+{
+   CreateFileMenu();
+}
+
+void MainWindow::CreateFileMenu()
 {
    m_fileMenuNewScan.reset(new QAction("New Scan...", this));
    m_fileMenuNewScan->setShortcuts(QKeySequence::New);
@@ -59,6 +85,11 @@ void MainWindow::CreateMenus()
    m_fileMenu->addAction(m_fileMenuNewScan.get());
    m_fileMenu->addAction(m_fileMenuPreferences.get());
    m_fileMenu->addAction(m_fileMenuExit.get());
+}
+
+void MainWindow::CreateWindowMenu()
+{
+   // TODO
 }
 
 void MainWindow::HandleFileMenuNewScan()
