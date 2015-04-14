@@ -26,13 +26,16 @@ class MainWindow : public QMainWindow
 
       std::wstring GetDirectoryToVisualize() const;
 
-   private slots:
-      void HandleFileMenuNewScan();
+   public slots:
+      void OnFileMenuNewScan();
+      void OnFieldOfViewChanged(int fieldOfView);
 
    private:
       void CreateMenus();
       void CreateFileMenu();
       void CreateWindowMenu();
+
+      void SetupSidebar();
 
       std::unique_ptr<QMenu> m_fileMenu;
 

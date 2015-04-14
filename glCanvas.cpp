@@ -230,6 +230,11 @@ void GLCanvas::ParseVisualization(const std::wstring& path)
    m_isVisualizationLoaded = true;
 }
 
+void GLCanvas::SetFieldOfView(const float fieldOfView)
+{
+   m_camera.SetFieldOfView(fieldOfView);
+}
+
 void GLCanvas::PrepareOriginMarkerShaderProgram()
 {
    if (!m_originMarkerShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,

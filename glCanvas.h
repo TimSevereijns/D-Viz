@@ -47,7 +47,17 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
       QSize sizeHint() const override;
 
+      /**
+       * @brief ParseVisualization
+       * @param path
+       */
       void ParseVisualization(const std::wstring& path);
+
+      /**
+       * @brief setFieldOfView
+       * @param fov
+       */
+      void SetFieldOfView(const float fieldOfView);
 
    protected:
       void initializeGL() override;

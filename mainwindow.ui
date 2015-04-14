@@ -68,7 +68,7 @@
    <property name="minimumSize">
     <size>
      <width>150</width>
-     <height>236</height>
+     <height>280</height>
     </size>
    </property>
    <attribute name="dockWidgetArea">
@@ -77,21 +77,21 @@
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="pruneTreeLabel">
        <property name="text">
         <string>Prune Tree:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox">
+      <widget class="QComboBox" name="pruneSizeComboBox">
        <property name="whatsThis">
         <string>Only those items larger than this size will be shown.</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="checkBox">
+      <widget class="QCheckBox" name="directoriesOnlyCheckbox">
        <property name="text">
         <string>Show Directories Only</string>
        </property>
@@ -112,14 +112,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="cameraSpeedLabel">
        <property name="text">
         <string>Camera Speed:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="doubleSpinBox">
+      <widget class="QDoubleSpinBox" name="cameraSpeedSpinner">
        <property name="singleStep">
         <double>0.250000000000000</double>
        </property>
@@ -129,19 +129,45 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="mouseSensitivityLabel">
        <property name="text">
         <string>Mouse Sensitivity:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+      <widget class="QDoubleSpinBox" name="mouseSensitivitySpinner">
        <property name="singleStep">
         <double>0.250000000000000</double>
        </property>
        <property name="value">
         <double>0.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="fieldOfViewLabel">
+       <property name="text">
+        <string>Field of View:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="fieldOfViewSlider">
+       <property name="minimum">
+        <number>5</number>
+       </property>
+       <property name="maximum">
+        <number>85</number>
+       </property>
+       <property name="singleStep">
+        <number>5</number>
+       </property>
+       <property name="value">
+        <number>45</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>

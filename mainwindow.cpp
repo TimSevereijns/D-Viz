@@ -10,23 +10,27 @@
 #include <QFileDialog>
 #include <QMenuBar>
 
-/**
- * @brief SideBarSetupHelper performs all tasks necessary to setup the sidebar.
- *
- * @param[in/out] ui                The UI on which all the controls exist.
- */
-void SideBarSetupHelper(Ui::MainWindow& ui)
+namespace
 {
-   ui.comboBox->addItem("Show All");
-   ui.comboBox->addItem("< 1 MB");
-   ui.comboBox->addItem("< 10 MB");
-   ui.comboBox->addItem("< 50 MB");
-   ui.comboBox->addItem("< 100 MB");
-   ui.comboBox->addItem("< 250 MB");
-   ui.comboBox->addItem("< 500 MB");
-   ui.comboBox->addItem("< 1 GB");
-   ui.comboBox->addItem("< 5 GB");
-   ui.comboBox->addItem("< 10 GB");
+   /**
+    * @brief SideBarSetupHelper performs all tasks necessary to setup the sidebar.
+    *
+    * @param[in/out] ui                The UI on which all the controls exist.
+    */
+   void SetupPruneSizeComboBox(Ui::MainWindow& ui)
+   {
+      // Setup the pruning options:
+      ui.pruneSizeComboBox->addItem("Show All");
+      ui.pruneSizeComboBox->addItem("< 1 MB");
+      ui.pruneSizeComboBox->addItem("< 10 MB");
+      ui.pruneSizeComboBox->addItem("< 50 MB");
+      ui.pruneSizeComboBox->addItem("< 100 MB");
+      ui.pruneSizeComboBox->addItem("< 250 MB");
+      ui.pruneSizeComboBox->addItem("< 500 MB");
+      ui.pruneSizeComboBox->addItem("< 1 GB");
+      ui.pruneSizeComboBox->addItem("< 5 GB");
+      ui.pruneSizeComboBox->addItem("< 10 GB");
+   }
 }
 
 MainWindow::MainWindow(QWidget* parent /*= 0*/, std::wstring path /*= L""*/)
@@ -46,12 +50,19 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/, std::wstring path /*= L""*/)
    m_glCanvas.reset(new GLCanvas(this));
    ui->canvasLayout->addWidget(m_glCanvas.get());
 
-   SideBarSetupHelper(*ui);
+   SetupSidebar();
 }
 
 MainWindow::~MainWindow()
 {
    delete ui;
+}
+
+void MainWindow::SetupSidebar()
+{
+   SetupPruneSizeComboBox(*ui);
+
+   connect(ui->fieldOfViewSlider, &QSlider::valueChanged, this, &MainWindow::OnFieldOfViewChanged);
 }
 
 std::wstring MainWindow::GetDirectoryToVisualize() const
@@ -69,7 +80,7 @@ void MainWindow::CreateFileMenu()
    m_fileMenuNewScan.reset(new QAction("New Scan...", this));
    m_fileMenuNewScan->setShortcuts(QKeySequence::New);
    m_fileMenuNewScan->setStatusTip("Start a new visualization");
-   connect(m_fileMenuNewScan.get(), &QAction::triggered, this, &MainWindow::HandleFileMenuNewScan);
+   connect(m_fileMenuNewScan.get(), &QAction::triggered, this, &MainWindow::OnFileMenuNewScan);
 
    m_fileMenuPreferences.reset(new QAction("Preferences...", this));
    m_fileMenuPreferences->setShortcuts(QKeySequence::Preferences);
@@ -92,7 +103,7 @@ void MainWindow::CreateWindowMenu()
    // TODO
 }
 
-void MainWindow::HandleFileMenuNewScan()
+void MainWindow::OnFileMenuNewScan()
 {
    QString selectedDirectory = QFileDialog::getExistingDirectory(this,
       "Select a Directory to Visualize", "/home",
@@ -103,4 +114,9 @@ void MainWindow::HandleFileMenuNewScan()
       m_directoryToVisualize = selectedDirectory.toStdWString();
       m_glCanvas->ParseVisualization(m_directoryToVisualize);
    }
+}
+
+void MainWindow::OnFieldOfViewChanged(const int fieldOfView)
+{
+   m_glCanvas->SetFieldOfView(static_cast<float>(fieldOfView));
 }
