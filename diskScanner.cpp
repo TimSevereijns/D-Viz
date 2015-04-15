@@ -240,7 +240,7 @@ std::uintmax_t DiskScanner::GetNumberOfFilesScanned()
    return m_filesScanned;
 }
 
-Tree<VizNode>& DiskScanner::GetDirectoryTree() const
+Tree<VizNode>& DiskScanner::GetFileTree() const
 {
    return *m_fileTree.get();
 }

@@ -14,7 +14,8 @@ const double Visualization::ROOT_BLOCK_DEPTH = 1000.0;
 
 Visualization::Visualization(const std::wstring& rawPath)
    : m_diskScanner(rawPath),
-     m_hasDataBeenParsed(false)
+     m_hasDataBeenParsed(false),
+     m_hasScanBeenPerformed(false)
 {
 }
 
@@ -39,9 +40,11 @@ void Visualization::ScanDirectory(std::function<void (const std::uintmax_t)> pro
 
    m_diskScanner.JoinScanningThread();
    m_diskScanner.PrintTreeMetadata();
+
+   m_hasScanBeenPerformed = true;
 }
 
-QVector<QVector3D>& Visualization::PopulateVertexBuffer()
+QVector<QVector3D>& Visualization::PopulateVertexBuffer(const ParsingOptions& options)
 {
    assert(m_hasDataBeenParsed);
 
@@ -52,11 +55,18 @@ QVector<QVector3D>& Visualization::PopulateVertexBuffer()
       return m_visualizationVertices;
    }
 
-   const Tree<VizNode>& directoryTree = m_diskScanner.GetDirectoryTree();
-   std::for_each(directoryTree.beginPreOrder(), directoryTree.endPreOrder(),
+   const Tree<VizNode>& fileTree = m_diskScanner.GetFileTree();
+   std::for_each(fileTree.beginPreOrder(), fileTree.endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
    {
-      m_visualizationVertices << node.GetData().m_block.m_vertices;
+      if (options.showDirectoriesOnly && node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY)
+      {
+         m_visualizationVertices << node.GetData().m_block.m_vertices;
+      }
+      else if (!options.showDirectoriesOnly)
+      {
+         m_visualizationVertices << node.GetData().m_block.m_vertices;
+      }
    });
 
    std::cout << "Vertex count: " << m_visualizationVertices.size() << std::endl;
@@ -67,10 +77,17 @@ QVector<QVector3D>& Visualization::PopulateVertexBuffer()
 
 unsigned int Visualization::GetVertexCount() const
 {
+   assert(m_hasDataBeenParsed);
+
    return m_visualizationVertices.size();
 }
 
-QVector<QVector3D>& Visualization::PopulateColorBuffer()
+bool Visualization::HasScanBeenPerformed() const
+{
+   return m_hasScanBeenPerformed;
+}
+
+QVector<QVector3D>& Visualization::PopulateColorBuffer(const ParsingOptions& options)
 {
    assert(m_hasDataBeenParsed);
 
@@ -81,15 +98,15 @@ QVector<QVector3D>& Visualization::PopulateColorBuffer()
       return m_visualizationColors;
    }
 
-   const Tree<VizNode>& directoryTree = m_diskScanner.GetDirectoryTree();
-   std::for_each(directoryTree.beginPreOrder(), directoryTree.endPreOrder(),
+   const Tree<VizNode>& fileTree = m_diskScanner.GetFileTree();
+   std::for_each(fileTree.beginPreOrder(), fileTree.endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
    {
       if (node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY)
       {
          m_visualizationColors << Visualization::CreateDirectoryColors();
       }
-      else if (node.GetData().m_file.m_type == FILE_TYPE::REGULAR)
+      else if (node.GetData().m_file.m_type == FILE_TYPE::REGULAR && !options.showDirectoriesOnly)
       {
          m_visualizationColors << Visualization::CreateBlockColors();
       }

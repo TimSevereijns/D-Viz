@@ -512,7 +512,7 @@ SquarifiedTreeMap::~SquarifiedTreeMap()
 
 void SquarifiedTreeMap::ParseScan()
 {
-   Tree<VizNode>& tree = m_diskScanner.GetDirectoryTree();
+   Tree<VizNode>& tree = m_diskScanner.GetFileTree();
 
    PruneNodes(tree);
    SortNodes(tree);

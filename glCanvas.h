@@ -4,8 +4,10 @@
 #include "camera.h"
 #include "keyboardManager.h"
 #include "mainwindow.h"
+#include "Visualizations/visualization.h"
 
 #include <chrono>
+#include <memory>
 
 #include <QOpenGLBuffer>
 #include <QOpenGLFunctions>
@@ -14,6 +16,9 @@
 #include <QOpenGLWidget>
 #include <QVector3D>
 
+/**
+ * @brief The Light struct
+ */
 struct Light
 {
    QVector3D position;
@@ -37,6 +42,9 @@ struct Light
    }
 };
 
+/**
+ * @brief The GLCanvas class
+ */
 class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 {
    Q_OBJECT
@@ -50,8 +58,9 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       /**
        * @brief ParseVisualization
        * @param path
+       * @param options
        */
-      void ParseVisualization(const std::wstring& path);
+      void ParseVisualization(const std::wstring& path, const ParsingOptions& options);
 
       /**
        * @brief setFieldOfView
@@ -89,6 +98,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       std::wstring m_visualizedDirectory;
 
       MainWindow* m_mainWindow;
+
+      std::unique_ptr<Visualization> m_treeMap;
 
       Camera m_camera;
 

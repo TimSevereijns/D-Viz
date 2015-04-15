@@ -6,6 +6,24 @@
 
 #include "../diskScanner.h"
 
+/**
+ * @brief The ParsingOptions struct
+ */
+struct ParsingOptions
+{
+   bool showDirectoriesOnly;
+   bool forceNewScan;
+
+   ParsingOptions()
+      : showDirectoriesOnly(false),
+        forceNewScan(false)
+   {
+   }
+};
+
+/**
+ * @brief The Visualization class
+ */
 class Visualization
 {
    public:
@@ -22,16 +40,18 @@ class Visualization
       virtual void ParseScan() = 0;
 
       /**
-       * @brief GetVertices
+       * @brief PopulateVertexBuffer
+       * @param options
        * @return
        */
-      QVector<QVector3D>& PopulateVertexBuffer();
+      QVector<QVector3D>& PopulateVertexBuffer(const ParsingOptions& options);
 
       /**
-       * @brief GetColors
+       * @brief PopulateColorBuffer
+       * @param options
        * @return
        */
-      QVector<QVector3D>& PopulateColorBuffer();
+      QVector<QVector3D>& PopulateColorBuffer(const ParsingOptions& options);
 
       /**
        * @brief GetVertexCount returns the number of vertices currently in the model's vertex
@@ -40,6 +60,12 @@ class Visualization
        * @returns the number of vertices.
        */
       unsigned int GetVertexCount() const;
+
+      /**
+       * @brief HasScanBeenPerformed
+       * @return
+       */
+      bool HasScanBeenPerformed() const;
 
       /**
        * @brief CreateBlockColors creates the vertex colors needed to color a single block.
@@ -57,6 +83,7 @@ class Visualization
       DiskScanner m_diskScanner;
 
       bool m_hasDataBeenParsed;
+      bool m_hasScanBeenPerformed;
 
       QVector<QVector3D> m_visualizationVertices;
       QVector<QVector3D> m_visualizationColors;

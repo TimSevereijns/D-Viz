@@ -35,6 +35,7 @@ namespace
 
 MainWindow::MainWindow(QWidget* parent /*= 0*/, std::wstring path /*= L""*/)
    : QMainWindow(parent),
+     m_showDirectoriesOnly(false),
      m_glCanvas(nullptr),
      m_fileMenu(nullptr),
      m_fileMenuNewScan(nullptr),
@@ -62,6 +63,9 @@ void MainWindow::SetupSidebar()
 {
    SetupPruneSizeComboBox(*ui);
 
+   connect(ui->directoriesOnlyCheckbox, &QCheckBox::stateChanged, this,
+      &MainWindow::OnDirectoryOnlyStateChanged);
+   connect(ui->pruneTreeButton, &QPushButton::clicked, this, &MainWindow::OnPruneTreeButtonClicked);
    connect(ui->fieldOfViewSlider, &QSlider::valueChanged, this, &MainWindow::OnFieldOfViewChanged);
 }
 
@@ -112,8 +116,29 @@ void MainWindow::OnFileMenuNewScan()
    if (!selectedDirectory.isEmpty())
    {
       m_directoryToVisualize = selectedDirectory.toStdWString();
-      m_glCanvas->ParseVisualization(m_directoryToVisualize);
+
+      ParsingOptions parsingOptions;
+      parsingOptions.showDirectoriesOnly = false;
+      parsingOptions.forceNewScan = true;
+
+      m_glCanvas->ParseVisualization(m_directoryToVisualize, parsingOptions);
    }
+}
+
+void MainWindow::OnDirectoryOnlyStateChanged(int state)
+{
+   m_showDirectoriesOnly = (state == Qt::Checked);
+}
+
+void MainWindow::OnPruneTreeButtonClicked()
+{
+   ParsingOptions parsingOptions;
+   parsingOptions.showDirectoriesOnly = m_showDirectoriesOnly;
+   parsingOptions.forceNewScan = false;
+
+   m_glCanvas->ParseVisualization(m_directoryToVisualize, parsingOptions);
+
+   std::cout << "Button pressed" << std::endl;
 }
 
 void MainWindow::OnFieldOfViewChanged(const int fieldOfView)

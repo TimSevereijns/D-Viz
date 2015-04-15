@@ -92,7 +92,7 @@ SliceAndDiceTreeMap::~SliceAndDiceTreeMap()
 
 void SliceAndDiceTreeMap::ParseScan()
 {
-   auto& tree = m_diskScanner.GetDirectoryTree();
+   auto& tree = m_diskScanner.GetFileTree();
 
    const auto startSortTime = std::chrono::high_resolution_clock::now();
 

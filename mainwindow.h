@@ -29,6 +29,8 @@ class MainWindow : public QMainWindow
    public slots:
       void OnFileMenuNewScan();
       void OnFieldOfViewChanged(int fieldOfView);
+      void OnDirectoryOnlyStateChanged(int state);
+      void OnPruneTreeButtonClicked();
 
    private:
       void CreateMenus();
@@ -36,6 +38,8 @@ class MainWindow : public QMainWindow
       void CreateWindowMenu();
 
       void SetupSidebar();
+
+      bool m_showDirectoriesOnly;
 
       std::unique_ptr<QMenu> m_fileMenu;
 

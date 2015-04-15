@@ -245,7 +245,7 @@ class DiskScanner
        * @brief GetDirectoryTree
        * @return
        */
-      Tree<VizNode>& GetDirectoryTree() const;
+      Tree<VizNode>& GetFileTree() const;
 
       /**
        * @brief ConvertBytesToMegaBytes Converts a size in bytes to megabytes.
