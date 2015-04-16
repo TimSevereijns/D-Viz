@@ -59,11 +59,14 @@ QVector<QVector3D>& Visualization::PopulateVertexBuffer(const ParsingOptions& op
    std::for_each(fileTree.beginPreOrder(), fileTree.endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
    {
-      if (options.showDirectoriesOnly && node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY)
+      if (options.showDirectoriesOnly &&
+          node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY &&
+          node.GetData().m_file.m_size >= options.fileSizeMinimum)
       {
          m_visualizationVertices << node.GetData().m_block.m_vertices;
       }
-      else if (!options.showDirectoriesOnly)
+      else if (!options.showDirectoriesOnly &&
+               node.GetData().m_file.m_size >= options.fileSizeMinimum)
       {
          m_visualizationVertices << node.GetData().m_block.m_vertices;
       }
@@ -102,11 +105,14 @@ QVector<QVector3D>& Visualization::PopulateColorBuffer(const ParsingOptions& opt
    std::for_each(fileTree.beginPreOrder(), fileTree.endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
    {
-      if (node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY)
+      if (node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY &&
+          node.GetData().m_file.m_size >= options.fileSizeMinimum)
       {
          m_visualizationColors << Visualization::CreateDirectoryColors();
       }
-      else if (node.GetData().m_file.m_type == FILE_TYPE::REGULAR && !options.showDirectoriesOnly)
+      else if (!options.showDirectoriesOnly &&
+               node.GetData().m_file.m_type == FILE_TYPE::REGULAR &&
+               node.GetData().m_file.m_size >= options.fileSizeMinimum)
       {
          m_visualizationColors << Visualization::CreateBlockColors();
       }

@@ -5,33 +5,11 @@
 
 #include <cassert>
 #include <iostream>
+#include <limits>
 
 #include <QAction>
 #include <QFileDialog>
 #include <QMenuBar>
-
-namespace
-{
-   /**
-    * @brief SideBarSetupHelper performs all tasks necessary to setup the sidebar.
-    *
-    * @param[in/out] ui                The UI on which all the controls exist.
-    */
-   void SetupPruneSizeComboBox(Ui::MainWindow& ui)
-   {
-      // Setup the pruning options:
-      ui.pruneSizeComboBox->addItem("Show All");
-      ui.pruneSizeComboBox->addItem("< 1 MB");
-      ui.pruneSizeComboBox->addItem("< 10 MB");
-      ui.pruneSizeComboBox->addItem("< 50 MB");
-      ui.pruneSizeComboBox->addItem("< 100 MB");
-      ui.pruneSizeComboBox->addItem("< 250 MB");
-      ui.pruneSizeComboBox->addItem("< 500 MB");
-      ui.pruneSizeComboBox->addItem("< 1 GB");
-      ui.pruneSizeComboBox->addItem("< 5 GB");
-      ui.pruneSizeComboBox->addItem("< 10 GB");
-   }
-}
 
 MainWindow::MainWindow(QWidget* parent /*= 0*/, std::wstring path /*= L""*/)
    : QMainWindow(parent),
@@ -42,7 +20,20 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/, std::wstring path /*= L""*/)
      m_fileMenuPreferences(nullptr),
      m_fileMenuExit(nullptr),
      m_directoryToVisualize(path),
-     ui(new Ui::MainWindow)
+     ui(new Ui::MainWindow),
+     m_sizePruningComboBoxIndex(0),
+     m_sizePruningOptions(
+        {  // Need the "ull" (unsigned long long) prefix to avoid integral constant overflows!
+           std::pair<std::uintmax_t, std::string>(std::numeric_limits<std::uintmax_t>::min(), "Show All"),
+           std::pair<std::uintmax_t, std::string>(1048576ull,         "< 1 MiB"),
+           std::pair<std::uintmax_t, std::string>(1048576ull * 10,    "< 10 MiB"),
+           std::pair<std::uintmax_t, std::string>(1048576ull * 100,   "< 100 MiB"),
+           std::pair<std::uintmax_t, std::string>(1048576ull * 250,   "< 250 MiB"),
+           std::pair<std::uintmax_t, std::string>(1048576ull * 500,   "< 500 MiB"),
+           std::pair<std::uintmax_t, std::string>(1048576ull * 1000,  "< 1 GiB"),
+           std::pair<std::uintmax_t, std::string>(1048576ull * 5000,  "< 5 GiB"),
+           std::pair<std::uintmax_t, std::string>(1048576ull * 10000, "< 10 GiB")
+        })
 {
    ui->setupUi(this);
 
@@ -61,10 +52,25 @@ MainWindow::~MainWindow()
 
 void MainWindow::SetupSidebar()
 {
-   SetupPruneSizeComboBox(*ui);
+   // Setup the pruning options:
+   ui->pruneSizeComboBox->addItem(QString::fromStdString(m_sizePruningOptions.at(0).second));
+   ui->pruneSizeComboBox->addItem(QString::fromStdString(m_sizePruningOptions.at(1).second));
+   ui->pruneSizeComboBox->addItem(QString::fromStdString(m_sizePruningOptions.at(2).second));
+   ui->pruneSizeComboBox->addItem(QString::fromStdString(m_sizePruningOptions.at(3).second));
+   ui->pruneSizeComboBox->addItem(QString::fromStdString(m_sizePruningOptions.at(4).second));
+   ui->pruneSizeComboBox->addItem(QString::fromStdString(m_sizePruningOptions.at(5).second));
+   ui->pruneSizeComboBox->addItem(QString::fromStdString(m_sizePruningOptions.at(6).second));
+   ui->pruneSizeComboBox->addItem(QString::fromStdString(m_sizePruningOptions.at(7).second));
+   ui->pruneSizeComboBox->addItem(QString::fromStdString(m_sizePruningOptions.at(8).second));
+
+   // The new syntax isn't entirely smooth yet: http://wiki.qt.io/New_Signal_Slot_Syntax
+   connect(ui->pruneSizeComboBox,
+      static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+      &MainWindow::OnPruneSizeComboBoxSelectionChanged);
 
    connect(ui->directoriesOnlyCheckbox, &QCheckBox::stateChanged, this,
       &MainWindow::OnDirectoryOnlyStateChanged);
+
    connect(ui->pruneTreeButton, &QPushButton::clicked, this, &MainWindow::OnPruneTreeButtonClicked);
    connect(ui->fieldOfViewSlider, &QSlider::valueChanged, this, &MainWindow::OnFieldOfViewChanged);
 }
@@ -120,6 +126,7 @@ void MainWindow::OnFileMenuNewScan()
       ParsingOptions parsingOptions;
       parsingOptions.showDirectoriesOnly = false;
       parsingOptions.forceNewScan = true;
+      parsingOptions.fileSizeMinimum = std::numeric_limits<std::uintmax_t>::min();
 
       m_glCanvas->ParseVisualization(m_directoryToVisualize, parsingOptions);
    }
@@ -135,10 +142,18 @@ void MainWindow::OnPruneTreeButtonClicked()
    ParsingOptions parsingOptions;
    parsingOptions.showDirectoriesOnly = m_showDirectoriesOnly;
    parsingOptions.forceNewScan = false;
+   parsingOptions.fileSizeMinimum = m_sizePruningOptions[m_sizePruningComboBoxIndex].first;
 
    m_glCanvas->ParseVisualization(m_directoryToVisualize, parsingOptions);
 
    std::cout << "Button pressed" << std::endl;
+}
+
+void MainWindow::OnPruneSizeComboBoxSelectionChanged(int index)
+{
+   m_sizePruningComboBoxIndex = index;
+
+   std::cout << "New index: " << index << std::endl;
 }
 
 void MainWindow::OnFieldOfViewChanged(const int fieldOfView)

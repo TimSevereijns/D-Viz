@@ -4,6 +4,9 @@
 #include <QVector>
 #include <QVector3D>
 
+#include <cstdint>
+#include <numeric>
+
 #include "../diskScanner.h"
 
 /**
@@ -13,10 +16,12 @@ struct ParsingOptions
 {
    bool showDirectoriesOnly;
    bool forceNewScan;
+   std::uint64_t fileSizeMinimum;
 
    ParsingOptions()
       : showDirectoriesOnly(false),
-        forceNewScan(false)
+        forceNewScan(false),
+        fileSizeMinimum(std::numeric_limits<std::uintmax_t>::max())
    {
    }
 };

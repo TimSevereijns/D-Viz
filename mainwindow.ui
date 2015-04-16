@@ -68,7 +68,7 @@
    <property name="minimumSize">
     <size>
      <width>150</width>
-     <height>280</height>
+     <height>290</height>
     </size>
    </property>
    <attribute name="dockWidgetArea">
@@ -168,6 +168,15 @@
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="invertedAppearance">
+        <bool>true</bool>
+       </property>
+       <property name="tickPosition">
+        <enum>QSlider::TicksBelow</enum>
+       </property>
+       <property name="tickInterval">
+        <number>10</number>
        </property>
       </widget>
      </item>
