@@ -5,7 +5,7 @@
 #include <math.h>
 
 // Keep vertical angle less than 90 degrees to avoid gimbal lock:
-static const double MAX_VERTICAL_ANGLE = 85.0f;
+static const double MAX_VERTICAL_ANGLE = 85.0;
 
 namespace
 {
@@ -81,6 +81,7 @@ void Camera::LookAt(const QVector3D& position)
 {
    assert(position != m_position);
    QVector3D direction = position - m_position;
+   direction.normalize();
 
    m_verticalAngle = std::asin(-direction.y());
    m_horizontalAngle = std::atan2(-direction.x(), -direction.z());

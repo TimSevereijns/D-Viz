@@ -32,7 +32,6 @@ class MainWindow : public QMainWindow
       void OnFieldOfViewChanged(int fieldOfView);
       void OnDirectoryOnlyStateChanged(int state);
       void OnPruneTreeButtonClicked();
-      void OnPruneSizeComboBoxSelectionChanged(int index);
 
    private:
       void CreateMenus();
@@ -57,7 +56,7 @@ class MainWindow : public QMainWindow
 
       std::wstring m_directoryToVisualize;
 
-      std::vector<std::pair<std::uintmax_t, std::string>> m_sizePruningOptions;
+      std::vector<std::pair<std::uintmax_t, QString>> m_sizePruningOptions;
 };
 
 #endif // MAINWINDOW_H

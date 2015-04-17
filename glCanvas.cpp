@@ -35,8 +35,8 @@ namespace
     *
     * @returns true if the key exists and was updated in the keyboard manager.
     */
-   inline bool keyPressHelper(KeyboardManager& keyboardManager, Qt::Key key,
-                              KeyboardManager::KEY_STATE state)
+   inline bool keyPressHelper(KeyboardManager& keyboardManager, const Qt::Key key,
+      const KeyboardManager::KEY_STATE state)
    {
       switch (key)
       {
@@ -57,39 +57,37 @@ namespace
     */
    QVector<QVector3D> CreateOriginMarkerVertices()
    {
-      const float markerAxisLength = 3;
+      const float markerAxisLength = Visualization::ROOT_BLOCK_WIDTH;
 
       QVector<QVector3D> marker;
       marker
          << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(markerAxisLength, 0.0f, 0.0f)   // X-axis
-         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, markerAxisLength, 0.0f)   // Y-axis
+         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 100.0f, 0.0f)             // Y-axis
          << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 0.0f, -markerAxisLength)  // Z-axis
 
          // Grid (Z-axis):
-         << QVector3D( 0.0f, 0.0f, -3.0f) << QVector3D( 0.0f, 0.0f, -10.0f)
-         << QVector3D( 1.0f, 0.0f,  0.0f) << QVector3D( 1.0f, 0.0f, -10.0f)
-         << QVector3D( 2.0f, 0.0f,  0.0f) << QVector3D( 2.0f, 0.0f, -10.0f)
-         << QVector3D( 3.0f, 0.0f,  0.0f) << QVector3D( 3.0f, 0.0f, -10.0f)
-         << QVector3D( 4.0f, 0.0f,  0.0f) << QVector3D( 4.0f, 0.0f, -10.0f)
-         << QVector3D( 5.0f, 0.0f,  0.0f) << QVector3D( 5.0f, 0.0f, -10.0f)
-         << QVector3D( 6.0f, 0.0f,  0.0f) << QVector3D( 6.0f, 0.0f, -10.0f)
-         << QVector3D( 7.0f, 0.0f,  0.0f) << QVector3D( 7.0f, 0.0f, -10.0f)
-         << QVector3D( 8.0f, 0.0f,  0.0f) << QVector3D( 8.0f, 0.0f, -10.0f)
-         << QVector3D( 9.0f, 0.0f,  0.0f) << QVector3D( 9.0f, 0.0f, -10.0f)
-         << QVector3D(10.0f, 0.0f,  0.0f) << QVector3D(10.0f, 0.0f, -10.0f)
+         << QVector3D( 100.0f, 0.0f,  0.0f) << QVector3D( 100.0f, 0.0f, -1000.0f)
+         << QVector3D( 200.0f, 0.0f,  0.0f) << QVector3D( 200.0f, 0.0f, -1000.0f)
+         << QVector3D( 300.0f, 0.0f,  0.0f) << QVector3D( 300.0f, 0.0f, -1000.0f)
+         << QVector3D( 400.0f, 0.0f,  0.0f) << QVector3D( 400.0f, 0.0f, -1000.0f)
+         << QVector3D( 500.0f, 0.0f,  0.0f) << QVector3D( 500.0f, 0.0f, -1000.0f)
+         << QVector3D( 600.0f, 0.0f,  0.0f) << QVector3D( 600.0f, 0.0f, -1000.0f)
+         << QVector3D( 700.0f, 0.0f,  0.0f) << QVector3D( 700.0f, 0.0f, -1000.0f)
+         << QVector3D( 800.0f, 0.0f,  0.0f) << QVector3D( 800.0f, 0.0f, -1000.0f)
+         << QVector3D( 900.0f, 0.0f,  0.0f) << QVector3D( 900.0f, 0.0f, -1000.0f)
+         << QVector3D(1000.0f, 0.0f,  0.0f) << QVector3D(1000.0f, 0.0f, -1000.0f)
 
          // Grid (X-axis):
-         << QVector3D(3.0f, 0.0f,   0.0f) << QVector3D(10.0f, 0.0f,   0.0f)
-         << QVector3D(0.0f, 0.0f,  -1.0f) << QVector3D(10.0f, 0.0f,  -1.0f)
-         << QVector3D(0.0f, 0.0f,  -2.0f) << QVector3D(10.0f, 0.0f,  -2.0f)
-         << QVector3D(0.0f, 0.0f,  -3.0f) << QVector3D(10.0f, 0.0f,  -3.0f)
-         << QVector3D(0.0f, 0.0f,  -4.0f) << QVector3D(10.0f, 0.0f,  -4.0f)
-         << QVector3D(0.0f, 0.0f,  -5.0f) << QVector3D(10.0f, 0.0f,  -5.0f)
-         << QVector3D(0.0f, 0.0f,  -6.0f) << QVector3D(10.0f, 0.0f,  -6.0f)
-         << QVector3D(0.0f, 0.0f,  -7.0f) << QVector3D(10.0f, 0.0f,  -7.0f)
-         << QVector3D(0.0f, 0.0f,  -8.0f) << QVector3D(10.0f, 0.0f,  -8.0f)
-         << QVector3D(0.0f, 0.0f,  -9.0f) << QVector3D(10.0f, 0.0f,  -9.0f)
-         << QVector3D(0.0f, 0.0f, -10.0f) << QVector3D(10.0f, 0.0f, -10.0f);
+         << QVector3D(0.0f, 0.0f,  -100.0f) << QVector3D(1000.0f, 0.0f,  -100.0f)
+         << QVector3D(0.0f, 0.0f,  -200.0f) << QVector3D(1000.0f, 0.0f,  -200.0f)
+         << QVector3D(0.0f, 0.0f,  -300.0f) << QVector3D(1000.0f, 0.0f,  -300.0f)
+         << QVector3D(0.0f, 0.0f,  -400.0f) << QVector3D(1000.0f, 0.0f,  -400.0f)
+         << QVector3D(0.0f, 0.0f,  -500.0f) << QVector3D(1000.0f, 0.0f,  -500.0f)
+         << QVector3D(0.0f, 0.0f,  -600.0f) << QVector3D(1000.0f, 0.0f,  -600.0f)
+         << QVector3D(0.0f, 0.0f,  -700.0f) << QVector3D(1000.0f, 0.0f,  -700.0f)
+         << QVector3D(0.0f, 0.0f,  -800.0f) << QVector3D(1000.0f, 0.0f,  -800.0f)
+         << QVector3D(0.0f, 0.0f,  -900.0f) << QVector3D(1000.0f, 0.0f,  -900.0f)
+         << QVector3D(0.0f, 0.0f, -1000.0f) << QVector3D(1000.0f, 0.0f, -1000.0f);
 
       return marker;
    }
@@ -188,7 +186,8 @@ GLCanvas::GLCanvas(QWidget* parent)
 
    // Set up the camera:
    m_camera.SetAspectRatio(3.0f / 2.0f);
-   m_camera.SetPosition(QVector3D(0, 0, m_distance));
+   m_camera.SetPosition(QVector3D(500, 100, 0));
+   //m_camera.LookAt(QVector3D(500, 0, -500));
 
    // Set keyboard and mouse focus:
    setFocusPolicy(Qt::StrongFocus);
@@ -231,11 +230,16 @@ void GLCanvas::ParseVisualization(const std::wstring& path, const ParsingOptions
    m_visualizationVertices = m_treeMap->PopulateVertexBuffer(options);
    m_visualizationColors = m_treeMap->PopulateColorBuffer(options);
 
-   m_visualizationShaderProgram.removeAllShaders();
-   m_visualizationVAO.destroy();
+   m_isVisualizationLoaded = !(m_visualizationVertices.empty() && m_visualizationColors.empty());
 
-   PrepareVisualizationVertexBuffers();
-   PrepareVisualizationShaderProgram();
+   if (m_isVisualizationLoaded)
+   {
+      m_visualizationShaderProgram.removeAllShaders();
+      m_visualizationVAO.destroy();
+
+      PrepareVisualizationVertexBuffers();
+      PrepareVisualizationShaderProgram();
+   }
 
    std::wstringstream message;
    message.imbue(std::locale(""));
@@ -244,7 +248,6 @@ void GLCanvas::ParseVisualization(const std::wstring& path, const ParsingOptions
    SetStatusBarMessage(*m_mainWindow, message.str());
 
    m_isPaintingSuspended = false;
-   m_isVisualizationLoaded = true;
 }
 
 void GLCanvas::SetFieldOfView(const float fieldOfView)
