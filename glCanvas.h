@@ -93,7 +93,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       bool m_isVisualizationLoaded;
 
       double m_distance;
-      double m_movementSpeed;
+      double m_cameraMovementSpeed;
+      double m_mouseSensitivity;
 
       std::wstring m_visualizedDirectory;
 
@@ -134,6 +135,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
    signals:
 
    public slots:
+      void OnCameraMovementSpeedChanged(double newSpeed);
+      void OnMouseSensitivityChanged(double newSensitivity);
 };
 
 #endif // GLCANVAS_H

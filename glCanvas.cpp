@@ -174,7 +174,8 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_isVisualizationLoaded(false),
      m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
      m_distance(2.5),
-     m_movementSpeed(0.2f),
+     m_cameraMovementSpeed(0.25),
+     m_mouseSensitivity(0.25),
      m_lastFrameTimeStamp(std::chrono::system_clock::now()),
      m_visualizationVertexColorBuffer(QOpenGLBuffer::VertexBuffer),
      m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer)
@@ -329,6 +330,16 @@ void GLCanvas::PrepareOriginMarkerVertexBuffers()
    m_originMarkerVAO.release();
 }
 
+void GLCanvas::OnCameraMovementSpeedChanged(double newSpeed)
+{
+   m_cameraMovementSpeed = newSpeed;
+}
+
+void GLCanvas::OnMouseSensitivityChanged(double newSensitivity)
+{
+   m_mouseSensitivity = newSensitivity;
+}
+
 void GLCanvas::PrepareVisualizationVertexBuffers()
 {
    m_visualizationVAO.create();
@@ -414,11 +425,11 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
 
    if (event->key() == Qt::Key_Up)
    {
-      m_movementSpeed *= 1.25f;
+      m_cameraMovementSpeed *= 1.25f;
    }
    else if (event->key() == Qt::Key_Down)
    {
-      m_movementSpeed *= 0.75f;
+      m_cameraMovementSpeed *= 0.75f;
    }
 
    const auto keyState = KeyboardManager::KEY_STATE::DOWN;
@@ -464,14 +475,12 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
 
 void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 {
-   const static float MOUSE_SENSITIVITY = 0.5f;
-
    const float deltaX = event->x() - m_lastMousePosition.x();
    const float deltaY = event->y() - m_lastMousePosition.y();
 
    if (event->buttons() & Qt::LeftButton)
    {
-      m_camera.OffsetOrientation(MOUSE_SENSITIVITY * deltaY, MOUSE_SENSITIVITY * deltaX);
+      m_camera.OffsetOrientation(m_mouseSensitivity * deltaY, m_mouseSensitivity * deltaX);
    }
 
    m_lastMousePosition = event->pos();
@@ -515,22 +524,22 @@ void GLCanvas::HandleCameraMovement()
 
    if (isKeyWDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_movementSpeed * m_camera.Forward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Forward());
    }
 
    if (isKeyADown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_movementSpeed * m_camera.Left());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Left());
    }
 
    if (isKeySDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_movementSpeed * m_camera.Backward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Backward());
    }
 
    if (isKeyDDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_movementSpeed * m_camera.Right());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Right());
    }
 
    m_light.SetPosition(m_camera.GetPosition());

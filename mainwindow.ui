@@ -71,6 +71,12 @@
      <height>290</height>
     </size>
    </property>
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
+   </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
@@ -120,11 +126,14 @@
      </item>
      <item>
       <widget class="QDoubleSpinBox" name="cameraSpeedSpinner">
+       <property name="maximum">
+        <double>1.000000000000000</double>
+       </property>
        <property name="singleStep">
-        <double>0.250000000000000</double>
+        <double>0.100000000000000</double>
        </property>
        <property name="value">
-        <double>1.000000000000000</double>
+        <double>0.250000000000000</double>
        </property>
       </widget>
      </item>
@@ -137,11 +146,14 @@
      </item>
      <item>
       <widget class="QDoubleSpinBox" name="mouseSensitivitySpinner">
+       <property name="maximum">
+        <double>1.000000000000000</double>
+       </property>
        <property name="singleStep">
-        <double>0.250000000000000</double>
+        <double>0.100000000000000</double>
        </property>
        <property name="value">
-        <double>0.500000000000000</double>
+        <double>0.250000000000000</double>
        </property>
       </widget>
      </item>

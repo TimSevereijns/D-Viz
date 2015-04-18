@@ -60,8 +60,18 @@ void MainWindow::SetupSidebar()
 
    connect(ui->directoriesOnlyCheckbox, &QCheckBox::stateChanged, this,
       &MainWindow::OnDirectoryOnlyStateChanged);
+
    connect(ui->pruneTreeButton, &QPushButton::clicked, this, &MainWindow::OnPruneTreeButtonClicked);
+
    connect(ui->fieldOfViewSlider, &QSlider::valueChanged, this, &MainWindow::OnFieldOfViewChanged);
+
+   connect(ui->cameraSpeedSpinner,
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
+      &GLCanvas::OnCameraMovementSpeedChanged);
+
+   connect(ui->mouseSensitivitySpinner,
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
+      &GLCanvas::OnMouseSensitivityChanged);
 }
 
 std::wstring MainWindow::GetDirectoryToVisualize() const
