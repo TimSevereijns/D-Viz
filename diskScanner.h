@@ -191,10 +191,13 @@ struct VizNode
    }
 };
 
+/**
+ * @brief The DiskScanner class
+ */
 class DiskScanner
 {
    public:
-      static std::uintmax_t SIZE_UNDEFINED;
+      static const std::uintmax_t SIZE_UNDEFINED;
 
       explicit DiskScanner();
       explicit DiskScanner(const std::wstring& rawPpath);

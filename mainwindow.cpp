@@ -11,7 +11,7 @@
 #include <QFileDialog>
 #include <QMenuBar>
 
-MainWindow::MainWindow(QWidget* parent /*= 0*/, std::wstring path /*= L""*/)
+MainWindow::MainWindow(QWidget* parent /*= 0*/)
    : QMainWindow(parent),
      m_showDirectoriesOnly(false),
      m_glCanvas(nullptr),
@@ -19,8 +19,8 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/, std::wstring path /*= L""*/)
      m_fileMenuNewScan(nullptr),
      m_fileMenuPreferences(nullptr),
      m_fileMenuExit(nullptr),
-     m_directoryToVisualize(path),
-     ui(new Ui::MainWindow),
+     m_directoryToVisualize(),
+     m_ui(new Ui::MainWindow),
      m_sizePruningComboBoxIndex(0),
      m_sizePruningOptions(
         {  // Need the "ull" (unsigned long long) prefix to avoid integral constant overflows!
@@ -35,19 +35,19 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/, std::wstring path /*= L""*/)
            std::pair<std::uintmax_t, QString>(1048576ull * 10000, "< 10 GiB")
         })
 {
-   ui->setupUi(this);
+   m_ui->setupUi(this);
 
    CreateMenus();
 
    m_glCanvas.reset(new GLCanvas(this));
-   ui->canvasLayout->addWidget(m_glCanvas.get());
+   m_ui->canvasLayout->addWidget(m_glCanvas.get());
 
    SetupSidebar();
 }
 
 MainWindow::~MainWindow()
 {
-   delete ui;
+   delete m_ui;
 }
 
 void MainWindow::SetupSidebar()
@@ -55,21 +55,21 @@ void MainWindow::SetupSidebar()
    std::for_each(std::begin(m_sizePruningOptions), std::end(m_sizePruningOptions),
       [&] (const std::pair<std::uintmax_t, QString>& pair)
    {
-      ui->pruneSizeComboBox->addItem(pair.second);
+      m_ui->pruneSizeComboBox->addItem(pair.second);
    });
 
-   connect(ui->directoriesOnlyCheckbox, &QCheckBox::stateChanged, this,
+   connect(m_ui->directoriesOnlyCheckbox, &QCheckBox::stateChanged, this,
       &MainWindow::OnDirectoryOnlyStateChanged);
 
-   connect(ui->pruneTreeButton, &QPushButton::clicked, this, &MainWindow::OnPruneTreeButtonClicked);
+   connect(m_ui->pruneTreeButton, &QPushButton::clicked, this, &MainWindow::OnPruneTreeButtonClicked);
 
-   connect(ui->fieldOfViewSlider, &QSlider::valueChanged, this, &MainWindow::OnFieldOfViewChanged);
+   connect(m_ui->fieldOfViewSlider, &QSlider::valueChanged, this, &MainWindow::OnFieldOfViewChanged);
 
-   connect(ui->cameraSpeedSpinner,
+   connect(m_ui->cameraSpeedSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
       &GLCanvas::OnCameraMovementSpeedChanged);
 
-   connect(ui->mouseSensitivitySpinner,
+   connect(m_ui->mouseSensitivitySpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
       &GLCanvas::OnMouseSensitivityChanged);
 }
@@ -141,7 +141,7 @@ void MainWindow::OnPruneTreeButtonClicked()
    ParsingOptions parsingOptions;
    parsingOptions.showDirectoriesOnly = m_showDirectoriesOnly;
    parsingOptions.forceNewScan = false;
-   parsingOptions.fileSizeMinimum = m_sizePruningOptions[ui->pruneSizeComboBox->currentIndex()].first;
+   parsingOptions.fileSizeMinimum = m_sizePruningOptions[m_ui->pruneSizeComboBox->currentIndex()].first;
 
    m_glCanvas->ParseVisualization(m_directoryToVisualize, parsingOptions);
 
@@ -151,4 +151,9 @@ void MainWindow::OnPruneTreeButtonClicked()
 void MainWindow::OnFieldOfViewChanged(const int fieldOfView)
 {
    m_glCanvas->SetFieldOfView(static_cast<float>(fieldOfView));
+}
+
+void MainWindow::UpdateFieldOfViewSlider(const int fieldOfView)
+{
+   m_ui->fieldOfViewSlider->setValue(fieldOfView);
 }

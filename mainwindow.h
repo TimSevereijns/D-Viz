@@ -21,16 +21,43 @@ class MainWindow : public QMainWindow
    Q_OBJECT
 
    public:
-      explicit MainWindow(QWidget* parent = 0, std::wstring path = L"");
+      explicit MainWindow(QWidget* parent = 0);
 
       ~MainWindow();
 
+      /**
+       * @brief GetDirectoryToVisualize
+       * @return
+       */
       std::wstring GetDirectoryToVisualize() const;
 
+      /**
+       * @brief UpdateFieldOfViewSlider
+       * @param fieldOfView
+       */
+      void UpdateFieldOfViewSlider(const int fieldOfView);
+
    public slots:
+      /**
+       * @brief OnFileMenuNewScan
+       */
       void OnFileMenuNewScan();
+
+      /**
+       * @brief OnFieldOfViewChanged
+       * @param fieldOfView
+       */
       void OnFieldOfViewChanged(int fieldOfView);
+
+      /**
+       * @brief OnDirectoryOnlyStateChanged
+       * @param state
+       */
       void OnDirectoryOnlyStateChanged(int state);
+
+      /**
+       * @brief OnPruneTreeButtonClicked
+       */
       void OnPruneTreeButtonClicked();
 
    private:
@@ -52,7 +79,7 @@ class MainWindow : public QMainWindow
 
       std::unique_ptr<GLCanvas> m_glCanvas;
 
-      Ui::MainWindow* ui; // Unfortunately it would appear as if this has to remain a raw pointer.
+      Ui::MainWindow* m_ui; // Unfortunately it would appear as if this has to remain a raw pointer.
 
       std::wstring m_directoryToVisualize;
 

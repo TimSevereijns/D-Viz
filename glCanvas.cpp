@@ -330,16 +330,6 @@ void GLCanvas::PrepareOriginMarkerVertexBuffers()
    m_originMarkerVAO.release();
 }
 
-void GLCanvas::OnCameraMovementSpeedChanged(double newSpeed)
-{
-   m_cameraMovementSpeed = newSpeed;
-}
-
-void GLCanvas::OnMouseSensitivityChanged(double newSensitivity)
-{
-   m_mouseSensitivity = newSensitivity;
-}
-
 void GLCanvas::PrepareVisualizationVertexBuffers()
 {
    m_visualizationVAO.create();
@@ -380,11 +370,6 @@ void GLCanvas::PrepareVisualizationVertexBuffers()
    m_visualizationVertexPositionBuffer.release();
    m_visualizationVertexColorBuffer.release();
    m_visualizationVAO.release();
-}
-
-QSize GLCanvas::sizeHint() const
-{
-   return QSize(m_mainWindow->size().width(), m_mainWindow->size().height());
 }
 
 void GLCanvas::initializeGL()
@@ -502,9 +487,21 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
       {
          m_camera.DecreaseFieldOfView();
       }
+
+      m_mainWindow->UpdateFieldOfViewSlider(static_cast<float>(m_camera.GetFieldOfView()));
    }
 
    event->accept();
+}
+
+void GLCanvas::OnCameraMovementSpeedChanged(const double newSpeed)
+{
+   m_cameraMovementSpeed = newSpeed;
+}
+
+void GLCanvas::OnMouseSensitivityChanged(const double newSensitivity)
+{
+   m_mouseSensitivity = newSensitivity;
 }
 
 void GLCanvas::HandleCameraMovement()

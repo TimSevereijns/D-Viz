@@ -77,36 +77,12 @@ namespace {
       file.write(serializerOutput);
       file.close();
    }
-
-   /**
-    * @brief NarrowStringToWideString
-    * @param narrow
-    * @return
-    */
-   std::wstring NarrowStringToWideString(const std::string& narrow)
-   {
-       typedef std::codecvt_utf8<wchar_t> convertType;
-       std::wstring_convert<convertType, wchar_t> converter;
-       return converter.from_bytes(narrow);
-   }
 }
 
 int main(int argc, char* argv[])
 {
-   std::wstring filePath;
-
-   if (argc == 1)
-   {
-      filePath = L"C:\\";
-   }
-   else
-   {
-      filePath = NarrowStringToWideString(argv[1]);
-      std::wcout << "Visualizing: " << filePath << L"..." << std::endl;
-   }
-
    QApplication application(argc, argv);
-   MainWindow mainWindow{/* parent =*/ 0, /* path =*/ filePath};
+   MainWindow mainWindow{/* parent =*/ 0};
    mainWindow.show();
 
    //QuickSortingTest();

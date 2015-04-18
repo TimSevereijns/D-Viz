@@ -53,8 +53,6 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       explicit GLCanvas(QWidget* parent = nullptr);
       ~GLCanvas();
 
-      QSize sizeHint() const override;
-
       /**
        * @brief ParseVisualization
        * @param path
@@ -67,6 +65,19 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
        * @param fov
        */
       void SetFieldOfView(const float fieldOfView);
+
+   public slots:
+      /**
+       * @brief OnCameraMovementSpeedChanged
+       * @param newSpeed
+       */
+      void OnCameraMovementSpeedChanged(const double newSpeed);
+
+      /**
+       * @brief OnMouseSensitivityChanged
+       * @param newSensitivity
+       */
+      void OnMouseSensitivityChanged(const double newSensitivity);
 
    protected:
       void initializeGL() override;
@@ -133,10 +144,6 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       QPoint m_lastMousePosition;
 
    signals:
-
-   public slots:
-      void OnCameraMovementSpeedChanged(double newSpeed);
-      void OnMouseSensitivityChanged(double newSensitivity);
 };
 
 #endif // GLCANVAS_H

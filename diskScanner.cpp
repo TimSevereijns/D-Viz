@@ -14,7 +14,7 @@
 #include <QJsonObject>
 #include <QString>
 
-std::uintmax_t DiskScanner::SIZE_UNDEFINED = 0;
+const std::uintmax_t DiskScanner::SIZE_UNDEFINED = 0;
 
 namespace
 {

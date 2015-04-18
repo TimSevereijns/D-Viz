@@ -163,9 +163,14 @@ void Camera::SetFieldOfView(const float angle)
    }
 }
 
+float Camera::GetFieldOfView() const
+{
+   return m_fieldOfView;
+}
+
 void Camera::IncreaseFieldOfView()
 {
-   m_fieldOfView *= 1.1f;
+   m_fieldOfView += 5.0f;
 
    if (m_fieldOfView > 85.0f)
    {
@@ -175,7 +180,7 @@ void Camera::IncreaseFieldOfView()
 
 void Camera::DecreaseFieldOfView()
 {
-   m_fieldOfView *= 0.9f;
+   m_fieldOfView -= 5.0f;
 
    if (m_fieldOfView < 5.0f)
    {

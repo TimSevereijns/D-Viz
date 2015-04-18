@@ -34,6 +34,8 @@ class Camera
       void SetAspectRatio(const float ratio);
 
       void SetFieldOfView(const float angle);
+      float GetFieldOfView() const;
+
       void IncreaseFieldOfView();
       void DecreaseFieldOfView();
 
