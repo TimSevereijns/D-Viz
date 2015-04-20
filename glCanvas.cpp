@@ -539,7 +539,7 @@ void GLCanvas::HandleCameraMovement()
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Right());
    }
 
-   m_light.SetPosition(m_camera.GetPosition());
+   m_light.SetPosition(QVector3D(500, 150, -500));
 }
 
 void GLCanvas::paintGL()
@@ -583,6 +583,9 @@ void GLCanvas::paintGL()
    {
       // Draw visualization:
       m_visualizationShaderProgram.bind();
+
+      // The model matrix is always the same, since the model doesn't move:
+      m_visualizationShaderProgram.setUniformValue("model", QMatrix4x4());
       m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
       m_visualizationShaderProgram.setUniformValue("light.position", m_light.position);
       m_visualizationShaderProgram.setUniformValue("light.intensity", m_light.intensity);
