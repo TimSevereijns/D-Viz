@@ -23,16 +23,23 @@ struct Light
 {
    QVector3D position;
    QVector3D intensity;
+   float attenuation;
+   float ambientCoefficient;
 
    Light()
       : position(QVector3D(0, 0, 0)),
-        intensity(QVector3D(1, 1, 1))
+        intensity(QVector3D(1, 1, 1)),
+        attenuation(0.75f),     // Arbitrary coefficient to control attenuation beyond distance.
+        ambientCoefficient(0.01f) // Minimum brightness is 1% of maximum brightness
    {
    }
 
-   Light(const QVector3D& lightPosition, const QVector3D& lightIntensity)
+   Light(const QVector3D& lightPosition, const QVector3D& lightIntensity,
+         const float lightAttenuation, const float lightAmbientCoefficient)
       : position(lightPosition),
-        intensity(lightIntensity)
+        intensity(lightIntensity),
+        attenuation(lightAttenuation),
+        ambientCoefficient(lightAmbientCoefficient)
    {
    }
 

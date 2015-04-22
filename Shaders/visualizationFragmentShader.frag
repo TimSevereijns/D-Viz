@@ -2,10 +2,17 @@
 
 uniform mat4 model;
 
+uniform vec3 cameraPosition;
+uniform vec3 materialSpecularColor;
+
+uniform float materialShininess;
+
 uniform struct Light
 {
    vec3 position;
    vec3 intensity;
+   float ambientCoefficient;
+   float attenuation;
 } light;
 
 in vec3 fragmentVertex;
@@ -16,20 +23,42 @@ out vec4 pixelColor;
 
 void main(void)
 {
-   // Transform the normal to world coordinates:
-   mat3 normalMatrix = transpose(inverse(mat3(model)));
-   vec3 normal = normalize(normalMatrix * fragmentNormal);
+   // Transform normal to world coordinates:
+   vec3 normal = normalize(transpose(inverse(mat3(model))) * fragmentNormal);
 
-   // Compute the position of the fragment in world coordinates:
-   vec3 fragmentPosition = vec3(model * vec4(fragmentVertex, 1));
+   // Compute vectors from the fragment (in world coordinates) to important objects in the scene:
+   vec3 surfacePosition = vec3(model * vec4(fragmentVertex, 1));
+   vec3 surfaceToLight = normalize(light.position - surfacePosition);
+   vec3 surfaceToCamera = normalize(cameraPosition - surfacePosition);
 
-   // Compute the vector from the current fragment to the light source:
-   vec3 surfaceToLight = light.position - fragmentPosition;
+   // Ambient:
+   vec3 ambient = light.ambientCoefficient * fragmentColor * light.intensity;
 
-   // Compute the brightness of the fragment based on the angle of incidence of the ray of light:
-   float brightness = dot(normal, surfaceToLight) / (length(surfaceToLight) * length(normal));
-   brightness = clamp(brightness, 0, 1);
+   // Diffuse:
+   float diffuseCoefficient = max(0.0, dot(normal, surfaceToLight));
+   vec3 diffuse = diffuseCoefficient * fragmentColor * light.intensity;
 
-   // Combine all this to get the final pixel color:
-   pixelColor = vec4(brightness * light.intensity * fragmentColor, 1);
+   // Specular:
+   float specularCoefficient = 0.0;
+   if (diffuseCoefficient > 0.0)
+   {
+      specularCoefficient = pow(max(0.0, dot(surfaceToCamera,
+         reflect(-surfaceToLight, normal))), materialShininess);
+   }
+   vec3 specular = specularCoefficient * materialSpecularColor * light.intensity;
+
+   // Attenuation:
+   float distanceToLight = length(light.position - surfacePosition);
+   float attenuation = 1.0 / (1.0 + light.attenuation * distanceToLight);
+
+   // Linear color (before gamma correction):
+   vec3 linearColor = ambient + attenuation * (diffuse + specular);
+
+   // Gamma correction:
+   vec3 gamma = vec3(1.0 / 2.2);
+
+   // Final pixel color:
+   pixelColor = vec4(pow(linearColor, gamma), 1);
+
+   //pixelColor = vec4(diffuse * light.intensity * fragmentColor, 1);
 }

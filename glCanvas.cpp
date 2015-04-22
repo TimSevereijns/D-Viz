@@ -385,7 +385,7 @@ void GLCanvas::initializeGL()
    PrepareVisualizationVertexBuffers();
    PrepareOriginMarkerVertexBuffers();
 
-   m_light = Light(QVector3D(2, 2, 0), QVector3D(1, 1, 1));
+   m_light = Light(QVector3D(2, 2, 0), QVector3D(1, 1, 1), 0.01f, 0.75f);
 }
 
 void GLCanvas::resizeGL(int width, int height)
@@ -539,7 +539,8 @@ void GLCanvas::HandleCameraMovement()
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Right());
    }
 
-   m_light.SetPosition(QVector3D(500, 150, -500));
+   //m_light.SetPosition(QVector3D(500, 150, -500));
+   m_light.SetPosition(m_camera.GetPosition());
 }
 
 void GLCanvas::paintGL()
@@ -587,8 +588,15 @@ void GLCanvas::paintGL()
       // The model matrix is always the same, since the model doesn't move:
       m_visualizationShaderProgram.setUniformValue("model", QMatrix4x4());
       m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
+      m_visualizationShaderProgram.setUniformValue("cameraPosition", m_camera.GetPosition());
+
+      m_visualizationShaderProgram.setUniformValue("materialShininess", 80.0f);
+      m_visualizationShaderProgram.setUniformValue("materialSpecularColor", QVector3D(1, 1, 1));
+
       m_visualizationShaderProgram.setUniformValue("light.position", m_light.position);
       m_visualizationShaderProgram.setUniformValue("light.intensity", m_light.intensity);
+      m_visualizationShaderProgram.setUniformValue("light.attenuation", 0.02f);
+      m_visualizationShaderProgram.setUniformValue("light.ambientCoefficient", 0.005f);
 
       m_visualizationVAO.bind();
 
