@@ -176,6 +176,12 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_distance(2.5),
      m_cameraMovementSpeed(0.25),
      m_mouseSensitivity(0.25),
+     m_ambientCoefficient(0.005f),
+     m_attenuation(.05f),
+     m_materialShininess(80.0f),
+     m_redLightComponent(1.0f),
+     m_greenLightComponent(1.0f),
+     m_blueLightComponent(1.0f),
      m_lastFrameTimeStamp(std::chrono::system_clock::now()),
      m_visualizationVertexColorBuffer(QOpenGLBuffer::VertexBuffer),
      m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer)
@@ -254,6 +260,17 @@ void GLCanvas::ParseVisualization(const std::wstring& path, const ParsingOptions
 void GLCanvas::SetFieldOfView(const float fieldOfView)
 {
    m_camera.SetFieldOfView(fieldOfView);
+}
+
+void GLCanvas::PrepareFXAAShaderProgram()
+{
+   if (!m_FXAAShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,
+      ":/Shaders/FXAA.frag"))
+   {
+      std::cout << "Error loading FXAA shader!" << std::endl;
+   }
+
+   m_FXAAShaderProgram.link();
 }
 
 void GLCanvas::PrepareOriginMarkerShaderProgram()
@@ -385,6 +402,8 @@ void GLCanvas::initializeGL()
    PrepareVisualizationVertexBuffers();
    PrepareOriginMarkerVertexBuffers();
 
+   PrepareFXAAShaderProgram();
+
    m_light = Light(QVector3D(2, 2, 0), QVector3D(1, 1, 1), 0.01f, 0.75f);
 }
 
@@ -504,6 +523,36 @@ void GLCanvas::OnMouseSensitivityChanged(const double newSensitivity)
    m_mouseSensitivity = newSensitivity;
 }
 
+void GLCanvas::OnAmbientCoefficientChanged(const double newCoefficient)
+{
+   m_ambientCoefficient = static_cast<float>(newCoefficient);
+}
+
+void GLCanvas::OnAttenuationChanged(const double newAttenuation)
+{
+   m_attenuation = static_cast<float>(newAttenuation);
+}
+
+void GLCanvas::OnShininessChanged(const double newShininess)
+{
+   m_materialShininess = static_cast<float>(newShininess);
+}
+
+void GLCanvas::OnRedLightComponentChanged(const int value)
+{
+   m_redLightComponent = static_cast<float>(value) / 100.0;
+}
+
+void GLCanvas::OnGreenLightComponentChanged(const int value)
+{
+   m_greenLightComponent = static_cast<float>(value) / 100.0;
+}
+
+void GLCanvas::OnBlueLightComponentChanged(const int value)
+{
+   m_blueLightComponent = static_cast<float>(value) / 100.0;
+}
+
 void GLCanvas::HandleCameraMovement()
 {
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -590,13 +639,14 @@ void GLCanvas::paintGL()
       m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
       m_visualizationShaderProgram.setUniformValue("cameraPosition", m_camera.GetPosition());
 
-      m_visualizationShaderProgram.setUniformValue("materialShininess", 80.0f);
-      m_visualizationShaderProgram.setUniformValue("materialSpecularColor", QVector3D(1, 1, 1));
+      m_visualizationShaderProgram.setUniformValue("materialShininess", m_materialShininess);
+      m_visualizationShaderProgram.setUniformValue("materialSpecularColor",
+         QVector3D(m_redLightComponent, m_greenLightComponent, m_blueLightComponent));
 
       m_visualizationShaderProgram.setUniformValue("light.position", m_light.position);
       m_visualizationShaderProgram.setUniformValue("light.intensity", m_light.intensity);
-      m_visualizationShaderProgram.setUniformValue("light.attenuation", 0.02f);
-      m_visualizationShaderProgram.setUniformValue("light.ambientCoefficient", 0.005f);
+      m_visualizationShaderProgram.setUniformValue("light.attenuation", m_attenuation);
+      m_visualizationShaderProgram.setUniformValue("light.ambientCoefficient", m_ambientCoefficient);
 
       m_visualizationVAO.bind();
 
@@ -604,7 +654,56 @@ void GLCanvas::paintGL()
 
       m_visualizationShaderProgram.release();
       m_visualizationVAO.release();
+
+      //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      //FXAABlit(2);
    }
 
    m_lastFrameTimeStamp = currentTime;
+}
+
+void GLCanvas::ApplyFXAA(int /*level*/)
+{
+// https://dangelog.wordpress.com/2013/02/10/using-fbos-instead-of-pbuffers-in-qt-5-2/
+
+//   float const vertexPosition[] = {
+//      m_aspectRatio, -1.0f,
+//      -m_aspectRatio, -1.0f,
+//      m_aspectRatio, 1.0f,
+//      -m_aspectRatio, 1.0f
+//   };
+
+//    float const textureCoord[] = {
+//        1.0f, 0.0f,
+//        0.0f, 0.0f,
+//        1.0f, 1.0f,
+//        0.0f, 1.0f
+//   };
+
+    //m_FXAAShaderProgram.bind();
+
+
+//   glDisable(GL_DEPTH_TEST);
+//   glUseProgram(m_FXAAProg[level]->getProgram());
+
+//   glActiveTexture(GL_TEXTURE0);
+//   glBindTexture(GL_TEXTURE_2D, m_sourceTexture);
+
+//   if (m_FXAALevel) {
+//      glUniform1i(m_FXAAProg[level]->getUniformLocation("uSourceTex"), 0);
+//      m_FXAAProg[level]->setUniform2f("RCPFrame", float(1.0/float(m_width)), float(1.0/float(m_height)));
+//   }
+
+//   int aPosCoord = m_FXAAProg[level]->getAttribLocation("aPosition");
+//   int aTexCoord = m_FXAAProg[level]->getAttribLocation("aTexCoord");
+
+//   glVertexAttribPointer(aPosCoord, 2, GL_FLOAT, GL_FALSE, 0, vertexPosition);
+//   glVertexAttribPointer(aTexCoord, 2, GL_FLOAT, GL_FALSE, 0, textureCoord);
+//   glEnableVertexAttribArray(aPosCoord);
+//   glEnableVertexAttribArray(aTexCoord);
+
+//   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+//   glDisableVertexAttribArray(aPosCoord);
+//   glDisableVertexAttribArray(aTexCoord);
 }

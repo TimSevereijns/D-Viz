@@ -40,7 +40,8 @@ DISTFILES += \
     Shaders/originMarkerVertexShader.vert \
     Shaders/originMarkerFragmentShader.frag \
     Shaders/visualizationFragmentShader.frag \
-    Shaders/visualizationVertexShader.vert
+    Shaders/visualizationVertexShader.vert \
+    Shaders/fxaa.frag
 
 RESOURCES += \
     resources.qrc

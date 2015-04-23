@@ -10,6 +10,7 @@
 #include <memory>
 
 #include <QOpenGLBuffer>
+#include <QOpenGLFramebufferObject>
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
@@ -86,6 +87,42 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
        */
       void OnMouseSensitivityChanged(const double newSensitivity);
 
+      /**
+       * @brief OnAmbientCoefficientChanged
+       * @param newCoefficient
+       */
+      void OnAmbientCoefficientChanged(const double newCoefficient);
+
+      /**
+       * @brief OnAttenuationChanged
+       * @param newAttenuation
+       */
+      void OnAttenuationChanged(const double newAttenuation);
+
+      /**
+       * @brief OnShiniessChanged
+       * @param newShininess
+       */
+      void OnShininessChanged(const double newShininess);
+
+      /**
+       * @brief OnRedLightComponentChanged
+       * @param value
+       */
+      void OnRedLightComponentChanged(const int value);
+
+      /**
+       * @brief OnGreenLightComponentChanged
+       * @param value
+       */
+      void OnGreenLightComponentChanged(const int value);
+
+      /**
+       * @brief OnBlueLightComponentChanged
+       * @param value
+       */
+      void OnBlueLightComponentChanged(const int value);
+
    protected:
       void initializeGL() override;
       void resizeGL(int width, int height) override;
@@ -107,12 +144,24 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       void PrepareVisualizationVertexBuffers();
       void PrepareOriginMarkerVertexBuffers();
 
+      void PrepareFXAAShaderProgram();
+
+      void ApplyFXAA(int level);
+
       bool m_isPaintingSuspended;
       bool m_isVisualizationLoaded;
 
       double m_distance;
       double m_cameraMovementSpeed;
       double m_mouseSensitivity;
+
+      float m_ambientCoefficient;
+      float m_attenuation;
+      float m_materialShininess;
+
+      float m_redLightComponent;
+      float m_greenLightComponent;
+      float m_blueLightComponent;
 
       std::wstring m_visualizedDirectory;
 
@@ -130,9 +179,12 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
       QOpenGLShaderProgram m_originMarkerShaderProgram;
       QOpenGLShaderProgram m_visualizationShaderProgram;
+      QOpenGLShaderProgram m_FXAAShaderProgram;
 
       QOpenGLVertexArrayObject m_visualizationVAO;
       QOpenGLVertexArrayObject m_originMarkerVAO;
+
+      //QOpenGLFramebufferObject m_frameBuffer;
 
       QOpenGLBuffer m_visualizationVertexPositionBuffer;
       QOpenGLBuffer m_visualizationVertexColorBuffer;

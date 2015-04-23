@@ -72,6 +72,27 @@ void MainWindow::SetupSidebar()
    connect(m_ui->mouseSensitivitySpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
       &GLCanvas::OnMouseSensitivityChanged);
+
+   connect(m_ui->ambientCoefficientSpinner,
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
+      &GLCanvas::OnAmbientCoefficientChanged);
+
+   connect(m_ui->attenuationSpinner,
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
+      &GLCanvas::OnAttenuationChanged);
+
+   connect(m_ui->shininesSpinner,
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
+      &GLCanvas::OnShininessChanged);
+
+   connect(m_ui->lightRedSlider, &QSlider::valueChanged, m_glCanvas.get(),
+      &GLCanvas::OnRedLightComponentChanged);
+
+   connect(m_ui->lightGreenSlider, &QSlider::valueChanged, m_glCanvas.get(),
+      &GLCanvas::OnGreenLightComponentChanged);
+
+   connect(m_ui->lightBlueSlider, &QSlider::valueChanged, m_glCanvas.get(),
+      &GLCanvas::OnBlueLightComponentChanged);
 }
 
 std::wstring MainWindow::GetDirectoryToVisualize() const

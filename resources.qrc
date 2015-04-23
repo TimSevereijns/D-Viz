@@ -4,5 +4,6 @@
         <file>Shaders/originMarkerVertexShader.vert</file>
         <file>Shaders/visualizationFragmentShader.frag</file>
         <file>Shaders/visualizationVertexShader.vert</file>
+        <file>Shaders/fxaa.frag</file>
     </qresource>
 </RCC>
