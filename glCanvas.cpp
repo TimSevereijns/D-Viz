@@ -184,7 +184,9 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_blueLightComponent(1.0f),
      m_lastFrameTimeStamp(std::chrono::system_clock::now()),
      m_visualizationVertexColorBuffer(QOpenGLBuffer::VertexBuffer),
-     m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer)
+     m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer),
+     m_frameBuffer(nullptr),
+     m_screenBuffer(nullptr)
 {
    if (!m_mainWindow)
    {
@@ -264,6 +266,15 @@ void GLCanvas::SetFieldOfView(const float fieldOfView)
 
 void GLCanvas::PrepareFXAAShaderProgram()
 {
+   m_frameBuffer = new QOpenGLFramebufferObject(/* height = */ 512, /* width = */ 512);
+   m_screenBuffer = new QOpenGLFramebufferObject(/* height = */ 512, /* width = */ 512);
+
+   const bool areBuffersValid = m_frameBuffer->isValid() && m_screenBuffer->isValid();
+   if (!areBuffersValid)
+   {
+      std::cout << "FBOs don't appear to be valid!" << std::endl;
+   }
+
    if (!m_FXAAShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,
       ":/Shaders/FXAA.frag"))
    {
@@ -599,8 +610,6 @@ void GLCanvas::paintGL()
       return;
    }
 
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
    const auto currentTime = std::chrono::system_clock::now();
    auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp).count();
@@ -617,6 +626,10 @@ void GLCanvas::paintGL()
    }
 
    HandleCameraMovement();
+
+   m_frameBuffer->bind();
+
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    // Draw origin marker:
    m_originMarkerShaderProgram.bind();
@@ -655,55 +668,16 @@ void GLCanvas::paintGL()
       m_visualizationShaderProgram.release();
       m_visualizationVAO.release();
 
-      //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-      //FXAABlit(2);
+      //ApplyFXAA(2);
    }
+
+   m_frameBuffer->release();
+   m_screenBuffer->bindDefault();
+   QOpenGLFramebufferObject::blitFramebuffer(m_screenBuffer, m_frameBuffer);
 
    m_lastFrameTimeStamp = currentTime;
 }
 
 void GLCanvas::ApplyFXAA(int /*level*/)
 {
-// https://dangelog.wordpress.com/2013/02/10/using-fbos-instead-of-pbuffers-in-qt-5-2/
-
-//   float const vertexPosition[] = {
-//      m_aspectRatio, -1.0f,
-//      -m_aspectRatio, -1.0f,
-//      m_aspectRatio, 1.0f,
-//      -m_aspectRatio, 1.0f
-//   };
-
-//    float const textureCoord[] = {
-//        1.0f, 0.0f,
-//        0.0f, 0.0f,
-//        1.0f, 1.0f,
-//        0.0f, 1.0f
-//   };
-
-    //m_FXAAShaderProgram.bind();
-
-
-//   glDisable(GL_DEPTH_TEST);
-//   glUseProgram(m_FXAAProg[level]->getProgram());
-
-//   glActiveTexture(GL_TEXTURE0);
-//   glBindTexture(GL_TEXTURE_2D, m_sourceTexture);
-
-//   if (m_FXAALevel) {
-//      glUniform1i(m_FXAAProg[level]->getUniformLocation("uSourceTex"), 0);
-//      m_FXAAProg[level]->setUniform2f("RCPFrame", float(1.0/float(m_width)), float(1.0/float(m_height)));
-//   }
-
-//   int aPosCoord = m_FXAAProg[level]->getAttribLocation("aPosition");
-//   int aTexCoord = m_FXAAProg[level]->getAttribLocation("aTexCoord");
-
-//   glVertexAttribPointer(aPosCoord, 2, GL_FLOAT, GL_FALSE, 0, vertexPosition);
-//   glVertexAttribPointer(aTexCoord, 2, GL_FLOAT, GL_FALSE, 0, textureCoord);
-//   glEnableVertexAttribArray(aPosCoord);
-//   glEnableVertexAttribArray(aTexCoord);
-
-//   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-//   glDisableVertexAttribArray(aPosCoord);
-//   glDisableVertexAttribArray(aTexCoord);
 }

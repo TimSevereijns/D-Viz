@@ -184,7 +184,10 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       QOpenGLVertexArrayObject m_visualizationVAO;
       QOpenGLVertexArrayObject m_originMarkerVAO;
 
-      //QOpenGLFramebufferObject m_frameBuffer;
+      // Needs to be a pointer, since we need to first construct a valid OpenGL context before we
+      // create the framebuffer.
+      QOpenGLFramebufferObject* m_frameBuffer;
+      QOpenGLFramebufferObject* m_screenBuffer;
 
       QOpenGLBuffer m_visualizationVertexPositionBuffer;
       QOpenGLBuffer m_visualizationVertexColorBuffer;
