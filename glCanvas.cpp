@@ -627,7 +627,7 @@ void GLCanvas::paintGL()
 
    HandleCameraMovement();
 
-   m_frameBuffer->bind();
+   //m_frameBuffer->bind();
 
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -667,17 +667,11 @@ void GLCanvas::paintGL()
 
       m_visualizationShaderProgram.release();
       m_visualizationVAO.release();
-
-      //ApplyFXAA(2);
    }
 
-   m_frameBuffer->release();
-   m_screenBuffer->bindDefault();
-   QOpenGLFramebufferObject::blitFramebuffer(m_screenBuffer, m_frameBuffer);
+   //makeCurrent();
+   //m_screenBuffer->bindDefault();
+   //QOpenGLFramebufferObject::blitFramebuffer(m_screenBuffer, m_frameBuffer);
 
    m_lastFrameTimeStamp = currentTime;
-}
-
-void GLCanvas::ApplyFXAA(int /*level*/)
-{
 }

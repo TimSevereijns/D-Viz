@@ -146,8 +146,6 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
       void PrepareFXAAShaderProgram();
 
-      void ApplyFXAA(int level);
-
       bool m_isPaintingSuspended;
       bool m_isVisualizationLoaded;
 
