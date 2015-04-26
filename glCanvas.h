@@ -123,6 +123,12 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
        */
       void OnBlueLightComponentChanged(const int value);
 
+      /**
+       * @brief OnAntiAliasingSamplingChanged
+       * @param samples
+       */
+      void OnAntiAliasingSamplingChanged(const int samples);
+
    protected:
       void initializeGL() override;
       void resizeGL(int width, int height) override;
@@ -144,7 +150,7 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       void PrepareVisualizationVertexBuffers();
       void PrepareOriginMarkerVertexBuffers();
 
-      void PrepareFXAAShaderProgram();
+      int m_samplesPerPixel;
 
       bool m_isPaintingSuspended;
       bool m_isVisualizationLoaded;
@@ -181,11 +187,6 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
       QOpenGLVertexArrayObject m_visualizationVAO;
       QOpenGLVertexArrayObject m_originMarkerVAO;
-
-      // Needs to be a pointer, since we need to first construct a valid OpenGL context before we
-      // create the framebuffer.
-      QOpenGLFramebufferObject* m_frameBuffer;
-      QOpenGLFramebufferObject* m_screenBuffer;
 
       QOpenGLBuffer m_visualizationVertexPositionBuffer;
       QOpenGLBuffer m_visualizationVertexColorBuffer;

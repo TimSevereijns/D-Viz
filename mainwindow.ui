@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>
@@ -67,8 +67,8 @@
   <widget class="QDockWidget" name="dockWidget">
    <property name="minimumSize">
     <size>
-     <width>150</width>
-     <height>561</height>
+     <width>175</width>
+     <height>717</height>
     </size>
    </property>
    <property name="features">
@@ -126,6 +126,9 @@
      </item>
      <item>
       <widget class="QDoubleSpinBox" name="cameraSpeedSpinner">
+       <property name="decimals">
+        <number>3</number>
+       </property>
        <property name="maximum">
         <double>1.000000000000000</double>
        </property>
@@ -210,6 +213,9 @@
       <widget class="QDoubleSpinBox" name="ambientCoefficientSpinner">
        <property name="decimals">
         <number>3</number>
+       </property>
+       <property name="minimum">
+        <double>0.001000000000000</double>
        </property>
        <property name="maximum">
         <double>1.000000000000000</double>
@@ -319,6 +325,30 @@
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>Samples Per Pixel:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="antiAliasingSpinner">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>16</number>
        </property>
       </widget>
      </item>

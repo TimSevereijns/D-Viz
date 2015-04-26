@@ -173,6 +173,7 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_isPaintingSuspended(false),
      m_isVisualizationLoaded(false),
      m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
+     m_samplesPerPixel(1),
      m_distance(2.5),
      m_cameraMovementSpeed(0.25),
      m_mouseSensitivity(0.25),
@@ -184,9 +185,7 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_blueLightComponent(1.0f),
      m_lastFrameTimeStamp(std::chrono::system_clock::now()),
      m_visualizationVertexColorBuffer(QOpenGLBuffer::VertexBuffer),
-     m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer),
-     m_frameBuffer(nullptr),
-     m_screenBuffer(nullptr)
+     m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer)
 {
    if (!m_mainWindow)
    {
@@ -203,6 +202,7 @@ GLCanvas::GLCanvas(QWidget* parent)
 
    QSurfaceFormat format;
    format.setDepthBufferSize(24);
+   format.setSamples(8);
    setFormat(format);
 
    // Set the target frame rate:
@@ -262,26 +262,6 @@ void GLCanvas::ParseVisualization(const std::wstring& path, const ParsingOptions
 void GLCanvas::SetFieldOfView(const float fieldOfView)
 {
    m_camera.SetFieldOfView(fieldOfView);
-}
-
-void GLCanvas::PrepareFXAAShaderProgram()
-{
-   m_frameBuffer = new QOpenGLFramebufferObject(/* height = */ 512, /* width = */ 512);
-   m_screenBuffer = new QOpenGLFramebufferObject(/* height = */ 512, /* width = */ 512);
-
-   const bool areBuffersValid = m_frameBuffer->isValid() && m_screenBuffer->isValid();
-   if (!areBuffersValid)
-   {
-      std::cout << "FBOs don't appear to be valid!" << std::endl;
-   }
-
-   if (!m_FXAAShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,
-      ":/Shaders/FXAA.frag"))
-   {
-      std::cout << "Error loading FXAA shader!" << std::endl;
-   }
-
-   m_FXAAShaderProgram.link();
 }
 
 void GLCanvas::PrepareOriginMarkerShaderProgram()
@@ -406,14 +386,14 @@ void GLCanvas::initializeGL()
 
    glEnable(GL_DEPTH_TEST);
    glEnable(GL_CULL_FACE);
+   glEnable(GL_MULTISAMPLE);
+   glEnable(GL_LINE_SMOOTH);
 
    PrepareVisualizationShaderProgram();
    PrepareOriginMarkerShaderProgram();
 
    PrepareVisualizationVertexBuffers();
    PrepareOriginMarkerVertexBuffers();
-
-   PrepareFXAAShaderProgram();
 
    m_light = Light(QVector3D(2, 2, 0), QVector3D(1, 1, 1), 0.01f, 0.75f);
 }
@@ -564,6 +544,17 @@ void GLCanvas::OnBlueLightComponentChanged(const int value)
    m_blueLightComponent = static_cast<float>(value) / 100.0;
 }
 
+void GLCanvas::OnAntiAliasingSamplingChanged(const int samples)
+{
+   m_samplesPerPixel = samples;
+
+   // TODO: Find a way to do this, since you can't call setFormat once the GL instance is running.
+//   QSurfaceFormat format;
+//   format.setDepthBufferSize(24);
+//   format.setSamples(m_samplesPerPixel);
+//   setFormat(format);
+}
+
 void GLCanvas::HandleCameraMovement()
 {
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -627,8 +618,6 @@ void GLCanvas::paintGL()
 
    HandleCameraMovement();
 
-   //m_frameBuffer->bind();
-
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    // Draw origin marker:
@@ -641,6 +630,7 @@ void GLCanvas::paintGL()
 
    m_originMarkerShaderProgram.release();
    m_originMarkerVAO.release();
+   m_originMarkerShaderProgram.release();
 
    if (m_isVisualizationLoaded)
    {
@@ -667,11 +657,8 @@ void GLCanvas::paintGL()
 
       m_visualizationShaderProgram.release();
       m_visualizationVAO.release();
+      m_visualizationShaderProgram.release();
    }
-
-   //makeCurrent();
-   //m_screenBuffer->bindDefault();
-   //QOpenGLFramebufferObject::blitFramebuffer(m_screenBuffer, m_frameBuffer);
 
    m_lastFrameTimeStamp = currentTime;
 }
