@@ -86,6 +86,12 @@ class MainWindow : public QMainWindow
        */
       bool IsXboxControllerConnected() const;
 
+      /**
+       * @brief XboxControllerStateChanged
+       * @param state
+       */
+      void XboxControllerStateChanged(XboxController::InputState state);
+
    private:
       void CreateMenus();
       void CreateFileMenu();
@@ -100,6 +106,7 @@ class MainWindow : public QMainWindow
       int m_sizePruningComboBoxIndex;
 
       std::unique_ptr<XboxController> m_xboxController;
+      std::unique_ptr<XboxController::InputState> m_xboxControllerState;
 
       std::unique_ptr<QMenu> m_fileMenu;
 

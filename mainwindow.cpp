@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/)
      m_showDirectoriesOnly(false),
      m_xboxControllerConnected(false),
      m_xboxController(nullptr),
+     m_xboxControllerState(nullptr),
      m_glCanvas(nullptr),
      m_fileMenu(nullptr),
      m_fileMenuNewScan(nullptr),
@@ -45,7 +46,7 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/)
    m_ui->canvasLayout->addWidget(m_glCanvas.get());
 
    SetupSidebar();
-   //SetupXboxController();
+   SetupXboxController();
 }
 
 MainWindow::~MainWindow()
@@ -112,6 +113,9 @@ void MainWindow::SetupXboxController()
 
    connect(&*m_xboxController, SIGNAL(controllerDisconnected(uint)),
       this, SLOT(XboxControllerDisconnected()));
+
+   connect(&*m_xboxController, SIGNAL(controllerNewState(XboxController::InputState)),
+      this, SLOT(XboxControllerStateChanged(XboxController::InputState)));
 }
 
 std::wstring MainWindow::GetDirectoryToVisualize() const
@@ -203,6 +207,11 @@ bool MainWindow::IsXboxControllerConnected() const
    return m_xboxControllerConnected;
 }
 
+void MainWindow::XboxControllerStateChanged(XboxController::InputState state)
+{
+   m_xboxControllerState.reset(new XboxController::InputState(state));
+}
+
 void MainWindow::OnFieldOfViewChanged(const int fieldOfView)
 {
    m_glCanvas->SetFieldOfView(static_cast<float>(fieldOfView));
@@ -215,5 +224,5 @@ void MainWindow::UpdateFieldOfViewSlider(const int fieldOfView)
 
 XboxController::InputState& MainWindow::GetXboxControllerState() const
 {
-   return m_xboxController->getCurrentState();
+   return *m_xboxControllerState;
 }
