@@ -14,6 +14,8 @@
 MainWindow::MainWindow(QWidget* parent /*= 0*/)
    : QMainWindow(parent),
      m_showDirectoriesOnly(false),
+     m_xboxControllerConnected(false),
+     m_xboxController(nullptr),
      m_glCanvas(nullptr),
      m_fileMenu(nullptr),
      m_fileMenuNewScan(nullptr),
@@ -24,7 +26,7 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/)
      m_sizePruningComboBoxIndex(0),
      m_sizePruningOptions(
         {  // Need the "ull" (unsigned long long) prefix to avoid integral constant overflows!
-           std::pair<std::uintmax_t, QString>(std::numeric_limits<std::uintmax_t>::min(), "Show All"),
+           std::pair<std::uintmax_t, QString>(0, "Show All"),
            std::pair<std::uintmax_t, QString>(1048576ull,         "< 1 MiB"),
            std::pair<std::uintmax_t, QString>(1048576ull * 10,    "< 10 MiB"),
            std::pair<std::uintmax_t, QString>(1048576ull * 100,   "< 100 MiB"),
@@ -43,6 +45,7 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/)
    m_ui->canvasLayout->addWidget(m_glCanvas.get());
 
    SetupSidebar();
+   //SetupXboxController();
 }
 
 MainWindow::~MainWindow()
@@ -97,6 +100,18 @@ void MainWindow::SetupSidebar()
    connect(m_ui->antiAliasingSpinner,
       static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), m_glCanvas.get(),
       &GLCanvas::OnAntiAliasingSamplingChanged);
+}
+
+void MainWindow::SetupXboxController()
+{
+   m_xboxController.reset(new XboxController(0));
+   m_xboxController->startAutoPolling(20);
+
+   connect(&*m_xboxController, SIGNAL(controllerConnected(uint)),
+      this, SLOT(XboxControllerConnected()));
+
+   connect(&*m_xboxController, SIGNAL(controllerDisconnected(uint)),
+      this, SLOT(XboxControllerDisconnected()));
 }
 
 std::wstring MainWindow::GetDirectoryToVisualize() const
@@ -173,6 +188,21 @@ void MainWindow::OnPruneTreeButtonClicked()
    std::cout << "Button pressed" << std::endl;
 }
 
+void MainWindow::XboxControllerConnected()
+{
+   m_xboxControllerConnected = true;
+}
+
+void MainWindow::XboxControllerDisconnected()
+{
+   m_xboxControllerConnected = false;
+}
+
+bool MainWindow::IsXboxControllerConnected() const
+{
+   return m_xboxControllerConnected;
+}
+
 void MainWindow::OnFieldOfViewChanged(const int fieldOfView)
 {
    m_glCanvas->SetFieldOfView(static_cast<float>(fieldOfView));
@@ -181,4 +211,9 @@ void MainWindow::OnFieldOfViewChanged(const int fieldOfView)
 void MainWindow::UpdateFieldOfViewSlider(const int fieldOfView)
 {
    m_ui->fieldOfViewSlider->setValue(fieldOfView);
+}
+
+XboxController::InputState& MainWindow::GetXboxControllerState() const
+{
+   return m_xboxController->getCurrentState();
 }

@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     keyboardManager.cpp \
     Visualizations/sliceAndDiceTreemap.cpp \
     Visualizations/visualization.cpp \
-    Visualizations/squarifiedTreemap.cpp
+    Visualizations/squarifiedTreemap.cpp \
+    xboxController.cpp
 
 HEADERS  += mainwindow.h \
     tree.h \
@@ -30,7 +31,9 @@ HEADERS  += mainwindow.h \
     keyboardManager.h \
     Visualizations/visualization.h \
     Visualizations/sliceAndDiceTreemap.h \
-    Visualizations/squarifiedTreemap.h
+    Visualizations/squarifiedTreemap.h \
+    xboxController.h \
+    xInput.h
 
 FORMS    += mainwindow.ui
 
@@ -40,8 +43,7 @@ DISTFILES += \
     Shaders/originMarkerVertexShader.vert \
     Shaders/originMarkerFragmentShader.frag \
     Shaders/visualizationFragmentShader.frag \
-    Shaders/visualizationVertexShader.vert \
-    Shaders/fxaa.frag
+    Shaders/visualizationVertexShader.vert
 
 RESOURCES += \
     resources.qrc
@@ -62,3 +64,5 @@ else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../boost_1_
 else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../boost_1_57_0/stage/lib/boost_filesystem-vc120-mt-1_57.lib
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../boost_1_57_0/stage/lib/boost_filesystem-vc120-mt-gd-1_57.lib
 else:unix: PRE_TARGETDEPS += $$PWD/../boost_1_57_0/stage/lib/libboost_filesystem-vc120-mt-1_57.a
+
+win32: LIBS += -lXInput

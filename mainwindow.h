@@ -9,6 +9,8 @@
 #include <cstdint>
 #include <string>
 
+#include "xboxController.h"
+
 namespace Ui
 {
    class MainWindow;
@@ -37,6 +39,12 @@ class MainWindow : public QMainWindow
        */
       void UpdateFieldOfViewSlider(const int fieldOfView);
 
+      /**
+       * @brief GetXboxController
+       * @return
+       */
+      XboxController::InputState& GetXboxControllerState() const;
+
    public slots:
       /**
        * @brief OnFileMenuNewScan
@@ -46,6 +54,8 @@ class MainWindow : public QMainWindow
       /**
        * @brief OnFieldOfViewChanged
        * @param fieldOfView
+       *
+       * TODO: Move to GLCanvas...
        */
       void OnFieldOfViewChanged(int fieldOfView);
 
@@ -60,16 +70,36 @@ class MainWindow : public QMainWindow
        */
       void OnPruneTreeButtonClicked();
 
+      /**
+       * @brief XboxControllerConnected
+       */
+      void XboxControllerConnected();
+
+      /**
+       * @brief XboxControllerDisconnect
+       */
+      void XboxControllerDisconnected();
+
+      /**
+       * @brief IsXboxControllerConnected
+       * @return
+       */
+      bool IsXboxControllerConnected() const;
+
    private:
       void CreateMenus();
       void CreateFileMenu();
       void CreateWindowMenu();
 
       void SetupSidebar();
+      void SetupXboxController();
 
       bool m_showDirectoriesOnly;
+      bool m_xboxControllerConnected;
 
       int m_sizePruningComboBoxIndex;
+
+      std::unique_ptr<XboxController> m_xboxController;
 
       std::unique_ptr<QMenu> m_fileMenu;
 

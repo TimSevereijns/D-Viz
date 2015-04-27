@@ -50,6 +50,36 @@ namespace
    }
 
    /**
+    * @brief HandleXboxControllerInput
+    */
+   void HandleXboxControllerInput(MainWindow& mainWindow)
+   {
+      if (!mainWindow.IsXboxControllerConnected())
+      {
+         return;
+      }
+
+      XboxController::InputState controllerState = mainWindow.GetXboxControllerState();
+
+      if (controllerState.isButtonPressed(XINPUT_GAMEPAD_A))
+      {
+         std::cout << "Button A is down" << std::endl;
+      }
+//      if (controllerState.isButtonPressed(XINPUT_GAMEPAD_B))
+//      {
+//         std::cout << "Button B is down" << std::endl;
+//      }
+//      if (controllerState.isButtonPressed(XINPUT_GAMEPAD_X))
+//      {
+//         std::cout << "Button X is down" << std::endl;
+//      }
+//      if (controllerState.isButtonPressed(XINPUT_GAMEPAD_Y))
+//      {
+//         std::cout << "Button Y is down" << std::endl;
+//      }
+   }
+
+   /**
     * @brief CreateOriginMarkerVertices returns the vertices needed to render the coordinate
     * system origin marker.
     *
@@ -557,6 +587,8 @@ void GLCanvas::OnAntiAliasingSamplingChanged(const int samples)
 
 void GLCanvas::HandleCameraMovement()
 {
+   HandleXboxControllerInput(*m_mainWindow);
+
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp);
 
