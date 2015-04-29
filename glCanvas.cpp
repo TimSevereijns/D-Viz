@@ -585,12 +585,12 @@ void GLCanvas::OnAntiAliasingSamplingChanged(const int samples)
 
 void GLCanvas::HandleCameraMovement()
 {
-   if (!m_mainWindow->IsXboxControllerConnected())
-   {
-      return;
-   }
+//   if (!m_mainWindow->IsXboxControllerConnected())
+//   {
+//      return;
+//   }
 
-   HandleXboxControllerInput(m_mainWindow->GetXboxControllerState());
+   //HandleXboxControllerInput(m_mainWindow->GetXboxControllerState());
 
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp);
@@ -605,22 +605,22 @@ void GLCanvas::HandleCameraMovement()
       return;
    }
 
-   if (isKeyWDown || m_mainWindow->GetXboxControllerState().leftThumbY > 0)
+   if (isKeyWDown)
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Forward());
    }
 
-   if (isKeyADown || m_mainWindow->GetXboxControllerState().leftThumbX < 0)
+   if (isKeyADown)
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Left());
    }
 
-   if (isKeySDown || m_mainWindow->GetXboxControllerState().leftThumbX > 0)
+   if (isKeySDown)
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Backward());
    }
 
-   if (isKeyDDown || m_mainWindow->GetXboxControllerState().leftThumbY < 0)
+   if (isKeyDDown)
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Right());
    }
