@@ -170,22 +170,27 @@ class TreeTests: public QObject
       void SortingATreeOfIntegers();
 
       /**
-       * @brief NodeRemovalFirstFromList TODO
+       * @brief NodeRemovalFirstFromList creates a simple tree with a few children, and then attempts
+       * to remove the first child in the list using the tree's node removal functions.
        */
       void NodeRemovalFirstFromList();
 
       /**
-       * @brief NodeRemovalLastFromList TODO
+       * @brief NodeRemovalLastFromList creates a simple tree with a few children, and then attempts
+       * to remove the last child in the list using the tree's node removal functions.
        */
       void NodeRemovalLastFromList();
 
       /**
-       * @brief NodeRemovalMiddleOfList TODO
+       * @brief NodeRemovalMiddleOfList creates a simple tree with a few chlildren, and then attempts
+       * to remove a child from the middle of the children.
        */
       void NodeRemovalMiddleOfList();
 
       /**
-       * @brief NodeRemovalChildCount TODO
+       * @brief NodeRemovalChildCount creates a simple tree and then attempts to remove a few of 
+       * these nodes in order to verify that the expected number of nodes exist in the tree after
+       * the removal operations are complete.
        */
       void NodeRemovalChildCount();
 };
