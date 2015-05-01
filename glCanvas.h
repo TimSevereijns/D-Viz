@@ -18,7 +18,9 @@
 #include <QVector3D>
 
 /**
- * @brief The Light struct
+ * @brief The Light struct represents a single point light. The light's fall-off with distance
+ * can be tweaked via the attentuation attribute, and the light's contribution to the ambient
+ * brightness of the scene can also be specified.
  */
 struct Light
 {
@@ -44,6 +46,7 @@ struct Light
    {
    }
 
+   // TODO: This can probably be removed, since position is public anyway.
    void SetPosition(const QVector3D& newPosition)
    {
       position = newPosition;
@@ -51,7 +54,9 @@ struct Light
 };
 
 /**
- * @brief The GLCanvas class
+ * @brief The GLCanvas class represents the canvas object on which the visualization
+ * is to be drawn. This class contains all the shader programs, Vertex Buffer Objects
+ * (VBOs), lights, and other assets needed to represent the scene.
  */
 class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 {
@@ -63,45 +68,59 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
       /**
        * @brief ParseVisualization
-       * @param path
-       * @param options
+       * 
+       * @param[in] path        The directory to visualize.      
+       * @param[in] options     A struct containing a variety of tweakable parameters.
        */
       void ParseVisualization(const std::wstring& path, const ParsingOptions& options);
 
       /**
-       * @brief setFieldOfView
-       * @param fov
+       * @brief setFieldOfView sets the current field of view for the camera.
+       * 
+       * TODO: Expose the camera object from this class.
+       * 
+       * @param[in] fieldOfView  The new field of view.
        */
       void SetFieldOfView(const float fieldOfView);
 
    public slots:
       /**
-       * @brief OnCameraMovementSpeedChanged
-       * @param newSpeed
+       * @brief OnCameraMovementSpeedChanged should be called when the camera's
+       * movement speed changes.
+       * 
+       * @param[in] newSpeed        The new speed.
        */
       void OnCameraMovementSpeedChanged(const double newSpeed);
 
       /**
-       * @brief OnMouseSensitivityChanged
-       * @param newSensitivity
+       * @brief OnMouseSensitivityChanged should be called when the mouse's
+       * movement sensitivity changes.
+       * 
+       * @param[in] newSensitivity  The new sensitivity value.
        */
       void OnMouseSensitivityChanged(const double newSensitivity);
 
       /**
-       * @brief OnAmbientCoefficientChanged
-       * @param newCoefficient
+       * @brief OnAmbientCoefficientChanged should be called when the scene's
+       * minimum ambient lighting changes.
+       * 
+       * @param[in] newCoefficient  The new ambient lighting coefficient.
        */
       void OnAmbientCoefficientChanged(const double newCoefficient);
 
       /**
-       * @brief OnAttenuationChanged
-       * @param newAttenuation
+       * @brief OnAttenuationChanged should be called when the point light's
+       * attentuation changes.
+       * 
+       * @param[in] newAttenuation  The new attenuation factor.
        */
       void OnAttenuationChanged(const double newAttenuation);
 
       /**
-       * @brief OnShiniessChanged
-       * @param newShininess
+       * @brief OnShininessChanged should be called when the block material
+       * shininess changes.
+       * 
+       * @param[in] newShininess    The new shininess value.
        */
       void OnShininessChanged(const double newShininess);
 
@@ -126,6 +145,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       /**
        * @brief OnAntiAliasingSamplingChanged
        * @param samples
+       * 
+       * TODO: Fix or remove.
        */
       void OnAntiAliasingSamplingChanged(const int samples);
 
