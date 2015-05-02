@@ -17,7 +17,8 @@
 #include "tree.h"
 
 /**
- * @brief The FILE_TYPE enum
+ * @brief The FILE_TYPE enum represents the three basic file types: non-directory files, 
+ * directories, and symbolic links (which includes junctions).
  */
 enum class FILE_TYPE
 {
@@ -44,7 +45,10 @@ struct FileInfo
 };
 
 /**
- * @brief The Block struct
+ * @brief The Block struct represents a single file or directory in the visualization. This
+ * struct constains not only the basic dimensions of the block, but also all of its vertices
+ * and color information. In addition to this, there is also some metadata to aid in the creation
+ * of the squarified treemap.
  */
 struct Block
 {
@@ -157,7 +161,7 @@ struct Block
    }
 
    /**
-    * @brief GetOriginPlusHeight
+    * @brief GetOriginPlusHeight.
     * @returns the coordinates of the block's origin offset by the height of the block.
     */
    QVector3D GetOriginPlusHeight() const
