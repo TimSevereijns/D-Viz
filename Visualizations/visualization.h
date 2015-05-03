@@ -10,7 +10,10 @@
 #include "../diskScanner.h"
 
 /**
- * @brief The ParsingOptions struct
+ * @brief The ParsingOptions struct represents the gamut of parsing options
+ * available. This includes such things as to whether to show only directory,
+ * whether to filter out files of a certain size, or whether to force a new
+ * disk scan.
  */
 struct ParsingOptions
 {
@@ -41,20 +44,38 @@ class Visualization
       static const double ROOT_BLOCK_WIDTH;
       static const double ROOT_BLOCK_DEPTH;
 
+      /**
+       * @brief ScanDirectory stars a scan of the system, starting at the location specified
+       * through the constructor.
+       * 
+       * @param[in] statusBarUpdater         The function to be called once progress updates.
+       */
       virtual void ScanDirectory(std::function<void (const std::uintmax_t)> statusBarUpdater);
+      
+      /**
+       * A pure virtual function that indicates how the scan is to be parsed and interpreted.
+       */
       virtual void ParseScan() = 0;
 
       /**
-       * @brief PopulateVertexBuffer
-       * @param options
-       * @return
+       * @brief PopulateVertexBuffer flushes the existing VBO and loads the newly
+       * parsed vertices.
+       * 
+       * @param[in] options            The options that specify how the scan is to
+       *                               be parsed and interpreted.
+       * 
+       * @returns a vector of vertices.
        */
       QVector<QVector3D>& PopulateVertexBuffer(const ParsingOptions& options);
 
       /**
-       * @brief PopulateColorBuffer
-       * @param options
-       * @return
+       * @brief PopulateColorBuffer flushes the existing color buffer and reloads
+       * it with the data from the latest parse.
+       * 
+       * @param[in] options            The options that specify how the scan is to
+       *                               be parse and interpreted.
+       * 
+       * @returns a vector of colors data per vertex.
        */
       QVector<QVector3D>& PopulateColorBuffer(const ParsingOptions& options);
 
@@ -67,19 +88,22 @@ class Visualization
       unsigned int GetVertexCount() const;
 
       /**
-       * @brief HasScanBeenPerformed
-       * @return
+       * @brief HasScanBeenPerformed indicates whether the scan has been performed.
+       * 
+       * @returns true if the scan has been performed; false otherwise.
        */
       bool HasScanBeenPerformed() const;
 
       /**
        * @brief CreateBlockColors creates the vertex colors needed to color a single block.
+       * 
        * @returns a vector of vertex colors.
        */
       static QVector<QVector3D> CreateBlockColors();
 
       /**
        * @brief CreateBlockColors creates the vertex colors needed to color a single block.
+       * 
        * @returns a vector of vertex colors.
        */
       static QVector<QVector3D> CreateDirectoryColors();
