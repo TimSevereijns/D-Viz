@@ -157,8 +157,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       void wheelEvent(QWheelEvent* event) override;
 
    private:
-      void HandleCameraMovement();
-      void HandleXBoxControllerMovement();
+      void HandleInput();
+      void HandleXBoxControllerInput();
 
       void PrepareVisualizationShaderProgram();
       void PrepareOriginMarkerShaderProgram();

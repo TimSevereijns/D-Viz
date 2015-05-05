@@ -98,9 +98,9 @@ void MainWindow::SetupSidebar()
    connect(m_ui->lightBlueSlider, &QSlider::valueChanged, m_glCanvas.get(),
       &GLCanvas::OnBlueLightComponentChanged);
 
-   connect(m_ui->antiAliasingSpinner,
-      static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), m_glCanvas.get(),
-      &GLCanvas::OnAntiAliasingSamplingChanged);
+   connect(m_ui->useXBoxController,
+      static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), m_glCanvas.get(),
+      &GLCanvas::OnUseXBoxControllerStateChanged);
 }
 
 void MainWindow::SetupXboxController()
