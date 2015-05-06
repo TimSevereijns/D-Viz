@@ -32,8 +32,8 @@ struct Light
    Light()
       : position(QVector3D(0, 0, 0)),
         intensity(QVector3D(1, 1, 1)),
-        attenuation(0.75f),     // Arbitrary coefficient to control attenuation beyond distance.
-        ambientCoefficient(0.01f) // Minimum brightness is 1% of maximum brightness
+        attenuation(0.75f),         // Arbitrary coefficient to control attenuation beyond distance.
+        ambientCoefficient(0.01f)   // Minimum brightness is 1% of maximum brightness
    {
    }
 
@@ -44,12 +44,6 @@ struct Light
         attenuation(lightAttenuation),
         ambientCoefficient(lightAmbientCoefficient)
    {
-   }
-
-   // TODO: This can probably be removed, since position is public anyway.
-   void SetPosition(const QVector3D& newPosition)
-   {
-      position = newPosition;
    }
 };
 
@@ -69,7 +63,7 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       /**
        * @brief ParseVisualization
        * 
-       * @param[in] path        The directory to visualize.      
+       * @param[in] path        The directory to visualize.
        * @param[in] options     A struct containing a variety of tweakable parameters.
        */
       void ParseVisualization(const std::wstring& path, const ParsingOptions& options);
@@ -85,40 +79,38 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
    public slots:
       /**
-       * @brief OnCameraMovementSpeedChanged should be called when the camera's
-       * movement speed changes.
+       * @brief OnCameraMovementSpeedChanged should be called when the camera's movement speed
+       * changes.
        * 
        * @param[in] newSpeed        The new speed.
        */
       void OnCameraMovementSpeedChanged(const double newSpeed);
 
       /**
-       * @brief OnMouseSensitivityChanged should be called when the mouse's
-       * movement sensitivity changes.
+       * @brief OnMouseSensitivityChanged should be called when the mouse's movement sensitivity
+       * changes.
        * 
        * @param[in] newSensitivity  The new sensitivity value.
        */
       void OnMouseSensitivityChanged(const double newSensitivity);
 
       /**
-       * @brief OnAmbientCoefficientChanged should be called when the scene's
-       * minimum ambient lighting changes.
+       * @brief OnAmbientCoefficientChanged should be called when the scene's minimum ambient
+       * lighting changes.
        * 
        * @param[in] newCoefficient  The new ambient lighting coefficient.
        */
       void OnAmbientCoefficientChanged(const double newCoefficient);
 
       /**
-       * @brief OnAttenuationChanged should be called when the point light's
-       * attentuation changes.
+       * @brief OnAttenuationChanged should be called when the point light's attentuation changes.
        * 
        * @param[in] newAttenuation  The new attenuation factor.
        */
       void OnAttenuationChanged(const double newAttenuation);
 
       /**
-       * @brief OnShininessChanged should be called when the block material
-       * shininess changes.
+       * @brief OnShininessChanged should be called when the block material shininess changes.
        * 
        * @param[in] newShininess    The new shininess value.
        */
@@ -142,6 +134,11 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
        */
       void OnBlueLightComponentChanged(const int value);
 
+      /**
+       * @brief OnUseXBoxControllerStateChanged sets whether the XBox controller is to be used.
+       *
+       * @param[in] useController   Pass in true to enable the use of the XBox controller.
+       */
       void OnUseXBoxControllerStateChanged(const bool useController);
 
    protected:
@@ -157,8 +154,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       void wheelEvent(QWheelEvent* event) override;
 
    private:
-      void HandleCameraMovement();
-      void HandleXBoxControllerMovement();
+      void HandleInput();
+      void HandleXBoxControllerInput();
 
       void PrepareVisualizationShaderProgram();
       void PrepareOriginMarkerShaderProgram();

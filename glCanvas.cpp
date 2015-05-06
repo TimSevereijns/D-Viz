@@ -29,9 +29,10 @@ namespace
    /**
     * @brief keyPressHelper is a helper function to update the press state of a keyboard key.
     *
-    * @param keyboardManager        The keyboard manager on which to update the key state.
-    * @param key                    The QKeyEvent that triggered the call.
-    * @param state                  Whether the key in question is up (released) or down (pressed).
+    * @param[in] keyboardManager        The keyboard manager on which to update the key state.
+    * @param[in] key                    The QKeyEvent that triggered the call.
+    * @param[in] state                  Whether the key in question is up (released) or down
+    *                                  (pressed).
     *
     * @returns true if the key exists and was updated in the keyboard manager.
     */
@@ -47,34 +48,6 @@ namespace
       }
 
       return false;
-   }
-
-   /**
-    * @brief HandleXboxControllerInput
-    *
-    * @param[in] mainWindow         The window that manages the controller.
-    */
-   void HandleXboxControllerInput(XboxController::InputState& controllerState)
-   {
-      if (controllerState.isButtonPressed(XINPUT_GAMEPAD_A))
-      {
-         std::cout << "Button A is down" << std::endl;
-      }
-      if (controllerState.isButtonPressed(XINPUT_GAMEPAD_B))
-      {
-         std::cout << "Button B is down" << std::endl;
-      }
-      if (controllerState.isButtonPressed(XINPUT_GAMEPAD_X))
-      {
-         std::cout << "Button X is down" << std::endl;
-      }
-      if (controllerState.isButtonPressed(XINPUT_GAMEPAD_Y))
-      {
-         std::cout << "Button Y is down" << std::endl;
-      }
-
-      //std::cout << controllerState.rightThumbX << std::endl;
-      //std::cout << controllerState.rightThumbY << std::endl;
    }
 
    /**
@@ -176,9 +149,12 @@ namespace
    }
 
    /**
-    * @brief ScanAndParse
-    * @param treeMap
-    * @param mainWindow
+    * @brief ScanAndParse is a helper function that sets up a status bar updating lambda that will
+    * be passed to the diretory scanner so that it can be used to report progress updates.
+    *
+    * @param[in/out] treeMap        The tree map to call the appropriate scan and parse operations
+    *                               on.
+    * @param[in] mainWindow         The mainwindow that contains the status bar to be updated.
     */
    void ScanAndParse(Visualization& treeMap, const MainWindow& mainWindow)
    {
@@ -200,8 +176,8 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_treeMap(nullptr),
      m_isPaintingSuspended(false),
      m_isVisualizationLoaded(false),
+     m_useXBoxController(false),
      m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
-     m_samplesPerPixel(1),
      m_distance(2.5),
      m_cameraMovementSpeed(0.25),
      m_mouseSensitivity(0.25),
@@ -223,7 +199,6 @@ GLCanvas::GLCanvas(QWidget* parent)
    // Set up the camera:
    m_camera.SetAspectRatio(3.0f / 2.0f);
    m_camera.SetPosition(QVector3D(500, 100, 0));
-   //m_camera.LookAt(QVector3D(500, 0, -500));
 
    // Set keyboard and mouse focus:
    setFocusPolicy(Qt::StrongFocus);
@@ -422,8 +397,6 @@ void GLCanvas::initializeGL()
 
    PrepareVisualizationVertexBuffers();
    PrepareOriginMarkerVertexBuffers();
-
-   m_light = Light(QVector3D(2, 2, 0), QVector3D(1, 1, 1), 0.01f, 0.75f);
 }
 
 void GLCanvas::resizeGL(int width, int height)
@@ -572,25 +545,19 @@ void GLCanvas::OnBlueLightComponentChanged(const int value)
    m_blueLightComponent = static_cast<float>(value) / 100.0;
 }
 
-void GLCanvas::OnAntiAliasingSamplingChanged(const int samples)
+void GLCanvas::OnUseXBoxControllerStateChanged(const bool useController)
 {
-   m_samplesPerPixel = samples;
-
-   // TODO: Find a way to do this, since you can't call setFormat once the GL instance is running.
-//   QSurfaceFormat format;
-//   format.setDepthBufferSize(24);
-//   format.setSamples(m_samplesPerPixel);
-//   setFormat(format);
+   m_useXBoxController = useController;
 }
 
-void GLCanvas::HandleCameraMovement()
+void GLCanvas::HandleInput()
 {
-//   if (!m_mainWindow->IsXboxControllerConnected())
-//   {
-//      return;
-//   }
+   if (m_useXBoxController && m_mainWindow->IsXboxControllerConnected())
+   {
+      HandleXBoxControllerInput();
 
-   //HandleXboxControllerInput(m_mainWindow->GetXboxControllerState());
+      return;
+   }
 
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp);
@@ -624,9 +591,60 @@ void GLCanvas::HandleCameraMovement()
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Right());
    }
+}
 
-   //m_light.SetPosition(QVector3D(500, 150, -500));
-   m_light.SetPosition(m_camera.GetPosition());
+void GLCanvas::HandleXBoxControllerInput()
+{
+   static const int CONTROLLER_AMPLIFICATION_FACTOR = 8;
+
+   const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::system_clock::now() - m_lastFrameTimeStamp);
+
+   XboxController::InputState controllerState = m_mainWindow->GetXboxControllerState();
+
+   if (controllerState.isButtonPressed(XINPUT_GAMEPAD_DPAD_UP))
+   {
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Forward());
+   }
+
+   if (controllerState.isButtonPressed(XINPUT_GAMEPAD_DPAD_LEFT))
+   {
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Left());
+   }
+
+   if (controllerState.isButtonPressed(XINPUT_GAMEPAD_DPAD_DOWN))
+   {
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Backward());
+   }
+
+   if (controllerState.isButtonPressed(XINPUT_GAMEPAD_DPAD_RIGHT))
+   {
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Right());
+   }
+
+   // Handle camera orientation via right thumb stick:
+   if (controllerState.rightThumbX || controllerState.rightThumbY)
+   {
+      m_camera.OffsetOrientation(
+         CONTROLLER_AMPLIFICATION_FACTOR * m_mouseSensitivity * -controllerState.rightThumbY,
+         CONTROLLER_AMPLIFICATION_FACTOR * m_mouseSensitivity * controllerState.rightThumbX);
+   }
+
+   // Handle camera forward/backward movement via left thumb stick:
+   if (controllerState.leftThumbY != 0)
+   {
+      m_camera.OffsetPosition(
+         CONTROLLER_AMPLIFICATION_FACTOR * m_cameraMovementSpeed * controllerState.leftThumbY *
+         m_camera.Forward());
+   }
+
+   // Handle camera left/right movement via left thumb stick:
+   if (controllerState.leftThumbX != 0)
+   {
+      m_camera.OffsetPosition(
+         CONTROLLER_AMPLIFICATION_FACTOR * m_cameraMovementSpeed * controllerState.leftThumbX *
+         m_camera.Right());
+   }
 }
 
 void GLCanvas::paintGL()
@@ -651,7 +669,9 @@ void GLCanvas::paintGL()
          QString::number((1000 / millisecondsElapsed)) + QString::fromStdString(" fps [*]"));
    }
 
-   HandleCameraMovement();
+   HandleInput();
+
+   m_light.position = m_camera.GetPosition();
 
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
