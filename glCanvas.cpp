@@ -622,6 +622,18 @@ void GLCanvas::HandleXBoxControllerInput()
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Right());
    }
 
+   if (controllerState.isButtonPressed(XINPUT_GAMEPAD_LEFT_SHOULDER))
+   {
+      m_camera.OffsetPosition(millisecondsElapsed.count() *
+         (m_cameraMovementSpeed / CONTROLLER_AMPLIFICATION_FACTOR) * m_camera.Down());
+   }
+
+   if (controllerState.isButtonPressed(XINPUT_GAMEPAD_RIGHT_SHOULDER))
+   {
+      m_camera.OffsetPosition(millisecondsElapsed.count() *
+         (m_cameraMovementSpeed / CONTROLLER_AMPLIFICATION_FACTOR) * m_camera.Up());
+   }
+
    // Handle camera orientation via right thumb stick:
    if (controllerState.rightThumbX || controllerState.rightThumbY)
    {
