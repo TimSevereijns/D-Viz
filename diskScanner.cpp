@@ -43,9 +43,10 @@ namespace
    }
 
    /**
-    * @brief WideStringToNarrowString
-    * @param wide
-    * @return
+    * @brief WideStringToNarrowString converts the given wide string to a narrow string.
+    * 
+    * @param[in] wide                  The wide string to be converted.
+    * @returns a narrow string.
     */
    std::string WideStringToNarrowString(const std::wstring& wide)
    {
@@ -55,9 +56,10 @@ namespace
    }
 
    /**
-    * @brief NarrowStringToWideString
-    * @param narrow
-    * @return
+    * @brief NarrowStringToWideString converts the given string to a wide string.
+    * 
+    * @param[in] narrow                The string to convert.
+    * @returns a wide string
     */
    std::wstring NarrowStringToWideString(const std::string& narrow)
    {
@@ -67,9 +69,11 @@ namespace
    }
 
    /**
-    * @brief SerializeRecursively
-    * @param jsonObject
-    * @param fileNode
+    * @brief SerializeRecursively is a helper function to recursively serialize the filesystem tree
+    * into the specified JSON array.
+    * 
+    * @param[in/out] jsonObject           The array into which the tree is to be serialized.
+    * @param[in] fileNode                 The tree node to be serialized.
     */
    void SerializeRecursively(QJsonArray& jsonArray, TreeNode<VizNode>* fileNode)
    {
