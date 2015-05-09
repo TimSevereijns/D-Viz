@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     Visualizations/sliceAndDiceTreemap.cpp \
     Visualizations/visualization.cpp \
     Visualizations/squarifiedTreemap.cpp \
-    xboxController.cpp
+    xboxController.cpp \
+    sceneAsset.cpp
 
 HEADERS  += mainwindow.h \
     tree.h \
@@ -33,7 +34,8 @@ HEADERS  += mainwindow.h \
     Visualizations/sliceAndDiceTreemap.h \
     Visualizations/squarifiedTreemap.h \
     xboxController.h \
-    xInput.h
+    xInput.h \
+    sceneAsset.h
 
 FORMS    += mainwindow.ui
 
