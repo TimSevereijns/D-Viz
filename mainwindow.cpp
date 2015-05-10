@@ -114,8 +114,8 @@ void MainWindow::SetupXboxController()
    connect(&*m_xboxController, SIGNAL(controllerDisconnected(uint)),
       this, SLOT(XboxControllerDisconnected()));
 
-   connect(&*m_xboxController, SIGNAL(controllerNewState(XboxController::InputState)),
-      this, SLOT(XboxControllerStateChanged(XboxController::InputState)));
+   connect(&*m_xboxController, SIGNAL(controllerNewState(XboxController::State)),
+      this, SLOT(XboxControllerStateChanged(XboxController::State)));
 }
 
 std::wstring MainWindow::GetDirectoryToVisualize() const
@@ -207,9 +207,9 @@ bool MainWindow::IsXboxControllerConnected() const
    return m_xboxControllerConnected;
 }
 
-void MainWindow::XboxControllerStateChanged(XboxController::InputState state)
+void MainWindow::XboxControllerStateChanged(XboxController::State state)
 {
-   m_xboxControllerState.reset(new XboxController::InputState(state));
+   m_xboxControllerState.reset(new XboxController::State(state));
 }
 
 void MainWindow::OnFieldOfViewChanged(const int fieldOfView)
@@ -222,7 +222,7 @@ void MainWindow::UpdateFieldOfViewSlider(const int fieldOfView)
    m_ui->fieldOfViewSlider->setValue(fieldOfView);
 }
 
-XboxController::InputState& MainWindow::GetXboxControllerState() const
+XboxController::State& MainWindow::GetXboxControllerState() const
 {
    return *m_xboxControllerState;
 }

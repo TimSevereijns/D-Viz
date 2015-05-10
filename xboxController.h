@@ -18,11 +18,12 @@
 class XboxController : public QObject
 {
    Q_OBJECT
+
    public:
-      class InputState
+      class State
       {
          public:
-             InputState();
+             explicit State();
 
              quint8 batteryType;
              quint8 batteryLevel;
@@ -36,27 +37,27 @@ class XboxController : public QObject
              float rightThumbX;
              float rightThumbY;
 
-             bool isButtonPressed(quint16 xinput_gamepad_button);
+             bool isButtonPressed(quint16 button) const;
 
-             static bool equals(InputState const& a, InputState const& b);
-             static bool batteryEquals(InputState const& a, InputState const& b);
+             static bool equals(State const& a, State const& b);
+             static bool batteryEquals(State const& a, State const& b);
       };
 
       explicit XboxController(unsigned int controllerNum = 0,
          unsigned int leftStickDeadZone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE,
          unsigned int rightStickDeadZone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE,
          unsigned int triggerThreshold = XINPUT_GAMEPAD_TRIGGER_THRESHOLD,
-         QObject *parent = 0);
+         QObject* parent = 0);
 
       ~XboxController();
 
       bool isStateChanged(void);
       bool isConnected(void){return curConnected;}
 
-      XboxController::InputState getCurrentState(void){return curState;}
+      XboxController::State getCurrentState(void){return curState;}
 
    signals:
-      void controllerNewState(XboxController::InputState);
+      void controllerNewState(XboxController::State);
       void controllerNewBatteryState(quint8 newBatteryType, quint8 newBatteryLevel);
       void controllerConnected(unsigned int controllerNum);
       void controllerDisconnected(unsigned int controllerNum);
@@ -67,13 +68,16 @@ class XboxController : public QObject
       void update(void);
       void setVibration(float leftVibration, float rightVibration);
 
-      //the following methods allows you to change the deadzones values, although the default values shoud be fine.
+      // The following methods allows you to change the deadzones values, although the default values
+      // should be fine.
       void setLeftStickDeadZone(unsigned int newDeadZone){leftStickDeadZone=qMin(newDeadZone,MAX_STICK_VALUE);}
       void setRightStickDeadZone(unsigned int newDeadZone){rightStickDeadZone=qMin(newDeadZone,MAX_STICK_VALUE);}
       void setTriggerThreshold(unsigned int newThreshold){triggerThreshold=qMin(newThreshold,MAX_TRIGGER_VALUE);}
 
    private:
-      static bool processStickDeadZone(qint16 rawXValue, qint16 rawYValue, float& xValue, float& yValue, unsigned int deadZoneRadius);
+      static bool processStickDeadZone(qint16 rawXValue, qint16 rawYValue, float& xValue,
+         float& yValue, unsigned int deadZoneRadius);
+
       static bool processTriggerThreshold(quint8 rawValue, float& value,unsigned int triggerThreshold);
 
       bool curConnected;
@@ -86,12 +90,12 @@ class XboxController : public QObject
 
       QTimer* pollingTimer;
 
-      InputState prevState;
-      InputState curState;
+      State prevState;
+      State curState;
 };
 
 #endif // XBOXCONTROLLER_H
 
-bool operator==(XboxController::InputState const& a, XboxController::InputState const& b);
-bool operator!=(XboxController::InputState const& a, XboxController::InputState const& b);
+bool operator==(XboxController::State const& a, XboxController::State const& b);
+bool operator!=(XboxController::State const& a, XboxController::State const& b);
 

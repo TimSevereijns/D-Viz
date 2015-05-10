@@ -3,7 +3,7 @@
 #include <cmath>
 #include <iostream>
 
-XboxController::InputState::InputState():
+XboxController::State::State():
    buttons(0),
    leftTrigger(0),
    rightTrigger(0),
@@ -16,7 +16,7 @@ XboxController::InputState::InputState():
 {
 }
 
-bool XboxController::InputState::equals(const InputState& a, const InputState& b)
+bool XboxController::State::equals(const State& a, const State& b)
 {
    return (a.buttons==b.buttons)&&
           (a.leftThumbX==b.leftThumbX)&&
@@ -29,14 +29,14 @@ bool XboxController::InputState::equals(const InputState& a, const InputState& b
           (a.batteryLevel==b.batteryLevel);
 }
 
-bool XboxController::InputState::batteryEquals(const InputState& a, const InputState& b)
+bool XboxController::State::batteryEquals(const State& a, const State& b)
 {
    return (a.batteryType == b.batteryType) && (a.batteryLevel == b.batteryLevel);
 }
 
-bool XboxController::InputState::isButtonPressed(quint16 xinput_gamepad_button)
+bool XboxController::State::isButtonPressed(quint16 button) const
 {
-   return (buttons & xinput_gamepad_button);
+   return (buttons & button);
 }
 
 XboxController::XboxController(unsigned int controllerNum, unsigned int leftStickDeadZone,
@@ -66,8 +66,6 @@ void XboxController::stopAutoPolling()
 
 void XboxController::update()
 {
-   //std::cout << "Update called" << std::endl;
-
    XINPUT_STATE xInputState;
    memset(&xInputState, 0, sizeof(XINPUT_STATE));
    curConnected = (XInputGetState(controllerNum, &xInputState) == ERROR_SUCCESS);
@@ -128,7 +126,7 @@ void XboxController::update()
          emit controllerNewState(curState);
       }
 
-      if (!InputState::batteryEquals(prevState, curState))
+      if (!State::batteryEquals(prevState, curState))
       {
          emit controllerNewBatteryState(curState.batteryType, curState.batteryLevel);
       }
@@ -200,10 +198,10 @@ XboxController::~XboxController()
    delete pollingTimer;
 }
 
-bool operator==(const XboxController::InputState& a, const XboxController::InputState& b){
-   return XboxController::InputState::equals(a,b);
+bool operator==(const XboxController::State& a, const XboxController::State& b){
+   return XboxController::State::equals(a,b);
 }
 
-bool operator!=(const XboxController::InputState& a, const XboxController::InputState& b){
-   return !XboxController::InputState::equals(a, b);
+bool operator!=(const XboxController::State& a, const XboxController::State& b){
+   return !XboxController::State::equals(a, b);
 }
