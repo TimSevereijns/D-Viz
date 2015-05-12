@@ -329,6 +329,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="attachLightToCameraCheckBox">
+       <property name="text">
+        <string>Attach Light to Camera</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="Line" name="line_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

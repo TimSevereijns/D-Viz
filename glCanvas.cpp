@@ -177,6 +177,7 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_isPaintingSuspended(false),
      m_isVisualizationLoaded(false),
      m_useXBoxController(false),
+     m_isLightAttachedToCamera(true),
      m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
      m_distance(2.5),
      m_cameraMovementSpeed(0.25),
@@ -550,6 +551,11 @@ void GLCanvas::OnUseXBoxControllerStateChanged(const bool useController)
    m_useXBoxController = useController;
 }
 
+void GLCanvas::OnAttachLightToCameraStateChanged(const bool attached)
+{
+   m_isLightAttachedToCamera = attached;
+}
+
 void GLCanvas::HandleInput()
 {
    if (m_useXBoxController && m_mainWindow->IsXboxControllerConnected())
@@ -600,7 +606,7 @@ void GLCanvas::HandleXBoxControllerInput()
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp);
 
-   XboxController::InputState controllerState = m_mainWindow->GetXboxControllerState();
+   XboxController::State controllerState = m_mainWindow->GetXboxControllerState();
 
    if (controllerState.isButtonPressed(XINPUT_GAMEPAD_DPAD_UP))
    {
@@ -633,6 +639,11 @@ void GLCanvas::HandleXBoxControllerInput()
       m_camera.OffsetPosition(millisecondsElapsed.count() *
          (m_cameraMovementSpeed / CONTROLLER_AMPLIFICATION_FACTOR) * m_camera.Up());
    }
+
+//   if (controllerState.isButtonPressed(XINPUT_GAMEPAD_BACK))
+//   {
+
+//   }
 
    // Handle camera orientation via right thumb stick:
    if (controllerState.rightThumbX || controllerState.rightThumbY)
@@ -683,7 +694,10 @@ void GLCanvas::paintGL()
 
    HandleInput();
 
-   m_light.position = m_camera.GetPosition();
+   if (m_isLightAttachedToCamera)
+   {
+      m_light.position = m_camera.GetPosition();
+   }
 
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -705,7 +719,9 @@ void GLCanvas::paintGL()
       m_visualizationShaderProgram.bind();
 
       // The model matrix is always the same, since the model doesn't move:
-      m_visualizationShaderProgram.setUniformValue("model", QMatrix4x4());
+      const static QMatrix4x4 DEFAULT_MATRIX = QMatrix4x4();
+
+      m_visualizationShaderProgram.setUniformValue("model", DEFAULT_MATRIX);
       m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
       m_visualizationShaderProgram.setUniformValue("cameraPosition", m_camera.GetPosition());
 

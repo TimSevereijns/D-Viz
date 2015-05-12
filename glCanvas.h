@@ -77,7 +77,7 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
        */
       void SetFieldOfView(const float fieldOfView);
 
-   public slots:
+   public slots:     // Move all of these functions to a unified options manager.
       /**
        * @brief OnCameraMovementSpeedChanged should be called when the camera's movement speed
        * changes.
@@ -141,6 +141,12 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
        */
       void OnUseXBoxControllerStateChanged(const bool useController);
 
+      /**
+       * @brief OnAttachLightToCameraStateChanged
+       * @param attached
+       */
+      void OnAttachLightToCameraStateChanged(const bool attached);
+
    protected:
       void initializeGL() override;
       void resizeGL(int width, int height) override;
@@ -166,6 +172,7 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       bool m_isPaintingSuspended;
       bool m_isVisualizationLoaded;
       bool m_useXBoxController;
+      bool m_isLightAttachedToCamera;
 
       double m_distance;
       double m_cameraMovementSpeed;

@@ -1,6 +1,8 @@
 #ifndef SCENEASSET_H
 #define SCENEASSET_H
 
+#include <QOpenGLShaderProgram>
+
 /**
  * @brief The SceneAsset class
  */
@@ -15,10 +17,15 @@ class SceneAsset
 
       bool ClearBuffers();
 
-      bool LoadShaders();
-      bool UnloadShaders();
+      bool LoadShaders(const QString& shaderLocation);
+      QOpenGLShaderProgram& GetVertexShader();
+      QOpenGLShaderProgram& GetFragmentShader();
 
       bool Render();
+
+   private:
+      QOpenGLShaderProgram m_vertexShader;
+      QOpenGLShaderProgram m_fragmentShader;
 };
 
 #endif // SCENEASSET_H

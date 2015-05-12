@@ -23,14 +23,19 @@ bool SceneAsset::ClearBuffers()
    return false;
 }
 
-bool SceneAsset::LoadShaders()
+bool SceneAsset::LoadShaders(const QString& shaderLocation)
 {
    return false;
 }
 
-bool SceneAsset::UnloadShaders()
+QOpenGLShaderProgram& SceneAsset::GetVertexShader()
 {
-   return false;
+   return m_vertexShader;
+}
+
+QOpenGLShaderProgram& SceneAsset::GetFragmentShader()
+{
+   return m_fragmentShader;
 }
 
 bool SceneAsset::Render()

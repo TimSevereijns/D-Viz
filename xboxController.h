@@ -56,6 +56,8 @@ class XboxController : public QObject
 
       XboxController::State getCurrentState(void){return curState;}
 
+      // TODO: Add ability to toggle key repeats.
+
    signals:
       void controllerNewState(XboxController::State);
       void controllerNewBatteryState(quint8 newBatteryType, quint8 newBatteryLevel);

@@ -98,6 +98,10 @@ void MainWindow::SetupSidebar()
    connect(m_ui->lightBlueSlider, &QSlider::valueChanged, m_glCanvas.get(),
       &GLCanvas::OnBlueLightComponentChanged);
 
+   connect(m_ui->attachLightToCameraCheckBox,
+      static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), m_glCanvas.get(),
+      &GLCanvas::OnAttachLightToCameraStateChanged);
+
    connect(m_ui->useXBoxController,
       static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), m_glCanvas.get(),
       &GLCanvas::OnUseXBoxControllerStateChanged);
