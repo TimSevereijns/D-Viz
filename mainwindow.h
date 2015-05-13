@@ -17,6 +17,7 @@ namespace Ui
 }
 
 class GLCanvas;
+class OptionsManager;
 
 class MainWindow : public QMainWindow
 {
@@ -44,6 +45,12 @@ class MainWindow : public QMainWindow
        * @return
        */
       XboxController::State& GetXboxControllerState() const;
+
+      /**
+       * @brief GetOptionsManager
+       * @return
+       */
+      OptionsManager* GetOptionsManager();
 
    public slots:
       /**
@@ -115,6 +122,7 @@ class MainWindow : public QMainWindow
       std::unique_ptr<QAction> m_fileMenuExit;
 
       std::unique_ptr<GLCanvas> m_glCanvas;
+      std::unique_ptr<OptionsManager> m_optionsManager;
 
       Ui::MainWindow* m_ui; // Unfortunately it would appear as if this has to remain a raw pointer.
 

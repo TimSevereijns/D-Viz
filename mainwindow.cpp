@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 
 #include "glCanvas.h"
+#include "optionsManager.h"
 #include "ui_mainwindow.h"
 
 #include <cassert>
@@ -18,6 +19,7 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/)
      m_xboxController(nullptr),
      m_xboxControllerState(nullptr),
      m_glCanvas(nullptr),
+     m_optionsManager(new OptionsManager()),
      m_fileMenu(nullptr),
      m_fileMenuNewScan(nullptr),
      m_fileMenuPreferences(nullptr),
@@ -67,27 +69,28 @@ void MainWindow::SetupSidebar()
 
    connect(m_ui->pruneTreeButton, &QPushButton::clicked, this, &MainWindow::OnPruneTreeButtonClicked);
 
-   connect(m_ui->fieldOfViewSlider, &QSlider::valueChanged, this, &MainWindow::OnFieldOfViewChanged);
+   connect(m_ui->fieldOfViewSlider, &QSlider::valueChanged, m_optionsManager.get(),
+      &OptionsManager::OnFieldOfViewChanged);
 
    connect(m_ui->cameraSpeedSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
-      &GLCanvas::OnCameraMovementSpeedChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+      m_optionsManager.get(), &OptionsManager::OnCameraMovementSpeedChanged);
 
    connect(m_ui->mouseSensitivitySpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
-      &GLCanvas::OnMouseSensitivityChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+      m_optionsManager.get(), &OptionsManager::OnMouseSensitivityChanged);
 
    connect(m_ui->ambientCoefficientSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
-      &GLCanvas::OnAmbientCoefficientChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+      m_optionsManager.get(), &OptionsManager::OnAmbientCoefficientChanged);
 
    connect(m_ui->attenuationSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
-      &GLCanvas::OnAttenuationChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+      m_optionsManager.get(), &OptionsManager::OnAttenuationChanged);
 
    connect(m_ui->shininesSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
-      &GLCanvas::OnShininessChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+      m_optionsManager.get(), &OptionsManager::OnShininessChanged);
 
    connect(m_ui->lightRedSlider, &QSlider::valueChanged, m_glCanvas.get(),
       &GLCanvas::OnRedLightComponentChanged);
@@ -229,4 +232,9 @@ void MainWindow::UpdateFieldOfViewSlider(const int fieldOfView)
 XboxController::State& MainWindow::GetXboxControllerState() const
 {
    return *m_xboxControllerState;
+}
+
+OptionsManager* MainWindow::GetOptionsManager()
+{
+   return m_optionsManager.get();
 }

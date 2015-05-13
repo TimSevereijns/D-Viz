@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     Visualizations/visualization.cpp \
     Visualizations/squarifiedTreemap.cpp \
     xboxController.cpp \
-    sceneAsset.cpp
+    sceneAsset.cpp \
+    optionsManager.cpp
 
 HEADERS  += mainwindow.h \
     tree.h \
@@ -35,7 +36,8 @@ HEADERS  += mainwindow.h \
     Visualizations/squarifiedTreemap.h \
     xboxController.h \
     xInput.h \
-    sceneAsset.h
+    sceneAsset.h \
+    optionsManager.h
 
 FORMS    += mainwindow.ui
 

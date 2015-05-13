@@ -2,6 +2,7 @@
 
 #include "camera.h"
 #include "mainwindow.h"
+#include "optionsManager.h"
 #include "Visualizations/sliceAndDiceTreemap.h"
 #include "Visualizations/squarifiedTreemap.h"
 
@@ -506,31 +507,6 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    event->accept();
 }
 
-void GLCanvas::OnCameraMovementSpeedChanged(const double newSpeed)
-{
-   m_cameraMovementSpeed = newSpeed;
-}
-
-void GLCanvas::OnMouseSensitivityChanged(const double newSensitivity)
-{
-   m_mouseSensitivity = newSensitivity;
-}
-
-void GLCanvas::OnAmbientCoefficientChanged(const double newCoefficient)
-{
-   m_ambientCoefficient = static_cast<float>(newCoefficient);
-}
-
-void GLCanvas::OnAttenuationChanged(const double newAttenuation)
-{
-   m_attenuation = static_cast<float>(newAttenuation);
-}
-
-void GLCanvas::OnShininessChanged(const double newShininess)
-{
-   m_materialShininess = static_cast<float>(newShininess);
-}
-
 void GLCanvas::OnRedLightComponentChanged(const int value)
 {
    m_redLightComponent = static_cast<float>(value) / 100.0;
@@ -608,6 +584,8 @@ void GLCanvas::HandleXBoxControllerInput()
 
    XboxController::State controllerState = m_mainWindow->GetXboxControllerState();
 
+   OptionsManager* settings = m_mainWindow->GetOptionsManager();
+
    if (controllerState.isButtonPressed(XINPUT_GAMEPAD_DPAD_UP))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Forward());
@@ -639,11 +617,6 @@ void GLCanvas::HandleXBoxControllerInput()
       m_camera.OffsetPosition(millisecondsElapsed.count() *
          (m_cameraMovementSpeed / CONTROLLER_AMPLIFICATION_FACTOR) * m_camera.Up());
    }
-
-//   if (controllerState.isButtonPressed(XINPUT_GAMEPAD_BACK))
-//   {
-
-//   }
 
    // Handle camera orientation via right thumb stick:
    if (controllerState.rightThumbX || controllerState.rightThumbY)
@@ -713,9 +686,9 @@ void GLCanvas::paintGL()
    m_originMarkerVAO.release();
    m_originMarkerShaderProgram.release();
 
+   // Draw visualization:
    if (m_isVisualizationLoaded)
    {
-      // Draw visualization:
       m_visualizationShaderProgram.bind();
 
       // The model matrix is always the same, since the model doesn't move:
