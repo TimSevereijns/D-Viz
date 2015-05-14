@@ -73,7 +73,7 @@ class OptionsManager : public QObject
        */
       void OnFieldOfViewChanged(int fieldOfView);
 
-   private:
+   public:
       double m_cameraMovementSpeed;
       double m_mouseSensitivity;
       double m_ambientCoefficient;

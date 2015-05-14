@@ -137,7 +137,7 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       bool m_isLightAttachedToCamera;
 
       double m_distance;
-      double m_cameraMovementSpeed;
+      //double m_cameraMovementSpeed;
       double m_mouseSensitivity;
 
       float m_ambientCoefficient;
