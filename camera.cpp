@@ -46,7 +46,7 @@ Camera::~Camera()
 {
 }
 
-QVector3D& Camera::GetPosition()
+const QVector3D& Camera::GetPosition() const
 {
    return m_position;
 }

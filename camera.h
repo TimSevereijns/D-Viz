@@ -10,7 +10,7 @@ class Camera
       Camera();
       ~Camera();
 
-      QVector3D& GetPosition();
+      const QVector3D& GetPosition() const;
 
       void SetPosition(const QVector3D& newPosition);
       void OffsetPosition(const QVector3D& offset);

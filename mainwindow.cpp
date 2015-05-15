@@ -69,28 +69,27 @@ void MainWindow::SetupSidebar()
 
    connect(m_ui->pruneTreeButton, &QPushButton::clicked, this, &MainWindow::OnPruneTreeButtonClicked);
 
-   connect(m_ui->fieldOfViewSlider, &QSlider::valueChanged, m_optionsManager.get(),
-      &OptionsManager::OnFieldOfViewChanged);
+   connect(m_ui->fieldOfViewSlider, &QSlider::valueChanged, this, &MainWindow::OnFieldOfViewChanged);
 
    connect(m_ui->cameraSpeedSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-      m_optionsManager.get(), &OptionsManager::OnCameraMovementSpeedChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
+      &GLCanvas::OnCameraMovementSpeedChanged);
 
    connect(m_ui->mouseSensitivitySpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-      m_optionsManager.get(), &OptionsManager::OnMouseSensitivityChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
+      &GLCanvas::OnMouseSensitivityChanged);
 
    connect(m_ui->ambientCoefficientSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-      m_optionsManager.get(), &OptionsManager::OnAmbientCoefficientChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
+      &GLCanvas::OnAmbientCoefficientChanged);
 
    connect(m_ui->attenuationSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-      m_optionsManager.get(), &OptionsManager::OnAttenuationChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
+      &GLCanvas::OnAttenuationChanged);
 
    connect(m_ui->shininesSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-      m_optionsManager.get(), &OptionsManager::OnShininessChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
+      &GLCanvas::OnShininessChanged);
 
    connect(m_ui->lightRedSlider, &QSlider::valueChanged, m_glCanvas.get(),
       &GLCanvas::OnRedLightComponentChanged);

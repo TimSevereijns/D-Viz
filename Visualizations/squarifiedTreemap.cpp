@@ -59,7 +59,7 @@ namespace
       for (TreeNode<VizNode>& node : tree)
       {
          node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
-            { return lhs.GetData().m_file.m_size >= rhs.GetData().m_file.m_size; });
+            { return lhs.GetData().m_file.m_size > rhs.GetData().m_file.m_size; });
       }
    }
 

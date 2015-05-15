@@ -181,6 +181,7 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_isLightAttachedToCamera(true),
      m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
      m_distance(2.5),
+     m_cameraMovementSpeed(0.25),
      m_mouseSensitivity(0.25),
      m_ambientCoefficient(0.005f),
      m_attenuation(.05f),
@@ -422,11 +423,11 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
 
    if (event->key() == Qt::Key_Up)
    {
-      m_mainWindow->GetOptionsManager()->m_cameraMovementSpeed *= 1.25f;
+      m_cameraMovementSpeed *= 1.25f;
    }
    else if (event->key() == Qt::Key_Down)
    {
-      m_mainWindow->GetOptionsManager()->m_cameraMovementSpeed *= 0.75f;
+      m_cameraMovementSpeed *= 0.75f;
    }
 
    const auto keyState = KeyboardManager::KEY_STATE::DOWN;
@@ -506,6 +507,31 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    event->accept();
 }
 
+void GLCanvas::OnCameraMovementSpeedChanged(const double newSpeed)
+{
+   m_cameraMovementSpeed = newSpeed;
+}
+
+void GLCanvas::OnMouseSensitivityChanged(const double newSensitivity)
+{
+   m_mouseSensitivity = newSensitivity;
+}
+
+void GLCanvas::OnAmbientCoefficientChanged(const double newCoefficient)
+{
+   m_ambientCoefficient = static_cast<float>(newCoefficient);
+}
+
+void GLCanvas::OnAttenuationChanged(const double newAttenuation)
+{
+   m_attenuation = static_cast<float>(newAttenuation);
+}
+
+void GLCanvas::OnShininessChanged(const double newShininess)
+{
+   m_materialShininess = static_cast<float>(newShininess);
+}
+
 void GLCanvas::OnRedLightComponentChanged(const int value)
 {
    m_redLightComponent = static_cast<float>(value) / 100.0;
@@ -553,27 +579,24 @@ void GLCanvas::HandleInput()
       return;
    }
 
-   OptionsManager* const settings = m_mainWindow->GetOptionsManager();
-   const double cameraMovementSpeed = settings->m_cameraMovementSpeed;
-
    if (isKeyWDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraMovementSpeed * m_camera.Forward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Forward());
    }
 
    if (isKeyADown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraMovementSpeed * m_camera.Left());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Left());
    }
 
    if (isKeySDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraMovementSpeed * m_camera.Backward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Backward());
    }
 
    if (isKeyDDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraMovementSpeed * m_camera.Right());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Right());
    }
 }
 
@@ -586,55 +609,51 @@ void GLCanvas::HandleXBoxControllerInput()
 
    XboxController::State controllerState = m_mainWindow->GetXboxControllerState();
 
-   OptionsManager* const settings = m_mainWindow->GetOptionsManager();
-   const double cameraMovementSpeed = settings->m_cameraMovementSpeed;
-   const double mouseSensitivity = settings->m_mouseSensitivity;
-
    if (controllerState.isButtonPressed(XINPUT_GAMEPAD_DPAD_UP))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraMovementSpeed * m_camera.Forward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Forward());
    }
 
    if (controllerState.isButtonPressed(XINPUT_GAMEPAD_DPAD_LEFT))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraMovementSpeed * m_camera.Left());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Left());
    }
 
    if (controllerState.isButtonPressed(XINPUT_GAMEPAD_DPAD_DOWN))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraMovementSpeed * m_camera.Backward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Backward());
    }
 
    if (controllerState.isButtonPressed(XINPUT_GAMEPAD_DPAD_RIGHT))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraMovementSpeed * m_camera.Right());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Right());
    }
 
    if (controllerState.isButtonPressed(XINPUT_GAMEPAD_LEFT_SHOULDER))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() *
-         (cameraMovementSpeed / CONTROLLER_AMPLIFICATION_FACTOR) * m_camera.Down());
+         (m_cameraMovementSpeed / CONTROLLER_AMPLIFICATION_FACTOR) * m_camera.Down());
    }
 
    if (controllerState.isButtonPressed(XINPUT_GAMEPAD_RIGHT_SHOULDER))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() *
-         (cameraMovementSpeed / CONTROLLER_AMPLIFICATION_FACTOR) * m_camera.Up());
+         (m_cameraMovementSpeed / CONTROLLER_AMPLIFICATION_FACTOR) * m_camera.Up());
    }
 
    // Handle camera orientation via right thumb stick:
    if (controllerState.rightThumbX || controllerState.rightThumbY)
    {
       m_camera.OffsetOrientation(
-         CONTROLLER_AMPLIFICATION_FACTOR * mouseSensitivity * -controllerState.rightThumbY,
-         CONTROLLER_AMPLIFICATION_FACTOR * mouseSensitivity * controllerState.rightThumbX);
+         CONTROLLER_AMPLIFICATION_FACTOR * m_mouseSensitivity * -controllerState.rightThumbY,
+         CONTROLLER_AMPLIFICATION_FACTOR * m_mouseSensitivity * controllerState.rightThumbX);
    }
 
    // Handle camera forward/backward movement via left thumb stick:
    if (controllerState.leftThumbY != 0)
    {
       m_camera.OffsetPosition(
-         CONTROLLER_AMPLIFICATION_FACTOR * cameraMovementSpeed * controllerState.leftThumbY *
+         CONTROLLER_AMPLIFICATION_FACTOR * m_cameraMovementSpeed * controllerState.leftThumbY *
          m_camera.Forward());
    }
 
@@ -642,7 +661,7 @@ void GLCanvas::HandleXBoxControllerInput()
    if (controllerState.leftThumbX != 0)
    {
       m_camera.OffsetPosition(
-         CONTROLLER_AMPLIFICATION_FACTOR * cameraMovementSpeed * controllerState.leftThumbX *
+         CONTROLLER_AMPLIFICATION_FACTOR * m_cameraMovementSpeed * controllerState.leftThumbX *
          m_camera.Right());
    }
 }
@@ -717,7 +736,6 @@ void GLCanvas::paintGL()
 
       m_visualizationShaderProgram.release();
       m_visualizationVAO.release();
-      m_visualizationShaderProgram.release();
    }
 
    m_lastFrameTimeStamp = currentTime;
