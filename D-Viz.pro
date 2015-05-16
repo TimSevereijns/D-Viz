@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     xboxController.cpp \
     optionsManager.cpp \
     Scene/Assets/visualizationAsset.cpp \
-    Scene/Assets/sceneAsset.cpp
+    Scene/Assets/sceneAsset.cpp \
+    Scene/Assets/gridAsset.cpp
 
 HEADERS  += mainwindow.h \
     tree.h \
@@ -39,7 +40,8 @@ HEADERS  += mainwindow.h \
     xInput.h \
     optionsManager.h \
     Scene/Assets/visualizationAsset.h \
-    Scene/Assets/sceneAsset.h
+    Scene/Assets/sceneAsset.h \
+    Scene/Assets/gridAsset.h
 
 FORMS    += mainwindow.ui
 
