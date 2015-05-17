@@ -6,3 +6,5 @@ This Qt and OpenGL based application will recursively scan your filesytem (or pa
 The project currently provides support for two different (but closely related) visualization of treemaps. The first is the "slice and dice" technique, which results in high-aspect ratio representations of folders and files. The second is an adaption of the far more aestheticaly pleasing squarification technique, as outlined in the paper "Squarified Treemaps," by Mark Bruls, Kees Huizing, and Jarke van Wijk. The squarification technique aims to keep block aspect ratios as close as possible to one. As of yet, the squarification technique isn't quite as recursive as it ought to be, so the final visualization can more aptly be described as hybrid between slice-n-dice and a true squarification.
 
 For information on how to set up and build the project, please see the Wiki.
+
+For now, you'll have to locate XINPUT1_4.dll on your Windows system and copy it to the build directory in order to get XBox Controller support.
