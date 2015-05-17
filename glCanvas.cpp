@@ -707,7 +707,6 @@ void GLCanvas::paintGL()
 
    m_originMarkerShaderProgram.release();
    m_originMarkerVAO.release();
-   m_originMarkerShaderProgram.release();
 
    // Draw visualization:
    if (m_isVisualizationLoaded)
