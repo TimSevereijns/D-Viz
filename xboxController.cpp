@@ -5,6 +5,7 @@
 
 XboxController::State::State():
    buttons(0),
+   isRepeatingKey(false),
    leftTrigger(0),
    rightTrigger(0),
    leftThumbX(0),
@@ -39,6 +40,11 @@ bool XboxController::State::isButtonPressed(quint16 button) const
    return (buttons & button);
 }
 
+bool XboxController::State::isButtonRepeating() const
+{
+   return isRepeatingKey;
+}
+
 XboxController::XboxController(unsigned int controllerNum, unsigned int leftStickDeadZone,
                                unsigned int rightStickDeadZone, unsigned int triggerThreshold,
                                QObject *parent)
@@ -66,6 +72,10 @@ void XboxController::stopAutoPolling()
 
 void XboxController::update()
 {
+   XINPUT_KEYSTROKE xKeyStroke;
+   memset(&xKeyStroke, 0, sizeof(XINPUT_KEYSTROKE));
+   XInputGetKeystroke(controllerNum, XINPUT_FLAG_GAMEPAD, &xKeyStroke);
+
    XINPUT_STATE xInputState;
    memset(&xInputState, 0, sizeof(XINPUT_STATE));
    curConnected = (XInputGetState(controllerNum, &xInputState) == ERROR_SUCCESS);
@@ -85,7 +95,8 @@ void XboxController::update()
    if (curConnected)
    {
       //buttons state
-      curState.buttons=xInputState.Gamepad.wButtons;
+      curState.buttons = xInputState.Gamepad.wButtons;
+      curState.isRepeatingKey = xKeyStroke.Flags & XINPUT_KEYSTROKE_REPEAT;
 
       //sticks state
       processStickDeadZone(xInputState.Gamepad.sThumbLX,

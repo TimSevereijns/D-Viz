@@ -29,6 +29,7 @@ class XboxController : public QObject
              quint8 batteryLevel;
 
              quint16 buttons;
+             bool isRepeatingKey;
 
              float leftTrigger;
              float rightTrigger;
@@ -38,6 +39,7 @@ class XboxController : public QObject
              float rightThumbY;
 
              bool isButtonPressed(quint16 button) const;
+             bool isButtonRepeating() const;
 
              static bool equals(State const& a, State const& b);
              static bool batteryEquals(State const& a, State const& b);

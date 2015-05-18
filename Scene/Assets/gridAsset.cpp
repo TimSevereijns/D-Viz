@@ -103,7 +103,7 @@ GridAsset::~GridAsset()
 
 bool GridAsset::PrepareVertexBuffers(const Camera& camera)
 {
-   const QVector<QVector3D> originMarkerVertices = CreateOriginMarkerVertices();
+   m_rawVertices = CreateOriginMarkerVertices();
 
    m_VAO.create();
    m_VAO.bind();
@@ -111,8 +111,7 @@ bool GridAsset::PrepareVertexBuffers(const Camera& camera)
    m_vertexBuffer.create();
    m_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
    m_vertexBuffer.bind();
-   m_vertexBuffer.allocate(originMarkerVertices.constData(), originMarkerVertices.size() *
-      3 * sizeof(GLfloat));
+   m_vertexBuffer.allocate(m_rawVertices.constData(), m_rawVertices.size() * 3 * sizeof(GLfloat));
 
    m_shader.bind();
    m_shader.setUniformValue("mvpMatrix", camera.GetMatrix());
@@ -131,7 +130,7 @@ bool GridAsset::PrepareVertexBuffers(const Camera& camera)
 
 bool GridAsset::PrepareColorBuffers(const Camera& camera)
 {
-   const QVector<QVector3D> originMarkerColors = CreateOriginMarkerColors();
+   m_rawColors = CreateOriginMarkerColors();
 
    m_VAO.create();
    m_VAO.bind();
@@ -139,8 +138,7 @@ bool GridAsset::PrepareColorBuffers(const Camera& camera)
    m_colorBuffer.create();
    m_colorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
    m_colorBuffer.bind();
-   m_colorBuffer.allocate(originMarkerColors.constData(), originMarkerColors.size() *
-      3 * sizeof(GLfloat));
+   m_colorBuffer.allocate(m_rawColors.constData(), m_rawColors.size() * 3 * sizeof(GLfloat));
 
    m_shader.bind();
    m_shader.setUniformValue("mvpMatrix", camera.GetMatrix());

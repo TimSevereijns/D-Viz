@@ -602,7 +602,7 @@ void GLCanvas::HandleInput()
 
 void GLCanvas::HandleXBoxControllerInput()
 {
-   static const int CONTROLLER_AMPLIFICATION_FACTOR = 8;
+   static const int MOVEMENT_AMPLIFICATION_FACTOR = 8;
 
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp);
@@ -632,28 +632,33 @@ void GLCanvas::HandleXBoxControllerInput()
    if (controllerState.isButtonPressed(XINPUT_GAMEPAD_LEFT_SHOULDER))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() *
-         (m_cameraMovementSpeed / CONTROLLER_AMPLIFICATION_FACTOR) * m_camera.Down());
+         (m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION_FACTOR) * m_camera.Down());
    }
 
    if (controllerState.isButtonPressed(XINPUT_GAMEPAD_RIGHT_SHOULDER))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() *
-         (m_cameraMovementSpeed / CONTROLLER_AMPLIFICATION_FACTOR) * m_camera.Up());
+         (m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION_FACTOR) * m_camera.Up());
+   }
+
+   if (controllerState.isButtonPressed(XINPUT_GAMEPAD_BACK) && !controllerState.isButtonRepeating())
+   {
+      std::cout << "Back pressed" << std::endl;
    }
 
    // Handle camera orientation via right thumb stick:
    if (controllerState.rightThumbX || controllerState.rightThumbY)
    {
       m_camera.OffsetOrientation(
-         CONTROLLER_AMPLIFICATION_FACTOR * m_mouseSensitivity * -controllerState.rightThumbY,
-         CONTROLLER_AMPLIFICATION_FACTOR * m_mouseSensitivity * controllerState.rightThumbX);
+         MOVEMENT_AMPLIFICATION_FACTOR * m_mouseSensitivity * -controllerState.rightThumbY,
+         MOVEMENT_AMPLIFICATION_FACTOR * m_mouseSensitivity * controllerState.rightThumbX);
    }
 
    // Handle camera forward/backward movement via left thumb stick:
    if (controllerState.leftThumbY != 0)
    {
       m_camera.OffsetPosition(
-         CONTROLLER_AMPLIFICATION_FACTOR * m_cameraMovementSpeed * controllerState.leftThumbY *
+         MOVEMENT_AMPLIFICATION_FACTOR * m_cameraMovementSpeed * controllerState.leftThumbY *
          m_camera.Forward());
    }
 
@@ -661,7 +666,7 @@ void GLCanvas::HandleXBoxControllerInput()
    if (controllerState.leftThumbX != 0)
    {
       m_camera.OffsetPosition(
-         CONTROLLER_AMPLIFICATION_FACTOR * m_cameraMovementSpeed * controllerState.leftThumbX *
+         MOVEMENT_AMPLIFICATION_FACTOR * m_cameraMovementSpeed * controllerState.leftThumbX *
          m_camera.Right());
    }
 }

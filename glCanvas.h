@@ -202,7 +202,6 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
       QOpenGLShaderProgram m_originMarkerShaderProgram;
       QOpenGLShaderProgram m_visualizationShaderProgram;
-      QOpenGLShaderProgram m_FXAAShaderProgram;
 
       QOpenGLVertexArrayObject m_visualizationVAO;
       QOpenGLVertexArrayObject m_originMarkerVAO;
