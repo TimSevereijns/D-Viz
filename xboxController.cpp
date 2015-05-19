@@ -74,7 +74,7 @@ void XboxController::update()
 {
    XINPUT_KEYSTROKE xKeyStroke;
    memset(&xKeyStroke, 0, sizeof(XINPUT_KEYSTROKE));
-   XInputGetKeystroke(controllerNum, XINPUT_FLAG_GAMEPAD, &xKeyStroke);
+   const bool newKeyEvent = XInputGetKeystroke(controllerNum, XINPUT_FLAG_GAMEPAD, &xKeyStroke) != ERROR_EMPTY;
 
    XINPUT_STATE xInputState;
    memset(&xInputState, 0, sizeof(XINPUT_STATE));
@@ -96,7 +96,14 @@ void XboxController::update()
    {
       //buttons state
       curState.buttons = xInputState.Gamepad.wButtons;
-      curState.isRepeatingKey = xKeyStroke.Flags & XINPUT_KEYSTROKE_REPEAT;
+      curState.isRepeatingKey = false;
+
+      if (newKeyEvent && (xKeyStroke.Flags & XINPUT_KEYSTROKE_REPEAT))
+      {
+            std::cout << "Repeating Key" << std::endl;
+      }
+
+      //std::cout << "curState.isRepeatingKey: " << curState.isRepeatingKey << std::endl;
 
       //sticks state
       processStickDeadZone(xInputState.Gamepad.sThumbLX,

@@ -10,7 +10,7 @@
 class GridAsset : public SceneAsset
 {
    public:
-      GridAsset();
+      explicit GridAsset();
       ~GridAsset();
 
       virtual bool PrepareVertexBuffers(const Camera& camera) override;
