@@ -3,6 +3,54 @@
 #include <cmath>
 #include <iostream>
 
+namespace
+{
+   /**
+    * @brief ButtonUpdateHelper
+    *
+    * @param buttonStates
+    * @param buttonMap
+    */
+   void ButtonUpdateHelper(const WORD buttonStates,
+      std::map<XboxController::BINARY_BUTTON, XboxController::KEY_STATE>& buttonMap)
+   {
+      buttonMap[XboxController::BINARY_BUTTON::A] = (buttonStates & XINPUT_GAMEPAD_A)
+         ? XboxController::KEY_STATE::DOWN
+         : XboxController::KEY_STATE::UP;
+      buttonMap[XboxController::BINARY_BUTTON::B] = (buttonStates & XINPUT_GAMEPAD_B)
+         ? XboxController::KEY_STATE::DOWN
+         : XboxController::KEY_STATE::UP;
+      buttonMap[XboxController::BINARY_BUTTON::X] = (buttonStates & XINPUT_GAMEPAD_X)
+         ? XboxController::KEY_STATE::DOWN
+         : XboxController::KEY_STATE::UP;
+      buttonMap[XboxController::BINARY_BUTTON::Y] = (buttonStates & XINPUT_GAMEPAD_Y)
+         ? XboxController::KEY_STATE::DOWN
+         : XboxController::KEY_STATE::UP;
+      buttonMap[XboxController::BINARY_BUTTON::LEFT_SHOULDER] =
+         (buttonStates & XINPUT_GAMEPAD_LEFT_SHOULDER)
+         ? XboxController::KEY_STATE::DOWN
+         : XboxController::KEY_STATE::UP;
+      buttonMap[XboxController::BINARY_BUTTON::RIGHT_SHOULDER] =
+         (buttonStates & XINPUT_GAMEPAD_RIGHT_SHOULDER)
+         ? XboxController::KEY_STATE::DOWN
+         : XboxController::KEY_STATE::UP;
+      buttonMap[XboxController::BINARY_BUTTON::LEFT_JOYSTICK_CLICK] =
+         (buttonStates & XINPUT_GAMEPAD_LEFT_THUMB)
+         ? XboxController::KEY_STATE::DOWN
+         : XboxController::KEY_STATE::UP;
+      buttonMap[XboxController::BINARY_BUTTON::RIGHT_JOYSTICK_CLICK] =
+         (buttonStates & XINPUT_GAMEPAD_RIGHT_THUMB)
+         ? XboxController::KEY_STATE::DOWN
+         : XboxController::KEY_STATE::UP;
+      buttonMap[XboxController::BINARY_BUTTON::BACK] = (buttonStates & XINPUT_GAMEPAD_BACK)
+         ? XboxController::KEY_STATE::DOWN
+         : XboxController::KEY_STATE::UP;
+      buttonMap[XboxController::BINARY_BUTTON::START] = (buttonStates & XINPUT_GAMEPAD_START)
+         ? XboxController::KEY_STATE::DOWN
+         : XboxController::KEY_STATE::UP;
+   }
+}
+
 XboxController::State::State():
    buttons(0),
    isRepeatingKey(false),
@@ -13,7 +61,20 @@ XboxController::State::State():
    rightThumbX(0),
    rightThumbY(0),
    batteryType(BATTERY_TYPE_DISCONNECTED),
-   batteryLevel(BATTERY_LEVEL_EMPTY)
+   batteryLevel(BATTERY_LEVEL_EMPTY),
+   m_buttonMap(
+      {
+         { XboxController::BINARY_BUTTON::A, XboxController::KEY_STATE::UP },
+         { XboxController::BINARY_BUTTON::B, XboxController::KEY_STATE::UP },
+         { XboxController::BINARY_BUTTON::X, XboxController::KEY_STATE::UP },
+         { XboxController::BINARY_BUTTON::Y, XboxController::KEY_STATE::UP },
+         { XboxController::BINARY_BUTTON::LEFT_SHOULDER, XboxController::KEY_STATE::UP },
+         { XboxController::BINARY_BUTTON::RIGHT_SHOULDER, XboxController::KEY_STATE::UP },
+         { XboxController::BINARY_BUTTON::LEFT_JOYSTICK_CLICK, XboxController::KEY_STATE::UP },
+         { XboxController::BINARY_BUTTON::RIGHT_JOYSTICK_CLICK, XboxController::KEY_STATE::UP },
+         { XboxController::BINARY_BUTTON::BACK, XboxController::KEY_STATE::UP },
+         { XboxController::BINARY_BUTTON::START, XboxController::KEY_STATE::UP }
+      })
 {
 }
 
@@ -51,43 +112,41 @@ XboxController::XboxController(unsigned int controllerNum, unsigned int leftStic
    : QObject(parent),
      curConnected(false),
      prevConnected(false),
-     leftStickDeadZone(qMin(leftStickDeadZone, MAX_STICK_VALUE)),
-     rightStickDeadZone(qMin(rightStickDeadZone, MAX_STICK_VALUE)),
-     triggerThreshold(qMin(triggerThreshold, MAX_TRIGGER_VALUE))
+     m_leftStickDeadZone(qMin(leftStickDeadZone, MAX_STICK_VALUE)),
+     m_rightStickDeadZone(qMin(rightStickDeadZone, MAX_STICK_VALUE)),
+     m_triggerThreshold(qMin(triggerThreshold, MAX_TRIGGER_VALUE))
 {
-   this->controllerNum = qMin(controllerNum, 3u);
-   pollingTimer = new QTimer();
-   connect(pollingTimer, SIGNAL(timeout()), this, SLOT(update()));
+   this->m_controllerNum = qMin(controllerNum, 3u);
+   m_pollingTimer = new QTimer();
+   connect(m_pollingTimer, SIGNAL(timeout()), this, SLOT(update()));
 }
 
 void XboxController::startAutoPolling(unsigned int interval)
 {
-   pollingTimer->start(interval);
+   m_pollingTimer->start(interval);
 }
 
 void XboxController::stopAutoPolling()
 {
-   pollingTimer->stop();
+   m_pollingTimer->stop();
 }
 
 void XboxController::update()
 {
-   XINPUT_KEYSTROKE xKeyStroke;
-   memset(&xKeyStroke, 0, sizeof(XINPUT_KEYSTROKE));
-   const bool newKeyEvent = XInputGetKeystroke(controllerNum, XINPUT_FLAG_GAMEPAD, &xKeyStroke) != ERROR_EMPTY;
-
    XINPUT_STATE xInputState;
    memset(&xInputState, 0, sizeof(XINPUT_STATE));
-   curConnected = (XInputGetState(controllerNum, &xInputState) == ERROR_SUCCESS);
+   curConnected = (XInputGetState(m_controllerNum, &xInputState) == ERROR_SUCCESS);
+
+   ButtonUpdateHelper(xInputState.Gamepad.wButtons, m_currentState.m_buttonMap);
 
    //handling gamepad connection/deconnection
    if (prevConnected == false && curConnected == true)
    {
-      emit controllerConnected(controllerNum);
+      emit controllerConnected(m_controllerNum);
    }
    else if (prevConnected == true && curConnected == false)
    {
-      emit controllerDisconnected(controllerNum);
+      emit controllerDisconnected(m_controllerNum);
    }
 
    prevConnected = curConnected;
@@ -95,61 +154,54 @@ void XboxController::update()
    if (curConnected)
    {
       //buttons state
-      curState.buttons = xInputState.Gamepad.wButtons;
-      curState.isRepeatingKey = false;
-
-      if (newKeyEvent && (xKeyStroke.Flags & XINPUT_KEYSTROKE_REPEAT))
-      {
-            std::cout << "Repeating Key" << std::endl;
-      }
-
-      //std::cout << "curState.isRepeatingKey: " << curState.isRepeatingKey << std::endl;
+      m_currentState.buttons = xInputState.Gamepad.wButtons;
 
       //sticks state
       processStickDeadZone(xInputState.Gamepad.sThumbLX,
                            xInputState.Gamepad.sThumbLY,
-                           curState.leftThumbX,
-                           curState.leftThumbY,
-                           leftStickDeadZone);
+                           m_currentState.leftThumbX,
+                           m_currentState.leftThumbY,
+                           m_leftStickDeadZone);
       processStickDeadZone(xInputState.Gamepad.sThumbRX,
                            xInputState.Gamepad.sThumbRY,
-                           curState.rightThumbX,
-                           curState.rightThumbY,
-                           rightStickDeadZone);
+                           m_currentState.rightThumbX,
+                           m_currentState.rightThumbY,
+                           m_rightStickDeadZone);
 
       //triggers state
       processTriggerThreshold(xInputState.Gamepad.bLeftTrigger,
-                              curState.leftTrigger,
-                              triggerThreshold);
+                              m_currentState.leftTrigger,
+                              m_triggerThreshold);
       processTriggerThreshold(xInputState.Gamepad.bRightTrigger,
-                              curState.rightTrigger,
-                              triggerThreshold);
+                              m_currentState.rightTrigger,
+                              m_triggerThreshold);
 
       //battery state
       XINPUT_BATTERY_INFORMATION xInputBattery;
       memset(&xInputBattery,0,sizeof(XINPUT_BATTERY_INFORMATION));
-      if (XInputGetBatteryInformation(controllerNum, BATTERY_DEVTYPE_GAMEPAD, &xInputBattery) == ERROR_SUCCESS)
+      if (XInputGetBatteryInformation(m_controllerNum, BATTERY_DEVTYPE_GAMEPAD, &xInputBattery) == ERROR_SUCCESS)
       {
-         curState.batteryType = xInputBattery.BatteryType;
-         curState.batteryLevel = xInputBattery.BatteryLevel;
+         m_currentState.batteryType = xInputBattery.BatteryType;
+         m_currentState.batteryLevel = xInputBattery.BatteryLevel;
       }
       else
       {
-         curState.batteryType = BATTERY_TYPE_UNKNOWN;
-         curState.batteryLevel = BATTERY_LEVEL_EMPTY;
+         m_currentState.batteryType = BATTERY_TYPE_UNKNOWN;
+         m_currentState.batteryLevel = BATTERY_LEVEL_EMPTY;
       }
 
-      if (curState != prevState)
+      // TODO: This seems pretty heavy handed!
+      if (m_currentState != m_previousState)
       {
-         emit controllerNewState(curState);
+         emit controllerNewState(m_currentState);
       }
 
-      if (!State::batteryEquals(prevState, curState))
+      if (!State::batteryEquals(m_previousState, m_currentState))
       {
-         emit controllerNewBatteryState(curState.batteryType, curState.batteryLevel);
+         emit controllerNewBatteryState(m_currentState.batteryType, m_currentState.batteryLevel);
       }
 
-      prevState = curState;
+      m_previousState = m_currentState;
    }
 }
 
@@ -200,20 +252,20 @@ void XboxController::setVibration(const float leftVibration, const float rightVi
    XINPUT_VIBRATION xInputVibration;
    xInputVibration.wLeftMotorSpeed = MAX_VIBRATION_VALUE * qBound(0.0f, 1.0f, leftVibration);
    xInputVibration.wRightMotorSpeed = MAX_VIBRATION_VALUE * qBound(0.0f, 1.0f, rightVibration);
-   XInputSetState(controllerNum, &xInputVibration);
+   XInputSetState(m_controllerNum, &xInputVibration);
 }
 
 bool XboxController::isStateChanged(void)
 {
-   return curState == prevState;
+   return m_currentState == m_previousState;
 }
 
 XboxController::~XboxController()
 {
    setVibration(0, 0);
 
-   pollingTimer->stop();
-   delete pollingTimer;
+   m_pollingTimer->stop();
+   delete m_pollingTimer;
 }
 
 bool operator==(const XboxController::State& a, const XboxController::State& b){

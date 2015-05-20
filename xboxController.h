@@ -1,6 +1,8 @@
 #ifndef XBOXCONTROLLER_H
 #define XBOXCONTROLLER_H
 
+#include <map>
+
 #include <QObject>
 #include <QTimer>
 #include <QDebug>
@@ -20,6 +22,26 @@ class XboxController : public QObject
    Q_OBJECT
 
    public:
+      enum class KEY_STATE
+      {
+         UP,
+         DOWN
+      };
+
+      enum class BINARY_BUTTON
+      {
+         A,
+         B,
+         X,
+         Y,
+         LEFT_SHOULDER,
+         RIGHT_SHOULDER,
+         LEFT_JOYSTICK_CLICK,
+         RIGHT_JOYSTICK_CLICK,
+         BACK,
+         START
+      };
+
       class State
       {
          public:
@@ -43,12 +65,14 @@ class XboxController : public QObject
 
              static bool equals(State const& a, State const& b);
              static bool batteryEquals(State const& a, State const& b);
+
+             std::map<XboxController::BINARY_BUTTON, XboxController::KEY_STATE> m_buttonMap;
       };
 
-      explicit XboxController(unsigned int controllerNum = 0,
-         unsigned int leftStickDeadZone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE,
-         unsigned int rightStickDeadZone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE,
-         unsigned int triggerThreshold = XINPUT_GAMEPAD_TRIGGER_THRESHOLD,
+      explicit XboxController(unsigned int m_controllerNum = 0,
+         unsigned int m_leftStickDeadZone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE,
+         unsigned int m_rightStickDeadZone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE,
+         unsigned int m_triggerThreshold = XINPUT_GAMEPAD_TRIGGER_THRESHOLD,
          QObject* parent = 0);
 
       ~XboxController();
@@ -56,15 +80,15 @@ class XboxController : public QObject
       bool isStateChanged(void);
       bool isConnected(void){return curConnected;}
 
-      XboxController::State getCurrentState(void){return curState;}
+      XboxController::State getCurrentState(void){return m_currentState;}
 
       // TODO: Add ability to toggle key repeats.
 
    signals:
       void controllerNewState(XboxController::State);
       void controllerNewBatteryState(quint8 newBatteryType, quint8 newBatteryLevel);
-      void controllerConnected(unsigned int controllerNum);
-      void controllerDisconnected(unsigned int controllerNum);
+      void controllerConnected(unsigned int m_controllerNum);
+      void controllerDisconnected(unsigned int m_controllerNum);
 
    public slots:
       void startAutoPolling(unsigned int interval);
@@ -74,28 +98,28 @@ class XboxController : public QObject
 
       // The following methods allows you to change the deadzones values, although the default values
       // should be fine.
-      void setLeftStickDeadZone(unsigned int newDeadZone){leftStickDeadZone=qMin(newDeadZone,MAX_STICK_VALUE);}
-      void setRightStickDeadZone(unsigned int newDeadZone){rightStickDeadZone=qMin(newDeadZone,MAX_STICK_VALUE);}
-      void setTriggerThreshold(unsigned int newThreshold){triggerThreshold=qMin(newThreshold,MAX_TRIGGER_VALUE);}
+      void setLeftStickDeadZone(unsigned int newDeadZone){m_leftStickDeadZone=qMin(newDeadZone,MAX_STICK_VALUE);}
+      void setRightStickDeadZone(unsigned int newDeadZone){m_rightStickDeadZone=qMin(newDeadZone,MAX_STICK_VALUE);}
+      void setTriggerThreshold(unsigned int newThreshold){m_triggerThreshold=qMin(newThreshold,MAX_TRIGGER_VALUE);}
 
    private:
       static bool processStickDeadZone(qint16 rawXValue, qint16 rawYValue, float& xValue,
          float& yValue, unsigned int deadZoneRadius);
 
-      static bool processTriggerThreshold(quint8 rawValue, float& value,unsigned int triggerThreshold);
+      static bool processTriggerThreshold(quint8 rawValue, float& value,unsigned int m_triggerThreshold);
 
       bool curConnected;
       bool prevConnected;
 
-      unsigned int controllerNum;
-      unsigned int leftStickDeadZone;
-      unsigned int rightStickDeadZone;
-      unsigned int triggerThreshold;
+      unsigned int m_controllerNum;
+      unsigned int m_leftStickDeadZone;
+      unsigned int m_rightStickDeadZone;
+      unsigned int m_triggerThreshold;
 
-      QTimer* pollingTimer;
+      QTimer* m_pollingTimer;
 
-      State prevState;
-      State curState;
+      State m_previousState;
+      State m_currentState;
 };
 
 #endif // XBOXCONTROLLER_H
