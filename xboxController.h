@@ -28,7 +28,7 @@ class XboxController : public QObject
          DOWN
       };
 
-      enum class BINARY_BUTTON
+      enum class BUTTON
       {
          A,
          B,
@@ -39,7 +39,11 @@ class XboxController : public QObject
          LEFT_JOYSTICK_CLICK,
          RIGHT_JOYSTICK_CLICK,
          BACK,
-         START
+         START,
+         DPAD_UP,
+         DPAD_LEFT,
+         DPAD_RIGHT,
+         DPAD_DOWN
       };
 
       class State
@@ -60,13 +64,12 @@ class XboxController : public QObject
              float rightThumbX;
              float rightThumbY;
 
-             bool isButtonPressed(quint16 button) const;
-             bool isButtonRepeating() const;
+             bool isButtonDown(const XboxController::BUTTON button) const;
 
              static bool equals(State const& a, State const& b);
              static bool batteryEquals(State const& a, State const& b);
 
-             std::map<XboxController::BINARY_BUTTON, XboxController::KEY_STATE> m_buttonMap;
+             std::map<XboxController::BUTTON, XboxController::KEY_STATE> m_buttonMap;
       };
 
       explicit XboxController(unsigned int m_controllerNum = 0,
