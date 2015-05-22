@@ -2,6 +2,7 @@
 #define XBOXCONTROLLER_H
 
 #include <map>
+#include <functional>
 
 #include <QObject>
 #include <QTimer>
@@ -46,6 +47,9 @@ class XboxController : public QObject
          DPAD_DOWN
       };
 
+      /**
+       * @brief The State class
+       */
       class State
       {
          public:
@@ -80,39 +84,34 @@ class XboxController : public QObject
 
       ~XboxController();
 
-      bool isStateChanged(void);
-      bool isConnected(void){return curConnected;}
+      bool HasStateChanged(void);
+      bool IsConnected(void);
 
-      XboxController::State getCurrentState(void){return m_currentState;}
+      XboxController::State GetCurrentState(void){return m_currentState;}
 
       // TODO: Add ability to toggle key repeats.
 
    signals:
-      void controllerNewState(XboxController::State);
-      void controllerNewBatteryState(quint8 newBatteryType, quint8 newBatteryLevel);
-      void controllerConnected(unsigned int m_controllerNum);
-      void controllerDisconnected(unsigned int m_controllerNum);
+      void ControllerNewState(XboxController::State);
+      void ControllerNewBatteryState(quint8 newBatteryType, quint8 newBatteryLevel);
+      void ControllerConnected(unsigned int m_controllerNum);
+      void ControllerDisconnected(unsigned int m_controllerNum);
 
    public slots:
-      void startAutoPolling(unsigned int interval);
-      void stopAutoPolling(void);
-      void update(void);
-      void setVibration(float leftVibration, float rightVibration);
+      void StartAutoPolling(unsigned int interval);
+      void StopAutoPolling(void);
+      void Update(void);
+      void SetVibration(float leftVibration, float rightVibration);
 
-      // The following methods allows you to change the deadzones values, although the default values
-      // should be fine.
-      void setLeftStickDeadZone(unsigned int newDeadZone){m_leftStickDeadZone=qMin(newDeadZone,MAX_STICK_VALUE);}
-      void setRightStickDeadZone(unsigned int newDeadZone){m_rightStickDeadZone=qMin(newDeadZone,MAX_STICK_VALUE);}
-      void setTriggerThreshold(unsigned int newThreshold){m_triggerThreshold=qMin(newThreshold,MAX_TRIGGER_VALUE);}
+      // The following methods allows you to change the deadzones values, although the default
+      // values should be fine.
+      void SetLeftStickDeadZone(unsigned int newDeadZone);
+      void SetRightStickDeadZone(unsigned int newDeadZone);
+      void SetTriggerThreshold(unsigned int newThreshold);
 
    private:
-      static bool processStickDeadZone(qint16 rawXValue, qint16 rawYValue, float& xValue,
-         float& yValue, unsigned int deadZoneRadius);
-
-      static bool processTriggerThreshold(quint8 rawValue, float& value,unsigned int m_triggerThreshold);
-
-      bool curConnected;
-      bool prevConnected;
+      bool m_isCurrentControllerConnected;
+      bool m_isPreviousControllerConnected;
 
       unsigned int m_controllerNum;
       unsigned int m_leftStickDeadZone;
@@ -123,6 +122,8 @@ class XboxController : public QObject
 
       State m_previousState;
       State m_currentState;
+
+      std::function<void ()> m_onButtonUpCallback;
 };
 
 #endif // XBOXCONTROLLER_H

@@ -112,7 +112,7 @@ void MainWindow::SetupSidebar()
 void MainWindow::SetupXboxController()
 {
    m_xboxController.reset(new XboxController(0));
-   m_xboxController->startAutoPolling(20);
+   m_xboxController->StartAutoPolling(20);
 
    connect(&*m_xboxController, SIGNAL(controllerConnected(uint)),
       this, SLOT(XboxControllerConnected()));
