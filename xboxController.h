@@ -48,6 +48,39 @@ class XboxController : public QObject
       };
 
       /**
+       * @brief The StateAndHandlers struct
+       */
+      struct StateAndHandlers
+      {
+         StateAndHandlers()
+            : state(XboxController::KEY_STATE::UP),
+              onButtonDown(nullptr),
+              onButtonUp(nullptr)
+         {
+         }
+
+         explicit StateAndHandlers(XboxController::KEY_STATE startingState)
+            : state(startingState),
+              onButtonDown(nullptr),
+              onButtonUp(nullptr)
+         {
+         }
+
+         StateAndHandlers(XboxController::KEY_STATE startingState,
+            const std::function<void ()>& downHandler,
+            const std::function<void ()>& upHandler)
+            : state(startingState),
+              onButtonDown(downHandler),
+              onButtonUp(upHandler)
+         {
+         }
+
+         XboxController::KEY_STATE state;
+         std::function<void ()> onButtonDown;
+         std::function<void ()> onButtonUp;
+      };
+
+      /**
        * @brief The State class
        */
       class State
@@ -73,14 +106,14 @@ class XboxController : public QObject
              static bool equals(State const& a, State const& b);
              static bool batteryEquals(State const& a, State const& b);
 
-             std::map<XboxController::BUTTON, XboxController::KEY_STATE> m_buttonMap;
+             std::map<XboxController::BUTTON, StateAndHandlers> m_buttonMap;
       };
 
       explicit XboxController(unsigned int m_controllerNum = 0,
          unsigned int m_leftStickDeadZone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE,
          unsigned int m_rightStickDeadZone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE,
          unsigned int m_triggerThreshold = XINPUT_GAMEPAD_TRIGGER_THRESHOLD,
-         QObject* parent = 0);
+         QObject* parent = nullptr);
 
       ~XboxController();
 
@@ -92,8 +125,8 @@ class XboxController : public QObject
       // TODO: Add ability to toggle key repeats.
 
    signals:
-      void ControllerNewState(XboxController::State);
-      void ControllerNewBatteryState(quint8 newBatteryType, quint8 newBatteryLevel);
+      void NewControllerState(XboxController::State);
+      void NewControllerBatteryState(quint8 newBatteryType, quint8 newBatteryLevel);
       void ControllerConnected(unsigned int m_controllerNum);
       void ControllerDisconnected(unsigned int m_controllerNum);
 
@@ -122,8 +155,6 @@ class XboxController : public QObject
 
       State m_previousState;
       State m_currentState;
-
-      std::function<void ()> m_onButtonUpCallback;
 };
 
 #endif // XBOXCONTROLLER_H

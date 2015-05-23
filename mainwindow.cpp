@@ -114,13 +114,13 @@ void MainWindow::SetupXboxController()
    m_xboxController.reset(new XboxController(0));
    m_xboxController->StartAutoPolling(20);
 
-   connect(&*m_xboxController, SIGNAL(controllerConnected(uint)),
+   connect(&*m_xboxController, SIGNAL(ControllerConnected(uint)),
       this, SLOT(XboxControllerConnected()));
 
-   connect(&*m_xboxController, SIGNAL(controllerDisconnected(uint)),
+   connect(&*m_xboxController, SIGNAL(ControllerDisconnected(uint)),
       this, SLOT(XboxControllerDisconnected()));
 
-   connect(&*m_xboxController, SIGNAL(controllerNewState(XboxController::State)),
+   connect(&*m_xboxController, SIGNAL(NewControllerState(XboxController::State)),
       this, SLOT(XboxControllerStateChanged(XboxController::State)));
 }
 

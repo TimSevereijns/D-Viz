@@ -12,61 +12,61 @@ namespace
     * @param[in] buttonMap
     */
    void ButtonUpdateHelper(const WORD State,
-      std::map<XboxController::BUTTON, XboxController::KEY_STATE>& buttonMap)
+      std::map<XboxController::BUTTON, XboxController::StateAndHandlers>& buttonMap)
    {
-      buttonMap[XboxController::BUTTON::A] = (State & XINPUT_GAMEPAD_A)
+      buttonMap[XboxController::BUTTON::A].state = (State & XINPUT_GAMEPAD_A)
          ? XboxController::KEY_STATE::DOWN
          : XboxController::KEY_STATE::UP;
 
-      buttonMap[XboxController::BUTTON::B] = (State & XINPUT_GAMEPAD_B)
+      buttonMap[XboxController::BUTTON::B].state = (State & XINPUT_GAMEPAD_B)
          ? XboxController::KEY_STATE::DOWN
          : XboxController::KEY_STATE::UP;
 
-      buttonMap[XboxController::BUTTON::X] = (State & XINPUT_GAMEPAD_X)
+      buttonMap[XboxController::BUTTON::X].state = (State & XINPUT_GAMEPAD_X)
          ? XboxController::KEY_STATE::DOWN
          : XboxController::KEY_STATE::UP;
 
-      buttonMap[XboxController::BUTTON::Y] = (State & XINPUT_GAMEPAD_Y)
+      buttonMap[XboxController::BUTTON::Y].state = (State & XINPUT_GAMEPAD_Y)
          ? XboxController::KEY_STATE::DOWN
          : XboxController::KEY_STATE::UP;
 
-      buttonMap[XboxController::BUTTON::LEFT_SHOULDER] = (State & XINPUT_GAMEPAD_LEFT_SHOULDER)
+      buttonMap[XboxController::BUTTON::LEFT_SHOULDER].state = (State & XINPUT_GAMEPAD_LEFT_SHOULDER)
          ? XboxController::KEY_STATE::DOWN
          : XboxController::KEY_STATE::UP;
 
-      buttonMap[XboxController::BUTTON::RIGHT_SHOULDER] = (State & XINPUT_GAMEPAD_RIGHT_SHOULDER)
+      buttonMap[XboxController::BUTTON::RIGHT_SHOULDER].state = (State & XINPUT_GAMEPAD_RIGHT_SHOULDER)
          ? XboxController::KEY_STATE::DOWN
          : XboxController::KEY_STATE::UP;
 
-      buttonMap[XboxController::BUTTON::LEFT_JOYSTICK_CLICK] = (State & XINPUT_GAMEPAD_LEFT_THUMB)
+      buttonMap[XboxController::BUTTON::LEFT_JOYSTICK_CLICK].state = (State & XINPUT_GAMEPAD_LEFT_THUMB)
          ? XboxController::KEY_STATE::DOWN
          : XboxController::KEY_STATE::UP;
 
-      buttonMap[XboxController::BUTTON::RIGHT_JOYSTICK_CLICK] = (State & XINPUT_GAMEPAD_RIGHT_THUMB)
+      buttonMap[XboxController::BUTTON::RIGHT_JOYSTICK_CLICK].state = (State & XINPUT_GAMEPAD_RIGHT_THUMB)
          ? XboxController::KEY_STATE::DOWN
          : XboxController::KEY_STATE::UP;
 
-      buttonMap[XboxController::BUTTON::BACK] = (State & XINPUT_GAMEPAD_BACK)
+      buttonMap[XboxController::BUTTON::BACK].state = (State & XINPUT_GAMEPAD_BACK)
          ? XboxController::KEY_STATE::DOWN
          : XboxController::KEY_STATE::UP;
 
-      buttonMap[XboxController::BUTTON::START] = (State & XINPUT_GAMEPAD_START)
+      buttonMap[XboxController::BUTTON::START].state = (State & XINPUT_GAMEPAD_START)
          ? XboxController::KEY_STATE::DOWN
          : XboxController::KEY_STATE::UP;
 
-      buttonMap[XboxController::BUTTON::DPAD_UP] = (State & XINPUT_GAMEPAD_DPAD_UP)
+      buttonMap[XboxController::BUTTON::DPAD_UP].state = (State & XINPUT_GAMEPAD_DPAD_UP)
          ? XboxController::KEY_STATE::DOWN
          : XboxController::KEY_STATE::UP;
 
-      buttonMap[XboxController::BUTTON::DPAD_LEFT] = (State & XINPUT_GAMEPAD_DPAD_LEFT)
+      buttonMap[XboxController::BUTTON::DPAD_LEFT].state = (State & XINPUT_GAMEPAD_DPAD_LEFT)
          ? XboxController::KEY_STATE::DOWN
          : XboxController::KEY_STATE::UP;
 
-      buttonMap[XboxController::BUTTON::DPAD_RIGHT] = (State & XINPUT_GAMEPAD_DPAD_RIGHT)
+      buttonMap[XboxController::BUTTON::DPAD_RIGHT].state = (State & XINPUT_GAMEPAD_DPAD_RIGHT)
          ? XboxController::KEY_STATE::DOWN
          : XboxController::KEY_STATE::UP;
 
-      buttonMap[XboxController::BUTTON::DPAD_DOWN] = (State & XINPUT_GAMEPAD_DPAD_DOWN)
+      buttonMap[XboxController::BUTTON::DPAD_DOWN].state = (State & XINPUT_GAMEPAD_DPAD_DOWN)
          ? XboxController::KEY_STATE::DOWN
          : XboxController::KEY_STATE::UP;
    }
@@ -145,20 +145,20 @@ XboxController::State::State():
    batteryLevel(BATTERY_LEVEL_EMPTY),
    m_buttonMap(
       {
-         { XboxController::BUTTON::A, XboxController::KEY_STATE::UP },
-         { XboxController::BUTTON::B, XboxController::KEY_STATE::UP },
-         { XboxController::BUTTON::X, XboxController::KEY_STATE::UP },
-         { XboxController::BUTTON::Y, XboxController::KEY_STATE::UP },
-         { XboxController::BUTTON::LEFT_SHOULDER, XboxController::KEY_STATE::UP },
-         { XboxController::BUTTON::RIGHT_SHOULDER, XboxController::KEY_STATE::UP },
-         { XboxController::BUTTON::LEFT_JOYSTICK_CLICK, XboxController::KEY_STATE::UP },
-         { XboxController::BUTTON::RIGHT_JOYSTICK_CLICK, XboxController::KEY_STATE::UP },
-         { XboxController::BUTTON::BACK, XboxController::KEY_STATE::UP },
-         { XboxController::BUTTON::START, XboxController::KEY_STATE::UP },
-         { XboxController::BUTTON::DPAD_UP, XboxController::KEY_STATE::UP },
-         { XboxController::BUTTON::DPAD_LEFT, XboxController::KEY_STATE::UP },
-         { XboxController::BUTTON::DPAD_RIGHT, XboxController::KEY_STATE::UP },
-         { XboxController::BUTTON::DPAD_DOWN, XboxController::KEY_STATE::UP }
+         { XboxController::BUTTON::A, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XboxController::BUTTON::B, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XboxController::BUTTON::X, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XboxController::BUTTON::Y, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XboxController::BUTTON::LEFT_SHOULDER, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XboxController::BUTTON::RIGHT_SHOULDER, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XboxController::BUTTON::LEFT_JOYSTICK_CLICK, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XboxController::BUTTON::RIGHT_JOYSTICK_CLICK, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XboxController::BUTTON::BACK, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XboxController::BUTTON::START, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XboxController::BUTTON::DPAD_UP, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XboxController::BUTTON::DPAD_LEFT, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XboxController::BUTTON::DPAD_RIGHT, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XboxController::BUTTON::DPAD_DOWN, StateAndHandlers(XboxController::KEY_STATE::UP) }
       })
 {
 }
@@ -186,7 +186,7 @@ bool XboxController::State::isButtonDown(const XboxController::BUTTON button) co
    const auto result = m_buttonMap.find(button);
    if (result != std::end(m_buttonMap))
    {
-      return result->second == XboxController::KEY_STATE::DOWN;
+      return result->second.state == KEY_STATE::DOWN;
    }
 
    return false;
@@ -272,12 +272,12 @@ void XboxController::Update()
       // TODO: This seems pretty heavy handed!
       if (m_currentState != m_previousState)
       {
-         emit ControllerNewState(m_currentState);
+         emit NewControllerState(m_currentState);
       }
 
       if (!State::batteryEquals(m_previousState, m_currentState))
       {
-         emit ControllerNewBatteryState(m_currentState.batteryType, m_currentState.batteryLevel);
+         emit NewControllerBatteryState(m_currentState.batteryType, m_currentState.batteryLevel);
       }
 
       m_previousState = m_currentState;
