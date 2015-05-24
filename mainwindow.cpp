@@ -114,6 +114,18 @@ void MainWindow::SetupXboxController()
    m_xboxController.reset(new XboxController(0));
    m_xboxController->StartAutoPolling(20);
 
+   m_xboxController->SetHandler(XboxController::BUTTON::Y, XboxController::KEY_STATE::DOWN,
+      [] ()
+   {
+      std::cout << "Button Y pressed..." << std::endl;
+   });
+
+   m_xboxController->SetHandler(XboxController::BUTTON::Y, XboxController::KEY_STATE::UP,
+      [] ()
+   {
+      std::cout << "Button Y released..." << std::endl;
+   });
+
    connect(&*m_xboxController, SIGNAL(ControllerConnected(uint)),
       this, SLOT(XboxControllerConnected()));
 

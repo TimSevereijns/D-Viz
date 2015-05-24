@@ -124,6 +124,9 @@ class XboxController : public QObject
 
       // TODO: Add ability to toggle key repeats.
 
+      void SetHandler(XboxController::BUTTON targetButton, XboxController::KEY_STATE targetState,
+         std::function<void ()> handler);
+
    signals:
       void NewControllerState(XboxController::State);
       void NewControllerBatteryState(quint8 newBatteryType, quint8 newBatteryLevel);
