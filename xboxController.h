@@ -101,12 +101,8 @@ class XboxController : public QObject
              float rightThumbX;
              float rightThumbY;
 
-             bool isButtonDown(const XboxController::BUTTON button) const;
-
              static bool equals(State const& a, State const& b);
              static bool batteryEquals(State const& a, State const& b);
-
-             std::map<XboxController::BUTTON, StateAndHandlers> m_buttonMap;
       };
 
       explicit XboxController(unsigned int m_controllerNum = 0,
@@ -119,6 +115,7 @@ class XboxController : public QObject
 
       bool HasStateChanged(void);
       bool IsConnected(void);
+      bool IsButtonDown(const XboxController::BUTTON button) const;
 
       XboxController::State GetCurrentState(void){return m_currentState;}
 
@@ -158,6 +155,8 @@ class XboxController : public QObject
 
       State m_previousState;
       State m_currentState;
+
+      std::map<XboxController::BUTTON, StateAndHandlers> m_buttonMap;
 };
 
 #endif // XBOXCONTROLLER_H

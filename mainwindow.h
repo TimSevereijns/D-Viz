@@ -52,6 +52,12 @@ class MainWindow : public QMainWindow
        */
       OptionsManager* GetOptionsManager();
 
+      /**
+       * @brief GetXboxControllerManager
+       * @return
+       */
+      XboxController& GetXboxControllerManager();
+
    public slots:
       /**
        * @brief OnFileMenuNewScan
