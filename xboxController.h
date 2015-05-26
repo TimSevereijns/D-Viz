@@ -48,7 +48,8 @@ class XboxController : public QObject
       };
 
       /**
-       * @brief The StateAndHandlers struct
+       * @brief The StateAndHandlers struct contains a key's current button state (either up or down),
+       * and the event handlers that deal with a key going down or coming up.
        */
       struct StateAndHandlers
       {
@@ -81,7 +82,7 @@ class XboxController : public QObject
       };
 
       /**
-       * @brief The State class
+       * @brief The State class represents a snapshot of the state of the controller.
        */
       class State
       {
@@ -117,9 +118,7 @@ class XboxController : public QObject
       bool IsConnected(void);
       bool IsButtonDown(const XboxController::BUTTON button) const;
 
-      XboxController::State GetCurrentState(void){return m_currentState;}
-
-      // TODO: Add ability to toggle key repeats.
+      XboxController::State GetCurrentState(void){ return m_currentState; }
 
       void SetHandler(XboxController::BUTTON targetButton, XboxController::KEY_STATE targetState,
          std::function<void ()> handler);
