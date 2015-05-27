@@ -153,7 +153,7 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
        * @brief SortChildren        Merge sorts the immediate child nodes.
        * @param comparator          The function to be used as the basis for the sorting comparison.
        */
-      void SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)> comparator);
+      void SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator);
 
       /**
        * @brief RemoveFromTree removes the node from the tree that it is in.
@@ -443,7 +443,7 @@ void TreeNode<T>::RemoveFromTree()
 }
 
 template<typename T>
-void TreeNode<T>::SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)> comparator)
+void TreeNode<T>::SortChildren(const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator)
 {
    MergeSort(m_firstChild, comparator);
 }

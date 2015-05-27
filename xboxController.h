@@ -29,24 +29,6 @@ class XboxController : public QObject
          DOWN
       };
 
-      enum class BUTTON
-      {
-         A,
-         B,
-         X,
-         Y,
-         LEFT_SHOULDER,
-         RIGHT_SHOULDER,
-         LEFT_JOYSTICK_CLICK,
-         RIGHT_JOYSTICK_CLICK,
-         BACK,
-         START,
-         DPAD_UP,
-         DPAD_LEFT,
-         DPAD_RIGHT,
-         DPAD_DOWN
-      };
-
       /**
        * @brief The StateAndHandlers struct contains a key's current button state (either up or down),
        * and the event handlers that deal with a key going down or coming up.
@@ -89,6 +71,8 @@ class XboxController : public QObject
          public:
              explicit State();
 
+             bool IsButtonDown(const unsigned int button) const;
+
              quint8 batteryType;
              quint8 batteryLevel;
 
@@ -104,6 +88,8 @@ class XboxController : public QObject
 
              static bool equals(State const& a, State const& b);
              static bool batteryEquals(State const& a, State const& b);
+
+             std::map<unsigned int, StateAndHandlers> m_buttonMap;
       };
 
       explicit XboxController(unsigned int m_controllerNum = 0,
@@ -116,12 +102,11 @@ class XboxController : public QObject
 
       bool HasStateChanged(void);
       bool IsConnected(void);
-      bool IsButtonDown(const XboxController::BUTTON button) const;
 
-      XboxController::State GetCurrentState(void){ return m_currentState; }
+      const XboxController::State& GetCurrentState(void);
 
-      void SetHandler(XboxController::BUTTON targetButton, XboxController::KEY_STATE targetState,
-         std::function<void ()> handler);
+      void SetHandler(const unsigned int targetButton, XboxController::KEY_STATE targetState,
+         const std::function<void ()>& handler);
 
    signals:
       void NewControllerState(XboxController::State);
@@ -154,8 +139,6 @@ class XboxController : public QObject
 
       State m_previousState;
       State m_currentState;
-
-      std::map<XboxController::BUTTON, StateAndHandlers> m_buttonMap;
 };
 
 #endif // XBOXCONTROLLER_H

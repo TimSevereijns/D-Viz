@@ -23,7 +23,7 @@ Visualization::~Visualization()
 {
 }
 
-void Visualization::ScanDirectory(std::function<void (const std::uintmax_t)> progressCallback)
+void Visualization::ScanDirectory(const std::function<void (const std::uintmax_t)> progressCallback)
 {
    std::atomic<std::pair<std::uintmax_t, bool>> progress{std::make_pair(0, false)};
    m_diskScanner.ScanInNewThread(&progress);

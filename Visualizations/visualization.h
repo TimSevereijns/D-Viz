@@ -50,7 +50,7 @@ class Visualization
        * 
        * @param[in] statusBarUpdater         The function to be called once progress updates.
        */
-      virtual void ScanDirectory(std::function<void (const std::uintmax_t)> statusBarUpdater);
+      virtual void ScanDirectory(const std::function<void (const std::uintmax_t)> statusBarUpdater);
       
       /**
        * A pure virtual function that indicates how the scan is to be parsed and interpreted.

@@ -607,41 +607,41 @@ void GLCanvas::HandleXBoxControllerInput()
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp);
 
-   XboxController::State controllerState = m_mainWindow->GetXboxControllerState();
+   XboxController::State& controllerState = m_mainWindow->GetXboxControllerState();
 
-   if (controllerState.isButtonDown(XboxController::BUTTON::DPAD_UP))
+   if (controllerState.IsButtonDown(XINPUT_GAMEPAD_DPAD_UP))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Forward());
    }
 
-   if (controllerState.isButtonDown(XboxController::BUTTON::DPAD_LEFT))
+   if (controllerState.IsButtonDown(XINPUT_GAMEPAD_DPAD_LEFT))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Left());
    }
 
-   if (controllerState.isButtonDown(XboxController::BUTTON::DPAD_DOWN))
+   if (controllerState.IsButtonDown(XINPUT_GAMEPAD_DPAD_DOWN))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Backward());
    }
 
-   if (controllerState.isButtonDown(XboxController::BUTTON::DPAD_RIGHT))
+   if (controllerState.IsButtonDown(XINPUT_GAMEPAD_DPAD_RIGHT))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Right());
    }
 
-   if (controllerState.isButtonDown(XboxController::BUTTON::LEFT_SHOULDER))
+   if (controllerState.IsButtonDown(XINPUT_GAMEPAD_LEFT_SHOULDER))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() *
          (m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION_FACTOR) * m_camera.Down());
    }
 
-   if (controllerState.isButtonDown(XboxController::BUTTON::RIGHT_SHOULDER))
+   if (controllerState.IsButtonDown(XINPUT_GAMEPAD_RIGHT_SHOULDER))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() *
          (m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION_FACTOR) * m_camera.Up());
    }
 
-   if (controllerState.isButtonDown(XboxController::BUTTON::BACK))
+   if (controllerState.IsButtonDown(XINPUT_GAMEPAD_BACK))
    {
       std::cout << "Back pressed" << std::endl;
    }
