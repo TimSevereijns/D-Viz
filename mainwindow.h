@@ -56,7 +56,7 @@ class MainWindow : public QMainWindow
        * @brief GetXboxControllerManager
        * @return
        */
-      XboxController* GetXboxControllerManager();
+      XboxController& GetXboxControllerManager();
 
    public slots:
       /**

@@ -607,41 +607,42 @@ void GLCanvas::HandleXBoxControllerInput()
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp);
 
-   XboxController::State& controllerState = m_mainWindow->GetXboxControllerState();
+   const XboxController::State& controllerState = m_mainWindow->GetXboxControllerState();
+   const XboxController& controller = m_mainWindow->GetXboxControllerManager();
 
-   if (controllerState.IsButtonDown(XINPUT_GAMEPAD_DPAD_UP))
+   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_UP))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Forward());
    }
 
-   if (controllerState.IsButtonDown(XINPUT_GAMEPAD_DPAD_LEFT))
+   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_LEFT))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Left());
    }
 
-   if (controllerState.IsButtonDown(XINPUT_GAMEPAD_DPAD_DOWN))
+   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_DOWN))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Backward());
    }
 
-   if (controllerState.IsButtonDown(XINPUT_GAMEPAD_DPAD_RIGHT))
+   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_RIGHT))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Right());
    }
 
-   if (controllerState.IsButtonDown(XINPUT_GAMEPAD_LEFT_SHOULDER))
+   if (controller.IsButtonDown(XINPUT_GAMEPAD_LEFT_SHOULDER))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() *
          (m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION_FACTOR) * m_camera.Down());
    }
 
-   if (controllerState.IsButtonDown(XINPUT_GAMEPAD_RIGHT_SHOULDER))
+   if (controller.IsButtonDown(XINPUT_GAMEPAD_RIGHT_SHOULDER))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() *
          (m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION_FACTOR) * m_camera.Up());
    }
 
-   if (controllerState.IsButtonDown(XINPUT_GAMEPAD_BACK))
+   if (controller.IsButtonDown(XINPUT_GAMEPAD_BACK))
    {
       std::cout << "Back pressed" << std::endl;
    }

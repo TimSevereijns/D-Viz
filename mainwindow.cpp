@@ -237,9 +237,9 @@ XboxController::State& MainWindow::GetXboxControllerState() const
    return *m_xboxControllerState;
 }
 
-XboxController* MainWindow::GetXboxControllerManager()
+XboxController& MainWindow::GetXboxControllerManager()
 {
-   return m_xboxController.get();
+   return *m_xboxController.get();
 }
 
 OptionsManager* MainWindow::GetOptionsManager()

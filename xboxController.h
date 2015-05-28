@@ -1,8 +1,9 @@
 #ifndef XBOXCONTROLLER_H
 #define XBOXCONTROLLER_H
 
-#include <map>
 #include <functional>
+#include <map>
+#include <memory>
 
 #include <QObject>
 #include <QTimer>
@@ -71,13 +72,10 @@ class XboxController : public QObject
          public:
              explicit State();
 
-             bool IsButtonDown(const unsigned int button) const;
-
              quint8 batteryType;
              quint8 batteryLevel;
 
              quint16 buttons;
-             bool isRepeatingKey;
 
              float leftTrigger;
              float rightTrigger;
@@ -86,10 +84,8 @@ class XboxController : public QObject
              float rightThumbX;
              float rightThumbY;
 
-             static bool equals(State const& a, State const& b);
-             static bool batteryEquals(State const& a, State const& b);
-
-             std::map<unsigned int, StateAndHandlers> m_buttonMap;
+             static bool Equals(const State& lhs, const State& rhs);
+             static bool BatteryEquals(const State& lhs, const State& rhs);
       };
 
       explicit XboxController(unsigned int m_controllerNum = 0,
@@ -102,6 +98,7 @@ class XboxController : public QObject
 
       bool HasStateChanged(void);
       bool IsConnected(void);
+      bool IsButtonDown(const unsigned int button) const;
 
       const XboxController::State& GetCurrentState(void);
 
@@ -135,10 +132,12 @@ class XboxController : public QObject
       unsigned int m_rightStickDeadZone;
       unsigned int m_triggerThreshold;
 
-      QTimer* m_pollingTimer;
+      std::unique_ptr<QTimer> m_pollingTimer;
 
       State m_previousState;
       State m_currentState;
+
+      std::map<unsigned int, StateAndHandlers> m_buttonMap;
 };
 
 #endif // XBOXCONTROLLER_H
