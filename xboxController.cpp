@@ -130,17 +130,22 @@ XboxController::State::State():
 {
 }
 
-bool XboxController::State::Equals(const State& lhs, const State& rhs)
+bool XboxController::State::operator==(const XboxController::State& rhs)
 {
-   return (lhs.buttons == rhs.buttons)
-      && (lhs.leftThumbX == rhs.leftThumbX)
-      && (lhs.leftThumbY == rhs.leftThumbY)
-      && (lhs.leftTrigger == rhs.leftTrigger)
-      && (lhs.rightThumbX == rhs.rightThumbX)
-      && (lhs.rightThumbY == rhs.rightThumbY)
-      && (lhs.rightTrigger == rhs.rightTrigger)
-      && (lhs.batteryType == rhs.batteryType)
-      && (lhs.batteryLevel == rhs.batteryLevel);
+   return (buttons == rhs.buttons)
+      && (leftThumbX == rhs.leftThumbX)
+      && (leftThumbY == rhs.leftThumbY)
+      && (leftTrigger == rhs.leftTrigger)
+      && (rightThumbX == rhs.rightThumbX)
+      && (rightThumbY == rhs.rightThumbY)
+      && (rightTrigger == rhs.rightTrigger)
+      && (batteryType == rhs.batteryType)
+      && (batteryLevel == rhs.batteryLevel);
+}
+
+bool XboxController::State::operator!=(const XboxController::State& rhs)
+{
+   return !(*this == rhs);
 }
 
 bool XboxController::State::BatteryEquals(const State& lhs, const State& rhs)
@@ -324,12 +329,4 @@ XboxController::~XboxController()
    SetVibration(/*leftVibration =*/ 0, /*rightVibration =*/0);
 
    m_pollingTimer->stop();
-}
-
-bool operator==(const XboxController::State& lhs, const XboxController::State& rhs){
-   return XboxController::State::Equals(lhs, rhs);
-}
-
-bool operator!=(const XboxController::State& lhs, const XboxController::State& rhs){
-   return !XboxController::State::Equals(lhs, rhs);
 }

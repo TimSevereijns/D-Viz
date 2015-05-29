@@ -84,8 +84,10 @@ class XboxController : public QObject
              float rightThumbX;
              float rightThumbY;
 
-             static bool Equals(const State& lhs, const State& rhs);
              static bool BatteryEquals(const State& lhs, const State& rhs);
+
+             bool operator==(const XboxController::State& rhs);
+             bool operator!=(const XboxController::State& rhs);
       };
 
       explicit XboxController(unsigned int m_controllerNum = 0,
@@ -141,7 +143,4 @@ class XboxController : public QObject
 };
 
 #endif // XBOXCONTROLLER_H
-
-bool operator==(XboxController::State const& a, XboxController::State const& b);
-bool operator!=(XboxController::State const& a, XboxController::State const& b);
 
