@@ -104,8 +104,8 @@ class XboxController : public QObject
 
       const XboxController::State& GetCurrentState(void);
 
-      void SetHandler(const unsigned int targetButton, XboxController::KEY_STATE targetState,
-         const std::function<void ()>& handler);
+      void SetDownHandler(const unsigned int targetButton, const std::function<void ()>& handler);
+      void SetUpHandler(const unsigned int targetButton, const std::function<void ()>& handler);
 
    signals:
       void NewControllerState(XboxController::State);

@@ -194,17 +194,16 @@ void XboxController::StopAutoPolling()
    m_pollingTimer->stop();
 }
 
-void XboxController::SetHandler(const unsigned int targetButton,
-   const XboxController::KEY_STATE targetState, const std::function<void ()>& handler)
+void XboxController::SetDownHandler(const unsigned int targetButton,
+   const std::function<void ()>& handler)
 {
-   if (targetState == XboxController::KEY_STATE::UP)
-   {
-      m_buttonMap[targetButton].onButtonUp = handler;
-   }
-   else if (targetState == XboxController::KEY_STATE::DOWN)
-   {
-      m_buttonMap[targetButton].onButtonDown = handler;
-   }
+   m_buttonMap[targetButton].onButtonDown = handler;
+}
+
+void XboxController::SetUpHandler(const unsigned int targetButton,
+   const std::function<void ()>& handler)
+{
+   m_buttonMap[targetButton].onButtonUp = handler;
 }
 
 bool XboxController::IsButtonDown(const unsigned int button) const
