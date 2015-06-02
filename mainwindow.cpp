@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/)
    : QMainWindow(parent),
      m_showDirectoriesOnly(false),
      m_xboxControllerConnected(false),
-     m_xboxController(nullptr),
+     m_xboxController(new XboxController(0)),
      m_xboxControllerState(nullptr),
      m_glCanvas(nullptr),
      m_optionsManager(new OptionsManager()),
@@ -40,6 +40,8 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/)
            std::pair<std::uintmax_t, QString>(1048576ull * 10000, "< 10 GiB")
         })
 {
+   SetupXboxController();
+
    m_ui->setupUi(this);
 
    CreateMenus();
@@ -48,7 +50,6 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/)
    m_ui->canvasLayout->addWidget(m_glCanvas.get());
 
    SetupSidebar();
-   SetupXboxController();
 }
 
 MainWindow::~MainWindow()
@@ -111,7 +112,6 @@ void MainWindow::SetupSidebar()
 
 void MainWindow::SetupXboxController()
 {
-   m_xboxController.reset(new XboxController(0));
    m_xboxController->StartAutoPolling(20);
 
    m_xboxController->SetDownHandler(XINPUT_GAMEPAD_Y,
