@@ -72,6 +72,7 @@ void MainWindow::SetupSidebar()
 
    connect(m_ui->fieldOfViewSlider, &QSlider::valueChanged, this, &MainWindow::OnFieldOfViewChanged);
 
+   // TODO: Reintroduce the options manager:
    connect(m_ui->cameraSpeedSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
       &GLCanvas::OnCameraMovementSpeedChanged);

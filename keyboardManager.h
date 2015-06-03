@@ -5,6 +5,10 @@
 
 #include <QKeyEvent>
 
+/**
+ * @brief The KeyboardManager class tracks the state of various keys on the keyboard. This is
+ * especially useful when you want to know if a particular key is being held down or not.
+ */
 class KeyboardManager
 {
    public:

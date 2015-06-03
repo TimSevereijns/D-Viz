@@ -16,7 +16,9 @@
 #define MAX_VIBRATION_VALUE 65535u
 
 /**
- * @brief The XboxController class is heavily based on the SimpleXbox360Controller by pilatomic:
+ * @brief The XboxController class tracks and manages the state of the attached Xbox controller(s).
+ *
+ * Start life as a class based on SimpleXbox360Controller by pilatomic:
  * https://www.gitorious.org/simple-xbox-360-controller/pages/Home
  */
 class XboxController : public QObject

@@ -216,7 +216,10 @@ GLCanvas::GLCanvas(QWidget* parent)
    timer->start(20);
 
    m_mainWindow->GetXboxControllerManager().SetUpHandler(XINPUT_GAMEPAD_Y,
-      [&] () { m_isLightAttachedToCamera = !m_isLightAttachedToCamera; });
+      [&] ()
+   {
+      m_isLightAttachedToCamera = !m_isLightAttachedToCamera;
+   });
 }
 
 GLCanvas::~GLCanvas()
