@@ -177,15 +177,15 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_treeMap(nullptr),
      m_isPaintingSuspended(false),
      m_isVisualizationLoaded(false),
-     m_useXBoxController(false),
-     m_isLightAttachedToCamera(true),
+     //m_useXBoxController(false),
+     //m_isLightAttachedToCamera(true),
      m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
      m_distance(2.5),
-     m_cameraMovementSpeed(0.25),
-     m_mouseSensitivity(0.25),
-     m_ambientCoefficient(0.005f),
-     m_attenuation(.05f),
-     m_materialShininess(80.0f),
+     //m_cameraMovementSpeed(0.25),
+     //m_mouseSensitivity(0.25),
+     //m_ambientCoefficient(0.005f),
+     //m_attenuation(.05f),
+     //m_materialShininess(80.0f),
      m_redLightComponent(1.0f),
      m_greenLightComponent(1.0f),
      m_blueLightComponent(1.0f),
@@ -197,6 +197,8 @@ GLCanvas::GLCanvas(QWidget* parent)
    {
       throw std::invalid_argument("Parent couldn't be interpreted as a MainWindow instance.");
    }
+
+   m_settings = m_mainWindow->GetOptionsManager();
 
    // Set up the camera:
    m_camera.SetAspectRatio(3.0f / 2.0f);
@@ -215,11 +217,11 @@ GLCanvas::GLCanvas(QWidget* parent)
    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
    timer->start(20);
 
-   m_mainWindow->GetXboxControllerManager().SetUpHandler(XINPUT_GAMEPAD_Y,
-      [&] ()
-   {
-      m_isLightAttachedToCamera = !m_isLightAttachedToCamera;
-   });
+//   m_mainWindow->GetXboxControllerManager().SetUpHandler(XINPUT_GAMEPAD_Y,
+//      [&] ()
+//   {
+//      m_isLightAttachedToCamera = !m_isLightAttachedToCamera;
+//   });
 }
 
 GLCanvas::~GLCanvas()
@@ -429,11 +431,11 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
 
    if (event->key() == Qt::Key_Up)
    {
-      m_cameraMovementSpeed *= 1.25f;
+      m_settings->m_cameraMovementSpeed *= 1.25f;
    }
    else if (event->key() == Qt::Key_Down)
    {
-      m_cameraMovementSpeed *= 0.75f;
+      m_settings->m_cameraMovementSpeed *= 0.75f;
    }
 
    const auto keyState = KeyboardManager::KEY_STATE::DOWN;
@@ -484,7 +486,8 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 
    if (event->buttons() & Qt::LeftButton)
    {
-      m_camera.OffsetOrientation(m_mouseSensitivity * deltaY, m_mouseSensitivity * deltaX);
+      m_camera.OffsetOrientation(m_settings->m_mouseSensitivity * deltaY,
+         m_settings->m_mouseSensitivity * deltaX);
    }
 
    m_lastMousePosition = event->pos();
@@ -513,29 +516,29 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    event->accept();
 }
 
-void GLCanvas::OnCameraMovementSpeedChanged(const double newSpeed)
-{
-   m_cameraMovementSpeed = newSpeed;
-}
+//void GLCanvas::OnCameraMovementSpeedChanged(const double newSpeed)
+//{
+//   m_settingsm_cameraMovementSpeed = newSpeed;
+//}
 
-void GLCanvas::OnMouseSensitivityChanged(const double newSensitivity)
-{
-   m_mouseSensitivity = newSensitivity;
-}
+//void GLCanvas::OnMouseSensitivityChanged(const double newSensitivity)
+//{
+//   m_mouseSensitivity = newSensitivity;
+//}
 
-void GLCanvas::OnAmbientCoefficientChanged(const double newCoefficient)
-{
-   m_ambientCoefficient = static_cast<float>(newCoefficient);
-}
+//void GLCanvas::OnAmbientCoefficientChanged(const double newCoefficient)
+//{
+//   m_ambientCoefficient = static_cast<float>(newCoefficient);
+//}
 
-void GLCanvas::OnAttenuationChanged(const double newAttenuation)
-{
-   m_attenuation = static_cast<float>(newAttenuation);
-}
+//void GLCanvas::OnAttenuationChanged(const double newAttenuation)
+//{
+//   m_attenuation = static_cast<float>(newAttenuation);
+//}
 
 void GLCanvas::OnShininessChanged(const double newShininess)
 {
-   m_materialShininess = static_cast<float>(newShininess);
+   m_settings->m_materialShininess = static_cast<float>(newShininess);
 }
 
 void GLCanvas::OnRedLightComponentChanged(const int value)
@@ -553,19 +556,19 @@ void GLCanvas::OnBlueLightComponentChanged(const int value)
    m_blueLightComponent = static_cast<float>(value) / 100.0;
 }
 
-void GLCanvas::OnUseXBoxControllerStateChanged(const bool useController)
-{
-   m_useXBoxController = useController;
-}
+//void GLCanvas::OnUseXBoxControllerStateChanged(const bool useController)
+//{
+//   m_useXBoxController = useController;
+//}
 
-void GLCanvas::OnAttachLightToCameraStateChanged(const bool attached)
-{
-   m_isLightAttachedToCamera = attached;
-}
+//void GLCanvas::OnAttachLightToCameraStateChanged(const bool attached)
+//{
+//   m_isLightAttachedToCamera = attached;
+//}
 
 void GLCanvas::HandleInput()
 {
-   if (m_useXBoxController && m_mainWindow->IsXboxControllerConnected())
+   if (m_settings->m_useXBoxController && m_mainWindow->IsXboxControllerConnected())
    {
       HandleXBoxControllerInput();
 
@@ -587,22 +590,26 @@ void GLCanvas::HandleInput()
 
    if (isKeyWDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Forward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed *
+         m_camera.Forward());
    }
 
    if (isKeyADown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Left());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed *
+         m_camera.Left());
    }
 
    if (isKeySDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Backward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed *
+         m_camera.Backward());
    }
 
    if (isKeyDDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Right());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed *
+         m_camera.Right());
    }
 }
 
@@ -618,34 +625,38 @@ void GLCanvas::HandleXBoxControllerInput()
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_UP))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Forward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
+         * m_camera.Forward());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_LEFT))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Left());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
+         * m_camera.Left());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_DOWN))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Backward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
+         * m_camera.Backward());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_RIGHT))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_cameraMovementSpeed * m_camera.Right());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
+         * m_camera.Right());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_LEFT_SHOULDER))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() *
-         (m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION_FACTOR) * m_camera.Down());
+         (m_settings->m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION_FACTOR) * m_camera.Down());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_RIGHT_SHOULDER))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() *
-         (m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION_FACTOR) * m_camera.Up());
+         (m_settings->m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION_FACTOR) * m_camera.Up());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_BACK))
@@ -657,15 +668,15 @@ void GLCanvas::HandleXBoxControllerInput()
    if (controllerState.rightThumbX || controllerState.rightThumbY)
    {
       m_camera.OffsetOrientation(
-         MOVEMENT_AMPLIFICATION_FACTOR * m_mouseSensitivity * -controllerState.rightThumbY,
-         MOVEMENT_AMPLIFICATION_FACTOR * m_mouseSensitivity * controllerState.rightThumbX);
+         MOVEMENT_AMPLIFICATION_FACTOR * m_settings->m_mouseSensitivity * -controllerState.rightThumbY,
+         MOVEMENT_AMPLIFICATION_FACTOR * m_settings->m_mouseSensitivity * controllerState.rightThumbX);
    }
 
    // Handle camera forward/backward movement via left thumb stick:
    if (controllerState.leftThumbY != 0)
    {
       m_camera.OffsetPosition(
-         MOVEMENT_AMPLIFICATION_FACTOR * m_cameraMovementSpeed * controllerState.leftThumbY *
+         MOVEMENT_AMPLIFICATION_FACTOR * m_settings->m_cameraMovementSpeed * controllerState.leftThumbY *
          m_camera.Forward());
    }
 
@@ -673,7 +684,7 @@ void GLCanvas::HandleXBoxControllerInput()
    if (controllerState.leftThumbX != 0)
    {
       m_camera.OffsetPosition(
-         MOVEMENT_AMPLIFICATION_FACTOR * m_cameraMovementSpeed * controllerState.leftThumbX *
+         MOVEMENT_AMPLIFICATION_FACTOR * m_settings->m_cameraMovementSpeed * controllerState.leftThumbX *
          m_camera.Right());
    }
 }
@@ -702,7 +713,7 @@ void GLCanvas::paintGL()
 
    HandleInput();
 
-   if (m_isLightAttachedToCamera)
+   if (m_settings->m_isLightAttachedToCamera)
    {
       m_light.position = m_camera.GetPosition();
    }
@@ -732,14 +743,14 @@ void GLCanvas::paintGL()
       m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
       m_visualizationShaderProgram.setUniformValue("cameraPosition", m_camera.GetPosition());
 
-      m_visualizationShaderProgram.setUniformValue("materialShininess", m_materialShininess);
+      m_visualizationShaderProgram.setUniformValue("materialShininess", m_settings->m_materialShininess);
       m_visualizationShaderProgram.setUniformValue("materialSpecularColor",
          QVector3D(m_redLightComponent, m_greenLightComponent, m_blueLightComponent));
 
       m_visualizationShaderProgram.setUniformValue("light.position", m_light.position);
       m_visualizationShaderProgram.setUniformValue("light.intensity", m_light.intensity);
-      m_visualizationShaderProgram.setUniformValue("light.attenuation", m_attenuation);
-      m_visualizationShaderProgram.setUniformValue("light.ambientCoefficient", m_ambientCoefficient);
+      m_visualizationShaderProgram.setUniformValue("light.attenuation", m_settings->m_lightAttenuationFactor);
+      m_visualizationShaderProgram.setUniformValue("light.ambientCoefficient", m_settings->m_ambientCoefficient);
 
       m_visualizationVAO.bind();
 

@@ -46,6 +46,8 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/)
 
    CreateMenus();
 
+   assert(m_optionsManager);
+
    m_glCanvas.reset(new GLCanvas(this));
    m_ui->canvasLayout->addWidget(m_glCanvas.get());
 
@@ -72,26 +74,25 @@ void MainWindow::SetupSidebar()
 
    connect(m_ui->fieldOfViewSlider, &QSlider::valueChanged, this, &MainWindow::OnFieldOfViewChanged);
 
-   // TODO: Reintroduce the options manager:
    connect(m_ui->cameraSpeedSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
-      &GLCanvas::OnCameraMovementSpeedChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_optionsManager.get(),
+      &OptionsManager::OnCameraMovementSpeedChanged);
 
    connect(m_ui->mouseSensitivitySpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
-      &GLCanvas::OnMouseSensitivityChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_optionsManager.get(),
+      &OptionsManager::OnMouseSensitivityChanged);
 
    connect(m_ui->ambientCoefficientSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
-      &GLCanvas::OnAmbientCoefficientChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_optionsManager.get(),
+      &OptionsManager::OnAmbientCoefficientChanged);
 
    connect(m_ui->attenuationSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
-      &GLCanvas::OnAttenuationChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_optionsManager.get(),
+      &OptionsManager::OnAttenuationChanged);
 
    connect(m_ui->shininesSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_glCanvas.get(),
-      &GLCanvas::OnShininessChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_optionsManager.get(),
+      &OptionsManager::OnShininessChanged);
 
    connect(m_ui->lightRedSlider, &QSlider::valueChanged, m_glCanvas.get(),
       &GLCanvas::OnRedLightComponentChanged);
@@ -103,12 +104,12 @@ void MainWindow::SetupSidebar()
       &GLCanvas::OnBlueLightComponentChanged);
 
    connect(m_ui->attachLightToCameraCheckBox,
-      static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), m_glCanvas.get(),
-      &GLCanvas::OnAttachLightToCameraStateChanged);
+      static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), m_optionsManager.get(),
+      &OptionsManager::OnAttachLightToCameraStateChanged);
 
    connect(m_ui->useXBoxController,
-      static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), m_glCanvas.get(),
-      &GLCanvas::OnUseXBoxControllerStateChanged);
+      static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), m_optionsManager.get(),
+      &OptionsManager::OnUseXBoxControllerStateChanged);
 }
 
 void MainWindow::SetupXboxController()
@@ -243,7 +244,7 @@ XboxController& MainWindow::GetXboxControllerManager()
    return *m_xboxController.get();
 }
 
-OptionsManager* MainWindow::GetOptionsManager()
+std::shared_ptr<OptionsManager> MainWindow::GetOptionsManager()
 {
-   return m_optionsManager.get();
+   return m_optionsManager;
 }

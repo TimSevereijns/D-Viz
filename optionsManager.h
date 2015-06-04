@@ -76,9 +76,10 @@ class OptionsManager : public QObject
    public:
       double m_cameraMovementSpeed;
       double m_mouseSensitivity;
-      double m_ambientCoefficient;
-      double m_lightAttenuationFactor;
-      double m_materialShininess;
+
+      float m_ambientCoefficient;
+      float m_lightAttenuationFactor;
+      float m_materialShininess;
 
       int m_fieldOfView;
 

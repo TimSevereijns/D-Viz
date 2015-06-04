@@ -50,7 +50,7 @@ class MainWindow : public QMainWindow
        * @brief GetOptionsManager
        * @return
        */
-      OptionsManager* GetOptionsManager();
+      std::shared_ptr<OptionsManager> GetOptionsManager();
 
       /**
        * @brief GetXboxControllerManager
@@ -128,7 +128,8 @@ class MainWindow : public QMainWindow
       std::unique_ptr<QAction> m_fileMenuExit;
 
       std::unique_ptr<GLCanvas> m_glCanvas;
-      std::unique_ptr<OptionsManager> m_optionsManager;
+
+      std::shared_ptr<OptionsManager> m_optionsManager;
 
       Ui::MainWindow* m_ui; // Unfortunately it would appear as if this has to remain a raw pointer.
 
