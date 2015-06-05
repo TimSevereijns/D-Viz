@@ -186,9 +186,9 @@ GLCanvas::GLCanvas(QWidget* parent)
      //m_ambientCoefficient(0.005f),
      //m_attenuation(.05f),
      //m_materialShininess(80.0f),
-     m_redLightComponent(1.0f),
-     m_greenLightComponent(1.0f),
-     m_blueLightComponent(1.0f),
+     //m_redLightComponent(1.0f),
+     //m_greenLightComponent(1.0f),
+     //m_blueLightComponent(1.0f),
      m_lastFrameTimeStamp(std::chrono::system_clock::now()),
      m_visualizationVertexColorBuffer(QOpenGLBuffer::VertexBuffer),
      m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer)
@@ -536,25 +536,25 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 //   m_attenuation = static_cast<float>(newAttenuation);
 //}
 
-void GLCanvas::OnShininessChanged(const double newShininess)
-{
-   m_settings->m_materialShininess = static_cast<float>(newShininess);
-}
+//void GLCanvas::OnShininessChanged(const double newShininess)
+//{
+//   m_settings->m_materialShininess = static_cast<float>(newShininess);
+//}
 
-void GLCanvas::OnRedLightComponentChanged(const int value)
-{
-   m_redLightComponent = static_cast<float>(value) / 100.0;
-}
+//void GLCanvas::OnRedLightComponentChanged(const int value)
+//{
+//   m_redLightComponent = static_cast<float>(value) / 100.0;
+//}
 
-void GLCanvas::OnGreenLightComponentChanged(const int value)
-{
-   m_greenLightComponent = static_cast<float>(value) / 100.0;
-}
+//void GLCanvas::OnGreenLightComponentChanged(const int value)
+//{
+//   m_greenLightComponent = static_cast<float>(value) / 100.0;
+//}
 
-void GLCanvas::OnBlueLightComponentChanged(const int value)
-{
-   m_blueLightComponent = static_cast<float>(value) / 100.0;
-}
+//void GLCanvas::OnBlueLightComponentChanged(const int value)
+//{
+//   m_blueLightComponent = static_cast<float>(value) / 100.0;
+//}
 
 //void GLCanvas::OnUseXBoxControllerStateChanged(const bool useController)
 //{
@@ -676,16 +676,16 @@ void GLCanvas::HandleXBoxControllerInput()
    if (controllerState.leftThumbY != 0)
    {
       m_camera.OffsetPosition(
-         MOVEMENT_AMPLIFICATION_FACTOR * m_settings->m_cameraMovementSpeed * controllerState.leftThumbY *
-         m_camera.Forward());
+         MOVEMENT_AMPLIFICATION_FACTOR * m_settings->m_cameraMovementSpeed * controllerState.leftThumbY
+         * m_camera.Forward());
    }
 
    // Handle camera left/right movement via left thumb stick:
    if (controllerState.leftThumbX != 0)
    {
       m_camera.OffsetPosition(
-         MOVEMENT_AMPLIFICATION_FACTOR * m_settings->m_cameraMovementSpeed * controllerState.leftThumbX *
-         m_camera.Right());
+         MOVEMENT_AMPLIFICATION_FACTOR * m_settings->m_cameraMovementSpeed * controllerState.leftThumbX
+         * m_camera.Right());
    }
 }
 
@@ -745,7 +745,8 @@ void GLCanvas::paintGL()
 
       m_visualizationShaderProgram.setUniformValue("materialShininess", m_settings->m_materialShininess);
       m_visualizationShaderProgram.setUniformValue("materialSpecularColor",
-         QVector3D(m_redLightComponent, m_greenLightComponent, m_blueLightComponent));
+         QVector3D(m_settings->m_redLightComponent, m_settings->m_greenLightComponent,
+         m_settings->m_blueLightComponent));
 
       m_visualizationShaderProgram.setUniformValue("light.position", m_light.position);
       m_visualizationShaderProgram.setUniformValue("light.intensity", m_light.intensity);

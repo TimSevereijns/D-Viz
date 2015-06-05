@@ -7,6 +7,9 @@ OptionsManager::OptionsManager()
      m_lightAttenuationFactor(0.05),
      m_materialShininess(80.0),
      m_fieldOfView(45),
+     m_redLightComponent(1.0f),
+     m_greenLightComponent(1.0f),
+     m_blueLightComponent(1.0f),
      m_isXboxControllerConnected(false),
      m_useXBoxController(false),
      m_isLightAttachedToCamera(true)
@@ -57,3 +60,19 @@ void OptionsManager::OnFieldOfViewChanged(int fieldOfView)
 {
    m_fieldOfView = fieldOfView;
 }
+
+void OptionsManager::OnRedLightComponentChanged(const int value)
+{
+   m_redLightComponent = static_cast<float>(value) / 100.0;
+}
+
+void OptionsManager::OnGreenLightComponentChanged(const int value)
+{
+   m_greenLightComponent = static_cast<float>(value) / 100.0;
+}
+
+void OptionsManager::OnBlueLightComponentChanged(const int value)
+{
+   m_blueLightComponent = static_cast<float>(value) / 100.0;
+}
+

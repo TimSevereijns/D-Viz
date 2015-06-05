@@ -94,14 +94,14 @@ void MainWindow::SetupSidebar()
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_optionsManager.get(),
       &OptionsManager::OnShininessChanged);
 
-   connect(m_ui->lightRedSlider, &QSlider::valueChanged, m_glCanvas.get(),
-      &GLCanvas::OnRedLightComponentChanged);
+   connect(m_ui->lightRedSlider, &QSlider::valueChanged, m_optionsManager.get(),
+      &OptionsManager::OnRedLightComponentChanged);
 
-   connect(m_ui->lightGreenSlider, &QSlider::valueChanged, m_glCanvas.get(),
-      &GLCanvas::OnGreenLightComponentChanged);
+   connect(m_ui->lightGreenSlider, &QSlider::valueChanged, m_optionsManager.get(),
+      &OptionsManager::OnGreenLightComponentChanged);
 
-   connect(m_ui->lightBlueSlider, &QSlider::valueChanged, m_glCanvas.get(),
-      &GLCanvas::OnBlueLightComponentChanged);
+   connect(m_ui->lightBlueSlider, &QSlider::valueChanged, m_optionsManager.get(),
+      &OptionsManager::OnBlueLightComponentChanged);
 
    connect(m_ui->attachLightToCameraCheckBox,
       static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), m_optionsManager.get(),

@@ -115,25 +115,25 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
        *
        * @param[in] newShininess    The new shininess value.
        */
-      void OnShininessChanged(const double newShininess);
+      //void OnShininessChanged(const double newShininess);
 
       /**
        * @brief OnRedLightComponentChanged
        * @param value
        */
-      void OnRedLightComponentChanged(const int value);
+      //void OnRedLightComponentChanged(const int value);
 
       /**
        * @brief OnGreenLightComponentChanged
        * @param value
        */
-      void OnGreenLightComponentChanged(const int value);
+      //void OnGreenLightComponentChanged(const int value);
 
       /**
        * @brief OnBlueLightComponentChanged
        * @param value
        */
-      void OnBlueLightComponentChanged(const int value);
+      //void OnBlueLightComponentChanged(const int value);
 
       /**
        * @brief OnUseXBoxControllerStateChanged sets whether the XBox controller is to be used.
@@ -183,9 +183,9 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       //float m_attenuation;
       //float m_materialShininess;
 
-      float m_redLightComponent;
-      float m_greenLightComponent;
-      float m_blueLightComponent;
+      //float m_redLightComponent;
+      //float m_greenLightComponent;
+      //float m_blueLightComponent;
 
       std::wstring m_visualizedDirectory;
 

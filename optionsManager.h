@@ -73,6 +73,24 @@ class OptionsManager : public QObject
        */
       void OnFieldOfViewChanged(int fieldOfView);
 
+      /**
+       * @brief OnRedLightComponentChanged
+       * @param value
+       */
+      void OnRedLightComponentChanged(const int value);
+
+      /**
+       * @brief OnGreenLightComponentChanged
+       * @param value
+       */
+      void OnGreenLightComponentChanged(const int value);
+
+      /**
+       * @brief OnBlueLightComponentChanged
+       * @param value
+       */
+      void OnBlueLightComponentChanged(const int value);
+
    public:
       double m_cameraMovementSpeed;
       double m_mouseSensitivity;
@@ -80,6 +98,10 @@ class OptionsManager : public QObject
       float m_ambientCoefficient;
       float m_lightAttenuationFactor;
       float m_materialShininess;
+
+      float m_redLightComponent;
+      float m_greenLightComponent;
+      float m_blueLightComponent;
 
       int m_fieldOfView;
 
