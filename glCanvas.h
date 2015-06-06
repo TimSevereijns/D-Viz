@@ -78,76 +78,6 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
        */
       void SetFieldOfView(const float fieldOfView);
 
-   public slots:     // Move all of these functions to a unified options manager.
-      /**
-       * @brief OnCameraMovementSpeedChanged should be called when the camera's movement speed
-       * changes.
-       *
-       * @param[in] newSpeed        The new speed.
-       */
-      //void OnCameraMovementSpeedChanged(const double newSpeed);
-
-      /**
-       * @brief OnMouseSensitivityChanged should be called when the mouse's movement sensitivity
-       * changes.
-       *
-       * @param[in] newSensitivity  The new sensitivity value.
-       */
-      //void OnMouseSensitivityChanged(const double newSensitivity);
-
-      /**
-       * @brief OnAmbientCoefficientChanged should be called when the scene's minimum ambient
-       * lighting changes.
-       *
-       * @param[in] newCoefficient  The new ambient lighting coefficient.
-       */
-      //void OnAmbientCoefficientChanged(const double newCoefficient);
-
-      /**
-       * @brief OnAttenuationChanged should be called when the point light's attentuation changes.
-       *
-       * @param[in] newAttenuation  The new attenuation factor.
-       */
-      //void OnAttenuationChanged(const double newAttenuation);
-
-      /**
-       * @brief OnShininessChanged should be called when the block material shininess changes.
-       *
-       * @param[in] newShininess    The new shininess value.
-       */
-      //void OnShininessChanged(const double newShininess);
-
-      /**
-       * @brief OnRedLightComponentChanged
-       * @param value
-       */
-      //void OnRedLightComponentChanged(const int value);
-
-      /**
-       * @brief OnGreenLightComponentChanged
-       * @param value
-       */
-      //void OnGreenLightComponentChanged(const int value);
-
-      /**
-       * @brief OnBlueLightComponentChanged
-       * @param value
-       */
-      //void OnBlueLightComponentChanged(const int value);
-
-      /**
-       * @brief OnUseXBoxControllerStateChanged sets whether the XBox controller is to be used.
-       *
-       * @param[in] useController   Pass in true to enable the use of the XBox controller.
-       */
-      //void OnUseXBoxControllerStateChanged(const bool useController);
-
-      /**
-       * @brief OnAttachLightToCameraStateChanged
-       * @param attached
-       */
-      //void OnAttachLightToCameraStateChanged(const bool attached);
-
    protected:
       void initializeGL() override;
       void resizeGL(int width, int height) override;
@@ -172,20 +102,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
       bool m_isPaintingSuspended;
       bool m_isVisualizationLoaded;
-      //bool m_useXBoxController;
-      //bool m_isLightAttachedToCamera;
 
       double m_distance;
-      //double m_cameraMovementSpeed;
-      //double m_mouseSensitivity;
-
-      //float m_ambientCoefficient;
-      //float m_attenuation;
-      //float m_materialShininess;
-
-      //float m_redLightComponent;
-      //float m_greenLightComponent;
-      //float m_blueLightComponent;
 
       std::wstring m_visualizedDirectory;
 

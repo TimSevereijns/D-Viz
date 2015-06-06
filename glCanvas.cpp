@@ -177,18 +177,8 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_treeMap(nullptr),
      m_isPaintingSuspended(false),
      m_isVisualizationLoaded(false),
-     //m_useXBoxController(false),
-     //m_isLightAttachedToCamera(true),
      m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
      m_distance(2.5),
-     //m_cameraMovementSpeed(0.25),
-     //m_mouseSensitivity(0.25),
-     //m_ambientCoefficient(0.005f),
-     //m_attenuation(.05f),
-     //m_materialShininess(80.0f),
-     //m_redLightComponent(1.0f),
-     //m_greenLightComponent(1.0f),
-     //m_blueLightComponent(1.0f),
      m_lastFrameTimeStamp(std::chrono::system_clock::now()),
      m_visualizationVertexColorBuffer(QOpenGLBuffer::VertexBuffer),
      m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer)
@@ -516,56 +506,6 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    event->accept();
 }
 
-//void GLCanvas::OnCameraMovementSpeedChanged(const double newSpeed)
-//{
-//   m_settingsm_cameraMovementSpeed = newSpeed;
-//}
-
-//void GLCanvas::OnMouseSensitivityChanged(const double newSensitivity)
-//{
-//   m_mouseSensitivity = newSensitivity;
-//}
-
-//void GLCanvas::OnAmbientCoefficientChanged(const double newCoefficient)
-//{
-//   m_ambientCoefficient = static_cast<float>(newCoefficient);
-//}
-
-//void GLCanvas::OnAttenuationChanged(const double newAttenuation)
-//{
-//   m_attenuation = static_cast<float>(newAttenuation);
-//}
-
-//void GLCanvas::OnShininessChanged(const double newShininess)
-//{
-//   m_settings->m_materialShininess = static_cast<float>(newShininess);
-//}
-
-//void GLCanvas::OnRedLightComponentChanged(const int value)
-//{
-//   m_redLightComponent = static_cast<float>(value) / 100.0;
-//}
-
-//void GLCanvas::OnGreenLightComponentChanged(const int value)
-//{
-//   m_greenLightComponent = static_cast<float>(value) / 100.0;
-//}
-
-//void GLCanvas::OnBlueLightComponentChanged(const int value)
-//{
-//   m_blueLightComponent = static_cast<float>(value) / 100.0;
-//}
-
-//void GLCanvas::OnUseXBoxControllerStateChanged(const bool useController)
-//{
-//   m_useXBoxController = useController;
-//}
-
-//void GLCanvas::OnAttachLightToCameraStateChanged(const bool attached)
-//{
-//   m_isLightAttachedToCamera = attached;
-//}
-
 void GLCanvas::HandleInput()
 {
    if (m_settings->m_useXBoxController && m_mainWindow->IsXboxControllerConnected())
@@ -743,15 +683,18 @@ void GLCanvas::paintGL()
       m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
       m_visualizationShaderProgram.setUniformValue("cameraPosition", m_camera.GetPosition());
 
-      m_visualizationShaderProgram.setUniformValue("materialShininess", m_settings->m_materialShininess);
+      m_visualizationShaderProgram.setUniformValue("materialShininess",
+         m_settings->m_materialShininess);
       m_visualizationShaderProgram.setUniformValue("materialSpecularColor",
          QVector3D(m_settings->m_redLightComponent, m_settings->m_greenLightComponent,
          m_settings->m_blueLightComponent));
 
       m_visualizationShaderProgram.setUniformValue("light.position", m_light.position);
       m_visualizationShaderProgram.setUniformValue("light.intensity", m_light.intensity);
-      m_visualizationShaderProgram.setUniformValue("light.attenuation", m_settings->m_lightAttenuationFactor);
-      m_visualizationShaderProgram.setUniformValue("light.ambientCoefficient", m_settings->m_ambientCoefficient);
+      m_visualizationShaderProgram.setUniformValue("light.attenuation",
+         m_settings->m_lightAttenuationFactor);
+      m_visualizationShaderProgram.setUniformValue("light.ambientCoefficient",
+         m_settings->m_ambientCoefficient);
 
       m_visualizationVAO.bind();
 

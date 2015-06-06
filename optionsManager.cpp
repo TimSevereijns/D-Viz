@@ -18,7 +18,6 @@ OptionsManager::OptionsManager()
 
 OptionsManager::~OptionsManager()
 {
-
 }
 
 void OptionsManager::OnCameraMovementSpeedChanged(const double newSpeed)
