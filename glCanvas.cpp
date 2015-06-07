@@ -203,15 +203,9 @@ GLCanvas::GLCanvas(QWidget* parent)
    setFormat(format);
 
    // Set the target frame rate:
-   QTimer* timer = new QTimer(this);
-   connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-   timer->start(20);
-
-//   m_mainWindow->GetXboxControllerManager().SetUpHandler(XINPUT_GAMEPAD_Y,
-//      [&] ()
-//   {
-//      m_isLightAttachedToCamera = !m_isLightAttachedToCamera;
-//   });
+   m_frameRedrawTimer.reset(new QTimer(this));
+   connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
+   m_frameRedrawTimer->start(20);
 }
 
 GLCanvas::~GLCanvas()
@@ -599,11 +593,6 @@ void GLCanvas::HandleXBoxControllerInput()
          (m_settings->m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION_FACTOR) * m_camera.Up());
    }
 
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_BACK))
-   {
-      std::cout << "Back pressed" << std::endl;
-   }
-
    // Handle camera orientation via right thumb stick:
    if (controllerState.rightThumbX || controllerState.rightThumbY)
    {
@@ -676,7 +665,7 @@ void GLCanvas::paintGL()
    {
       m_visualizationShaderProgram.bind();
 
-      // The model matrix is always the same, since the model doesn't move:
+      // The model matrix is always the same, since the model itself doesn't move:
       const static QMatrix4x4 DEFAULT_MATRIX = QMatrix4x4();
 
       m_visualizationShaderProgram.setUniformValue("model", DEFAULT_MATRIX);
@@ -685,9 +674,15 @@ void GLCanvas::paintGL()
 
       m_visualizationShaderProgram.setUniformValue("materialShininess",
          m_settings->m_materialShininess);
-      m_visualizationShaderProgram.setUniformValue("materialSpecularColor",
-         QVector3D(m_settings->m_redLightComponent, m_settings->m_greenLightComponent,
-         m_settings->m_blueLightComponent));
+
+      const QVector3D specularColor
+      {
+         m_settings->m_redLightComponent,
+         m_settings->m_greenLightComponent,
+         m_settings->m_blueLightComponent
+      };
+
+      m_visualizationShaderProgram.setUniformValue("materialSpecularColor", specularColor);
 
       m_visualizationShaderProgram.setUniformValue("light.position", m_light.position);
       m_visualizationShaderProgram.setUniformValue("light.intensity", m_light.intensity);

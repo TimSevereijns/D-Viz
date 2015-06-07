@@ -16,6 +16,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLWidget>
+#include <QTimer>
 #include <QVector3D>
 
 /**
@@ -110,6 +111,7 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       MainWindow* m_mainWindow;
 
       std::unique_ptr<Visualization> m_treeMap;
+      std::unique_ptr<QTimer> m_frameRedrawTimer;
 
       Camera m_camera;
 
