@@ -43,32 +43,6 @@ namespace
    }
 
    /**
-    * @brief WideStringToNarrowString converts the given wide string to a narrow string.
-    * 
-    * @param[in] wide                  The wide string to be converted.
-    * @returns a narrow string.
-    */
-   std::string WideStringToNarrowString(const std::wstring& wide)
-   {
-      typedef std::codecvt_utf8<wchar_t> convertType;
-      std::wstring_convert<convertType, wchar_t> converter;
-      return converter.to_bytes(wide);
-   }
-
-   /**
-    * @brief NarrowStringToWideString converts the given string to a wide string.
-    * 
-    * @param[in] narrow                The string to convert.
-    * @returns a wide string
-    */
-   std::wstring NarrowStringToWideString(const std::string& narrow)
-   {
-       typedef std::codecvt_utf8<wchar_t> convertType;
-       std::wstring_convert<convertType, wchar_t> converter;
-       return converter.from_bytes(narrow);
-   }
-
-   /**
     * @brief SerializeRecursively is a helper function to recursively serialize the filesystem tree
     * into the specified JSON array.
     * 

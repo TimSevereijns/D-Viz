@@ -6,9 +6,10 @@
 #include "Visualizations/sliceAndDiceTreemap.h"
 #include "Visualizations/squarifiedTreemap.h"
 
+#include <QApplication>
 #include <QMouseEvent>
 #include <QOpenGLShader>
-
+#include <QProgressDialog>
 #include <QStatusBar>
 #include <QTimer>
 
@@ -164,21 +165,33 @@ namespace
       SetStatusBarMessage(mainWindow, message.str());
    }
 
+   /**
+    * @brief ScanDirectory
+    * @param parameters
+    * @param progressCallback
+    * @param mainWindow
+    * @return
+    */
    std::shared_ptr<Tree<VizNode>> ScanDirectory(const VisualizationParameters& parameters,
-      const std::function<void (std::uintmax_t)>& progressCallback)
+      const std::function<void (std::uintmax_t)>& progressCallback, MainWindow& mainWindow)
    {
       std::atomic<std::pair<std::uintmax_t, bool>> progress{std::make_pair(0, false)};
 
       DiskScanner scanner{parameters.rootDirectory};
       scanner.ScanInNewThread(&progress);
 
+      QProgressDialog progressDialog("Scanning Directory...", "Cancel", 0, 0, &mainWindow, 0);
+      progressDialog.setWindowModality(Qt::WindowModal);
+      progressDialog.setFixedWidth(600);
+      progressDialog.show();
+
       while (progress.load().second == false)
       {
-         std::cout << "Files scanned so far: " << progress.load().first << std::endl;
+         const unsigned int filesScannedSoFar = progress.load().first;
+         progressCallback(filesScannedSoFar);
 
-         progressCallback(progress.load().first);
-
-         std::this_thread::sleep_for(std::chrono::seconds(1));
+         QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+         std::this_thread::sleep_for(std::chrono::milliseconds(100));
       }
 
       scanner.JoinScanningThread();
@@ -197,7 +210,7 @@ namespace
     * @param[in] mainWindow         The mainwindow that contains the status bar to be updated.
     */
    void ScanAndParse(Visualization& visualization,
-      const VisualizationParameters& parameters, const MainWindow& mainWindow)
+      const VisualizationParameters& parameters, MainWindow& mainWindow)
    {
       const auto& statusBarUpdater = [&] (const std::uintmax_t numberOfFilesScanned)
       {
@@ -207,7 +220,7 @@ namespace
          SetStatusBarMessage(mainWindow, message.str());
       };
 
-      const auto& theTree = ScanDirectory(parameters, statusBarUpdater);
+      const auto& theTree = ScanDirectory(parameters, statusBarUpdater, mainWindow);
       visualization.Parse(theTree);
    }
 }
