@@ -6,10 +6,9 @@
 class SliceAndDiceTreeMap : public Visualization
 {
    public:
-      SliceAndDiceTreeMap(const std::wstring& rawPath);
-      ~SliceAndDiceTreeMap();
+      SliceAndDiceTreeMap(const VisualizationParameters& parameters);
 
-      void ParseScan() override;
+      void Parse(const std::shared_ptr<Tree<VizNode> >& theTree) override;
 };
 
 #endif // SLICEANDDICETREEMAP_H

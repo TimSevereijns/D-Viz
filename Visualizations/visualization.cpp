@@ -12,10 +12,9 @@ const double Visualization::MAX_PADDING = 0.75;
 const double Visualization::ROOT_BLOCK_WIDTH = 1000.0;
 const double Visualization::ROOT_BLOCK_DEPTH = 1000.0;
 
-Visualization::Visualization(const std::wstring& rawPath)
-   : m_diskScanner(rawPath),
-     m_hasDataBeenParsed(false),
-     m_hasScanBeenPerformed(false)
+Visualization::Visualization(const VisualizationParameters& parameters)
+   : m_vizParameters(parameters),
+     m_hasDataBeenParsed(false)
 {
 }
 
@@ -23,30 +22,10 @@ Visualization::~Visualization()
 {
 }
 
-void Visualization::ScanDirectory(const std::function<void (const std::uintmax_t)> progressCallback)
-{
-   std::atomic<std::pair<std::uintmax_t, bool>> progress{std::make_pair(0, false)};
-   m_diskScanner.ScanInNewThread(&progress);
-
-   while (progress.load().second == false)
-   {
-      std::cout << "Files scanned so far: "
-                << progress.load().first << std::endl;
-
-      progressCallback(progress.load().first);
-
-      std::this_thread::sleep_for(std::chrono::seconds(1));
-   }
-
-   m_diskScanner.JoinScanningThread();
-   m_diskScanner.PrintTreeMetadata();
-
-   m_hasScanBeenPerformed = true;
-}
-
-QVector<QVector3D>& Visualization::PopulateVertexBuffer(const ParsingOptions& options)
+QVector<QVector3D>& Visualization::PopulateVertexBuffer(const VisualizationParameters& parameters)
 {
    assert(m_hasDataBeenParsed);
+   assert(m_theTree);
 
    m_visualizationVertices.clear();
 
@@ -55,18 +34,17 @@ QVector<QVector3D>& Visualization::PopulateVertexBuffer(const ParsingOptions& op
       return m_visualizationVertices;
    }
 
-   const Tree<VizNode>& fileTree = m_diskScanner.GetFileTree();
-   std::for_each(fileTree.beginPreOrder(), fileTree.endPreOrder(),
+   std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
    {
-      if (!options.showDirectoriesOnly &&
-         node.GetData().m_file.m_size >= options.fileSizeMinimum)
+      if (!parameters.onlyShowDirectories &&
+         node.GetData().m_file.m_size >= parameters.minimumFileSize)
       {
          m_visualizationVertices << node.GetData().m_block.m_vertices;
       }
-      else if (options.showDirectoriesOnly &&
+      else if (parameters.onlyShowDirectories &&
          node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY &&
-         node.GetData().m_file.m_size >= options.fileSizeMinimum)
+         node.GetData().m_file.m_size >= parameters.minimumFileSize)
       {
          m_visualizationVertices << node.GetData().m_block.m_vertices;
       }
@@ -78,9 +56,10 @@ QVector<QVector3D>& Visualization::PopulateVertexBuffer(const ParsingOptions& op
    return m_visualizationVertices;
 }
 
-QVector<QVector3D>& Visualization::PopulateColorBuffer(const ParsingOptions& options)
+QVector<QVector3D>& Visualization::PopulateColorBuffer(const VisualizationParameters& options)
 {
    assert(m_hasDataBeenParsed);
+   assert(m_theTree);
 
    m_visualizationColors.clear();
 
@@ -89,18 +68,17 @@ QVector<QVector3D>& Visualization::PopulateColorBuffer(const ParsingOptions& opt
       return m_visualizationColors;
    }
 
-   const Tree<VizNode>& fileTree = m_diskScanner.GetFileTree();
-   std::for_each(fileTree.beginPreOrder(), fileTree.endPreOrder(),
+   std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
    {
-      if (!options.showDirectoriesOnly &&
+      if (!options.onlyShowDirectories &&
          node.GetData().m_file.m_type == FILE_TYPE::REGULAR &&
-         node.GetData().m_file.m_size >= options.fileSizeMinimum)
+         node.GetData().m_file.m_size >= options.minimumFileSize)
       {
          m_visualizationColors << Visualization::CreateBlockColors();
       }
       else if (node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY &&
-         node.GetData().m_file.m_size >= options.fileSizeMinimum)
+         node.GetData().m_file.m_size >= options.minimumFileSize)
       {
          m_visualizationColors << Visualization::CreateDirectoryColors();
       }
@@ -116,11 +94,6 @@ unsigned int Visualization::GetVertexCount() const
    assert(m_hasDataBeenParsed);
 
    return m_visualizationVertices.size();
-}
-
-bool Visualization::HasScanBeenPerformed() const
-{
-   return m_hasScanBeenPerformed;
 }
 
 QVector<QVector3D> Visualization::CreateBlockColors()

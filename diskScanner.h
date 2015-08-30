@@ -205,7 +205,6 @@ class DiskScanner
 
       explicit DiskScanner();
       explicit DiskScanner(const std::wstring& rawPpath);
-      ~DiskScanner();
 
       void PrintTree() const;
       void PrintTreeMetadata() const;
@@ -252,7 +251,7 @@ class DiskScanner
        * @brief GetDirectoryTree
        * @return
        */
-      Tree<VizNode>& GetFileTree() const;
+      std::shared_ptr<Tree<VizNode>> GetFileTree() const;
 
       /**
        * @brief ConvertBytesToMegaBytes Converts a size in bytes to megabytes.
@@ -277,7 +276,7 @@ class DiskScanner
       void ScanRecursively(const boost::filesystem::path& path, TreeNode<VizNode>& fileNode,
          std::atomic<std::pair<std::uintmax_t, bool>>* progress);
 
-      std::unique_ptr<Tree<VizNode>> m_fileTree;
+      std::shared_ptr<Tree<VizNode>> m_fileTree;
 
       boost::filesystem::path m_path;
 

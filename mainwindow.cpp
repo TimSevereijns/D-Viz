@@ -180,12 +180,13 @@ void MainWindow::OnFileMenuNewScan()
    {
       m_directoryToVisualize = selectedDirectory.toStdWString();
 
-      ParsingOptions parsingOptions;
-      parsingOptions.showDirectoriesOnly = false;
-      parsingOptions.forceNewScan = true;
-      parsingOptions.fileSizeMinimum = std::numeric_limits<std::uintmax_t>::min();
+      VisualizationParameters parameters;
+      parameters.rootDirectory = m_directoryToVisualize;
+      parameters.onlyShowDirectories = false;
+      parameters.forceNewScan = true;
+      parameters.minimumFileSize = 0;
 
-      m_glCanvas->ParseVisualization(m_directoryToVisualize, parsingOptions);
+      m_glCanvas->CreateNewVisualization(parameters);
    }
 }
 
@@ -196,12 +197,13 @@ void MainWindow::OnDirectoryOnlyStateChanged(int state)
 
 void MainWindow::OnPruneTreeButtonClicked()
 {
-   ParsingOptions parsingOptions;
-   parsingOptions.showDirectoriesOnly = m_showDirectoriesOnly;
+   VisualizationParameters parsingOptions;
+   parsingOptions.rootDirectory = m_directoryToVisualize;
+   parsingOptions.onlyShowDirectories = m_showDirectoriesOnly;
    parsingOptions.forceNewScan = false;
-   parsingOptions.fileSizeMinimum = m_sizePruningOptions[m_ui->pruneSizeComboBox->currentIndex()].first;
+   parsingOptions.minimumFileSize = m_sizePruningOptions[m_ui->pruneSizeComboBox->currentIndex()].first;
 
-   m_glCanvas->ParseVisualization(m_directoryToVisualize, parsingOptions);
+   m_glCanvas->CreateNewVisualization(parsingOptions);
 }
 
 void MainWindow::XboxControllerConnected()

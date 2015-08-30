@@ -3,7 +3,7 @@
 OptionsManager::OptionsManager()
    : m_cameraMovementSpeed(0.25),
      m_mouseSensitivity(0.25),
-     m_ambientCoefficient(0.005),
+     m_ambientCoefficient(0.075),
      m_lightAttenuationFactor(0.05),
      m_materialShininess(80.0),
      m_fieldOfView(45),
@@ -13,10 +13,6 @@ OptionsManager::OptionsManager()
      m_isXboxControllerConnected(false),
      m_useXBoxController(false),
      m_isLightAttachedToCamera(true)
-{
-}
-
-OptionsManager::~OptionsManager()
 {
 }
 

@@ -6,10 +6,9 @@
 class SquarifiedTreeMap : public Visualization
 {
    public:
-      SquarifiedTreeMap(const std::wstring& rawPath);
-      ~SquarifiedTreeMap();
+      SquarifiedTreeMap(const VisualizationParameters& parameters);
 
-      void ParseScan() override;
+      void Parse(const std::shared_ptr<Tree<VizNode>>& theTree) override;
 };
 
 #endif // SQUARIFIEDTREEMAP_H

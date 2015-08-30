@@ -132,10 +132,6 @@ DiskScanner::DiskScanner(const std::wstring& rawPath)
    m_path = path;
 }
 
-DiskScanner::~DiskScanner()
-{
-}
-
 void DiskScanner::StartScanning(std::atomic<std::pair<std::uintmax_t, bool>>* progress)
 {
    assert(boost::filesystem::is_directory(m_path));
@@ -152,7 +148,7 @@ void DiskScanner::StartScanning(std::atomic<std::pair<std::uintmax_t, bool>>* pr
    FileInfo fileInfo{L"Dummy Root Node", DiskScanner::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY};
    VizNode rootNode{fileInfo, rootBlock};
 
-   m_fileTree = std::make_unique<Tree<VizNode>>(Tree<VizNode>(rootNode));
+   m_fileTree = std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
 
    try
    {
@@ -244,9 +240,9 @@ std::uintmax_t DiskScanner::GetNumberOfFilesScanned()
    return m_filesScanned;
 }
 
-Tree<VizNode>& DiskScanner::GetFileTree() const
+std::shared_ptr<Tree<VizNode>> DiskScanner::GetFileTree() const
 {
-   return *m_fileTree.get();
+   return m_fileTree;
 }
 
 void DiskScanner::PrintTree() const

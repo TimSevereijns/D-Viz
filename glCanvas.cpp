@@ -144,9 +144,48 @@ namespace
     * @param[in] mainWindow         The window which contains the status bar to be updated.
     * @param[in] message            The message to be set on the status bar.
     */
-   void SetStatusBarMessage(const MainWindow& mainWindow, const std::wstring& message)
+   inline void SetStatusBarMessage(const MainWindow& mainWindow, const std::wstring& message)
    {
       mainWindow.statusBar()->showMessage(QString::fromStdWString(message));
+   }
+
+   /**
+    * @brief UpdateVertexCountInStatusBar
+    * @param vertexCount
+    * @param mainWindow
+    */
+   void UpdateVertexCountInStatusBar(const unsigned int vertexCount, const MainWindow& mainWindow)
+   {
+      std::wstringstream message;
+      message.imbue(std::locale(""));
+      message << std::fixed << vertexCount << L" vertices in "
+         << (vertexCount / Block::VERTICES_PER_BLOCK) << L" blocks";
+
+      SetStatusBarMessage(mainWindow, message.str());
+   }
+
+   std::shared_ptr<Tree<VizNode>> ScanDirectory(const VisualizationParameters& parameters,
+      const std::function<void (std::uintmax_t)>& progressCallback)
+   {
+      std::atomic<std::pair<std::uintmax_t, bool>> progress{std::make_pair(0, false)};
+
+      DiskScanner scanner{parameters.rootDirectory};
+      scanner.ScanInNewThread(&progress);
+
+      while (progress.load().second == false)
+      {
+         std::cout << "Files scanned so far: " << progress.load().first << std::endl;
+
+         progressCallback(progress.load().first);
+
+         std::this_thread::sleep_for(std::chrono::seconds(1));
+      }
+
+      scanner.JoinScanningThread();
+      scanner.PrintTreeMetadata();
+
+      const auto theTree = scanner.GetFileTree();
+      return theTree;
    }
 
    /**
@@ -157,9 +196,10 @@ namespace
     *                               on.
     * @param[in] mainWindow         The mainwindow that contains the status bar to be updated.
     */
-   void ScanAndParse(Visualization& treeMap, const MainWindow& mainWindow)
+   void ScanAndParse(Visualization& visualization,
+      const VisualizationParameters& parameters, const MainWindow& mainWindow)
    {
-      const auto statusBarUpdater = [&] (const std::uintmax_t numberOfFilesScanned)
+      const auto& statusBarUpdater = [&] (const std::uintmax_t numberOfFilesScanned)
       {
          std::wstringstream message;
          message.imbue(std::locale(""));
@@ -167,14 +207,14 @@ namespace
          SetStatusBarMessage(mainWindow, message.str());
       };
 
-      treeMap.ScanDirectory(statusBarUpdater);
-      treeMap.ParseScan();
+      const auto& theTree = ScanDirectory(parameters, statusBarUpdater);
+      visualization.Parse(theTree);
    }
 }
 
 GLCanvas::GLCanvas(QWidget* parent)
    : QOpenGLWidget(parent),
-     m_treeMap(nullptr),
+     m_theVisualization(nullptr),
      m_isPaintingSuspended(false),
      m_isVisualizationLoaded(false),
      m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
@@ -208,33 +248,10 @@ GLCanvas::GLCanvas(QWidget* parent)
    m_frameRedrawTimer->start(20);
 }
 
-GLCanvas::~GLCanvas()
+void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
 {
-}
-
-void GLCanvas::ParseVisualization(const std::wstring& path, const ParsingOptions& options)
-{
-   if (path.empty())
-   {
-      return;
-   }
-
-   m_isPaintingSuspended = true;
-
-   m_visualizedDirectory = path;
-
-   if (!m_treeMap || options.forceNewScan)
-   {
-      m_treeMap.reset(new SquarifiedTreeMap(m_visualizedDirectory));
-   }
-
-   if (m_treeMap && (options.forceNewScan || !m_treeMap->HasScanBeenPerformed()))
-   {
-      ScanAndParse(*m_treeMap, *m_mainWindow);
-   }
-
-   m_visualizationVertices = m_treeMap->PopulateVertexBuffer(options);
-   m_visualizationColors = m_treeMap->PopulateColorBuffer(options);
+   m_visualizationVertices = m_theVisualization->PopulateVertexBuffer(parameters);
+   m_visualizationColors = m_theVisualization->PopulateColorBuffer(parameters);
 
    m_isVisualizationLoaded = !(m_visualizationVertices.empty() && m_visualizationColors.empty());
 
@@ -246,12 +263,29 @@ void GLCanvas::ParseVisualization(const std::wstring& path, const ParsingOptions
       PrepareVisualizationVertexBuffers();
       PrepareVisualizationShaderProgram();
    }
+}
 
-   std::wstringstream message;
-   message.imbue(std::locale(""));
-   message << std::fixed << m_treeMap->GetVertexCount() << L" vertices in "
-      << (m_treeMap->GetVertexCount() / Block::VERTICES_PER_BLOCK) << L" blocks";
-   SetStatusBarMessage(*m_mainWindow, message.str());
+void GLCanvas::CreateNewVisualization(const VisualizationParameters& parameters)
+{
+   if (parameters.rootDirectory.empty())
+   {
+      return;
+   }
+
+   m_isPaintingSuspended = true;
+
+   if (!m_theVisualization || parameters.forceNewScan)
+   {
+      m_theVisualization.reset(new SquarifiedTreeMap(parameters));
+   }
+
+   if (m_theVisualization && parameters.forceNewScan)
+   {
+      ScanAndParse(*m_theVisualization, parameters, *m_mainWindow);
+   }
+
+   ReloadVisualization(parameters);
+   UpdateVertexCountInStatusBar(m_theVisualization->GetVertexCount(), *m_mainWindow);
 
    m_isPaintingSuspended = false;
 }

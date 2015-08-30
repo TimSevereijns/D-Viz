@@ -20,22 +20,20 @@
 #include <QVector3D>
 
 /**
- * @brief The Light struct represents a single point light. The light's fall-off with distance
- * can be tweaked via the attentuation attribute, and the light's contribution to the ambient
- * brightness of the scene can also be specified.
+ * @brief The Light struct represents a single point light.
  */
 struct Light
 {
-   QVector3D position;
-   QVector3D intensity;
-   float attenuation;
-   float ambientCoefficient;
+   QVector3D position;              ///< The position of the light in 3D space.
+   QVector3D intensity;             ///< The intensity of the RGB values, i.e., the light color.
+   float attenuation;               ///< The factor with which the light falls off with distance.
+   float ambientCoefficient;        ///< The light's contribution to ambient.
 
    Light()
       : position(QVector3D(0, 0, 0)),
         intensity(QVector3D(1, 1, 1)),
-        attenuation(0.75f),         // Arbitrary coefficient to control attenuation beyond distance.
-        ambientCoefficient(0.01f)   // Minimum brightness is 1% of maximum brightness
+        attenuation(0.75f),
+        ambientCoefficient(0.01f)
    {
    }
 
@@ -60,15 +58,20 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
    public:
       explicit GLCanvas(QWidget* parent = nullptr);
-      ~GLCanvas();
 
       /**
-       * @brief ParseVisualization
-       * 
-       * @param[in] path        The directory to visualize.
-       * @param[in] options     A struct containing a variety of tweakable parameters.
+       * @brief CreateNewVisualization
+       *
+       * @param[in] parameters      @see VisualizationParameters
        */
-      void ParseVisualization(const std::wstring& path, const ParsingOptions& options);
+      void CreateNewVisualization(const VisualizationParameters& parameters);
+
+      /**
+       * @brief ReloadVisualization
+       *
+       * @param[in] parameters      @see VisualizationParameters
+       */
+      void ReloadVisualization(const VisualizationParameters& parameters);
 
       /**
        * @brief setFieldOfView sets the current field of view for the camera.
@@ -78,8 +81,7 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
        * @param[in] fieldOfView  The new field of view.
        */
       void SetFieldOfView(const float fieldOfView);
-
-   protected:
+    protected:
       void initializeGL() override;
       void resizeGL(int width, int height) override;
       void paintGL() override;
@@ -106,11 +108,9 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
       double m_distance;
 
-      std::wstring m_visualizedDirectory;
-
       MainWindow* m_mainWindow;
 
-      std::unique_ptr<Visualization> m_treeMap;
+      std::unique_ptr<Visualization> m_theVisualization;
       std::unique_ptr<QTimer> m_frameRedrawTimer;
 
       Camera m_camera;
@@ -144,8 +144,6 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       std::chrono::system_clock::time_point m_lastFrameTimeStamp;
 
       QPoint m_lastMousePosition;
-
-   signals:
 };
 
 #endif // GLCANVAS_H

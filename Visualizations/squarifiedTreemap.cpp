@@ -501,21 +501,23 @@ namespace
    }
 }
 
-SquarifiedTreeMap::SquarifiedTreeMap(const std::wstring& rawPath)
-   : Visualization(rawPath)
+SquarifiedTreeMap::SquarifiedTreeMap(const VisualizationParameters& parameters)
+   : Visualization(parameters)
 {
 }
 
-SquarifiedTreeMap::~SquarifiedTreeMap()
+void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
 {
-}
+   if (!theTree)
+   {
+      assert(!"Whoops, no tree in sight!");
+      return;
+   }
 
-void SquarifiedTreeMap::ParseScan()
-{
-   Tree<VizNode>& tree = m_diskScanner.GetFileTree();
+   m_theTree = theTree;
 
-   PruneNodes(tree);
-   SortNodes(tree);
+   PruneNodes(*theTree);
+   SortNodes(*theTree);
 
    const Block rootBlock
    {
@@ -525,10 +527,10 @@ void SquarifiedTreeMap::ParseScan()
       Visualization::ROOT_BLOCK_DEPTH
    };
 
-   tree.GetHead()->GetData().m_block = rootBlock;
+   theTree->GetHead()->GetData().m_block = rootBlock;
 
    const auto startParseTime = std::chrono::high_resolution_clock::now();
-   Squarify(*tree.GetHead()->GetFirstChild());
+   Squarify(*theTree->GetHead()->GetFirstChild());
    const auto endParseTime = std::chrono::high_resolution_clock::now();
 
    auto parsingTime =

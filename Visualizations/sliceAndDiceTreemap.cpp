@@ -81,22 +81,18 @@ namespace
    }
 }
 
-SliceAndDiceTreeMap::SliceAndDiceTreeMap(const std::wstring& rawPath)
-   : Visualization(rawPath)
+SliceAndDiceTreeMap::SliceAndDiceTreeMap(const VisualizationParameters& parameters)
+   : Visualization(parameters)
 {
 }
 
-SliceAndDiceTreeMap::~SliceAndDiceTreeMap()
+void SliceAndDiceTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
 {
-}
-
-void SliceAndDiceTreeMap::ParseScan()
-{
-   auto& tree = m_diskScanner.GetFileTree();
+   m_theTree = theTree;
 
    const auto startSortTime = std::chrono::high_resolution_clock::now();
 
-   std::for_each(std::begin(tree), std::end(tree),
+   std::for_each(std::begin(*theTree), std::end(*theTree),
       [] (TreeNode<VizNode>& node)
    {
       node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
@@ -111,7 +107,7 @@ void SliceAndDiceTreeMap::ParseScan()
    std::cout << "Sort time (in seconds): " << sortingTime.count() << std::endl;
 
    const auto startParseTime = std::chrono::high_resolution_clock::now();
-   std::for_each(tree.beginPreOrder(), tree.endPreOrder(), ParseNode);
+   std::for_each(theTree->beginPreOrder(), theTree->endPreOrder(), ParseNode);
    const auto endParseTime = std::chrono::high_resolution_clock::now();
 
    std::chrono::duration<double> parsingTime =

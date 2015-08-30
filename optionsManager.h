@@ -12,7 +12,6 @@ class OptionsManager : public QObject
 
    public:
       OptionsManager();
-      ~OptionsManager();
 
    public slots:
       /**

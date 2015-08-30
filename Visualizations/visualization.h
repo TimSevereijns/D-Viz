@@ -5,26 +5,30 @@
 #include <QVector3D>
 
 #include <cstdint>
+#include <memory>
 #include <numeric>
 
+#include "../tree.h"
 #include "../diskScanner.h"
 
 /**
- * @brief The ParsingOptions struct represents the gamut of parsing options
- * available. This includes such things as to whether to show only directory,
- * whether to filter out files of a certain size, or whether to force a new
- * disk scan.
+ * @brief The ParsingOptions struct represents the gamut of visualization parameters that can be
+ * adjusted.
  */
-struct ParsingOptions
+struct VisualizationParameters
 {
-   bool showDirectoriesOnly;
-   bool forceNewScan;
-   std::uint64_t fileSizeMinimum;
+   std::wstring rootDirectory;      ///< The path to the directory at the root of the visualization.
 
-   ParsingOptions()
-      : showDirectoriesOnly(false),
-        forceNewScan(false),
-        fileSizeMinimum(std::numeric_limits<std::uintmax_t>::max())
+   std::uint64_t minimumFileSize;   ///< The minimum size a file should be before it shows up.
+
+   bool forceNewScan;               ///< Whether a new scan of the rootDirectory should take place.
+   bool onlyShowDirectories;        ///< Whether only directories should be shown.
+
+   VisualizationParameters()
+      : rootDirectory(L""),
+        minimumFileSize(0),
+        onlyShowDirectories(false),
+        forceNewScan(true)
    {
    }
 };
@@ -35,7 +39,7 @@ struct ParsingOptions
 class Visualization
 {
    public:
-      explicit Visualization(const std::wstring& rawPath);
+      explicit Visualization(const VisualizationParameters& parameters);
       virtual ~Visualization();
 
       static const double BLOCK_HEIGHT;
@@ -45,28 +49,19 @@ class Visualization
       static const double ROOT_BLOCK_DEPTH;
 
       /**
-       * @brief ScanDirectory stars a scan of the system, starting at the location specified
-       * through the constructor.
-       * 
-       * @param[in] statusBarUpdater         The function to be called once progress updates.
+       * Parses the specified directory scan into the vertex and color buffers.
        */
-      virtual void ScanDirectory(const std::function<void (const std::uintmax_t)> statusBarUpdater);
-      
-      /**
-       * A pure virtual function that indicates how the scan is to be parsed and interpreted.
-       */
-      virtual void ParseScan() = 0;
+      virtual void Parse(const std::shared_ptr<Tree<VizNode>>& theTree) = 0;
 
       /**
        * @brief PopulateVertexBuffer flushes the existing VBO and loads the newly
        * parsed vertices.
        * 
-       * @param[in] options            The options that specify how the scan is to
-       *                               be parsed and interpreted.
+       * @param[in] parameters         @see VisualizationParameters
        * 
        * @returns a vector of vertices.
        */
-      QVector<QVector3D>& PopulateVertexBuffer(const ParsingOptions& options);
+      QVector<QVector3D>& PopulateVertexBuffer(const VisualizationParameters& parameters);
 
       /**
        * @brief PopulateColorBuffer flushes the existing color buffer and reloads
@@ -77,7 +72,7 @@ class Visualization
        * 
        * @returns a vector of colors data per vertex.
        */
-      QVector<QVector3D>& PopulateColorBuffer(const ParsingOptions& options);
+      QVector<QVector3D>& PopulateColorBuffer(const VisualizationParameters& options);
 
       /**
        * @brief GetVertexCount returns the number of vertices currently in the model's vertex
@@ -86,13 +81,6 @@ class Visualization
        * @returns the number of vertices.
        */
       unsigned int GetVertexCount() const;
-
-      /**
-       * @brief HasScanBeenPerformed indicates whether the scan has been performed.
-       * 
-       * @returns true if the scan has been performed; false otherwise.
-       */
-      bool HasScanBeenPerformed() const;
 
       /**
        * @brief CreateBlockColors creates the vertex colors needed to color a single block.
@@ -109,10 +97,11 @@ class Visualization
       static QVector<QVector3D> CreateDirectoryColors();
 
    protected:
-      DiskScanner m_diskScanner;
+      std::shared_ptr<Tree<VizNode>> m_theTree; ///< @todo ...or should this be a weak_ptr?
+
+      VisualizationParameters m_vizParameters;
 
       bool m_hasDataBeenParsed;
-      bool m_hasScanBeenPerformed;
 
       QVector<QVector3D> m_visualizationVertices;
       QVector<QVector3D> m_visualizationColors;
