@@ -188,9 +188,104 @@ namespace
    }
 
    /**
-    * @brief LayoutStrip slices the real estate into file size proportional pieces.
+    * @return
+    */
+   double SlicePerpendicularToWidth(Block& land, const double percentageOfParent,
+      double debug_consumedWidth, VizNode& data, const size_t nodeCount)
+   {
+      const double blockWidthPlusPadding = land.m_width * percentageOfParent;
+      const double ratioBasedPadding = ((land.m_width * 0.1) / nodeCount) / 2.0;
+
+      double widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
+      double finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPaddingPerSide);
+      if (finalBlockWidth < 0)
+      {
+         finalBlockWidth = blockWidthPlusPadding * Visualization::PADDING_RATIO;
+         widthPaddingPerSide = (blockWidthPlusPadding * (1.0 - Visualization::PADDING_RATIO)) / 2.0;
+      }
+
+      const double ratioBasedBlockDepth = std::abs(land.m_depth * Visualization::PADDING_RATIO);
+      const double depthPaddingPerSide = std::min((land.m_depth - ratioBasedBlockDepth) / 2.0,
+         Visualization::MAX_PADDING);
+
+      const double finalBlockDepth = (depthPaddingPerSide == Visualization::MAX_PADDING)
+         ? std::abs(land.m_depth) - (2.0 * Visualization::MAX_PADDING)
+         : ratioBasedBlockDepth;
+
+      const QVector3D offset
+      {
+         static_cast<float>((land.m_width * land.m_percentCovered) + widthPaddingPerSide),
+         0.0, // If you want vertical spacing between blocks, increase this value...
+         static_cast<float>(-depthPaddingPerSide)
+      };
+
+      data.m_block = Block(land.m_vertices.front() + offset,
+         finalBlockWidth,
+         Visualization::BLOCK_HEIGHT,
+         finalBlockDepth
+      );
+
+      debug_consumedWidth += blockWidthPlusPadding;
+      if (debug_consumedWidth > land.m_width * 1.001) // For rounding errors greater than 0.1%
+      {
+         assert(!"Found a ridiculous rounding error!");
+      }
+
+      const double additionalCoverage = blockWidthPlusPadding / land.m_width;
+      return additionalCoverage;
+   }
+
+   /**
     *
-    * @param[in] row                The items to be placed in the current piece of real estate.
+    */
+   double SlicePerpendicularToDepth(Block& land, const double percentageOfParent,
+      double debug_consumedDepth, VizNode& data, const size_t nodeCount)
+   {
+      const double blockDepthPlusPadding = std::abs(land.m_depth * percentageOfParent);
+      const double ratioBasedPadding = (land.m_depth * 0.1) / nodeCount / 2.0;
+
+      double depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
+      double finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPaddingPerSide);
+      if (finalBlockDepth < 0)
+      {
+         finalBlockDepth = blockDepthPlusPadding * Visualization::PADDING_RATIO;
+         depthPaddingPerSide = (blockDepthPlusPadding * (1.0 - Visualization::PADDING_RATIO)) / 2.0;
+      }
+
+      const double ratioBasedWidth = land.m_width * Visualization::PADDING_RATIO;
+      const double widthPaddingPerSide = std::min((land.m_width - ratioBasedWidth) / 2.0,
+         Visualization::MAX_PADDING);
+
+      const double finalBlockWidth = (widthPaddingPerSide == Visualization::MAX_PADDING)
+         ? land.m_width - (2.0 * Visualization::MAX_PADDING)
+         : ratioBasedWidth;
+
+      const QVector3D offset
+      {
+         static_cast<float>(widthPaddingPerSide),
+         0.0, // If you want vertical spacing between blocks, increase this value...
+         static_cast<float>(-(land.m_depth * land.m_percentCovered) - depthPaddingPerSide)
+      };
+
+      data.m_block = Block(land.m_vertices.front() + offset,
+         finalBlockWidth,
+         Visualization::BLOCK_HEIGHT,
+         std::abs(finalBlockDepth)
+      );
+
+      debug_consumedDepth += blockDepthPlusPadding;
+      if (debug_consumedDepth > land.m_depth * 1.001) // For rounding errors greater than 0.1%
+      {
+         assert(!"Found a ridiculous rounding error!");
+      }
+
+      const double additionalCoverage = blockDepthPlusPadding / land.m_depth;
+      return additionalCoverage;
+   }
+
+   /**
+    * @brief LayoutRow
+    * @param row
     */
    void LayoutRow(std::vector<TreeNode<VizNode>*>& row)
    {
@@ -233,87 +328,13 @@ namespace
 
          if (land.m_width > std::abs(land.m_depth))
          {
-            const double blockWidthPlusPadding = land.m_width * percentageOfParent;
-            const double ratioBasedPadding = ((land.m_width * 0.1) / nodeCount) / 2.0;
-
-            double widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
-            double finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPaddingPerSide);
-            if (finalBlockWidth < 0)
-            {
-               finalBlockWidth = blockWidthPlusPadding * Visualization::PADDING_RATIO;
-               widthPaddingPerSide = (blockWidthPlusPadding * (1.0 - Visualization::PADDING_RATIO)) / 2.0;
-            }
-
-            const double ratioBasedBlockDepth = std::abs(land.m_depth * Visualization::PADDING_RATIO);
-            const double depthPaddingPerSide = std::min((land.m_depth - ratioBasedBlockDepth) / 2.0,
-               Visualization::MAX_PADDING);
-
-            const double finalBlockDepth = (depthPaddingPerSide == Visualization::MAX_PADDING)
-               ? std::abs(land.m_depth) - (2.0 * Visualization::MAX_PADDING)
-               : ratioBasedBlockDepth;
-
-            const QVector3D offset
-            {
-               static_cast<float>((land.m_width * land.m_percentCovered) + widthPaddingPerSide),
-               0.0, // If you want vertical spacing between block, increase this value...
-               static_cast<float>(-depthPaddingPerSide)
-            };
-
-            data.m_block = Block(land.m_vertices.front() + offset,
-               finalBlockWidth,
-               Visualization::BLOCK_HEIGHT,
-               finalBlockDepth
-            );
-
-            additionalCoverage = blockWidthPlusPadding / land.m_width;
-
-            debug_consumedWidth += blockWidthPlusPadding;
-            if (debug_consumedWidth > land.m_width * 1.001) // For rounding errors greater than 0.1%
-            {
-               assert(!"Found a ridiculous rounding error!");
-            }
+            additionalCoverage = SlicePerpendicularToWidth(land, percentageOfParent,
+               debug_consumedWidth, data, nodeCount);
          }
          else
          {
-            const double blockDepthPlusPadding = std::abs(land.m_depth * percentageOfParent);
-            const double ratioBasedPadding = (land.m_depth * 0.1) / nodeCount / 2.0;
-
-            double depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
-            double finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPaddingPerSide);
-            if (finalBlockDepth < 0)
-            {
-               finalBlockDepth = blockDepthPlusPadding * Visualization::PADDING_RATIO;
-               depthPaddingPerSide = (blockDepthPlusPadding * (1.0 - Visualization::PADDING_RATIO)) / 2.0;
-            }
-
-            const double ratioBasedWidth = land.m_width * Visualization::PADDING_RATIO;
-            const double widthPaddingPerSide = std::min((land.m_width - ratioBasedWidth) / 2.0,
-               Visualization::MAX_PADDING);
-
-            const double finalBlockWidth = (widthPaddingPerSide == Visualization::MAX_PADDING)
-               ? land.m_width - (2.0 * Visualization::MAX_PADDING)
-               : ratioBasedWidth;
-
-            const QVector3D offset
-            {
-               static_cast<float>(widthPaddingPerSide),
-               0.0, // If you want vertical spacing between block, increase this value...
-               static_cast<float>(-(land.m_depth * land.m_percentCovered) - depthPaddingPerSide)
-            };
-
-            data.m_block = Block(land.m_vertices.front() + offset,
-               finalBlockWidth,
-               Visualization::BLOCK_HEIGHT,
-               std::abs(finalBlockDepth)
-            );
-
-            additionalCoverage = blockDepthPlusPadding / land.m_depth;
-
-            debug_consumedDepth += blockDepthPlusPadding;
-            if (debug_consumedDepth > land.m_depth * 1.001) // For rounding errors greater than 0.1%
-            {
-               assert(!"Found a ridiculous rounding error!");
-            }
+            additionalCoverage = SlicePerpendicularToDepth(land, percentageOfParent,
+               debug_consumedDepth, data, nodeCount);
          }
 
          if (!data.m_block.IsDefined())
@@ -339,7 +360,7 @@ namespace
     *                                  into the same row. Can be nullptr.
     * @param[in] lengthOfShortestSide  Length of shortest side of the enclosing row's boundary.
     *
-    * @returns a float representing the aspect ration that farthest from optimal (i.e.: square).
+    * @returns a float representing the aspect ratio farthest from optimal (i.e.: square).
     */
    double ComputeWorstAspectRatio(const std::vector<TreeNode<VizNode>*>& row,
       const TreeNode<VizNode>* candidateItem, const float shortestSideOfRow, VizNode& parentNode)
@@ -406,6 +427,60 @@ namespace
    }
 
    /**
+    * @brief SquarifyAndLayoutRow
+    * @param row
+    */
+   void SquarifyAndLayoutRow(std::vector<TreeNode<VizNode>*>& row)
+   {
+      LayoutRow(row);
+      return;
+
+      // The rest of this function is meant to replace the above two lines once done:
+
+//      if (row.empty())
+//      {
+//         return;
+//      }
+
+//      TreeNode<VizNode>* parentNode = &*row.front()->GetParent();
+//      assert(parentNode);
+
+//      const double shortestSide = std::min(
+//         parentNode->GetData().m_block.m_width,
+//         parentNode->GetData().m_block.m_depth);
+
+//      std::vector<TreeNode<VizNode>*> subRow;
+//      subRow.emplace_back(row.front());
+
+//      for (TreeNode<VizNode>* node : row)
+//      {
+//         const double worstRatioWithNodeAddedToCurrentRow =
+//            ComputeWorstAspectRatio(subRow, node, shortestSide, parentNode->GetData());
+
+//         const double worstRatioWithoutNodeAddedToCurrentRow =
+//            ComputeWorstAspectRatio(subRow, nullptr, shortestSide, parentNode->GetData());
+
+//         if (worstRatioWithNodeAddedToCurrentRow <= worstRatioWithoutNodeAddedToCurrentRow)
+//         {
+//            subRow.emplace_back(node);
+//         }
+//         else
+//         {
+//            // @todo: This probably doesn't offset the offset on the parent node...
+//            LayoutRow(subRow);
+
+//            subRow.clear();
+//            subRow.emplace_back(node);
+//         }
+//      }
+
+//      if (!subRow.empty())
+//      {
+//         LayoutRow(subRow);
+//      }
+   }
+
+   /**
     * @brief Squarify is the main function that drives the parsing and creation of a simplified
     * squarified tree map.
     *
@@ -414,27 +489,33 @@ namespace
     */
    void Squarify(TreeNode<VizNode>& node)
    {
-      TreeNode<VizNode>* currentNode = &node;
-      TreeNode<VizNode>* firstChild = currentNode;
+      TreeNode<VizNode>* firstChild = &node;
+
       std::vector<TreeNode<VizNode>*> currentRow;
 
+      TreeNode<VizNode>* currentNode = &node;
       while (currentNode)
       {
          TreeNode<VizNode>* parentNode = &*currentNode->GetParent();
          assert(parentNode);
 
-         const double shortestSide = std::min(parentNode->GetData().m_block.m_width,
+         const double shortestSide = std::min(
+            parentNode->GetData().m_block.m_width,
             parentNode->GetData().m_block.m_depth);
 
-         // If worst aspect ratio improves, add block to current row:
-         if (ComputeWorstAspectRatio(currentRow, currentNode, shortestSide, parentNode->GetData()) <=
-             ComputeWorstAspectRatio(currentRow, nullptr,     shortestSide, parentNode->GetData()))
+         const double worstRatioWithNodeAddedToCurrentRow =
+            ComputeWorstAspectRatio(currentRow, currentNode, shortestSide, parentNode->GetData());
+
+         const double worstRatioWithoutNodeAddedToCurrentRow =
+            ComputeWorstAspectRatio(currentRow, nullptr, shortestSide, parentNode->GetData());
+
+         if (worstRatioWithNodeAddedToCurrentRow <= worstRatioWithoutNodeAddedToCurrentRow)
          {
             currentRow.emplace_back(currentNode);
          }
-         else // if aspect ratio gets worse, layout current row and create a new row:
+         else
          {
-            LayoutRow(currentRow);
+            SquarifyAndLayoutRow(currentRow);
 
             currentRow.clear();
             currentRow.emplace_back(currentNode);
@@ -463,40 +544,44 @@ namespace
     * @param currentRow
     * @param shortestSide
     */
-   void SquarifyProper(TreeNode<VizNode>* node, std::vector<TreeNode<VizNode>*> currentRow,
-      const double shortestSide)
+   void SquarifyProper(TreeNode<VizNode>* node, std::vector<TreeNode<VizNode>*> currentRow)
    {
-      if (!node)
+      if (currentRow.empty())
       {
          return;
       }
 
-      // If worst aspect ratio improves, add block to current row:
-      if (ComputeWorstAspectRatio(currentRow, node, shortestSide, node->GetParent()->GetData()) <=
-          ComputeWorstAspectRatio(currentRow, nullptr, shortestSide, node->GetParent()->GetData()))
+      TreeNode<VizNode>* parentNode = &*node->GetParent();
+      assert(parentNode);
+
+      const double shortestSide = std::min(
+         parentNode->GetData().m_block.m_width,
+         parentNode->GetData().m_block.m_depth);
+
+      const double worstRatioWithNodeAddedToCurrentRow =
+         ComputeWorstAspectRatio(currentRow, node, shortestSide, parentNode->GetData());
+
+      const double worstRatioWithoutNodeAddedToCurrentRow =
+         ComputeWorstAspectRatio(currentRow, nullptr, shortestSide, parentNode->GetData());
+
+      if (worstRatioWithNodeAddedToCurrentRow <= worstRatioWithoutNodeAddedToCurrentRow)
       {
+         // Add the current node to the current row:
          currentRow.emplace_back(node);
-         SquarifyProper(&*node->GetNextSibling(), currentRow, shortestSide);
+
+         // Recurse on the remaining children:
+         SquarifyProper(&*node->GetNextSibling(), currentRow);
       }
       else
       {
-         if (!currentRow.empty())
-         {
-            LayoutRow(currentRow);
-         }
+         LayoutRow(currentRow);
 
-         TreeNode<VizNode>* parentNode = &*node->GetParent();
-         if (parentNode)
-         {
-            return;
-         }
+         currentRow.clear();
+         currentRow.emplace_back(node);
 
-         const double newShortestSide = std::min(parentNode->GetData().m_block.m_width,
-            parentNode->GetData().m_block.m_depth);
+         // @todo: Figure out when to go to the sibling and when to go to the child.
 
-         auto emptyRow = std::vector<TreeNode<VizNode>*>();
-
-         SquarifyProper(node, emptyRow, newShortestSide);
+         //SquarifyProper(node, current);
       }
    }
 }
