@@ -127,22 +127,24 @@ namespace
 
       const Block remainingLand
       {
-         nearCorner,
-         farCorner.x() - nearCorner.x(),
-         Visualization::BLOCK_HEIGHT,
-         farCorner.z() - nearCorner.z()
+         nearCorner,                         // Origin
+         farCorner.x() - nearCorner.x(),     // Width
+         Visualization::BLOCK_HEIGHT,        // Height
+         farCorner.z() - nearCorner.z()      // Depth
       };
 
       const double parentBlockArea = parentBlock.m_width * parentBlock.m_depth;
       const double remainingLandArea = std::abs(remainingLand.m_width * remainingLand.m_depth);
       const double parentBytesToFill = (remainingLandArea / parentBlockArea) * parentNode.m_file.m_size;
+
       const std::uintmax_t rowSizeInBytes = RowSizeInBytes(row, candidate);
       const double rowToParentRatio = rowSizeInBytes / parentBytesToFill;
 
       Block rowRealEstate;
       if (remainingLand.m_width > std::abs(remainingLand.m_depth))
       {
-         rowRealEstate = Block(QVector3D(nearCorner),
+         rowRealEstate = Block(
+            nearCorner,
             remainingLand.m_width * rowToParentRatio,
             remainingLand.m_height,
             -remainingLand.m_depth);
@@ -191,7 +193,7 @@ namespace
     * @return
     */
    double SlicePerpendicularToWidth(Block& land, const double percentageOfParent,
-      double debug_consumedWidth, VizNode& data, const size_t nodeCount)
+      VizNode& data, const size_t nodeCount)
    {
       const double blockWidthPlusPadding = land.m_width * percentageOfParent;
       const double ratioBasedPadding = ((land.m_width * 0.1) / nodeCount) / 2.0;
@@ -215,7 +217,7 @@ namespace
       const QVector3D offset
       {
          static_cast<float>((land.m_width * land.m_percentCovered) + widthPaddingPerSide),
-         0.0, // If you want vertical spacing between blocks, increase this value...
+         0.0,
          static_cast<float>(-depthPaddingPerSide)
       };
 
@@ -225,12 +227,6 @@ namespace
          finalBlockDepth
       );
 
-      debug_consumedWidth += blockWidthPlusPadding;
-      if (debug_consumedWidth > land.m_width * 1.001) // For rounding errors greater than 0.1%
-      {
-         assert(!"Found a ridiculous rounding error!");
-      }
-
       const double additionalCoverage = blockWidthPlusPadding / land.m_width;
       return additionalCoverage;
    }
@@ -239,7 +235,7 @@ namespace
     *
     */
    double SlicePerpendicularToDepth(Block& land, const double percentageOfParent,
-      double debug_consumedDepth, VizNode& data, const size_t nodeCount)
+      VizNode& data, const size_t nodeCount)
    {
       const double blockDepthPlusPadding = std::abs(land.m_depth * percentageOfParent);
       const double ratioBasedPadding = (land.m_depth * 0.1) / nodeCount / 2.0;
@@ -263,7 +259,7 @@ namespace
       const QVector3D offset
       {
          static_cast<float>(widthPaddingPerSide),
-         0.0, // If you want vertical spacing between blocks, increase this value...
+         0.0,
          static_cast<float>(-(land.m_depth * land.m_percentCovered) - depthPaddingPerSide)
       };
 
@@ -272,12 +268,6 @@ namespace
          Visualization::BLOCK_HEIGHT,
          std::abs(finalBlockDepth)
       );
-
-      debug_consumedDepth += blockDepthPlusPadding;
-      if (debug_consumedDepth > land.m_depth * 1.001) // For rounding errors greater than 0.1%
-      {
-         assert(!"Found a ridiculous rounding error!");
-      }
 
       const double additionalCoverage = blockDepthPlusPadding / land.m_depth;
       return additionalCoverage;
@@ -291,7 +281,7 @@ namespace
    {
       if (row.empty())
       {
-         assert(!"The row to be laid out is non-existent!");
+         assert(!"Cannot layout an empty row.");
          return;
       }
 
@@ -309,32 +299,26 @@ namespace
 
       double additionalCoverage = 0.0;
 
-      double debug_consumedWidth = 0.0;
-      double debug_consumedDepth = 0.0;
-
       for (TreeNode<VizNode>* node : row)
       {
          VizNode& data = node->GetData();
-         const std::uintmax_t fileSize = data.m_file.m_size;
-
-         if (fileSize == 0)
+         const std::uintmax_t nodeFileSize = data.m_file.m_size;
+         if (nodeFileSize == 0)
          {
-            assert(!"Found a node without a size!");
+            assert(!"Found a node without a file size!");
             return;
          }
 
          const double percentageOfParent =
-            static_cast<float>(fileSize) / static_cast<float>(rowFileSize);
+            static_cast<double>(nodeFileSize) / static_cast<double>(rowFileSize);
 
          if (land.m_width > std::abs(land.m_depth))
          {
-            additionalCoverage = SlicePerpendicularToWidth(land, percentageOfParent,
-               debug_consumedWidth, data, nodeCount);
+            additionalCoverage = SlicePerpendicularToWidth(land, percentageOfParent, data, nodeCount);
          }
          else
          {
-            additionalCoverage = SlicePerpendicularToDepth(land, percentageOfParent,
-               debug_consumedDepth, data, nodeCount);
+            additionalCoverage = SlicePerpendicularToDepth(land, percentageOfParent, data, nodeCount);
          }
 
          if (!data.m_block.IsDefined())
@@ -427,161 +411,86 @@ namespace
    }
 
    /**
-    * @brief SquarifyAndLayoutRow
-    * @param row
+    * @brief SquarifyAndLayoutRows
+    * @param nodes
     */
-   void SquarifyAndLayoutRow(std::vector<TreeNode<VizNode>*>& row)
+   void SquarifyAndLayoutRows(const std::vector<TreeNode<VizNode>*>& nodes)
    {
-      LayoutRow(row);
-      return;
-
-      // The rest of this function is meant to replace the above two lines once done:
-
-//      if (row.empty())
-//      {
-//         return;
-//      }
-
-//      TreeNode<VizNode>* parentNode = &*row.front()->GetParent();
-//      assert(parentNode);
-
-//      const double shortestSide = std::min(
-//         parentNode->GetData().m_block.m_width,
-//         parentNode->GetData().m_block.m_depth);
-
-//      std::vector<TreeNode<VizNode>*> subRow;
-//      subRow.emplace_back(row.front());
-
-//      for (TreeNode<VizNode>* node : row)
-//      {
-//         const double worstRatioWithNodeAddedToCurrentRow =
-//            ComputeWorstAspectRatio(subRow, node, shortestSide, parentNode->GetData());
-
-//         const double worstRatioWithoutNodeAddedToCurrentRow =
-//            ComputeWorstAspectRatio(subRow, nullptr, shortestSide, parentNode->GetData());
-
-//         if (worstRatioWithNodeAddedToCurrentRow <= worstRatioWithoutNodeAddedToCurrentRow)
-//         {
-//            subRow.emplace_back(node);
-//         }
-//         else
-//         {
-//            // @todo: This probably doesn't offset the offset on the parent node...
-//            LayoutRow(subRow);
-
-//            subRow.clear();
-//            subRow.emplace_back(node);
-//         }
-//      }
-
-//      if (!subRow.empty())
-//      {
-//         LayoutRow(subRow);
-//      }
-   }
-
-   /**
-    * @brief Squarify is the main function that drives the parsing and creation of a simplified
-    * squarified tree map.
-    *
-    * @param[in] nodes              The first node in the tree to be laid out. This node must have
-    *                               a parent; this parent can be a dummy node to kick things off.
-    */
-   void Squarify(TreeNode<VizNode>& node)
-   {
-      TreeNode<VizNode>* firstChild = &node;
-
-      std::vector<TreeNode<VizNode>*> currentRow;
-
-      TreeNode<VizNode>* currentNode = &node;
-      while (currentNode)
-      {
-         TreeNode<VizNode>* parentNode = &*currentNode->GetParent();
-         assert(parentNode);
-
-         const double shortestSide = std::min(
-            parentNode->GetData().m_block.m_width,
-            parentNode->GetData().m_block.m_depth);
-
-         const double worstRatioWithNodeAddedToCurrentRow =
-            ComputeWorstAspectRatio(currentRow, currentNode, shortestSide, parentNode->GetData());
-
-         const double worstRatioWithoutNodeAddedToCurrentRow =
-            ComputeWorstAspectRatio(currentRow, nullptr, shortestSide, parentNode->GetData());
-
-         if (worstRatioWithNodeAddedToCurrentRow <= worstRatioWithoutNodeAddedToCurrentRow)
-         {
-            currentRow.emplace_back(currentNode);
-         }
-         else
-         {
-            SquarifyAndLayoutRow(currentRow);
-
-            currentRow.clear();
-            currentRow.emplace_back(currentNode);
-         }
-
-         currentNode = &*currentNode->GetNextSibling();
-      }
-
-      if (!currentRow.empty())
-      {
-         LayoutRow(currentRow);
-      }
-
-      currentNode = firstChild;
-
-      while (currentNode)
-      {
-         Squarify(*currentNode->GetFirstChild());
-         currentNode = &*currentNode->GetNextSibling();
-      }
-   }
-
-   /**
-    * @brief SquarifyProper
-    * @param node
-    * @param currentRow
-    * @param shortestSide
-    */
-   void SquarifyProper(TreeNode<VizNode>* node, std::vector<TreeNode<VizNode>*> currentRow)
-   {
-      if (currentRow.empty())
+      if (nodes.empty())
       {
          return;
       }
 
-      TreeNode<VizNode>* parentNode = &*node->GetParent();
+      TreeNode<VizNode>* parentNode = &*nodes.front()->GetParent();
       assert(parentNode);
 
-      const double shortestSide = std::min(
-         parentNode->GetData().m_block.m_width,
-         parentNode->GetData().m_block.m_depth);
+      Block parentBlock = parentNode->GetData().m_block;
+      assert(parentBlock.IsDefined() && parentBlock.IsValid());
 
-      const double worstRatioWithNodeAddedToCurrentRow =
-         ComputeWorstAspectRatio(currentRow, node, shortestSide, parentNode->GetData());
+      const double shortestRemainingSide = std::min(
+         parentBlock.m_width - (parentBlock.m_width * parentBlock.m_percentCovered),
+         parentBlock.m_depth - (parentBlock.m_depth * parentBlock.m_percentCovered));
 
-      const double worstRatioWithoutNodeAddedToCurrentRow =
-         ComputeWorstAspectRatio(currentRow, nullptr, shortestSide, parentNode->GetData());
+      std::vector<TreeNode<VizNode>*> row;
 
-      if (worstRatioWithNodeAddedToCurrentRow <= worstRatioWithoutNodeAddedToCurrentRow)
+      for (TreeNode<VizNode>* node : nodes)
       {
-         // Add the current node to the current row:
-         currentRow.emplace_back(node);
+         const double worstRatioWithNodeAddedToCurrentRow =
+            ComputeWorstAspectRatio(row, node, shortestRemainingSide, parentNode->GetData());
 
-         // Recurse on the remaining children:
-         SquarifyProper(&*node->GetNextSibling(), currentRow);
+         const double worstRatioWithoutNodeAddedToCurrentRow =
+            ComputeWorstAspectRatio(row, nullptr, shortestRemainingSide, parentNode->GetData());
+
+         if (worstRatioWithNodeAddedToCurrentRow <= worstRatioWithoutNodeAddedToCurrentRow)
+         {
+            row.emplace_back(node);
+         }
+         else
+         {
+            LayoutRow(row);
+
+            row.clear();
+            row.emplace_back(node);
+         }
       }
-      else
+
+      if (!row.empty())
       {
-         LayoutRow(currentRow);
+         LayoutRow(row);
+      }
+   }
 
-         currentRow.clear();
-         currentRow.emplace_back(node);
+   /**
+    * @brief SquarifyRecursively
+    * @param root
+    */
+   void SquarifyRecursively(const TreeNode<VizNode>* root)
+   {
+      if (!root)
+      {
+         return;
+      }
 
-         // @todo: Figure out when to go to the sibling and when to go to the child.
+      const std::shared_ptr<TreeNode<VizNode>>& firstChild = root->GetFirstChild();
+      if (!firstChild)
+      {
+         return;
+      }
 
-         //SquarifyProper(node, current);
+      std::vector<TreeNode<VizNode>*> children;
+      children.emplace_back(&*firstChild);
+
+      std::shared_ptr<TreeNode<VizNode>> nextChild = firstChild->GetNextSibling();
+      while (nextChild)
+      {
+         children.emplace_back(&*nextChild);
+         nextChild = nextChild->GetNextSibling();
+      }
+      SquarifyAndLayoutRows(children);
+
+      for (TreeNode<VizNode>* grandChild : children)
+      {
+         SquarifyRecursively(grandChild);
       }
    }
 }
@@ -615,7 +524,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
    theTree->GetHead()->GetData().m_block = rootBlock;
 
    const auto startParseTime = std::chrono::high_resolution_clock::now();
-   Squarify(*theTree->GetHead()->GetFirstChild());
+   SquarifyRecursively(&*theTree->GetHead());
    const auto endParseTime = std::chrono::high_resolution_clock::now();
 
    auto parsingTime =
