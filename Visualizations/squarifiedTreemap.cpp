@@ -359,28 +359,29 @@ namespace
     * @param row
     * @return
     */
-   double ComputeShortestEdgeOfRemainingArea(VizNode& parentNode,
-      const std::vector<TreeNode<VizNode>*>& row, const TreeNode<VizNode>* candidate)
+   double ComputeShortestEdgeOfRemainingBounds(VizNode& parentNode)
    {
       const Block remainingRealEstate = ComputeRemainingArea(parentNode.m_block);
-      const double remainingArea = std::abs(remainingRealEstate.m_depth * remainingRealEstate.m_width);
-      const double parentArea = std::abs(parentNode.m_block.m_depth * parentNode.m_block.m_width);
+      return std::min(std::abs(remainingRealEstate.m_depth), std::abs(remainingRealEstate.m_width));
 
-      const unsigned int remainingBytes = (remainingArea / parentArea) * parentNode.m_file.m_size;
+//      const double remainingArea = std::abs(remainingRealEstate.m_depth * remainingRealEstate.m_width);
+//      const double parentArea = std::abs(parentNode.m_block.m_depth * parentNode.m_block.m_width);
 
-      const unsigned int totalBytesInRow = ComputeBytesInRow(row, candidate);
+//      const unsigned int remainingBytes = (remainingArea / parentArea) * parentNode.m_file.m_size;
 
-      const double longestEdge = std::max(std::abs(remainingRealEstate.m_depth),
-         std::abs(remainingRealEstate.m_width));
+//      const unsigned int totalBytesInRow = ComputeBytesInRow(row, nullptr);
 
-      const double shortestEdge = std::min(std::abs(remainingRealEstate.m_depth),
-         std::abs(remainingRealEstate.m_width));
+//      const double longestEdge = std::max(std::abs(remainingRealEstate.m_depth),
+//         std::abs(remainingRealEstate.m_width));
 
-      const double remainingEdge = longestEdge *
-            (static_cast<double>(totalBytesInRow) / static_cast<double>(remainingBytes));
+//      const double shortestEdge = std::min(std::abs(remainingRealEstate.m_depth),
+//         std::abs(remainingRealEstate.m_width));
 
-      const double newShortestEdge = std::min(shortestEdge, remainingEdge);
-      return newShortestEdge;
+//      const double remainingEdge = longestEdge *
+//            (static_cast<double>(totalBytesInRow) / static_cast<double>(remainingBytes));
+
+//      const double newShortestEdge = std::min(shortestEdge, remainingEdge);
+//      return newShortestEdge;
    }
 
    /**
@@ -395,7 +396,7 @@ namespace
     * @returns a float representing the aspect ratio farthest from optimal (i.e.: square).
     */
    double ComputeWorstAspectRatio(const std::vector<TreeNode<VizNode>*>& row,
-      const TreeNode<VizNode>* candidateItem, VizNode& parentNode)
+      const TreeNode<VizNode>* candidateItem, VizNode& parentNode, const double shortestEdgeOfBounds)
    {
       if (row.empty() && !candidateItem)
       {
@@ -451,8 +452,6 @@ namespace
 
       // Now compute the worst aspect ratio between the two choices above:
 
-      const double shortestEdgeOfBounds = ComputeShortestEdgeOfRemainingArea(parentNode, row, candidateItem);
-
       const double lengthSquared = shortestEdgeOfBounds * shortestEdgeOfBounds;
       const double areaSquared = totalRowArea * totalRowArea;
 
@@ -481,16 +480,15 @@ namespace
 
       std::vector<TreeNode<VizNode>*> row;
 
+      double shortestEdgeOfBounds = ComputeShortestEdgeOfRemainingBounds(parentNode->GetData());
+
       for (TreeNode<VizNode>* node : nodes)
       {
          const double worstRatioWithNodeAddedToCurrentRow =
-            ComputeWorstAspectRatio(row, node, parentNode->GetData());
+            ComputeWorstAspectRatio(row, node, parentNode->GetData(), shortestEdgeOfBounds);
 
          const double worstRatioWithoutNodeAddedToCurrentRow =
-            ComputeWorstAspectRatio(row, nullptr, parentNode->GetData());
-
-         std::cout << "With: " << worstRatioWithNodeAddedToCurrentRow << std::endl;
-         std::cout << "Without: " << worstRatioWithoutNodeAddedToCurrentRow << std::endl << std::endl;
+            ComputeWorstAspectRatio(row, nullptr, parentNode->GetData(), shortestEdgeOfBounds);
 
          if (worstRatioWithNodeAddedToCurrentRow <= worstRatioWithoutNodeAddedToCurrentRow)
          {
@@ -500,10 +498,10 @@ namespace
          {
             LayoutRow(row);
 
-            std::cout << "Starting a new row..." << std::endl << std::endl;
-
             row.clear();
             row.emplace_back(node);
+
+            shortestEdgeOfBounds = ComputeShortestEdgeOfRemainingBounds(parentNode->GetData());
          }
       }
 
