@@ -2,10 +2,10 @@
 
 OptionsManager::OptionsManager()
    : m_cameraMovementSpeed(0.25),
-     m_mouseSensitivity(0.25),
-     m_ambientCoefficient(0.075),
-     m_lightAttenuationFactor(0.05),
-     m_materialShininess(80.0),
+     m_mouseSensitivity(0.20),
+     m_ambientCoefficient(0.1f),
+     m_lightAttenuationFactor(0.005f),
+     m_materialShininess(80.0f),
      m_fieldOfView(45),
      m_redLightComponent(1.0f),
      m_greenLightComponent(1.0f),

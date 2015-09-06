@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>
@@ -67,8 +67,8 @@
   <widget class="QDockWidget" name="dockWidget">
    <property name="minimumSize">
     <size>
-     <width>175</width>
-     <height>717</height>
+     <width>180</width>
+     <height>719</height>
     </size>
    </property>
    <property name="features">
@@ -156,7 +156,7 @@
         <double>0.100000000000000</double>
        </property>
        <property name="value">
-        <double>0.250000000000000</double>
+        <double>0.200000000000000</double>
        </property>
       </widget>
      </item>
@@ -224,7 +224,7 @@
         <double>0.005000000000000</double>
        </property>
        <property name="value">
-        <double>0.005000000000000</double>
+        <double>0.100000000000000</double>
        </property>
       </widget>
      </item>
@@ -244,10 +244,10 @@
         <double>1.000000000000000</double>
        </property>
        <property name="singleStep">
-        <double>0.005000000000000</double>
+        <double>0.001000000000000</double>
        </property>
        <property name="value">
-        <double>0.050000000000000</double>
+        <double>0.005000000000000</double>
        </property>
       </widget>
      </item>
@@ -349,6 +349,9 @@
       <widget class="QCheckBox" name="useXBoxController">
        <property name="text">
         <string>Use XBox Controller</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
