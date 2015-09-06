@@ -354,6 +354,36 @@ namespace
    }
 
    /**
+    * @brief ComputeShortestEdgeOfRemainingArea
+    * @param parentNode
+    * @param row
+    * @return
+    */
+   double ComputeShortestEdgeOfRemainingArea(VizNode& parentNode,
+      const std::vector<TreeNode<VizNode>*>& row, const TreeNode<VizNode>* candidate)
+   {
+      const Block remainingRealEstate = ComputeRemainingArea(parentNode.m_block);
+      const double remainingArea = std::abs(remainingRealEstate.m_depth * remainingRealEstate.m_width);
+      const double parentArea = std::abs(parentNode.m_block.m_depth * parentNode.m_block.m_width);
+
+      const unsigned int remainingBytes = (remainingArea / parentArea) * parentNode.m_file.m_size;
+
+      const unsigned int totalBytesInRow = ComputeBytesInRow(row, candidate);
+
+      const double longestEdge = std::max(std::abs(remainingRealEstate.m_depth),
+         std::abs(remainingRealEstate.m_width));
+
+      const double shortestEdge = std::min(std::abs(remainingRealEstate.m_depth),
+         std::abs(remainingRealEstate.m_width));
+
+      const double remainingEdge = longestEdge *
+            (static_cast<double>(totalBytesInRow) / static_cast<double>(remainingBytes));
+
+      const double newShortestEdge = std::min(shortestEdge, remainingEdge);
+      return newShortestEdge;
+   }
+
+   /**
     * @brief ComputeWorstAspectRatio calculates the worst aspect ratio of all items accepted into
     * the row along with one optional candidate item.
     *
@@ -365,7 +395,7 @@ namespace
     * @returns a float representing the aspect ratio farthest from optimal (i.e.: square).
     */
    double ComputeWorstAspectRatio(const std::vector<TreeNode<VizNode>*>& row,
-      const TreeNode<VizNode>* candidateItem, const float shortestEdgeOfBounds, VizNode& parentNode)
+      const TreeNode<VizNode>* candidateItem, VizNode& parentNode)
    {
       if (row.empty() && !candidateItem)
       {
@@ -374,7 +404,9 @@ namespace
 
       const Block rowBounds = CalculateRowBounds(row, candidateItem, parentNode,
          /*updateOffset =*/ false);
+
       const double totalRowArea = std::abs(rowBounds.m_width * rowBounds.m_depth);
+
       const std::uintmax_t totalRowSize = ComputeBytesInRow(row, candidateItem);
 
       // Find the largest surface area if the row and candidate were laid out:
@@ -419,6 +451,8 @@ namespace
 
       // Now compute the worst aspect ratio between the two choices above:
 
+      const double shortestEdgeOfBounds = ComputeShortestEdgeOfRemainingArea(parentNode, row, candidateItem);
+
       const double lengthSquared = shortestEdgeOfBounds * shortestEdgeOfBounds;
       const double areaSquared = totalRowArea * totalRowArea;
 
@@ -426,29 +460,6 @@ namespace
          (areaSquared) / (lengthSquared * smallestArea));
 
       return worstRatio;
-   }
-
-   /**
-    * @brief NewShortestEdge
-    * @param parentNode
-    * @param row
-    * @return
-    */
-   double NewShortestEdge(VizNode& parentNode, std::vector<TreeNode<VizNode>*>& row)
-   {
-      const Block remainingRealEstate = ComputeRemainingArea(parentNode.m_block);
-      const double remainingArea = std::abs(remainingRealEstate.m_depth * remainingRealEstate.m_width);
-      const double parentArea = std::abs(parentNode.m_block.m_depth * parentNode.m_block.m_width);
-
-      const unsigned int remainingBytes = (remainingArea / parentArea) * parentNode.m_file.m_size;
-
-      const unsigned int totalBytesInRow = ComputeBytesInRow(row, nullptr);
-
-      const double longestEdge = std::max(std::abs(remainingRealEstate.m_depth),
-                                          std::abs(remainingRealEstate.m_width));
-
-      const double remainingEdge = longestEdge * (totalBytesInRow / remainingBytes);
-      return remainingEdge;
    }
 
    /**
@@ -468,20 +479,16 @@ namespace
       Block parentBlock = parentNode->GetData().m_block;
       assert(parentBlock.IsDefined() && parentBlock.IsValid());
 
-      const Block remainingLand = ComputeRemainingArea(parentBlock);
-      double shortestRemainingSide = std::min(remainingLand.m_width, remainingLand.m_depth);
-
       std::vector<TreeNode<VizNode>*> row;
 
       for (TreeNode<VizNode>* node : nodes)
       {
          const double worstRatioWithNodeAddedToCurrentRow =
-            ComputeWorstAspectRatio(row, node, shortestRemainingSide, parentNode->GetData());
+            ComputeWorstAspectRatio(row, node, parentNode->GetData());
 
          const double worstRatioWithoutNodeAddedToCurrentRow =
-            ComputeWorstAspectRatio(row, nullptr, shortestRemainingSide, parentNode->GetData());
+            ComputeWorstAspectRatio(row, nullptr, parentNode->GetData());
 
-         //std::cout << "Shortest side: " << shortestRemainingSide << std::endl;
          std::cout << "With: " << worstRatioWithNodeAddedToCurrentRow << std::endl;
          std::cout << "Without: " << worstRatioWithoutNodeAddedToCurrentRow << std::endl << std::endl;
 
