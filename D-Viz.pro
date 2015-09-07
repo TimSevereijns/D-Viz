@@ -26,12 +26,12 @@ SOURCES += main.cpp\
     Scene/Assets/visualizationAsset.cpp \
     Scene/Assets/sceneAsset.cpp \
     Scene/Assets/gridAsset.cpp \
-    DiskScanner/diskScanner.cpp \
-    DiskScanner/scanningWorker.cpp \
+    DriveScanner/scanningWorker.cpp \
     DataStructs/block.cpp \
     DataStructs/vizNode.cpp \
     DataStructs/fileInfo.cpp \
-    DataStructs/light.cpp
+    DataStructs/light.cpp \
+    DriveScanner/driveScanner.cpp
 
 HEADERS  += mainwindow.h \
     tree.h \
@@ -48,12 +48,12 @@ HEADERS  += mainwindow.h \
     Scene/Assets/visualizationAsset.h \
     Scene/Assets/sceneAsset.h \
     Scene/Assets/gridAsset.h \
-    DiskScanner/diskScanner.h \
-    DiskScanner/scanningWorker.h \
+    DriveScanner/scanningWorker.h \
     DataStructs/block.h \
     DataStructs/vizNode.h \
     DataStructs/fileInfo.h \
-    DataStructs/light.h
+    DataStructs/light.h \
+    DriveScanner/driveScanner.h
 
 FORMS    += mainwindow.ui
 
