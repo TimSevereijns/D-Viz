@@ -25,7 +25,13 @@ SOURCES += main.cpp\
     optionsManager.cpp \
     Scene/Assets/visualizationAsset.cpp \
     Scene/Assets/sceneAsset.cpp \
-    Scene/Assets/gridAsset.cpp
+    Scene/Assets/gridAsset.cpp \
+    DiskScanner/diskScanner.cpp \
+    DiskScanner/scanningWorker.cpp \
+    DataStructs/block.cpp \
+    DataStructs/vizNode.cpp \
+    DataStructs/fileInfo.cpp \
+    DataStructs/light.cpp
 
 HEADERS  += mainwindow.h \
     tree.h \
@@ -41,7 +47,13 @@ HEADERS  += mainwindow.h \
     optionsManager.h \
     Scene/Assets/visualizationAsset.h \
     Scene/Assets/sceneAsset.h \
-    Scene/Assets/gridAsset.h
+    Scene/Assets/gridAsset.h \
+    DiskScanner/diskScanner.h \
+    DiskScanner/scanningWorker.h \
+    DataStructs/block.h \
+    DataStructs/vizNode.h \
+    DataStructs/fileInfo.h \
+    DataStructs/light.h
 
 FORMS    += mainwindow.ui
 

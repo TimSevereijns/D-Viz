@@ -5,6 +5,9 @@
 #include "keyboardManager.h"
 #include "mainwindow.h"
 #include "optionsManager.h"
+
+#include "DataStructs/light.h"
+
 #include "Visualizations/visualization.h"
 
 #include <chrono>
@@ -18,34 +21,6 @@
 #include <QOpenGLWidget>
 #include <QTimer>
 #include <QVector3D>
-
-/**
- * @brief The Light struct represents a single point light.
- */
-struct Light
-{
-   QVector3D position;              ///< The position of the light in 3D space.
-   QVector3D intensity;             ///< The intensity of the RGB values, i.e., the light color.
-   float attenuation;               ///< The factor with which the light falls off with distance.
-   float ambientCoefficient;        ///< The light's contribution to ambient.
-
-   Light()
-      : position(QVector3D(0, 0, 0)),
-        intensity(QVector3D(1, 1, 1)),
-        attenuation(0.75f),
-        ambientCoefficient(0.01f)
-   {
-   }
-
-   Light(const QVector3D& lightPosition, const QVector3D& lightIntensity,
-         const float lightAttenuation, const float lightAmbientCoefficient)
-      : position(lightPosition),
-        intensity(lightIntensity),
-        attenuation(lightAttenuation),
-        ambientCoefficient(lightAmbientCoefficient)
-   {
-   }
-};
 
 /**
  * @brief The GLCanvas class represents the canvas object on which the visualization
