@@ -5,6 +5,9 @@
 #include <QThread>
 
 #include <cstdint>
+#include <memory>
+
+#include "scanningWorker.h"
 
 /**
  * @brief The DiskScanner class
@@ -26,10 +29,13 @@ class DriveScanner : public QObject
       void StartScanning();
 
    public slots:
+      void HandleCompletion(const std::uintmax_t filesScanned);
       void HandleProgressUpdates(const std::uintmax_t filesScanned);
+      void HandleErrors(const std::wstring message);
 
    private:
-      QThread m_workerThread;
+      std::unique_ptr<QThread> m_thread;
+      std::unique_ptr<ScanningWorker> m_worker;
 };
 
 #endif // DISKSCANNER_H

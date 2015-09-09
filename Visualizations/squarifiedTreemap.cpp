@@ -17,7 +17,7 @@ namespace
    {
       std::cout << "\tRow: ";
 
-      for (const TreeNode<VizNode>* node : row)
+      for (const TreeNode<VizNode>* const node : row)
       {
          std::wcout << node->GetData().m_file.m_name << " ";
       }
@@ -334,7 +334,7 @@ namespace
 
       double additionalCoverage = 0.0;
 
-      for (TreeNode<VizNode>* node : row)
+      for (TreeNode<VizNode>* const node : row)
       {
          VizNode& data = node->GetData();
 
@@ -466,7 +466,7 @@ namespace
          return;
       }
 
-      TreeNode<VizNode>* parentNode = &*nodes.front()->GetParent();
+      TreeNode<VizNode>* parentNode = nodes.front()->GetParent().get();
       assert(parentNode);
 
       VizNode& parentVizNode = parentNode->GetData();
@@ -476,7 +476,7 @@ namespace
 
       double shortestEdgeOfBounds = ComputeShortestEdgeOfRemainingBounds(parentVizNode);
 
-      for (TreeNode<VizNode>* node : nodes)
+      for (TreeNode<VizNode>* const node : nodes)
       {
          const double worstRatioWithNodeAddedToCurrentRow =
             ComputeWorstAspectRatio(row, node->GetData().m_file.m_size, parentVizNode,
@@ -513,7 +513,7 @@ namespace
     *
     * @param root                   The node whose children to lay out.
     */
-   void SquarifyRecursively(const TreeNode<VizNode>* root)
+   void SquarifyRecursively(const TreeNode<VizNode>* const root)
    {
       if (!root)
       {
@@ -527,19 +527,19 @@ namespace
       }
 
       std::vector<TreeNode<VizNode>*> children;
-      children.emplace_back(&*firstChild);
+      children.emplace_back(firstChild.get());
 
       std::shared_ptr<TreeNode<VizNode>> nextChild = firstChild->GetNextSibling();
       while (nextChild)
       {
-         children.emplace_back(&*nextChild);
+         children.emplace_back(nextChild.get());
          nextChild = nextChild->GetNextSibling();
       }
       SquarifyAndLayoutRows(children);
 
-      for (TreeNode<VizNode>* grandChild : children)
+      for (TreeNode<VizNode>* const child : children)
       {
-         SquarifyRecursively(grandChild);
+         SquarifyRecursively(child);
       }
    }
 }
@@ -573,13 +573,13 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
    theTree->GetHead()->GetData().m_block = rootBlock;
 
    const auto startParseTime = std::chrono::high_resolution_clock::now();
-   SquarifyRecursively(&*theTree->GetHead());
+   SquarifyRecursively(theTree->GetHead().get());
    const auto endParseTime = std::chrono::high_resolution_clock::now();
 
-   auto parsingTime =
-      std::chrono::duration_cast<std::chrono::duration<double>>(endParseTime - startParseTime);
+   const auto parsingTime = std::chrono::duration_cast<std::chrono::milliseconds>
+      (endParseTime - startParseTime);
 
-   std::cout << "Parse time (in seconds): " << parsingTime.count() << std::endl;
+   std::cout << "Parse time (in milliseconds): " << parsingTime.count() << std::endl;
 
    m_hasDataBeenParsed = true;
 }

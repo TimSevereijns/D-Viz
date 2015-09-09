@@ -4,81 +4,103 @@
 #include <chrono>
 #include <locale>
 #include <numeric>
+#include <utility>
 
-#include "../DataStructs/block.h"
+const std::uintmax_t ScanningWorker::SIZE_UNDEFINED = 0;
 
-//const std::uintmax_t DiskScanner::SIZE_UNDEFINED = 0;
-
-//namespace
-//{
-//   /**
-//    * Traverses the file tree from beginning to end, accumulating the file sizes (in bytes) of all
-//    * regular (non-directory, or symbolic) files.
-//    *
-//    * @param[in] fileTree           The tree to be traversed.
-//    * @returns The size in bytes of all files in the tree.
-//    */
-//   std::uintmax_t ComputeTopLevelDirectorySizeInBytesViaTraversal(const Tree<VizNode>& fileTree)
-//   {
-//      const std::uintmax_t treeSize = std::accumulate(fileTree.beginLeaf(), fileTree.endLeaf(),
-//         std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<VizNode>& node)
-//      {
-//         const FileInfo fileInfo = node.GetData().m_file;
-//         if (fileInfo.m_type == FILE_TYPE::REGULAR)
-//         {
-//            return result + fileInfo.m_size;
-//         }
-
-//         return result;
-//      });
-
-//      return treeSize;
-//   }
-//}
-
-
-ScanningWorker::ScanningWorker(QObject *parent) : QObject(parent)
+ScanningWorker::ScanningWorker(QObject* parent)
+   : QObject(parent)
 {
-
 }
 
-ScanningWorker::~ScanningWorker()
+void ScanningWorker::ComputeDirectorySizes()
 {
+   assert(m_fileTree);
+
+   std::for_each(std::begin(*m_fileTree), std::end(*m_fileTree),
+      [] (const TreeNode<VizNode>& node)
+   {
+      const FileInfo fileInfo = node.GetData().m_file;
+
+      std::shared_ptr<TreeNode<VizNode>>& parent = node.GetParent();
+      if (parent)
+      {
+         FileInfo& parentInfo = parent->GetData().m_file;
+         if (parentInfo.m_type == FILE_TYPE::DIRECTORY)
+         {
+            parentInfo.m_size += fileInfo.m_size;
+         }
+      }
+   });
+}
+
+void ScanningWorker::ScanRecursively(const boost::filesystem::path& path, TreeNode<VizNode>& treeNode)
+{
+   if (boost::filesystem::is_symlink(path))
+   {
+      return;
+   }
+
+   emit ProgressUpdate(m_filesScanned);
+
+   if (boost::filesystem::is_regular_file(path) && boost::filesystem::file_size(path) > 0)
+   {
+      FileInfo fileInfo(path.filename().wstring(), boost::filesystem::file_size(path),
+         FILE_TYPE::REGULAR);
+      treeNode.AppendChild(VizNode(fileInfo));
+
+      ++m_filesScanned;
+   }
+   else if (boost::filesystem::is_directory(path) && !boost::filesystem::is_empty(path))
+   {
+      FileInfo directoryInfo(path.filename().wstring(), ScanningWorker::SIZE_UNDEFINED,
+         FILE_TYPE::DIRECTORY);
+      treeNode.AppendChild(VizNode(directoryInfo));
+
+      ++m_filesScanned;
+
+      for (auto itr = boost::filesystem::directory_iterator(path);
+           itr != boost::filesystem::directory_iterator();
+           ++itr)
+      {
+         const boost::filesystem::path nextPath = itr->path();
+         ScanRecursively(nextPath, *treeNode.GetLastChild());
+      }
+   }
 }
 
 void ScanningWorker::Start()
 {
    assert(boost::filesystem::is_directory(m_path));
 
-//   const Block rootBlock
-//   {
-//      QVector3D(0, 0, 0),
-//      Visualization::ROOT_BLOCK_WIDTH,
-//      Visualization::BLOCK_HEIGHT,
-//      Visualization::ROOT_BLOCK_DEPTH
-//   };
+   const Block rootBlock
+   {
+      QVector3D(0, 0, 0),
+      Visualization::ROOT_BLOCK_WIDTH,
+      Visualization::BLOCK_HEIGHT,
+      Visualization::ROOT_BLOCK_DEPTH
+   };
 
-//   // Dummy root node:
-//   FileInfo fileInfo{L"Dummy Root Node", DiskScanner::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY};
-//   VizNode rootNode{fileInfo, rootBlock};
+   FileInfo fileInfo{L"Dummy Root Node", ScanningWorker::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY};
+   VizNode rootNode{fileInfo, rootBlock};
 
-//   m_fileTree = std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
+   m_fileTree = std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
 
-//   try
-//   {
-//      const auto start = std::chrono::high_resolution_clock::now();
-//      ScanRecursively(m_path, *m_fileTree->GetHead(), progress);
-//      const auto end = std::chrono::high_resolution_clock::now();
+   try
+   {
+      const auto start = std::chrono::high_resolution_clock::now();
+      ScanRecursively(m_path, *m_fileTree->GetHead().get());
+      const auto end = std::chrono::high_resolution_clock::now();
 
-//      m_scanningTime = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+      m_scanningTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-//      progress->store(std::make_pair(m_filesScanned, /*isScanningDone =*/ true));
+      ComputeDirectorySizes();
 
-//      ComputeDirectorySizes();
-//   }
-//   catch (const boost::filesystem::filesystem_error& exception)
-//   {
-//      std::cout << exception.what() << std::endl;
-//   }
+      emit Finished(m_filesScanned);
+   }
+   catch (const boost::filesystem::filesystem_error& exception)
+   {
+      std::cout << exception.what() << std::endl;
+   }
 }
 
