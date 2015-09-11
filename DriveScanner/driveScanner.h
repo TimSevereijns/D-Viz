@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <string>
 
 #include "scanningWorker.h"
 
@@ -19,12 +20,26 @@
  *    https://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/
  */
 
+struct DriveScannerParameters
+{
+   std::function<void (const std::wstring message)> m_onErrorCallback;
+   std::function<void (const std::uintmax_t filesScanned)> m_onProgressUpdateCallback;
+   std::function<void (const std::uintmax_t filesScanned)> m_onScanCompletedCallback;
+
+   DriveScannerParameters()
+      : m_onErrorCallback(std::function<void (const std::wstring)>()),
+        m_onProgressUpdateCallback(std::function<void (const std::uintmax_t)>()),
+        m_onScanCompletedCallback(std::function<void (const std::uintmax_t)>())
+   {
+   }
+};
+
 class DriveScanner : public QObject
 {
    Q_OBJECT
 
    public:
-      explicit DriveScanner(QObject* parent = nullptr);
+      explicit DriveScanner(const DriveScannerParameters& parameters);
 
       void StartScanning();
 
@@ -34,6 +49,8 @@ class DriveScanner : public QObject
       void HandleErrors(const std::wstring message);
 
    private:
+      DriveScannerParameters m_scanningParameters;
+
       std::unique_ptr<QThread> m_thread;
       std::unique_ptr<ScanningWorker> m_worker;
 };

@@ -49,7 +49,7 @@ namespace
       std::map<unsigned int, XboxController::StateAndHandlers>& buttonMap)
    {
       std::for_each(std::begin(buttonMap), std::end(buttonMap),
-         [&buttonMap, currentState, previousState] (const std::pair<unsigned int,
+         [&buttonMap, currentState, previousState] (const std::pair<const unsigned int,
          XboxController::StateAndHandlers>& pair)
       {
          UpdateSingleButton(pair.first, buttonMap, currentState, previousState);

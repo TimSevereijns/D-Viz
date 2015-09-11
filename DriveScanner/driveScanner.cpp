@@ -2,24 +2,25 @@
 
 #include <iostream>
 
-DriveScanner::DriveScanner(QObject* parent)
-   : QObject(parent)
+DriveScanner::DriveScanner(const DriveScannerParameters& parameters)
+   : QObject(),
+     m_scanningParameters(parameters)
 {
 }
 
 void DriveScanner::HandleProgressUpdates(const std::uintmax_t filesScanned)
 {
-   std::wcout << L"Progress Update: " << filesScanned << L" files scanned..." << std::endl;
+   m_scanningParameters.m_onProgressUpdateCallback(filesScanned);
 }
 
 void DriveScanner::HandleErrors(const std::wstring message)
 {
-   std::wcout << L"Error: " << message << std::endl;
+   m_scanningParameters.m_onErrorCallback(message);
 }
 
 void DriveScanner::HandleCompletion(const std::uintmax_t filesScanned)
 {
-   std::wcout << L"Done. " << filesScanned << L" files scanned!" << std::endl;
+   m_scanningParameters.m_onScanCompletedCallback(filesScanned);
 }
 
 void DriveScanner::StartScanning()
@@ -34,7 +35,8 @@ void DriveScanner::StartScanning()
    connect(m_worker.get(), SIGNAL(Finished(std::uintmax_t)),
            m_thread.get(), SLOT(HandleCompletion(std::uintmax_t)));
 
-   //connect(m_worker, SIGNAL(finished()), m_worker, SLOT(deleteLater()));
+   connect(m_worker.get(), SIGNAL(finished()), m_worker.get(), SLOT(deleteLater()));
+   connect(m_thread.get(), SIGNAL(finished()), m_thread.get(), SLOT(deleteLater()));
 
    connect(m_thread.get(), SIGNAL(finished()), m_thread.get(), SLOT(deleteLater()));
    connect(m_thread.get(), SIGNAL(started()), m_worker.get(), SLOT(Start()));

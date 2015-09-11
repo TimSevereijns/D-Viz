@@ -56,6 +56,7 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
        * @param[in] fieldOfView  The new field of view.
        */
       void SetFieldOfView(const float fieldOfView);
+
     protected:
       void initializeGL() override;
       void resizeGL(int width, int height) override;

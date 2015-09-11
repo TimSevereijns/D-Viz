@@ -35,9 +35,6 @@ KeyboardManager::KeyboardManager()
 {
 }
 
-KeyboardManager::~KeyboardManager()
-{
-}
 
 bool KeyboardManager::IsKeyDown(const Qt::Key key)
 {

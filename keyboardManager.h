@@ -19,7 +19,6 @@ class KeyboardManager
       };
 
       KeyboardManager();
-      ~KeyboardManager();
 
       /**
        * @brief IsKeyDown indicates whether the key in question is currently

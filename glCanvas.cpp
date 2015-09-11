@@ -186,9 +186,6 @@ namespace
       progressDialog.setFixedWidth(600);
       progressDialog.show();
 
-//      DriveScanner driveScanner;
-//      driveScanner.StartScanning();
-
       while (progress.load().second == false)
       {
          const unsigned int filesScannedSoFar = progress.load().first;
