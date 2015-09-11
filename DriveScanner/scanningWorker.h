@@ -1,5 +1,5 @@
-#ifndef SCANNINGTHREAD_H
-#define SCANNINGTHREAD_H
+#ifndef SCANNINGWORKER_H
+#define SCANNINGWORKER_H
 
 #include <boost/filesystem.hpp>
 
@@ -56,4 +56,4 @@ class ScanningWorker : public QObject
       std::chrono::duration<double> m_scanningTime;
 };
 
-#endif // SCANNINGTHREAD_H
+#endif // SCANNINGWORKER_H

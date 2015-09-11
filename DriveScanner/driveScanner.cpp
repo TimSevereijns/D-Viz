@@ -17,6 +17,11 @@ void DriveScanner::HandleErrors(const std::wstring message)
    std::wcout << L"Error: " << message << std::endl;
 }
 
+void DriveScanner::HandleCompletion(const std::uintmax_t filesScanned)
+{
+   std::wcout << L"Done. " << filesScanned << L" files scanned!" << std::endl;
+}
+
 void DriveScanner::StartScanning()
 {
    m_thread.reset(new QThread);
@@ -26,8 +31,8 @@ void DriveScanner::StartScanning()
    connect(m_worker.get(), SIGNAL(Error(std::wstring)),
            this, SLOT(HandleErrors(std::wstring)));
 
-   connect(m_worker, SIGNAL(Finished(std::uintmax_t)),
-           m_thread, SLOT(HandleCompletion(std::uintmax_t)));
+   connect(m_worker.get(), SIGNAL(Finished(std::uintmax_t)),
+           m_thread.get(), SLOT(HandleCompletion(std::uintmax_t)));
 
    //connect(m_worker, SIGNAL(finished()), m_worker, SLOT(deleteLater()));
 

@@ -1,6 +1,7 @@
 #include "glCanvas.h"
 
 #include "camera.h"
+#include "DriveScanner/driveScanner.h"
 #include "mainwindow.h"
 #include "optionsManager.h"
 #include "Visualizations/sliceAndDiceTreemap.h"
@@ -184,6 +185,9 @@ namespace
       progressDialog.setWindowModality(Qt::WindowModal);
       progressDialog.setFixedWidth(600);
       progressDialog.show();
+
+//      DriveScanner driveScanner;
+//      driveScanner.StartScanning();
 
       while (progress.load().second == false)
       {

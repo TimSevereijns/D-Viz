@@ -1,5 +1,5 @@
-#ifndef DISKSCANNER_H
-#define DISKSCANNER_H
+#ifndef DRIVESCANNER_H
+#define DRIVESCANNER_H
 
 #include <QObject>
 #include <QThread>
@@ -38,4 +38,4 @@ class DriveScanner : public QObject
       std::unique_ptr<ScanningWorker> m_worker;
 };
 
-#endif // DISKSCANNER_H
+#endif // DRIVESCANNER_H
