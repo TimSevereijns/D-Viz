@@ -84,7 +84,7 @@ void ScanningWorker::Start()
    FileInfo fileInfo{L"Dummy Root Node", ScanningWorker::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY};
    VizNode rootNode{fileInfo, rootBlock};
 
-   m_fileTree = std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
+   m_fileTree = std::make_unique<Tree<VizNode>>(Tree<VizNode>(rootNode));
 
    try
    {
@@ -96,7 +96,7 @@ void ScanningWorker::Start()
 
       ComputeDirectorySizes();
 
-      emit Finished(m_filesScanned);
+      emit Finished(m_filesScanned, m_fileTree.get());
    }
    catch (const boost::filesystem::filesystem_error& exception)
    {

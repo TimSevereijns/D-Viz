@@ -7,7 +7,7 @@
 #include "optionsManager.h"
 
 #include "DataStructs/light.h"
-
+#include "DriveScanner/driveScanner.h"
 #include "Visualizations/visualization.h"
 
 #include <chrono>
@@ -70,6 +70,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       void wheelEvent(QWheelEvent* event) override;
 
    private:
+      void ScanDrive();
+
       void HandleInput();
       void HandleXBoxControllerInput();
 
@@ -90,6 +92,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       std::unique_ptr<QTimer> m_frameRedrawTimer;
 
       Camera m_camera;
+
+      DriveScanner m_scanner;
 
       Light m_light;
 

@@ -2,10 +2,20 @@
 
 #include <iostream>
 
+DriveScanner::DriveScanner()
+   : QObject()
+{
+}
+
 DriveScanner::DriveScanner(const DriveScannerParameters& parameters)
    : QObject(),
      m_scanningParameters(parameters)
 {
+}
+
+void DriveScanner::SetParameters(const DriveScannerParameters& parameters)
+{
+   m_scanningParameters = parameters;
 }
 
 void DriveScanner::HandleProgressUpdates(const std::uintmax_t filesScanned)
@@ -18,8 +28,12 @@ void DriveScanner::HandleErrors(const std::wstring message)
    m_scanningParameters.m_onErrorCallback(message);
 }
 
-void DriveScanner::HandleCompletion(const std::uintmax_t filesScanned)
+void DriveScanner::HandleCompletion(const std::uintmax_t filesScanned,
+   Tree<VizNode>* finalTree)
 {
+   assert(finalTree);
+   m_theTree.reset(finalTree);
+
    m_scanningParameters.m_onScanCompletedCallback(filesScanned);
 }
 

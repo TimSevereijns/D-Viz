@@ -749,3 +749,29 @@ void GLCanvas::paintGL()
 
    m_lastFrameTimeStamp = currentTime;
 }
+
+void GLCanvas::ScanDrive()
+{
+   const auto& statusBarUpdater =
+      [&] (const std::uintmax_t numberOfFilesScanned)
+   {
+      std::wstringstream message;
+      message.imbue(std::locale(""));
+      message << std::fixed << L"Files Scanned: " << numberOfFilesScanned;
+      SetStatusBarMessage(*m_mainWindow, message.str());
+   };
+
+   const auto& handOffToParser =
+      [&] (const std::uintmax_t /*numberOfFilesScanned*/)
+   {
+      //m_scanner.FetchTree();
+   };
+
+   DriveScannerParameters parameters;
+   parameters.m_onProgressUpdateCallback = statusBarUpdater;
+   parameters.m_onScanCompletedCallback = handOffToParser;
+
+   //m_scanner.SetParameters();
+   //m_scanner.StartScanning();
+}
+
