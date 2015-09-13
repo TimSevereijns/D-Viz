@@ -27,10 +27,13 @@ struct DriveScannerParameters
    std::function<void (const std::uintmax_t filesScanned)> m_onProgressUpdateCallback;
    std::function<void (const std::uintmax_t filesScanned)> m_onScanCompletedCallback;
 
+   std::wstring m_path;
+
    DriveScannerParameters()
       : m_onErrorCallback(std::function<void (const std::wstring)>()),
         m_onProgressUpdateCallback(std::function<void (const std::uintmax_t)>()),
-        m_onScanCompletedCallback(std::function<void (const std::uintmax_t)>())
+        m_onScanCompletedCallback(std::function<void (const std::uintmax_t)>()),
+        m_path(L"")
    {
    }
 };
@@ -42,12 +45,15 @@ class DriveScanner : public QObject
    public:
       explicit DriveScanner();
       explicit DriveScanner(const DriveScannerParameters& parameters);
+      ~DriveScanner();
 
       void SetParameters(const DriveScannerParameters& parameters);
       void StartScanning();
 
+      std::shared_ptr<Tree<VizNode>> GetTree() const;
+
    public slots:
-      void HandleCompletion(const std::uintmax_t filesScanned, Tree<VizNode>* finalTree);
+      void HandleCompletion(const std::uintmax_t filesScanned);
       void HandleProgressUpdates(const std::uintmax_t filesScanned);
       void HandleErrors(const std::wstring message);
 
@@ -57,7 +63,7 @@ class DriveScanner : public QObject
       std::unique_ptr<QThread> m_thread;
       std::unique_ptr<ScanningWorker> m_worker;
 
-      std::unique_ptr<Tree<VizNode>> m_theTree;
+      std::shared_ptr<Tree<VizNode>> m_theTree;
 };
 
 #endif // DRIVESCANNER_H

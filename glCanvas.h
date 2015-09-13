@@ -70,7 +70,7 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       void wheelEvent(QWheelEvent* event) override;
 
    private:
-      void ScanDrive();
+      void ScanDrive(const VisualizationParameters& vizParameters);
 
       void HandleInput();
       void HandleXBoxControllerInput();

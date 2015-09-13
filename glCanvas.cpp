@@ -286,7 +286,7 @@ void GLCanvas::CreateNewVisualization(const VisualizationParameters& parameters)
       return;
    }
 
-   m_isPaintingSuspended = true;
+   //m_isPaintingSuspended = true;
 
    if (!m_theVisualization || parameters.forceNewScan)
    {
@@ -295,13 +295,14 @@ void GLCanvas::CreateNewVisualization(const VisualizationParameters& parameters)
 
    if (m_theVisualization && parameters.forceNewScan)
    {
-      ScanAndParse(*m_theVisualization, parameters, *m_mainWindow);
+      //ScanAndParse(*m_theVisualization, parameters, *m_mainWindow);
+      ScanDrive(parameters);
    }
 
-   ReloadVisualization(parameters);
-   UpdateVertexCountInStatusBar(m_theVisualization->GetVertexCount(), *m_mainWindow);
+//   ReloadVisualization(parameters);
+//   UpdateVertexCountInStatusBar(m_theVisualization->GetVertexCount(), *m_mainWindow);
 
-   m_isPaintingSuspended = false;
+//   m_isPaintingSuspended = false;
 }
 
 void GLCanvas::SetFieldOfView(const float fieldOfView)
@@ -750,9 +751,9 @@ void GLCanvas::paintGL()
    m_lastFrameTimeStamp = currentTime;
 }
 
-void GLCanvas::ScanDrive()
+void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
 {
-   const auto& statusBarUpdater =
+   const auto& progressHandler =
       [&] (const std::uintmax_t numberOfFilesScanned)
    {
       std::wstringstream message;
@@ -761,17 +762,30 @@ void GLCanvas::ScanDrive()
       SetStatusBarMessage(*m_mainWindow, message.str());
    };
 
-   const auto& handOffToParser =
-      [&] (const std::uintmax_t /*numberOfFilesScanned*/)
+   const auto& completionHandler =
+      [&] (const std::uintmax_t numberOfFilesScanned)
    {
-      //m_scanner.FetchTree();
+      m_isPaintingSuspended = true;
+
+      std::wstringstream message;
+      message.imbue(std::locale(""));
+      message << std::fixed << L"Total Files Scanned: " << numberOfFilesScanned;
+      SetStatusBarMessage(*m_mainWindow, message.str());
+
+      const auto theTree = m_scanner.GetTree();
+      m_theVisualization->Parse(theTree);
+
+      ReloadVisualization(vizParameters);
+      UpdateVertexCountInStatusBar(m_theVisualization->GetVertexCount(), *m_mainWindow);
+
+      m_isPaintingSuspended = false;
    };
 
-   DriveScannerParameters parameters;
-   parameters.m_onProgressUpdateCallback = statusBarUpdater;
-   parameters.m_onScanCompletedCallback = handOffToParser;
+   DriveScannerParameters scanningParameters;
+   scanningParameters.m_onProgressUpdateCallback = progressHandler;
+   scanningParameters.m_onScanCompletedCallback = completionHandler;
+   scanningParameters.m_path = vizParameters.rootDirectory;
 
-   //m_scanner.SetParameters();
-   //m_scanner.StartScanning();
+   m_scanner.SetParameters(scanningParameters);
+   m_scanner.StartScanning();
 }
-

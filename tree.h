@@ -872,6 +872,7 @@ Tree<T>::Tree(const Tree<T>& otherTree)
 template<typename T>
 Tree<T>::~Tree()
 {
+   std::cout << "The Tree is dead..." << std::endl;
 }
 
 template<typename T>

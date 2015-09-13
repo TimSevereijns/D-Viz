@@ -2,15 +2,24 @@
 
 #include <algorithm>
 #include <chrono>
+#include <iostream>
 #include <locale>
 #include <numeric>
 #include <utility>
 
 const std::uintmax_t ScanningWorker::SIZE_UNDEFINED = 0;
 
-ScanningWorker::ScanningWorker(QObject* parent)
-   : QObject(parent)
+ScanningWorker::ScanningWorker(Tree<VizNode>* destination, std::wstring path)
+   : QObject(),
+     m_path(path),
+     m_filesScanned(0),
+     m_fileTree(destination)
 {
+}
+
+ScanningWorker::~ScanningWorker()
+{
+   std::cout << "The worker is dead..." << std::endl;
 }
 
 void ScanningWorker::ComputeDirectorySizes()
@@ -41,7 +50,10 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path, TreeNo
       return;
    }
 
-   emit ProgressUpdate(m_filesScanned);
+   if (m_filesScanned % 100 == 0)
+   {
+      emit ProgressUpdate(m_filesScanned);
+   }
 
    if (boost::filesystem::is_regular_file(path) && boost::filesystem::file_size(path) > 0)
    {
@@ -73,18 +85,18 @@ void ScanningWorker::Start()
 {
    assert(boost::filesystem::is_directory(m_path));
 
-   const Block rootBlock
-   {
-      QVector3D(0, 0, 0),
-      Visualization::ROOT_BLOCK_WIDTH,
-      Visualization::BLOCK_HEIGHT,
-      Visualization::ROOT_BLOCK_DEPTH
-   };
+//   const Block rootBlock
+//   {
+//      QVector3D(0, 0, 0),
+//      Visualization::ROOT_BLOCK_WIDTH,
+//      Visualization::BLOCK_HEIGHT,
+//      Visualization::ROOT_BLOCK_DEPTH
+//   };
 
-   FileInfo fileInfo{L"Dummy Root Node", ScanningWorker::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY};
-   VizNode rootNode{fileInfo, rootBlock};
+//   FileInfo fileInfo{L"Dummy Root Node", ScanningWorker::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY};
+//   VizNode rootNode{fileInfo, rootBlock};
 
-   m_fileTree = std::make_unique<Tree<VizNode>>(Tree<VizNode>(rootNode));
+   //m_fileTree = std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
 
    try
    {
@@ -96,7 +108,7 @@ void ScanningWorker::Start()
 
       ComputeDirectorySizes();
 
-      emit Finished(m_filesScanned, m_fileTree.get());
+      emit Finished(m_filesScanned);
    }
    catch (const boost::filesystem::filesystem_error& exception)
    {

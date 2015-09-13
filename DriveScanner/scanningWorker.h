@@ -27,14 +27,15 @@ class ScanningWorker : public QObject
    public:
       static const std::uintmax_t SIZE_UNDEFINED;
 
-      explicit ScanningWorker(QObject* parent = nullptr);
+      explicit ScanningWorker(Tree<VizNode>* destination, std::wstring path);
+      ~ScanningWorker();
 
    public slots:
       void Start();
 
    signals:
       void Error(std::wstring message);
-      void Finished(const std::uintmax_t filesScanned, Tree<VizNode>* finalTree);
+      void Finished(const std::uintmax_t filesScanned);
       void ProgressUpdate(const std::uintmax_t filesScanned);
 
    private:
@@ -47,7 +48,7 @@ class ScanningWorker : public QObject
 
       void ComputeDirectorySizes();
 
-      std::unique_ptr<Tree<VizNode>> m_fileTree;
+      Tree<VizNode>* m_fileTree;
 
       boost::filesystem::path m_path;
 
