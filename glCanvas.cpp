@@ -763,7 +763,7 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
    };
 
    const auto& completionHandler =
-      [&] (const std::uintmax_t numberOfFilesScanned)
+      [&, vizParameters] (const std::uintmax_t numberOfFilesScanned)
    {
       m_isPaintingSuspended = true;
 
@@ -772,7 +772,7 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
       message << std::fixed << L"Total Files Scanned: " << numberOfFilesScanned;
       SetStatusBarMessage(*m_mainWindow, message.str());
 
-      const auto theTree = m_scanner.GetTree();
+      const auto& theTree = m_scanner.GetTree();
       m_theVisualization->Parse(theTree);
 
       ReloadVisualization(vizParameters);

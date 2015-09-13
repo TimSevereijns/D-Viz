@@ -4,9 +4,9 @@
 
 DriveScanner::DriveScanner()
    : QObject(),
-     m_theTree(nullptr),
-     m_thread(nullptr),
-     m_worker(nullptr)
+     m_theTree(nullptr)
+//     m_thread(nullptr),
+//     m_worker(nullptr)
 {
 }
 
@@ -60,35 +60,30 @@ void DriveScanner::StartScanning()
 
    m_theTree = std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
 
-   if (m_thread && m_thread->isRunning())
-   {
-      m_thread->exit();
-   }
+   QThread* thread = new QThread;
+   ScanningWorker* worker = new ScanningWorker(m_theTree, m_scanningParameters.m_path);
+   worker->moveToThread(thread);
 
-   m_thread.reset(new QThread);
-   m_worker.reset(new ScanningWorker(m_theTree, m_scanningParameters.m_path));
-   m_worker->moveToThread(m_thread.get());
+   connect(worker, SIGNAL(Error(std::wstring)),
+      this, SLOT(HandleErrors(std::wstring)));
 
-   connect(m_worker.get(), SIGNAL(Error(std::wstring)),
-           this, SLOT(HandleErrors(std::wstring)));
+   connect(worker, SIGNAL(Finished(const std::uintmax_t)),
+      this, SLOT(HandleCompletion(const std::uintmax_t)));
 
-   connect(m_worker.get(), SIGNAL(Finished(const std::uintmax_t)),
-           this, SLOT(HandleCompletion(const std::uintmax_t)));
+   connect(worker, SIGNAL(ProgressUpdate(const std::uintmax_t)),
+      this, SLOT(HandleProgressUpdates(std::uintmax_t)));
 
-   connect(m_worker.get(), SIGNAL(ProgressUpdate(const std::uintmax_t)),
-           this, SLOT(HandleProgressUpdates(std::uintmax_t)));
+   connect(worker, SIGNAL(Finished(const std::uintmax_t)),
+      worker, SLOT(deleteLater()));
 
-   connect(m_worker.get(), SIGNAL(Finished(const std::uintmax_t)),
-           m_worker.get(), SLOT(deleteLater()));
+   connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+   connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+   connect(thread, SIGNAL(started()), worker, SLOT(Start()));
 
-   connect(m_thread.get(), SIGNAL(finished()), m_thread.get(), SLOT(deleteLater()));
-   connect(m_thread.get(), SIGNAL(finished()), m_thread.get(), SLOT(deleteLater()));
-   connect(m_thread.get(), SIGNAL(started()), m_worker.get(), SLOT(Start()));
-
-   m_thread->start();
+   thread->start();
 }
 
-std::shared_ptr<Tree<VizNode> > DriveScanner::GetTree() const
+std::shared_ptr<Tree<VizNode>> DriveScanner::GetTree() const
 {
    return m_theTree;
 }

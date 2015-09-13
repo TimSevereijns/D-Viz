@@ -59,8 +59,8 @@ class DriveScanner : public QObject
    private:
       DriveScannerParameters m_scanningParameters;
 
-      std::unique_ptr<QThread> m_thread;
-      std::unique_ptr<ScanningWorker> m_worker;
+      //std::unique_ptr<QThread> m_thread;
+      //std::unique_ptr<ScanningWorker> m_worker;
 
       std::shared_ptr<Tree<VizNode>> m_theTree;
 };
