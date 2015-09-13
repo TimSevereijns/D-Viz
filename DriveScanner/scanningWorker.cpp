@@ -50,7 +50,7 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path, TreeNo
       return;
    }
 
-   if (m_filesScanned % 100 == 0)
+   if (m_filesScanned % 1000 == 0)
    {
       emit ProgressUpdate(m_filesScanned);
    }

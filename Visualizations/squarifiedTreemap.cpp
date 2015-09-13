@@ -559,9 +559,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
    }
 
    m_theTree = theTree;
-
-   PruneNodes(*theTree);
-   SortNodes(*theTree);
+   SortNodes(*m_theTree);
 
    const Block rootBlock
    {

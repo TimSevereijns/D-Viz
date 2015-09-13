@@ -32,6 +32,8 @@ QVector<QVector3D>& Visualization::PopulateVertexBuffer(const VisualizationParam
       return m_visualizationVertices;
    }
 
+   int unidentified = 0;
+
    std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
    {
@@ -46,10 +48,15 @@ QVector<QVector3D>& Visualization::PopulateVertexBuffer(const VisualizationParam
       {
          m_visualizationVertices << node.GetData().m_block.m_vertices;
       }
+      else
+      {
+         unidentified++;
+      }
    });
 
    std::cout << "Vertex count: " << m_visualizationVertices.size() << std::endl;
    std::cout << "Block count: " << m_visualizationVertices.size() / Block::VERTICES_PER_BLOCK << std::endl;
+   std::cout << "Populate Vertex Buffer: " << unidentified << " unidentified nodes." << std::endl;
 
    return m_visualizationVertices;
 }
@@ -66,6 +73,8 @@ QVector<QVector3D>& Visualization::PopulateColorBuffer(const VisualizationParame
       return m_visualizationColors;
    }
 
+   int unidentified = 0;
+
    std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
    {
@@ -80,9 +89,14 @@ QVector<QVector3D>& Visualization::PopulateColorBuffer(const VisualizationParame
       {
          m_visualizationColors << Visualization::CreateDirectoryColors();
       }
+      else
+      {
+         unidentified++;
+      }
    });
 
    std::cout << "Color count: " << m_visualizationColors.size() / 30 << std::endl;
+   std::cout << "Populate Color Buffer: " << unidentified << " unidentified nodes." << std::endl;
 
    return m_visualizationColors;
 }
