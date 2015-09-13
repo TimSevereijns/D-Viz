@@ -14,7 +14,6 @@ CONFIG += c++11 console
 
 SOURCES += main.cpp\
     mainwindow.cpp \
-    diskScanner.cpp \
     glCanvas.cpp \
     camera.cpp \
     keyboardManager.cpp \
@@ -35,7 +34,6 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h \
     tree.h \
-    diskScanner.h \
     glCanvas.h \
     camera.h \
     keyboardManager.h \

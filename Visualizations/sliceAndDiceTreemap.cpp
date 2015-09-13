@@ -1,5 +1,6 @@
 #include "sliceAndDiceTreemap.h"
 
+#include <chrono>
 #include <iostream>
 
 namespace

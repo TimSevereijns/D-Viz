@@ -11,7 +11,7 @@
 #include "scanningWorker.h"
 
 /**
- * @brief The DiskScanner class
+ * @brief The DriveScanner class
  *
  * Dev Resources:
  *

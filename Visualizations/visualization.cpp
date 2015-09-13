@@ -1,7 +1,5 @@
 #include "visualization.h"
 
-#include "../diskScanner.h"
-
 #include <algorithm>
 #include <iostream>
 #include <string>

@@ -166,65 +166,6 @@ namespace
 
       SetStatusBarMessage(mainWindow, message.str());
    }
-
-   /**
-    * @brief ScanDirectory
-    * @param parameters
-    * @param progressCallback
-    * @param mainWindow
-    * @return
-    */
-   std::shared_ptr<Tree<VizNode>> ScanDirectory(const VisualizationParameters& parameters,
-      const std::function<void (std::uintmax_t)>& progressCallback, MainWindow& mainWindow)
-   {
-      std::atomic<std::pair<std::uintmax_t, bool>> progress{std::make_pair(0, false)};
-
-      DiskScanner scanner{parameters.rootDirectory};
-      scanner.ScanInNewThread(&progress);
-
-      QProgressDialog progressDialog("Scanning Directory...", "Cancel", 0, 0, &mainWindow, 0);
-      progressDialog.setWindowModality(Qt::WindowModal);
-      progressDialog.setFixedWidth(600);
-      progressDialog.show();
-
-      while (progress.load().second == false)
-      {
-         const unsigned int filesScannedSoFar = progress.load().first;
-         progressCallback(filesScannedSoFar);
-
-         QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-      }
-
-      scanner.JoinScanningThread();
-      scanner.PrintTreeMetadata();
-
-      const auto theTree = scanner.GetFileTree();
-      return theTree;
-   }
-
-   /**
-    * @brief ScanAndParse is a helper function that sets up a status bar updating lambda that will
-    * be passed to the diretory scanner so that it can be used to report progress updates.
-    *
-    * @param[in/out] treeMap        The tree map to call the appropriate scan and parse operations
-    *                               on.
-    * @param[in] mainWindow         The mainwindow that contains the status bar to be updated.
-    */
-   void ScanAndParse(Visualization& visualization,
-      const VisualizationParameters& parameters, MainWindow& mainWindow)
-   {
-      const auto& statusBarUpdater = [&] (const std::uintmax_t numberOfFilesScanned)
-      {
-         std::wstringstream message;
-         message.imbue(std::locale(""));
-         message << std::fixed << L"Files Scanned: " << numberOfFilesScanned;
-         SetStatusBarMessage(mainWindow, message.str());
-      };
-
-      const auto& theTree = ScanDirectory(parameters, statusBarUpdater, mainWindow);
-      visualization.Parse(theTree);
-   }
 }
 
 GLCanvas::GLCanvas(QWidget* parent)
@@ -292,8 +233,6 @@ void GLCanvas::CreateNewVisualization(const VisualizationParameters& parameters)
       return;
    }
 
-   //m_isPaintingSuspended = true;
-
    if (!m_theVisualization || parameters.forceNewScan)
    {
       m_theVisualization.reset(new SquarifiedTreeMap(parameters));
@@ -301,14 +240,8 @@ void GLCanvas::CreateNewVisualization(const VisualizationParameters& parameters)
 
    if (m_theVisualization && parameters.forceNewScan)
    {
-      //ScanAndParse(*m_theVisualization, parameters, *m_mainWindow);
       ScanDrive(parameters);
    }
-
-//   ReloadVisualization(parameters);
-//   UpdateVertexCountInStatusBar(m_theVisualization->GetVertexCount(), *m_mainWindow);
-
-//   m_isPaintingSuspended = false;
 }
 
 void GLCanvas::SetFieldOfView(const float fieldOfView)

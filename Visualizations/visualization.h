@@ -9,7 +9,8 @@
 #include <numeric>
 
 #include "../tree.h"
-#include "../diskScanner.h"
+
+#include "../DataStructs/vizNode.h"
 
 /**
  * @brief The ParsingOptions struct represents the gamut of visualization parameters that can be

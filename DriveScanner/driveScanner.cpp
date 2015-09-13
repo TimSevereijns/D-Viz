@@ -5,8 +5,6 @@
 DriveScanner::DriveScanner()
    : QObject(),
      m_theTree(nullptr)
-//     m_thread(nullptr),
-//     m_worker(nullptr)
 {
 }
 
