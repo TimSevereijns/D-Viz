@@ -10,12 +10,6 @@ DriveScanner::DriveScanner()
 {
 }
 
-DriveScanner::DriveScanner(const DriveScannerParameters& parameters)
-   : QObject(),
-     m_scanningParameters(parameters)
-{
-}
-
 DriveScanner::~DriveScanner()
 {
    std::cout << "Drive Scanner is dead..." << std::endl;
@@ -51,13 +45,28 @@ void DriveScanner::StartScanning()
       Visualization::ROOT_BLOCK_DEPTH
    };
 
-   FileInfo fileInfo{L"Dummy Root Node", ScanningWorker::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY};
-   VizNode rootNode{fileInfo, rootBlock};
+   const FileInfo fileInfo
+   {
+      L"Dummy Root Node",
+      ScanningWorker::SIZE_UNDEFINED,
+      FILE_TYPE::DIRECTORY
+   };
+
+   const VizNode rootNode
+   {
+      fileInfo,
+      rootBlock
+   };
 
    m_theTree = std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
 
+   if (m_thread && m_thread->isRunning())
+   {
+      m_thread->exit();
+   }
+
    m_thread.reset(new QThread);
-   m_worker.reset(new ScanningWorker(m_theTree.get(), m_scanningParameters.m_path));
+   m_worker.reset(new ScanningWorker(m_theTree, m_scanningParameters.m_path));
    m_worker->moveToThread(m_thread.get());
 
    connect(m_worker.get(), SIGNAL(Error(std::wstring)),

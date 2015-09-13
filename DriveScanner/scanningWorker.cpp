@@ -9,7 +9,7 @@
 
 const std::uintmax_t ScanningWorker::SIZE_UNDEFINED = 0;
 
-ScanningWorker::ScanningWorker(Tree<VizNode>* destination, std::wstring path)
+ScanningWorker::ScanningWorker(std::shared_ptr<Tree<VizNode>> destination, std::wstring path)
    : QObject(),
      m_path(path),
      m_filesScanned(0),
@@ -57,16 +57,26 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path, TreeNo
 
    if (boost::filesystem::is_regular_file(path) && boost::filesystem::file_size(path) > 0)
    {
-      FileInfo fileInfo(path.filename().wstring(), boost::filesystem::file_size(path),
-         FILE_TYPE::REGULAR);
+      FileInfo fileInfo
+      {
+         path.filename().wstring(),
+         boost::filesystem::file_size(path),
+         FILE_TYPE::REGULAR
+      };
+
       treeNode.AppendChild(VizNode(fileInfo));
 
       ++m_filesScanned;
    }
    else if (boost::filesystem::is_directory(path) && !boost::filesystem::is_empty(path))
    {
-      FileInfo directoryInfo(path.filename().wstring(), ScanningWorker::SIZE_UNDEFINED,
-         FILE_TYPE::DIRECTORY);
+      FileInfo directoryInfo
+      {
+         path.filename().wstring(),
+         ScanningWorker::SIZE_UNDEFINED,
+         FILE_TYPE::DIRECTORY
+      };
+
       treeNode.AppendChild(VizNode(directoryInfo));
 
       ++m_filesScanned;
@@ -84,19 +94,6 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path, TreeNo
 void ScanningWorker::Start()
 {
    assert(boost::filesystem::is_directory(m_path));
-
-//   const Block rootBlock
-//   {
-//      QVector3D(0, 0, 0),
-//      Visualization::ROOT_BLOCK_WIDTH,
-//      Visualization::BLOCK_HEIGHT,
-//      Visualization::ROOT_BLOCK_DEPTH
-//   };
-
-//   FileInfo fileInfo{L"Dummy Root Node", ScanningWorker::SIZE_UNDEFINED, FILE_TYPE::DIRECTORY};
-//   VizNode rootNode{fileInfo, rootBlock};
-
-   //m_fileTree = std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
 
    try
    {

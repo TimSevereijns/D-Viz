@@ -27,7 +27,7 @@ class ScanningWorker : public QObject
    public:
       static const std::uintmax_t SIZE_UNDEFINED;
 
-      explicit ScanningWorker(Tree<VizNode>* destination, std::wstring path);
+      explicit ScanningWorker(std::shared_ptr<Tree<VizNode>> destination, std::wstring path);
       ~ScanningWorker();
 
    public slots:
@@ -48,7 +48,7 @@ class ScanningWorker : public QObject
 
       void ComputeDirectorySizes();
 
-      Tree<VizNode>* m_fileTree;
+      std::shared_ptr<Tree<VizNode>> m_fileTree;
 
       boost::filesystem::path m_path;
 

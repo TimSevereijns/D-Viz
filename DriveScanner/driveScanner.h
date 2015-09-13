@@ -44,7 +44,6 @@ class DriveScanner : public QObject
 
    public:
       explicit DriveScanner();
-      explicit DriveScanner(const DriveScannerParameters& parameters);
       ~DriveScanner();
 
       void SetParameters(const DriveScannerParameters& parameters);
