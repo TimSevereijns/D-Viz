@@ -6,6 +6,7 @@
 #include "optionsManager.h"
 #include "Visualizations/sliceAndDiceTreemap.h"
 #include "Visualizations/squarifiedTreemap.h"
+#include "Utilities/scopeExit.hpp"
 
 #include <QApplication>
 #include <QMouseEvent>
@@ -264,6 +265,11 @@ GLCanvas::GLCanvas(QWidget* parent)
 
 void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
 {
+   const bool previousSuspensionState = m_isPaintingSuspended;
+   m_isPaintingSuspended = true;
+
+   ON_SCOPE_EXIT(m_isPaintingSuspended = previousSuspensionState);
+
    m_visualizationVertices = m_theVisualization->PopulateVertexBuffer(parameters);
    m_visualizationColors = m_theVisualization->PopulateColorBuffer(parameters);
 
@@ -765,7 +771,10 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
    const auto& completionHandler =
       [&, vizParameters] (const std::uintmax_t numberOfFilesScanned)
    {
+      const bool previousSuspensionState = m_isPaintingSuspended;
       m_isPaintingSuspended = true;
+
+      ON_SCOPE_EXIT(m_isPaintingSuspended = previousSuspensionState);
 
       std::wstringstream message;
       message.imbue(std::locale(""));
@@ -777,8 +786,6 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
 
       ReloadVisualization(vizParameters);
       UpdateVertexCountInStatusBar(m_theVisualization->GetVertexCount(), *m_mainWindow);
-
-      m_isPaintingSuspended = false;
    };
 
    DriveScannerParameters scanningParameters;

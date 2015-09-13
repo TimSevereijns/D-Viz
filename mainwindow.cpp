@@ -67,49 +67,51 @@ void MainWindow::SetupSidebar()
       m_ui->pruneSizeComboBox->addItem(pair.second);
    });
 
-   connect(m_ui->directoriesOnlyCheckbox, &QCheckBox::stateChanged, this,
-      &MainWindow::OnDirectoryOnlyStateChanged);
+   connect(m_ui->directoriesOnlyCheckbox, &QCheckBox::stateChanged,
+      this, &MainWindow::OnDirectoryOnlyStateChanged);
 
-   connect(m_ui->pruneTreeButton, &QPushButton::clicked, this, &MainWindow::OnPruneTreeButtonClicked);
+   connect(m_ui->pruneTreeButton, &QPushButton::clicked,
+      this, &MainWindow::OnPruneTreeButtonClicked);
 
-   connect(m_ui->fieldOfViewSlider, &QSlider::valueChanged, this, &MainWindow::OnFieldOfViewChanged);
+   connect(m_ui->fieldOfViewSlider, &QSlider::valueChanged,
+      this, &MainWindow::OnFieldOfViewChanged);
 
    connect(m_ui->cameraSpeedSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_optionsManager.get(),
-      &OptionsManager::OnCameraMovementSpeedChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+      m_optionsManager.get(), &OptionsManager::OnCameraMovementSpeedChanged);
 
    connect(m_ui->mouseSensitivitySpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_optionsManager.get(),
-      &OptionsManager::OnMouseSensitivityChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+      m_optionsManager.get(), &OptionsManager::OnMouseSensitivityChanged);
 
    connect(m_ui->ambientCoefficientSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_optionsManager.get(),
-      &OptionsManager::OnAmbientCoefficientChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+      m_optionsManager.get(), &OptionsManager::OnAmbientCoefficientChanged);
 
    connect(m_ui->attenuationSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_optionsManager.get(),
-      &OptionsManager::OnAttenuationChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+      m_optionsManager.get(), &OptionsManager::OnAttenuationChanged);
 
    connect(m_ui->shininesSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), m_optionsManager.get(),
-      &OptionsManager::OnShininessChanged);
+      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+      m_optionsManager.get(), &OptionsManager::OnShininessChanged);
 
-   connect(m_ui->lightRedSlider, &QSlider::valueChanged, m_optionsManager.get(),
-      &OptionsManager::OnRedLightComponentChanged);
+   connect(m_ui->lightRedSlider, &QSlider::valueChanged,
+      m_optionsManager.get(), &OptionsManager::OnRedLightComponentChanged);
 
-   connect(m_ui->lightGreenSlider, &QSlider::valueChanged, m_optionsManager.get(),
-      &OptionsManager::OnGreenLightComponentChanged);
+   connect(m_ui->lightGreenSlider, &QSlider::valueChanged,
+      m_optionsManager.get(), &OptionsManager::OnGreenLightComponentChanged);
 
-   connect(m_ui->lightBlueSlider, &QSlider::valueChanged, m_optionsManager.get(),
-      &OptionsManager::OnBlueLightComponentChanged);
+   connect(m_ui->lightBlueSlider, &QSlider::valueChanged,
+      m_optionsManager.get(), &OptionsManager::OnBlueLightComponentChanged);
 
    connect(m_ui->attachLightToCameraCheckBox,
-      static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), m_optionsManager.get(),
-      &OptionsManager::OnAttachLightToCameraStateChanged);
+      static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
+      m_optionsManager.get(), &OptionsManager::OnAttachLightToCameraStateChanged);
 
    connect(m_ui->useXBoxController,
-      static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), m_optionsManager.get(),
-      &OptionsManager::OnUseXBoxControllerStateChanged);
+      static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
+      m_optionsManager.get(), &OptionsManager::OnUseXBoxControllerStateChanged);
 }
 
 void MainWindow::SetupXboxController()
@@ -197,13 +199,15 @@ void MainWindow::OnDirectoryOnlyStateChanged(int state)
 
 void MainWindow::OnPruneTreeButtonClicked()
 {
-   VisualizationParameters parsingOptions;
-   parsingOptions.rootDirectory = m_directoryToVisualize;
-   parsingOptions.onlyShowDirectories = m_showDirectoriesOnly;
-   parsingOptions.forceNewScan = false;
-   parsingOptions.minimumFileSize = m_sizePruningOptions[m_ui->pruneSizeComboBox->currentIndex()].first;
+   const auto pruneSizeIndex = m_ui->pruneSizeComboBox->currentIndex();
 
-   m_glCanvas->CreateNewVisualization(parsingOptions);
+   VisualizationParameters parameters;
+   parameters.rootDirectory = m_directoryToVisualize;
+   parameters.onlyShowDirectories = m_showDirectoriesOnly;
+   parameters.forceNewScan = false;
+   parameters.minimumFileSize = m_sizePruningOptions[pruneSizeIndex].first;
+
+   m_glCanvas->ReloadVisualization(parameters);
 }
 
 void MainWindow::XboxControllerConnected()

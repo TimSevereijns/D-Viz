@@ -53,7 +53,8 @@ HEADERS  += mainwindow.h \
     DataStructs/vizNode.h \
     DataStructs/fileInfo.h \
     DataStructs/light.h \
-    DriveScanner/driveScanner.h
+    DriveScanner/driveScanner.h \
+    Utilities/scopeExit.hpp
 
 FORMS    += mainwindow.ui
 
