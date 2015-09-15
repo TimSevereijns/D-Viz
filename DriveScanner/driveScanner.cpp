@@ -45,7 +45,7 @@ void DriveScanner::StartScanning()
 
    const FileInfo fileInfo
    {
-      L"Dummy Root Node",
+      m_scanningParameters.m_path,
       ScanningWorker::SIZE_UNDEFINED,
       FILE_TYPE::DIRECTORY
    };

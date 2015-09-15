@@ -7,6 +7,32 @@
 #include <numeric>
 #include <utility>
 
+namespace
+{
+   /**
+    * @brief PruneNodes removes nodes whose corresponding file or directory size is zero.
+    *
+    * @param[in/out] tree           The tree to be pruned.
+    */
+   void PruneEmptyFiles(Tree<VizNode>& tree)
+   {
+      std::cout << "Nodes before pruning: " << tree.Size(*tree.GetHead()) << std::endl;
+
+      unsigned int nodesRemoved = 0;
+      for (TreeNode<VizNode>& node : tree)
+      {
+         if (node.GetData().m_file.m_size == 0)
+         {
+            node.RemoveFromTree();
+            nodesRemoved++;
+         }
+      }
+
+      std::cout << "Nodes removed: " << nodesRemoved << std::endl;
+      std::cout << "Nodes after pruning: " << tree.Size(*tree.GetHead()) << std::endl;
+   }
+}
+
 const std::uintmax_t ScanningWorker::SIZE_UNDEFINED = 0;
 
 ScanningWorker::ScanningWorker(std::shared_ptr<Tree<VizNode>> destination, std::wstring path)
@@ -45,11 +71,6 @@ void ScanningWorker::ComputeDirectorySizes()
 
 void ScanningWorker::ScanRecursively(const boost::filesystem::path& path, TreeNode<VizNode>& treeNode)
 {
-   if (boost::filesystem::is_symlink(path))
-   {
-      return;
-   }
-
    if (m_filesScanned % 1000 == 0)
    {
       emit ProgressUpdate(m_filesScanned);
@@ -68,7 +89,8 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path, TreeNo
 
       ++m_filesScanned;
    }
-   else if (boost::filesystem::is_directory(path) && !boost::filesystem::is_empty(path))
+   else if (boost::filesystem::is_directory(path) && !boost::filesystem::is_empty(path)
+      && !boost::filesystem::is_symlink(path))
    {
       FileInfo directoryInfo
       {
@@ -105,6 +127,9 @@ void ScanningWorker::Start()
 
       ComputeDirectorySizes();
 
+      PruneEmptyFiles(*m_fileTree);
+      PruneEmptyFiles(*m_fileTree);
+
       emit Finished(m_filesScanned);
    }
    catch (const boost::filesystem::filesystem_error& exception)
@@ -112,4 +137,3 @@ void ScanningWorker::Start()
       std::cout << exception.what() << std::endl;
    }
 }
-

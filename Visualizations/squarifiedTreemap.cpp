@@ -27,29 +27,6 @@ namespace
    }
 
    /**
-    * @brief PruneNodes removes nodes whose corresponding file or directory size is zero.
-    *
-    * @param[in/out] tree           The tree to be pruned.
-    */
-   void PruneNodes(Tree<VizNode>& tree)
-   {
-      std::cout << "Nodes before pruning: " << tree.Size(*tree.GetHead()) << std::endl;
-
-      unsigned int nodesRemoved = 0;
-      for (TreeNode<VizNode>& node : tree)
-      {
-         if (node.GetData().m_file.m_size == 0)
-         {
-            node.RemoveFromTree();
-            nodesRemoved++;
-         }
-      }
-
-      std::cout << "Nodes removed: " << nodesRemoved << std::endl;
-      std::cout << "Nodes after pruning: " << tree.Size(*tree.GetHead()) << std::endl;
-   }
-
-   /**
     * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each node
     * by their respective file sizes.
     *
@@ -115,6 +92,11 @@ namespace
          Visualization::BLOCK_HEIGHT,        // Height
          farCorner.z() - nearCorner.z()      // Depth
       };
+
+      if (!remainingArea.IsDefined())
+      {
+         assert(!"Whoops. No remaining area left.");
+      }
 
       return remainingArea;
    }

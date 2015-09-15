@@ -37,23 +37,16 @@ QVector<QVector3D>& Visualization::PopulateVertexBuffer(const VisualizationParam
    std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
    {
-      if (!parameters.onlyShowDirectories &&
-         node.GetData().m_file.m_size >= parameters.minimumFileSize)
+      if ((parameters.onlyShowDirectories && node.GetData().m_file.m_type != FILE_TYPE::DIRECTORY) ||
+          node.GetData().m_file.m_size < parameters.minimumFileSize)
       {
-         m_visualizationVertices << node.GetData().m_block.m_vertices;
+         return;
       }
-      else if (parameters.onlyShowDirectories &&
-         node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY &&
-         node.GetData().m_file.m_size >= parameters.minimumFileSize)
-      {
-         m_visualizationVertices << node.GetData().m_block.m_vertices;
-      }
-      else
-      {
-         unidentified++;
-      }
+
+      m_visualizationVertices << node.GetData().m_block.m_vertices;
    });
 
+   std::cout << "Total Node Count: " << m_theTree->Size() << std::endl;
    std::cout << "Vertex count: " << m_visualizationVertices.size() << std::endl;
    std::cout << "Block count: " << m_visualizationVertices.size() / Block::VERTICES_PER_BLOCK << std::endl;
    std::cout << "Populate Vertex Buffer: " << unidentified << " unidentified nodes." << std::endl;
@@ -61,7 +54,7 @@ QVector<QVector3D>& Visualization::PopulateVertexBuffer(const VisualizationParam
    return m_visualizationVertices;
 }
 
-QVector<QVector3D>& Visualization::PopulateColorBuffer(const VisualizationParameters& options)
+QVector<QVector3D>& Visualization::PopulateColorBuffer(const VisualizationParameters& parameters)
 {
    assert(m_hasDataBeenParsed);
    assert(m_theTree);
@@ -78,23 +71,23 @@ QVector<QVector3D>& Visualization::PopulateColorBuffer(const VisualizationParame
    std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
    {
-      if (!options.onlyShowDirectories &&
-         node.GetData().m_file.m_type == FILE_TYPE::REGULAR &&
-         node.GetData().m_file.m_size >= options.minimumFileSize)
+      if ((parameters.onlyShowDirectories && node.GetData().m_file.m_type != FILE_TYPE::DIRECTORY) ||
+          node.GetData().m_file.m_size < parameters.minimumFileSize)
       {
-         m_visualizationColors << Visualization::CreateBlockColors();
+         return;
       }
-      else if (node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY &&
-         node.GetData().m_file.m_size >= options.minimumFileSize)
+
+      if (node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY)
       {
          m_visualizationColors << Visualization::CreateDirectoryColors();
       }
-      else
+      else if (node.GetData().m_file.m_type == FILE_TYPE::REGULAR)
       {
-         unidentified++;
+         m_visualizationColors << Visualization::CreateBlockColors();
       }
    });
 
+   std::cout << "Total Node Count: " << m_theTree->Size() << std::endl;
    std::cout << "Color count: " << m_visualizationColors.size() / 30 << std::endl;
    std::cout << "Populate Color Buffer: " << unidentified << " unidentified nodes." << std::endl;
 
