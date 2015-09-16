@@ -20,53 +20,21 @@ Visualization::~Visualization()
 {
 }
 
-QVector<QVector3D>& Visualization::PopulateVertexBuffer(const VisualizationParameters& parameters)
-{
-   assert(m_hasDataBeenParsed);
-   assert(m_theTree);
-
-   m_visualizationVertices.clear();
-
-   if (!m_hasDataBeenParsed)
-   {
-      return m_visualizationVertices;
-   }
-
-   int unidentified = 0;
-
-   std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
-      [&] (const TreeNode<VizNode>& node)
-   {
-      if ((parameters.onlyShowDirectories && node.GetData().m_file.m_type != FILE_TYPE::DIRECTORY) ||
-          node.GetData().m_file.m_size < parameters.minimumFileSize)
-      {
-         return;
-      }
-
-      m_visualizationVertices << node.GetData().m_block.m_vertices;
-   });
-
-   std::cout << "Total Node Count: " << m_theTree->Size() << std::endl;
-   std::cout << "Vertex count: " << m_visualizationVertices.size() << std::endl;
-   std::cout << "Block count: " << m_visualizationVertices.size() / Block::VERTICES_PER_BLOCK << std::endl;
-   std::cout << "Populate Vertex Buffer: " << unidentified << " unidentified nodes." << std::endl;
-
-   return m_visualizationVertices;
-}
-
-QVector<QVector3D>& Visualization::PopulateColorBuffer(const VisualizationParameters& parameters)
+void Visualization::PopulateVertexAndColorBuffers(const VisualizationParameters& parameters)
 {
    assert(m_hasDataBeenParsed);
    assert(m_theTree);
 
    m_visualizationColors.clear();
+   m_visualizationVertices.clear();
 
    if (!m_hasDataBeenParsed)
    {
-      return m_visualizationColors;
+      return;
    }
 
-   int unidentified = 0;
+   int vCountBefore = 0;
+   int cCountBefore = 0;
 
    std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
@@ -76,6 +44,11 @@ QVector<QVector3D>& Visualization::PopulateColorBuffer(const VisualizationParame
       {
          return;
       }
+
+      vCountBefore = m_visualizationVertices.size();
+      cCountBefore = m_visualizationColors.size();
+
+      m_visualizationVertices << node.GetData().m_block.m_vertices;
 
       if (node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY)
       {
@@ -83,25 +56,39 @@ QVector<QVector3D>& Visualization::PopulateColorBuffer(const VisualizationParame
       }
       else if (node.GetData().m_file.m_type == FILE_TYPE::REGULAR)
       {
-         m_visualizationColors << Visualization::CreateBlockColors();
+         m_visualizationColors << Visualization::CreateFileColors();
       }
+
+      if (vCountBefore + Block::VERTICES_PER_BLOCK != m_visualizationVertices.size())
+      {
+         assert(!"Whoa, there!");
+         std::cout << "Vertices Fucked Up!" << std::endl;
+      }
+
+      if (cCountBefore + 30 != m_visualizationColors.size())
+      {
+         std::cout << "Color Fucked Up!" << std::endl;
+      }
+
    });
 
-   std::cout << "Total Node Count: " << m_theTree->Size() << std::endl;
-   std::cout << "Color count: " << m_visualizationColors.size() / 30 << std::endl;
-   std::cout << "Populate Color Buffer: " << unidentified << " unidentified nodes." << std::endl;
+   std::cout << "Color Block count:  " << m_visualizationColors.size() / 30 << std::endl;
+   std::cout << "Vertex Block count: " << m_visualizationVertices.size() / Block::VERTICES_PER_BLOCK << std::endl;
+}
 
+QVector<QVector3D>& Visualization::GetColorBuffer()
+{
+   assert(!m_visualizationColors.empty());
    return m_visualizationColors;
 }
 
-unsigned int Visualization::GetVertexCount() const
+QVector<QVector3D>& Visualization::GetVertexBuffer()
 {
-   assert(m_hasDataBeenParsed);
-
-   return m_visualizationVertices.size();
+   assert(!m_visualizationVertices.empty());
+   return m_visualizationVertices;
 }
 
-QVector<QVector3D> Visualization::CreateBlockColors()
+QVector<QVector3D> Visualization::CreateFileColors()
 {
    QVector<QVector3D> blockColors;
    blockColors.reserve(30);

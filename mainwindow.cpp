@@ -24,12 +24,13 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/)
      m_fileMenuNewScan(nullptr),
      m_fileMenuPreferences(nullptr),
      m_fileMenuExit(nullptr),
-     m_directoryToVisualize(),
+     m_directoryToVisualize(L""),
      m_ui(new Ui::MainWindow),
      m_sizePruningComboBoxIndex(0),
      m_sizePruningOptions(
         {  // Need the "ull" (unsigned long long) prefix to avoid integral constant overflows!
            std::pair<std::uintmax_t, QString>(0, "Show All"),
+           std::pair<std::uintmax_t, QString>(1024ull,            "< 1 Kib"),
            std::pair<std::uintmax_t, QString>(1048576ull,         "< 1 MiB"),
            std::pair<std::uintmax_t, QString>(1048576ull * 10,    "< 10 MiB"),
            std::pair<std::uintmax_t, QString>(1048576ull * 100,   "< 100 MiB"),
@@ -182,11 +183,13 @@ void MainWindow::OnFileMenuNewScan()
    {
       m_directoryToVisualize = selectedDirectory.toStdWString();
 
+      const auto pruneSizeIndex = m_ui->pruneSizeComboBox->currentIndex();
+
       VisualizationParameters parameters;
       parameters.rootDirectory = m_directoryToVisualize;
-      parameters.onlyShowDirectories = false;
+      parameters.onlyShowDirectories = m_showDirectoriesOnly;
       parameters.forceNewScan = true;
-      parameters.minimumFileSize = 0;
+      parameters.minimumFileSize = m_sizePruningOptions[pruneSizeIndex].first;
 
       m_glCanvas->CreateNewVisualization(parameters);
    }
@@ -207,7 +210,11 @@ void MainWindow::OnPruneTreeButtonClicked()
    parameters.forceNewScan = false;
    parameters.minimumFileSize = m_sizePruningOptions[pruneSizeIndex].first;
 
-   m_glCanvas->ReloadVisualization(parameters);
+   // Allow the "Apply" button to be clicked even if nothing is loaded:
+   if (!m_directoryToVisualize.empty())
+   {
+      m_glCanvas->ReloadVisualization(parameters);
+   }
 }
 
 void MainWindow::XboxControllerConnected()

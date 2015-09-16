@@ -184,6 +184,19 @@ namespace
 
       if (!rowRealEstate.IsDefined())
       {
+         if (!row.empty())
+         {
+            auto smallestElement = std::min(row.front()->GetData().m_file.m_size,
+               row.back()->GetData().m_file.m_size);
+
+            if (candidateSize)
+            {
+               smallestElement = std::min(smallestElement, candidateSize);
+            }
+
+            std::cout << "Smallest Element: " << smallestElement << std::endl;
+         }
+
          assert(!"No real estate created!");
       }
 

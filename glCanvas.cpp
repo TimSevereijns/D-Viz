@@ -211,8 +211,10 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
 
    ON_SCOPE_EXIT(m_isPaintingSuspended = previousSuspensionState);
 
-   m_visualizationVertices = m_theVisualization->PopulateVertexBuffer(parameters);
-   m_visualizationColors = m_theVisualization->PopulateColorBuffer(parameters);
+   m_theVisualization->PopulateVertexAndColorBuffers(parameters);
+
+   m_visualizationVertices = m_theVisualization->GetVertexBuffer();
+   m_visualizationColors = m_theVisualization->GetColorBuffer();
 
    m_isVisualizationLoaded = !(m_visualizationVertices.empty() && m_visualizationColors.empty());
 
@@ -718,7 +720,7 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
       m_theVisualization->Parse(theTree);
 
       ReloadVisualization(vizParameters);
-      UpdateVertexCountInStatusBar(m_theVisualization->GetVertexCount(), *m_mainWindow);
+      UpdateVertexCountInStatusBar(m_theVisualization->GetVertexBuffer().size(), *m_mainWindow);
    };
 
    DriveScannerParameters scanningParameters;

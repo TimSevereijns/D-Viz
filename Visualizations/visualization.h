@@ -55,40 +55,28 @@ class Visualization
       virtual void Parse(const std::shared_ptr<Tree<VizNode>>& theTree) = 0;
 
       /**
-       * @brief PopulateVertexBuffer flushes the existing VBO and loads the newly
-       * parsed vertices.
-       * 
-       * @param[in] parameters         @see VisualizationParameters
-       * 
-       * @returns a vector of vertices.
+       * @brief PopulateVertexAndColorBuffers
        */
-      QVector<QVector3D>& PopulateVertexBuffer(const VisualizationParameters& parameters);
+      void PopulateVertexAndColorBuffers(const VisualizationParameters& parameters);
 
       /**
-       * @brief PopulateColorBuffer flushes the existing color buffer and reloads
-       * it with the data from the latest parse.
-       * 
-       * @param[in] options            The options that specify how the scan is to
-       *                               be parse and interpreted.
-       * 
-       * @returns a vector of colors data per vertex.
+       * @brief GetVertexBuffer
+       * @return
        */
-      QVector<QVector3D>& PopulateColorBuffer(const VisualizationParameters& options);
+      QVector<QVector3D>& GetVertexBuffer();
 
       /**
-       * @brief GetVertexCount returns the number of vertices currently in the model's vertex
-       * buffer.
-       *
-       * @returns the number of vertices.
+       * @brief GetColorBuffer
+       * @return
        */
-      unsigned int GetVertexCount() const;
+      QVector<QVector3D>& GetColorBuffer();
 
       /**
        * @brief CreateBlockColors creates the vertex colors needed to color a single block.
        * 
        * @returns a vector of vertex colors.
        */
-      static QVector<QVector3D> CreateBlockColors();
+      static QVector<QVector3D> CreateFileColors();
 
       /**
        * @brief CreateBlockColors creates the vertex colors needed to color a single block.
@@ -108,6 +96,8 @@ class Visualization
       QVector<QVector3D> m_visualizationColors;
 
       QVector<QVector3D> m_boundingBoxVertices;
+
+      std::uintmax_t m_smallestErrorFreeNodeInBytes;
 };
 
 #endif // VISUALIZATION_H
