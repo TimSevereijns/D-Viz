@@ -85,6 +85,14 @@ class Visualization
        */
       static QVector<QVector3D> CreateDirectoryColors();
 
+      /**
+       * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each node
+       * by their respective file sizes.
+       *
+       * @param[in/out] tree           The tree to be sorted.
+       */
+      static void SortNodes(Tree<VizNode>& tree);
+
    protected:
       std::shared_ptr<Tree<VizNode>> m_theTree; ///< @todo ...or should this be a weak_ptr?
 

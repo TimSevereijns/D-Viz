@@ -27,21 +27,6 @@ namespace
    }
 
    /**
-    * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each node
-    * by their respective file sizes.
-    *
-    * @param[in/out] tree           Th tree to be sorted.
-    */
-   void SortNodes(Tree<VizNode>& tree)
-   {
-      for (TreeNode<VizNode>& node : tree)
-      {
-         node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
-            { return lhs.GetData().m_file.m_size > rhs.GetData().m_file.m_size; });
-      }
-   }
-
-   /**
     * @brief RowSizeInBytes computes the total disk space represented by the nodes in the row.
     *
     * @param[in] row                The nodes in the whose size is to contribute to total row size.
@@ -554,7 +539,8 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
    }
 
    m_theTree = theTree;
-   SortNodes(*m_theTree);
+
+   Visualization::SortNodes(*m_theTree);
 
    const Block rootBlock
    {

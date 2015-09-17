@@ -91,21 +91,7 @@ void SliceAndDiceTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
 {
    m_theTree = theTree;
 
-   const auto startSortTime = std::chrono::high_resolution_clock::now();
-
-   std::for_each(std::begin(*theTree), std::end(*theTree),
-      [] (TreeNode<VizNode>& node)
-   {
-      node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
-         { return lhs.GetData().m_file.m_size < rhs.GetData().m_file.m_size; });
-   });
-
-   const auto endSortTime = std::chrono::high_resolution_clock::now();
-
-   std::chrono::duration<double> sortingTime =
-      std::chrono::duration_cast<std::chrono::duration<double>>(endSortTime - startSortTime);
-
-   std::cout << "Sort time (in seconds): " << sortingTime.count() << std::endl;
+   Visualization::SortNodes(*m_theTree);
 
    const auto startParseTime = std::chrono::high_resolution_clock::now();
    std::for_each(theTree->beginPreOrder(), theTree->endPreOrder(), ParseNode);

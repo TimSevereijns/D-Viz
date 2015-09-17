@@ -1,6 +1,8 @@
 #ifndef SCOPEEXIT_HPP
 #define SCOPEEXIT_HPP
 
+#include <utility>
+
 /**
  * This struct is templated because the type of a C++11 lambda is only fully defined at compile
  * time, and as such cannot be referred to prior to that. By using a lambda we can get around this
@@ -10,11 +12,11 @@
  * Since operations performed on scope exit are likely to be small and trivial in nature, limiting
  * overhead is strongly desirable.
  */
-template <typename LAMBDA>
+template <typename FnType>
 struct ScopeExit
 {
-  ScopeExit(LAMBDA lambda)
-     : m_lambda(lambda)
+  ScopeExit(FnType&& lambda)
+     : m_lambda(std::forward<FnType>(lambda))
   {
   }
 
@@ -23,13 +25,13 @@ struct ScopeExit
      m_lambda();
   }
 
-  LAMBDA m_lambda;
+  FnType m_lambda;
 };
 
-template <typename LAMBDA>
-ScopeExit<LAMBDA> MakeScopeExit(LAMBDA lambda)
+template <typename FnType>
+ScopeExit<FnType> MakeScopeExit(FnType&& lambda)
 {
-  return ScopeExit<LAMBDA>(lambda);
+  return ScopeExit<FnType>(std::forward<FnType>(lambda));
 };
 
 #define JOIN_TWO_STRINGS(str1, str2) str1 ## str2

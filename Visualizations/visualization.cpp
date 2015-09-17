@@ -34,7 +34,6 @@ void Visualization::PopulateVertexAndColorBuffers(const VisualizationParameters&
    }
 
    int vCountBefore = 0;
-   int cCountBefore = 0;
 
    std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
@@ -46,7 +45,6 @@ void Visualization::PopulateVertexAndColorBuffers(const VisualizationParameters&
       }
 
       vCountBefore = m_visualizationVertices.size();
-      cCountBefore = m_visualizationColors.size();
 
       m_visualizationVertices << node.GetData().m_block.m_vertices;
 
@@ -61,19 +59,9 @@ void Visualization::PopulateVertexAndColorBuffers(const VisualizationParameters&
 
       if (vCountBefore + Block::VERTICES_PER_BLOCK != m_visualizationVertices.size())
       {
-         assert(!"Whoa, there!");
-         std::cout << "Vertices Fucked Up!" << std::endl;
+         std::cout << "Buffer data mismatch detected!" << std::endl;
       }
-
-      if (cCountBefore + 30 != m_visualizationColors.size())
-      {
-         std::cout << "Color Fucked Up!" << std::endl;
-      }
-
    });
-
-   std::cout << "Color Block count:  " << m_visualizationColors.size() / 30 << std::endl;
-   std::cout << "Vertex Block count: " << m_visualizationVertices.size() / Block::VERTICES_PER_BLOCK << std::endl;
 }
 
 QVector<QVector3D>& Visualization::GetColorBuffer()
@@ -124,4 +112,13 @@ QVector<QVector3D> Visualization::CreateDirectoryColors()
       << QVector3D(1, 1, 1) << QVector3D(1, 1, 1) << QVector3D(1, 1, 1);
 
    return blockColors;
+}
+
+void Visualization::SortNodes(Tree<VizNode>& tree)
+{
+   for (auto&& node : tree)
+   {
+      node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
+         { return lhs.GetData().m_file.m_size > rhs.GetData().m_file.m_size; });
+   }
 }

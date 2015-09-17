@@ -226,6 +226,8 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
       PrepareVisualizationVertexBuffers();
       PrepareVisualizationShaderProgram();
    }
+
+   UpdateVertexCountInStatusBar(m_visualizationVertices.size(), *m_mainWindow);
 }
 
 void GLCanvas::CreateNewVisualization(const VisualizationParameters& parameters)
@@ -720,7 +722,6 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
       m_theVisualization->Parse(theTree);
 
       ReloadVisualization(vizParameters);
-      UpdateVertexCountInStatusBar(m_theVisualization->GetVertexBuffer().size(), *m_mainWindow);
    };
 
    DriveScannerParameters scanningParameters;

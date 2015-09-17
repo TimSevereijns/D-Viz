@@ -10,16 +10,19 @@
 namespace
 {
    /**
-    * @brief PruneNodes removes nodes whose corresponding file or directory size is zero.
+    * @brief PruneNodes removes nodes whose corresponding file or directory size is zero. This is
+    * often necessary because a directory may contain a single other directory within it that is
+    * empty. In such a case, the outer directory has a size of zero, but boost::filesystem::is_empty
+    * will still have reported this directory as being non-empty.
     *
     * @param[in/out] tree           The tree to be pruned.
     */
-   void PruneEmptyFiles(Tree<VizNode>& tree)
+   void PruneEmptyFilesAndDirectories(Tree<VizNode>& tree)
    {
       std::cout << "Nodes before pruning: " << tree.Size(*tree.GetHead()) << std::endl;
 
       unsigned int nodesRemoved = 0;
-      for (TreeNode<VizNode>& node : tree)
+      for (auto&& node : tree)
       {
          if (node.GetData().m_file.m_size == 0)
          {
@@ -127,8 +130,7 @@ void ScanningWorker::Start()
 
       ComputeDirectorySizes();
 
-      PruneEmptyFiles(*m_fileTree);
-      PruneEmptyFiles(*m_fileTree);
+      PruneEmptyFilesAndDirectories(*m_fileTree);
 
       emit Finished(m_filesScanned);
    }
