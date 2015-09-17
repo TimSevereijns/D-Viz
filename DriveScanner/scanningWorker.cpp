@@ -55,8 +55,7 @@ void ScanningWorker::ComputeDirectorySizes()
 {
    assert(m_fileTree);
 
-   std::for_each(std::begin(*m_fileTree), std::end(*m_fileTree),
-      [] (const TreeNode<VizNode>& node)
+   for (auto&& node : *m_fileTree)
    {
       const FileInfo fileInfo = node.GetData().m_file;
 
@@ -69,7 +68,7 @@ void ScanningWorker::ComputeDirectorySizes()
             parentInfo.m_size += fileInfo.m_size;
          }
       }
-   });
+   }
 }
 
 void ScanningWorker::ScanRecursively(const boost::filesystem::path& path, TreeNode<VizNode>& treeNode)
@@ -81,7 +80,7 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path, TreeNo
 
    if (boost::filesystem::is_regular_file(path) && boost::filesystem::file_size(path) > 0)
    {
-      FileInfo fileInfo
+      const FileInfo fileInfo
       {
          path.filename().wstring(),
          boost::filesystem::file_size(path),
@@ -95,7 +94,7 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path, TreeNo
    else if (boost::filesystem::is_directory(path) && !boost::filesystem::is_empty(path)
       && !boost::filesystem::is_symlink(path))
    {
-      FileInfo directoryInfo
+      const FileInfo directoryInfo
       {
          path.filename().wstring(),
          ScanningWorker::SIZE_UNDEFINED,

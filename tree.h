@@ -28,13 +28,17 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
       // TODO: PrependSibling(...)
       // TODO: AppendSibling(...)
 
-      void MergeSort(std::shared_ptr<TreeNode<T>>& list,
+      void MergeSort(
+         std::shared_ptr<TreeNode<T>>& list,
          const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator);
 
-      void DivideList(std::shared_ptr<TreeNode<T>> head, std::shared_ptr<TreeNode<T>>& lhs,
+      void DivideList(
+         std::shared_ptr<TreeNode<T>> head,
+         std::shared_ptr<TreeNode<T>>& lhs,
          std::shared_ptr<TreeNode<T>>& rhs);
 
-      std::shared_ptr<TreeNode<T>> MergeSortedHalves(std::shared_ptr<TreeNode<T>>& lhs,
+      std::shared_ptr<TreeNode<T>> MergeSortedHalves(
+         std::shared_ptr<TreeNode<T>>& lhs,
          std::shared_ptr<TreeNode<T>>& rhs,
          const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator);
 
@@ -54,7 +58,6 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
       explicit TreeNode();
       explicit TreeNode(T data);
       TreeNode(const TreeNode<T>& otherTree);
-      ~TreeNode();
 
       TreeNode<T>& operator=(TreeNode<T> other);
 
@@ -80,14 +83,14 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
        * @param data                The underlying data to be stored in the node.
        * @returns the prepended node.
        */
-      std::shared_ptr<TreeNode<T>> PrependChild(T data);
+      std::shared_ptr<TreeNode<T>> PrependChild(T&& data);
 
       /**
        * @brief AppendChild         Adds a child node as the last child of the node.
        * @param data                The underlying data to be stored in the node.
        * @returns the appended node.
        */
-      std::shared_ptr<TreeNode<T>> AppendChild(T data);
+      std::shared_ptr<TreeNode<T>> AppendChild(T&& data);
 
       /**
        * @brief GetData             Retrieves reference to the data stored in the node.
@@ -205,11 +208,6 @@ TreeNode<T>::TreeNode(const TreeNode<T>& otherTree)
 }
 
 template<typename T>
-TreeNode<T>::~TreeNode()
-{
-}
-
-template<typename T>
 TreeNode<T>& TreeNode<T>::operator=(TreeNode<T> other)
 {
    std::swap(this->m_childCount, other.m_childCount);
@@ -280,9 +278,9 @@ std::shared_ptr<TreeNode<T>> TreeNode<T>::AddFirstChild(std::shared_ptr<TreeNode
 }
 
 template<typename T>
-std::shared_ptr<TreeNode<T>> TreeNode<T>::PrependChild(T data)
+std::shared_ptr<TreeNode<T>> TreeNode<T>::PrependChild(T&& data)
 {
-   const auto newNode = std::make_shared<TreeNode<T>>(data);
+   const auto newNode = std::make_shared<TreeNode<T>>(std::forward<T>(data));
    return PrependChild(newNode);
 }
 
@@ -308,9 +306,9 @@ std::shared_ptr<TreeNode<T>> TreeNode<T>::PrependChild(std::shared_ptr<TreeNode<
 }
 
 template<typename T>
-std::shared_ptr<TreeNode<T>> TreeNode<T>::AppendChild(T data)
+std::shared_ptr<TreeNode<T>> TreeNode<T>::AppendChild(T&& data)
 {
-   auto newNode = std::make_shared<TreeNode<T>>(data);
+   auto newNode = std::make_shared<TreeNode<T>>(std::forward<T>(data));
    return AppendChild(newNode);
 }
 
