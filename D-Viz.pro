@@ -30,6 +30,7 @@ SOURCES += main.cpp\
     DataStructs/vizNode.cpp \
     DataStructs/fileInfo.cpp \
     DataStructs/light.cpp \
+    DataStructs/doublePoint3d.cpp \
     DriveScanner/driveScanner.cpp
 
 HEADERS  += mainwindow.h \
@@ -52,6 +53,7 @@ HEADERS  += mainwindow.h \
     DataStructs/fileInfo.h \
     DataStructs/light.h \
     DriveScanner/driveScanner.h \
+    DataStructs/doublePoint3d.h \
     Utilities/scopeExit.hpp
 
 FORMS    += mainwindow.ui

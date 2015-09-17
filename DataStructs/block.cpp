@@ -8,16 +8,18 @@ Block::Block()
 {
 }
 
-Block::Block(const QVector3D& bottomLeft, const double width, const double height, const double depth)
+Block::Block(const DoublePoint3D& bottomLeft, const double width, const double height,
+             const double depth)
    : m_width(width),
      m_height(height),
      m_depth(depth),
      m_percentCovered(0.0),
+     m_blockOrigin(bottomLeft),
      m_nextRowOrigin(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
 {
-   const float x = bottomLeft.x();
-   const float y = bottomLeft.y();
-   const float z = bottomLeft.z();
+   const auto x = static_cast<float>(bottomLeft.x());
+   const auto y = static_cast<float>(bottomLeft.y());
+   const auto z = static_cast<float>(bottomLeft.z());
 
    m_vertices.reserve(VERTICES_PER_BLOCK);
    m_vertices
@@ -58,21 +60,18 @@ Block::Block(const QVector3D& bottomLeft, const double width, const double heigh
       << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0); // 58
 }
 
-bool Block::IsDefined() const
+bool Block::HasVolume() const
 {
    return (m_width != 0.0 && m_height != 0.0 && m_depth != 0.0);
 }
 
-bool Block::IsValid() const
+bool Block::IsNotInverted() const
 {
    // The indices used are keyed off of the vertex order used in the constructor above.
    return m_vertices[36].x() < m_vertices[12].x();
 }
 
-QVector3D Block::GetOriginPlusHeight() const
+DoublePoint3D Block::GetNextChildOrigin() const
 {
-   QVector3D origin = m_vertices.front();
-   origin += QVector3D(0, m_height, 0);
-
-   return origin;
+   return m_blockOrigin + DoublePoint3D(0, m_height, 0);
 }

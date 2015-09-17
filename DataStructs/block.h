@@ -1,6 +1,8 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
+#include "doublePoint3d.h"
+
 #include <QVector>
 #include <QVector3D>
 
@@ -17,7 +19,8 @@ struct Block
    QVector<QVector3D> m_vertices;
    QVector<QVector3D> m_colors;
 
-   QVector3D m_nextRowOrigin; // Specific to the Squarified Treemap.
+   DoublePoint3D m_blockOrigin;
+   DoublePoint3D m_nextRowOrigin; // Specific to the Squarified Treemap.
 
    double m_percentCovered;
    double m_width;
@@ -39,7 +42,8 @@ struct Block
     *
     * @returns a vector of vertices.
     */
-   Block(const QVector3D& bottomLeft, const double width, const double height, const double depth);
+   Block(const DoublePoint3D& bottomLeft, const double width, const double height,
+         const double depth);
 
    /**
     * @brief IsDefined checks if width, height, and depth are all non-zero. It does not check
@@ -48,7 +52,7 @@ struct Block
     *
     * @returns true if the block is properly defined.
     */
-   bool IsDefined() const;
+   bool HasVolume() const;
 
    /**
     * @brief IsValid performs a quick check of Cartesian X-axis coordinates to determine if the
@@ -57,12 +61,12 @@ struct Block
     * @returns true if the block is defined and the left face is indeed to the left of the right
     * face; false otherwise.
     */
-   bool IsValid() const;
+   bool IsNotInverted() const;
 
    /**
     * @brief GetOriginPlusHeight.
     * @returns the coordinates of the block's origin offset by the height of the block.
     */
-   QVector3D GetOriginPlusHeight() const;
+   DoublePoint3D GetNextChildOrigin() const;
 };
 #endif // BLOCK_H

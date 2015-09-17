@@ -1,5 +1,7 @@
 #include "driveScanner.h"
 
+#include "../DataStructs/doublePoint3d.h"
+
 #include <iostream>
 
 DriveScanner::DriveScanner()
@@ -37,7 +39,7 @@ void DriveScanner::StartScanning()
 {
    const Block rootBlock
    {
-      QVector3D(0, 0, 0),
+      DoublePoint3D(0, 0, 0),
       Visualization::ROOT_BLOCK_WIDTH,
       Visualization::BLOCK_HEIGHT,
       Visualization::ROOT_BLOCK_DEPTH

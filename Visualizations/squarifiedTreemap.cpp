@@ -56,18 +56,18 @@ namespace
     */
    Block ComputeRemainingArea(const Block& block)
    {
-      const QVector3D nearCorner
+      const DoublePoint3D nearCorner
       {
          block.m_nextRowOrigin.x(),
          block.m_nextRowOrigin.y(),
          block.m_nextRowOrigin.z()
       };
 
-      const QVector3D farCorner
+      const DoublePoint3D farCorner
       {
-         block.GetOriginPlusHeight().x() + static_cast<float>(block.m_width),
-         block.GetOriginPlusHeight().y(),
-         block.GetOriginPlusHeight().z() - static_cast<float>(block.m_depth)
+         block.GetNextChildOrigin().x() + block.m_width,
+         block.GetNextChildOrigin().y(),
+         block.GetNextChildOrigin().z() - block.m_depth
       };
 
       const Block remainingArea
@@ -78,7 +78,7 @@ namespace
          farCorner.z() - nearCorner.z()      // Depth
       };
 
-      if (!remainingArea.IsDefined())
+      if (!remainingArea.HasVolume())
       {
          assert(!"Whoops. No remaining area left.");
       }
@@ -105,7 +105,7 @@ namespace
    {
       const Block& parentBlock = parentNode.m_block;
 
-      if (!parentBlock.IsDefined())
+      if (!parentBlock.HasVolume())
       {
          assert(!"Parent block is not defined!");
       }
@@ -119,7 +119,7 @@ namespace
       const std::uintmax_t rowSizeInBytes = ComputeBytesInRow(row, candidateSize);
       const double rowToParentRatio = rowSizeInBytes / remainingBytes;
 
-      const QVector3D nearCorner
+      const DoublePoint3D nearCorner
       {
          parentBlock.m_nextRowOrigin.x(),
          parentBlock.m_nextRowOrigin.y(),
@@ -137,9 +137,9 @@ namespace
 
          if (updateOffset)
          {
-            const QVector3D nextRowOffset
+            const DoublePoint3D nextRowOffset
             {
-               static_cast<float>(rowRealEstate.m_width),
+               rowRealEstate.m_width,
                0.0, // Height
                0.0  // Depth
             };
@@ -149,25 +149,25 @@ namespace
       }
       else
       {
-         rowRealEstate = Block(QVector3D(nearCorner),
+         rowRealEstate = Block(DoublePoint3D(nearCorner),
             remainingLand.m_width,
             remainingLand.m_height,
             -remainingLand.m_depth * rowToParentRatio);
 
          if (updateOffset)
          {
-            const QVector3D nextRowOffset
+            const DoublePoint3D nextRowOffset
             {
                0.0, // Width
                0.0, // Height
-               static_cast<float>(-rowRealEstate.m_depth)
+               -rowRealEstate.m_depth
             };
 
             parentNode.m_block.m_nextRowOrigin = nearCorner + nextRowOffset;
          }
       }
 
-      if (!rowRealEstate.IsDefined())
+      if (!rowRealEstate.HasVolume())
       {
          if (!row.empty())
          {
@@ -220,14 +220,14 @@ namespace
          ? std::abs(land.m_depth) - (2.0 * Visualization::MAX_PADDING)
          : ratioBasedBlockDepth;
 
-      const QVector3D offset
+      const DoublePoint3D offset
       {
-         static_cast<float>((land.m_width * land.m_percentCovered) + widthPaddingPerSide),
+         (land.m_width * land.m_percentCovered) + widthPaddingPerSide,
          0.0,
-         static_cast<float>(-depthPaddingPerSide)
+         -depthPaddingPerSide
       };
 
-      data.m_block = Block(land.m_vertices.front() + offset,
+      data.m_block = Block(land.m_blockOrigin + offset,
          finalBlockWidth,
          Visualization::BLOCK_HEIGHT,
          finalBlockDepth
@@ -269,14 +269,14 @@ namespace
          ? land.m_width - (2.0 * Visualization::MAX_PADDING)
          : ratioBasedWidth;
 
-      const QVector3D offset
+      const DoublePoint3D offset
       {
-         static_cast<float>(widthPaddingPerSide),
+         widthPaddingPerSide,
          0.0,
-         static_cast<float>(-(land.m_depth * land.m_percentCovered) - depthPaddingPerSide)
+         -(land.m_depth * land.m_percentCovered) - depthPaddingPerSide
       };
 
-      data.m_block = Block(land.m_vertices.front() + offset,
+      data.m_block = Block(land.m_blockOrigin + offset,
          finalBlockWidth,
          Visualization::BLOCK_HEIGHT,
          std::abs(finalBlockDepth)
@@ -304,7 +304,7 @@ namespace
       Block& land = CalculateRowBounds(row, /*candidateSize =*/ 0,
          row.front()->GetParent()->GetData(), /*updateOffset =*/ true);
 
-      if (!land.IsDefined())
+      if (!land.HasVolume())
       {
          assert(!"No land to build upon!");
          return;
@@ -333,7 +333,7 @@ namespace
             ? SlicePerpendicularToWidth(land, percentageOfParent, data, nodeCount)
             : SlicePerpendicularToDepth(land, percentageOfParent, data, nodeCount);
 
-         if (!data.m_block.IsDefined())
+         if (!data.m_block.HasVolume())
          {
             assert(!"Block is not defined!");
          }
@@ -451,7 +451,7 @@ namespace
       assert(parentNode);
 
       VizNode& parentVizNode = parentNode->GetData();
-      assert(parentVizNode.m_block.IsDefined() && parentVizNode.m_block.IsValid());
+      assert(parentVizNode.m_block.HasVolume() && parentVizNode.m_block.IsNotInverted());
 
       std::vector<TreeNode<VizNode>*> row;
 
@@ -544,7 +544,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
 
    const Block rootBlock
    {
-      QVector3D(0, 0, 0),
+      DoublePoint3D(0, 0, 0),
       Visualization::ROOT_BLOCK_WIDTH,
       Visualization::BLOCK_HEIGHT,
       Visualization::ROOT_BLOCK_DEPTH
