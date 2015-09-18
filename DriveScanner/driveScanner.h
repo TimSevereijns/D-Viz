@@ -23,16 +23,17 @@
 
 struct DriveScannerParameters
 {
-   std::function<void (const std::wstring message)> m_onErrorCallback;
-   std::function<void (const std::uintmax_t filesScanned)> m_onProgressUpdateCallback;
-   std::function<void (const std::uintmax_t filesScanned)> m_onScanCompletedCallback;
+   using ProgressCallback = std::function<void (const std::uintmax_t filesScanned)>;
+   using ScanCompleteCallback = std::function<void (const std::uintmax_t filesScanned)>;
+
+   ProgressCallback m_onProgressUpdateCallback;
+   ScanCompleteCallback m_onScanCompletedCallback;
 
    std::wstring m_path;
 
    DriveScannerParameters()
-      : m_onErrorCallback(std::function<void (const std::wstring)>()),
-        m_onProgressUpdateCallback(std::function<void (const std::uintmax_t)>()),
-        m_onScanCompletedCallback(std::function<void (const std::uintmax_t)>()),
+      : m_onProgressUpdateCallback(ProgressCallback()),
+        m_onScanCompletedCallback(ScanCompleteCallback()),
         m_path(L"")
    {
    }
@@ -54,7 +55,6 @@ class DriveScanner : public QObject
    public slots:
       void HandleCompletion(const std::uintmax_t filesScanned);
       void HandleProgressUpdates(const std::uintmax_t filesScanned);
-      void HandleErrors(const std::wstring message);
 
    private:
       DriveScannerParameters m_scanningParameters;

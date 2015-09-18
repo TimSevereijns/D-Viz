@@ -394,7 +394,9 @@ void GLCanvas::resizeGL(int width, int height)
    }
 
    glViewport(0, 0, width, height);
+
    m_camera.SetAspectRatio(static_cast<float>(width) / static_cast<float>(height));
+   m_camera.SetViewport(QRect(QPoint(0,0), QPoint(width, height)));
 }
 
 void GLCanvas::keyPressEvent(QKeyEvent* const event)
@@ -448,9 +450,40 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
    }
 }
 
+void GLCanvas::HandleRightClick(const QMouseEvent& event)
+{
+   std::cout << event.x() <<  ", " << event.y() << std::endl;
+/*
+   const QPoint mouseClick(event.x(), event.y());
+   const QPoint mappedClick = m_camera.MapToOpenGLViewport(mouseClick);
+
+//   const QVector3D projectedPoint =
+//      m_camera.GetProjectionMatrix() *
+//      m_camera.GetViewMatrix() *
+//      QVector3D(mappedClick.x(), mappedClick.y(), 0);
+
+   int width = m_camera.GetViewport().width();
+   int height = m_camera.GetViewport().height();
+
+   float depth;// = projectedPoint.z();
+   //glReadPixels(mappedClick.x(), mappedClick.y(), width, height, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+
+   QVector3D modelCoordinates = m_camera.Unproject(QPoint(event.x(), event.y()), depth, QMatrix4x4());
+
+   std::cout << modelCoordinates.x()  <<  ", "
+             << modelCoordinates.y()  <<  ", "
+             << modelCoordinates.z() << std::endl;
+*/
+}
+
 void GLCanvas::mousePressEvent(QMouseEvent* const event)
 {
    m_lastMousePosition = event->pos();
+
+   if (event->button() == Qt::RightButton)
+   {
+      HandleRightClick(*event);
+   }
 
    event->accept();
 }

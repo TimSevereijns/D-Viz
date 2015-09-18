@@ -57,6 +57,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
        */
       void SetFieldOfView(const float fieldOfView);
 
+      void HandleRightClick(const QMouseEvent& event);
+
     protected:
       void initializeGL() override;
       void resizeGL(int width, int height) override;

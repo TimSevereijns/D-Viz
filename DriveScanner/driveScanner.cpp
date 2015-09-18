@@ -25,11 +25,6 @@ void DriveScanner::HandleProgressUpdates(const std::uintmax_t filesScanned)
    m_scanningParameters.m_onProgressUpdateCallback(filesScanned);
 }
 
-void DriveScanner::HandleErrors(const std::wstring message)
-{
-   m_scanningParameters.m_onErrorCallback(message);
-}
-
 void DriveScanner::HandleCompletion(const std::uintmax_t filesScanned)
 {
    m_scanningParameters.m_onScanCompletedCallback(filesScanned);
@@ -63,9 +58,6 @@ void DriveScanner::StartScanning()
    QThread* thread = new QThread;
    ScanningWorker* worker = new ScanningWorker(m_theTree, m_scanningParameters.m_path);
    worker->moveToThread(thread);
-
-   connect(worker, SIGNAL(Error(std::wstring)),
-      this, SLOT(HandleErrors(std::wstring)));
 
    connect(worker, SIGNAL(Finished(const std::uintmax_t)),
       this, SLOT(HandleCompletion(const std::uintmax_t)));

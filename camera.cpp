@@ -42,10 +42,6 @@ Camera::Camera()
 {
 }
 
-Camera::~Camera()
-{
-}
-
 const QVector3D& Camera::GetPosition() const
 {
    return m_position;
@@ -122,7 +118,7 @@ QVector3D Camera::Down() const
    return -Up();
 }
 
-QMatrix4x4 Camera::GetProjection() const
+QMatrix4x4 Camera::GetProjectionMatrix() const
 {
    QMatrix4x4 matrix;
    matrix.perspective(m_fieldOfView, m_aspectRatio, m_nearPlane, m_farPlane);
@@ -130,7 +126,7 @@ QMatrix4x4 Camera::GetProjection() const
    return matrix;
 }
 
-QMatrix4x4 Camera::GetView() const
+QMatrix4x4 Camera::GetViewMatrix() const
 {
    QMatrix4x4 matrix = GetOrientation();
    matrix.translate(-m_position);
@@ -139,12 +135,50 @@ QMatrix4x4 Camera::GetView() const
 
 QMatrix4x4 Camera::GetMatrix() const
 {
-   return GetProjection() * GetView();
+   return GetProjectionMatrix() * GetViewMatrix();
+}
+
+QVector3D Camera::Unproject(QPoint point, float viewDepth, QMatrix4x4 modelMatrix) const
+{
+   const QMatrix4x4 modelViewProjectionMatrix = GetProjectionMatrix() * GetViewMatrix() * modelMatrix;
+
+   bool wasMatrixInvertible = false;
+   const QMatrix4x4 inverseMatrix = modelViewProjectionMatrix.inverted(&wasMatrixInvertible);
+
+   if (!wasMatrixInvertible)
+   {
+      return {};
+   }
+
+   float x = 2.0f * ((float)point.x() - (float)m_viewport.x()) / (float)m_viewport.width() - 1.0f;
+   float y = 2.0f * ((float)point.y() - (float)m_viewport.y()) / (float)m_viewport.height() - 1.0f;
+   float z = 2.0f * viewDepth - 1.0f;
+
+   const QVector3D viewportPoint(x, y, z);
+   const QVector3D unprojectPoint = inverseMatrix.map(viewportPoint);
+
+   return unprojectPoint;
+}
+
+QPoint Camera::MapToOpenGLViewport(const QPoint& coordinatesOnQtWidget) const
+{
+   const int invertedY = m_viewport.y() + (m_viewport.height() - coordinatesOnQtWidget.y());
+   return { coordinatesOnQtWidget.x(), invertedY };
 }
 
 void Camera::SetAspectRatio(const float ratio)
 {
    m_aspectRatio = ratio;
+}
+
+void Camera::SetViewport(const QRect& bounds)
+{
+   m_viewport = bounds;
+}
+
+QRect Camera::GetViewport() const
+{
+   return m_viewport;
 }
 
 void Camera::SetFieldOfView(const float angle)

@@ -3,12 +3,12 @@
 
 #include <QMatrix3x3>
 #include <QMatrix4x4>
+#include <QRect>
 
 class Camera
 {
    public:
       Camera();
-      ~Camera();
 
       const QVector3D& GetPosition() const;
 
@@ -27,11 +27,29 @@ class Camera
       QVector3D Up() const;
       QVector3D Down() const;
 
-      QMatrix4x4 GetProjection() const;
-      QMatrix4x4 GetView() const;
+      QMatrix4x4 GetProjectionMatrix() const;
+      QMatrix4x4 GetViewMatrix() const;
       QMatrix4x4 GetMatrix() const;
 
+      /**
+       * @brief Unproject
+       * @note Source: https://github.com/Cavewhere/cavewhere/blob/
+       *               9121490139b3e0f046fc0086b86f0e1659d3bc8e/src/cwCamera.cpp
+       *
+       * @param point
+       * @param viewDepth
+       * @param modelMatrix
+       *
+       * @returns
+       */
+      QVector3D Unproject(QPoint point, float viewDepth, QMatrix4x4 modelMatrix) const;
+
+      QPoint MapToOpenGLViewport(const QPoint& coordinatesOnQtWidget) const;
+
       void SetAspectRatio(const float ratio);
+
+      void SetViewport(const QRect& bounds);
+      QRect GetViewport() const;
 
       void SetFieldOfView(const float angle);
       float GetFieldOfView() const;
@@ -41,6 +59,8 @@ class Camera
 
    private:
       QVector3D m_position;
+
+      QRect m_viewport;
 
       double m_horizontalAngle;
       double m_verticalAngle;
