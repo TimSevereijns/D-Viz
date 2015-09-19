@@ -20,7 +20,7 @@ bool VisualizationAsset::PrepareVertexBuffers(const Camera& camera)
    m_vertexBuffer.allocate(m_rawVertices.constData(), m_rawVertices.size() * 3 * sizeof(GLfloat));
 
    m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", camera.GetMatrix());
+   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 
    m_vertexBuffer.bind();
 
@@ -50,7 +50,7 @@ bool VisualizationAsset::PrepareColorBuffers(const Camera& camera)
    m_colorBuffer.allocate(m_rawColors.constData(), m_rawColors.size() * 3 * sizeof(GLfloat));
 
    m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", camera.GetMatrix());
+   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 
    m_colorBuffer.bind();
 
@@ -70,7 +70,7 @@ bool VisualizationAsset::Render(const Camera& camera)
 
    m_shader.bind();
    m_shader.setUniformValue("model", DEFAULT_MATRIX);
-   m_shader.setUniformValue("mvpMatrix", camera.GetMatrix());
+   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
    m_shader.setUniformValue("cameraPosition", camera.GetPosition());
 
    m_shader.setUniformValue("materialShininess", 80.0f);

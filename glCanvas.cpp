@@ -309,7 +309,7 @@ void GLCanvas::PrepareOriginMarkerVertexBuffers()
 
    m_originMarkerShaderProgram.bind();
 
-   m_originMarkerShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
+   m_originMarkerShaderProgram.setUniformValue("mvpMatrix", m_camera.GetProjectionViewMatrix());
 
    m_originMarkerVertexPositionBuffer.bind();
    m_originMarkerShaderProgram.enableAttributeArray("vertex");
@@ -346,7 +346,7 @@ void GLCanvas::PrepareVisualizationVertexBuffers()
 
    m_visualizationShaderProgram.bind();
 
-   m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
+   m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetProjectionViewMatrix());
 
    m_visualizationVertexPositionBuffer.bind();
    m_visualizationShaderProgram.enableAttributeArray("vertex");
@@ -676,7 +676,7 @@ void GLCanvas::paintGL()
 
    // Draw origin marker:
    m_originMarkerShaderProgram.bind();
-   m_originMarkerShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
+   m_originMarkerShaderProgram.setUniformValue("mvpMatrix", m_camera.GetProjectionViewMatrix());
 
    m_originMarkerVAO.bind();
 
@@ -694,7 +694,7 @@ void GLCanvas::paintGL()
       const static QMatrix4x4 DEFAULT_MATRIX = QMatrix4x4();
 
       m_visualizationShaderProgram.setUniformValue("model", DEFAULT_MATRIX);
-      m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetMatrix());
+      m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetProjectionViewMatrix());
       m_visualizationShaderProgram.setUniformValue("cameraPosition", m_camera.GetPosition());
 
       m_visualizationShaderProgram.setUniformValue("materialShininess",

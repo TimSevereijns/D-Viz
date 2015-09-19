@@ -114,7 +114,7 @@ bool GridAsset::PrepareVertexBuffers(const Camera& camera)
    m_vertexBuffer.allocate(m_rawVertices.constData(), m_rawVertices.size() * 3 * sizeof(GLfloat));
 
    m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", camera.GetMatrix());
+   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 
    m_vertexBuffer.bind();
    m_shader.enableAttributeArray("vertex");
@@ -141,7 +141,7 @@ bool GridAsset::PrepareColorBuffers(const Camera& camera)
    m_colorBuffer.allocate(m_rawColors.constData(), m_rawColors.size() * 3 * sizeof(GLfloat));
 
    m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", camera.GetMatrix());
+   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 
    m_colorBuffer.bind();
    m_shader.enableAttributeArray("color");
@@ -157,7 +157,7 @@ bool GridAsset::PrepareColorBuffers(const Camera& camera)
 bool GridAsset::Render(const Camera& camera)
 {
    m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", camera.GetMatrix());
+   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 
    m_VAO.bind();
 

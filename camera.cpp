@@ -65,10 +65,10 @@ QMatrix4x4 Camera::GetOrientation() const
    return orientation;
 }
 
-void Camera::OffsetOrientation(float verticalAngle, float horizontalAngle)
+void Camera::OffsetOrientation(float pitch, float yaw)
 {
-   m_horizontalAngle += horizontalAngle;
-   m_verticalAngle += verticalAngle;
+   m_horizontalAngle += yaw;
+   m_verticalAngle += pitch;
 
    NormalizeAngles(m_horizontalAngle, m_verticalAngle);
 }
@@ -133,7 +133,7 @@ QMatrix4x4 Camera::GetViewMatrix() const
    return matrix;
 }
 
-QMatrix4x4 Camera::GetMatrix() const
+QMatrix4x4 Camera::GetProjectionViewMatrix() const
 {
    return GetProjectionMatrix() * GetViewMatrix();
 }
@@ -171,9 +171,9 @@ void Camera::SetAspectRatio(const float ratio)
    m_aspectRatio = ratio;
 }
 
-void Camera::SetViewport(const QRect& bounds)
+void Camera::SetViewport(const QRect& size)
 {
-   m_viewport = bounds;
+   m_viewport = size;
 }
 
 QRect Camera::GetViewport() const
