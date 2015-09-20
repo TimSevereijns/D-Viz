@@ -138,7 +138,7 @@ QMatrix4x4 Camera::GetProjectionViewMatrix() const
    return GetProjectionMatrix() * GetViewMatrix();
 }
 
-QVector3D Camera::Unproject(QPoint point, float viewDepth, QMatrix4x4 modelMatrix) const
+QVector3D Camera::Unproject(const QPoint& point, float viewDepth, QMatrix4x4 modelMatrix) const
 {
    const QMatrix4x4 modelViewProjectionMatrix = GetProjectionMatrix() * GetViewMatrix() * modelMatrix;
 
@@ -164,6 +164,19 @@ QPoint Camera::MapToOpenGLViewport(const QPoint& coordinatesOnQtWidget) const
 {
    const int invertedY = m_viewport.y() + (m_viewport.height() - coordinatesOnQtWidget.y());
    return { coordinatesOnQtWidget.x(), invertedY };
+}
+
+std::pair<QVector3D, QVector3D> Camera::GeneratePickingRay(const QPoint& coordinatesOnQtWidget) const
+{
+   const QPoint glCoordinates = MapToOpenGLViewport(coordinatesOnQtWidget);
+
+   const QVector3D nearPlanePoint = Unproject(glCoordinates, 0.0f, QMatrix4x4());
+   const QVector3D farPlanePoint = Unproject(glCoordinates, 1.0f, QMatrix4x4());
+
+   const QVector3D direction = QVector3D(nearPlanePoint - farPlanePoint).normalized();
+
+   const auto pickingRay = std::make_pair(nearPlanePoint, direction);
+   return pickingRay;
 }
 
 void Camera::SetAspectRatio(const float ratio)

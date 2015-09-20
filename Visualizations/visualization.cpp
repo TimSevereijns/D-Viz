@@ -70,6 +70,19 @@ QVector<QVector3D>& Visualization::GetColorBuffer()
    return m_visualizationColors;
 }
 
+double Visualization::ComputeNearestIntersection(std::pair<QVector3D, QVector3D> /*ray*/) const
+{
+   for (auto&& node : *m_theTree)
+   {
+      if (node.GetData().m_file.m_size < m_vizParameters.minimumFileSize)
+      {
+         continue;
+      }
+   }
+
+   return std::numeric_limits<double>::infinity();
+}
+
 QVector<QVector3D>& Visualization::GetVertexBuffer()
 {
    assert(!m_visualizationVertices.empty());

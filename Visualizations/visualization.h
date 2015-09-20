@@ -72,6 +72,12 @@ class Visualization
       QVector<QVector3D>& GetColorBuffer();
 
       /**
+       * @brief ComputeNearestIntersection
+       * @returns the distance to the nearest intersection point in the visualization.
+       */
+      double ComputeNearestIntersection(std::pair<QVector3D, QVector3D> ray) const;
+
+      /**
        * @brief CreateBlockColors creates the vertex colors needed to color a single block.
        * 
        * @returns a vector of vertex colors.
@@ -102,10 +108,6 @@ class Visualization
 
       QVector<QVector3D> m_visualizationVertices;
       QVector<QVector3D> m_visualizationColors;
-
-      QVector<QVector3D> m_boundingBoxVertices;
-
-      std::uintmax_t m_smallestErrorFreeNodeInBytes;
 };
 
 #endif // VISUALIZATION_H

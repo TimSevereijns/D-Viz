@@ -132,7 +132,7 @@ class Camera
        *
        * @returns
        */
-      QVector3D Unproject(QPoint point, float viewDepth, QMatrix4x4 modelMatrix) const;
+      QVector3D Unproject(const QPoint& point, float viewDepth, QMatrix4x4 modelMatrix) const;
 
       /**
        * @brief MapToOpenGLViewport maps the 2D coordinates of the OpenGL Qt widget to the
@@ -191,6 +191,12 @@ class Camera
        */
       void DecreaseFieldOfView();
 
+      /**
+       * @brief GeneratePickingRay
+       * @param coordinatesOnQtWidget
+       * @return
+       */
+      std::pair<QVector3D, QVector3D> GeneratePickingRay(const QPoint& coordinatesOnQtWidget) const;
    private:
       QVector3D m_position;
 

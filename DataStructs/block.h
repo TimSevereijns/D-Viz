@@ -14,13 +14,29 @@
  */
 struct Block
 {
+   /**
+    * @brief The FaceInterator class
+    */
+   class FaceInterator
+   {
+      public:
+         friend struct Block;
+
+//         typedef QPlane3D                          value_type;
+//         typedef QPlane3D                          pointer;
+//         typedef QPlane3D&                         reference;
+//         typedef int                               size_type;
+//         typedef std::ptrdiff_t                    difference_type;
+//         typedef std::bidirectional_iterator_tag   iterator_category;
+   };
+
    const static int VERTICES_PER_BLOCK = 60;
 
    QVector<QVector3D> m_vertices;
    QVector<QVector3D> m_colors;
 
    DoublePoint3D m_blockOrigin;
-   DoublePoint3D m_nextRowOrigin; // Specific to the Squarified Treemap.
+   DoublePoint3D m_nextRowOrigin; ///< Specific to the Squarified Treemap.
 
    double m_percentCovered;
    double m_width;

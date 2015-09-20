@@ -11,7 +11,6 @@
 #include <QApplication>
 #include <QMouseEvent>
 #include <QOpenGLShader>
-#include <QProgressDialog>
 #include <QStatusBar>
 #include <QTimer>
 
@@ -453,27 +452,9 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
 void GLCanvas::HandleRightClick(const QMouseEvent& event)
 {
    std::cout << event.x() <<  ", " << event.y() << std::endl;
-/*
-   const QPoint mouseClick(event.x(), event.y());
-   const QPoint mappedClick = m_camera.MapToOpenGLViewport(mouseClick);
 
-//   const QVector3D projectedPoint =
-//      m_camera.GetProjectionMatrix() *
-//      m_camera.GetViewMatrix() *
-//      QVector3D(mappedClick.x(), mappedClick.y(), 0);
-
-   int width = m_camera.GetViewport().width();
-   int height = m_camera.GetViewport().height();
-
-   float depth;// = projectedPoint.z();
-   //glReadPixels(mappedClick.x(), mappedClick.y(), width, height, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-
-   QVector3D modelCoordinates = m_camera.Unproject(QPoint(event.x(), event.y()), depth, QMatrix4x4());
-
-   std::cout << modelCoordinates.x()  <<  ", "
-             << modelCoordinates.y()  <<  ", "
-             << modelCoordinates.z() << std::endl;
-*/
+   const auto widgetCoordinates = QPoint(event.x(), event.y());
+   const auto ray = m_camera.GeneratePickingRay(widgetCoordinates);
 }
 
 void GLCanvas::mousePressEvent(QMouseEvent* const event)

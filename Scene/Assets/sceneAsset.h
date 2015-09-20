@@ -4,6 +4,7 @@
 #include "../../camera.h"
 
 #include <QOpenGLBuffer>
+#include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 

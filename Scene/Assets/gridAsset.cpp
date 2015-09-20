@@ -161,7 +161,7 @@ bool GridAsset::Render(const Camera& camera)
 
    m_VAO.bind();
 
-   glDrawArrays(GL_LINES, /* first = */ 0, /* count = */ m_rawVertices.size());
+   //glDrawArrays(GL_LINES, /* first = */ 0, /* count = */ m_rawVertices.size());
 
    m_shader.release();
    m_VAO.release();
