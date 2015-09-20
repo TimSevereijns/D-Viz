@@ -4,9 +4,9 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl 3dcore
+QT       += core gui opengl
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets 3dcore
 
 TARGET = D-Viz
 TEMPLATE = app

@@ -12,6 +12,11 @@
 
 #include "../DataStructs/vizNode.h"
 
+namespace Qt3D
+{
+   class QRay3D;
+}
+
 /**
  * @brief The ParsingOptions struct represents the gamut of visualization parameters that can be
  * adjusted.
@@ -73,9 +78,12 @@ class Visualization
 
       /**
        * @brief ComputeNearestIntersection
+       *
+       * @param[in] ray             The ray to be shot into the scene.
+       *
        * @returns the distance to the nearest intersection point in the visualization.
        */
-      double ComputeNearestIntersection(std::pair<QVector3D, QVector3D> ray) const;
+      double ComputeNearestIntersection(const Qt3D::QRay3D& ray) const;
 
       /**
        * @brief CreateBlockColors creates the vertex colors needed to color a single block.

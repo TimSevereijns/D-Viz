@@ -3,6 +3,39 @@
 #include <algorithm>
 #include <iostream>
 #include <string>
+#include <Qt3DCore/QRay3D>
+#include <QRectF>
+
+namespace
+{
+   const double EPSILON = 0.0001;
+
+   /**
+    * @brief DoRayAndPlaneIntersect calculates whether the specified ray hits the specified plane,
+    * given a margin of error, epsilon.
+    *
+    * @param[in] ray                The ray to be fired at the plane.
+    * @param[in] pointOnPlane       Any point on the plane.
+    * @param[in] planeNormal        The normal for that point on the plane.
+    *
+    * @returns true if the ray and the plane intersect.
+    */
+   bool DoesRayIntersectPlane(const Qt3D::QRay3D& ray, const QVector3D& pointOnPlane,
+      const QVector3D& planeNormal)
+   {
+      const double denominator = QVector3D::dotProduct(ray.direction(), planeNormal);
+      if (std::abs(denominator) < EPSILON)
+      {
+         return false;
+      }
+
+      const double numerator = QVector3D::dotProduct(pointOnPlane - ray.origin(), planeNormal);
+
+      const double scalar = numerator / denominator;
+      const bool doesRayHitPlane = scalar > EPSILON;
+      return doesRayHitPlane;
+   }
+}
 
 const double Visualization::BLOCK_HEIGHT = 2.0;
 const double Visualization::PADDING_RATIO = 0.9;
@@ -33,7 +66,7 @@ void Visualization::PopulateVertexAndColorBuffers(const VisualizationParameters&
       return;
    }
 
-   int vCountBefore = 0;
+   int vertexCount = 0;
 
    std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
@@ -44,9 +77,13 @@ void Visualization::PopulateVertexAndColorBuffers(const VisualizationParameters&
          return;
       }
 
-      vCountBefore = m_visualizationVertices.size();
+      vertexCount = m_visualizationVertices.size();
 
-      m_visualizationVertices << node.GetData().m_block.m_vertices;
+      std::for_each(std::begin(node.GetData().m_block), std::end(node.GetData().m_block),
+         [&] (const BlockFace& face)
+      {
+         m_visualizationVertices << face.m_vertices;
+      });
 
       if (node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY)
       {
@@ -57,7 +94,7 @@ void Visualization::PopulateVertexAndColorBuffers(const VisualizationParameters&
          m_visualizationColors << Visualization::CreateFileColors();
       }
 
-      if (vCountBefore + Block::VERTICES_PER_BLOCK != m_visualizationVertices.size())
+      if (vertexCount + Block::VERTICES_PER_BLOCK != m_visualizationVertices.size())
       {
          std::cout << "Buffer data mismatch detected!" << std::endl;
       }
@@ -70,7 +107,7 @@ QVector<QVector3D>& Visualization::GetColorBuffer()
    return m_visualizationColors;
 }
 
-double Visualization::ComputeNearestIntersection(std::pair<QVector3D, QVector3D> /*ray*/) const
+double Visualization::ComputeNearestIntersection(const Qt3D::QRay3D& /*ray*/) const
 {
    for (auto&& node : *m_theTree)
    {
@@ -78,6 +115,8 @@ double Visualization::ComputeNearestIntersection(std::pair<QVector3D, QVector3D>
       {
          continue;
       }
+
+      //const bool doesRayIntersectPlane = DoesRayIntersectPlane(ray, pointOnPlane, planeNormal);
    }
 
    return std::numeric_limits<double>::infinity();
