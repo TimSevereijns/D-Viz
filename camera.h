@@ -5,6 +5,8 @@
 #include <QMatrix4x4>
 #include <QRect>
 
+#include <Qt3DCore/QRay3D>
+
 class Camera
 {
    public:
@@ -193,10 +195,13 @@ class Camera
 
       /**
        * @brief GeneratePickingRay
+       *
        * @param coordinatesOnQtWidget
-       * @return
+       *
+       * @returns a ray shooting into the scene from the point of click on the canvas.
        */
-      std::pair<QVector3D, QVector3D> GeneratePickingRay(const QPoint& coordinatesOnQtWidget) const;
+      Qt3D::QRay3D GeneratePickingRay(const QPoint& coordinatesOnQtWidget) const;
+
    private:
       QVector3D m_position;
 

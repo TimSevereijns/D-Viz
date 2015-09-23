@@ -455,6 +455,8 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
 
    const auto widgetCoordinates = QPoint(event.x(), event.y());
    const auto ray = m_camera.GeneratePickingRay(widgetCoordinates);
+
+   m_theVisualization->ComputeNearestIntersection(ray);
 }
 
 void GLCanvas::mousePressEvent(QMouseEvent* const event)

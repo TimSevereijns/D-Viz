@@ -9,16 +9,31 @@
 #include <iterator>
 
 /**
- * @brief The BlockFace struct represents a single face of the block.
+ * @brief The BlockFace struct represents the vertices (and their normals) for a a single face of
+ * the Block struct.
+ *
+ * @see Block
  */
 struct BlockFace
 {
+   /// @note the enum value order is dictated by the face insertion order into Block::m_blockFaces.
+   enum struct Side
+   {
+      FRONT = 0,     ///< Normal points towards +Z in OpenGL.
+      RIGHT,         ///< Normal points towards +X in OpenGL.
+      BACK,          ///< Normal points towards -Z in OpenGL.
+      LEFT,          ///< Normal points towards -X in OpenGL.
+      TOP            ///< Normal points towards +Y in OpenGL.
+   };
+
    BlockFace()
+      : m_side(Side::FRONT)
    {
    }
 
-   BlockFace(const QVector<QVector3D>& vertices)
-      : m_vertices(vertices)
+   BlockFace(const QVector<QVector3D>& vertices, const Side side)
+      : m_vertices(vertices),
+        m_side(side)
    {
    }
 
@@ -28,6 +43,7 @@ struct BlockFace
    }
 
    QVector<QVector3D> m_vertices;
+   Side m_side;
 };
 
 /**
@@ -44,7 +60,6 @@ struct Block
    const static int FACES_PER_BLOCK = 5;
    const static int VERTICES_PER_BLOCK = 60;
 
-   //QVector<QVector3D> m_vertices; ///< Remove;
    QVector<QVector3D> m_colors;
 
    QVector<BlockFace> m_blockFaces;

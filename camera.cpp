@@ -166,7 +166,7 @@ QPoint Camera::MapToOpenGLViewport(const QPoint& coordinatesOnQtWidget) const
    return { coordinatesOnQtWidget.x(), invertedY };
 }
 
-std::pair<QVector3D, QVector3D> Camera::GeneratePickingRay(const QPoint& coordinatesOnQtWidget) const
+Qt3D::QRay3D Camera::GeneratePickingRay(const QPoint& coordinatesOnQtWidget) const
 {
    const QPoint glCoordinates = MapToOpenGLViewport(coordinatesOnQtWidget);
 
@@ -175,7 +175,12 @@ std::pair<QVector3D, QVector3D> Camera::GeneratePickingRay(const QPoint& coordin
 
    const QVector3D direction = QVector3D(nearPlanePoint - farPlanePoint).normalized();
 
-   const auto pickingRay = std::make_pair(nearPlanePoint, direction);
+   const Qt3D::QRay3D pickingRay
+   {
+      nearPlanePoint,
+      direction
+   };
+
    return pickingRay;
 }
 

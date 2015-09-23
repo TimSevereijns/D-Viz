@@ -78,11 +78,11 @@ Block::Block(const DoublePoint3D& bottomLeft, const double width, const double h
 
    m_blockFaces.reserve(5);
    m_blockFaces
-      << BlockFace(frontFace)
-      << BlockFace(rightFace)
-      << BlockFace(backFace)
-      << BlockFace(leftFace)
-      << BlockFace(topFace);
+      << BlockFace(frontFace, BlockFace::Side::FRONT)
+      << BlockFace(rightFace, BlockFace::Side::RIGHT)
+      << BlockFace(backFace, BlockFace::Side::BACK)
+      << BlockFace(leftFace, BlockFace::Side::LEFT)
+      << BlockFace(topFace, BlockFace::Side::TOP);
 }
 
 Block::FaceIterator Block::begin() const

@@ -1,5 +1,7 @@
 #include "visualization.h"
 
+#include <boost/optional.hpp>
+
 #include <algorithm>
 #include <iostream>
 #include <string>
@@ -18,10 +20,11 @@ namespace
     * @param[in] pointOnPlane       Any point on the plane.
     * @param[in] planeNormal        The normal for that point on the plane.
     *
-    * @returns true if the ray and the plane intersect.
+    * @returns the point of intersection if there is an intersection greater than the margin of
+    * error, or boost::none if no such intersection exists.
     */
-   bool DoesRayIntersectPlane(const Qt3D::QRay3D& ray, const QVector3D& pointOnPlane,
-      const QVector3D& planeNormal)
+   boost::optional<QVector3D> DoesRayIntersectPlane(const Qt3D::QRay3D& ray,
+      const QVector3D& pointOnPlane, const QVector3D& planeNormal)
    {
       const double denominator = QVector3D::dotProduct(ray.direction(), planeNormal);
       if (std::abs(denominator) < EPSILON)
@@ -33,7 +36,47 @@ namespace
 
       const double scalar = numerator / denominator;
       const bool doesRayHitPlane = scalar > EPSILON;
-      return doesRayHitPlane;
+
+      if (doesRayHitPlane)
+      {
+         return scalar * ray.direction() + ray.origin();
+      }
+
+      return boost::none;
+   }
+
+   /**
+    * @brief DoesRayIntersectBLock
+    *
+    * @param[in] ray
+    * @param[in] node
+    *
+    * @returns true if the ray intersects the block; false otherwise.
+    */
+   bool DoesRayIntersectBLock(const Qt3D::QRay3D& ray, const Block& block)
+   {
+      const bool intersectionFound = std::any_of(std::begin(block), std::end(block),
+         [&ray] (const BlockFace& face)
+      {
+         const QVector3D& randomPointOnFace = face.m_vertices[0];
+         const QVector3D& normalForRandomPoint = face.m_vertices[1];
+
+         const boost::optional<QVector3D> doesRayIntersectPlane =
+            DoesRayIntersectPlane(ray, randomPointOnFace, normalForRandomPoint);
+
+//         if (!doesRayIntersectPlane)
+//         {
+//            return false;
+//         }
+
+//         return false;
+
+         return doesRayIntersectPlane;
+
+         /// @todo: Determine whether the hit is within the bounds of the face.
+      });
+
+      return intersectionFound;
    }
 }
 
@@ -107,7 +150,7 @@ QVector<QVector3D>& Visualization::GetColorBuffer()
    return m_visualizationColors;
 }
 
-double Visualization::ComputeNearestIntersection(const Qt3D::QRay3D& /*ray*/) const
+double Visualization::ComputeNearestIntersection(const Qt3D::QRay3D& ray) const
 {
    for (auto&& node : *m_theTree)
    {
@@ -116,7 +159,11 @@ double Visualization::ComputeNearestIntersection(const Qt3D::QRay3D& /*ray*/) co
          continue;
       }
 
-      //const bool doesRayIntersectPlane = DoesRayIntersectPlane(ray, pointOnPlane, planeNormal);
+      const bool doesRayIntersectBlock = DoesRayIntersectBLock(ray, node.GetData().m_block);
+      if (doesRayIntersectBlock)
+      {
+         std::cout << "Intersection found..." << std::endl;
+      }
    }
 
    return std::numeric_limits<double>::infinity();
