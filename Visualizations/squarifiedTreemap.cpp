@@ -20,7 +20,7 @@ namespace
 
       for (const TreeNode<VizNode>* const node : row)
       {
-         std::wcout << node->GetData().m_file.m_name << " ";
+         std::wcout << (*node)->m_file.m_name << " ";
       }
 
       std::cout << std::endl;
@@ -40,7 +40,7 @@ namespace
       std::uintmax_t sumOfFileSizes = std::accumulate(std::begin(row), std::end(row),
          std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<VizNode>* node)
       {
-         return result + node->GetData().m_file.m_size;
+         return result + (*node)->m_file.m_size;
       });
 
       sumOfFileSizes += candidateSize;
@@ -171,8 +171,8 @@ namespace
       {
          if (!row.empty())
          {
-            auto smallestElement = std::min(row.front()->GetData().m_file.m_size,
-               row.back()->GetData().m_file.m_size);
+            auto smallestElement = std::min((*row.front())->m_file.m_size,
+               (*row.back())->m_file.m_size);
 
             if (candidateSize)
             {

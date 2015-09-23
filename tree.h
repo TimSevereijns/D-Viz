@@ -66,6 +66,9 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
       bool operator>(const TreeNode<T>& rhs) const;
       bool operator>=(const TreeNode<T>& rhs) const;
 
+      T* operator->();
+      const T* operator->() const;
+
       /**
        * @brief GetVisited          Retrieve visitation status of the node
        * @returns True if the node has already been visited.
@@ -331,6 +334,19 @@ std::shared_ptr<TreeNode<T>> TreeNode<T>::AppendChild(std::shared_ptr<TreeNode<T
    m_childCount++;
 
    return m_lastChild;
+}
+
+template<typename T>
+T* TreeNode<T>::operator->()
+{
+   return &m_data;
+}
+
+
+template<typename T>
+const T* TreeNode<T>::operator->() const
+{
+   return &m_data;
 }
 
 template<typename T>
@@ -667,8 +683,11 @@ class Tree
             explicit Iterator(std::shared_ptr<TreeNode<T>> node);
             explicit Iterator(std::shared_ptr<TreeNode<T>> node, std::shared_ptr<TreeNode<T>> head);
 
-            TreeNode<T>& operator*() const;
-            TreeNode<T>* operator->() const;
+            TreeNode<T>& operator*();
+            const TreeNode<T>& operator*() const;
+
+            TreeNode<T>* operator->();
+            const TreeNode<T>* operator->() const;
 
             SiblingIterator begin() const;
             SiblingIterator end() const;
@@ -1098,13 +1117,26 @@ Tree<T>::Iterator::Iterator(std::shared_ptr<TreeNode<T>> node, std::shared_ptr<T
 }
 
 template<typename T>
-TreeNode<T>& Tree<T>::Iterator::operator*() const
+TreeNode<T>& Tree<T>::Iterator::operator*()
+{
+   return *m_node;
+}
+
+
+template<typename T>
+const TreeNode<T>& Tree<T>::Iterator::operator*() const
 {
    return *m_node;
 }
 
 template<typename T>
-TreeNode<T>* Tree<T>::Iterator::operator->() const
+TreeNode<T>* Tree<T>::Iterator::operator->()
+{
+   return &(*m_node);
+}
+
+template<typename T>
+const TreeNode<T>* Tree<T>::Iterator::operator->() const
 {
    return &(*m_node);
 }

@@ -24,7 +24,7 @@ namespace
       unsigned int nodesRemoved = 0;
       for (auto&& node : tree)
       {
-         if (node.GetData().m_file.m_size == 0)
+         if (node->m_file.m_size == 0)
          {
             node.RemoveFromTree();
             nodesRemoved++;
@@ -57,7 +57,7 @@ void ScanningWorker::ComputeDirectorySizes()
 
    for (auto&& node : *m_fileTree)
    {
-      const FileInfo fileInfo = node.GetData().m_file;
+      const FileInfo fileInfo = node->m_file;
 
       std::shared_ptr<TreeNode<VizNode>>& parent = node.GetParent();
       if (parent)

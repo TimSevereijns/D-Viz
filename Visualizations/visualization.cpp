@@ -114,25 +114,25 @@ void Visualization::PopulateVertexAndColorBuffers(const VisualizationParameters&
    std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
    {
-      if ((parameters.onlyShowDirectories && node.GetData().m_file.m_type != FILE_TYPE::DIRECTORY) ||
-          node.GetData().m_file.m_size < parameters.minimumFileSize)
+      if ((parameters.onlyShowDirectories && node->m_file.m_type != FILE_TYPE::DIRECTORY) ||
+          node->m_file.m_size < parameters.minimumFileSize)
       {
          return;
       }
 
       vertexCount = m_visualizationVertices.size();
 
-      std::for_each(std::begin(node.GetData().m_block), std::end(node.GetData().m_block),
+      std::for_each(std::begin(node->m_block), std::end(node->m_block),
          [&] (const BlockFace& face)
       {
          m_visualizationVertices << face.m_vertices;
       });
 
-      if (node.GetData().m_file.m_type == FILE_TYPE::DIRECTORY)
+      if (node->m_file.m_type == FILE_TYPE::DIRECTORY)
       {
          m_visualizationColors << Visualization::CreateDirectoryColors();
       }
-      else if (node.GetData().m_file.m_type == FILE_TYPE::REGULAR)
+      else if (node->m_file.m_type == FILE_TYPE::REGULAR)
       {
          m_visualizationColors << Visualization::CreateFileColors();
       }
@@ -154,12 +154,12 @@ double Visualization::ComputeNearestIntersection(const Qt3D::QRay3D& ray) const
 {
    for (auto&& node : *m_theTree)
    {
-      if (node.GetData().m_file.m_size < m_vizParameters.minimumFileSize)
+      if (node->m_file.m_size < m_vizParameters.minimumFileSize)
       {
          continue;
       }
 
-      const bool doesRayIntersectBlock = DoesRayIntersectBLock(ray, node.GetData().m_block);
+      const bool doesRayIntersectBlock = DoesRayIntersectBLock(ray, node->m_block);
       if (doesRayIntersectBlock)
       {
          std::cout << "Intersection found..." << std::endl;
@@ -218,6 +218,6 @@ void Visualization::SortNodes(Tree<VizNode>& tree)
    for (auto&& node : tree)
    {
       node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
-         { return lhs.GetData().m_file.m_size > rhs.GetData().m_file.m_size; });
+         { return lhs->m_file.m_size > rhs->m_file.m_size; });
    }
 }
