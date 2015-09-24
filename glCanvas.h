@@ -8,6 +8,7 @@
 
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
+#include "Scene/sceneAsset.h"
 #include "Visualizations/visualization.h"
 
 #include <chrono>
@@ -74,6 +75,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
    private:
       void ScanDrive(const VisualizationParameters& vizParameters);
 
+      std::chrono::time_point<std::chrono::system_clock> UpdateFPS();
+
       void HandleInput();
       void HandleXBoxControllerInput();
 
@@ -104,6 +107,8 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
       std::shared_ptr<OptionsManager> m_settings;
 
       QMatrix4x4 m_projectionMatrix;
+
+      std::vector<std::unique_ptr<SceneAsset>> m_sceneAssets;
 
       QOpenGLShaderProgram m_originMarkerShaderProgram;
       QOpenGLShaderProgram m_visualizationShaderProgram;

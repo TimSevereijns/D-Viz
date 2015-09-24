@@ -12,10 +12,15 @@ class VisualizationAsset : public SceneAsset
    public:
       VisualizationAsset();
 
+      virtual bool LoadShaders() override;
+
       virtual bool PrepareVertexBuffers(const Camera& camera) override;
       virtual bool PrepareColorBuffers(const Camera& camera) override;
 
-      virtual bool Render(const Camera& camera) override;
+      virtual bool Render(const Camera& camera, const Light& light, bool isVizualizationLoaded,
+                          const OptionsManager& settings) override;
+
+      virtual bool Reload(const Camera& camera) override;
 };
 
 #endif // VISUALIZATIONASSET_H

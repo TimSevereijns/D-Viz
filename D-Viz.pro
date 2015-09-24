@@ -22,9 +22,9 @@ SOURCES += main.cpp\
     Visualizations/squarifiedTreemap.cpp \
     xboxController.cpp \
     optionsManager.cpp \
-    Scene/Assets/visualizationAsset.cpp \
-    Scene/Assets/sceneAsset.cpp \
-    Scene/Assets/gridAsset.cpp \
+    Scene/visualizationAsset.cpp \
+    Scene/sceneAsset.cpp \
+    Scene/gridAsset.cpp \
     DriveScanner/scanningWorker.cpp \
     DataStructs/block.cpp \
     DataStructs/vizNode.cpp \
@@ -44,9 +44,9 @@ HEADERS  += mainwindow.h \
     xboxController.h \
     xInput.h \
     optionsManager.h \
-    Scene/Assets/visualizationAsset.h \
-    Scene/Assets/sceneAsset.h \
-    Scene/Assets/gridAsset.h \
+    Scene/visualizationAsset.h \
+    Scene/sceneAsset.h \
+    Scene/gridAsset.h \
     DriveScanner/scanningWorker.h \
     DataStructs/block.h \
     DataStructs/vizNode.h \

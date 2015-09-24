@@ -53,27 +53,34 @@ namespace
     *
     * @returns true if the ray intersects the block; false otherwise.
     */
-   bool DoesRayIntersectBLock(const Qt3D::QRay3D& ray, const Block& block)
+   bool DoesRayIntersectBlock(const Qt3D::QRay3D& ray, const Block& block)
    {
       const bool intersectionFound = std::any_of(std::begin(block), std::end(block),
          [&ray] (const BlockFace& face)
       {
+         if (face.m_side != BlockFace::Side::FRONT)
+         {
+            return false;
+         }
+
          const QVector3D& randomPointOnFace = face.m_vertices[0];
          const QVector3D& normalForRandomPoint = face.m_vertices[1];
 
-         const boost::optional<QVector3D> doesRayIntersectPlane =
+         const boost::optional<QVector3D> intersectionPoint =
             DoesRayIntersectPlane(ray, randomPointOnFace, normalForRandomPoint);
 
-//         if (!doesRayIntersectPlane)
-//         {
-//            return false;
-//         }
+         if (!intersectionPoint)
+         {
+            return false;
+         }
 
-//         return false;
+         std::cout << "Plane intersection found: " << intersectionPoint->x() << std::endl;
 
-         return doesRayIntersectPlane;
-
-         /// @todo: Determine whether the hit is within the bounds of the face.
+         return
+            face.m_vertices[0].x() < intersectionPoint->x() &&
+            face.m_vertices[2].x() > intersectionPoint->x() &&
+            face.m_vertices[0].y() < intersectionPoint->y() &&
+            face.m_vertices[4].y() > intersectionPoint->y();
       });
 
       return intersectionFound;
@@ -159,7 +166,7 @@ double Visualization::ComputeNearestIntersection(const Qt3D::QRay3D& ray) const
          continue;
       }
 
-      const bool doesRayIntersectBlock = DoesRayIntersectBLock(ray, node->m_block);
+      const bool doesRayIntersectBlock = DoesRayIntersectBlock(ray, node->m_block);
       if (doesRayIntersectBlock)
       {
          std::cout << "Intersection found..." << std::endl;

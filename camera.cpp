@@ -155,9 +155,9 @@ QVector3D Camera::Unproject(const QPoint& point, float viewDepth, QMatrix4x4 mod
    float z = 2.0f * viewDepth - 1.0f;
 
    const QVector3D viewportPoint(x, y, z);
-   const QVector3D unprojectPoint = inverseMatrix.map(viewportPoint);
+   const QVector3D unprojectedPoint = inverseMatrix.map(viewportPoint);
 
-   return unprojectPoint;
+   return unprojectedPoint;
 }
 
 QPoint Camera::MapToOpenGLViewport(const QPoint& coordinatesOnQtWidget) const

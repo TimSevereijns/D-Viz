@@ -3,11 +3,17 @@
 VisualizationAsset::VisualizationAsset()
    : SceneAsset()
 {
+
+}
+
+bool VisualizationAsset::LoadShaders()
+{
+   return SceneAsset::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
 }
 
 bool VisualizationAsset::PrepareVertexBuffers(const Camera& camera)
 {
-   m_VAO.create();
+   m_VAO.create();  ///< This is a bit a hack: I happen to know that I load vertices before colors
    m_VAO.bind();
 
    m_vertexBuffer.create();
@@ -37,7 +43,6 @@ bool VisualizationAsset::PrepareVertexBuffers(const Camera& camera)
 
 bool VisualizationAsset::PrepareColorBuffers(const Camera& camera)
 {
-   m_VAO.create();
    m_VAO.bind();
 
    m_colorBuffer.create();
@@ -57,35 +62,60 @@ bool VisualizationAsset::PrepareColorBuffers(const Camera& camera)
    m_shader.release();
    m_VAO.release();
 
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   return true;
+}
+
+bool VisualizationAsset::Render(const Camera& camera, const Light& light,
+   bool isVizualizationLoaded,
+   const OptionsManager& settings)
+{
+   const static QMatrix4x4 DEFAULT_MATRIX = QMatrix4x4();
+
+   if (!isVizualizationLoaded)
+   {
+      return true;
+   }
+
+   m_shader.bind();
+   m_shader.setUniformValue("model",                     DEFAULT_MATRIX);
+   m_shader.setUniformValue("mvpMatrix",                 camera.GetProjectionViewMatrix());
+   m_shader.setUniformValue("cameraPosition",            camera.GetPosition());
+
+   m_shader.setUniformValue("materialShininess",         settings.m_materialShininess);
+
+   const QVector3D specularColor
+   {
+      settings.m_redLightComponent,
+      settings.m_greenLightComponent,
+      settings.m_blueLightComponent
+   };
+
+   m_shader.setUniformValue("materialSpecularColor",     specularColor);
+
+   m_shader.setUniformValue("light.position",            light.position);
+   m_shader.setUniformValue("light.intensity",           light.intensity);
+   m_shader.setUniformValue("light.attenuation",         settings.m_lightAttenuationFactor);
+   m_shader.setUniformValue("light.ambientCoefficient",  settings.m_ambientCoefficient);
+
+   m_VAO.bind();
+
+   glDrawArrays(GL_TRIANGLES, /* first = */ 0, /* count = */ m_rawVertices.size());
+
+   m_shader.release();
+   m_VAO.release();
 
    return true;
 }
 
-bool VisualizationAsset::Render(const Camera& camera)
+bool VisualizationAsset::Reload(const Camera& camera)
 {
-   const static QMatrix4x4 DEFAULT_MATRIX = QMatrix4x4();
+   m_shader.removeAllShaders();
+   m_VAO.destroy();
 
-   m_shader.bind();
-   m_shader.setUniformValue("model", DEFAULT_MATRIX);
-   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
-   m_shader.setUniformValue("cameraPosition", camera.GetPosition());
+   PrepareVertexBuffers(camera);
+   PrepareColorBuffers(camera);
 
-   m_shader.setUniformValue("materialShininess", 80.0f);
-   m_shader.setUniformValue("materialSpecularColor", QVector3D(1.0f, 1.0f, 1.0f));
-
-   m_shader.setUniformValue("light.position", camera.GetPosition());
-   m_shader.setUniformValue("light.intensity", QVector3D(1.0f, 1.0f, 1.0f));
-   m_shader.setUniformValue("light.attenuation", 0.05f);
-   m_shader.setUniformValue("light.ambientCoefficient", 0.01f);
-
-   m_VAO.bind();
-
-
-   //glDrawArrays(GL_TRIANGLES, /* first = */ 0, /* count = */ m_rawVertices.size());
-
-   m_shader.release();
-   m_VAO.release();
+   LoadShaders();
 
    return true;
 }

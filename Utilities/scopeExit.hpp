@@ -10,7 +10,7 @@
  * callable type, it can incur quite a bit of overhead to achieve this, including heap allocation.
  *
  * Since operations performed on scope exit are likely to be small and trivial in nature, limiting
- * overhead is strongly desirable.
+ * overhead is highly desirable.
  */
 template <typename FnType>
 struct ScopeExit

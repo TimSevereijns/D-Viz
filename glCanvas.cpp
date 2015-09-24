@@ -4,6 +4,8 @@
 #include "DriveScanner/driveScanner.h"
 #include "mainwindow.h"
 #include "optionsManager.h"
+#include "Scene/visualizationAsset.h"
+#include "Scene/gridAsset.h"
 #include "Visualizations/sliceAndDiceTreemap.h"
 #include "Visualizations/squarifiedTreemap.h"
 #include "Utilities/scopeExit.hpp"
@@ -189,6 +191,10 @@ GLCanvas::GLCanvas(QWidget* parent)
    m_camera.SetAspectRatio(3.0f / 2.0f);
    m_camera.SetPosition(QVector3D(500, 100, 0));
 
+   // Set up the scene assets:
+   m_sceneAssets.emplace_back(std::make_unique<GridAsset>());
+   m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>());
+
    // Set keyboard and mouse focus:
    setFocusPolicy(Qt::StrongFocus);
 
@@ -201,32 +207,6 @@ GLCanvas::GLCanvas(QWidget* parent)
    m_frameRedrawTimer.reset(new QTimer(this));
    connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
    m_frameRedrawTimer->start(20);
-}
-
-void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
-{
-   const bool previousSuspensionState = m_isPaintingSuspended;
-   m_isPaintingSuspended = true;
-
-   ON_SCOPE_EXIT(m_isPaintingSuspended = previousSuspensionState);
-
-   m_theVisualization->PopulateVertexAndColorBuffers(parameters);
-
-   m_visualizationVertices = m_theVisualization->GetVertexBuffer();
-   m_visualizationColors = m_theVisualization->GetColorBuffer();
-
-   m_isVisualizationLoaded = !(m_visualizationVertices.empty() && m_visualizationColors.empty());
-
-   if (m_isVisualizationLoaded)
-   {
-      m_visualizationShaderProgram.removeAllShaders();
-      m_visualizationVAO.destroy();
-
-      PrepareVisualizationVertexBuffers();
-      PrepareVisualizationShaderProgram();
-   }
-
-   UpdateVertexCountInStatusBar(m_visualizationVertices.size(), *m_mainWindow);
 }
 
 void GLCanvas::CreateNewVisualization(const VisualizationParameters& parameters)
@@ -245,6 +225,79 @@ void GLCanvas::CreateNewVisualization(const VisualizationParameters& parameters)
    {
       ScanDrive(parameters);
    }
+}
+
+void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
+{
+   const auto& progressHandler =
+      [&] (const std::uintmax_t numberOfFilesScanned)
+   {
+      std::wstringstream message;
+      message.imbue(std::locale(""));
+      message << std::fixed << L"Files Scanned: " << numberOfFilesScanned;
+      SetStatusBarMessage(*m_mainWindow, message.str());
+   };
+
+   const auto& completionHandler =
+      [&, vizParameters] (const std::uintmax_t numberOfFilesScanned)
+   {
+      const bool previousSuspensionState = m_isPaintingSuspended;
+      m_isPaintingSuspended = true;
+
+      ON_SCOPE_EXIT(m_isPaintingSuspended = previousSuspensionState);
+
+      std::wstringstream message;
+      message.imbue(std::locale(""));
+      message << std::fixed << L"Total Files Scanned: " << numberOfFilesScanned;
+      SetStatusBarMessage(*m_mainWindow, message.str());
+
+      const auto& theTree = m_scanner.GetTree();
+      m_theVisualization->Parse(theTree);
+
+      ReloadVisualization(vizParameters);
+   };
+
+   DriveScannerParameters scanningParameters;
+   scanningParameters.m_onProgressUpdateCallback = progressHandler;
+   scanningParameters.m_onScanCompletedCallback = completionHandler;
+   scanningParameters.m_path = vizParameters.rootDirectory;
+
+   m_scanner.SetParameters(scanningParameters);
+   m_scanner.StartScanning();
+}
+
+void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
+{
+   const bool previousSuspensionState = m_isPaintingSuspended;
+   m_isPaintingSuspended = true;
+
+   ON_SCOPE_EXIT(m_isPaintingSuspended = previousSuspensionState);
+
+   m_theVisualization->PopulateVertexAndColorBuffers(parameters);
+
+   m_visualizationVertices = m_theVisualization->GetVertexBuffer();
+   m_visualizationColors = m_theVisualization->GetColorBuffer();
+
+//   m_sceneAssets[1]->SetVertexData(std::move(m_theVisualization->GetVertexBuffer()));
+//   m_sceneAssets[1]->SetColorData(std::move(m_theVisualization->GetColorBuffer()));
+
+   m_isVisualizationLoaded = !(m_visualizationVertices.empty() && m_visualizationColors.empty());
+
+   if (m_isVisualizationLoaded)
+   {
+      m_visualizationShaderProgram.removeAllShaders();
+      m_visualizationVAO.destroy();
+
+      PrepareVisualizationVertexBuffers();
+      PrepareVisualizationShaderProgram();
+
+//      for (const auto& asset : m_sceneAssets)
+//      {
+//         asset->Reload(m_camera);
+//      }
+   }
+
+   UpdateVertexCountInStatusBar(m_visualizationVertices.size(), *m_mainWindow);
 }
 
 void GLCanvas::SetFieldOfView(const float fieldOfView)
@@ -382,6 +435,14 @@ void GLCanvas::initializeGL()
 
    PrepareVisualizationVertexBuffers();
    PrepareOriginMarkerVertexBuffers();
+
+//   for (const auto& asset : m_sceneAssets)
+//   {
+//      asset->LoadShaders();
+
+//      asset->PrepareVertexBuffers(m_camera);
+//      asset->PrepareColorBuffers(m_camera);
+//   }
 }
 
 void GLCanvas::resizeGL(int width, int height)
@@ -456,7 +517,7 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
    const auto widgetCoordinates = QPoint(event.x(), event.y());
    const auto ray = m_camera.GeneratePickingRay(widgetCoordinates);
 
-   //m_theVisualization->ComputeNearestIntersection(ray);
+   m_theVisualization->ComputeNearestIntersection(ray);
 }
 
 void GLCanvas::mousePressEvent(QMouseEvent* const event)
@@ -626,13 +687,8 @@ void GLCanvas::HandleXBoxControllerInput()
    }
 }
 
-void GLCanvas::paintGL()
+std::chrono::time_point<std::chrono::system_clock> GLCanvas::UpdateFPS()
 {
-   if (m_isPaintingSuspended)
-   {
-      return;
-   }
-
    const auto currentTime = std::chrono::system_clock::now();
    auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp).count();
@@ -647,6 +703,18 @@ void GLCanvas::paintGL()
       m_mainWindow->setWindowTitle(QString::fromStdString("D-Viz @ ") +
          QString::number((1000 / millisecondsElapsed)) + QString::fromStdString(" fps [*]"));
    }
+
+   return currentTime;
+}
+
+void GLCanvas::paintGL()
+{
+   if (m_isPaintingSuspended)
+   {
+      return;
+   }
+
+   const auto currentTime = UpdateFPS();
 
    HandleInput();
 
@@ -667,6 +735,8 @@ void GLCanvas::paintGL()
 
    m_originMarkerShaderProgram.release();
    m_originMarkerVAO.release();
+
+   //////////
 
    // Draw visualization:
    if (m_isVisualizationLoaded)
@@ -707,44 +777,10 @@ void GLCanvas::paintGL()
       m_visualizationVAO.release();
    }
 
+//   for (const auto& asset : m_sceneAssets)
+//   {
+//      asset->Render(m_camera, m_light, m_isVisualizationLoaded, *m_settings);
+//   }
+
    m_lastFrameTimeStamp = currentTime;
-}
-
-void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
-{
-   const auto& progressHandler =
-      [&] (const std::uintmax_t numberOfFilesScanned)
-   {
-      std::wstringstream message;
-      message.imbue(std::locale(""));
-      message << std::fixed << L"Files Scanned: " << numberOfFilesScanned;
-      SetStatusBarMessage(*m_mainWindow, message.str());
-   };
-
-   const auto& completionHandler =
-      [&, vizParameters] (const std::uintmax_t numberOfFilesScanned)
-   {
-      const bool previousSuspensionState = m_isPaintingSuspended;
-      m_isPaintingSuspended = true;
-
-      ON_SCOPE_EXIT(m_isPaintingSuspended = previousSuspensionState);
-
-      std::wstringstream message;
-      message.imbue(std::locale(""));
-      message << std::fixed << L"Total Files Scanned: " << numberOfFilesScanned;
-      SetStatusBarMessage(*m_mainWindow, message.str());
-
-      const auto& theTree = m_scanner.GetTree();
-      m_theVisualization->Parse(theTree);
-
-      ReloadVisualization(vizParameters);
-   };
-
-   DriveScannerParameters scanningParameters;
-   scanningParameters.m_onProgressUpdateCallback = progressHandler;
-   scanningParameters.m_onScanCompletedCallback = completionHandler;
-   scanningParameters.m_path = vizParameters.rootDirectory;
-
-   m_scanner.SetParameters(scanningParameters);
-   m_scanner.StartScanning();
 }
