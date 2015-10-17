@@ -6,7 +6,6 @@
 #include "optionsManager.h"
 #include "Scene/visualizationAsset.h"
 #include "Scene/gridAsset.h"
-#include "Visualizations/sliceAndDiceTreemap.h"
 #include "Visualizations/squarifiedTreemap.h"
 #include "Utilities/scopeExit.hpp"
 
@@ -89,7 +88,6 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_isPaintingSuspended(false),
      m_isVisualizationLoaded(false),
      m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
-     m_distance(2.5),
      m_lastFrameTimeStamp(std::chrono::system_clock::now())
 {
    if (!m_mainWindow)
@@ -100,7 +98,6 @@ GLCanvas::GLCanvas(QWidget* parent)
    m_settings = m_mainWindow->GetOptionsManager();
 
    // Set up the camera:
-   m_camera.SetAspectRatio(3.0f / 2.0f);
    m_camera.SetPosition(QVector3D(500, 100, 0));
 
    // Set keyboard and mouse focus:
@@ -116,6 +113,42 @@ GLCanvas::GLCanvas(QWidget* parent)
    connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
    m_frameRedrawTimer->start(20);
 }
+
+void GLCanvas::initializeGL()
+{
+   m_graphicsDevice = std::make_unique<GraphicsDevice>();
+
+   m_graphicsDevice->glEnable(GL_DEPTH_TEST);
+   m_graphicsDevice->glEnable(GL_CULL_FACE);
+   m_graphicsDevice->glEnable(GL_MULTISAMPLE);
+   m_graphicsDevice->glEnable(GL_LINE_SMOOTH);
+
+   m_sceneAssets.emplace_back(std::make_unique<GridAsset>(*m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(*m_graphicsDevice));
+
+   for (const auto& asset : m_sceneAssets)
+   {
+      asset->LoadShaders();
+
+      asset->PrepareVertexBuffers(m_camera);
+      asset->PrepareColorBuffers(m_camera);
+   }
+}
+
+void GLCanvas::resizeGL(int width, int height)
+{
+   // Avoid a divide-by-zero situation:
+   if (height == 0)
+   {
+      height = 1;
+   }
+
+   m_graphicsDevice->glViewport(0, 0, width, height);
+
+   m_camera.SetAspectRatio(static_cast<float>(width) / static_cast<float>(height));
+   m_camera.SetViewport(QRect(QPoint(0,0), QPoint(width, height)));
+}
+
 
 void GLCanvas::CreateNewVisualization(const VisualizationParameters& parameters)
 {
@@ -202,41 +235,6 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
 void GLCanvas::SetFieldOfView(const float fieldOfView)
 {
    m_camera.SetFieldOfView(fieldOfView);
-}
-
-void GLCanvas::initializeGL()
-{
-   m_graphicsDevice = std::make_unique<GraphicsDevice>();
-
-   m_graphicsDevice->glEnable(GL_DEPTH_TEST);
-   m_graphicsDevice->glEnable(GL_CULL_FACE);
-   m_graphicsDevice->glEnable(GL_MULTISAMPLE);
-   m_graphicsDevice->glEnable(GL_LINE_SMOOTH);
-
-   m_sceneAssets.emplace_back(std::make_unique<GridAsset>(*m_graphicsDevice));
-   m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(*m_graphicsDevice));
-
-   for (const auto& asset : m_sceneAssets)
-   {
-      asset->LoadShaders();
-
-      asset->PrepareVertexBuffers(m_camera);
-      asset->PrepareColorBuffers(m_camera);
-   }
-}
-
-void GLCanvas::resizeGL(int width, int height)
-{
-   // Avoid a divide-by-zero situation:
-   if (height == 0)
-   {
-      height = 1;
-   }
-
-   m_graphicsDevice->glViewport(0, 0, width, height);
-
-   m_camera.SetAspectRatio(static_cast<float>(width) / static_cast<float>(height));
-   m_camera.SetViewport(QRect(QPoint(0,0), QPoint(width, height)));
 }
 
 void GLCanvas::keyPressEvent(QKeyEvent* const event)
@@ -451,7 +449,7 @@ void GLCanvas::HandleXBoxControllerInput()
    }
 
    // Handle camera forward/backward movement via left thumb stick:
-   if (controllerState.leftThumbY != 0)
+   if (controllerState.leftThumbY)
    {
       m_camera.OffsetPosition(
          MOVEMENT_AMPLIFICATION_FACTOR * m_settings->m_cameraMovementSpeed * controllerState.leftThumbY
@@ -459,7 +457,7 @@ void GLCanvas::HandleXBoxControllerInput()
    }
 
    // Handle camera left/right movement via left thumb stick:
-   if (controllerState.leftThumbX != 0)
+   if (controllerState.leftThumbX)
    {
       m_camera.OffsetPosition(
          MOVEMENT_AMPLIFICATION_FACTOR * m_settings->m_cameraMovementSpeed * controllerState.leftThumbX
@@ -467,21 +465,21 @@ void GLCanvas::HandleXBoxControllerInput()
    }
 }
 
-std::chrono::time_point<std::chrono::system_clock> GLCanvas::UpdateFPS()
+std::chrono::time_point<std::chrono::system_clock> GLCanvas::UpdateFPSAndReturnCurrentTime()
 {
-   const auto currentTime = std::chrono::system_clock::now();
-   auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::system_clock::now() - m_lastFrameTimeStamp).count();
+   using namespace std::chrono;
 
-   if (millisecondsElapsed == 0)
-   {
-      millisecondsElapsed = 1;
-   }
+   const auto currentTime = system_clock::now();
+   const auto millisecondsElapsed = std::max<unsigned int>(
+      duration_cast<milliseconds>(system_clock::now() - m_lastFrameTimeStamp).count(),
+      1); // This will avoid division by zero.
 
    if (m_mainWindow)
    {
-      m_mainWindow->setWindowTitle(QString::fromStdString("D-Viz @ ") +
-         QString::number((1000 / millisecondsElapsed)) + QString::fromStdString(" fps [*]"));
+      m_mainWindow->setWindowTitle(
+         QString::fromStdString("D-Viz @ ") +
+         QString::number((1000 / millisecondsElapsed)) +
+         QString::fromStdString(" fps [*]"));
    }
 
    return currentTime;
@@ -494,9 +492,9 @@ void GLCanvas::paintGL()
       return;
    }
 
-   const auto currentTime = UpdateFPS();
-
    HandleInput();
+
+   m_lastFrameTimeStamp = UpdateFPSAndReturnCurrentTime();
 
    if (m_settings->m_isLightAttachedToCamera)
    {
@@ -507,8 +505,6 @@ void GLCanvas::paintGL()
 
    for (const auto& asset : m_sceneAssets)
    {
-      asset->Render(m_camera, m_light, m_isVisualizationLoaded, *m_settings);
+      asset->Render(m_camera, m_light, *m_settings);
    }
-
-   m_lastFrameTimeStamp = currentTime;
 }

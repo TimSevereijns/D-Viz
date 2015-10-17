@@ -71,7 +71,7 @@ class GLCanvas : public QOpenGLWidget
    private:
       void ScanDrive(const VisualizationParameters& vizParameters);
 
-      std::chrono::time_point<std::chrono::system_clock> UpdateFPS();
+      std::chrono::time_point<std::chrono::system_clock> UpdateFPSAndReturnCurrentTime();
 
       void HandleInput();
       void HandleXBoxControllerInput();
@@ -84,8 +84,6 @@ class GLCanvas : public QOpenGLWidget
 
       bool m_isPaintingSuspended;
       bool m_isVisualizationLoaded;
-
-      double m_distance;
 
       MainWindow* m_mainWindow;
 

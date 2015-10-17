@@ -10,15 +10,15 @@ namespace
     *
     * @returns a vector of vertices.
     */
-   QVector<QVector3D> CreateOriginMarkerVertices()
+   QVector<QVector3D> CreateOriginMarkerAndGridVertices()
    {
-      const float markerAxisLength = Visualization::ROOT_BLOCK_WIDTH;
+      const float axisLength = Visualization::ROOT_BLOCK_WIDTH;
 
-      QVector<QVector3D> marker;
-      marker
-         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(markerAxisLength, 0.0f, 0.0f)   // X-axis
-         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 100.0f, 0.0f)             // Y-axis
-         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 0.0f, -markerAxisLength)  // Z-axis
+      QVector<QVector3D> vertices;
+      vertices
+         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(axisLength, 0.0f, 0.0f)   // X-axis
+         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 100.0f, 0.0f)       // Y-axis
+         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 0.0f, -axisLength)  // Z-axis
 
          // Grid (Z-axis):
          << QVector3D( 100.0f, 0.0f,  0.0f) << QVector3D( 100.0f, 0.0f, -1000.0f)
@@ -44,7 +44,7 @@ namespace
          << QVector3D(0.0f, 0.0f,  -900.0f) << QVector3D(1000.0f, 0.0f,  -900.0f)
          << QVector3D(0.0f, 0.0f, -1000.0f) << QVector3D(1000.0f, 0.0f, -1000.0f);
 
-      return marker;
+      return vertices;
    }
 
    /**
@@ -52,10 +52,10 @@ namespace
     *
     * @returns a vector of vertex colors.
     */
-   QVector<QVector3D> CreateOriginMarkerColors()
+   QVector<QVector3D> CreateOriginMarkerAndGridColors()
    {
-      QVector<QVector3D> markerColors;
-      markerColors
+      QVector<QVector3D> colors;
+      colors
          << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 0.0f, 0.0f)  // X-axis (red)
          << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(0.0f, 1.0f, 0.0f)  // Y-axis (green)
          << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f)  // Z-axis (blue)
@@ -88,15 +88,15 @@ namespace
          << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
          << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f);
 
-      return markerColors;
+      return colors;
    }
 }
 
 GridAsset::GridAsset(GraphicsDevice& device)
    : SceneAsset(device)
 {
-   m_rawVertices = CreateOriginMarkerVertices();
-   m_rawColors = CreateOriginMarkerColors();
+   m_rawVertices = CreateOriginMarkerAndGridVertices();
+   m_rawColors = CreateOriginMarkerAndGridColors();
 }
 
 bool GridAsset::LoadShaders()
@@ -119,8 +119,7 @@ bool GridAsset::PrepareVertexBuffers(const Camera& camera)
 
    m_vertexBuffer.bind();
    m_shader.enableAttributeArray("vertex");
-   m_shader.setAttributeBuffer("vertex", GL_FLOAT, /* offset = */ 0,
-      /* tupleSize = */ 3, /* stride = */ 6 * sizeof(GLfloat));
+   m_shader.setAttributeBuffer("vertex", GL_FLOAT, /* offset = */ 0, /* tupleSize = */ 3);
 
    m_vertexBuffer.release();
    m_shader.release();
@@ -152,8 +151,7 @@ bool GridAsset::PrepareColorBuffers(const Camera& camera)
    return true;
 }
 
-bool GridAsset::Render(const Camera& camera, const Light& light, bool isVizualizationLoaded,
-                       const OptionsManager& settings)
+bool GridAsset::Render(const Camera& camera, const Light&, const OptionsManager&)
 {
    m_shader.bind();
    m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
@@ -168,9 +166,7 @@ bool GridAsset::Render(const Camera& camera, const Light& light, bool isVizualiz
    return true;
 }
 
-bool GridAsset::Reload(const Camera& camera)
+bool GridAsset::Reload(const Camera&)
 {
-   // No-op
-
    return true;
 }

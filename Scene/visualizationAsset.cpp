@@ -3,7 +3,6 @@
 VisualizationAsset::VisualizationAsset(GraphicsDevice& device)
    : SceneAsset(device)
 {
-
 }
 
 bool VisualizationAsset::LoadShaders()
@@ -66,12 +65,11 @@ bool VisualizationAsset::PrepareColorBuffers(const Camera& camera)
 }
 
 bool VisualizationAsset::Render(const Camera& camera, const Light& light,
-   bool isVizualizationLoaded,
    const OptionsManager& settings)
 {
    const static QMatrix4x4 DEFAULT_MATRIX = QMatrix4x4();
 
-   if (!isVizualizationLoaded)
+   if (!IsAssetLoaded())
    {
       return true;
    }

@@ -30,8 +30,8 @@ class SceneAsset
 
       QOpenGLShaderProgram& GetVertexShader();
 
-      virtual bool Render(const Camera& camera, const Light& light, bool isVizualizationLoaded,
-                          const OptionsManager& settings) = 0;
+      virtual bool Render(const Camera& camera, const Light& light,
+         const OptionsManager& settings) = 0;
 
       bool IsAssetLoaded() const;
 
