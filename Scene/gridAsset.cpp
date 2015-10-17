@@ -92,8 +92,8 @@ namespace
    }
 }
 
-GridAsset::GridAsset()
-   : SceneAsset()
+GridAsset::GridAsset(GraphicsDevice& device)
+   : SceneAsset(device)
 {
    m_rawVertices = CreateOriginMarkerVertices();
    m_rawColors = CreateOriginMarkerColors();
@@ -160,7 +160,7 @@ bool GridAsset::Render(const Camera& camera, const Light& light, bool isVizualiz
 
    m_VAO.bind();
 
-   glDrawArrays(GL_LINES, /* first = */ 0, /* count = */ m_rawVertices.size());
+   m_graphicsDevice.glDrawArrays(GL_LINES, /* first = */ 0, /* count = */ m_rawVertices.size());
 
    m_shader.release();
    m_VAO.release();

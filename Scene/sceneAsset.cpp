@@ -3,7 +3,8 @@
 #include <iostream>
 #include <utility>
 
-SceneAsset::SceneAsset()
+SceneAsset::SceneAsset(GraphicsDevice& device)
+   : m_graphicsDevice(device)
 {
 }
 
@@ -55,4 +56,14 @@ void SceneAsset::SetVertexData(QVector<QVector3D>&& data)
 void SceneAsset::SetColorData(QVector<QVector3D>&& data)
 {
    m_rawColors.append(std::forward<QVector<QVector3D>>(data));
+}
+
+unsigned int SceneAsset::GetVertexCount() const
+{
+   return static_cast<unsigned int>(m_rawVertices.size());
+}
+
+unsigned int SceneAsset::GetColorCount() const
+{
+   return static_cast<unsigned int>(m_rawColors.size());
 }

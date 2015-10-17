@@ -56,93 +56,6 @@ namespace
    }
 
    /**
-    * @brief CreateOriginMarkerVertices returns the vertices needed to render the coordinate
-    * system origin marker.
-    *
-    * @returns a vector of vertices.
-    */
-   QVector<QVector3D> CreateOriginMarkerVertices()
-   {
-      const float markerAxisLength = Visualization::ROOT_BLOCK_WIDTH;
-
-      QVector<QVector3D> marker;
-      marker
-         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(markerAxisLength, 0.0f, 0.0f)   // X-axis
-         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 100.0f, 0.0f)             // Y-axis
-         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 0.0f, -markerAxisLength)  // Z-axis
-
-         // Grid (Z-axis):
-         << QVector3D( 100.0f, 0.0f,  0.0f) << QVector3D( 100.0f, 0.0f, -1000.0f)
-         << QVector3D( 200.0f, 0.0f,  0.0f) << QVector3D( 200.0f, 0.0f, -1000.0f)
-         << QVector3D( 300.0f, 0.0f,  0.0f) << QVector3D( 300.0f, 0.0f, -1000.0f)
-         << QVector3D( 400.0f, 0.0f,  0.0f) << QVector3D( 400.0f, 0.0f, -1000.0f)
-         << QVector3D( 500.0f, 0.0f,  0.0f) << QVector3D( 500.0f, 0.0f, -1000.0f)
-         << QVector3D( 600.0f, 0.0f,  0.0f) << QVector3D( 600.0f, 0.0f, -1000.0f)
-         << QVector3D( 700.0f, 0.0f,  0.0f) << QVector3D( 700.0f, 0.0f, -1000.0f)
-         << QVector3D( 800.0f, 0.0f,  0.0f) << QVector3D( 800.0f, 0.0f, -1000.0f)
-         << QVector3D( 900.0f, 0.0f,  0.0f) << QVector3D( 900.0f, 0.0f, -1000.0f)
-         << QVector3D(1000.0f, 0.0f,  0.0f) << QVector3D(1000.0f, 0.0f, -1000.0f)
-
-         // Grid (X-axis):
-         << QVector3D(0.0f, 0.0f,  -100.0f) << QVector3D(1000.0f, 0.0f,  -100.0f)
-         << QVector3D(0.0f, 0.0f,  -200.0f) << QVector3D(1000.0f, 0.0f,  -200.0f)
-         << QVector3D(0.0f, 0.0f,  -300.0f) << QVector3D(1000.0f, 0.0f,  -300.0f)
-         << QVector3D(0.0f, 0.0f,  -400.0f) << QVector3D(1000.0f, 0.0f,  -400.0f)
-         << QVector3D(0.0f, 0.0f,  -500.0f) << QVector3D(1000.0f, 0.0f,  -500.0f)
-         << QVector3D(0.0f, 0.0f,  -600.0f) << QVector3D(1000.0f, 0.0f,  -600.0f)
-         << QVector3D(0.0f, 0.0f,  -700.0f) << QVector3D(1000.0f, 0.0f,  -700.0f)
-         << QVector3D(0.0f, 0.0f,  -800.0f) << QVector3D(1000.0f, 0.0f,  -800.0f)
-         << QVector3D(0.0f, 0.0f,  -900.0f) << QVector3D(1000.0f, 0.0f,  -900.0f)
-         << QVector3D(0.0f, 0.0f, -1000.0f) << QVector3D(1000.0f, 0.0f, -1000.0f);
-
-      return marker;
-   }
-
-   /**
-    * @brief CreateOriginMarkerColors returns the vertex colors needed to paint the origin marker.
-    *
-    * @returns a vector of vertex colors.
-    */
-   QVector<QVector3D> CreateOriginMarkerColors()
-   {
-      QVector<QVector3D> markerColors;
-      markerColors
-         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 0.0f, 0.0f)  // X-axis (red)
-         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(0.0f, 1.0f, 0.0f)  // Y-axis (green)
-         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f)  // Z-axis (blue)
-
-         // Grid (Z-axis):
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-
-         // Grid (X-axis):
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f);
-
-      return markerColors;
-   }
-
-   /**
     * @brief SetStatusBarMessage displays the vertex count in the status bar.
     *
     * @param[in] mainWindow         The window which contains the status bar to be updated.
@@ -171,14 +84,13 @@ namespace
 
 GLCanvas::GLCanvas(QWidget* parent)
    : QOpenGLWidget(parent),
+     m_graphicsDevice(nullptr),
      m_theVisualization(nullptr),
      m_isPaintingSuspended(false),
      m_isVisualizationLoaded(false),
      m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
      m_distance(2.5),
-     m_lastFrameTimeStamp(std::chrono::system_clock::now()),
-     m_visualizationVertexColorBuffer(QOpenGLBuffer::VertexBuffer),
-     m_visualizationVertexPositionBuffer(QOpenGLBuffer::VertexBuffer)
+     m_lastFrameTimeStamp(std::chrono::system_clock::now())
 {
    if (!m_mainWindow)
    {
@@ -190,10 +102,6 @@ GLCanvas::GLCanvas(QWidget* parent)
    // Set up the camera:
    m_camera.SetAspectRatio(3.0f / 2.0f);
    m_camera.SetPosition(QVector3D(500, 100, 0));
-
-   // Set up the scene assets:
-   m_sceneAssets.emplace_back(std::make_unique<GridAsset>());
-   m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>());
 
    // Set keyboard and mouse focus:
    setFocusPolicy(Qt::StrongFocus);
@@ -275,29 +183,20 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
 
    m_theVisualization->PopulateVertexAndColorBuffers(parameters);
 
-   m_visualizationVertices = m_theVisualization->GetVertexBuffer();
-   m_visualizationColors = m_theVisualization->GetColorBuffer();
+   m_sceneAssets[1]->SetVertexData(std::move(m_theVisualization->GetVertexBuffer()));
+   m_sceneAssets[1]->SetColorData(std::move(m_theVisualization->GetColorBuffer()));
 
-//   m_sceneAssets[1]->SetVertexData(std::move(m_theVisualization->GetVertexBuffer()));
-//   m_sceneAssets[1]->SetColorData(std::move(m_theVisualization->GetColorBuffer()));
-
-   m_isVisualizationLoaded = !(m_visualizationVertices.empty() && m_visualizationColors.empty());
+   m_isVisualizationLoaded = m_sceneAssets[1]->IsAssetLoaded();
 
    if (m_isVisualizationLoaded)
    {
-      m_visualizationShaderProgram.removeAllShaders();
-      m_visualizationVAO.destroy();
-
-      PrepareVisualizationVertexBuffers();
-      PrepareVisualizationShaderProgram();
-
-//      for (const auto& asset : m_sceneAssets)
-//      {
-//         asset->Reload(m_camera);
-//      }
+      for (const auto& asset : m_sceneAssets)
+      {
+         asset->Reload(m_camera);
+      }
    }
 
-   UpdateVertexCountInStatusBar(m_visualizationVertices.size(), *m_mainWindow);
+   UpdateVertexCountInStatusBar(m_sceneAssets[1]->GetVertexCount(), *m_mainWindow);
 }
 
 void GLCanvas::SetFieldOfView(const float fieldOfView)
@@ -305,144 +204,25 @@ void GLCanvas::SetFieldOfView(const float fieldOfView)
    m_camera.SetFieldOfView(fieldOfView);
 }
 
-void GLCanvas::PrepareOriginMarkerShaderProgram()
-{
-   if (!m_originMarkerShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,
-      ":/Shaders/originMarkerVertexShader.vert"))
-   {
-      std::cout << "Error loading origin marker vertex shader!" << std::endl;
-   }
-
-   if (!m_originMarkerShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,
-      ":/Shaders/originMarkerFragmentShader.frag"))
-   {
-      std::cout << "Error loading origin marker fragment shader!" << std::endl;
-   }
-
-   m_originMarkerShaderProgram.link();
-}
-
-void GLCanvas::PrepareVisualizationShaderProgram()
-{
-   if (!m_visualizationShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,
-      ":/Shaders/visualizationVertexShader.vert"))
-   {
-      std::cout << "Error loading visualization vertex shader!" << std::endl;
-   }
-
-   if (!m_visualizationShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,
-      ":/Shaders/visualizationFragmentShader.frag"))
-   {
-      std::cout << "Error loading visualization fragment shader!" << std::endl;
-   }
-
-   m_visualizationShaderProgram.link();
-}
-
-void GLCanvas::PrepareOriginMarkerVertexBuffers()
-{
-   m_originMarkerVertices << CreateOriginMarkerVertices();
-   m_originMarkerColors << CreateOriginMarkerColors();
-
-   m_originMarkerVAO.create();
-   m_originMarkerVAO.bind();
-
-   m_originMarkerVertexPositionBuffer.create();
-   m_originMarkerVertexPositionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-   m_originMarkerVertexPositionBuffer.bind();
-   m_originMarkerVertexPositionBuffer.allocate(m_originMarkerVertices.constData(),
-      m_originMarkerVertices.size() * 3 * sizeof(GLfloat));
-
-   m_originMarkerVertexColorBuffer.create();
-   m_originMarkerVertexColorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-   m_originMarkerVertexColorBuffer.bind();
-   m_originMarkerVertexColorBuffer.allocate(m_originMarkerColors.constData(),
-      m_originMarkerColors.size() * 3 * sizeof(GLfloat));
-
-   m_originMarkerShaderProgram.bind();
-
-   m_originMarkerShaderProgram.setUniformValue("mvpMatrix", m_camera.GetProjectionViewMatrix());
-
-   m_originMarkerVertexPositionBuffer.bind();
-   m_originMarkerShaderProgram.enableAttributeArray("vertex");
-   m_originMarkerShaderProgram.setAttributeBuffer("vertex", GL_FLOAT, /* offset = */ 0,
-      /* tupleSize = */ 3);
-
-   m_originMarkerVertexColorBuffer.bind();
-   m_originMarkerShaderProgram.enableAttributeArray("color");
-   m_originMarkerShaderProgram.setAttributeBuffer("color", GL_FLOAT, /* offset = */ 0,
-      /* tupleSize = */ 3);
-
-   m_originMarkerShaderProgram.release();
-   m_originMarkerVertexPositionBuffer.release();
-   m_originMarkerVertexColorBuffer.release();
-   m_originMarkerVAO.release();
-}
-
-void GLCanvas::PrepareVisualizationVertexBuffers()
-{
-   m_visualizationVAO.create();
-   m_visualizationVAO.bind();
-
-   m_visualizationVertexPositionBuffer.create();
-   m_visualizationVertexPositionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-   m_visualizationVertexPositionBuffer.bind();
-   m_visualizationVertexPositionBuffer.allocate(m_visualizationVertices.constData(),
-      m_visualizationVertices.size() * 3 * sizeof(GLfloat));
-
-   m_visualizationVertexColorBuffer.create();
-   m_visualizationVertexColorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-   m_visualizationVertexColorBuffer.bind();
-   m_visualizationVertexColorBuffer.allocate(m_visualizationColors.constData(),
-      m_visualizationColors.size() * 3 * sizeof(GLfloat));
-
-   m_visualizationShaderProgram.bind();
-
-   m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetProjectionViewMatrix());
-
-   m_visualizationVertexPositionBuffer.bind();
-   m_visualizationShaderProgram.enableAttributeArray("vertex");
-   m_visualizationShaderProgram.setAttributeBuffer("vertex", GL_FLOAT, /* offset = */ 0,
-      /* tupleSize = */ 3, /* stride = */ 6 * sizeof(GLfloat));
-
-   m_visualizationVertexPositionBuffer.bind();
-   m_visualizationShaderProgram.enableAttributeArray("normal");
-   m_visualizationShaderProgram.setAttributeBuffer("normal", GL_FLOAT,
-      /* offset = */ 3 * sizeof(GLfloat), /* tupleSize = */ 3, /* stride = */ 6 * sizeof(GLfloat));
-
-   m_visualizationVertexColorBuffer.bind();
-   m_visualizationShaderProgram.enableAttributeArray("color");
-   m_visualizationShaderProgram.setAttributeBuffer("color", GL_FLOAT, /* offset = */ 0,
-      /* tupleSize = */ 3);
-
-   m_visualizationShaderProgram.release();
-   m_visualizationVertexPositionBuffer.release();
-   m_visualizationVertexColorBuffer.release();
-   m_visualizationVAO.release();
-}
-
 void GLCanvas::initializeGL()
 {
-   initializeOpenGLFunctions();
+   m_graphicsDevice = std::make_unique<GraphicsDevice>();
 
-   glEnable(GL_DEPTH_TEST);
-   glEnable(GL_CULL_FACE);
-   glEnable(GL_MULTISAMPLE);
-   glEnable(GL_LINE_SMOOTH);
+   m_graphicsDevice->glEnable(GL_DEPTH_TEST);
+   m_graphicsDevice->glEnable(GL_CULL_FACE);
+   m_graphicsDevice->glEnable(GL_MULTISAMPLE);
+   m_graphicsDevice->glEnable(GL_LINE_SMOOTH);
 
-   PrepareVisualizationShaderProgram();
-   PrepareOriginMarkerShaderProgram();
+   m_sceneAssets.emplace_back(std::make_unique<GridAsset>(*m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(*m_graphicsDevice));
 
-   PrepareVisualizationVertexBuffers();
-   PrepareOriginMarkerVertexBuffers();
+   for (const auto& asset : m_sceneAssets)
+   {
+      asset->LoadShaders();
 
-//   for (const auto& asset : m_sceneAssets)
-//   {
-//      asset->LoadShaders();
-
-//      asset->PrepareVertexBuffers(m_camera);
-//      asset->PrepareColorBuffers(m_camera);
-//   }
+      asset->PrepareVertexBuffers(m_camera);
+      asset->PrepareColorBuffers(m_camera);
+   }
 }
 
 void GLCanvas::resizeGL(int width, int height)
@@ -453,7 +233,7 @@ void GLCanvas::resizeGL(int width, int height)
       height = 1;
    }
 
-   glViewport(0, 0, width, height);
+   m_graphicsDevice->glViewport(0, 0, width, height);
 
    m_camera.SetAspectRatio(static_cast<float>(width) / static_cast<float>(height));
    m_camera.SetViewport(QRect(QPoint(0,0), QPoint(width, height)));
@@ -723,64 +503,12 @@ void GLCanvas::paintGL()
       m_light.position = m_camera.GetPosition();
    }
 
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   m_graphicsDevice->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-   // Draw origin marker:
-   m_originMarkerShaderProgram.bind();
-   m_originMarkerShaderProgram.setUniformValue("mvpMatrix", m_camera.GetProjectionViewMatrix());
-
-   m_originMarkerVAO.bind();
-
-   glDrawArrays(GL_LINES, /* first = */ 0, /* count = */ m_originMarkerVertices.size());
-
-   m_originMarkerShaderProgram.release();
-   m_originMarkerVAO.release();
-
-   //////////
-
-   // Draw visualization:
-   if (m_isVisualizationLoaded)
+   for (const auto& asset : m_sceneAssets)
    {
-      m_visualizationShaderProgram.bind();
-
-      // The model matrix is always the same, since the model itself doesn't move:
-      const static QMatrix4x4 DEFAULT_MATRIX = QMatrix4x4();
-
-      m_visualizationShaderProgram.setUniformValue("model", DEFAULT_MATRIX);
-      m_visualizationShaderProgram.setUniformValue("mvpMatrix", m_camera.GetProjectionViewMatrix());
-      m_visualizationShaderProgram.setUniformValue("cameraPosition", m_camera.GetPosition());
-
-      m_visualizationShaderProgram.setUniformValue("materialShininess",
-         m_settings->m_materialShininess);
-
-      const QVector3D specularColor
-      {
-         m_settings->m_redLightComponent,
-         m_settings->m_greenLightComponent,
-         m_settings->m_blueLightComponent
-      };
-
-      m_visualizationShaderProgram.setUniformValue("materialSpecularColor", specularColor);
-
-      m_visualizationShaderProgram.setUniformValue("light.position", m_light.position);
-      m_visualizationShaderProgram.setUniformValue("light.intensity", m_light.intensity);
-      m_visualizationShaderProgram.setUniformValue("light.attenuation",
-         m_settings->m_lightAttenuationFactor);
-      m_visualizationShaderProgram.setUniformValue("light.ambientCoefficient",
-         m_settings->m_ambientCoefficient);
-
-      m_visualizationVAO.bind();
-
-      glDrawArrays(GL_TRIANGLES, /* first = */ 0, /* count = */ m_visualizationVertices.size());
-
-      m_visualizationShaderProgram.release();
-      m_visualizationVAO.release();
+      asset->Render(m_camera, m_light, m_isVisualizationLoaded, *m_settings);
    }
-
-//   for (const auto& asset : m_sceneAssets)
-//   {
-//      asset->Render(m_camera, m_light, m_isVisualizationLoaded, *m_settings);
-//   }
 
    m_lastFrameTimeStamp = currentTime;
 }

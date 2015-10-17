@@ -10,7 +10,7 @@
 class VisualizationAsset : public SceneAsset
 {
    public:
-      VisualizationAsset();
+      VisualizationAsset(GraphicsDevice& device);
 
       virtual bool LoadShaders() override;
 

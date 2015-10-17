@@ -25,6 +25,7 @@ SOURCES += main.cpp\
     Scene/visualizationAsset.cpp \
     Scene/sceneAsset.cpp \
     Scene/gridAsset.cpp \
+    Scene/graphicsDevice.cpp \
     DriveScanner/scanningWorker.cpp \
     DataStructs/block.cpp \
     DataStructs/vizNode.cpp \
@@ -47,6 +48,7 @@ HEADERS  += mainwindow.h \
     Scene/visualizationAsset.h \
     Scene/sceneAsset.h \
     Scene/gridAsset.h \
+    Scene/graphicsDevice.h \
     DriveScanner/scanningWorker.h \
     DataStructs/block.h \
     DataStructs/vizNode.h \

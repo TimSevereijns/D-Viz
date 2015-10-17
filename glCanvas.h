@@ -9,16 +9,12 @@
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
 #include "Scene/sceneAsset.h"
+#include "Scene/graphicsDevice.h"
 #include "Visualizations/visualization.h"
 
 #include <chrono>
 #include <memory>
 
-#include <QOpenGLBuffer>
-#include <QOpenGLFramebufferObject>
-#include <QOpenGLFunctions>
-#include <QOpenGLShaderProgram>
-#include <QOpenGLVertexArrayObject>
 #include <QOpenGLWidget>
 #include <QTimer>
 #include <QVector3D>
@@ -28,7 +24,7 @@
  * is to be drawn. This class contains all the shader programs, Vertex Buffer Objects
  * (VBOs), lights, and other assets needed to represent the scene.
  */
-class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
+class GLCanvas : public QOpenGLWidget
 {
    Q_OBJECT
 
@@ -110,27 +106,11 @@ class GLCanvas : public QOpenGLWidget, protected QOpenGLFunctions
 
       std::vector<std::unique_ptr<SceneAsset>> m_sceneAssets;
 
-      QOpenGLShaderProgram m_originMarkerShaderProgram;
-      QOpenGLShaderProgram m_visualizationShaderProgram;
-
-      QOpenGLVertexArrayObject m_visualizationVAO;
-      QOpenGLVertexArrayObject m_originMarkerVAO;
-
-      QOpenGLBuffer m_visualizationVertexPositionBuffer;
-      QOpenGLBuffer m_visualizationVertexColorBuffer;
-
-      QOpenGLBuffer m_originMarkerVertexPositionBuffer;
-      QOpenGLBuffer m_originMarkerVertexColorBuffer;
-
-      QVector<QVector3D> m_originMarkerVertices;
-      QVector<QVector3D> m_originMarkerColors;
-
-      QVector<QVector3D> m_visualizationVertices;
-      QVector<QVector3D> m_visualizationColors;
-
       std::chrono::system_clock::time_point m_lastFrameTimeStamp;
 
       QPoint m_lastMousePosition;
+
+      std::unique_ptr<GraphicsDevice> m_graphicsDevice;
 };
 
 #endif // GLCANVAS_H

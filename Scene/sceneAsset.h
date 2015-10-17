@@ -5,8 +5,9 @@
 #include "../DataStructs/light.h"
 #include "../optionsManager.h"
 
+#include "graphicsDevice.h"
+
 #include <QOpenGLBuffer>
-#include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 
@@ -14,10 +15,10 @@
  * @brief The SceneAsset class is an abstract base class that can be used to simplify the management
  * and rendering of assets in the scene.
  */
-class SceneAsset : protected QOpenGLFunctions
+class SceneAsset
 {
    public:
-      explicit SceneAsset();
+      explicit SceneAsset(GraphicsDevice& device);
       virtual ~SceneAsset();
 
       virtual bool PrepareVertexBuffers(const Camera& camera) = 0;
@@ -40,6 +41,9 @@ class SceneAsset : protected QOpenGLFunctions
 
       void SetColorData(QVector<QVector3D>&& data);
 
+      unsigned int GetVertexCount() const;
+      unsigned int GetColorCount() const;
+
    protected:
       bool LoadShaders(const QString& vertexShaderName, const QString& fragmentShaderName);
 
@@ -52,6 +56,8 @@ class SceneAsset : protected QOpenGLFunctions
 
       QVector<QVector3D> m_rawVertices;
       QVector<QVector3D> m_rawColors;
+
+      GraphicsDevice& m_graphicsDevice;
 };
 
 #endif // SCENEASSET_H

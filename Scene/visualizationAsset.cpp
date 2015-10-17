@@ -1,7 +1,7 @@
 #include "visualizationAsset.h"
 
-VisualizationAsset::VisualizationAsset()
-   : SceneAsset()
+VisualizationAsset::VisualizationAsset(GraphicsDevice& device)
+   : SceneAsset(device)
 {
 
 }
@@ -99,7 +99,7 @@ bool VisualizationAsset::Render(const Camera& camera, const Light& light,
 
    m_VAO.bind();
 
-   glDrawArrays(GL_TRIANGLES, /* first = */ 0, /* count = */ m_rawVertices.size());
+   m_graphicsDevice.glDrawArrays(GL_TRIANGLES, /* first = */ 0, /* count = */ m_rawVertices.size());
 
    m_shader.release();
    m_VAO.release();

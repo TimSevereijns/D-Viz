@@ -10,7 +10,7 @@
 class GridAsset : public SceneAsset
 {
    public:
-      explicit GridAsset();
+      explicit GridAsset(GraphicsDevice& device);
 
       virtual bool LoadShaders() override;
 
