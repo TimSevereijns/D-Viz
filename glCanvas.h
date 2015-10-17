@@ -71,7 +71,7 @@ class GLCanvas : public QOpenGLWidget
    private:
       void ScanDrive(const VisualizationParameters& vizParameters);
 
-      std::chrono::time_point<std::chrono::system_clock> UpdateFPSAndReturnCurrentTime();
+      void UpdateFPS();
 
       void HandleInput();
       void HandleXBoxControllerInput();

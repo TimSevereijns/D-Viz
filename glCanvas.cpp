@@ -465,14 +465,16 @@ void GLCanvas::HandleXBoxControllerInput()
    }
 }
 
-std::chrono::time_point<std::chrono::system_clock> GLCanvas::UpdateFPSAndReturnCurrentTime()
+void GLCanvas::UpdateFPS()
 {
    using namespace std::chrono;
 
    const auto currentTime = system_clock::now();
    const auto millisecondsElapsed = std::max<unsigned int>(
-      duration_cast<milliseconds>(system_clock::now() - m_lastFrameTimeStamp).count(),
+      duration_cast<milliseconds>(currentTime - m_lastFrameTimeStamp).count(),
       1); // This will avoid division by zero.
+
+   m_lastFrameTimeStamp = currentTime;
 
    if (m_mainWindow)
    {
@@ -481,8 +483,6 @@ std::chrono::time_point<std::chrono::system_clock> GLCanvas::UpdateFPSAndReturnC
          QString::number((1000 / millisecondsElapsed)) +
          QString::fromStdString(" fps [*]"));
    }
-
-   return currentTime;
 }
 
 void GLCanvas::paintGL()
@@ -493,8 +493,7 @@ void GLCanvas::paintGL()
    }
 
    HandleInput();
-
-   m_lastFrameTimeStamp = UpdateFPSAndReturnCurrentTime();
+   UpdateFPS();
 
    if (m_settings->m_isLightAttachedToCamera)
    {
