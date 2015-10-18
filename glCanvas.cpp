@@ -19,15 +19,6 @@
 #include <sstream>
 #include <stdexcept>
 
-/*
- * AWESOME RESOURCES:
- * ------------------
- * https://github.com/advancingu/Qt5OppenGL
- * www.tomdalling.com/
- * https://github.com/qtproject/learning-guides/tree/master/openGL_tutorial
- * https://github.com/g-truc/ogl-samples/tree/master/tests
- */
-
 namespace
 {
    /**
@@ -476,11 +467,26 @@ void GLCanvas::UpdateFPS()
 
    m_lastFrameTimeStamp = currentTime;
 
+   if (m_frameRateDeque.size() > 32)
+   {
+      m_frameRateDeque.pop_front();
+   }
+
+   m_frameRateDeque.emplace_back(1000 / millisecondsElapsed);
+
+   const int fpsSum = std::accumulate(std::begin(m_frameRateDeque), std::end(m_frameRateDeque), 0,
+      [] (const int currentTotal, const int fps)
+   {
+      return currentTotal + fps;
+   });
+
+   const auto averageFps = fpsSum / m_frameRateDeque.size();
+
    if (m_mainWindow)
    {
       m_mainWindow->setWindowTitle(
          QString::fromStdString("D-Viz @ ") +
-         QString::number((1000 / millisecondsElapsed)) +
+         QString::number(averageFps) +
          QString::fromStdString(" fps [*]"));
    }
 }

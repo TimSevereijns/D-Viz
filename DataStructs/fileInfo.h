@@ -20,9 +20,9 @@ enum class FILE_TYPE
  */
 struct FileInfo
 {
-   std::wstring m_name;
-   std::uintmax_t m_size;
-   FILE_TYPE m_type;
+   std::wstring name;
+   std::uintmax_t size;
+   FILE_TYPE type;
 
    FileInfo(const std::wstring& name, std::uintmax_t size, FILE_TYPE type);
 };

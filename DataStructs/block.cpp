@@ -1,21 +1,21 @@
 #include "block.h"
 
 Block::Block()
-   : m_width(0.0),
-     m_height(0.0),
-     m_depth(0.0),
-     m_percentCovered(0.0)
+   : width(0.0),
+     height(0.0),
+     depth(0.0),
+     percentCovered(0.0)
 {
 }
 
 Block::Block(const DoublePoint3D& bottomLeft, const double width, const double height,
              const double depth)
-   : m_width(width),
-     m_height(height),
-     m_depth(depth),
-     m_percentCovered(0.0),
-     m_blockOrigin(bottomLeft),
-     m_nextRowOrigin(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
+   : width(width),
+     height(height),
+     depth(depth),
+     percentCovered(0.0),
+     blockOrigin(bottomLeft),
+     nextRowOrigin(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
 {
    const auto x = static_cast<float>(bottomLeft.x());
    const auto y = static_cast<float>(bottomLeft.y());
@@ -76,8 +76,8 @@ Block::Block(const DoublePoint3D& bottomLeft, const double width, const double h
       << QVector3D(x           , y + height   , z - depth   ) << QVector3D( 0,  1,  0)  // 56
       << QVector3D(x + width   , y + height   , z           ) << QVector3D( 0,  1,  0); // 58
 
-   m_blockFaces.reserve(5);
-   m_blockFaces
+   blockFaces.reserve(5);
+   blockFaces
       << BlockFace(frontFace, BlockFace::Side::FRONT)
       << BlockFace(rightFace, BlockFace::Side::RIGHT)
       << BlockFace(backFace,  BlockFace::Side::BACK)
@@ -99,7 +99,7 @@ Block::FaceIterator Block::end() const
 
 bool Block::HasVolume() const
 {
-   return (m_width != 0.0 && m_height != 0.0 && m_depth != 0.0);
+   return (width != 0.0 && height != 0.0 && depth != 0.0);
 }
 
 bool Block::IsNotInverted() const
@@ -113,5 +113,5 @@ bool Block::IsNotInverted() const
 
 DoublePoint3D Block::GetNextChildOrigin() const
 {
-   return m_blockOrigin + DoublePoint3D(0, m_height, 0);
+   return blockOrigin + DoublePoint3D(0, height, 0);
 }

@@ -27,13 +27,13 @@ struct BlockFace
    };
 
    BlockFace()
-      : m_side(Side::FRONT)
+      : side(Side::FRONT)
    {
    }
 
    BlockFace(const QVector<QVector3D>& vertices, const Side side)
-      : m_vertices(vertices),
-        m_side(side)
+      : vertices(vertices),
+        side(side)
    {
    }
 
@@ -42,8 +42,8 @@ struct BlockFace
       return {};
    }
 
-   QVector<QVector3D> m_vertices;
-   Side m_side;
+   QVector<QVector3D> vertices;
+   Side side;
 };
 
 /**
@@ -60,17 +60,17 @@ struct Block
    const static int FACES_PER_BLOCK = 5;
    const static int VERTICES_PER_BLOCK = 60;
 
-   QVector<QVector3D> m_colors;
+   QVector<QVector3D> colors;
 
-   QVector<BlockFace> m_blockFaces;
+   QVector<BlockFace> blockFaces;
 
-   DoublePoint3D m_blockOrigin;
-   DoublePoint3D m_nextRowOrigin; ///< Specific to the Squarified Treemap.
+   DoublePoint3D blockOrigin;
+   DoublePoint3D nextRowOrigin; ///< Specific to the Squarified Treemap.
 
-   double m_percentCovered;
-   double m_width;
-   double m_height;
-   double m_depth;
+   double percentCovered;
+   double width;
+   double height;
+   double depth;
 
    Block();
 
@@ -193,12 +193,12 @@ struct Block
 
          const BlockFace& operator*() const
          {
-            return m_block->m_blockFaces.at(m_faceIndex);
+            return m_block->blockFaces.at(m_faceIndex);
          }
 
          const BlockFace* const operator->() const
          {
-            return &(m_block->m_blockFaces.at(m_faceIndex));
+            return &(m_block->blockFaces.at(m_faceIndex));
          }
 
       private:

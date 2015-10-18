@@ -9,8 +9,8 @@
  */
 struct VizNode
 {
-   FileInfo m_file;
-   Block m_block;
+   FileInfo file;
+   Block block;
 
    explicit VizNode(const FileInfo& file);
 

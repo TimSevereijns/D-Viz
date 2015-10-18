@@ -14,6 +14,7 @@
 
 #include <chrono>
 #include <memory>
+#include <deque>
 
 #include <QOpenGLWidget>
 #include <QTimer>
@@ -21,8 +22,8 @@
 
 /**
  * @brief The GLCanvas class represents the canvas object on which the visualization
- * is to be drawn. This class contains all the shader programs, Vertex Buffer Objects
- * (VBOs), lights, and other assets needed to represent the scene.
+ * is to be drawn. This class contains the central rendering code that invokes the render functions
+ * on the individual scene assets that make up the entire visualization.
  */
 class GLCanvas : public QOpenGLWidget
 {
@@ -90,6 +91,8 @@ class GLCanvas : public QOpenGLWidget
       std::unique_ptr<Visualization> m_theVisualization;
       std::unique_ptr<QTimer> m_frameRedrawTimer;
 
+      std::shared_ptr<OptionsManager> m_settings;
+
       Camera m_camera;
 
       DriveScanner m_scanner;
@@ -98,15 +101,15 @@ class GLCanvas : public QOpenGLWidget
 
       KeyboardManager m_keyboardManager;
 
-      std::shared_ptr<OptionsManager> m_settings;
-
       QMatrix4x4 m_projectionMatrix;
+
+      QPoint m_lastMousePosition;
 
       std::vector<std::unique_ptr<SceneAsset>> m_sceneAssets;
 
       std::chrono::system_clock::time_point m_lastFrameTimeStamp;
 
-      QPoint m_lastMousePosition;
+      std::deque<int> m_frameRateDeque;
 
       std::unique_ptr<GraphicsDevice> m_graphicsDevice;
 };

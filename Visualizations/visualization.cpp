@@ -58,13 +58,13 @@ namespace
       const bool intersectionFound = std::any_of(std::begin(block), std::end(block),
          [&ray] (const BlockFace& face)
       {
-         if (face.m_side != BlockFace::Side::FRONT)
+         if (face.side != BlockFace::Side::FRONT)
          {
             return false;
          }
 
-         const QVector3D& randomPointOnFace = face.m_vertices[0];
-         const QVector3D& normalForRandomPoint = face.m_vertices[1];
+         const QVector3D& randomPointOnFace = face.vertices[0];
+         const QVector3D& normalForRandomPoint = face.vertices[1];
 
          const boost::optional<QVector3D> intersectionPoint =
             DoesRayIntersectPlane(ray, randomPointOnFace, normalForRandomPoint);
@@ -77,10 +77,10 @@ namespace
          std::cout << "Plane intersection found: " << intersectionPoint->x() << std::endl;
 
          return
-            face.m_vertices[0].x() < intersectionPoint->x() &&
-            face.m_vertices[2].x() > intersectionPoint->x() &&
-            face.m_vertices[0].y() < intersectionPoint->y() &&
-            face.m_vertices[4].y() > intersectionPoint->y();
+            face.vertices[0].x() < intersectionPoint->x() &&
+            face.vertices[2].x() > intersectionPoint->x() &&
+            face.vertices[0].y() < intersectionPoint->y() &&
+            face.vertices[4].y() > intersectionPoint->y();
       });
 
       return intersectionFound;
@@ -121,25 +121,25 @@ void Visualization::PopulateVertexAndColorBuffers(const VisualizationParameters&
    std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
       [&] (const TreeNode<VizNode>& node)
    {
-      if ((parameters.onlyShowDirectories && node->m_file.m_type != FILE_TYPE::DIRECTORY) ||
-          node->m_file.m_size < parameters.minimumFileSize)
+      if ((parameters.onlyShowDirectories && node->file.type != FILE_TYPE::DIRECTORY) ||
+          node->file.size < parameters.minimumFileSize)
       {
          return;
       }
 
       vertexCount = m_visualizationVertices.size();
 
-      std::for_each(std::begin(node->m_block), std::end(node->m_block),
+      std::for_each(std::begin(node->block), std::end(node->block),
          [&] (const BlockFace& face)
       {
-         m_visualizationVertices << face.m_vertices;
+         m_visualizationVertices << face.vertices;
       });
 
-      if (node->m_file.m_type == FILE_TYPE::DIRECTORY)
+      if (node->file.type == FILE_TYPE::DIRECTORY)
       {
          m_visualizationColors << Visualization::CreateDirectoryColors();
       }
-      else if (node->m_file.m_type == FILE_TYPE::REGULAR)
+      else if (node->file.type == FILE_TYPE::REGULAR)
       {
          m_visualizationColors << Visualization::CreateFileColors();
       }
@@ -161,12 +161,12 @@ double Visualization::ComputeNearestIntersection(const Qt3D::QRay3D& ray) const
 {
    for (auto&& node : *m_theTree)
    {
-      if (node->m_file.m_size < m_vizParameters.minimumFileSize)
+      if (node->file.size < m_vizParameters.minimumFileSize)
       {
          continue;
       }
 
-      const bool doesRayIntersectBlock = DoesRayIntersectBlock(ray, node->m_block);
+      const bool doesRayIntersectBlock = DoesRayIntersectBlock(ray, node->block);
       if (doesRayIntersectBlock)
       {
          std::cout << "Intersection found..." << std::endl;
@@ -225,6 +225,6 @@ void Visualization::SortNodes(Tree<VizNode>& tree)
    for (auto&& node : tree)
    {
       node.SortChildren([] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
-         { return lhs->m_file.m_size > rhs->m_file.m_size; });
+         { return lhs->file.size > rhs->file.size; });
    }
 }
