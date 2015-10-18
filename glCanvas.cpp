@@ -4,8 +4,9 @@
 #include "DriveScanner/driveScanner.h"
 #include "mainwindow.h"
 #include "optionsManager.h"
-#include "Scene/visualizationAsset.h"
+#include "Scene/debuggingRayAsset.h"
 #include "Scene/gridAsset.h"
+#include "Scene/visualizationAsset.h"
 #include "Visualizations/squarifiedTreemap.h"
 #include "Utilities/scopeExit.hpp"
 
@@ -116,6 +117,7 @@ void GLCanvas::initializeGL()
 
    m_sceneAssets.emplace_back(std::make_unique<GridAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(*m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<DebuggingRayAsset>(*m_graphicsDevice));
 
    for (const auto& asset : m_sceneAssets)
    {
@@ -286,7 +288,15 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
    const auto widgetCoordinates = QPoint(event.x(), event.y());
    const auto ray = m_camera.GeneratePickingRay(widgetCoordinates);
 
-   m_theVisualization->ComputeNearestIntersection(ray);
+   { // BEGIN DEBUGGING
+      QVector<QVector3D> vertices;
+      vertices << ray.origin() << ray.direction().normalized() * -1000.0f;
+
+      m_sceneAssets[2]->SetVertexData(std::move(vertices));
+      m_sceneAssets[2]->Reload(m_camera);
+   } // END DEBUGGING
+
+   //m_theVisualization->ComputeNearestIntersection(ray);
 }
 
 void GLCanvas::mousePressEvent(QMouseEvent* const event)

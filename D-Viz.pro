@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     DataStructs/fileInfo.cpp \
     DataStructs/light.cpp \
     DataStructs/doublePoint3d.cpp \
-    DriveScanner/driveScanner.cpp
+    DriveScanner/driveScanner.cpp \
+    Scene/debuggingRayAsset.cpp
 
 HEADERS  += mainwindow.h \
     tree.h \
@@ -56,7 +57,8 @@ HEADERS  += mainwindow.h \
     DataStructs/light.h \
     DriveScanner/driveScanner.h \
     DataStructs/doublePoint3d.h \
-    Utilities/scopeExit.hpp
+    Utilities/scopeExit.hpp \
+    Scene/debuggingRayAsset.h
 
 FORMS    += mainwindow.ui
 

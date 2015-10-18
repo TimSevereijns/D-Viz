@@ -12,7 +12,11 @@ bool VisualizationAsset::LoadShaders()
 
 bool VisualizationAsset::PrepareVertexBuffers(const Camera& camera)
 {
-   m_VAO.create();  ///< This is a bit a hack: I happen to know that I load vertices before colors
+   if (!m_VAO.isCreated())
+   {
+      m_VAO.create();
+   }
+
    m_VAO.bind();
 
    m_vertexBuffer.create();
@@ -42,6 +46,11 @@ bool VisualizationAsset::PrepareVertexBuffers(const Camera& camera)
 
 bool VisualizationAsset::PrepareColorBuffers(const Camera& camera)
 {
+   if (!m_VAO.isCreated())
+   {
+      m_VAO.create();
+   }
+
    m_VAO.bind();
 
    m_colorBuffer.create();
