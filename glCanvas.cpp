@@ -287,8 +287,10 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
    const auto ray = m_camera.GeneratePickingRay(widgetCoordinates);
 
    { // BEGIN DEBUGGING
+      const static float RAY_LENGTH = 2000.0f;
+
       QVector<QVector3D> vertices;
-      vertices << ray.origin() << ray.origin() + ray.direction().normalized() * 500.0f;
+      vertices << ray.origin() << ray.origin() + ray.direction().normalized() * RAY_LENGTH;
 
       m_sceneAssets[2]->SetVertexData(std::move(vertices));
       m_sceneAssets[2]->Reload(m_camera);

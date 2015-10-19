@@ -116,13 +116,8 @@ bool VisualizationAsset::Render(const Camera& camera, const Light& light,
 
 bool VisualizationAsset::Reload(const Camera& camera)
 {
-   m_shader.removeAllShaders();
-   m_VAO.destroy();
-
    PrepareVertexBuffers(camera);
    PrepareColorBuffers(camera);
-
-   LoadShaders();
 
    return true;
 }

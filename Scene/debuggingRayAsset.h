@@ -17,8 +17,6 @@ class DebuggingRayAsset : public SceneAsset
          const OptionsManager& settings) override;
 
       virtual bool Reload(const Camera& camera) override;
-
-      void SetDebuggingRay(const QVector3D& start, const QVector3D& end);
 };
 
 #endif // DEBUGGINGRAYASSET_H

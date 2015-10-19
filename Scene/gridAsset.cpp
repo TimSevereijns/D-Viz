@@ -56,9 +56,9 @@ namespace
    {
       QVector<QVector3D> colors;
       colors
-         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 0.0f, 0.0f)  // X-axis (red)
-         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(0.0f, 1.0f, 0.0f)  // Y-axis (green)
-         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f)  // Z-axis (blue)
+         << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)  // X-axis (red)
+         << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)  // Y-axis (green)
+         << QVector3D(0.0f, 0.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f)  // Z-axis (blue)
 
          // Grid (Z-axis):
          << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
@@ -106,7 +106,11 @@ bool GridAsset::LoadShaders()
 
 bool GridAsset::PrepareVertexBuffers(const Camera& camera)
 {
-   m_VAO.create(); ///< This is a bit a hack: I happen to know that I load vertices before colors
+   if (!m_VAO.isCreated())
+   {
+      m_VAO.create();
+   }
+
    m_VAO.bind();
 
    m_vertexBuffer.create();
@@ -130,6 +134,11 @@ bool GridAsset::PrepareVertexBuffers(const Camera& camera)
 
 bool GridAsset::PrepareColorBuffers(const Camera& camera)
 {
+   if (!m_VAO.isCreated())
+   {
+      m_VAO.create();
+   }
+
    m_VAO.bind();
 
    m_colorBuffer.create();
@@ -158,7 +167,11 @@ bool GridAsset::Render(const Camera& camera, const Light&, const OptionsManager&
 
    m_VAO.bind();
 
-   m_graphicsDevice.glDrawArrays(GL_LINES, /* first = */ 0, /* count = */ m_rawVertices.size());
+   m_graphicsDevice.glLineWidth(2);
+   m_graphicsDevice.glDrawArrays(GL_LINES, /* first = */ 0, /* count = */ 6);
+
+   m_graphicsDevice.glLineWidth(1);
+   m_graphicsDevice.glDrawArrays(GL_LINES, /* first = */ 6, /* count = */ m_rawVertices.size());
 
    m_shader.release();
    m_VAO.release();

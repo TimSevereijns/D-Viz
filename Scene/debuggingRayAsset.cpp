@@ -4,9 +4,11 @@ namespace
 {
    QVector<QVector3D> CreateDefaultRayVertices()
    {
-      // The default location of the ray is under the visualization.
+      // The default start and end vertices result in an "invisible" ray.
       QVector<QVector3D> vertices;
-      vertices << QVector3D(500.0f, -100.0f, 0.0f) << QVector3D(500.0f, -100.0f, -1000.0f);
+      vertices
+         << QVector3D(0.0f, 0.0f, 0.0f)
+         << QVector3D(0.0f, 0.0f, 0.0f);
 
       return vertices;
    }
@@ -98,7 +100,9 @@ bool DebuggingRayAsset::Render(const Camera& camera, const Light&, const Options
 
    m_VAO.bind();
 
+   m_graphicsDevice.glLineWidth(3);
    m_graphicsDevice.glDrawArrays(GL_LINES, /* first = */ 0, /* count = */ m_rawVertices.size());
+   m_graphicsDevice.glLineWidth(1);
 
    m_shader.release();
    m_VAO.release();
@@ -111,11 +115,4 @@ bool DebuggingRayAsset::Reload(const Camera& camera)
    PrepareVertexBuffers(camera);
 
    return true;
-}
-
-void DebuggingRayAsset::SetDebuggingRay(const QVector3D& start, const QVector3D& end)
-{
-   m_rawVertices.clear();
-   m_rawVertices.append(start);
-   m_rawVertices.append(end);
 }
