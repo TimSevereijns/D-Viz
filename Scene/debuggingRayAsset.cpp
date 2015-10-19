@@ -17,7 +17,7 @@ namespace
       QVector<QVector3D> colors;
       colors
          << QVector3D(1.0f, 105.0f / 255.0f, 180.0f / 255.0f)
-         << QVector3D(1.0f, 105.0f / 255.0f, 180.0f / 255.0f);
+         << QVector3D(0.0f, 0.0f, 0.0f);
 
       return colors;
    }

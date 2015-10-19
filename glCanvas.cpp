@@ -283,14 +283,12 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
 
 void GLCanvas::HandleRightClick(const QMouseEvent& event)
 {
-   std::cout << event.x() <<  ", " << event.y() << std::endl;
-
    const auto widgetCoordinates = QPoint(event.x(), event.y());
    const auto ray = m_camera.GeneratePickingRay(widgetCoordinates);
 
    { // BEGIN DEBUGGING
       QVector<QVector3D> vertices;
-      vertices << ray.origin() << ray.direction().normalized() * -1000.0f;
+      vertices << ray.origin() << ray.origin() + ray.direction().normalized() * 500.0f;
 
       m_sceneAssets[2]->SetVertexData(std::move(vertices));
       m_sceneAssets[2]->Reload(m_camera);

@@ -88,7 +88,7 @@ void Camera::LookAt(const QVector3D& position)
 QVector3D Camera::Forward() const
 {
    const QVector4D forwardVector = GetOrientation().inverted() * QVector4D(0, 0, -1, 1);
-   return QVector3D(forwardVector);
+   return QVector3D { forwardVector };
 }
 
 QVector3D Camera::Backward() const
@@ -99,7 +99,7 @@ QVector3D Camera::Backward() const
 QVector3D Camera::Right() const
 {
    const QVector4D rightVector = GetOrientation().inverted() * QVector4D(1, 0, 0, 1);
-   return QVector3D(rightVector);
+   return QVector3D { rightVector };
 }
 
 QVector3D Camera::Left() const
@@ -110,7 +110,7 @@ QVector3D Camera::Left() const
 QVector3D Camera::Up() const
 {
    const QVector4D upVector = GetOrientation().inverted() * QVector4D(0, 1, 0, 1);
-   return QVector3D(upVector);
+   return QVector3D { upVector };
 }
 
 QVector3D Camera::Down() const
@@ -150,11 +150,11 @@ QVector3D Camera::Unproject(const QPoint& point, float viewDepth, QMatrix4x4 mod
       return {};
    }
 
-   float x = 2.0f * ((float)point.x() - (float)m_viewport.x()) / (float)m_viewport.width() - 1.0f;
-   float y = 2.0f * ((float)point.y() - (float)m_viewport.y()) / (float)m_viewport.height() - 1.0f;
-   float z = 2.0f * viewDepth - 1.0f;
+   const float x = 2.0f * (float)(point.x() - m_viewport.x()) / (float)m_viewport.width() - 1.0f;
+   const float y = 2.0f * (float)(point.y() - m_viewport.y()) / (float)m_viewport.height() - 1.0f;
+   const float z = 2.0f * viewDepth - 1.0f;
 
-   const QVector3D viewportPoint(x, y, z);
+   const QVector3D viewportPoint { x, y, z };
    const QVector3D unprojectedPoint = inverseMatrix.map(viewportPoint);
 
    return unprojectedPoint;
@@ -178,7 +178,7 @@ Qt3D::QRay3D Camera::GeneratePickingRay(const QPoint& coordinatesOnQtWidget) con
    const Qt3D::QRay3D pickingRay
    {
       nearPlanePoint,
-      direction
+      -direction
    };
 
    return pickingRay;
