@@ -222,9 +222,9 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
    };
 
    DriveScannerParameters scanningParameters;
-   scanningParameters.m_onProgressUpdateCallback = progressHandler;
-   scanningParameters.m_onScanCompletedCallback = completionHandler;
-   scanningParameters.m_path = vizParameters.rootDirectory;
+   scanningParameters.onProgressUpdateCallback = progressHandler;
+   scanningParameters.onScanCompletedCallback = completionHandler;
+   scanningParameters.path = vizParameters.rootDirectory;
 
    m_scanner.SetParameters(scanningParameters);
    m_scanner.StartScanning();
@@ -313,16 +313,18 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
 
 void GLCanvas::HandleRightClick(const QMouseEvent& event)
 {
+   const static float RAY_LENGTH = 2000.0f;
+   const static QVector3D HOT_PINK = QVector3D { 1.0f, 105.0f / 255.0f, 180.0f / 255.0f };
+   const static QVector3D BLACK = QVector3D { 0.0f, 0.0f, 0.0f };
+
    const auto widgetCoordinates = QPoint(event.x(), event.y());
    const auto ray = m_camera.GeneratePickingRay(widgetCoordinates);
 
-   const static float RAY_LENGTH = 2000.0f;
-   const static QVector3D HOT_PINK = QVector3D(1.0f, 105.0f / 255.0f, 180.0f / 255.0f);
-
    QVector<QVector3D> vertices;
-   QVector<QVector3D> colors;
    vertices << ray.origin() << ray.origin() + ray.direction().normalized() * RAY_LENGTH;
-   colors << HOT_PINK << QVector3D(0.0f, 0.0f, 0.0f);
+
+   QVector<QVector3D> colors;
+   colors << HOT_PINK << BLACK;
 
    const auto& foundNode = m_theVisualization->ComputeNearestIntersection(ray);
    if (foundNode)
@@ -336,18 +338,6 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
       {
          nodeVertices << face.vertices;
       });
-
-//      vertices
-//         << nodeVertices[0] << nodeVertices[2]
-//         << nodeVertices[2] << nodeVertices[6]
-//         << nodeVertices[6] << nodeVertices[4]
-//         << nodeVertices[4] << nodeVertices[0];
-
-//      colors
-//         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-//         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-//         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-//         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f);
 
       vertices
          << nodeVertices[50] << nodeVertices[52]

@@ -11,34 +11,29 @@
 #include "scanningWorker.h"
 
 /**
- * @brief The DriveScanner class
- *
- * Dev Resources:
- *
- *    http://doc.qt.io/qt-5.4/qthread.html
- *    https://wiki.qt.io/QThreads_general_usage
- *    https://mayaposch.wordpress.com/2011/11/01/
- *       how-to-really-truly-use-qthreads-the-full-explanation/
+ * @brief The DriveScannerParameters struct
  */
-
 struct DriveScannerParameters
 {
    using ProgressCallback = std::function<void (const std::uintmax_t filesScanned)>;
    using ScanCompleteCallback = std::function<void (const std::uintmax_t filesScanned)>;
 
-   ProgressCallback m_onProgressUpdateCallback;
-   ScanCompleteCallback m_onScanCompletedCallback;
+   ProgressCallback onProgressUpdateCallback;
+   ScanCompleteCallback onScanCompletedCallback;
 
-   std::wstring m_path;
+   std::wstring path;
 
    DriveScannerParameters()
-      : m_onProgressUpdateCallback(ProgressCallback()),
-        m_onScanCompletedCallback(ScanCompleteCallback()),
-        m_path(L"")
+      : onProgressUpdateCallback(ProgressCallback()),
+        onScanCompletedCallback(ScanCompleteCallback()),
+        path(L"")
    {
    }
 };
 
+/**
+ * @brief The DriveScanner class
+ */
 class DriveScanner : public QObject
 {
    Q_OBJECT
@@ -58,9 +53,6 @@ class DriveScanner : public QObject
 
    private:
       DriveScannerParameters m_scanningParameters;
-
-      //std::unique_ptr<QThread> m_thread;
-      //std::unique_ptr<ScanningWorker> m_worker;
 
       std::shared_ptr<Tree<VizNode>> m_theTree;
 };

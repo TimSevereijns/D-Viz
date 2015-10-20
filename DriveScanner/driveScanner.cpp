@@ -22,12 +22,12 @@ void DriveScanner::SetParameters(const DriveScannerParameters& parameters)
 
 void DriveScanner::HandleProgressUpdates(const std::uintmax_t filesScanned)
 {
-   m_scanningParameters.m_onProgressUpdateCallback(filesScanned);
+   m_scanningParameters.onProgressUpdateCallback(filesScanned);
 }
 
 void DriveScanner::HandleCompletion(const std::uintmax_t filesScanned)
 {
-   m_scanningParameters.m_onScanCompletedCallback(filesScanned);
+   m_scanningParameters.onScanCompletedCallback(filesScanned);
 }
 
 void DriveScanner::StartScanning()
@@ -42,7 +42,7 @@ void DriveScanner::StartScanning()
 
    const FileInfo fileInfo
    {
-      m_scanningParameters.m_path,
+      m_scanningParameters.path,
       ScanningWorker::SIZE_UNDEFINED,
       FILE_TYPE::DIRECTORY
    };
@@ -56,7 +56,7 @@ void DriveScanner::StartScanning()
    m_theTree = std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
 
    QThread* thread = new QThread;
-   ScanningWorker* worker = new ScanningWorker(m_theTree, m_scanningParameters.m_path);
+   ScanningWorker* worker = new ScanningWorker(m_theTree, m_scanningParameters.path);
    worker->moveToThread(thread);
 
    connect(worker, SIGNAL(Finished(const std::uintmax_t)),
