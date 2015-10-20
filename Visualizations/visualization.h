@@ -1,6 +1,8 @@
 #ifndef VISUALIZATION_H
 #define VISUALIZATION_H
 
+#include <boost/optional.hpp>
+
 #include <QVector>
 #include <QVector3D>
 
@@ -83,7 +85,7 @@ class Visualization
        *
        * @returns the distance to the nearest intersection point in the visualization.
        */
-      double ComputeNearestIntersection(const Qt3D::QRay3D& ray) const;
+      boost::optional<TreeNode<VizNode> > ComputeNearestIntersection(const Qt3D::QRay3D& ray) const;
 
       /**
        * @brief CreateBlockColors creates the vertex colors needed to color a single block.

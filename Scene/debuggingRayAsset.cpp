@@ -113,6 +113,7 @@ bool DebuggingRayAsset::Render(const Camera& camera, const Light&, const Options
 bool DebuggingRayAsset::Reload(const Camera& camera)
 {
    PrepareVertexBuffers(camera);
+   PrepareColorBuffers(camera);
 
    return true;
 }

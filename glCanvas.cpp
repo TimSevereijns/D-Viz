@@ -71,6 +71,36 @@ namespace
 
       SetStatusBarMessage(mainWindow, message.str());
    }
+
+   /**
+    * @brief GetFullNodePath
+    *
+    * @todo Fix printing of complete path.
+    *
+    * @param[in] node               The starting node.
+    *
+    * @returns the complete path as created by following the current node up to the root.
+    */
+   std::wstring GetFullNodePath(const TreeNode<VizNode> node)
+   {
+      std::vector<std::wstring> reversePath;
+      reversePath.reserve(Tree<VizNode>::Depth(node));
+      reversePath.emplace_back(node->file.name);
+
+      TreeNode<VizNode> currentNode = node;
+
+      while (currentNode.GetParent())
+      {
+         currentNode = *currentNode.GetParent();
+         reversePath.emplace_back(currentNode->file.name);
+      }
+
+      return std::accumulate(std::rbegin(reversePath) + 1, std::rend(reversePath), std::wstring(),
+         [] (const std::wstring path, const std::wstring file)
+      {
+         return path + std::wstring(L"/") + file;
+      });
+   }
 }
 
 GLCanvas::GLCanvas(QWidget* parent)
@@ -286,17 +316,51 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
    const auto widgetCoordinates = QPoint(event.x(), event.y());
    const auto ray = m_camera.GeneratePickingRay(widgetCoordinates);
 
-   { // BEGIN DEBUGGING
-      const static float RAY_LENGTH = 2000.0f;
+   const static float RAY_LENGTH = 2000.0f;
+   const static QVector3D HOT_PINK = QVector3D(1.0f, 105.0f / 255.0f, 180.0f / 255.0f);
 
-      QVector<QVector3D> vertices;
-      vertices << ray.origin() << ray.origin() + ray.direction().normalized() * RAY_LENGTH;
+   QVector<QVector3D> vertices;
+   QVector<QVector3D> colors;
+   vertices << ray.origin() << ray.origin() + ray.direction().normalized() * RAY_LENGTH;
+   colors << HOT_PINK << QVector3D(0.0f, 0.0f, 0.0f);
 
-      m_sceneAssets[2]->SetVertexData(std::move(vertices));
-      m_sceneAssets[2]->Reload(m_camera);
-   } // END DEBUGGING
+   const auto& foundNode = m_theVisualization->ComputeNearestIntersection(ray);
+   if (foundNode)
+   {
+      std::wcout << GetFullNodePath(*foundNode) << std::endl;
 
-   //m_theVisualization->ComputeNearestIntersection(ray);
+      QVector<QVector3D> nodeVertices;
+
+      std::for_each(std::begin(foundNode->GetData().block), std::end(foundNode->GetData().block),
+         [&] (const BlockFace& face)
+      {
+         nodeVertices << face.vertices;
+      });
+
+//      vertices
+//         << nodeVertices[0] << nodeVertices[2]
+//         << nodeVertices[2] << nodeVertices[6]
+//         << nodeVertices[6] << nodeVertices[4]
+//         << nodeVertices[4] << nodeVertices[0];
+
+//      colors
+//         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
+//         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
+//         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
+//         << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f);
+
+      vertices
+         << nodeVertices[50] << nodeVertices[52]
+         << nodeVertices[48] << nodeVertices[54];
+
+      colors
+         << HOT_PINK << HOT_PINK
+         << HOT_PINK << HOT_PINK;
+   }
+
+   m_sceneAssets[2]->SetVertexData(std::move(vertices));
+   m_sceneAssets[2]->SetColorData(std::move(colors));
+   m_sceneAssets[2]->Reload(m_camera);
 }
 
 void GLCanvas::mousePressEvent(QMouseEvent* const event)

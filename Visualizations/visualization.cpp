@@ -39,7 +39,7 @@ namespace
 
       if (doesRayHitPlane)
       {
-         return scalar * ray.direction() + ray.origin();
+         return scalar * ray.direction().normalized() + ray.origin();
       }
 
       return boost::none;
@@ -74,8 +74,6 @@ namespace
             return false;
          }
 
-         std::cout << "Plane intersection found: " << intersectionPoint->x() << std::endl;
-
          return
             face.vertices[0].x() < intersectionPoint->x() &&
             face.vertices[2].x() > intersectionPoint->x() &&
@@ -95,6 +93,7 @@ const double Visualization::ROOT_BLOCK_DEPTH = 1000.0;
 
 Visualization::Visualization(const VisualizationParameters& parameters)
    : m_vizParameters(parameters),
+     m_theTree(nullptr),
      m_hasDataBeenParsed(false)
 {
 }
@@ -157,8 +156,13 @@ QVector<QVector3D>& Visualization::GetColorBuffer()
    return m_visualizationColors;
 }
 
-double Visualization::ComputeNearestIntersection(const Qt3D::QRay3D& ray) const
+boost::optional<TreeNode<VizNode>> Visualization::ComputeNearestIntersection(const Qt3D::QRay3D& ray) const
 {
+   if (!m_hasDataBeenParsed)
+   {
+      return boost::none;
+   }
+
    for (auto&& node : *m_theTree)
    {
       if (node->file.size < m_vizParameters.minimumFileSize)
@@ -169,11 +173,11 @@ double Visualization::ComputeNearestIntersection(const Qt3D::QRay3D& ray) const
       const bool doesRayIntersectBlock = DoesRayIntersectBlock(ray, node->block);
       if (doesRayIntersectBlock)
       {
-         std::cout << "Intersection found..." << std::endl;
+         return node;
       }
    }
 
-   return std::numeric_limits<double>::infinity();
+   return boost::none;
 }
 
 QVector<QVector3D>& Visualization::GetVertexBuffer()
