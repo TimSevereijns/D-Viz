@@ -46,6 +46,31 @@ namespace
    }
 
    /**
+    * @brief FindClosestIntersectionPoint
+    *
+    * @param[in] ray
+    * @param[in] intersections
+    *
+    * @return
+    */
+   boost::optional<QVector3D> FindClosestIntersectionPoint(const Qt3D::QRay3D& ray,
+      const std::vector<QVector3D>& allIntersections)
+   {
+      const auto& closest = std::min_element(std::begin(allIntersections), std::end(allIntersections),
+         [&ray] (const QVector3D& lhs, const QVector3D& rhs)
+      {
+         return (ray.origin().distanceToPoint(lhs) < ray.origin().distanceToPoint(rhs));
+      });
+
+      if (closest != std::end(allIntersections))
+      {
+         return *closest;
+      }
+
+      return boost::none;
+   }
+
+   /**
     * @brief DoesRayIntersectBLock
     *
     * @param[in] ray
@@ -53,16 +78,13 @@ namespace
     *
     * @returns true if the ray intersects the block; false otherwise.
     */
-   bool DoesRayIntersectBlock(const Qt3D::QRay3D& ray, const Block& block)
+   boost::optional<QVector3D> DoesRayIntersectBlock(const Qt3D::QRay3D& ray, const Block& block)
    {
-      const bool intersectionFound = std::any_of(std::begin(block), std::end(block),
-         [&ray] (const BlockFace& face)
-      {
-         if (face.side != BlockFace::Side::FRONT)
-         {
-            return false;
-         }
+      std::vector<QVector3D> allIntersections;
 
+      std::for_each(std::begin(block), std::end(block),
+         [&ray, &allIntersections] (const BlockFace& face)
+      {
          const QVector3D& randomPointOnFace = face.vertices[0];
          const QVector3D& normalForRandomPoint = face.vertices[1];
 
@@ -71,17 +93,62 @@ namespace
 
          if (!intersectionPoint)
          {
-            return false;
+            return;
          }
 
-         return
-            face.vertices[0].x() < intersectionPoint->x() &&
-            face.vertices[2].x() > intersectionPoint->x() &&
-            face.vertices[0].y() < intersectionPoint->y() &&
-            face.vertices[4].y() > intersectionPoint->y();
+         if (face.side == BlockFace::Side::TOP)
+         {
+            if (face.vertices[0].x() < intersectionPoint->x() &&
+                face.vertices[2].x() > intersectionPoint->x() &&
+                face.vertices[0].z() > intersectionPoint->z() &&
+                face.vertices[4].z() < intersectionPoint->z())
+            {
+               allIntersections.emplace_back(*intersectionPoint);
+            }
+         }
+         else if (face.side == BlockFace::Side::FRONT)
+         {
+            if (face.vertices[0].x() < intersectionPoint->x() &&
+                face.vertices[2].x() > intersectionPoint->x() &&
+                face.vertices[0].y() < intersectionPoint->y() &&
+                face.vertices[4].y() > intersectionPoint->y())
+            {
+               allIntersections.emplace_back(*intersectionPoint);
+            }
+         }
+         else if (face.side == BlockFace::Side::BACK)
+         {
+            if (face.vertices[2].x() < intersectionPoint->x() &&
+                face.vertices[0].x() > intersectionPoint->x() &&
+                face.vertices[2].y() < intersectionPoint->y() &&
+                face.vertices[6].y() > intersectionPoint->y())
+            {
+               allIntersections.emplace_back(*intersectionPoint);
+            }
+         }
+         else if (face.side == BlockFace::Side::LEFT)
+         {
+            if (face.vertices[2].z() > intersectionPoint->z() &&
+                face.vertices[0].z() < intersectionPoint->z() &&
+                face.vertices[0].y() < intersectionPoint->y() &&
+                face.vertices[4].y() > intersectionPoint->y())
+            {
+               allIntersections.emplace_back(*intersectionPoint);
+            }
+         }
+         else if (face.side == BlockFace::Side::RIGHT)
+         {
+            if (face.vertices[0].z() > intersectionPoint->z() &&
+                face.vertices[2].z() < intersectionPoint->z() &&
+                face.vertices[0].y() < intersectionPoint->y() &&
+                face.vertices[4].y() > intersectionPoint->y())
+            {
+               allIntersections.emplace_back(*intersectionPoint);
+            }
+         }
       });
 
-      return intersectionFound;
+      return FindClosestIntersectionPoint(ray, allIntersections);
    }
 }
 
@@ -163,6 +230,9 @@ boost::optional<TreeNode<VizNode>> Visualization::ComputeNearestIntersection(con
       return boost::none;
    }
 
+   using PointNodePair = std::pair<QVector3D, TreeNode<VizNode>>;
+   std::vector<PointNodePair> allIntersections;
+
    for (auto&& node : *m_theTree)
    {
       if (node->file.size < m_vizParameters.minimumFileSize)
@@ -170,11 +240,22 @@ boost::optional<TreeNode<VizNode>> Visualization::ComputeNearestIntersection(con
          continue;
       }
 
-      const bool doesRayIntersectBlock = DoesRayIntersectBlock(ray, node->block);
-      if (doesRayIntersectBlock)
+      const auto& intersectionPoint = DoesRayIntersectBlock(ray, node->block);
+      if (intersectionPoint)
       {
-         return node;
+         allIntersections.emplace_back(std::make_pair(*intersectionPoint, node));
       }
+   }
+
+   const auto& closestNode = std::min_element(std::begin(allIntersections), std::end(allIntersections),
+      [&ray] (const PointNodePair& lhs, const PointNodePair& rhs)
+   {
+      return (ray.origin().distanceToPoint(lhs.first) < ray.origin().distanceToPoint(rhs.first));
+   });
+
+   if (closestNode != std::end(allIntersections))
+   {
+      return closestNode->second;
    }
 
    return boost::none;

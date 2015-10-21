@@ -317,6 +317,9 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
    const static QVector3D HOT_PINK = QVector3D { 1.0f, 105.0f / 255.0f, 180.0f / 255.0f };
    const static QVector3D BLACK = QVector3D { 0.0f, 0.0f, 0.0f };
 
+   using namespace std::chrono;
+   const auto startTime = system_clock::now();
+
    const auto widgetCoordinates = QPoint(event.x(), event.y());
    const auto ray = m_camera.GeneratePickingRay(widgetCoordinates);
 
@@ -347,6 +350,11 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
          << HOT_PINK << HOT_PINK
          << HOT_PINK << HOT_PINK;
    }
+
+   const auto endTime = system_clock::now();
+   const auto selectionTime = duration_cast<std::chrono::milliseconds>(endTime - startTime);
+
+   std::cout << "Parse time (in milliseconds): " << selectionTime.count() << std::endl;
 
    m_sceneAssets[2]->SetVertexData(std::move(vertices));
    m_sceneAssets[2]->SetColorData(std::move(colors));
