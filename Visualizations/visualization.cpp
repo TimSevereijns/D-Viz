@@ -46,12 +46,13 @@ namespace
    }
 
    /**
-    * @brief FindClosestIntersectionPoint
+    * @brief FindClosestIntersectionPoint will return the intersection point that is closest to the
+    * origin of the ray.
     *
-    * @param[in] ray
-    * @param[in] intersections
+    * @param[in] ray                The ray that caused the intersections.
+    * @param[in] intersections      All the intersections caused by the ray.
     *
-    * @return
+    * @return the closest intersection point, or boost::none should anything weird occur.
     */
    boost::optional<QVector3D> FindClosestIntersectionPoint(const Qt3D::QRay3D& ray,
       const std::vector<QVector3D>& allIntersections)
@@ -71,12 +72,13 @@ namespace
    }
 
    /**
-    * @brief DoesRayIntersectBLock
+    * @brief DoesRayIntersectBlock will find the point at which the given ray intersects the given
+    * block.
     *
-    * @param[in] ray
-    * @param[in] node
+    * @param[in] ray                The ray fired at the block.
+    * @param[in] block              The block to be tested for intersection.
     *
-    * @returns true if the ray intersects the block; false otherwise.
+    * @returns the point of intersection should it exist; boost::none otherwise.
     */
    boost::optional<QVector3D> DoesRayIntersectBlock(const Qt3D::QRay3D& ray, const Block& block)
    {
@@ -169,7 +171,7 @@ Visualization::~Visualization()
 {
 }
 
-void Visualization::PopulateVertexAndColorBuffers(const VisualizationParameters& parameters)
+void Visualization::ComputeVertexAndColorData(const VisualizationParameters& parameters)
 {
    assert(m_hasDataBeenParsed);
    assert(m_theTree);
@@ -217,13 +219,13 @@ void Visualization::PopulateVertexAndColorBuffers(const VisualizationParameters&
    });
 }
 
-QVector<QVector3D>& Visualization::GetColorBuffer()
+QVector<QVector3D>& Visualization::GetColorData()
 {
    assert(!m_visualizationColors.empty());
    return m_visualizationColors;
 }
 
-boost::optional<TreeNode<VizNode>> Visualization::ComputeNearestIntersection(const Qt3D::QRay3D& ray) const
+boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersection(const Qt3D::QRay3D& ray) const
 {
    if (!m_hasDataBeenParsed)
    {
@@ -261,7 +263,7 @@ boost::optional<TreeNode<VizNode>> Visualization::ComputeNearestIntersection(con
    return boost::none;
 }
 
-QVector<QVector3D>& Visualization::GetVertexBuffer()
+QVector<QVector3D>& Visualization::GetVertexData()
 {
    assert(!m_visualizationVertices.empty());
    return m_visualizationVertices;

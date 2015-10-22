@@ -237,10 +237,10 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
 
    ON_SCOPE_EXIT(m_isPaintingSuspended = previousSuspensionState);
 
-   m_theVisualization->PopulateVertexAndColorBuffers(parameters);
+   m_theVisualization->ComputeVertexAndColorData(parameters);
 
-   m_sceneAssets[1]->SetVertexData(std::move(m_theVisualization->GetVertexBuffer()));
-   m_sceneAssets[1]->SetColorData(std::move(m_theVisualization->GetColorBuffer()));
+   m_sceneAssets[1]->SetVertexData(std::move(m_theVisualization->GetVertexData()));
+   m_sceneAssets[1]->SetColorData(std::move(m_theVisualization->GetColorData()));
 
    m_isVisualizationLoaded = m_sceneAssets[1]->IsAssetLoaded();
 
@@ -321,7 +321,7 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
    const auto startTime = system_clock::now();
 
    const auto widgetCoordinates = QPoint(event.x(), event.y());
-   const auto ray = m_camera.GeneratePickingRay(widgetCoordinates);
+   const auto ray = m_camera.ShootRayIntoScene(widgetCoordinates);
 
    QVector<QVector3D> vertices;
    vertices << ray.origin() << ray.origin() + ray.direction().normalized() * RAY_LENGTH;
@@ -329,7 +329,7 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
    QVector<QVector3D> colors;
    colors << HOT_PINK << BLACK;
 
-   const auto& foundNode = m_theVisualization->ComputeNearestIntersection(ray);
+   const auto& foundNode = m_theVisualization->FindNearestIntersection(ray);
    if (foundNode)
    {
       std::wcout << GetFullNodePath(*foundNode) << std::endl;
@@ -354,7 +354,7 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
    const auto endTime = system_clock::now();
    const auto selectionTime = duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
-   std::cout << "Parse time (in milliseconds): " << selectionTime.count() << std::endl;
+   std::cout << "Node selected in time: " << selectionTime.count() << "ms" << std::endl;
 
    m_sceneAssets[2]->SetVertexData(std::move(vertices));
    m_sceneAssets[2]->SetColorData(std::move(colors));

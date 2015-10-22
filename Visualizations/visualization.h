@@ -20,8 +20,8 @@ namespace Qt3D
 }
 
 /**
- * @brief The ParsingOptions struct represents the gamut of visualization parameters that can be
- * adjusted.
+ * @brief The VisualizationParameters struct represents the gamut of visualization parameters that
+ * can be set to control when visualization updates occur, as well as what nodes get included.
  */
 struct VisualizationParameters
 {
@@ -57,35 +57,39 @@ class Visualization
       static const double ROOT_BLOCK_DEPTH;
 
       /**
-       * Parses the specified directory scan into the vertex and color buffers.
+       * Parses the specified directory scan into vertex and color data.
+       *
+       * @param[in/out] theTree         The unparsed scan results.
        */
       virtual void Parse(const std::shared_ptr<Tree<VizNode>>& theTree) = 0;
 
       /**
-       * @brief PopulateVertexAndColorBuffers
+       * @brief ComputeVertexAndColorData
        */
-      void PopulateVertexAndColorBuffers(const VisualizationParameters& parameters);
+      void ComputeVertexAndColorData(const VisualizationParameters& parameters);
 
       /**
-       * @brief GetVertexBuffer
-       * @return
+       * @brief GetVertexData
+       *
+       * @returns the vertices that represent the entire visualization.
        */
-      QVector<QVector3D>& GetVertexBuffer();
+      QVector<QVector3D>& GetVertexData();
 
       /**
-       * @brief GetColorBuffer
-       * @return
+       * @brief GetColorData
+       *
+       * @returns the color data that is associated with the vertex data. @see GetVertexData
        */
-      QVector<QVector3D>& GetColorBuffer();
+      QVector<QVector3D>& GetColorData();
 
       /**
-       * @brief ComputeNearestIntersection
+       * @brief FindNearestIntersection
        *
        * @param[in] ray             The ray to be shot into the scene.
        *
-       * @returns the distance to the nearest intersection point in the visualization.
+       * @returns the closest node that the ray intersected with.
        */
-      boost::optional<TreeNode<VizNode> > ComputeNearestIntersection(const Qt3D::QRay3D& ray) const;
+      boost::optional<TreeNode<VizNode>> FindNearestIntersection(const Qt3D::QRay3D& ray) const;
 
       /**
        * @brief CreateBlockColors creates the vertex colors needed to color a single block.
@@ -102,8 +106,8 @@ class Visualization
       static QVector<QVector3D> CreateDirectoryColors();
 
       /**
-       * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each node
-       * by their respective file sizes.
+       * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each
+       * node by their respective file sizes.
        *
        * @param[in/out] tree           The tree to be sorted.
        */

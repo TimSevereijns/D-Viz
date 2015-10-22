@@ -160,15 +160,15 @@ QVector3D Camera::Unproject(const QPoint& point, float viewDepth, QMatrix4x4 mod
    return unprojectedPoint;
 }
 
-QPoint Camera::MapToOpenGLViewport(const QPoint& coordinatesOnQtWidget) const
+QPoint Camera::MapToOpenGLViewport(const QPoint& widgetCoordinates) const
 {
-   const int invertedY = m_viewport.y() + (m_viewport.height() - coordinatesOnQtWidget.y());
-   return { coordinatesOnQtWidget.x(), invertedY };
+   const int invertedY = m_viewport.y() + (m_viewport.height() - widgetCoordinates.y());
+   return { widgetCoordinates.x(), invertedY };
 }
 
-Qt3D::QRay3D Camera::GeneratePickingRay(const QPoint& coordinatesOnQtWidget) const
+Qt3D::QRay3D Camera::ShootRayIntoScene(const QPoint& widgetCoordinates) const
 {
-   const QPoint glCoordinates = MapToOpenGLViewport(coordinatesOnQtWidget);
+   const QPoint glCoordinates = MapToOpenGLViewport(widgetCoordinates);
 
    const QVector3D nearPlanePoint = Unproject(glCoordinates, 0.0f, QMatrix4x4());
    const QVector3D farPlanePoint = Unproject(glCoordinates, 1.0f, QMatrix4x4());

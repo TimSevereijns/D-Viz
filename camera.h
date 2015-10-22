@@ -138,14 +138,14 @@ class Camera
 
       /**
        * @brief MapToOpenGLViewport maps the 2D coordinates of the OpenGL Qt widget to the
-       * coordinates used by OpenGL. The difference between the two is that one has the positive Y
-       * going up, while the other has them going down.
+       * coordinates used by OpenGL. The difference between the two is that OpenGL has positive Y
+       * extending upwards, while Qt has it extending downwards.
        *
-       * @param[in] coordinatesOnQtWidget
+       * @param[in] widgetCoordinates     2D Qt widget coordinates.
        *
        * @returns the converted point.
        */
-      QPoint MapToOpenGLViewport(const QPoint& coordinatesOnQtWidget) const;
+      QPoint MapToOpenGLViewport(const QPoint& widgetCoordinates) const;
 
       /**
        * @brief SetAspectRatio sets the current aspect ratio that factors into the perspective
@@ -194,13 +194,14 @@ class Camera
       void DecreaseFieldOfView();
 
       /**
-       * @brief GeneratePickingRay
+       * @brief ShootRayIntoScene shoots a ray into the scene starting at the specified point on the
+       * widget canvas.
        *
-       * @param coordinatesOnQtWidget
+       * @param[in] widgetCoordinates   2D widget coordinates
        *
-       * @returns a ray shooting into the scene from the point of click on the canvas.
+       * @returns a ray shooting into the scene.
        */
-      Qt3D::QRay3D GeneratePickingRay(const QPoint& coordinatesOnQtWidget) const;
+      Qt3D::QRay3D ShootRayIntoScene(const QPoint& widgetCoordinates) const;
 
    private:
       QVector3D m_position;
