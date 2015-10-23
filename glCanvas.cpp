@@ -324,10 +324,10 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
    const auto ray = m_camera.ShootRayIntoScene(widgetCoordinates);
 
    QVector<QVector3D> vertices;
-   vertices << ray.origin() << ray.origin() + ray.direction().normalized() * RAY_LENGTH;
+   //vertices << ray.origin() << ray.origin() + ray.direction().normalized() * RAY_LENGTH;
 
    QVector<QVector3D> colors;
-   colors << HOT_PINK << BLACK;
+   //colors << HOT_PINK << BLACK;
 
    const auto& foundNode = m_theVisualization->FindNearestIntersection(ray);
    if (foundNode)

@@ -26,6 +26,7 @@ SOURCES += main.cpp\
     Scene/sceneAsset.cpp \
     Scene/gridAsset.cpp \
     Scene/graphicsDevice.cpp \
+    Scene/debuggingRayAsset.cpp \
     DriveScanner/scanningWorker.cpp \
     DataStructs/block.cpp \
     DataStructs/vizNode.cpp \
@@ -33,7 +34,7 @@ SOURCES += main.cpp\
     DataStructs/light.cpp \
     DataStructs/doublePoint3d.cpp \
     DriveScanner/driveScanner.cpp \
-    Scene/debuggingRayAsset.cpp
+    Scene/lineAsset.cpp
 
 HEADERS  += mainwindow.h \
     tree.h \
@@ -50,6 +51,7 @@ HEADERS  += mainwindow.h \
     Scene/sceneAsset.h \
     Scene/gridAsset.h \
     Scene/graphicsDevice.h \
+    Scene/debuggingRayAsset.h \
     DriveScanner/scanningWorker.h \
     DataStructs/block.h \
     DataStructs/vizNode.h \
@@ -58,17 +60,17 @@ HEADERS  += mainwindow.h \
     DriveScanner/driveScanner.h \
     DataStructs/doublePoint3d.h \
     Utilities/scopeExit.hpp \
-    Scene/debuggingRayAsset.h
+    Scene/lineAsset.h
 
 FORMS    += mainwindow.ui
 
 INCLUDEPATH += ../boost_1_57_0
 
 DISTFILES += \
-    Shaders/originMarkerVertexShader.vert \
-    Shaders/originMarkerFragmentShader.frag \
     Shaders/visualizationFragmentShader.frag \
-    Shaders/visualizationVertexShader.vert
+    Shaders/visualizationVertexShader.vert \
+    Shaders/simpleLineFragmentShader.frag \
+    Shaders/simpleLineVertexShader.vert
 
 RESOURCES += \
     resources.qrc
