@@ -12,6 +12,12 @@ For information on how to set up and build the project, please see the Wiki.
 ![Example 1]
 (https://raw.githubusercontent.com/TimSevereijns/D-Viz/master/Screenshots/Example1.png?token=AAsADyYMtO45ilWzi898t0zG6dmMmrb2ks5WNrE1wA%3D%3D)
 
+![Example 2]
+(https://raw.githubusercontent.com/TimSevereijns/D-Viz/master/Screenshots/Example3.png?token=AAsAD3YA9PKJvce2RzjcjD4veWUMDbwGks5WNrGWwA%3D%3D)
+
+![Example 3]
+(https://raw.githubusercontent.com/TimSevereijns/D-Viz/master/Screenshots/Example4.png?token=AAsADyX8DJhFWJ2UXMOCV1-flThEKi-dks5WNrGywA%3D%3D)
+
 ## Notes
 
 * For now, you'll have to locate XINPUT1_4.dll on your Windows system and copy it to the build directory in order to get XBox Controller support.
