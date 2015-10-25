@@ -78,11 +78,11 @@ namespace
     *
     * @todo Fix printing of complete path.
     *
-    * @param[in] node               The starting node.
+    * @param[in] node               The selected node.
     *
     * @returns the complete path as created by following the current node up to the root.
     */
-   std::wstring GetFullNodePath(const TreeNode<VizNode> node)
+   std::wstring GetFullNodePath(const TreeNode<VizNode>& node)
    {
       std::vector<std::wstring> reversePath;
       reversePath.reserve(Tree<VizNode>::Depth(node));
@@ -104,14 +104,65 @@ namespace
    }
 
    /**
+    * @brief HighlightSelectedFile will outline the selected node.
+    *
+    * @param[in] node               The selected node.
+    * @param[in] highlightAsset     The visual asset representing the outline.
+    * @param[in] camera             The camera from which the selection was made.
+    */
+   void HighlightSelection(const TreeNode<VizNode>& node, SceneAsset& highlightAsset,
+      const Camera& camera)
+   {
+      std::wcout << GetFullNodePath(node) << std::endl;
+
+      QVector<QVector3D> nodeVertices;
+
+      std::for_each(std::begin(node->block), std::end(node->block),
+         [&] (const BlockFace& face)
+      {
+         nodeVertices << face.vertices;
+      });
+
+      QVector<QVector3D> vertices;
+      QVector<QVector3D> colors;
+
+      vertices
+         // Top:
+         << nodeVertices[48] << nodeVertices[50]
+         << nodeVertices[50] << nodeVertices[54]
+         << nodeVertices[54] << nodeVertices[56]
+         << nodeVertices[56] << nodeVertices[48]
+         // Bottom:
+         << nodeVertices[ 0] << nodeVertices[ 2]
+         << nodeVertices[ 2] << nodeVertices[14]
+         << nodeVertices[14] << nodeVertices[26]
+         << nodeVertices[26] << nodeVertices[ 0]
+         // Sides:
+         << nodeVertices[ 0] << nodeVertices[ 4]
+         << nodeVertices[ 2] << nodeVertices[ 6]
+         << nodeVertices[26] << nodeVertices[30]
+         << nodeVertices[24] << nodeVertices[28];
+
+      const QVector3D hotPink = QVector3D { 1.0f, 105.0f / 255.0f, 180.0f / 255.0f };
+      for (int index = 0; index < vertices.size(); index++)
+      {
+         colors << hotPink;
+      }
+
+      highlightAsset.SetVertexData(std::move(vertices));
+      highlightAsset.SetColorData(std::move(colors));
+      highlightAsset.Reload(camera);
+   }
+
+   /**
     * @brief The Asset enum
     */
    enum Asset
    {
-      GRID = 0,
-      TREEMAP,
-      PICKING_RAY,
-      HIGHLIGHT
+      GRID = 0,      ///< GridAsset
+      TREEMAP,       ///< VisualizationAsset
+      PICKING_RAY,   ///< DebuggingRayAsset
+      HIGHLIGHT      ///< SelectionHighlightAsset
    };
 }
 
@@ -323,9 +374,7 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
 
 void GLCanvas::HandleRightClick(const QMouseEvent& event)
 {
-   const static QVector3D HOT_PINK = QVector3D { 1.0f, 105.0f / 255.0f, 180.0f / 255.0f };
-
-   if (!m_sceneAssets[Asset::TREEMAP]->IsAssetLoaded())
+   if (!m_isVisualizationLoaded)
    {
       return;
    }
@@ -333,56 +382,18 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
    using namespace std::chrono;
    const auto startTime = system_clock::now();
 
-   const auto widgetCoordinates = QPoint(event.x(), event.y());
-   const auto ray = m_camera.ShootRayIntoScene(widgetCoordinates);
-
-   QVector<QVector3D> vertices;
-   QVector<QVector3D> colors;
-
-   const auto& foundNode = m_theVisualization->FindNearestIntersection(ray, m_visualizationParameters);
-   if (foundNode)
+   const auto canvasCoordinates = QPoint(event.x(), event.y());
+   const auto ray = m_camera.ShootRayIntoScene(canvasCoordinates);
+   const auto selection = m_theVisualization->FindNearestIntersection(ray, m_visualizationParameters);
+   if (selection)
    {
-      std::wcout << GetFullNodePath(*foundNode) << std::endl;
-
-      QVector<QVector3D> nodeVertices;
-
-      std::for_each(std::begin(foundNode->GetData().block), std::end(foundNode->GetData().block),
-         [&] (const BlockFace& face)
-      {
-         nodeVertices << face.vertices;
-      });
-
-      vertices
-         // Top:
-         << nodeVertices[48] << nodeVertices[50]
-         << nodeVertices[50] << nodeVertices[54]
-         << nodeVertices[54] << nodeVertices[56]
-         << nodeVertices[56] << nodeVertices[48]
-         // Bottom:
-         << nodeVertices[ 0] << nodeVertices[ 2]
-         << nodeVertices[ 2] << nodeVertices[14]
-         << nodeVertices[14] << nodeVertices[26]
-         << nodeVertices[26] << nodeVertices[ 0]
-         // Sides:
-         << nodeVertices[ 0] << nodeVertices[ 4]
-         << nodeVertices[ 2] << nodeVertices[ 6]
-         << nodeVertices[26] << nodeVertices[30]
-         << nodeVertices[24] << nodeVertices[28];
-
-      for (int index = 0; index < vertices.size(); index++)
-      {
-         colors << HOT_PINK;
-      }
+      HighlightSelection(*selection, *m_sceneAssets[Asset::HIGHLIGHT], m_camera);
    }
 
    const auto endTime = system_clock::now();
    const auto selectionTime = duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
    std::cout << "Node selected in time: " << selectionTime.count() << "ms" << std::endl;
-
-   m_sceneAssets[Asset::HIGHLIGHT]->SetVertexData(std::move(vertices));
-   m_sceneAssets[Asset::HIGHLIGHT]->SetColorData(std::move(colors));
-   m_sceneAssets[Asset::HIGHLIGHT]->Reload(m_camera);
 }
 
 void GLCanvas::mousePressEvent(QMouseEvent* const event)
