@@ -7,6 +7,11 @@ The project currently provides support for two different (but closely related) v
 
 For information on how to set up and build the project, please see the Wiki.
 
+## Screenshots
+
+![Example 1]
+(https://raw.githubusercontent.com/TimSevereijns/D-Viz/master/Screenshots/Example1.png?token=AAsADyYMtO45ilWzi898t0zG6dmMmrb2ks5WNrE1wA%3D%3D)
+
 ## Notes
 
 * For now, you'll have to locate XINPUT1_4.dll on your Windows system and copy it to the build directory in order to get XBox Controller support.
