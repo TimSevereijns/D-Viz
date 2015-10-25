@@ -55,6 +55,10 @@ class GLCanvas : public QOpenGLWidget
        */
       void SetFieldOfView(const float fieldOfView);
 
+      /**
+       * @brief HandleRightClick
+       * @param event
+       */
       void HandleRightClick(const QMouseEvent& event);
 
     protected:
@@ -85,6 +89,8 @@ class GLCanvas : public QOpenGLWidget
 
       bool m_isPaintingSuspended;
       bool m_isVisualizationLoaded;
+
+      VisualizationParameters m_visualizationParameters;
 
       MainWindow* m_mainWindow;
 

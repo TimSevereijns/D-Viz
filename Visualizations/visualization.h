@@ -86,10 +86,12 @@ class Visualization
        * @brief FindNearestIntersection
        *
        * @param[in] ray             The ray to be shot into the scene.
+       * @param[in] parameters      The current visualization parameters.
        *
        * @returns the closest node that the ray intersected with.
        */
-      boost::optional<TreeNode<VizNode>> FindNearestIntersection(const Qt3D::QRay3D& ray) const;
+      boost::optional<TreeNode<VizNode>> FindNearestIntersection(const Qt3D::QRay3D& ray,
+         const VisualizationParameters& parameters) const;
 
       /**
        * @brief CreateBlockColors creates the vertex colors needed to color a single block.

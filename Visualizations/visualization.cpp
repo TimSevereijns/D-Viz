@@ -225,7 +225,8 @@ QVector<QVector3D>& Visualization::GetColorData()
    return m_visualizationColors;
 }
 
-boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersection(const Qt3D::QRay3D& ray) const
+boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersection(const Qt3D::QRay3D& ray,
+   const VisualizationParameters& parameters) const
 {
    if (!m_hasDataBeenParsed)
    {
@@ -237,7 +238,8 @@ boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersection(const 
 
    for (auto&& node : *m_theTree)
    {
-      if (node->file.size < m_vizParameters.minimumFileSize)
+      if (node->file.size < parameters.minimumFileSize ||
+          (parameters.onlyShowDirectories && node->file.type != FILE_TYPE::DIRECTORY))
       {
          continue;
       }
