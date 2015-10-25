@@ -6,6 +6,7 @@
 #include "optionsManager.h"
 #include "Scene/debuggingRayAsset.h"
 #include "Scene/gridAsset.h"
+#include "Scene/selectionHighlightAsset.h"
 #include "Scene/visualizationAsset.h"
 #include "Visualizations/squarifiedTreemap.h"
 #include "Utilities/scopeExit.hpp"
@@ -101,6 +102,17 @@ namespace
          return path + std::wstring(L"/") + file;
       });
    }
+
+   /**
+    * @brief The Asset enum
+    */
+   enum Asset
+   {
+      GRID = 0,
+      TREEMAP,
+      PICKING_RAY,
+      HIGHLIGHT
+   };
 }
 
 GLCanvas::GLCanvas(QWidget* parent)
@@ -148,6 +160,7 @@ void GLCanvas::initializeGL()
    m_sceneAssets.emplace_back(std::make_unique<GridAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<DebuggingRayAsset>(*m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<SelectionHighlightAsset>(*m_graphicsDevice));
 
    for (const auto& asset : m_sceneAssets)
    {
@@ -183,10 +196,6 @@ void GLCanvas::CreateNewVisualization(const VisualizationParameters& parameters)
    if (!m_theVisualization || parameters.forceNewScan)
    {
       m_theVisualization.reset(new SquarifiedTreeMap(parameters));
-   }
-
-   if (m_theVisualization && parameters.forceNewScan)
-   {
       ScanDrive(parameters);
    }
 }
@@ -237,12 +246,13 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
 
    ON_SCOPE_EXIT(m_isPaintingSuspended = previousSuspensionState);
 
+   m_visualizationParameters = parameters;
    m_theVisualization->ComputeVertexAndColorData(parameters);
 
-   m_sceneAssets[1]->SetVertexData(std::move(m_theVisualization->GetVertexData()));
-   m_sceneAssets[1]->SetColorData(std::move(m_theVisualization->GetColorData()));
+   m_sceneAssets[Asset::TREEMAP]->SetVertexData(std::move(m_theVisualization->GetVertexData()));
+   m_sceneAssets[Asset::TREEMAP]->SetColorData(std::move(m_theVisualization->GetColorData()));
 
-   m_isVisualizationLoaded = m_sceneAssets[1]->IsAssetLoaded();
+   m_isVisualizationLoaded = m_sceneAssets[Asset::TREEMAP]->IsAssetLoaded();
 
    if (m_isVisualizationLoaded)
    {
@@ -252,7 +262,7 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
       }
    }
 
-   UpdateVertexCountInStatusBar(m_sceneAssets[1]->GetVertexCount(), *m_mainWindow);
+   UpdateVertexCountInStatusBar(m_sceneAssets[Asset::TREEMAP]->GetVertexCount(), *m_mainWindow);
 }
 
 void GLCanvas::SetFieldOfView(const float fieldOfView)
@@ -313,9 +323,12 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
 
 void GLCanvas::HandleRightClick(const QMouseEvent& event)
 {
-   const static float RAY_LENGTH = 2000.0f;
    const static QVector3D HOT_PINK = QVector3D { 1.0f, 105.0f / 255.0f, 180.0f / 255.0f };
-   const static QVector3D BLACK = QVector3D { 0.0f, 0.0f, 0.0f };
+
+   if (!m_sceneAssets[Asset::TREEMAP]->IsAssetLoaded())
+   {
+      return;
+   }
 
    using namespace std::chrono;
    const auto startTime = system_clock::now();
@@ -324,12 +337,9 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
    const auto ray = m_camera.ShootRayIntoScene(widgetCoordinates);
 
    QVector<QVector3D> vertices;
-   //vertices << ray.origin() << ray.origin() + ray.direction().normalized() * RAY_LENGTH;
-
    QVector<QVector3D> colors;
-   //colors << HOT_PINK << BLACK;
 
-   const auto& foundNode = m_theVisualization->FindNearestIntersection(ray);
+   const auto& foundNode = m_theVisualization->FindNearestIntersection(ray, m_visualizationParameters);
    if (foundNode)
    {
       std::wcout << GetFullNodePath(*foundNode) << std::endl;
@@ -343,12 +353,26 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
       });
 
       vertices
-         << nodeVertices[50] << nodeVertices[52]
-         << nodeVertices[48] << nodeVertices[54];
+         // Top:
+         << nodeVertices[48] << nodeVertices[50]
+         << nodeVertices[50] << nodeVertices[54]
+         << nodeVertices[54] << nodeVertices[56]
+         << nodeVertices[56] << nodeVertices[48]
+         // Bottom:
+         << nodeVertices[ 0] << nodeVertices[ 2]
+         << nodeVertices[ 2] << nodeVertices[14]
+         << nodeVertices[14] << nodeVertices[26]
+         << nodeVertices[26] << nodeVertices[ 0]
+         // Sides:
+         << nodeVertices[ 0] << nodeVertices[ 4]
+         << nodeVertices[ 2] << nodeVertices[ 6]
+         << nodeVertices[26] << nodeVertices[30]
+         << nodeVertices[24] << nodeVertices[28];
 
-      colors
-         << HOT_PINK << HOT_PINK
-         << HOT_PINK << HOT_PINK;
+      for (int index = 0; index < vertices.size(); index++)
+      {
+         colors << HOT_PINK;
+      }
    }
 
    const auto endTime = system_clock::now();
@@ -356,9 +380,9 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
 
    std::cout << "Node selected in time: " << selectionTime.count() << "ms" << std::endl;
 
-   m_sceneAssets[2]->SetVertexData(std::move(vertices));
-   m_sceneAssets[2]->SetColorData(std::move(colors));
-   m_sceneAssets[2]->Reload(m_camera);
+   m_sceneAssets[Asset::HIGHLIGHT]->SetVertexData(std::move(vertices));
+   m_sceneAssets[Asset::HIGHLIGHT]->SetColorData(std::move(colors));
+   m_sceneAssets[Asset::HIGHLIGHT]->Reload(m_camera);
 }
 
 void GLCanvas::mousePressEvent(QMouseEvent* const event)

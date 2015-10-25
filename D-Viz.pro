@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     DataStructs/light.cpp \
     DataStructs/doublePoint3d.cpp \
     DriveScanner/driveScanner.cpp \
-    Scene/lineAsset.cpp
+    Scene/lineAsset.cpp \
+    Scene/selectionHighlightAsset.cpp
 
 HEADERS  += mainwindow.h \
     tree.h \
@@ -60,7 +61,8 @@ HEADERS  += mainwindow.h \
     DriveScanner/driveScanner.h \
     DataStructs/doublePoint3d.h \
     Utilities/scopeExit.hpp \
-    Scene/lineAsset.h
+    Scene/lineAsset.h \
+    Scene/selectionHighlightAsset.h
 
 FORMS    += mainwindow.ui
 

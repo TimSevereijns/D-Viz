@@ -25,9 +25,6 @@ class TreeNode : public std::enable_shared_from_this<TreeNode<T>>
       std::shared_ptr<TreeNode<T>> PrependChild(std::shared_ptr<TreeNode<T>>& child);
       std::shared_ptr<TreeNode<T>> AppendChild(std::shared_ptr<TreeNode<T>>& child);
 
-      // TODO: PrependSibling(...)
-      // TODO: AppendSibling(...)
-
       void MergeSort(
          std::shared_ptr<TreeNode<T>>& list,
          const std::function<bool (TreeNode<T>, TreeNode<T>)>& comparator);
@@ -607,7 +604,6 @@ class Tree
       explicit Tree();
       explicit Tree(T data);
       explicit Tree(const Tree<T>& otherTree);
-      ~Tree();
 
       /**
        * @brief GetHead
@@ -884,12 +880,6 @@ template<typename T>
 Tree<T>::Tree(const Tree<T>& otherTree)
    : m_head(otherTree.m_head)
 {
-}
-
-template<typename T>
-Tree<T>::~Tree()
-{
-   std::cout << "The Tree is dead..." << std::endl;
 }
 
 template<typename T>
