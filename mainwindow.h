@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <string>
 
-#include "xboxController.h"
+#include "HID/xboxController.h"
 
 namespace Ui
 {

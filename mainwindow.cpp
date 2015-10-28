@@ -1,8 +1,8 @@
 #include "mainwindow.h"
 
-#include "glCanvas.h"
 #include "optionsManager.h"
 #include "ui_mainwindow.h"
+#include "Viewport/glCanvas.h"
 
 #include <cassert>
 #include <iostream>

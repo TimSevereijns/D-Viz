@@ -1,7 +1,7 @@
 #ifndef SCENEASSET_H
 #define SCENEASSET_H
 
-#include "../camera.h"
+#include "../Viewport/camera.h"
 #include "../DataStructs/light.h"
 #include "../optionsManager.h"
 

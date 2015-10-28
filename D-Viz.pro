@@ -14,55 +14,55 @@ CONFIG += c++11 console
 
 SOURCES += main.cpp\
     mainwindow.cpp \
-    glCanvas.cpp \
-    camera.cpp \
-    keyboardManager.cpp \
-    Visualizations/sliceAndDiceTreemap.cpp \
-    Visualizations/visualization.cpp \
-    Visualizations/squarifiedTreemap.cpp \
-    xboxController.cpp \
     optionsManager.cpp \
-    Scene/visualizationAsset.cpp \
-    Scene/sceneAsset.cpp \
-    Scene/gridAsset.cpp \
-    Scene/graphicsDevice.cpp \
-    Scene/debuggingRayAsset.cpp \
-    DriveScanner/scanningWorker.cpp \
     DataStructs/block.cpp \
-    DataStructs/vizNode.cpp \
     DataStructs/fileInfo.cpp \
     DataStructs/light.cpp \
+    DataStructs/vizNode.cpp \
     DataStructs/doublePoint3d.cpp \
     DriveScanner/driveScanner.cpp \
+    DriveScanner/scanningWorker.cpp \
+    HID/keyboardManager.cpp \
+    HID/xboxController.cpp \
+    Scene/debuggingRayAsset.cpp \
+    Scene/gridAsset.cpp \
     Scene/lineAsset.cpp \
-    Scene/selectionHighlightAsset.cpp
+    Scene/sceneAsset.cpp \
+    Scene/selectionHighlightAsset.cpp \
+    Scene/visualizationAsset.cpp \
+    Viewport/camera.cpp \
+    Viewport/glCanvas.cpp \
+    Viewport/graphicsDevice.cpp \
+    Visualizations/sliceAndDiceTreemap.cpp \
+    Visualizations/squarifiedTreemap.cpp \
+    Visualizations/visualization.cpp
 
 HEADERS  += mainwindow.h \
     tree.h \
-    glCanvas.h \
-    camera.h \
-    keyboardManager.h \
-    Visualizations/visualization.h \
-    Visualizations/sliceAndDiceTreemap.h \
-    Visualizations/squarifiedTreemap.h \
-    xboxController.h \
-    xInput.h \
     optionsManager.h \
-    Scene/visualizationAsset.h \
-    Scene/sceneAsset.h \
-    Scene/gridAsset.h \
-    Scene/graphicsDevice.h \
-    Scene/debuggingRayAsset.h \
-    DriveScanner/scanningWorker.h \
     DataStructs/block.h \
-    DataStructs/vizNode.h \
     DataStructs/fileInfo.h \
     DataStructs/light.h \
-    DriveScanner/driveScanner.h \
+    DataStructs/vizNode.h \
     DataStructs/doublePoint3d.h \
-    Utilities/scopeExit.hpp \
+    DriveScanner/driveScanner.h \
+    DriveScanner/scanningWorker.h \
+    HID/keyboardManager.h \
+    HID/xboxController.h \
+    HID/xInput.h \
+    Scene/debuggingRayAsset.h \
+    Scene/gridAsset.h \
     Scene/lineAsset.h \
-    Scene/selectionHighlightAsset.h
+    Scene/sceneAsset.h \
+    Scene/selectionHighlightAsset.h \
+    Scene/visualizationAsset.h \
+    Utilities/scopeExit.hpp \
+    Viewport/camera.h \
+    Viewport/glCanvas.h \
+    Viewport/graphicsDevice.h \
+    Visualizations/sliceAndDiceTreemap.h \
+    Visualizations/squarifiedTreemap.h \
+    Visualizations/visualization.h
 
 FORMS    += mainwindow.ui
 
