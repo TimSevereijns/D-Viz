@@ -38,11 +38,6 @@ bool SceneAsset::LoadShaders(const QString& vertexShaderName, const QString& fra
    return m_shader.link();
 }
 
-QOpenGLShaderProgram& SceneAsset::GetVertexShader()
-{
-   return m_shader;
-}
-
 bool SceneAsset::IsAssetLoaded() const
 {
    return !(m_rawVertices.empty() && m_rawColors.empty());

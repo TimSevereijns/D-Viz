@@ -21,11 +21,3 @@ bool SelectionHighlightAsset::Render(const Camera& camera, const Light&, const O
 
    return true;
 }
-
-bool SelectionHighlightAsset::Reload(const Camera& camera)
-{
-   PrepareVertexBuffers(camera);
-   PrepareColorBuffers(camera);
-
-   return true;
-}

@@ -37,11 +37,6 @@ struct BlockFace
    {
    }
 
-   QVector3D ComputeCenter() const
-   {
-      return {};
-   }
-
    QVector<QVector3D> vertices;
    Side side;
 };
@@ -127,7 +122,8 @@ struct Block
    DoublePoint3D GetNextChildOrigin() const;
 
    /**
-    * @brief The FaceInterator class
+    * @brief The FaceInterator class provides a const iterator over all the faces that make up a
+    * block.
     */
    class FaceIterator
    {

@@ -10,7 +10,7 @@
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
 #include "Scene/sceneAsset.h"
-#include "Scene/graphicsDevice.h"
+#include "Viewport/graphicsDevice.h"
 #include "Visualizations/visualization.h"
 
 #include <chrono>
