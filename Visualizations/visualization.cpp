@@ -184,10 +184,9 @@ void Visualization::UpdateBoundingBoxes()
    std::for_each(std::begin(*m_theTree), std::end(*m_theTree),
       [&] (TreeNode<VizNode>& node)
    {
-      node->boundingBox = node->block;
-
       if (!node.HasChildren())
       {
+         node->boundingBox = node->block;
          return;
       }
 
@@ -204,7 +203,13 @@ void Visualization::UpdateBoundingBoxes()
          currentChild = currentChild->GetNextSibling();
       }
 
-      node->boundingBox.height += tallestDescendant;
+      node->boundingBox = Block
+      {
+         node->block.blockOrigin,
+         node->block.width,
+         node->block.height + tallestDescendant,
+         node->block.depth
+      };
    });
 }
 
@@ -285,10 +290,10 @@ boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersectionUsingAA
          continue;
       }
 
-      const auto& possibleIntersection = DoesRayIntersectBlock(ray, node->GetData().boundingBox);
-      if (possibleIntersection)
+      const auto& boundingBoxIntersection = DoesRayIntersectBlock(ray, node->GetData().boundingBox);
+      if (boundingBoxIntersection)
       {
-         intersectionPointAndNode = std::make_pair(*possibleIntersection, *node);
+         intersectionPointAndNode = std::make_pair(*boundingBoxIntersection, *node);
 
          if (node->HasChildren())
          {
