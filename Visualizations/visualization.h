@@ -64,6 +64,11 @@ class Visualization
       virtual void Parse(const std::shared_ptr<Tree<VizNode>>& theTree) = 0;
 
       /**
+       * @brief UpdateBoundingBoxes
+       */
+      virtual void UpdateBoundingBoxes();
+
+      /**
        * @brief ComputeVertexAndColorData
        */
       void ComputeVertexAndColorData(const VisualizationParameters& parameters);
@@ -91,6 +96,17 @@ class Visualization
        * @returns the closest node that the ray intersected with.
        */
       boost::optional<TreeNode<VizNode>> FindNearestIntersection(const Qt3D::QRay3D& ray,
+         const VisualizationParameters& parameters) const;
+
+      /**
+       * @brief FindNearestIntersectionUsingAABB
+       *
+       * @param ray
+       * @param parameters
+       *
+       * @returns
+       */
+      boost::optional<TreeNode<VizNode>> FindNearestIntersectionUsingAABB(const Qt3D::QRay3D& ray,
          const VisualizationParameters& parameters) const;
 
       /**

@@ -171,6 +171,43 @@ Visualization::~Visualization()
 {
 }
 
+void Visualization::UpdateBoundingBoxes()
+{
+   assert(m_hasDataBeenParsed);
+   assert(m_theTree);
+
+   if (!m_hasDataBeenParsed)
+   {
+      return;
+   }
+
+   std::for_each(std::begin(*m_theTree), std::end(*m_theTree),
+      [&] (TreeNode<VizNode>& node)
+   {
+      node->boundingBox = node->block;
+
+      if (!node.HasChildren())
+      {
+         return;
+      }
+
+      double tallestDescendant = 0.0;
+
+      std::shared_ptr<TreeNode<VizNode>> currentChild = node.GetFirstChild();
+      while (currentChild)
+      {
+         if (currentChild->GetData().boundingBox.height > tallestDescendant)
+         {
+            tallestDescendant = currentChild->GetData().boundingBox.height;
+         }
+
+         currentChild = currentChild->GetNextSibling();
+      }
+
+      node->boundingBox.height += tallestDescendant;
+   });
+}
+
 void Visualization::ComputeVertexAndColorData(const VisualizationParameters& parameters)
 {
    assert(m_hasDataBeenParsed);
@@ -223,6 +260,84 @@ QVector<QVector3D>& Visualization::GetColorData()
 {
    assert(!m_visualizationColors.empty());
    return m_visualizationColors;
+}
+
+boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersectionUsingAABB(const Qt3D::QRay3D& ray,
+   const VisualizationParameters& parameters) const
+{
+   if (!m_hasDataBeenParsed)
+   {
+      return boost::none;
+   }
+
+   using PointNodePair = std::pair<QVector3D, TreeNode<VizNode>>;
+   std::vector<PointNodePair> allIntersections;
+
+   auto node = m_theTree->GetHead();
+
+   boost::optional<PointNodePair> intersectionPointAndNode;
+
+   while (node)
+   {
+      if (node->GetData().file.size < parameters.minimumFileSize ||
+          (parameters.onlyShowDirectories && node->GetData().file.type != FILE_TYPE::DIRECTORY))
+      {
+         continue;
+      }
+
+      const auto& possibleIntersection = DoesRayIntersectBlock(ray, node->GetData().boundingBox);
+      if (possibleIntersection)
+      {
+         intersectionPointAndNode = std::make_pair(*possibleIntersection, *node);
+
+         if (node->HasChildren())
+         {
+            node = node->GetFirstChild();
+         }
+         else
+         {
+            break;
+         }
+      }
+      else if (node->GetNextSibling())
+      {
+         node = node->GetNextSibling();
+      }
+      else
+      {
+         while (node->GetParent() && !node->GetParent()->GetNextSibling())
+         {
+            node = node->GetParent();
+         }
+
+         if (node->GetParent())
+         {
+            node = node->GetParent()->GetNextSibling();
+         }
+         else
+         {
+            node = nullptr;
+         }
+      }
+   }
+
+   if (intersectionPointAndNode)
+   {
+      allIntersections.emplace_back(*intersectionPointAndNode);
+   }
+
+   const auto& closestNode = std::min_element(std::begin(allIntersections), std::end(allIntersections),
+      [&ray] (const PointNodePair& lhs, const PointNodePair& rhs)
+   {
+      return (ray.origin().distanceToPoint(lhs.first) < ray.origin().distanceToPoint(rhs.first));
+   });
+
+   if (closestNode != std::end(allIntersections))
+   {
+      return closestNode->second;
+   }
+
+   return boost::none;
 }
 
 boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersection(const Qt3D::QRay3D& ray,

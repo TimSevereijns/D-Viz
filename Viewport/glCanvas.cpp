@@ -114,6 +114,7 @@ namespace
       const Camera& camera)
    {
       std::wcout << GetFullNodePath(node) << std::endl;
+      //std::wcout << L"Bounding Box: " << node->boundingBox.height << std::endl;
 
       QVector<QVector3D> nodeVertices;
 
@@ -277,6 +278,7 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
 
       const auto& theTree = m_scanner.GetTree();
       m_theVisualization->Parse(theTree);
+      m_theVisualization->UpdateBoundingBoxes();
 
       ReloadVisualization(vizParameters);
    };

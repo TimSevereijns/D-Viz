@@ -2,7 +2,8 @@
 
 VizNode::VizNode(const FileInfo& file)
    : file(file),
-     block()
+     block(),
+     boundingBox()
 {
 }
 
