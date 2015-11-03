@@ -386,7 +386,7 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
 
    const auto canvasCoordinates = QPoint(event.x(), event.y());
    const auto ray = m_camera.ShootRayIntoScene(canvasCoordinates);
-   const auto selection = m_theVisualization->FindNearestIntersection(ray, m_visualizationParameters);
+   const auto selection = m_theVisualization->FindNearestIntersectionUsingAABB(ray, m_visualizationParameters);
    if (selection)
    {
       HighlightSelection(*selection, *m_sceneAssets[Asset::HIGHLIGHT], m_camera);

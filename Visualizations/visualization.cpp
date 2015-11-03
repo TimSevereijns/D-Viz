@@ -280,31 +280,9 @@ boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersectionUsingAA
 
    auto node = m_theTree->GetHead();
 
-   boost::optional<PointNodePair> intersectionPointAndNode;
-
-   while (node)
+   const auto& advanceToNext = [] (std::shared_ptr<TreeNode<VizNode>>& node)
    {
-      if (node->GetData().file.size < parameters.minimumFileSize ||
-          (parameters.onlyShowDirectories && node->GetData().file.type != FILE_TYPE::DIRECTORY))
-      {
-         continue;
-      }
-
-      const auto& boundingBoxIntersection = DoesRayIntersectBlock(ray, node->GetData().boundingBox);
-      if (boundingBoxIntersection)
-      {
-         intersectionPointAndNode = std::make_pair(*boundingBoxIntersection, *node);
-
-         if (node->HasChildren())
-         {
-            node = node->GetFirstChild();
-         }
-         else
-         {
-            break;
-         }
-      }
-      else if (node->GetNextSibling())
+      if (node->GetNextSibling())
       {
          node = node->GetNextSibling();
       }
@@ -324,11 +302,38 @@ boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersectionUsingAA
             node = nullptr;
          }
       }
-   }
+   };
 
-   if (intersectionPointAndNode)
+   while (node)
    {
-      allIntersections.emplace_back(*intersectionPointAndNode);
+      if (node->GetData().file.size < parameters.minimumFileSize ||
+          (parameters.onlyShowDirectories && node->GetData().file.type != FILE_TYPE::DIRECTORY))
+      {
+         continue;
+      }
+
+      const auto& boundingBoxIntersection = DoesRayIntersectBlock(ray, node->GetData().boundingBox);
+      if (boundingBoxIntersection)
+      {
+         const auto& blockIntersection = DoesRayIntersectBlock(ray, node->GetData().block);
+         if (blockIntersection)
+         {
+            allIntersections.emplace_back(std::make_pair(*blockIntersection, *node));
+         }
+
+         if (node->HasChildren())
+         {
+            node = node->GetFirstChild();
+         }
+         else
+         {
+            advanceToNext(node);
+         }
+      }
+      else
+      {
+         advanceToNext(node);
+      }
    }
 
    const auto& closestNode = std::min_element(std::begin(allIntersections), std::end(allIntersections),
