@@ -3,6 +3,7 @@
 #include <boost/optional.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <iostream>
 #include <string>
 #include <Qt3DCore/QRay3D>
@@ -35,7 +36,7 @@ namespace
       const double numerator = QVector3D::dotProduct(pointOnPlane - ray.origin(), planeNormal);
 
       const double scalar = numerator / denominator;
-      const bool doesRayHitPlane = scalar > EPSILON;
+      const bool doesRayHitPlane = std::abs(scalar) > EPSILON;
 
       if (doesRayHitPlane)
       {
@@ -152,6 +153,36 @@ namespace
 
       return FindClosestIntersectionPoint(ray, allIntersections);
    }
+
+   /**
+    * @brief AdvanceToNextNonDescendant is a helper function that will advance the passed-in node
+    * to the next node in the tree that is not a descendant of said node.
+    *
+    * @param[out] node              The node to advance.
+    */
+   void AdvanceToNextNonDescendant(std::shared_ptr<TreeNode<VizNode>>& node)
+   {
+      if (node->GetNextSibling())
+      {
+         node = node->GetNextSibling();
+      }
+      else
+      {
+         while (node->GetParent() && !node->GetParent()->GetNextSibling())
+         {
+            node = node->GetParent();
+         }
+
+         if (node->GetParent())
+         {
+            node = node->GetParent()->GetNextSibling();
+         }
+         else
+         {
+            node = nullptr;
+         }
+      }
+   }
 }
 
 const double Visualization::BLOCK_HEIGHT = 2.0;
@@ -267,7 +298,9 @@ QVector<QVector3D>& Visualization::GetColorData()
    return m_visualizationColors;
 }
 
-boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersectionUsingAABB(const Qt3D::QRay3D& ray,
+boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersectionUsingAABB(
+   const Camera& camera,
+   const Qt3D::QRay3D& ray,
    const VisualizationParameters& parameters) const
 {
    if (!m_hasDataBeenParsed)
@@ -275,34 +308,13 @@ boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersectionUsingAA
       return boost::none;
    }
 
+   using namespace std::chrono;
+   const auto startTime = system_clock::now();
+
    using PointNodePair = std::pair<QVector3D, TreeNode<VizNode>>;
    std::vector<PointNodePair> allIntersections;
 
    auto node = m_theTree->GetHead();
-
-   const auto& advanceToNext = [] (std::shared_ptr<TreeNode<VizNode>>& node)
-   {
-      if (node->GetNextSibling())
-      {
-         node = node->GetNextSibling();
-      }
-      else
-      {
-         while (node->GetParent() && !node->GetParent()->GetNextSibling())
-         {
-            node = node->GetParent();
-         }
-
-         if (node->GetParent())
-         {
-            node = node->GetParent()->GetNextSibling();
-         }
-         else
-         {
-            node = nullptr;
-         }
-      }
-   };
 
    while (node)
    {
@@ -316,7 +328,7 @@ boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersectionUsingAA
       if (boundingBoxIntersection)
       {
          const auto& blockIntersection = DoesRayIntersectBlock(ray, node->GetData().block);
-         if (blockIntersection)
+         if (blockIntersection && camera.IsPointInFrontOfCamera(*blockIntersection))
          {
             allIntersections.emplace_back(std::make_pair(*blockIntersection, *node));
          }
@@ -327,27 +339,31 @@ boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersectionUsingAA
          }
          else
          {
-            advanceToNext(node);
+            AdvanceToNextNonDescendant(node);
          }
       }
       else
       {
-         advanceToNext(node);
+         AdvanceToNextNonDescendant(node);
       }
    }
 
-   const auto& closestNode = std::min_element(std::begin(allIntersections), std::end(allIntersections),
+   if (allIntersections.empty())
+   {
+      return boost::none;
+   }
+
+   std::sort(std::begin(allIntersections), std::end(allIntersections),
       [&ray] (const PointNodePair& lhs, const PointNodePair& rhs)
    {
       return (ray.origin().distanceToPoint(lhs.first) < ray.origin().distanceToPoint(rhs.first));
    });
 
-   if (closestNode != std::end(allIntersections))
-   {
-      return closestNode->second;
-   }
+   const auto endTime = system_clock::now();
+   const auto selectionTime = duration_cast<std::chrono::milliseconds>(endTime - startTime);
+   std::cout << "Node selected in time: " << selectionTime.count() << "ms" << std::endl;
 
-   return boost::none;
+   return allIntersections.front().second;
 }
 
 boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersection(const Qt3D::QRay3D& ray,
@@ -376,18 +392,18 @@ boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersection(const 
       }
    }
 
-   const auto& closestNode = std::min_element(std::begin(allIntersections), std::end(allIntersections),
+   if (allIntersections.empty())
+   {
+      return boost::none;
+   }
+
+   std::sort(std::begin(allIntersections), std::end(allIntersections),
       [&ray] (const PointNodePair& lhs, const PointNodePair& rhs)
    {
       return (ray.origin().distanceToPoint(lhs.first) < ray.origin().distanceToPoint(rhs.first));
    });
 
-   if (closestNode != std::end(allIntersections))
-   {
-      return closestNode->second;
-   }
-
-   return boost::none;
+   return allIntersections.front().second;
 }
 
 QVector<QVector3D>& Visualization::GetVertexData()

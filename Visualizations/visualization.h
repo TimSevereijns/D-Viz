@@ -13,6 +13,7 @@
 #include "../tree.h"
 
 #include "../DataStructs/vizNode.h"
+#include "../Viewport/camera.h"
 
 namespace Qt3D
 {
@@ -64,7 +65,9 @@ class Visualization
       virtual void Parse(const std::shared_ptr<Tree<VizNode>>& theTree) = 0;
 
       /**
-       * @brief UpdateBoundingBoxes
+       * @brief UpdateBoundingBoxes will compute the minimum Axis-Aligned Bounding Boxes (AABB) for
+       * each node in the tree. Each node's bounding box will not only minimally enclose the block
+       * of the node to which it belongs, but also all descendants of the node in question.
        */
       virtual void UpdateBoundingBoxes();
 
@@ -99,14 +102,20 @@ class Visualization
          const VisualizationParameters& parameters) const;
 
       /**
-       * @brief FindNearestIntersectionUsingAABB
+       * @brief FindNearestIntersectionUsingAABB will attempt to identify the closest node in front
+       * of the camera that the specified ray intersects with. This search operation is carried out
+       * with aid of the minimum Axis-Aligned Bounding Boxes (AABB) that surround each node and its
+       * descendants.
        *
-       * @param ray
-       * @param parameters
+       * @param[in] camera          The camera from which the ray originated.
+       * @param[in] ray             The picking ray.
+       * @param[in] parameters      @see VisualizationParameters. Used to prune disqualified nodes.
        *
-       * @returns
+       * @returns the node that was clicked on; boost::none otherwise.
        */
-      boost::optional<TreeNode<VizNode>> FindNearestIntersectionUsingAABB(const Qt3D::QRay3D& ray,
+      boost::optional<TreeNode<VizNode>> FindNearestIntersectionUsingAABB(
+         const Camera& camera,
+         const Qt3D::QRay3D& ray,
          const VisualizationParameters& parameters) const;
 
       /**

@@ -203,6 +203,15 @@ class Camera
        */
       Qt3D::QRay3D ShootRayIntoScene(const QPoint& widgetCoordinates) const;
 
+      /**
+       * @brief IsPointInFrontOfCamera
+       *
+       * @param[in] point
+       *
+       * @returns
+       */
+      bool IsPointInFrontOfCamera(const QVector3D& point) const;
+
    private:
       QVector3D m_position;
 

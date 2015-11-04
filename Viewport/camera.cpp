@@ -184,6 +184,16 @@ Qt3D::QRay3D Camera::ShootRayIntoScene(const QPoint& widgetCoordinates) const
    return pickingRay;
 }
 
+bool Camera::IsPointInFrontOfCamera(const QVector3D& point) const
+{
+   const QVector3D distanceToIntersection = m_position - point;
+
+   const auto inverseRotationMatrix = GetOrientation().inverted();
+   const auto result = distanceToIntersection * inverseRotationMatrix;
+
+   return result.z() > 0;
+}
+
 void Camera::SetAspectRatio(const float ratio)
 {
    m_aspectRatio = ratio;

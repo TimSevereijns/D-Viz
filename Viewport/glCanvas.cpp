@@ -156,6 +156,19 @@ namespace
    }
 
    /**
+    * @brief ClearHighlightSelection
+    *
+    * @param[in] highlightAsset
+    * @param[in] camera
+    */
+   void ClearHighlightSelection(SceneAsset& highlightAsset, const Camera& camera)
+   {
+      highlightAsset.SetVertexData(QVector<QVector3D>());
+      highlightAsset.SetColorData(QVector<QVector3D>());
+      highlightAsset.Reload(camera);
+   }
+
+   /**
     * @brief The Asset enum
     */
    enum Asset
@@ -280,6 +293,8 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
       m_theVisualization->Parse(theTree);
       m_theVisualization->UpdateBoundingBoxes();
 
+      ClearHighlightSelection(*m_sceneAssets[Asset::HIGHLIGHT], m_camera);
+
       ReloadVisualization(vizParameters);
    };
 
@@ -381,21 +396,19 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
       return;
    }
 
-   using namespace std::chrono;
-   const auto startTime = system_clock::now();
-
    const auto canvasCoordinates = QPoint(event.x(), event.y());
    const auto ray = m_camera.ShootRayIntoScene(canvasCoordinates);
-   const auto selection = m_theVisualization->FindNearestIntersectionUsingAABB(ray, m_visualizationParameters);
+   const auto selection = m_theVisualization->FindNearestIntersectionUsingAABB(m_camera, ray,
+      m_visualizationParameters);
+
    if (selection)
    {
       HighlightSelection(*selection, *m_sceneAssets[Asset::HIGHLIGHT], m_camera);
    }
-
-   const auto endTime = system_clock::now();
-   const auto selectionTime = duration_cast<std::chrono::milliseconds>(endTime - startTime);
-
-   std::cout << "Node selected in time: " << selectionTime.count() << "ms" << std::endl;
+   else
+   {
+      ClearHighlightSelection(*m_sceneAssets[Asset::HIGHLIGHT], m_camera);
+   }
 }
 
 void GLCanvas::mousePressEvent(QMouseEvent* const event)
