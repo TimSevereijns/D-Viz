@@ -36,6 +36,7 @@ class Camera
 
       /**
        * @brief GetOrientation
+       *
        * @returns the current orientation of the camera; that is, pitch, roll, and yaw.
        */
       QMatrix4x4 GetOrientation() const;
@@ -50,10 +51,13 @@ class Camera
       void OffsetOrientation(float pitch, float yaw);
 
       /**
-       * @brief LookAt
-       * @param position
+       * @brief LookAt will orient the camera so that the specified point is within view.
+       *
+       * @param[in] point           The point to be brought into view.
+       *
+       * @todo Fix this function; it currently doesn't bring the point into view.
        */
-      void LookAt(const QVector3D& position);
+      void LookAt(const QVector3D& point);
 
       /**
        * @brief Forward
@@ -124,15 +128,20 @@ class Camera
       QMatrix4x4 GetProjectionViewMatrix() const;
 
       /**
-       * @brief Unproject
+       * @brief Unproject is the inverse of projecting 3D scenery onto the 2D canvas. In other
+       * words, given a point on the canvas, what is the 3D equivalent of that point at a specific
+       * depth in the scene.
+       *
        * @note Source: https://github.com/Cavewhere/cavewhere/blob/
        *               9121490139b3e0f046fc0086b86f0e1659d3bc8e/src/cwCamera.cpp
        *
-       * @param point
-       * @param viewDepth
-       * @param modelMatrix
+       * @param[in] point           The 2D coordinates that represent the location on the GL canvas.
+       * @param[in] viewDepth       The normalized depth (or Z-coordinate) by which to extend the
+       *                            2D coordinate into the scene. Zero is on the near view plane,
+       *                            and one is on the far view plane.
+       * @param[in] modelMatrix     The matrix of transformations applied to the model.
        *
-       * @returns
+       * @returns a 3D point representing the 2D canvas coordinates in 3D world coordinates.
        */
       QVector3D Unproject(const QPoint& point, float viewDepth, QMatrix4x4 modelMatrix) const;
 
@@ -199,16 +208,18 @@ class Camera
        *
        * @param[in] widgetCoordinates   2D widget coordinates
        *
-       * @returns a ray shooting into the scene.
+       * @returns a ray extending into the scene from the near plane to the far plane.
        */
       Qt3D::QRay3D ShootRayIntoScene(const QPoint& widgetCoordinates) const;
 
       /**
        * @brief IsPointInFrontOfCamera
        *
-       * @param[in] point
+       * @param[in] point           The point being targeted.
        *
-       * @returns
+       * @returns true if the point in question lies in front of the camera's positional plane. Note
+       * that the near plane still lies a little bit in front of positional plane. Returns false if
+       * the point lies behind the camera.
        */
       bool IsPointInFrontOfCamera(const QVector3D& point) const;
 

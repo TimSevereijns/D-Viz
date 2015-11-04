@@ -8,18 +8,18 @@ Block::Block()
 {
 }
 
-Block::Block(const DoublePoint3D& bottomLeft, const double width, const double height,
+Block::Block(const DoublePoint3D& origin, const double width, const double height,
              const double depth)
    : width(width),
      height(height),
      depth(depth),
      percentCovered(0.0),
-     blockOrigin(bottomLeft),
-     nextRowOrigin(bottomLeft.x(), bottomLeft.y() + height, bottomLeft.z())
+     origin(origin),
+     nextRowOrigin(origin.x(), origin.y() + height, origin.z())
 {
-   const auto x = static_cast<float>(bottomLeft.x());
-   const auto y = static_cast<float>(bottomLeft.y());
-   const auto z = static_cast<float>(bottomLeft.z());
+   const auto x = static_cast<float>(origin.x());
+   const auto y = static_cast<float>(origin.y());
+   const auto z = static_cast<float>(origin.z());
 
    QVector<QVector3D> frontFace;
    frontFace.reserve(12);
@@ -113,5 +113,5 @@ bool Block::IsNotInverted() const
 
 DoublePoint3D Block::GetNextChildOrigin() const
 {
-   return blockOrigin + DoublePoint3D(0, height, 0);
+   return origin + DoublePoint3D(0, height, 0);
 }

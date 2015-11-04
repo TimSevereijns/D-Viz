@@ -236,7 +236,7 @@ void Visualization::UpdateBoundingBoxes()
 
       node->boundingBox = Block
       {
-         node->block.blockOrigin,
+         node->block.origin,
          node->block.width,
          node->block.height + tallestDescendant,
          node->block.depth

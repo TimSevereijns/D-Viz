@@ -59,7 +59,7 @@ struct Block
 
    QVector<BlockFace> blockFaces;
 
-   DoublePoint3D blockOrigin;
+   DoublePoint3D origin;
    DoublePoint3D nextRowOrigin; ///< Specific to the Squarified Treemap.
 
    double percentCovered;
@@ -70,30 +70,35 @@ struct Block
    Block();
 
    /**
-    * @brief Block creates the vertices needed to represent a single block. Each
-    *        face consists of two triangles, and each vertex is followed by its corresponding
-    *        normal. Since we are unlikely to see the bottom faces of the block, no vertices (or
-    *        normals) wil be dedicated to visualizing it.
+    * @brief Block creates the vertices needed to represent a single block. Each face consists of
+    * two triangles, and each vertex is followed by its corresponding normal. Since we are unlikely
+    * to see the bottom faces of the block, no vertices (or normals) wil be dedicated to visualizing
+    * it.
     *
-    * @param bottomLeft             The bottom-left corner of the block under construction.
-    * @param width                  The desired block width; width grows along positive x-axis.
-    * @param height                 The desired block height; height grows along positive y-axis.
-    * @param depth                  The desired block depth; depth grows along negative z-axis.
+    * @param[in] origin             The bottom-left corner of the block under construction.
+    * @param[in] width              The desired block width; width grows along positive x-axis.
+    * @param[in] height             The desired block height; height grows along positive y-axis.
+    * @param[in] depth              The desired block depth; depth grows along negative z-axis.
     *
     * @returns a vector of vertices.
     */
-   Block(const DoublePoint3D& bottomLeft, const double width, const double height,
-         const double depth);
+   Block(
+      const DoublePoint3D& origin,
+      const double width,
+      const double height,
+      const double depth);
 
    /**
     * @brief begin
-    * @return
+    *
+    * @returns an iterator to the "first" face of the block.
     */
    FaceIterator begin() const;
 
    /**
     * @brief end
-    * @return
+    *
+    * @returns an iterator past the "last" face of the block.
     */
    FaceIterator end() const;
 
@@ -116,7 +121,9 @@ struct Block
    bool IsNotInverted() const;
 
    /**
-    * @brief GetOriginPlusHeight.
+    * @brief GetNextChildOrigin will return the location at which to start the laying out immediate
+    * descendants.
+    *
     * @returns the coordinates of the block's origin offset by the height of the block.
     */
    DoublePoint3D GetNextChildOrigin() const;

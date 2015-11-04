@@ -59,9 +59,11 @@ namespace
    }
 
    /**
-    * @brief UpdateVertexCountInStatusBar
-    * @param vertexCount
-    * @param mainWindow
+    * @brief UpdateVertexCountInStatusBar is a helper function to set the specifed vertex and block
+    * count in the bottom status bar.
+    *
+    * @param[in] vertexCount        The readout value.
+    * @param[in] mainWindow         The main window that contains the status bar.
     */
    void UpdateVertexCountInStatusBar(const unsigned int vertexCount, const MainWindow& mainWindow)
    {
@@ -114,7 +116,6 @@ namespace
       const Camera& camera)
    {
       std::wcout << GetFullNodePath(node) << std::endl;
-      //std::wcout << L"Bounding Box: " << node->boundingBox.height << std::endl;
 
       QVector<QVector3D> nodeVertices;
 
@@ -156,12 +157,13 @@ namespace
    }
 
    /**
-    * @brief ClearHighlightSelection
+    * @brief ClearHighlightSelection will clear the vertex and color data buffers from the specified
+    * asset, and will then reload the now empty asset.
     *
-    * @param[in] highlightAsset
-    * @param[in] camera
+    * @param[in] highlightAsset     The asset to be nuked and reloaded.
+    * @param[in] camera             The camera used to view the asset in the scene.
     */
-   void ClearHighlightSelection(SceneAsset& highlightAsset, const Camera& camera)
+   void ClearAssetBuffersAndReload(SceneAsset& highlightAsset, const Camera& camera)
    {
       highlightAsset.SetVertexData(QVector<QVector3D>());
       highlightAsset.SetColorData(QVector<QVector3D>());
@@ -169,7 +171,7 @@ namespace
    }
 
    /**
-    * @brief The Asset enum
+    * @brief The Asset enum provides an easier way to index into the asset vector.
     */
    enum Asset
    {
@@ -293,7 +295,7 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
       m_theVisualization->Parse(theTree);
       m_theVisualization->UpdateBoundingBoxes();
 
-      ClearHighlightSelection(*m_sceneAssets[Asset::HIGHLIGHT], m_camera);
+      ClearAssetBuffersAndReload(*m_sceneAssets[Asset::HIGHLIGHT], m_camera);
 
       ReloadVisualization(vizParameters);
    };
@@ -407,7 +409,7 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
    }
    else
    {
-      ClearHighlightSelection(*m_sceneAssets[Asset::HIGHLIGHT], m_camera);
+      ClearAssetBuffersAndReload(*m_sceneAssets[Asset::HIGHLIGHT], m_camera);
    }
 }
 

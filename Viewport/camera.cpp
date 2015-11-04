@@ -73,10 +73,10 @@ void Camera::OffsetOrientation(float pitch, float yaw)
    NormalizeAngles(m_horizontalAngle, m_verticalAngle);
 }
 
-void Camera::LookAt(const QVector3D& position)
+void Camera::LookAt(const QVector3D& point)
 {
-   assert(position != m_position);
-   QVector3D direction = position - m_position;
+   assert(point != m_position);
+   QVector3D direction = point - m_position;
    direction.normalize();
 
    m_verticalAngle = std::asin(-direction.y());
@@ -186,10 +186,10 @@ Qt3D::QRay3D Camera::ShootRayIntoScene(const QPoint& widgetCoordinates) const
 
 bool Camera::IsPointInFrontOfCamera(const QVector3D& point) const
 {
-   const QVector3D distanceToIntersection = m_position - point;
+   const QVector3D distanceToPoint = m_position - point;
 
    const auto inverseRotationMatrix = GetOrientation().inverted();
-   const auto result = distanceToIntersection * inverseRotationMatrix;
+   const auto result = distanceToPoint * inverseRotationMatrix;
 
    return result.z() > 0;
 }

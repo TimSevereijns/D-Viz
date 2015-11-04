@@ -227,7 +227,7 @@ namespace
          -depthPaddingPerSide
       };
 
-      data.block = Block(land.blockOrigin + offset,
+      data.block = Block(land.origin + offset,
          finalBlockWidth,
          Visualization::BLOCK_HEIGHT,
          finalBlockDepth
@@ -276,7 +276,7 @@ namespace
          -(land.depth * land.percentCovered) - depthPaddingPerSide
       };
 
-      data.block = Block(land.blockOrigin + offset,
+      data.block = Block(land.origin + offset,
          finalBlockWidth,
          Visualization::BLOCK_HEIGHT,
          std::abs(finalBlockDepth)

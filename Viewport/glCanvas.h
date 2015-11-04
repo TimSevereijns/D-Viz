@@ -49,18 +49,10 @@ class GLCanvas : public QOpenGLWidget
 
       /**
        * @brief setFieldOfView sets the current field of view for the camera.
-       * 
-       * TODO: Expose the camera object from this class.
-       * 
+       *
        * @param[in] fieldOfView  The new field of view.
        */
       void SetFieldOfView(const float fieldOfView);
-
-      /**
-       * @brief HandleRightClick
-       * @param event
-       */
-      void HandleRightClick(const QMouseEvent& event);
 
     protected:
       void initializeGL() override;
@@ -78,6 +70,8 @@ class GLCanvas : public QOpenGLWidget
       void ScanDrive(const VisualizationParameters& vizParameters);
 
       void UpdateFPS();
+
+      void HandleRightClick(const QMouseEvent& event);
 
       void HandleInput();
       void HandleXBoxControllerInput();
