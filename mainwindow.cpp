@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/)
      m_fileMenuPreferences(nullptr),
      m_fileMenuExit(nullptr),
      m_directoryToVisualize(L""),
+     m_permanentStatusBarMessage(nullptr),
      m_ui(new Ui::MainWindow),
      m_sizePruningComboBoxIndex(0),
      m_sizePruningOptions(
@@ -255,6 +256,11 @@ XboxController::State& MainWindow::GetXboxControllerState() const
 XboxController& MainWindow::GetXboxControllerManager()
 {
    return *m_xboxController.get();
+}
+
+void MainWindow::SetStatusBarMessage(const std::wstring& message)
+{
+   statusBar()->showMessage(QString::fromStdWString(message));
 }
 
 std::shared_ptr<OptionsManager> MainWindow::GetOptionsManager()

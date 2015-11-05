@@ -128,9 +128,8 @@ class Camera
       QMatrix4x4 GetProjectionViewMatrix() const;
 
       /**
-       * @brief Unproject is the inverse of projecting 3D scenery onto the 2D canvas. In other
-       * words, given a point on the canvas, what is the 3D equivalent of that point at a specific
-       * depth in the scene.
+       * @brief Unproject will translate a 2D point on the viewport into a 3D point at a specified
+       * distance from the near view plane.
        *
        * @note Source: https://github.com/Cavewhere/cavewhere/blob/
        *               9121490139b3e0f046fc0086b86f0e1659d3bc8e/src/cwCamera.cpp

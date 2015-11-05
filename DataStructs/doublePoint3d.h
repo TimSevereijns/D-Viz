@@ -1,6 +1,10 @@
 #ifndef DOUBLEPOINT3D_H
 #define DOUBLEPOINT3D_H
 
+/**
+ * @brief The DoublePoint3D class provides the bare necessities needed to perform all node layout
+ * arithmetic with double (instead of single) floating point precision.
+ */
 class DoublePoint3D
 {
    public:

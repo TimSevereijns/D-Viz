@@ -91,17 +91,6 @@ class Visualization
       QVector<QVector3D>& GetColorData();
 
       /**
-       * @brief FindNearestIntersection
-       *
-       * @param[in] ray             The ray to be shot into the scene.
-       * @param[in] parameters      The current visualization parameters.
-       *
-       * @returns the closest node that the ray intersected with.
-       */
-      boost::optional<TreeNode<VizNode>> FindNearestIntersection(const Qt3D::QRay3D& ray,
-         const VisualizationParameters& parameters) const;
-
-      /**
        * @brief FindNearestIntersectionUsingAABB will attempt to identify the closest node in front
        * of the camera that the specified ray intersects with. This search operation is carried out
        * with aid of the minimum Axis-Aligned Bounding Boxes (AABB) that surround each node and its
@@ -113,7 +102,7 @@ class Visualization
        *
        * @returns the node that was clicked on; boost::none otherwise.
        */
-      boost::optional<TreeNode<VizNode>> FindNearestIntersectionUsingAABB(
+      boost::optional<TreeNode<VizNode>> FindNearestIntersection(
          const Camera& camera,
          const Qt3D::QRay3D& ray,
          const VisualizationParameters& parameters) const;

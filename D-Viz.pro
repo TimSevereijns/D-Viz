@@ -33,7 +33,6 @@ SOURCES += main.cpp\
     Viewport/camera.cpp \
     Viewport/glCanvas.cpp \
     Viewport/graphicsDevice.cpp \
-    Visualizations/sliceAndDiceTreemap.cpp \
     Visualizations/squarifiedTreemap.cpp \
     Visualizations/visualization.cpp
 
@@ -60,7 +59,6 @@ HEADERS  += mainwindow.h \
     Viewport/camera.h \
     Viewport/glCanvas.h \
     Viewport/graphicsDevice.h \
-    Visualizations/sliceAndDiceTreemap.h \
     Visualizations/squarifiedTreemap.h \
     Visualizations/visualization.h
 

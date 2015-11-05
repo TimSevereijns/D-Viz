@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QAction>
+#include <QLabel>
 #include <QMainWindow>
 #include <QMenu>
 
@@ -57,6 +58,12 @@ class MainWindow : public QMainWindow
        * @return
        */
       XboxController& GetXboxControllerManager();
+
+      /**
+       * @brief SetPermanentStatusBarMessage
+       * @param message
+       */
+      void SetStatusBarMessage(const std::wstring& message);
 
    public slots:
       /**
@@ -126,6 +133,8 @@ class MainWindow : public QMainWindow
       std::unique_ptr<QAction> m_fileMenuNewScan;
       std::unique_ptr<QAction> m_fileMenuPreferences;
       std::unique_ptr<QAction> m_fileMenuExit;
+
+      std::unique_ptr<QLabel> m_permanentStatusBarMessage;
 
       std::unique_ptr<GLCanvas> m_glCanvas;
 

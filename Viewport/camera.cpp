@@ -147,6 +147,7 @@ QVector3D Camera::Unproject(const QPoint& point, float viewDepth, QMatrix4x4 mod
 
    if (!wasMatrixInvertible)
    {
+      std::cout << "Matrix was not invertible!" << std::endl;
       return {};
    }
 
@@ -175,13 +176,13 @@ Qt3D::QRay3D Camera::ShootRayIntoScene(const QPoint& widgetCoordinates) const
 
    const QVector3D direction = QVector3D(nearPlanePoint - farPlanePoint).normalized();
 
-   const Qt3D::QRay3D pickingRay
+   const Qt3D::QRay3D ray
    {
       nearPlanePoint,
       -direction
    };
 
-   return pickingRay;
+   return ray;
 }
 
 bool Camera::IsPointInFrontOfCamera(const QVector3D& point) const

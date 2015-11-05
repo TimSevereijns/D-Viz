@@ -48,31 +48,20 @@ namespace
    }
 
    /**
-    * @brief SetStatusBarMessage displays the vertex count in the status bar.
-    *
-    * @param[in] mainWindow         The window which contains the status bar to be updated.
-    * @param[in] message            The message to be set on the status bar.
-    */
-   inline void SetStatusBarMessage(const MainWindow& mainWindow, const std::wstring& message)
-   {
-      mainWindow.statusBar()->showMessage(QString::fromStdWString(message));
-   }
-
-   /**
     * @brief UpdateVertexCountInStatusBar is a helper function to set the specifed vertex and block
     * count in the bottom status bar.
     *
     * @param[in] vertexCount        The readout value.
     * @param[in] mainWindow         The main window that contains the status bar.
     */
-   void UpdateVertexCountInStatusBar(const unsigned int vertexCount, const MainWindow& mainWindow)
+   void PrintMetadataToStatusBar(const unsigned int vertexCount, MainWindow& mainWindow)
    {
       std::wstringstream message;
       message.imbue(std::locale(""));
       message << std::fixed << vertexCount << L" vertices in "
          << (vertexCount / Block::VERTICES_PER_BLOCK) << L" blocks";
 
-      SetStatusBarMessage(mainWindow, message.str());
+      mainWindow.SetStatusBarMessage(message.str());
    }
 
    /**
@@ -275,7 +264,7 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
       std::wstringstream message;
       message.imbue(std::locale(""));
       message << std::fixed << L"Files Scanned: " << numberOfFilesScanned;
-      SetStatusBarMessage(*m_mainWindow, message.str());
+      m_mainWindow->SetStatusBarMessage(message.str());
    };
 
    const auto& completionHandler =
@@ -289,7 +278,7 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
       std::wstringstream message;
       message.imbue(std::locale(""));
       message << std::fixed << L"Total Files Scanned: " << numberOfFilesScanned;
-      SetStatusBarMessage(*m_mainWindow, message.str());
+      m_mainWindow->SetStatusBarMessage(message.str());
 
       const auto& theTree = m_scanner.GetTree();
       m_theVisualization->Parse(theTree);
@@ -332,7 +321,7 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
       }
    }
 
-   UpdateVertexCountInStatusBar(m_sceneAssets[Asset::TREEMAP]->GetVertexCount(), *m_mainWindow);
+   PrintMetadataToStatusBar(m_sceneAssets[Asset::TREEMAP]->GetVertexCount(), *m_mainWindow);
 }
 
 void GLCanvas::SetFieldOfView(const float fieldOfView)
@@ -342,6 +331,12 @@ void GLCanvas::SetFieldOfView(const float fieldOfView)
 
 void GLCanvas::keyPressEvent(QKeyEvent* const event)
 {
+   assert(event);
+   if (!event)
+   {
+      return;
+   }
+
    if (event->isAutoRepeat())
    {
       event->ignore();
@@ -372,6 +367,12 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
 
 void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
 {
+   assert(event);
+   if (!event)
+   {
+      return;
+   }
+
    if (event->isAutoRepeat())
    {
       event->ignore();
@@ -400,21 +401,31 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
 
    const auto canvasCoordinates = QPoint(event.x(), event.y());
    const auto ray = m_camera.ShootRayIntoScene(canvasCoordinates);
-   const auto selection = m_theVisualization->FindNearestIntersectionUsingAABB(m_camera, ray,
+   const auto selection = m_theVisualization->FindNearestIntersection(m_camera, ray,
       m_visualizationParameters);
 
    if (selection)
    {
       HighlightSelection(*selection, *m_sceneAssets[Asset::HIGHLIGHT], m_camera);
+
+      m_mainWindow->SetStatusBarMessage(GetFullNodePath(*selection));
    }
    else
    {
       ClearAssetBuffersAndReload(*m_sceneAssets[Asset::HIGHLIGHT], m_camera);
+
+      PrintMetadataToStatusBar(m_sceneAssets[Asset::TREEMAP]->GetVertexCount(), *m_mainWindow);
    }
 }
 
 void GLCanvas::mousePressEvent(QMouseEvent* const event)
 {
+   assert(event);
+   if (!event)
+   {
+      return;
+   }
+
    m_lastMousePosition = event->pos();
 
    if (event->button() == Qt::RightButton)
@@ -427,6 +438,12 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
 
 void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 {
+   assert(event);
+   if (!event)
+   {
+      return;
+   }
+
    const float deltaX = event->x() - m_lastMousePosition.x();
    const float deltaY = event->y() - m_lastMousePosition.y();
 
@@ -443,6 +460,12 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 
 void GLCanvas::wheelEvent(QWheelEvent* const event)
 {
+   assert(event);
+   if (!event)
+   {
+      return;
+   }
+
    const int delta = event->delta();
 
    if (event->orientation() == Qt::Vertical)
@@ -464,6 +487,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
 void GLCanvas::HandleInput()
 {
+   assert(m_settings && m_mainWindow);
    if (m_settings->m_useXBoxController && m_mainWindow->IsXboxControllerConnected())
    {
       HandleXBoxControllerInput();
@@ -625,6 +649,7 @@ void GLCanvas::paintGL()
    HandleInput();
    UpdateFPS();
 
+   assert(m_settings);
    if (m_settings->m_isLightAttachedToCamera)
    {
       m_light.position = m_camera.GetPosition();

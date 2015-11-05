@@ -9,7 +9,7 @@ Block::Block()
 }
 
 Block::Block(const DoublePoint3D& origin, const double width, const double height,
-             const double depth)
+   const double depth)
    : width(width),
      height(height),
      depth(depth),

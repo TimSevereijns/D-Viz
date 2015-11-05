@@ -79,11 +79,8 @@ struct Block
     * @param[in] width              The desired block width; width grows along positive x-axis.
     * @param[in] height             The desired block height; height grows along positive y-axis.
     * @param[in] depth              The desired block depth; depth grows along negative z-axis.
-    *
-    * @returns a vector of vertices.
     */
-   Block(
-      const DoublePoint3D& origin,
+   Block(const DoublePoint3D& origin,
       const double width,
       const double height,
       const double depth);

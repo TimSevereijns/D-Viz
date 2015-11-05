@@ -298,7 +298,7 @@ QVector<QVector3D>& Visualization::GetColorData()
    return m_visualizationColors;
 }
 
-boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersectionUsingAABB(
+boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersection(
    const Camera& camera,
    const Qt3D::QRay3D& ray,
    const VisualizationParameters& parameters) const
@@ -321,6 +321,7 @@ boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersectionUsingAA
       if (node->GetData().file.size < parameters.minimumFileSize ||
           (parameters.onlyShowDirectories && node->GetData().file.type != FILE_TYPE::DIRECTORY))
       {
+         AdvanceToNextNonDescendant(node);
          continue;
       }
 
@@ -362,46 +363,6 @@ boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersectionUsingAA
    const auto endTime = system_clock::now();
    const auto selectionTime = duration_cast<std::chrono::milliseconds>(endTime - startTime);
    std::cout << "Node selected in time: " << selectionTime.count() << "ms" << std::endl;
-
-   return allIntersections.front().second;
-}
-
-boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersection(const Qt3D::QRay3D& ray,
-   const VisualizationParameters& parameters) const
-{
-   if (!m_hasDataBeenParsed)
-   {
-      return boost::none;
-   }
-
-   using PointNodePair = std::pair<QVector3D, TreeNode<VizNode>>;
-   std::vector<PointNodePair> allIntersections;
-
-   for (auto&& node : *m_theTree)
-   {
-      if (node->file.size < parameters.minimumFileSize ||
-          (parameters.onlyShowDirectories && node->file.type != FILE_TYPE::DIRECTORY))
-      {
-         continue;
-      }
-
-      const auto& intersectionPoint = DoesRayIntersectBlock(ray, node->block);
-      if (intersectionPoint)
-      {
-         allIntersections.emplace_back(std::make_pair(*intersectionPoint, node));
-      }
-   }
-
-   if (allIntersections.empty())
-   {
-      return boost::none;
-   }
-
-   std::sort(std::begin(allIntersections), std::end(allIntersections),
-      [&ray] (const PointNodePair& lhs, const PointNodePair& rhs)
-   {
-      return (ray.origin().distanceToPoint(lhs.first) < ray.origin().distanceToPoint(rhs.first));
-   });
 
    return allIntersections.front().second;
 }

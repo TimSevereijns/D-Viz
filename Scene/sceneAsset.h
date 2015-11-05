@@ -1,10 +1,9 @@
 #ifndef SCENEASSET_H
 #define SCENEASSET_H
 
-#include "../Viewport/camera.h"
 #include "../DataStructs/light.h"
 #include "../optionsManager.h"
-
+#include "../Viewport/camera.h"
 #include "../Viewport/graphicsDevice.h"
 
 #include <QOpenGLBuffer>
