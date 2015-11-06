@@ -24,7 +24,7 @@ class SceneAsset
        * @brief PrepareVertexBuffers loads the vertex data into the OpenGL buffer. Use
        * SceneAsset::SetVertexData() to set the data before calling this function.
        *
-       * @param camera              The camera associated with the OpenGL context.
+       * @param[in] camera          The camera associated with the OpenGL context.
        *
        * @returns true if the operation succeeded.
        */
@@ -34,7 +34,7 @@ class SceneAsset
        * @brief PrepareColorBuffers loads the color data into the OpenGL buffer. Use
        * SceneAsset::SetColorData() to set the data before calling this function.
        *
-       * @param camera              The camera associated with the OpenGL context.
+       * @param[in] camera          The camera associated with the OpenGL context.
        *
        * @returns true if the operation succeeded.
        */
@@ -59,9 +59,9 @@ class SceneAsset
        * @brief Render performs the necessary actions to render the asset in question to the
        * OpenGL canvas.
        *
-       * @param camera              The camera associated with the OpenGL context.
-       * @param light               The light source for the scene.
-       * @param settings            Any additional settings relevant to rendering.
+       * @param[in] camera          The camera associated with the OpenGL context.
+       * @param[in] light           The light source for the scene.
+       * @param[in] settings        Any additional settings relevant to rendering.
        *
        * @returns true if the operation succeeded.
        */
@@ -78,7 +78,7 @@ class SceneAsset
       /**
        * @brief Reload performs all actions necessary to update the data in the OpenGL buffers.
        *
-       * @param camera              The camera associated with the OpenGL context.
+       * @param[in] camera          The camera associated with the OpenGL context.
        *
        * @returns true if the operation succeeded.
        */
@@ -88,7 +88,7 @@ class SceneAsset
        * @brief SetVertexData is the primary function to set the vertex data associated with the
        * asset in question.
        *
-       * @param data                The asset vertices and normals.
+       * @param[in] data            The asset vertices and normals.
        */
       void SetVertexData(QVector<QVector3D>&& data);
 
@@ -96,18 +96,20 @@ class SceneAsset
        * @brief SetColorData is the primary function to set the color data associated with the
        * asset in question.
        *
-       * @param data                The vertex colors.
+       * @param[in] data            The vertex colors.
        */
       void SetColorData(QVector<QVector3D>&& data);
 
       /**
        * @brief GetVertexCount
+       *
        * @returns the count of vertices used to represent the asset.
        */
       unsigned int GetVertexCount() const;
 
       /**
        * @brief GetColorCount
+       *
        * @returns the count of color entries used to present the asset's color.
        */
       unsigned int GetColorCount() const;

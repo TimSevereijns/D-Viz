@@ -42,6 +42,7 @@ namespace
          case Qt::Key_A: keyboardManager.UpdateKeyState(key, state); return true;
          case Qt::Key_S: keyboardManager.UpdateKeyState(key, state); return true;
          case Qt::Key_D: keyboardManager.UpdateKeyState(key, state); return true;
+         case Qt::Key_Shift: keyboardManager.UpdateKeyState(key, state); return true;
       }
 
       return false;
@@ -66,8 +67,6 @@ namespace
 
    /**
     * @brief GetFullNodePath
-    *
-    * @todo Fix printing of complete path.
     *
     * @param[in] node               The selected node.
     *
@@ -104,8 +103,6 @@ namespace
    void HighlightSelection(const TreeNode<VizNode>& node, SceneAsset& highlightAsset,
       const Camera& camera)
    {
-      std::wcout << GetFullNodePath(node) << std::endl;
-
       QVector<QVector3D> nodeVertices;
 
       std::for_each(std::begin(node->block), std::end(node->block),
@@ -466,9 +463,29 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
       return;
    }
 
+   event->accept();
+
+   if (event->orientation() != Qt::Vertical)
+   {
+      return;
+   }
+
    const int delta = event->delta();
 
-   if (event->orientation() == Qt::Vertical)
+   if (m_keyboardManager.IsKeyUp(Qt::Key_Shift))
+   {
+      if (delta > 0 && m_settings->m_cameraMovementSpeed < 1.0)
+      {
+         m_settings->m_cameraMovementSpeed += 0.01;
+      }
+      else if (delta < 0 && m_settings->m_cameraMovementSpeed > 0.01)
+      {
+         m_settings->m_cameraMovementSpeed -= 0.01;
+      }
+
+      m_mainWindow->UpdateCameraSpeedSpinner(static_cast<double>(m_settings->m_cameraMovementSpeed));
+   }
+   else
    {
       if (delta < 0)
       {
@@ -481,8 +498,6 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
       m_mainWindow->UpdateFieldOfViewSlider(static_cast<float>(m_camera.GetFieldOfView()));
    }
-
-   event->accept();
 }
 
 void GLCanvas::HandleInput()

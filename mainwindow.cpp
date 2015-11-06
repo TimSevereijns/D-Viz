@@ -248,6 +248,11 @@ void MainWindow::UpdateFieldOfViewSlider(const int fieldOfView)
    m_ui->fieldOfViewSlider->setValue(fieldOfView);
 }
 
+void MainWindow::UpdateCameraSpeedSpinner(const double speed)
+{
+   m_ui->cameraSpeedSpinner->setValue(speed);
+}
+
 XboxController::State& MainWindow::GetXboxControllerState() const
 {
    return *m_xboxControllerState;

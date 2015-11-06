@@ -30,7 +30,8 @@ KeyboardManager::KeyboardManager()
          { Qt::Key_W, KEY_STATE::UP },
          { Qt::Key_X, KEY_STATE::UP },
          { Qt::Key_Y, KEY_STATE::UP },
-         { Qt::Key_Z, KEY_STATE::UP }
+         { Qt::Key_Z, KEY_STATE::UP },
+         { Qt::Key_Shift, KEY_STATE::UP }
       })
 {
 }

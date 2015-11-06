@@ -135,9 +135,9 @@ class Camera
        *               9121490139b3e0f046fc0086b86f0e1659d3bc8e/src/cwCamera.cpp
        *
        * @param[in] point           The 2D coordinates that represent the location on the GL canvas.
-       * @param[in] viewDepth       The normalized depth (or Z-coordinate) by which to extend the
-       *                            2D coordinate into the scene. Zero is on the near view plane,
-       *                            and one is on the far view plane.
+       * @param[in] viewDepth       The normalized depth by which to extend the 2D coordinate into
+       *                            the scene. Zero is on the near view plane, and one is on the far
+       *                            view plane.
        * @param[in] modelMatrix     The matrix of transformations applied to the model.
        *
        * @returns a 3D point representing the 2D canvas coordinates in 3D world coordinates.
