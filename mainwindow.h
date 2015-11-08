@@ -1,14 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QAction>
 #include <QLabel>
 #include <QMainWindow>
-#include <QMenu>
-
-#include <memory>
-#include <cstdint>
-#include <string>
 
 #include "HID/xboxController.h"
 

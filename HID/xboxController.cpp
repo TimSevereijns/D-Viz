@@ -4,6 +4,15 @@
 #include <cmath>
 #include <iostream>
 
+const uint8_t XboxController::MAX_TRIGGER_VALUE = std::numeric_limits<int8_t>::max();
+const uint8_t XboxController::MIN_TRIGGER_VALUE = std::numeric_limits<int8_t>::min();
+
+const int16_t XboxController::MAX_STICK_VALUE =std::numeric_limits<int16_t>::max();
+const int16_t XboxController::MIN_STICK_VALUE = std::numeric_limits<int16_t>::min();
+
+const int32_t XboxController::MAX_VIBRATION_VALUE = std::numeric_limits<int32_t>::max();
+const int32_t XboxController::MIN_VIBRATION_VALUE = std::numeric_limits<int32_t>::min();
+
 namespace
 {
    /**
@@ -66,15 +75,15 @@ namespace
     * @param deadZoneRadius
     * @return
     */
-   bool ProcessStickDeadZone(qint16 rawXValue, qint16 rawYValue, float& xValue, float& yValue,
+   bool ProcessStickDeadZone(int rawXValue, int rawYValue, float& xValue, float& yValue,
       const unsigned int deadZoneRadius)
    {
       xValue = 0;
       yValue = 0;
 
       // Make values symetrical (otherwise negative value can be 1 unit larger than positive value):
-      rawXValue = qMax(rawXValue, (qint16) - MAX_STICK_VALUE);
-      rawYValue = qMax(rawYValue, (qint16) - MAX_STICK_VALUE);
+      rawXValue = std::max<int>(rawXValue, XboxController::MIN_STICK_VALUE + 1);
+      rawYValue = std::max<int>(rawYValue, XboxController::MIN_STICK_VALUE + 1);
 
       float magnitude = sqrt(rawXValue * rawXValue + rawYValue * rawYValue);
       if (magnitude < deadZoneRadius)
@@ -86,8 +95,10 @@ namespace
       xValue = ((float) rawXValue) / magnitude;
       yValue = ((float) rawYValue) / magnitude;
 
-      magnitude = qMin(magnitude, (float) MAX_STICK_VALUE);
-      float normalizedMagnitude = (magnitude - deadZoneRadius) / ((MAX_STICK_VALUE - deadZoneRadius));
+      magnitude = std::min(magnitude, static_cast<float>(XboxController::MAX_STICK_VALUE));
+
+      const float normalizedMagnitude = (magnitude - deadZoneRadius) /
+            ((XboxController::MAX_STICK_VALUE - deadZoneRadius));
 
       xValue *= normalizedMagnitude;
       yValue *= normalizedMagnitude;
@@ -112,7 +123,7 @@ namespace
          return false;
       }
 
-      value = ((float) rawValue - triggerThreshold) / (MAX_TRIGGER_VALUE - triggerThreshold);
+      value = ((float) rawValue - triggerThreshold) / (XboxController::MAX_TRIGGER_VALUE - triggerThreshold);
       return true;
    }
 }
@@ -153,14 +164,14 @@ bool XboxController::State::BatteryEquals(const State& lhs, const State& rhs)
    return (lhs.batteryType == rhs.batteryType) && (lhs.batteryLevel == rhs.batteryLevel);
 }
 
-XboxController::XboxController(unsigned int controllerNum, unsigned int leftStickDeadZone,
-   unsigned int rightStickDeadZone, unsigned int triggerThreshold, QObject* parent)
+XboxController::XboxController(unsigned int controllerNum, int16_t leftStickDeadZone,
+   int16_t rightStickDeadZone, uint8_t triggerThreshold, QObject* parent)
    : QObject(parent),
      m_isCurrentControllerConnected(false),
      m_isPreviousControllerConnected(false),
-     m_leftStickDeadZone(qMin(leftStickDeadZone, MAX_STICK_VALUE)),
-     m_rightStickDeadZone(qMin(rightStickDeadZone, MAX_STICK_VALUE)),
-     m_triggerThreshold(qMin(triggerThreshold, MAX_TRIGGER_VALUE)),
+     m_leftStickDeadZone(std::min(leftStickDeadZone, XboxController::MAX_STICK_VALUE)),
+     m_rightStickDeadZone(std::min(rightStickDeadZone, XboxController::MAX_STICK_VALUE)),
+     m_triggerThreshold(std::min(triggerThreshold, XboxController::MAX_TRIGGER_VALUE)),
      m_pollingTimer(new QTimer()),
      m_buttonMap(
         {
@@ -217,14 +228,13 @@ bool XboxController::IsButtonDown(const unsigned int button) const
    return false;
 }
 
-
 void XboxController::Update()
 {
-   XINPUT_STATE xInputState;
-   memset(&xInputState, 0, sizeof(XINPUT_STATE));
-   m_isCurrentControllerConnected = (XInputGetState(m_controllerNum, &xInputState) == ERROR_SUCCESS);
+   XINPUT_STATE inputState;
+   memset(&inputState, 0, sizeof(XINPUT_STATE));
+   m_isCurrentControllerConnected = (XInputGetState(m_controllerNum, &inputState) == ERROR_SUCCESS);
 
-   //Handling gamepad connection/deconnection:
+   // Handle gamepad connection/deconnection:
    if (m_isPreviousControllerConnected == false && m_isCurrentControllerConnected == true)
    {
       emit ControllerConnected(m_controllerNum);
@@ -236,68 +246,70 @@ void XboxController::Update()
 
    m_isPreviousControllerConnected = m_isCurrentControllerConnected;
 
-   if (m_isCurrentControllerConnected)
+   if (!m_isCurrentControllerConnected)
    {
-      // Fetch the state of the buttons:
-      m_currentState.buttons = xInputState.Gamepad.wButtons;
-
-      UpdateAllButtons(m_currentState.buttons, m_previousState.buttons, m_buttonMap);
-
-      // Process stick deadzone:
-      ProcessStickDeadZone(xInputState.Gamepad.sThumbLX, xInputState.Gamepad.sThumbLY,
-         m_currentState.leftThumbX, m_currentState.leftThumbY, m_leftStickDeadZone);
-      ProcessStickDeadZone(xInputState.Gamepad.sThumbRX, xInputState.Gamepad.sThumbRY,
-         m_currentState.rightThumbX, m_currentState.rightThumbY, m_rightStickDeadZone);
-
-      // Process trigger thresholds:
-      ProcessTriggerThreshold(xInputState.Gamepad.bLeftTrigger, m_currentState.leftTrigger,
-         m_triggerThreshold);
-      ProcessTriggerThreshold(xInputState.Gamepad.bRightTrigger, m_currentState.rightTrigger,
-         m_triggerThreshold);
-
-      // Update battery states:
-      XINPUT_BATTERY_INFORMATION xInputBattery;
-      memset(&xInputBattery,0,sizeof(XINPUT_BATTERY_INFORMATION));
-      const auto batteryDataFetchResult = XInputGetBatteryInformation(m_controllerNum,
-         BATTERY_DEVTYPE_GAMEPAD, &xInputBattery);
-      if ( batteryDataFetchResult == ERROR_SUCCESS)
-      {
-         m_currentState.batteryType = xInputBattery.BatteryType;
-         m_currentState.batteryLevel = xInputBattery.BatteryLevel;
-      }
-      else
-      {
-         m_currentState.batteryType = BATTERY_TYPE_UNKNOWN;
-         m_currentState.batteryLevel = BATTERY_LEVEL_EMPTY;
-      }
-
-      if (m_currentState != m_previousState)
-      {
-         emit NewControllerState(m_currentState);
-      }
-
-      if (!State::BatteryEquals(m_previousState, m_currentState))
-      {
-         emit NewControllerBatteryState(m_currentState.batteryType, m_currentState.batteryLevel);
-      }
-
-      m_previousState = m_currentState;
+      return;
    }
+
+   // Fetch the state of the buttons:
+   m_currentState.buttons = inputState.Gamepad.wButtons;
+
+   UpdateAllButtons(m_currentState.buttons, m_previousState.buttons, m_buttonMap);
+
+   // Process stick deadzone:
+   ProcessStickDeadZone(inputState.Gamepad.sThumbLX, inputState.Gamepad.sThumbLY,
+      m_currentState.leftThumbX, m_currentState.leftThumbY, m_leftStickDeadZone);
+   ProcessStickDeadZone(inputState.Gamepad.sThumbRX, inputState.Gamepad.sThumbRY,
+      m_currentState.rightThumbX, m_currentState.rightThumbY, m_rightStickDeadZone);
+
+   // Process trigger thresholds:
+   ProcessTriggerThreshold(inputState.Gamepad.bLeftTrigger, m_currentState.leftTrigger,
+      m_triggerThreshold);
+   ProcessTriggerThreshold(inputState.Gamepad.bRightTrigger, m_currentState.rightTrigger,
+      m_triggerThreshold);
+
+   // Update battery states:
+   XINPUT_BATTERY_INFORMATION inputBattery;
+   memset(&inputBattery, 0, sizeof(XINPUT_BATTERY_INFORMATION));
+   const auto batteryDataFetchResult = XInputGetBatteryInformation(m_controllerNum,
+      BATTERY_DEVTYPE_GAMEPAD, &inputBattery);
+   if ( batteryDataFetchResult == ERROR_SUCCESS)
+   {
+      m_currentState.batteryType = inputBattery.BatteryType;
+      m_currentState.batteryLevel = inputBattery.BatteryLevel;
+   }
+   else
+   {
+      m_currentState.batteryType = BATTERY_TYPE_UNKNOWN;
+      m_currentState.batteryLevel = BATTERY_LEVEL_EMPTY;
+   }
+
+   if (m_currentState != m_previousState)
+   {
+      emit NewControllerState(m_currentState);
+   }
+
+   if (!State::BatteryEquals(m_previousState, m_currentState))
+   {
+      emit NewControllerBatteryState(m_currentState.batteryType, m_currentState.batteryLevel);
+   }
+
+   m_previousState = m_currentState;
 }
 
-void XboxController::SetLeftStickDeadZone(unsigned int newDeadZone)
+void XboxController::SetLeftStickDeadZone(int16_t newDeadZone)
 {
-   m_leftStickDeadZone = qMin(newDeadZone, MAX_STICK_VALUE);
+   m_leftStickDeadZone = qMin(newDeadZone, XboxController::MAX_STICK_VALUE);
 }
 
-void XboxController::SetRightStickDeadZone(unsigned int newDeadZone)
+void XboxController::SetRightStickDeadZone(int16_t newDeadZone)
 {
-   m_rightStickDeadZone = qMin(newDeadZone, MAX_STICK_VALUE);
+   m_rightStickDeadZone = std::min(newDeadZone, XboxController::MAX_STICK_VALUE);
 }
 
-void XboxController::SetTriggerThreshold(unsigned int newThreshold)
+void XboxController::SetTriggerThreshold(uint8_t newThreshold)
 {
-   m_triggerThreshold = qMin(newThreshold, MAX_TRIGGER_VALUE);
+   m_triggerThreshold = std::min(newThreshold, XboxController::MAX_TRIGGER_VALUE);
 }
 
 void XboxController::SetVibration(const float leftVibration, const float rightVibration)

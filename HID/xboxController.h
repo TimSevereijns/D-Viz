@@ -1,19 +1,16 @@
 #ifndef XBOXCONTROLLER_H
 #define XBOXCONTROLLER_H
 
+#include <cstdint>
 #include <functional>
 #include <map>
+#include <numeric>
 #include <memory>
 
 #include <QObject>
 #include <QTimer>
-#include <QDebug>
 
 #include "xInput.h"
-
-#define MAX_STICK_VALUE 32767u
-#define MAX_TRIGGER_VALUE 255u
-#define MAX_VIBRATION_VALUE 65535u
 
 /**
  * @brief The XboxController class tracks and manages the state of the attached Xbox controller(s).
@@ -26,6 +23,15 @@ class XboxController : public QObject
    Q_OBJECT
 
    public:
+      static const uint8_t MAX_TRIGGER_VALUE;
+      static const uint8_t MIN_TRIGGER_VALUE;
+
+      static const int16_t MAX_STICK_VALUE;
+      static const int16_t MIN_STICK_VALUE;
+
+      static const int32_t MAX_VIBRATION_VALUE;
+      static const int32_t MIN_VIBRATION_VALUE;
+
       enum class KEY_STATE
       {
          UP,
@@ -67,35 +73,34 @@ class XboxController : public QObject
       };
 
       /**
-       * @brief The State class represents a snapshot of the state of the controller.
+       * @brief The State struct represents a snapshot of the state of the controller.
        */
-      class State
+      struct State
       {
-         public:
-             explicit State();
+         explicit State();
 
-             quint8 batteryType;
-             quint8 batteryLevel;
+          uint8_t batteryType;
+          uint8_t batteryLevel;
 
-             quint16 buttons;
+          uint16_t buttons;
 
-             float leftTrigger;
-             float rightTrigger;
-             float leftThumbX;
-             float leftThumbY;
-             float rightThumbX;
-             float rightThumbY;
+          float leftTrigger;
+          float rightTrigger;
+          float leftThumbX;
+          float leftThumbY;
+          float rightThumbX;
+          float rightThumbY;
 
-             static bool BatteryEquals(const State& lhs, const State& rhs);
+          static bool BatteryEquals(const State& lhs, const State& rhs);
 
-             bool operator==(const XboxController::State& rhs);
-             bool operator!=(const XboxController::State& rhs);
+          bool operator==(const XboxController::State& rhs);
+          bool operator!=(const XboxController::State& rhs);
       };
 
       explicit XboxController(unsigned int m_controllerNum = 0,
-         unsigned int m_leftStickDeadZone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE,
-         unsigned int m_rightStickDeadZone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE,
-         unsigned int m_triggerThreshold = XINPUT_GAMEPAD_TRIGGER_THRESHOLD,
+         int16_t m_leftStickDeadZone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE,
+         int16_t m_rightStickDeadZone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE,
+         uint8_t m_triggerThreshold = XINPUT_GAMEPAD_TRIGGER_THRESHOLD,
          QObject* parent = nullptr);
 
       ~XboxController();
@@ -111,7 +116,7 @@ class XboxController : public QObject
 
    signals:
       void NewControllerState(XboxController::State);
-      void NewControllerBatteryState(quint8 newBatteryType, quint8 newBatteryLevel);
+      void NewControllerBatteryState(uint8_t newBatteryType, uint8_t newBatteryLevel);
       void ControllerConnected(unsigned int m_controllerNum);
       void ControllerDisconnected(unsigned int m_controllerNum);
 
@@ -123,18 +128,18 @@ class XboxController : public QObject
 
       // The following methods allows you to change the deadzones values, although the default
       // values should be fine.
-      void SetLeftStickDeadZone(unsigned int newDeadZone);
-      void SetRightStickDeadZone(unsigned int newDeadZone);
-      void SetTriggerThreshold(unsigned int newThreshold);
+      void SetLeftStickDeadZone(int16_t newDeadZone);
+      void SetRightStickDeadZone(int16_t newDeadZone);
+      void SetTriggerThreshold(uint8_t newThreshold);
 
    private:
       bool m_isCurrentControllerConnected;
       bool m_isPreviousControllerConnected;
 
-      unsigned int m_controllerNum;
-      unsigned int m_leftStickDeadZone;
-      unsigned int m_rightStickDeadZone;
-      unsigned int m_triggerThreshold;
+      int m_controllerNum;
+      int m_leftStickDeadZone;
+      int m_rightStickDeadZone;
+      int m_triggerThreshold;
 
       std::unique_ptr<QTimer> m_pollingTimer;
 

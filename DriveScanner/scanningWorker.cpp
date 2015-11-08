@@ -1,12 +1,5 @@
 #include "scanningWorker.h"
 
-#include <algorithm>
-#include <chrono>
-#include <iostream>
-#include <locale>
-#include <numeric>
-#include <utility>
-
 namespace
 {
    /**

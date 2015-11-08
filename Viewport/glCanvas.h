@@ -110,7 +110,7 @@ class GLCanvas : public QOpenGLWidget
 
       std::chrono::system_clock::time_point m_lastFrameTimeStamp;
 
-      std::deque<int> m_frameRateDeque;
+      std::deque<const int> m_frameRateDeque;
 
       std::unique_ptr<GraphicsDevice> m_graphicsDevice;
 };

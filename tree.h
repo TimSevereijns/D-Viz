@@ -2,13 +2,10 @@
 #define TREE_H
 
 #include <cassert>
-#include <cstdint>
 #include <functional>
 #include <iostream>
 #include <iterator>
 #include <memory>
-#include <stdexcept>
-#include <utility>
 
 /**
  * The Tree Node class declares the actual nodes of the tree.

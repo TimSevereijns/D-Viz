@@ -1,9 +1,5 @@
 #include "glCanvas.h"
 
-#include "camera.h"
-#include "DriveScanner/driveScanner.h"
-#include "mainwindow.h"
-#include "optionsManager.h"
 #include "Scene/debuggingRayAsset.h"
 #include "Scene/gridAsset.h"
 #include "Scene/selectionHighlightAsset.h"
@@ -11,43 +7,10 @@
 #include "Visualizations/squarifiedTreemap.h"
 #include "Utilities/scopeExit.hpp"
 
-#include <QApplication>
-#include <QMouseEvent>
-#include <QOpenGLShader>
-#include <QStatusBar>
-#include <QTimer>
-
-#include <iostream>
 #include <sstream>
-#include <stdexcept>
 
 namespace
 {
-   /**
-    * @brief keyPressHelper is a helper function to update the press state of a keyboard key.
-    *
-    * @param[in] keyboardManager        The keyboard manager on which to update the key state.
-    * @param[in] key                    The QKeyEvent that triggered the call.
-    * @param[in] state                  Whether the key in question is up (released) or down
-    *                                  (pressed).
-    *
-    * @returns true if the key exists and was updated in the keyboard manager.
-    */
-   inline bool keyPressHelper(KeyboardManager& keyboardManager, const Qt::Key key,
-      const KeyboardManager::KEY_STATE state)
-   {
-      switch (key)
-      {
-         case Qt::Key_W: keyboardManager.UpdateKeyState(key, state); return true;
-         case Qt::Key_A: keyboardManager.UpdateKeyState(key, state); return true;
-         case Qt::Key_S: keyboardManager.UpdateKeyState(key, state); return true;
-         case Qt::Key_D: keyboardManager.UpdateKeyState(key, state); return true;
-         case Qt::Key_Shift: keyboardManager.UpdateKeyState(key, state); return true;
-      }
-
-      return false;
-   }
-
    /**
     * @brief UpdateVertexCountInStatusBar is a helper function to set the specifed vertex and block
     * count in the bottom status bar.
@@ -78,7 +41,7 @@ namespace
       reversePath.reserve(Tree<VizNode>::Depth(node));
       reversePath.emplace_back(node->file.name);
 
-      TreeNode<VizNode> currentNode = node;
+      auto currentNode = node;
 
       while (currentNode.GetParent())
       {
@@ -131,7 +94,7 @@ namespace
          << nodeVertices[26] << nodeVertices[30]
          << nodeVertices[24] << nodeVertices[28];
 
-      const QVector3D hotPink = QVector3D { 1.0f, 105.0f / 255.0f, 180.0f / 255.0f };
+      const auto hotPink = QVector3D { 1.0f, 105.0f / 255.0f, 180.0f / 255.0f };
       for (int index = 0; index < vertices.size(); index++)
       {
          colors << hotPink;
@@ -340,26 +303,10 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
       return;
    }
 
-   if (event->key() == Qt::Key_Up)
-   {
-      m_settings->m_cameraMovementSpeed *= 1.25f;
-   }
-   else if (event->key() == Qt::Key_Down)
-   {
-      m_settings->m_cameraMovementSpeed *= 0.75f;
-   }
+   const auto state = KeyboardManager::KEY_STATE::DOWN;
+   m_keyboardManager.UpdateKeyState(static_cast<Qt::Key>(event->key()), state);
 
-   const auto keyState = KeyboardManager::KEY_STATE::DOWN;
-   const bool wasKeyRecognized = keyPressHelper(m_keyboardManager,
-      static_cast<Qt::Key>(event->key()), keyState);
-   if (wasKeyRecognized)
-   {
-      event->accept();
-   }
-   else
-   {
-      QOpenGLWidget::keyPressEvent(event);
-   }
+   event->accept();
 }
 
 void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
@@ -376,17 +323,10 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
       return;
    }
 
-   const auto keyState = KeyboardManager::KEY_STATE::UP;
-   const bool wasKeyRecognized = keyPressHelper(m_keyboardManager,
-      static_cast<Qt::Key>(event->key()), keyState);
-   if (wasKeyRecognized)
-   {
-      event->accept();
-   }
-   else
-   {
-      QOpenGLWidget::keyReleaseEvent(event);
-   }
+   const auto state = KeyboardManager::KEY_STATE::UP;
+   m_keyboardManager.UpdateKeyState(static_cast<Qt::Key>(event->key()), state);
+
+   event->accept();
 }
 
 void GLCanvas::HandleRightClick(const QMouseEvent& event)
@@ -410,7 +350,6 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
    else
    {
       ClearAssetBuffersAndReload(*m_sceneAssets[Asset::HIGHLIGHT], m_camera);
-
       PrintMetadataToStatusBar(m_sceneAssets[Asset::TREEMAP]->GetVertexCount(), *m_mainWindow);
    }
 }
