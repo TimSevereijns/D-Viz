@@ -243,12 +243,12 @@ void MainWindow::OnFieldOfViewChanged(const int fieldOfView)
    m_glCanvas->SetFieldOfView(static_cast<float>(fieldOfView));
 }
 
-void MainWindow::UpdateFieldOfViewSlider(const int fieldOfView)
+void MainWindow::SetFieldOfViewSlider(const int fieldOfView)
 {
    m_ui->fieldOfViewSlider->setValue(fieldOfView);
 }
 
-void MainWindow::UpdateCameraSpeedSpinner(const double speed)
+void MainWindow::SetCameraSpeedSpinner(const double speed)
 {
    m_ui->cameraSpeedSpinner->setValue(speed);
 }

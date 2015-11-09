@@ -66,9 +66,15 @@ void ScanningWorker::ComputeDirectorySizes()
 
 void ScanningWorker::ScanRecursively(const boost::filesystem::path& path, TreeNode<VizNode>& treeNode)
 {
-   if (m_filesScanned % 1000 == 0)
+   using namespace std::chrono;
+   const auto timeSinceLastProgressUpdate =
+         duration_cast<milliseconds>(high_resolution_clock::now() - m_lastProgressUpdate).count();
+
+   if (timeSinceLastProgressUpdate > 1000)
    {
       emit ProgressUpdate(m_filesScanned);
+
+      m_lastProgressUpdate = high_resolution_clock::now();
    }
 
    if (boost::filesystem::is_regular_file(path) && boost::filesystem::file_size(path) > 0)
@@ -111,6 +117,8 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path, TreeNo
 void ScanningWorker::Start()
 {
    assert(boost::filesystem::is_directory(m_path));
+
+   m_lastProgressUpdate = std::chrono::high_resolution_clock::now();
 
    try
    {

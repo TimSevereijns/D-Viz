@@ -422,7 +422,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
          m_settings->m_cameraMovementSpeed -= 0.01;
       }
 
-      m_mainWindow->UpdateCameraSpeedSpinner(static_cast<double>(m_settings->m_cameraMovementSpeed));
+      m_mainWindow->SetCameraSpeedSpinner(static_cast<double>(m_settings->m_cameraMovementSpeed));
    }
    else
    {
@@ -435,7 +435,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
          m_camera.DecreaseFieldOfView();
       }
 
-      m_mainWindow->UpdateFieldOfViewSlider(static_cast<float>(m_camera.GetFieldOfView()));
+      m_mainWindow->SetFieldOfViewSlider(static_cast<float>(m_camera.GetFieldOfView()));
    }
 }
 

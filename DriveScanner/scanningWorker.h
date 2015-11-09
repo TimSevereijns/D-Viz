@@ -55,6 +55,7 @@ class ScanningWorker : public QObject
       std::uintmax_t m_filesScanned;
 
       std::chrono::duration<double> m_scanningTime;
+      std::chrono::high_resolution_clock::time_point m_lastProgressUpdate;
 };
 
 #endif // SCANNINGWORKER_H
