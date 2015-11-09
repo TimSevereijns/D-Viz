@@ -9,7 +9,7 @@ For information on how to set up and build the project, please see the Wiki.
 ## Screenshots
 
 ![Example 1]
-(https://raw.githubusercontent.com/TimSevereijns/D-Viz/master/Screenshots/Example1.png?token=AAsAD7eC5MFEY2MddgUnp23Wy2E2UVhbks5WQAQ6wA%3D%3D)
+(https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example1.png)
 
 ![Example 2]
 (https://raw.githubusercontent.com/TimSevereijns/D-Viz/master/Screenshots/Example3.png?token=AAsAD18uT-uSjIHwIlr-TBa3c1RbrAznks5WQAR1wA%3D%3D)
