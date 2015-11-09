@@ -12,10 +12,10 @@ For information on how to set up and build the project, please see the Wiki.
 (https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example1.png)
 
 ![Example 2]
-(https://raw.githubusercontent.com/TimSevereijns/D-Viz/master/Screenshots/Example3.png?token=AAsAD18uT-uSjIHwIlr-TBa3c1RbrAznks5WQAR1wA%3D%3D)
+(https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example3.png)
 
 ![Example 3]
-(https://raw.githubusercontent.com/TimSevereijns/D-Viz/master/Screenshots/Example4.png?token=AAsAD8-yaruivPQ4eXyjNYVc7ivKNpzfks5WQASOwA%3D%3D)
+(https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example5.png)
 
 ## Notes
 
