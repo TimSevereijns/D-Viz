@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include <QMessageBox>
+
 DriveScanner::DriveScanner()
    : QObject(),
      m_theTree(nullptr)
@@ -28,6 +30,15 @@ void DriveScanner::HandleProgressUpdates(const std::uintmax_t filesScanned)
 void DriveScanner::HandleCompletion(const std::uintmax_t filesScanned)
 {
    m_scanningParameters.onScanCompletedCallback(filesScanned);
+}
+
+void DriveScanner::HandleMessageBox(const QString& message)
+{
+   QMessageBox messageBox;
+   messageBox.setText(message);
+   messageBox.setIcon(QMessageBox::Warning);
+   messageBox.setStandardButtons(QMessageBox::Ok);
+   messageBox.exec();
 }
 
 void DriveScanner::StartScanning()
@@ -64,6 +75,9 @@ void DriveScanner::StartScanning()
 
    connect(worker, SIGNAL(ProgressUpdate(const std::uintmax_t)),
       this, SLOT(HandleProgressUpdates(std::uintmax_t)));
+
+   connect(worker, SIGNAL(ShowMessageBox(const QString&)),
+      this, SLOT(HandleMessageBox(const QString&)), Qt::BlockingQueuedConnection);
 
    connect(worker, SIGNAL(Finished(const std::uintmax_t)),
       worker, SLOT(deleteLater()));

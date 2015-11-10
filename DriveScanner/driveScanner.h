@@ -51,6 +51,8 @@ class DriveScanner : public QObject
       void HandleCompletion(const std::uintmax_t filesScanned);
       void HandleProgressUpdates(const std::uintmax_t filesScanned);
 
+      void HandleMessageBox(const QString& message);
+
    private:
       DriveScannerParameters m_scanningParameters;
 

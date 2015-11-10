@@ -64,7 +64,8 @@ void ScanningWorker::ComputeDirectorySizes()
    }
 }
 
-void ScanningWorker::ScanRecursively(const boost::filesystem::path& path, TreeNode<VizNode>& treeNode)
+void ScanningWorker::ScanRecursively(const boost::filesystem::path& path,
+   TreeNode<VizNode>& treeNode)
 {
    using namespace std::chrono;
    const auto timeSinceLastProgressUpdate =
@@ -90,8 +91,9 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path, TreeNo
 
       ++m_filesScanned;
    }
-   else if (boost::filesystem::is_directory(path) && !boost::filesystem::is_empty(path)
-      && !boost::filesystem::is_symlink(path))
+   else if (boost::filesystem::is_directory(path) &&
+      !boost::filesystem::is_empty(path) &&
+      !boost::filesystem::is_symlink(path))
    {
       const FileInfo directoryInfo
       {
@@ -120,6 +122,8 @@ void ScanningWorker::Start()
 
    m_lastProgressUpdate = std::chrono::high_resolution_clock::now();
 
+   emit ProgressUpdate(0);
+
    try
    {
       const auto start = std::chrono::high_resolution_clock::now();
@@ -129,13 +133,12 @@ void ScanningWorker::Start()
       m_scanningTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
       ComputeDirectorySizes();
-
       PruneEmptyFilesAndDirectories(*m_fileTree);
 
       emit Finished(m_filesScanned);
    }
    catch (const boost::filesystem::filesystem_error& exception)
    {
-      std::cout << exception.what() << std::endl;
+      emit ShowMessageBox(QString(exception.what()) + "\n\nScanning aborted.");
    }
 }

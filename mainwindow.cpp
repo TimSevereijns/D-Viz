@@ -11,6 +11,7 @@
 #include <QAction>
 #include <QFileDialog>
 #include <QMenuBar>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget* parent /*= 0*/)
    : QMainWindow(parent),

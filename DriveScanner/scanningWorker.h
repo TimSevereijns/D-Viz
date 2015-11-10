@@ -38,6 +38,8 @@ class ScanningWorker : public QObject
       void Finished(const std::uintmax_t filesScanned);
       void ProgressUpdate(const std::uintmax_t filesScanned);
 
+      void ShowMessageBox(const QString& message);
+
    private:
       /**
        * Max path length in Windows is 260 characters, so if that includes slashes, then the maximum
