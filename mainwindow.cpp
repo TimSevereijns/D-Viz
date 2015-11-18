@@ -11,7 +11,6 @@
 #include <QAction>
 #include <QFileDialog>
 #include <QMenuBar>
-#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget* parent /*= 0*/)
    : QMainWindow(parent),
@@ -39,6 +38,7 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/)
            std::pair<std::uintmax_t, QString>(1048576ull * 250,   "< 250 MiB"),
            std::pair<std::uintmax_t, QString>(1048576ull * 500,   "< 500 MiB"),
            std::pair<std::uintmax_t, QString>(1048576ull * 1000,  "< 1 GiB"),
+           std::pair<std::uintmax_t, QString>(1048576ull * 2500,  "< 2.5 GiB"),
            std::pair<std::uintmax_t, QString>(1048576ull * 5000,  "< 5 GiB"),
            std::pair<std::uintmax_t, QString>(1048576ull * 10000, "< 10 GiB")
         })
@@ -127,13 +127,13 @@ void MainWindow::SetupXboxController()
    m_xboxController->SetUpHandler(XINPUT_GAMEPAD_Y,
       [] () { std::cout << "Button Y released..." << std::endl; });
 
-   connect(&*m_xboxController, SIGNAL(ControllerConnected(uint)),
+   connect(m_xboxController.get(), SIGNAL(ControllerConnected(uint)),
       this, SLOT(XboxControllerConnected()));
 
-   connect(&*m_xboxController, SIGNAL(ControllerDisconnected(uint)),
+   connect(m_xboxController.get(), SIGNAL(ControllerDisconnected(uint)),
       this, SLOT(XboxControllerDisconnected()));
 
-   connect(&*m_xboxController, SIGNAL(NewControllerState(XboxController::State)),
+   connect(m_xboxController.get(), SIGNAL(NewControllerState(XboxController::State)),
       this, SLOT(XboxControllerStateChanged(XboxController::State)));
 }
 

@@ -106,12 +106,27 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path,
 
       ++m_filesScanned;
 
-      for (auto itr = boost::filesystem::directory_iterator(path);
-           itr != boost::filesystem::directory_iterator();
-           ++itr)
+      boost::system::error_code errorCode;
+
+      try
       {
-         const boost::filesystem::path nextPath = itr->path();
-         ScanRecursively(nextPath, *treeNode.GetLastChild());
+         for (auto itr = boost::filesystem::directory_iterator(path, errorCode);
+              itr != boost::filesystem::directory_iterator();
+              itr.increment(errorCode))
+         {
+            if (errorCode)
+            {
+               return;
+            }
+
+            const boost::filesystem::path nextPath = itr->path();
+            ScanRecursively(nextPath, *treeNode.GetLastChild());
+         }
+      }
+      catch (const boost::filesystem::filesystem_error& exception)
+      {
+         emit ShowMessageBox(QString(exception.what()) + "\n\n" +
+            "This file or directory will be skipped!");
       }
    }
 }
