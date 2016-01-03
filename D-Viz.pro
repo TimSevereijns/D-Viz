@@ -10,7 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets 3dcore
 
 TARGET = D-Viz
 TEMPLATE = app
-CONFIG += c++11 console
+CONFIG += c++11
 
 SOURCES += main.cpp\
     mainwindow.cpp \
@@ -70,7 +70,8 @@ DISTFILES += \
     Shaders/visualizationFragmentShader.frag \
     Shaders/visualizationVertexShader.vert \
     Shaders/simpleLineFragmentShader.frag \
-    Shaders/simpleLineVertexShader.vert
+    Shaders/simpleLineVertexShader.vert \
+    Resources/XInput1_4.dll
 
 RESOURCES += \
     resources.qrc
