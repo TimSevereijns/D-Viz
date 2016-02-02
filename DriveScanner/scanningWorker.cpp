@@ -92,8 +92,8 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path,
       ++m_filesScanned;
    }
    else if (boost::filesystem::is_directory(path) &&
-      !boost::filesystem::is_empty(path) &&
-      !boost::filesystem::is_symlink(path))
+      !boost::filesystem::is_symlink(path) &&
+      !boost::filesystem::is_empty(path))
    {
       const FileInfo directoryInfo
       {
