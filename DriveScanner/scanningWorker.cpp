@@ -91,15 +91,21 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path,
 
       ++m_filesScanned;
    }
-   else if (boost::filesystem::is_directory(path) &&
-      path.filename() == "System Volume Information")
+   else if (boost::filesystem::is_directory(path) && !boost::filesystem::is_symlink(path))
    {
-      return;
-   }
-   else if (boost::filesystem::is_directory(path) &&
-      !boost::filesystem::is_symlink(path) &&
-      !boost::filesystem::is_empty(path))
-   {
+      try
+      {
+         // If we don't have the correct permissions, we can't safely perform this check:
+         if (boost::filesystem::is_empty(path))
+         {
+            return;
+         }
+      }
+      catch (...)
+      {
+         return;
+      }
+
       const FileInfo directoryInfo
       {
          path.filename().wstring(),
@@ -113,25 +119,27 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path,
 
       boost::system::error_code errorCode;
 
-      try
+      auto itr = boost::filesystem::directory_iterator(path, errorCode);
+      if (errorCode)
       {
-         for (auto itr = boost::filesystem::directory_iterator(path, errorCode);
-              itr != boost::filesystem::directory_iterator();
-              itr.increment(errorCode))
-         {
-            if (errorCode)
-            {
-               return;
-            }
-
-            const boost::filesystem::path nextPath = itr->path();
-            ScanRecursively(nextPath, *treeNode.GetLastChild());
-         }
+         emit ShowMessageBox("Could not create iterator!");
+         return;
       }
-      catch (const boost::filesystem::filesystem_error& exception)
+
+      const auto end = boost::filesystem::directory_iterator();
+      while (itr != end)
       {
-         emit ShowMessageBox(QString(exception.what()) + "\n\n" +
-            "This file or directory will be skipped!");
+         ScanRecursively(itr->path(), *treeNode.GetLastChild());
+
+         try
+         {
+            itr++;
+         }
+         catch (const boost::filesystem::filesystem_error& exception)
+         {
+            emit ShowMessageBox(QString(exception.what()) + "\n\n" +
+               "Could not advance iterator!");
+         }
       }
    }
 }
