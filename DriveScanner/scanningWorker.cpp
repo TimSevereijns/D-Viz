@@ -152,10 +152,18 @@ void ScanningWorker::Start()
 
    emit ProgressUpdate(0);
 
+   // Since the root node of the tree already represents the user's selected starting path,
+   // we'll start with the first item in that directory:
+   auto itr = boost::filesystem::directory_iterator(m_path);
+   if (itr == boost::filesystem::directory_iterator())
+   {
+      return;
+   }
+
    try
    {
       const auto start = std::chrono::high_resolution_clock::now();
-      ScanRecursively(m_path, *m_fileTree->GetHead().get());
+      ScanRecursively(itr->path(), *m_fileTree->GetHead().get());
       const auto end = std::chrono::high_resolution_clock::now();
 
       m_scanningTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
