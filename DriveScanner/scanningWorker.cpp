@@ -131,14 +131,12 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path,
       {
          ScanRecursively(itr->path(), *treeNode.GetLastChild());
 
-         try
+         errorCode.clear();
+         itr.increment(errorCode);
+
+         if (errorCode)
          {
-            itr++;
-         }
-         catch (const boost::filesystem::filesystem_error& exception)
-         {
-            emit ShowMessageBox(QString(exception.what()) + "\n\n" +
-               "Could not advance iterator!");
+            emit ShowMessageBox("Could not advance iterator!");
          }
       }
    }
@@ -148,33 +146,38 @@ void ScanningWorker::Start()
 {
    assert(boost::filesystem::is_directory(m_path));
 
-   m_lastProgressUpdate = std::chrono::high_resolution_clock::now();
-
    emit ProgressUpdate(0);
 
-   // Since the root node of the tree already represents the user's selected starting path,
-   // we'll start with the first item in that directory:
-   auto itr = boost::filesystem::directory_iterator(m_path);
-   if (itr == boost::filesystem::directory_iterator())
+   const auto startTime = std::chrono::high_resolution_clock::now();
+   m_lastProgressUpdate = startTime;
+
+   boost::system::error_code errorCode;
+   auto itr = boost::filesystem::directory_iterator(m_path, errorCode);
+   if (errorCode)
    {
+      emit ShowMessageBox("Could not create iterator!");
       return;
    }
 
-   try
+   const auto end = boost::filesystem::directory_iterator();
+   while (itr != end)
    {
-      const auto start = std::chrono::high_resolution_clock::now();
       ScanRecursively(itr->path(), *m_fileTree->GetHead().get());
-      const auto end = std::chrono::high_resolution_clock::now();
 
-      m_scanningTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+      errorCode.clear();
+      itr.increment(errorCode);
 
-      ComputeDirectorySizes();
-      PruneEmptyFilesAndDirectories(*m_fileTree);
-
-      emit Finished(m_filesScanned);
+      if (errorCode)
+      {
+         emit ShowMessageBox("Could not advance iterator!");
+      }
    }
-   catch (const boost::filesystem::filesystem_error& exception)
-   {
-      emit ShowMessageBox(QString(exception.what()) + "\n\nScanning aborted.");
-   }
+
+   const auto endTime = std::chrono::high_resolution_clock::now();
+   m_scanningTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+
+   ComputeDirectorySizes();
+   PruneEmptyFilesAndDirectories(*m_fileTree);
+
+   emit Finished(m_filesScanned);
 }

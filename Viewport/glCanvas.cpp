@@ -49,8 +49,8 @@ namespace
          reversePath.emplace_back(currentNode->file.name);
       }
 
-      auto completePath = std::accumulate(std::rbegin(reversePath), std::rend(reversePath), std::wstring(),
-         [] (const std::wstring path, const std::wstring file)
+      const auto completePath = std::accumulate(std::rbegin(reversePath), std::rend(reversePath),
+         std::wstring{}, [] (const std::wstring path, const std::wstring file)
       {
          return path + (!path.empty() ? L"/" : L"") + file;
       });
