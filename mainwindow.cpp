@@ -41,6 +41,14 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/)
            std::pair<std::uintmax_t, QString>(1048576ull * 2500,  "< 2.5 GiB"),
            std::pair<std::uintmax_t, QString>(1048576ull * 5000,  "< 5 GiB"),
            std::pair<std::uintmax_t, QString>(1048576ull * 10000, "< 10 GiB")
+        }),
+     m_fileSizeReadoutOptions(
+        {
+           std::pair<std::uintmax_t, QString>(1,                    "Bytes"),
+           std::pair<std::uintmax_t, QString>(1024ull,              "Kibibytes"),
+           std::pair<std::uintmax_t, QString>(1048576ull,           "Mebibytes"),
+           std::pair<std::uintmax_t, QString>(1048576ull * 1000,    "Gibibytes"),
+           std::pair<std::uintmax_t, QString>(1048576ull * 1000000, "Tebibytes")
         })
 {
    SetupXboxController();
@@ -69,6 +77,14 @@ void MainWindow::SetupSidebar()
    {
       m_ui->pruneSizeComboBox->addItem(pair.second);
    });
+
+   std::for_each(std::begin(m_fileSizeReadoutOptions), std::end(m_fileSizeReadoutOptions),
+      [&] (const std::pair<std::uintmax_t, QString>& pair)
+   {
+      m_ui->fileSizeUnitComboBox->addItem(pair.second);
+   });
+
+   m_ui->fileSizeUnitComboBox->setCurrentIndex(2);
 
    connect(m_ui->directoriesOnlyCheckbox, &QCheckBox::stateChanged,
       this, &MainWindow::OnDirectoryOnlyStateChanged);
@@ -142,6 +158,12 @@ std::wstring MainWindow::GetDirectoryToVisualize() const
    return m_directoryToVisualize;
 }
 
+std::pair<std::uintmax_t, QString> MainWindow::GetFileSizeReadoutUnits() const
+{
+   const auto comboBoxIndex = m_ui->fileSizeUnitComboBox->currentIndex();
+   return m_fileSizeReadoutOptions[comboBoxIndex];
+}
+
 void MainWindow::CreateMenus()
 {
    CreateFileMenu();
@@ -185,13 +207,13 @@ void MainWindow::OnFileMenuNewScan()
    {
       m_directoryToVisualize = selectedDirectory.toStdWString();
 
-      const auto pruneSizeIndex = m_ui->pruneSizeComboBox->currentIndex();
+      const auto comboBoxIndex = m_ui->pruneSizeComboBox->currentIndex();
 
       VisualizationParameters parameters;
       parameters.rootDirectory = m_directoryToVisualize;
       parameters.onlyShowDirectories = m_showDirectoriesOnly;
       parameters.forceNewScan = true;
-      parameters.minimumFileSize = m_sizePruningOptions[pruneSizeIndex].first;
+      parameters.minimumFileSize = m_sizePruningOptions[comboBoxIndex].first;
 
       m_glCanvas->CreateNewVisualization(parameters);
    }

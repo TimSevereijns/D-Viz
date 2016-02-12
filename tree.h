@@ -676,6 +676,8 @@ class Tree
             explicit Iterator(std::shared_ptr<TreeNode<T>> node);
             explicit Iterator(std::shared_ptr<TreeNode<T>> node, std::shared_ptr<TreeNode<T>> head);
 
+            explicit operator bool() const;
+
             TreeNode<T>& operator*();
             const TreeNode<T>& operator*() const;
 
@@ -920,7 +922,7 @@ unsigned int Tree<T>::Size(const TreeNode<T>& node)
    unsigned int count = 0;
 
    Tree<T>::PostOrderIterator itr = Tree<T>::PostOrderIterator(std::make_shared<TreeNode<T>>(node));
-   for (++itr; &*itr != &node; ++itr)
+   for (++itr; itr && &*itr != &node; ++itr)
    {
       count++;
    }
@@ -1101,6 +1103,13 @@ Tree<T>::Iterator::Iterator(std::shared_ptr<TreeNode<T>> node, std::shared_ptr<T
    : m_node(node),
      m_head(head)
 {
+}
+
+template<typename T>
+Tree<T>::Iterator::operator bool() const
+{
+   const bool isValid = (m_node != nullptr);
+   return isValid;
 }
 
 template<typename T>

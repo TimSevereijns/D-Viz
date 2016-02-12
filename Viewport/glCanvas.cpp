@@ -347,7 +347,14 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
    {
       HighlightSelection(*selection, *m_sceneAssets[Asset::HIGHLIGHT], m_camera);
 
-      m_mainWindow->SetStatusBarMessage(GetFullNodePath(*selection));
+      const auto fileSize = selection->GetData().file.size;
+      const std::pair<std::uintmax_t, QString> sizeUnits = m_mainWindow->GetFileSizeReadoutUnits();
+
+      std::wstringstream message;
+      message.imbue(std::locale(""));
+      message << GetFullNodePath(*selection) << L"  |  "
+         << fileSize / (double)sizeUnits.first << L" " << sizeUnits.second.toStdWString();
+      m_mainWindow->SetStatusBarMessage(message.str());
    }
    else
    {
