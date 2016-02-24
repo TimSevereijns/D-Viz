@@ -7,7 +7,7 @@
 const uint8_t XboxController::MAX_TRIGGER_VALUE = std::numeric_limits<int8_t>::max();
 const uint8_t XboxController::MIN_TRIGGER_VALUE = std::numeric_limits<int8_t>::min();
 
-const int16_t XboxController::MAX_STICK_VALUE =std::numeric_limits<int16_t>::max();
+const int16_t XboxController::MAX_STICK_VALUE = std::numeric_limits<int16_t>::max();
 const int16_t XboxController::MIN_STICK_VALUE = std::numeric_limits<int16_t>::min();
 
 const int32_t XboxController::MAX_VIBRATION_VALUE = std::numeric_limits<int32_t>::max();
@@ -24,7 +24,7 @@ namespace
     * @param previousState
     */
    void UpdateSingleButton(const unsigned int targetButton,
-      std::map<unsigned int, XboxController::StateAndHandlers>& buttonMap,
+      std::unordered_map<unsigned int, XboxController::StateAndHandlers>& buttonMap,
       const quint16 currentState, const quint16 previousState)
    {
       auto& stateAndHandler = buttonMap[targetButton];
@@ -55,7 +55,7 @@ namespace
     * @param buttonMap
     */
    void UpdateAllButtons(const quint16 currentState, const quint16 previousState,
-      std::map<unsigned int, XboxController::StateAndHandlers>& buttonMap)
+      std::unordered_map<unsigned int, XboxController::StateAndHandlers>& buttonMap)
    {
       std::for_each(std::begin(buttonMap), std::end(buttonMap),
          [&buttonMap, currentState, previousState] (const std::pair<const unsigned int,

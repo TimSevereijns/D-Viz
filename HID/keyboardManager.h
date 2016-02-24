@@ -1,7 +1,7 @@
 #ifndef KEYBOARDMANAGER_H
 #define KEYBOARDMANAGER_H
 
-#include <map>
+#include <unordered_map>
 
 #include <QKeyEvent>
 
@@ -49,7 +49,7 @@ class KeyboardManager
       void UpdateKeyState(const Qt::Key, const KEY_STATE state);
 
    private:
-      std::map<Qt::Key, KEY_STATE> m_keyMap;
+      std::unordered_map<Qt::Key, KEY_STATE> m_keyMap;
 };
 
 #endif // KEYBOARDMANAGER_H

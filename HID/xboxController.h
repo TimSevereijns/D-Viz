@@ -3,9 +3,9 @@
 
 #include <cstdint>
 #include <functional>
-#include <map>
 #include <numeric>
 #include <memory>
+#include <unordered_map>
 
 #include <QObject>
 #include <QTimer>
@@ -146,7 +146,7 @@ class XboxController : public QObject
       State m_previousState;
       State m_currentState;
 
-      std::map<unsigned int, StateAndHandlers> m_buttonMap;
+      std::unordered_map<unsigned int, StateAndHandlers> m_buttonMap;
 };
 
 #endif // XBOXCONTROLLER_H
