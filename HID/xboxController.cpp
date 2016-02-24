@@ -164,7 +164,7 @@ bool XboxController::State::BatteryEquals(const State& lhs, const State& rhs)
    return (lhs.batteryType == rhs.batteryType) && (lhs.batteryLevel == rhs.batteryLevel);
 }
 
-XboxController::XboxController(unsigned int controllerNum, int16_t leftStickDeadZone,
+XboxController::XboxController(unsigned int controllerNumber, int16_t leftStickDeadZone,
    int16_t rightStickDeadZone, uint8_t triggerThreshold, QObject* parent)
    : QObject(parent),
      m_isCurrentControllerConnected(false),
@@ -172,7 +172,7 @@ XboxController::XboxController(unsigned int controllerNum, int16_t leftStickDead
      m_leftStickDeadZone(std::min(leftStickDeadZone, XboxController::MAX_STICK_VALUE)),
      m_rightStickDeadZone(std::min(rightStickDeadZone, XboxController::MAX_STICK_VALUE)),
      m_triggerThreshold(std::min(triggerThreshold, XboxController::MAX_TRIGGER_VALUE)),
-     m_pollingTimer(new QTimer()),
+     m_pollingTimer(new QTimer{}),
      m_buttonMap(
         {
            { XINPUT_GAMEPAD_A, StateAndHandlers(XboxController::KEY_STATE::UP) },
@@ -191,7 +191,7 @@ XboxController::XboxController(unsigned int controllerNum, int16_t leftStickDead
            { XINPUT_GAMEPAD_DPAD_DOWN, StateAndHandlers(XboxController::KEY_STATE::UP) }
         })
 {
-   m_controllerNum = qMin(controllerNum, 3u);
+   m_controllerNumber = qMin(controllerNumber, 3u);
    connect(m_pollingTimer.get(), SIGNAL(timeout()), this, SLOT(Update()));
 }
 
@@ -232,16 +232,16 @@ void XboxController::Update()
 {
    XINPUT_STATE inputState;
    memset(&inputState, 0, sizeof(XINPUT_STATE));
-   m_isCurrentControllerConnected = (XInputGetState(m_controllerNum, &inputState) == ERROR_SUCCESS);
+   m_isCurrentControllerConnected = (XInputGetState(m_controllerNumber, &inputState) == ERROR_SUCCESS);
 
    // Handle gamepad connection/deconnection:
    if (m_isPreviousControllerConnected == false && m_isCurrentControllerConnected == true)
    {
-      emit ControllerConnected(m_controllerNum);
+      emit ControllerConnected(m_controllerNumber);
    }
    else if (m_isPreviousControllerConnected == true && m_isCurrentControllerConnected == false)
    {
-      emit ControllerDisconnected(m_controllerNum);
+      emit ControllerDisconnected(m_controllerNumber);
    }
 
    m_isPreviousControllerConnected = m_isCurrentControllerConnected;
@@ -271,7 +271,7 @@ void XboxController::Update()
    // Update battery states:
    XINPUT_BATTERY_INFORMATION inputBattery;
    memset(&inputBattery, 0, sizeof(XINPUT_BATTERY_INFORMATION));
-   const auto batteryDataFetchResult = XInputGetBatteryInformation(m_controllerNum,
+   const auto batteryDataFetchResult = XInputGetBatteryInformation(m_controllerNumber,
       BATTERY_DEVTYPE_GAMEPAD, &inputBattery);
    if ( batteryDataFetchResult == ERROR_SUCCESS)
    {
@@ -317,7 +317,7 @@ void XboxController::SetVibration(const float leftVibration, const float rightVi
    XINPUT_VIBRATION xInputVibration;
    xInputVibration.wLeftMotorSpeed = MAX_VIBRATION_VALUE * qBound(0.0f, 1.0f, leftVibration);
    xInputVibration.wRightMotorSpeed = MAX_VIBRATION_VALUE * qBound(0.0f, 1.0f, rightVibration);
-   XInputSetState(m_controllerNum, &xInputVibration);
+   XInputSetState(m_controllerNumber, &xInputVibration);
 }
 
 bool XboxController::HasStateChanged(void)

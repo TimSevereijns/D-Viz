@@ -76,7 +76,7 @@ bool VisualizationAsset::PrepareColorBuffers(const Camera& camera)
 bool VisualizationAsset::Render(const Camera& camera, const Light& light,
    const OptionsManager& settings)
 {
-   const static QMatrix4x4 DEFAULT_MATRIX = QMatrix4x4();
+   const static QMatrix4x4 DEFAULT_MATRIX = QMatrix4x4{};
 
    if (!IsAssetLoaded())
    {

@@ -20,7 +20,7 @@ namespace
 
       for (const TreeNode<VizNode>* const node : row)
       {
-         std::wcout << (*node)->file.name << " ";
+         std::wcout << (*node)->file.name << L" ";
       }
 
       std::cout << std::endl;
@@ -129,11 +129,13 @@ namespace
       Block rowRealEstate;
       if (remainingLand.width > std::abs(remainingLand.depth))
       {
-         rowRealEstate = Block(
+         rowRealEstate = Block
+         {
             nearCorner,
             remainingLand.width * rowToParentRatio,
             remainingLand.height,
-            -remainingLand.depth);
+            -remainingLand.depth
+         };
 
          if (updateOffset)
          {
@@ -149,10 +151,13 @@ namespace
       }
       else
       {
-         rowRealEstate = Block(DoublePoint3D(nearCorner),
+         rowRealEstate = Block
+         {
+            DoublePoint3D(nearCorner),
             remainingLand.width,
             remainingLand.height,
-            -remainingLand.depth * rowToParentRatio);
+            -remainingLand.depth * rowToParentRatio
+         };
 
          if (updateOffset)
          {
@@ -227,11 +232,13 @@ namespace
          -depthPaddingPerSide
       };
 
-      data.block = Block(land.origin + offset,
+      data.block = Block
+      {
+         land.origin + offset,
          finalBlockWidth,
          Visualization::BLOCK_HEIGHT,
          finalBlockDepth
-      );
+      };
 
       const double additionalCoverage = blockWidthPlusPadding / land.width;
       return additionalCoverage;
@@ -276,11 +283,13 @@ namespace
          -(land.depth * land.percentCovered) - depthPaddingPerSide
       };
 
-      data.block = Block(land.origin + offset,
+      data.block = Block
+      {
+         land.origin + offset,
          finalBlockWidth,
          Visualization::BLOCK_HEIGHT,
          std::abs(finalBlockDepth)
-      );
+      };
 
       const double additionalCoverage = blockDepthPlusPadding / land.depth;
       return additionalCoverage;

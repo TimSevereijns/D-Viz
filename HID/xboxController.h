@@ -97,7 +97,7 @@ class XboxController : public QObject
           bool operator!=(const XboxController::State& rhs);
       };
 
-      explicit XboxController(unsigned int m_controllerNum = 0,
+      explicit XboxController(unsigned int m_controllerNumber = 0,
          int16_t m_leftStickDeadZone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE,
          int16_t m_rightStickDeadZone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE,
          uint8_t m_triggerThreshold = XINPUT_GAMEPAD_TRIGGER_THRESHOLD,
@@ -117,8 +117,8 @@ class XboxController : public QObject
    signals:
       void NewControllerState(XboxController::State);
       void NewControllerBatteryState(uint8_t newBatteryType, uint8_t newBatteryLevel);
-      void ControllerConnected(unsigned int m_controllerNum);
-      void ControllerDisconnected(unsigned int m_controllerNum);
+      void ControllerConnected(unsigned int m_controllerNumber);
+      void ControllerDisconnected(unsigned int m_controllerNumber);
 
    public slots:
       void StartAutoPolling(unsigned int interval);
@@ -136,7 +136,7 @@ class XboxController : public QObject
       bool m_isCurrentControllerConnected;
       bool m_isPreviousControllerConnected;
 
-      int m_controllerNum;
+      int m_controllerNumber;
       int m_leftStickDeadZone;
       int m_rightStickDeadZone;
       int m_triggerThreshold;

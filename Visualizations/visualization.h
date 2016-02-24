@@ -60,7 +60,7 @@ class Visualization
       /**
        * Parses the specified directory scan into vertex and color data.
        *
-       * @param[in/out] theTree         The unparsed scan results.
+       * @param[in, out] theTree         The unparsed scan results.
        */
       virtual void Parse(const std::shared_ptr<Tree<VizNode>>& theTree) = 0;
 
@@ -125,12 +125,12 @@ class Visualization
        * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each
        * node by their respective file sizes.
        *
-       * @param[in/out] tree           The tree to be sorted.
+       * @param[in, out] tree           The tree to be sorted.
        */
       static void SortNodes(Tree<VizNode>& tree);
 
    protected:
-      std::shared_ptr<Tree<VizNode>> m_theTree; ///< @todo ...or should this be a weak_ptr?
+      std::shared_ptr<Tree<VizNode>> m_theTree;
 
       VisualizationParameters m_vizParameters;
 

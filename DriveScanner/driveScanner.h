@@ -8,31 +8,12 @@
 #include <memory>
 #include <string>
 
+#include "../DataStructs/driveScanningParameters.h"
+
 #include "scanningWorker.h"
 
 /**
- * @brief The DriveScannerParameters struct
- */
-struct DriveScannerParameters
-{
-   using ProgressCallback = std::function<void (const std::uintmax_t filesScanned)>;
-   using ScanCompleteCallback = std::function<void (const std::uintmax_t filesScanned)>;
-
-   ProgressCallback onProgressUpdateCallback;
-   ScanCompleteCallback onScanCompletedCallback;
-
-   std::wstring path;
-
-   DriveScannerParameters()
-      : onProgressUpdateCallback(ProgressCallback()),
-        onScanCompletedCallback(ScanCompleteCallback()),
-        path(L"")
-   {
-   }
-};
-
-/**
- * @brief The DriveScanner class
+ * @brief The DriveScanner class uses a dedicate thread to scan the specified drive or part thereof.
  */
 class DriveScanner : public QObject
 {
@@ -42,21 +23,39 @@ class DriveScanner : public QObject
       explicit DriveScanner();
       ~DriveScanner();
 
-      void SetParameters(const DriveScannerParameters& parameters);
-      void StartScanning();
-
-      std::shared_ptr<Tree<VizNode>> GetTree() const;
+      /**
+       * @brief StartScanning
+       *
+       * @param parameters
+       */
+      void StartScanning(const DriveScanningParameters& parameters);
 
    public slots:
-      void HandleCompletion(const std::uintmax_t filesScanned);
+      /**
+       * @brief HandleCompletion is meant to handle the ScanningWorker::Finished signal.
+       *
+       * @see ScanningWorker::Finished
+       */
+      void HandleCompletion(const std::uintmax_t filesScanned,
+         std::shared_ptr<Tree<VizNode> > fileTree);
+
+      /**
+       * @brief HandleProgressUpdates is meant to handle the ScanningWorker::ProgressUpdate
+       * signal.
+       *
+       * @see ScanningWorker::ProgressUpdate
+       */
       void HandleProgressUpdates(const std::uintmax_t filesScanned);
 
+      /**
+       * @brief HandleMessageBox is meant to handle the ScanningWorker::ShowMessageBox signal.
+       *
+       * @see ScanningWorker::ShowMessageBox
+       */
       void HandleMessageBox(const QString& message);
 
    private:
-      DriveScannerParameters m_scanningParameters;
-
-      std::shared_ptr<Tree<VizNode>> m_theTree;
+      DriveScanningParameters m_parameters;
 };
 
 #endif // DRIVESCANNER_H

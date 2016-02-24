@@ -8,7 +8,7 @@
 
 DriveScanner::DriveScanner()
    : QObject(),
-     m_theTree(nullptr)
+     m_parameters()
 {
 }
 
@@ -17,19 +17,15 @@ DriveScanner::~DriveScanner()
    std::cout << "Drive Scanner is dead..." << std::endl;
 }
 
-void DriveScanner::SetParameters(const DriveScannerParameters& parameters)
-{
-   m_scanningParameters = parameters;
-}
-
 void DriveScanner::HandleProgressUpdates(const std::uintmax_t filesScanned)
 {
-   m_scanningParameters.onProgressUpdateCallback(filesScanned);
+   m_parameters.onProgressUpdateCallback(filesScanned);
 }
 
-void DriveScanner::HandleCompletion(const std::uintmax_t filesScanned)
+void DriveScanner::HandleCompletion(const std::uintmax_t filesScanned,
+   std::shared_ptr<Tree<VizNode>> fileTree)
 {
-   m_scanningParameters.onScanCompletedCallback(filesScanned);
+   m_parameters.onScanCompletedCallback(filesScanned, fileTree);
 }
 
 void DriveScanner::HandleMessageBox(const QString& message)
@@ -41,45 +37,24 @@ void DriveScanner::HandleMessageBox(const QString& message)
    messageBox.exec();
 }
 
-void DriveScanner::StartScanning()
+void DriveScanner::StartScanning(const DriveScanningParameters& parameters)
 {
-   const Block rootBlock
-   {
-      DoublePoint3D(0, 0, 0),
-      Visualization::ROOT_BLOCK_WIDTH,
-      Visualization::BLOCK_HEIGHT,
-      Visualization::ROOT_BLOCK_DEPTH
-   };
-
-   const FileInfo fileInfo
-   {
-      m_scanningParameters.path,
-      ScanningWorker::SIZE_UNDEFINED,
-      FILE_TYPE::DIRECTORY
-   };
-
-   const VizNode rootNode
-   {
-      fileInfo,
-      rootBlock
-   };
-
-   m_theTree = std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
+   m_parameters = parameters;
 
    QThread* thread = new QThread;
-   ScanningWorker* worker = new ScanningWorker(m_theTree, m_scanningParameters.path);
+   ScanningWorker* worker = new ScanningWorker{m_parameters};
    worker->moveToThread(thread);
 
-   connect(worker, SIGNAL(Finished(const std::uintmax_t)),
-      this, SLOT(HandleCompletion(const std::uintmax_t)));
+   connect(worker, SIGNAL(Finished(const std::uintmax_t, std::shared_ptr<Tree<VizNode>>)),
+      this, SLOT(HandleCompletion(const std::uintmax_t, std::shared_ptr<Tree<VizNode>>)));
 
    connect(worker, SIGNAL(ProgressUpdate(const std::uintmax_t)),
-      this, SLOT(HandleProgressUpdates(std::uintmax_t)));
+      this, SLOT(HandleProgressUpdates(const std::uintmax_t)));
 
    connect(worker, SIGNAL(ShowMessageBox(const QString&)),
       this, SLOT(HandleMessageBox(const QString&)), Qt::BlockingQueuedConnection);
 
-   connect(worker, SIGNAL(Finished(const std::uintmax_t)),
+   connect(worker, SIGNAL(Finished(const std::uintmax_t, std::shared_ptr<Tree<VizNode>>)),
       worker, SLOT(deleteLater()));
 
    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
@@ -87,9 +62,4 @@ void DriveScanner::StartScanning()
    connect(thread, SIGNAL(started()), worker, SLOT(Start()));
 
    thread->start();
-}
-
-std::shared_ptr<Tree<VizNode>> DriveScanner::GetTree() const
-{
-   return m_theTree;
 }

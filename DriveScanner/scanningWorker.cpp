@@ -1,3 +1,4 @@
+#include "driveScanner.h"
 #include "scanningWorker.h"
 
 namespace
@@ -8,7 +9,7 @@ namespace
     * empty. In such a case, the outer directory has a size of zero, but boost::filesystem::is_empty
     * will still have reported this directory as being non-empty.
     *
-    * @param[in/out] tree           The tree to be pruned.
+    * @param[in, out] tree           The tree to be pruned.
     */
    void PruneEmptyFilesAndDirectories(Tree<VizNode>& tree)
    {
@@ -27,15 +28,38 @@ namespace
       std::cout << "Nodes removed: " << nodesRemoved << std::endl;
       std::cout << "Nodes after pruning: " << tree.Size(*tree.GetHead()) << std::endl;
    }
+
+   /**
+    * @brief ComputeDirectorySizes
+    * @param tree
+    */
+   void ComputeDirectorySizes(Tree<VizNode>& tree)
+   {
+      for (auto&& node : tree)
+      {
+         const FileInfo fileInfo = node->file;
+
+         std::shared_ptr<TreeNode<VizNode>>& parent = node.GetParent();
+         if (!parent)
+         {
+            return;
+         }
+
+         FileInfo& parentInfo = parent->GetData().file;
+         if (parentInfo.type == FILE_TYPE::DIRECTORY)
+         {
+            parentInfo.size += fileInfo.size;
+         }
+      }
+   }
 }
 
 const std::uintmax_t ScanningWorker::SIZE_UNDEFINED = 0;
 
-ScanningWorker::ScanningWorker(std::shared_ptr<Tree<VizNode>> destination, std::wstring path)
+ScanningWorker::ScanningWorker(const DriveScanningParameters& parameters)
    : QObject(),
-     m_path(path),
-     m_filesScanned(0),
-     m_fileTree(destination)
+     m_parameters(parameters),
+     m_filesScanned(0)
 {
 }
 
@@ -44,24 +68,37 @@ ScanningWorker::~ScanningWorker()
    std::cout << "The worker is dead..." << std::endl;
 }
 
-void ScanningWorker::ComputeDirectorySizes()
+std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateRootNode()
 {
-   assert(m_fileTree);
-
-   for (auto&& node : *m_fileTree)
+   assert(boost::filesystem::is_directory(m_parameters.path));
+   if (!boost::filesystem::is_directory(m_parameters.path))
    {
-      const FileInfo fileInfo = node->file;
-
-      std::shared_ptr<TreeNode<VizNode>>& parent = node.GetParent();
-      if (parent)
-      {
-         FileInfo& parentInfo = parent->GetData().file;
-         if (parentInfo.type == FILE_TYPE::DIRECTORY)
-         {
-            parentInfo.size += fileInfo.size;
-         }
-      }
+      emit ShowMessageBox("Please select a directory.");
+      return nullptr;
    }
+
+   const Block rootBlock
+   {
+      DoublePoint3D{0.0, 0.0, 0.0},
+      Visualization::ROOT_BLOCK_WIDTH,
+      Visualization::BLOCK_HEIGHT,
+      Visualization::ROOT_BLOCK_DEPTH
+   };
+
+   const FileInfo fileInfo
+   {
+      m_parameters.path,
+      ScanningWorker::SIZE_UNDEFINED,
+      FILE_TYPE::DIRECTORY
+   };
+
+   const VizNode rootNode
+   {
+      fileInfo,
+      rootBlock
+   };
+
+   return std::make_shared<Tree<VizNode>>(Tree<VizNode>{rootNode});
 }
 
 void ScanningWorker::ScanRecursively(const boost::filesystem::path& path,
@@ -87,7 +124,7 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path,
          FILE_TYPE::REGULAR
       };
 
-      treeNode.AppendChild(VizNode(fileInfo));
+      treeNode.AppendChild(VizNode{fileInfo});
 
       ++m_filesScanned;
    }
@@ -113,20 +150,20 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path,
          FILE_TYPE::DIRECTORY
       };
 
-      treeNode.AppendChild(VizNode(directoryInfo));
+      treeNode.AppendChild(VizNode{directoryInfo});
 
       ++m_filesScanned;
 
       boost::system::error_code errorCode;
 
-      auto itr = boost::filesystem::directory_iterator(path, errorCode);
+      auto itr = boost::filesystem::directory_iterator{path, errorCode};
       if (errorCode)
       {
          emit ShowMessageBox("Could not create iterator!");
          return;
       }
 
-      const auto end = boost::filesystem::directory_iterator();
+      const auto end = boost::filesystem::directory_iterator{};
       while (itr != end)
       {
          ScanRecursively(itr->path(), *treeNode.GetLastChild());
@@ -144,7 +181,11 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path,
 
 void ScanningWorker::Start()
 {
-   assert(boost::filesystem::is_directory(m_path));
+   auto theTree = CreateRootNode();
+   if (!theTree)
+   {
+      return;
+   }
 
    emit ProgressUpdate(0);
 
@@ -152,17 +193,17 @@ void ScanningWorker::Start()
    m_lastProgressUpdate = startTime;
 
    boost::system::error_code errorCode;
-   auto itr = boost::filesystem::directory_iterator(m_path, errorCode);
+   auto itr = boost::filesystem::directory_iterator{m_parameters.path, errorCode};
    if (errorCode)
    {
       emit ShowMessageBox("Could not create iterator!");
       return;
    }
 
-   const auto end = boost::filesystem::directory_iterator();
+   const auto end = boost::filesystem::directory_iterator{};
    while (itr != end)
    {
-      ScanRecursively(itr->path(), *m_fileTree->GetHead().get());
+      ScanRecursively(itr->path(), *theTree->GetHead().get());
 
       errorCode.clear();
       itr.increment(errorCode);
@@ -176,8 +217,8 @@ void ScanningWorker::Start()
    const auto endTime = std::chrono::high_resolution_clock::now();
    m_scanningTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
-   ComputeDirectorySizes();
-   PruneEmptyFilesAndDirectories(*m_fileTree);
+   ComputeDirectorySizes(*theTree);
+   PruneEmptyFilesAndDirectories(*theTree);
 
-   emit Finished(m_filesScanned);
+   emit Finished(m_filesScanned, theTree);
 }

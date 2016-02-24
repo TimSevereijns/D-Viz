@@ -96,7 +96,7 @@ namespace
          << nodeVertices[26] << nodeVertices[30]
          << nodeVertices[24] << nodeVertices[28];
 
-      const auto hotPink = QVector3D { 1.0f, 105.0f / 255.0f, 180.0f / 255.0f };
+      const auto hotPink = QVector3D{1.0f, 105.0f / 255.0f, 180.0f / 255.0f};
       for (int index = 0; index < vertices.size(); index++)
       {
          colors << hotPink;
@@ -116,8 +116,8 @@ namespace
     */
    void ClearAssetBuffersAndReload(SceneAsset& highlightAsset, const Camera& camera)
    {
-      highlightAsset.SetVertexData(QVector<QVector3D>());
-      highlightAsset.SetColorData(QVector<QVector3D>());
+      highlightAsset.SetVertexData(QVector<QVector3D>{});
+      highlightAsset.SetColorData(QVector<QVector3D>{});
       highlightAsset.Reload(camera);
    }
 
@@ -150,7 +150,7 @@ GLCanvas::GLCanvas(QWidget* parent)
    m_settings = m_mainWindow->GetOptionsManager();
 
    // Set up the camera:
-   m_camera.SetPosition(QVector3D(500, 100, 0));
+   m_camera.SetPosition(QVector3D{500, 100, 0});
 
    // Set keyboard and mouse focus:
    setFocusPolicy(Qt::StrongFocus);
@@ -161,7 +161,7 @@ GLCanvas::GLCanvas(QWidget* parent)
    setFormat(format);
 
    // Set the target frame rate:
-   m_frameRedrawTimer.reset(new QTimer(this));
+   m_frameRedrawTimer.reset(new QTimer{this});
    connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
    m_frameRedrawTimer->start(20);
 }
@@ -200,7 +200,7 @@ void GLCanvas::resizeGL(int width, int height)
    m_graphicsDevice->glViewport(0, 0, width, height);
 
    m_camera.SetAspectRatio(static_cast<float>(width) / static_cast<float>(height));
-   m_camera.SetViewport(QRect(QPoint(0,0), QPoint(width, height)));
+   m_camera.SetViewport(QRect{QPoint{0,0}, QPoint{width, height}});
 }
 
 
@@ -213,7 +213,7 @@ void GLCanvas::CreateNewVisualization(const VisualizationParameters& parameters)
 
    if (!m_theVisualization || parameters.forceNewScan)
    {
-      m_theVisualization.reset(new SquarifiedTreeMap(parameters));
+      m_theVisualization.reset(new SquarifiedTreeMap{parameters});
       ScanDrive(parameters);
    }
 }
@@ -224,13 +224,14 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
       [&] (const std::uintmax_t numberOfFilesScanned)
    {
       std::wstringstream message;
-      message.imbue(std::locale(""));
+      message.imbue(std::locale{""});
       message << std::fixed << L"Files Scanned: " << numberOfFilesScanned;
       m_mainWindow->SetStatusBarMessage(message.str());
    };
 
    const auto& completionHandler =
-      [&, vizParameters] (const std::uintmax_t numberOfFilesScanned)
+      [&, vizParameters] (const std::uintmax_t numberOfFilesScanned,
+      std::shared_ptr<Tree<VizNode>> fileTree)
    {
       const bool previousSuspensionState = m_isPaintingSuspended;
       m_isPaintingSuspended = true;
@@ -242,8 +243,7 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
       message << std::fixed << L"Total Files Scanned: " << numberOfFilesScanned;
       m_mainWindow->SetStatusBarMessage(message.str());
 
-      const auto& theTree = m_scanner.GetTree();
-      m_theVisualization->Parse(theTree);
+      m_theVisualization->Parse(fileTree);
       m_theVisualization->UpdateBoundingBoxes();
 
       ClearAssetBuffersAndReload(*m_sceneAssets[Asset::HIGHLIGHT], m_camera);
@@ -251,13 +251,12 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
       ReloadVisualization(vizParameters);
    };
 
-   DriveScannerParameters scanningParameters;
+   DriveScanningParameters scanningParameters;
    scanningParameters.onProgressUpdateCallback = progressHandler;
    scanningParameters.onScanCompletedCallback = completionHandler;
    scanningParameters.path = vizParameters.rootDirectory;
 
-   m_scanner.SetParameters(scanningParameters);
-   m_scanner.StartScanning();
+   m_scanner.StartScanning(scanningParameters);
 }
 
 void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
@@ -338,7 +337,7 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
       return;
    }
 
-   const auto canvasCoordinates = QPoint(event.x(), event.y());
+   const auto canvasCoordinates = QPoint{event.x(), event.y()};
    const auto ray = m_camera.ShootRayIntoScene(canvasCoordinates);
    const auto selection = m_theVisualization->FindNearestIntersection(m_camera, ray,
       m_visualizationParameters);
@@ -351,7 +350,7 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
       const std::pair<std::uintmax_t, QString> sizeUnits = m_mainWindow->GetFileSizeReadoutUnits();
 
       std::wstringstream message;
-      message.imbue(std::locale(""));
+      message.imbue(std::locale{""});
       message << GetFullNodePath(*selection) << L"  |  "
          << fileSize / (double)sizeUnits.first << L" " << sizeUnits.second.toStdWString();
       m_mainWindow->SetStatusBarMessage(message.str());

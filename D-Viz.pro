@@ -20,6 +20,7 @@ SOURCES += main.cpp\
     DataStructs/light.cpp \
     DataStructs/vizNode.cpp \
     DataStructs/doublePoint3d.cpp \
+    DataStructs/driveScanningParameters.cpp \
     DriveScanner/driveScanner.cpp \
     DriveScanner/scanningWorker.cpp \
     HID/keyboardManager.cpp \
@@ -44,6 +45,7 @@ HEADERS  += mainwindow.h \
     DataStructs/light.h \
     DataStructs/vizNode.h \
     DataStructs/doublePoint3d.h \
+    DataStructs/driveScanningParameters.cpp \
     DriveScanner/driveScanner.h \
     DriveScanner/scanningWorker.h \
     HID/keyboardManager.h \
