@@ -28,6 +28,11 @@ struct DriveScanningParameters
    std::wstring path;
 
    DriveScanningParameters();
+
+   DriveScanningParameters(
+      const std::wstring& startingPath,
+      ProgressCallback progressCallback,
+      ScanCompleteCallback completionCallback);
 };
 
 #endif // DRIVESCANNINGPARAMETERS_H

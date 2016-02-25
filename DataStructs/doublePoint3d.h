@@ -8,8 +8,8 @@
 class DoublePoint3D
 {
    public:
-      DoublePoint3D();
-      DoublePoint3D(double x, double y, double z);
+      explicit DoublePoint3D();
+      explicit DoublePoint3D(double x, double y, double z);
 
       double x() const;
       double y() const;

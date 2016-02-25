@@ -14,9 +14,22 @@ struct VizNode
    Block block;         ///< The actual block as rendered to the OpenGL canvas.
    Block boundingBox;   ///< Minimum axis-aligned bounding box for node and all descendents.
 
+   /**
+    * @brief VizNode constructs a new VizNode to represent the specified file. The block, and its
+    * bounding box will be default constructed.
+    *
+    * @param[in] file               The file that the VizNode represents.
+    */
    explicit VizNode(const FileInfo& file);
 
-   VizNode(const FileInfo& file, const Block& block);
+   /**
+    * @brief VizNode constructs a new VizNode to represent the specified file using the specified
+    * block. The bounding box will be initialized to the same size as the block.
+    *
+    * @param[in] file               The file that the VizNode represents.
+    * @param[in] block              The visual representation of the file in question.
+    */
+   explicit VizNode(const FileInfo& file, const Block& block);
 };
 
 #endif // VIZNODE_H

@@ -100,8 +100,11 @@ namespace
     *
     * @returns a block representing the outer dimensions of the row boundary.
     */
-   Block CalculateRowBounds(const std::vector<TreeNode<VizNode>*>& row,
-      const std::uintmax_t candidateSize, VizNode& parentNode, const bool updateOffset)
+   Block CalculateRowBounds(
+      const std::vector<TreeNode<VizNode>*>& row,
+      const std::uintmax_t candidateSize,
+      VizNode& parentNode,
+      const bool updateOffset)
    {
       const Block& parentBlock = parentNode.block;
 
@@ -203,8 +206,11 @@ namespace
     *
     * @return
     */
-   double SlicePerpendicularToWidth(Block& land, const double percentageOfParent,
-      VizNode& data, const size_t nodeCount)
+   double SlicePerpendicularToWidth(
+      Block& land,
+      const double percentageOfParent,
+      VizNode& data,
+      const size_t nodeCount)
    {
       const double blockWidthPlusPadding = land.width * percentageOfParent;
       const double ratioBasedPadding = ((land.width * 0.1) / nodeCount) / 2.0;
@@ -254,8 +260,11 @@ namespace
     *
     * @return
     */
-   double SlicePerpendicularToDepth(Block& land, const double percentageOfParent,
-      VizNode& data, const size_t nodeCount)
+   double SlicePerpendicularToDepth(
+      Block& land,
+      const double percentageOfParent,
+      VizNode& data,
+      const size_t nodeCount)
    {
       const double blockDepthPlusPadding = std::abs(land.depth * percentageOfParent);
       const double ratioBasedPadding = (land.depth * 0.1) / nodeCount / 2.0;
@@ -335,8 +344,8 @@ namespace
             return;
          }
 
-         const double percentageOfParent = static_cast<double>(nodeFileSize) /
-                                           static_cast<double>(rowFileSize);
+         const double percentageOfParent =
+            static_cast<double>(nodeFileSize) / static_cast<double>(rowFileSize);
 
          additionalCoverage = (land.width > std::abs(land.depth))
             ? SlicePerpendicularToWidth(land, percentageOfParent, data, nodeCount)
@@ -376,8 +385,11 @@ namespace
     *
     * @returns a double representing the least square aspect ratio.
     */
-   double ComputeWorstAspectRatio(const std::vector<TreeNode<VizNode>*>& row,
-      const std::uintmax_t candidateSize, VizNode& parentNode, const double shortestEdgeOfBounds)
+   double ComputeWorstAspectRatio(
+      const std::vector<TreeNode<VizNode>*>& row,
+      const std::uintmax_t candidateSize,
+      VizNode& parentNode,
+      const double shortestEdgeOfBounds)
    {
       if (row.empty() && candidateSize == 0)
       {
@@ -399,6 +411,8 @@ namespace
       {
          largestNodeInBytes = row.front()->GetData().file.size;
       }
+
+      assert(largestNodeInBytes > 0);
 
       const bool updateOffset = false;
       const Block rowBounds = CalculateRowBounds(row, candidateSize, parentNode, updateOffset);
@@ -426,6 +440,8 @@ namespace
       {
          smallestNodeInBytes = row.back()->GetData().file.size;
       }
+
+      assert(smallestNodeInBytes > 0);
 
       const double smallestArea =
          (static_cast<double>(smallestNodeInBytes) / static_cast<double>(totalRowSize)) *
@@ -465,6 +481,7 @@ namespace
       std::vector<TreeNode<VizNode>*> row;
 
       double shortestEdgeOfBounds = ComputeShortestEdgeOfRemainingBounds(parentVizNode);
+      assert(shortestEdgeOfBounds > 0.0);
 
       for (TreeNode<VizNode>* const node : nodes)
       {
@@ -474,6 +491,9 @@ namespace
 
          const double worstRatioWithoutNodeAddedToCurrentRow =
             ComputeWorstAspectRatio(row, 0, parentVizNode, shortestEdgeOfBounds);
+
+         assert(worstRatioWithNodeAddedToCurrentRow > 0.0);
+         assert(worstRatioWithoutNodeAddedToCurrentRow > 0.0);
 
          if (worstRatioWithNodeAddedToCurrentRow <= worstRatioWithoutNodeAddedToCurrentRow)
          {
@@ -487,6 +507,7 @@ namespace
             row.emplace_back(node);
 
             shortestEdgeOfBounds = ComputeShortestEdgeOfRemainingBounds(parentVizNode);
+            assert(shortestEdgeOfBounds > 0.0);
          }
       }
 
@@ -503,20 +524,16 @@ namespace
     *
     * @param root                   The node whose children to lay out.
     */
-   void SquarifyRecursively(const TreeNode<VizNode>* const root)
+   void SquarifyRecursively(const TreeNode<VizNode>& root)
    {
-      if (!root)
-      {
-         return;
-      }
-
-      const std::shared_ptr<TreeNode<VizNode>>& firstChild = root->GetFirstChild();
+      const std::shared_ptr<TreeNode<VizNode>>& firstChild = root.GetFirstChild();
       if (!firstChild)
       {
          return;
       }
 
       std::vector<TreeNode<VizNode>*> children;
+      children.reserve(root.GetChildCount());
       children.emplace_back(firstChild.get());
 
       std::shared_ptr<TreeNode<VizNode>> nextChild = firstChild->GetNextSibling();
@@ -525,11 +542,15 @@ namespace
          children.emplace_back(nextChild.get());
          nextChild = nextChild->GetNextSibling();
       }
+
       SquarifyAndLayoutRows(children);
 
       for (TreeNode<VizNode>* const child : children)
       {
-         SquarifyRecursively(child);
+         if (child)
+         {
+            SquarifyRecursively(*child);
+         }
       }
    }
 }
@@ -553,7 +574,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
 
    const Block rootBlock
    {
-      DoublePoint3D(0, 0, 0),
+      DoublePoint3D{},
       Visualization::ROOT_BLOCK_WIDTH,
       Visualization::BLOCK_HEIGHT,
       Visualization::ROOT_BLOCK_DEPTH
@@ -562,11 +583,11 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
    theTree->GetHead()->GetData().block = rootBlock;
 
    const auto startParseTime = std::chrono::high_resolution_clock::now();
-   SquarifyRecursively(theTree->GetHead().get());
+   SquarifyRecursively(*theTree->GetHead());
    const auto endParseTime = std::chrono::high_resolution_clock::now();
 
-   const auto parsingTime = std::chrono::duration_cast<std::chrono::milliseconds>
-      (endParseTime - startParseTime);
+   const auto parsingTime =
+      std::chrono::duration_cast<std::chrono::milliseconds>(endParseTime - startParseTime);
 
    std::cout << "Parse time (in milliseconds): " << parsingTime.count() << std::endl;
 

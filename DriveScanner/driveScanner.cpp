@@ -6,12 +6,6 @@
 
 #include <QMessageBox>
 
-DriveScanner::DriveScanner()
-   : QObject(),
-     m_parameters()
-{
-}
-
 DriveScanner::~DriveScanner()
 {
    std::cout << "Drive Scanner is dead..." << std::endl;

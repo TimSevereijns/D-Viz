@@ -30,8 +30,10 @@ namespace
    }
 
    /**
-    * @brief ComputeDirectorySizes
-    * @param tree
+    * @brief ComputeDirectorySizes is a post-processing step that iterates through the tree and
+    * computes the size of all directories.
+    *
+    * @param[in, out] tree          The tree whose nodes need their directory sizes computed.
     */
    void ComputeDirectorySizes(Tree<VizNode>& tree)
    {
@@ -68,7 +70,7 @@ ScanningWorker::~ScanningWorker()
    std::cout << "The worker is dead..." << std::endl;
 }
 
-std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateRootNode()
+std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
 {
    assert(boost::filesystem::is_directory(m_parameters.path));
    if (!boost::filesystem::is_directory(m_parameters.path))
@@ -79,7 +81,7 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateRootNode()
 
    const Block rootBlock
    {
-      DoublePoint3D{0.0, 0.0, 0.0},
+      DoublePoint3D{},
       Visualization::ROOT_BLOCK_WIDTH,
       Visualization::BLOCK_HEIGHT,
       Visualization::ROOT_BLOCK_DEPTH
@@ -101,12 +103,31 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateRootNode()
    return std::make_shared<Tree<VizNode>>(Tree<VizNode>{rootNode});
 }
 
-void ScanningWorker::ScanRecursively(const boost::filesystem::path& path,
+void ScanningWorker::IterateOverDirectory(
+   boost::filesystem::directory_iterator& itr,
+   TreeNode<VizNode>& treeNode)
+{
+   const auto end = boost::filesystem::directory_iterator{};
+   while (itr != end)
+   {
+      ScanRecursively(itr->path(), treeNode);
+
+      boost::system::error_code errorCode;
+      itr.increment(errorCode);
+      if (errorCode)
+      {
+         emit ShowMessageBox("Could not advance iterator!");
+      }
+   }
+}
+
+void ScanningWorker::ScanRecursively(
+   const boost::filesystem::path& path,
    TreeNode<VizNode>& treeNode)
 {
    using namespace std::chrono;
    const auto timeSinceLastProgressUpdate =
-         duration_cast<milliseconds>(high_resolution_clock::now() - m_lastProgressUpdate).count();
+      duration_cast<milliseconds>(high_resolution_clock::now() - m_lastProgressUpdate).count();
 
    if (timeSinceLastProgressUpdate > 1000)
    {
@@ -132,7 +153,10 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path,
    {
       try
       {
-         // If we don't have the correct permissions, we can't safely perform this check:
+         // In some edge-cases, the Windows operating system doesn't allow anyone to access certain
+         // directories, and attempts to do so will result in exceptional behaviour---pun intended.
+         // In order to deal with these rare cases, we'll need to rely on a try-catch to keep going.
+         // One example of a problematic directory in Windows 7 is: C:\System Volume Information
          if (boost::filesystem::is_empty(path))
          {
             return;
@@ -155,7 +179,6 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path,
       ++m_filesScanned;
 
       boost::system::error_code errorCode;
-
       auto itr = boost::filesystem::directory_iterator{path, errorCode};
       if (errorCode)
       {
@@ -163,25 +186,13 @@ void ScanningWorker::ScanRecursively(const boost::filesystem::path& path,
          return;
       }
 
-      const auto end = boost::filesystem::directory_iterator{};
-      while (itr != end)
-      {
-         ScanRecursively(itr->path(), *treeNode.GetLastChild());
-
-         errorCode.clear();
-         itr.increment(errorCode);
-
-         if (errorCode)
-         {
-            emit ShowMessageBox("Could not advance iterator!");
-         }
-      }
+      IterateOverDirectory(itr, *treeNode.GetLastChild());
    }
 }
 
 void ScanningWorker::Start()
 {
-   auto theTree = CreateRootNode();
+   auto theTree = CreateTreeAndRootNode();
    if (!theTree)
    {
       return;
@@ -200,19 +211,7 @@ void ScanningWorker::Start()
       return;
    }
 
-   const auto end = boost::filesystem::directory_iterator{};
-   while (itr != end)
-   {
-      ScanRecursively(itr->path(), *theTree->GetHead().get());
-
-      errorCode.clear();
-      itr.increment(errorCode);
-
-      if (errorCode)
-      {
-         emit ShowMessageBox("Could not advance iterator!");
-      }
-   }
+   IterateOverDirectory(itr, *theTree->GetHead());
 
    const auto endTime = std::chrono::high_resolution_clock::now();
    m_scanningTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);

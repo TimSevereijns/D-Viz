@@ -251,10 +251,12 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
       ReloadVisualization(vizParameters);
    };
 
-   DriveScanningParameters scanningParameters;
-   scanningParameters.onProgressUpdateCallback = progressHandler;
-   scanningParameters.onScanCompletedCallback = completionHandler;
-   scanningParameters.path = vizParameters.rootDirectory;
+   const DriveScanningParameters scanningParameters
+   {
+      vizParameters.rootDirectory,
+      progressHandler,
+      completionHandler
+   };
 
    m_scanner.StartScanning(scanningParameters);
 }

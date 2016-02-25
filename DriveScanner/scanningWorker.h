@@ -71,13 +71,28 @@ class ScanningWorker : public QObject
 
    private:
       /**
+       * @brief IterateOverDirectory is a helper function to facilitate exception-free iteration
+       * over a directory.
+       *
+       * @todo UPGRADE TO C++11: noexcept
+       *
+       * @param itr
+       * @param treeNode
+       */
+      void IterateOverDirectory(
+         boost::filesystem::directory_iterator& itr,
+         TreeNode<VizNode>& treeNode);
+
+      /**
        * Max path length in Windows is 260 characters, so if that includes slashes, then the maximum
        * depth of a directory or file is no more than 130, or so. Given that the default stack size
        * in MSVC is 1MB, and I only pass in references, this recursive version may be fine---maybe!
        */
-      void ScanRecursively(const boost::filesystem::path& path, TreeNode<VizNode>& fileNode);
+      void ScanRecursively(
+         const boost::filesystem::path& path,
+         TreeNode<VizNode>& fileNode);
 
-      std::shared_ptr<Tree<VizNode>> CreateRootNode();
+      std::shared_ptr<Tree<VizNode>> CreateTreeAndRootNode();
 
       std::uintmax_t m_filesScanned;
 

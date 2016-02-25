@@ -20,13 +20,13 @@ class DriveScanner : public QObject
    Q_OBJECT
 
    public:
-      explicit DriveScanner();
       ~DriveScanner();
 
       /**
-       * @brief StartScanning
+       * @brief StartScanning kicks off the drive scanning process in a separate thread using the
+       * specified parameters.
        *
-       * @param parameters
+       * @param[in] parameters      @see DriveScanningParameters
        */
       void StartScanning(const DriveScanningParameters& parameters);
 
@@ -36,8 +36,9 @@ class DriveScanner : public QObject
        *
        * @see ScanningWorker::Finished
        */
-      void HandleCompletion(const std::uintmax_t filesScanned,
-         std::shared_ptr<Tree<VizNode> > fileTree);
+      void HandleCompletion(
+         const std::uintmax_t filesScanned,
+         std::shared_ptr<Tree<VizNode>> fileTree);
 
       /**
        * @brief HandleProgressUpdates is meant to handle the ScanningWorker::ProgressUpdate
