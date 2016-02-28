@@ -584,7 +584,8 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
 
    theTree->GetHead()->GetData().block = rootBlock;
 
-   TIME_THIS(SquarifyRecursively(*theTree->GetHead()), "Parsed Scanning Results in ");
+   TIME_THIS(SquarifyRecursively(*theTree->GetHead()), "Parsed Scanning Results in ",
+             std::chrono::milliseconds);
 
    m_hasDataBeenParsed = true;
 }

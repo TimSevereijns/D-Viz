@@ -120,10 +120,10 @@ class StopWatch
 };
 
 /**
-* @example TIME_THIS(Parser::Run(data), "Parsed Data in ");
+* @example TIME_THIS(Parser::Run(data), "Parsed Data in ", std::chrono::milliseconds);
 */
-#define TIME_THIS(code, message)                                  \
-   StopWatch<std::chrono::milliseconds>(                          \
+#define TIME_THIS(code, message, resolution)                      \
+   StopWatch<resolution>(                                         \
       [&] { code; },                                              \
       [&] (std::uint64_t elapsedTime, const std::string& units)   \
       { std::cout << message << elapsedTime << " " << units; });
