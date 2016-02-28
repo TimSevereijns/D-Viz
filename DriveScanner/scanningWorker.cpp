@@ -136,7 +136,18 @@ void ScanningWorker::ScanRecursively(
       m_lastProgressUpdate = high_resolution_clock::now();
    }
 
-   if (boost::filesystem::is_regular_file(path) && boost::filesystem::file_size(path) > 0)
+   bool isRegularFile = false;
+   try {
+      // In certain cases, this function can, apparently, raise exceptions, although it
+      // isn't entirely clear to me what circumstances need to exist for this to occur:
+      isRegularFile = boost::filesystem::is_regular_file(path);
+   }
+   catch (...)
+   {
+      return;
+   }
+
+   if (isRegularFile && boost::filesystem::file_size(path) > 0)
    {
       const FileInfo fileInfo
       {

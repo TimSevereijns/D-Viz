@@ -7,6 +7,8 @@
 #include <limits>
 #include <numeric>
 
+#include "../Utilities/stopwatch.h"
+
 namespace
 {
    /**
@@ -582,14 +584,9 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
 
    theTree->GetHead()->GetData().block = rootBlock;
 
-   const auto startParseTime = std::chrono::high_resolution_clock::now();
-   SquarifyRecursively(*theTree->GetHead());
-   const auto endParseTime = std::chrono::high_resolution_clock::now();
-
-   const auto parsingTime =
-      std::chrono::duration_cast<std::chrono::milliseconds>(endParseTime - startParseTime);
-
-   std::cout << "Parse time (in milliseconds): " << parsingTime.count() << std::endl;
+   StopWatch<std::chrono::milliseconds>(
+      [&] { SquarifyRecursively(*theTree->GetHead()); },
+      L"Parse time: ");
 
    m_hasDataBeenParsed = true;
 }

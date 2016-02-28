@@ -7,16 +7,13 @@
  * This struct is templated because the type of a C++11 lambda is only fully defined at compile
  * time, and as such cannot be referred to prior to that. By using a lambda we can get around this
  * without having to wrap the lambda inside of a std::function. While std::functions can wrap any
- * callable type, it can incur quite a bit of overhead to achieve this, including heap allocation.
- *
- * Since operations performed on scope exit are likely to be small and trivial in nature, limiting
- * overhead is highly desirable.
+ * callable type, it can incur additional overhead, including heap allocation, in certain cases.
  */
-template <typename FnType>
+template <typename FunctionType>
 struct ScopeExit
 {
-  ScopeExit(FnType&& lambda)
-     : m_lambda(std::forward<FnType>(lambda))
+  ScopeExit(FunctionType&& lambda)
+     : m_lambda(std::forward<FunctionType>(lambda))
   {
   }
 
@@ -25,14 +22,15 @@ struct ScopeExit
      m_lambda();
   }
 
-  FnType m_lambda;
+private:
+  FunctionType m_lambda;
 };
 
-template <typename FnType>
-ScopeExit<FnType> MakeScopeExit(FnType&& lambda)
+template <typename FunctionType>
+ScopeExit<FunctionType> MakeScopeExit(FunctionType&& lambda)
 {
-  return ScopeExit<FnType>(std::forward<FnType>(lambda));
-};
+  return ScopeExit<FunctionType>(std::forward<FunctionType>(lambda));
+}
 
 #define JOIN_TWO_STRINGS(str1, str2) str1 ## str2
 
