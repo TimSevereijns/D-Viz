@@ -2,78 +2,71 @@
 #define STOPWATCH_H
 
 #include <chrono>
-#include <iostream>
+#include <cstdint>
 #include <functional>
 #include <string>
 
 template<typename Type>
-class TypeName
+struct TypeName
 {
-   public:
-      static const char* Get()
-      {
-         return typeid(Type).name();
-      }
+   static const char* Resolve()
+   {
+      return typeid(Type).name();
+   }
 };
 
 template<>
-class TypeName<std::chrono::nanoseconds>
+struct TypeName<std::chrono::nanoseconds>
 {
-   public:
-      static const char* Get()
-      {
-         return "nanoseconds";
-      }
+   static const char* Resolve()
+   {
+      return "nanoseconds";
+   }
 };
 
 template<>
-class TypeName<std::chrono::microseconds>
+struct TypeName<std::chrono::microseconds>
 {
-   public:
-      static const char* Get()
-      {
-         return "microseconds";
-      }
+   static const char* Resolve()
+   {
+      return "microseconds";
+   }
 };
 
 template<>
-class TypeName<std::chrono::milliseconds>
+struct TypeName<std::chrono::milliseconds>
 {
-   public:
-      static const char* Get()
-      {
-         return "milliseconds";
-      }
+   static const char* Resolve()
+   {
+      return "milliseconds";
+   }
 };
 
 template<>
-class TypeName<std::chrono::seconds>
+struct TypeName<std::chrono::seconds>
 {
-   public:
-      static const char* Get()
-      {
-         return "seconds";
-      }
+   static const char* Resolve()
+   {
+      return "seconds";
+   }
 };
 
 template<>
-class TypeName<std::chrono::minutes>
+struct TypeName<std::chrono::minutes>
 {
-   public:
-      static const char* Get()
-      {
-         return "minutes";
-      }
+   static const char* Resolve()
+   {
+      return "minutes";
+   }
 };
 
 template<>
-class TypeName<std::chrono::hours>
+struct TypeName<std::chrono::hours>
 {
-   public:
-      static const char* Get()
-      {
-         return "hours";
-      }
+   static const char* Resolve()
+   {
+      return "hours";
+   }
 };
 
 /**
@@ -81,7 +74,7 @@ class TypeName<std::chrono::hours>
  * output the elapsed time to the console. Since this is an RAII object, if the function in question
  * throws, timing information will still be provided.
  *
- * @tparam TimeResolutionType       One of the following std::chrono time representations:
+ * @tparam ChronoType               One of the following std::chrono time representations:
  *                                     @li std::chrono::nanoseconds
  *                                     @li std::chrono::microseconds
  *                                     @li std::chrono::milliseconds
@@ -89,21 +82,21 @@ class TypeName<std::chrono::hours>
  *                                     @li std::chrono::minutes
  *                                     @li std::chrono::hours
  */
-template<typename TimeResolutionType>
+template<typename ChronoType>
 class StopWatch
 {
    public:
+      using LoggingFunction = std::function<void (std::uint64_t, const std::string&)>;
+
       /**
        * @brief StopWatch constructor that executes the code to be timed after starting the timer.
        *
        * @param[in] functionToTime  A callable object representing the code to be timed.
-       * @param[in] message         A brief description of the task at hand, which will be written
-       *                            out to the console. @example "Task Execution Time: " @note The
-       *                            timing units will be appended after the message with the correct
-       *                            units (which will be derived from the template type).
+       * @param[in] logger          Callback to handle the timing result.
        */
-      StopWatch(std::function<void ()> functionToTime, const std::wstring& message)
-         : m_message(message),
+      StopWatch(const std::function<void ()>& functionToTime,
+                const LoggingFunction& logger)
+         : m_logger(logger),
            m_start(std::chrono::high_resolution_clock::now())
       {
          functionToTime();
@@ -112,19 +105,27 @@ class StopWatch
       ~StopWatch()
       {
          const auto end = std::chrono::high_resolution_clock::now();
-         const auto delta = std::chrono::duration_cast<TimeResolutionType>(end - m_start);
+         const auto delta = std::chrono::duration_cast<ChronoType>(end - m_start);
 
-         if (!m_message.empty())
+         if (m_logger)
          {
-            std::wcout << m_message << delta.count()
-               << L" " << TypeName<TimeResolutionType>::Get() << std::endl;
+            m_logger(delta.count(), TypeName<ChronoType>::Resolve());
          }
       }
 
    private:
-      const std::wstring& m_message;
+      const LoggingFunction& m_logger;
 
       std::chrono::high_resolution_clock::time_point m_start;
 };
+
+/**
+* @example TIME_THIS(Parser::Run(data), "Parsed Data in ");
+*/
+#define TIME_THIS(code, message)                                  \
+   StopWatch<std::chrono::milliseconds>(                          \
+      [&] { code; },                                              \
+      [&] (std::uint64_t elapsedTime, const std::string& units)   \
+      { std::cout << message << elapsedTime << " " << units; });
 
 #endif // STOPWATCH_H
