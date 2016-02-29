@@ -32,11 +32,14 @@ namespace
    /**
     * @brief FileSizeInMostAppropriateUnits
     *
-    * @param[in] sizeInBytes
-    * @return
+    * @param[in] sizeInBytes        The size (in bytes) to be converted to a more appropriate unit.
+    *
+    * @returns A std::pair encapsulating the converted file size, and corresponding unit readout
+    * string.
     */
    std::pair<double, std::wstring> GetFileSizeInMostAppropriateUnits(double sizeInBytes)
    {
+      // @todo UPGRADE TO C++11: constexpr instead of const
       const static double oneKibibyte = std::pow(2, 10);
       const static double oneMebibyte = std::pow(2, 20);
       const static double oneGibibyte = std::pow(2, 30);
@@ -391,7 +394,7 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
       message.imbue(std::locale{""});
       message.precision(2);
 
-      std::pair<double, std::wstring> sizeAndUnits = GetFileSizeInMostAppropriateUnits(fileSize);
+      const auto sizeAndUnits = GetFileSizeInMostAppropriateUnits(fileSize);
       message << GetFullNodePath(*selection) << L"  |  "
          << std::fixed << sizeAndUnits.first << sizeAndUnits.second;
 
