@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>
@@ -68,7 +68,7 @@
    <property name="minimumSize">
     <size>
      <width>180</width>
-     <height>719</height>
+     <height>781</height>
     </size>
    </property>
    <property name="features">
@@ -352,27 +352,6 @@
        </property>
        <property name="checked">
         <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="line_4">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_7">
-       <property name="text">
-        <string>File Size Readout Units:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="fileSizeUnitComboBox">
-       <property name="currentIndex">
-        <number>-1</number>
        </property>
       </widget>
      </item>

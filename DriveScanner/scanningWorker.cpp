@@ -1,6 +1,8 @@
 #include "driveScanner.h"
 #include "scanningWorker.h"
 
+#include "../Utilities/stopwatch.h"
+
 namespace
 {
    /**
@@ -54,6 +56,8 @@ namespace
          }
       }
    }
+
+   const unsigned int UPDATE_FREQUENCY = 1000;
 }
 
 const std::uintmax_t ScanningWorker::SIZE_UNDEFINED = 0;
@@ -129,7 +133,7 @@ void ScanningWorker::ScanRecursively(
    const auto timeSinceLastProgressUpdate =
       duration_cast<milliseconds>(high_resolution_clock::now() - m_lastProgressUpdate).count();
 
-   if (timeSinceLastProgressUpdate > 1000)
+   if (timeSinceLastProgressUpdate > UPDATE_FREQUENCY)
    {
       emit ProgressUpdate(m_filesScanned);
 
@@ -211,21 +215,20 @@ void ScanningWorker::Start()
 
    emit ProgressUpdate(0);
 
-   const auto startTime = std::chrono::high_resolution_clock::now();
-   m_lastProgressUpdate = startTime;
+   m_lastProgressUpdate = std::chrono::high_resolution_clock::now();
 
-   boost::system::error_code errorCode;
-   auto itr = boost::filesystem::directory_iterator{m_parameters.path, errorCode};
-   if (errorCode)
+   StopWatch<std::chrono::seconds>([&]
    {
-      emit ShowMessageBox("Could not create iterator!");
-      return;
-   }
+      boost::system::error_code errorCode;
+      auto itr = boost::filesystem::directory_iterator{m_parameters.path, errorCode};
+      if (errorCode)
+      {
+         emit ShowMessageBox("Could not create iterator!");
+         return;
+      }
 
-   IterateOverDirectory(itr, *theTree->GetHead());
-
-   const auto endTime = std::chrono::high_resolution_clock::now();
-   m_scanningTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+      IterateOverDirectory(itr, *theTree->GetHead());
+   }, "Scanned Drive in ");
 
    ComputeDirectorySizes(*theTree);
    PruneEmptyFilesAndDirectories(*theTree);

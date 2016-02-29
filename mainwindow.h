@@ -30,12 +30,6 @@ class MainWindow : public QMainWindow
       std::wstring GetDirectoryToVisualize() const;
 
       /**
-       * @brief GetFileSizeReadoutUnits
-       * @return
-       */
-      std::pair<uintmax_t, QString> GetFileSizeReadoutUnits() const;
-
-      /**
        * @brief UpdateFieldOfViewSlider
        * @param fieldOfView
        */
@@ -151,7 +145,6 @@ class MainWindow : public QMainWindow
       std::wstring m_directoryToVisualize;
 
       std::vector<std::pair<std::uintmax_t, QString>> m_sizePruningOptions;
-      std::vector<std::pair<std::uintmax_t, QString>> m_fileSizeReadoutOptions;
 };
 
 #endif // MAINWINDOW_H

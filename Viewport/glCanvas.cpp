@@ -8,6 +8,7 @@
 #include "Utilities/scopeExit.hpp"
 
 #include <sstream>
+#include <utility>
 
 namespace
 {
@@ -26,6 +27,42 @@ namespace
          << (vertexCount / Block::VERTICES_PER_BLOCK) << L" blocks";
 
       mainWindow.SetStatusBarMessage(message.str());
+   }
+
+   /**
+    * @brief FileSizeInMostAppropriateUnits
+    *
+    * @param[in] sizeInBytes
+    * @return
+    */
+   std::pair<double, std::wstring> GetFileSizeInMostAppropriateUnits(double sizeInBytes)
+   {
+      const static double oneKibibyte = std::pow(2, 10);
+      const static double oneMebibyte = std::pow(2, 20);
+      const static double oneGibibyte = std::pow(2, 30);
+      const static double oneTebibyte = std::pow(2, 40);
+
+      if (sizeInBytes < oneKibibyte)
+      {
+         return std::make_pair<double, std::wstring>(std::move(sizeInBytes), L" bytes");
+      }
+
+      if (sizeInBytes < oneMebibyte)
+      {
+         return std::make_pair<double, std::wstring>(sizeInBytes / oneKibibyte, L" KiB");
+      }
+
+      if (sizeInBytes < oneGibibyte)
+      {
+         return std::make_pair<double, std::wstring>(sizeInBytes / oneMebibyte, L" MiB");
+      }
+
+      if (sizeInBytes < oneTebibyte)
+      {
+         return std::make_pair<double, std::wstring>(sizeInBytes / oneGibibyte, L" GiB");
+      }
+
+      return std::make_pair<double, std::wstring>(sizeInBytes / oneTebibyte, L" TiB");
    }
 
    /**
@@ -349,12 +386,15 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
       HighlightSelection(*selection, *m_sceneAssets[Asset::HIGHLIGHT], m_camera);
 
       const auto fileSize = selection->GetData().file.size;
-      const std::pair<std::uintmax_t, QString> sizeUnits = m_mainWindow->GetFileSizeReadoutUnits();
 
       std::wstringstream message;
       message.imbue(std::locale{""});
+      message.precision(2);
+
+      std::pair<double, std::wstring> sizeAndUnits = GetFileSizeInMostAppropriateUnits(fileSize);
       message << GetFullNodePath(*selection) << L"  |  "
-         << fileSize / (double)sizeUnits.first << L" " << sizeUnits.second.toStdWString();
+         << std::fixed << sizeAndUnits.first << sizeAndUnits.second;
+
       m_mainWindow->SetStatusBarMessage(message.str());
    }
    else
@@ -570,14 +610,12 @@ void GLCanvas::HandleXBoxControllerInput()
 
 void GLCanvas::UpdateFPS()
 {
-   using namespace std::chrono;
-
-   const auto currentTime = system_clock::now();
+   const auto now = std::chrono::system_clock::now();
    const auto millisecondsElapsed = std::max<unsigned int>(
-      duration_cast<milliseconds>(currentTime - m_lastFrameTimeStamp).count(),
+      std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastFrameTimeStamp).count(),
       1); // This will avoid division by zero.
 
-   m_lastFrameTimeStamp = currentTime;
+   m_lastFrameTimeStamp = now;
 
    if (m_frameRateDeque.size() > 32)
    {
@@ -587,9 +625,9 @@ void GLCanvas::UpdateFPS()
    m_frameRateDeque.emplace_back(1000 / millisecondsElapsed);
 
    const int fpsSum = std::accumulate(std::begin(m_frameRateDeque), std::end(m_frameRateDeque), 0,
-      [] (const int currentTotal, const int fps)
+      [] (const int runningTotal, const int fps)
    {
-      return currentTotal + fps;
+      return runningTotal + fps;
    });
 
    const auto averageFps = fpsSum / m_frameRateDeque.size();

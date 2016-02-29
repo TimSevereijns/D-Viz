@@ -572,7 +572,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
 
    m_theTree = theTree;
 
-   Visualization::SortNodes(*m_theTree);
+   TIME_IN_MILLISECONDS(Visualization::SortNodes(*m_theTree), "Sorted tree in ");
 
    const Block rootBlock
    {
@@ -584,8 +584,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
 
    theTree->GetHead()->GetData().block = rootBlock;
 
-   TIME_THIS(SquarifyRecursively(*theTree->GetHead()), "Parsed Scanning Results in ",
-             std::chrono::milliseconds);
+   TIME_IN_MILLISECONDS(SquarifyRecursively(*theTree->GetHead()), "Visualization generated in ");
 
    m_hasDataBeenParsed = true;
 }
