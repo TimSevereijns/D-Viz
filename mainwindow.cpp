@@ -181,20 +181,27 @@ void MainWindow::OnFileMenuNewScan()
       "Select a Directory to Visualize", "/home",
       QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-   if (!selectedDirectory.isEmpty())
+   if (selectedDirectory.isEmpty())
    {
-      m_directoryToVisualize = selectedDirectory.toStdWString();
-
-      const auto comboBoxIndex = m_ui->pruneSizeComboBox->currentIndex();
-
-      VisualizationParameters parameters;
-      parameters.rootDirectory = m_directoryToVisualize;
-      parameters.onlyShowDirectories = m_showDirectoriesOnly;
-      parameters.forceNewScan = true;
-      parameters.minimumFileSize = m_sizePruningOptions[comboBoxIndex].first;
-
-      m_glCanvas->CreateNewVisualization(parameters);
+      return;
    }
+
+   const int stringLength = selectedDirectory.length();
+   m_directoryToVisualize = (selectedDirectory.endsWith("/") && stringLength > 1)
+      ? selectedDirectory.left(stringLength - 1).toStdWString()
+      : selectedDirectory.toStdWString();
+
+   assert(selectedDirectory.length());
+
+   const auto comboBoxIndex = m_ui->pruneSizeComboBox->currentIndex();
+
+   VisualizationParameters parameters;
+   parameters.rootDirectory = m_directoryToVisualize;
+   parameters.onlyShowDirectories = m_showDirectoriesOnly;
+   parameters.forceNewScan = true;
+   parameters.minimumFileSize = m_sizePruningOptions[comboBoxIndex].first;
+
+   m_glCanvas->CreateNewVisualization(parameters);
 }
 
 void MainWindow::OnDirectoryOnlyStateChanged(int state)

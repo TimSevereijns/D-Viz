@@ -1,7 +1,7 @@
 #include "driveScanner.h"
 #include "scanningWorker.h"
 
-#include "../Utilities/stopwatch.h"
+#include "../Utilities/stopwatch.hpp"
 
 namespace
 {
@@ -141,7 +141,8 @@ void ScanningWorker::ScanRecursively(
    }
 
    bool isRegularFile = false;
-   try {
+   try
+   {
       // In certain cases, this function can, apparently, raise exceptions, although it
       // isn't entirely clear to me what circumstances need to exist for this to occur:
       isRegularFile = boost::filesystem::is_regular_file(path);
@@ -217,7 +218,7 @@ void ScanningWorker::Start()
 
    m_lastProgressUpdate = std::chrono::high_resolution_clock::now();
 
-   StopWatch<std::chrono::seconds>([&]
+   Stopwatch<std::chrono::seconds>([&]
    {
       boost::system::error_code errorCode;
       auto itr = boost::filesystem::directory_iterator{m_parameters.path, errorCode};

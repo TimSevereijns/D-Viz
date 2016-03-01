@@ -7,7 +7,7 @@
 #include <limits>
 #include <numeric>
 
-#include "../Utilities/stopwatch.h"
+#include "../Utilities/stopwatch.hpp"
 
 namespace
 {

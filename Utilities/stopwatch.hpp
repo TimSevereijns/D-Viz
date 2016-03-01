@@ -79,8 +79,7 @@ struct TypeName<std::chrono::hours>
 /**
  * @brief The StopWatch class will wrap the function to be timed in a timing block, and then
  * pass the time taken to execute said block to the specified callback so that the user may specify
- * how to handle the result. Since this is an RAII object, if the function in question
- * throws, timing information will still be provided.
+ * how to handle the result.
  *
  * @tparam ChronoType               One of the following std::chrono time representations:
  *                                     @li std::chrono::nanoseconds
@@ -91,7 +90,7 @@ struct TypeName<std::chrono::hours>
  *                                     @li std::chrono::hours
  */
 template<typename ChronoType>
-class StopWatch
+class Stopwatch
 {
    public:
       using LoggingFunction = std::function<void (std::uint64_t, const std::string&)>;
@@ -104,7 +103,7 @@ class StopWatch
        * @param[in] functionToTime  std::function encapsulating the code to be timed.
        * @param[in] logger          Callback to handle the timing result.
        */
-      StopWatch(const std::function<void ()>& functionToTime,
+      Stopwatch(const std::function<void ()>& functionToTime,
                 const LoggingFunction&& logger)
          : m_logger(std::move(logger)),
            m_start(std::chrono::high_resolution_clock::now())
@@ -121,7 +120,7 @@ class StopWatch
        * @param[in] functionToTime  std::function encapsulating the code to be timed.
        * @param[in] message         Output message.
        */
-      StopWatch(const std::function<void ()>& functionToTime,
+      Stopwatch(const std::function<void ()>& functionToTime,
          const char* message)
          : m_logger(LoggingFunction()),
            m_message(message),
@@ -130,7 +129,7 @@ class StopWatch
          functionToTime();
       }
 
-      ~StopWatch()
+      ~Stopwatch()
       {
          const auto end = std::chrono::high_resolution_clock::now();
          const auto delta = std::chrono::duration_cast<ChronoType>(end - m_start);
@@ -154,32 +153,32 @@ class StopWatch
 };
 
 #define TIME_IN_NANOSECONDS(code, message)   \
-   StopWatch<std::chrono::nanoseconds>(      \
+   Stopwatch<std::chrono::nanoseconds>(      \
       [&] { code; },                         \
       message);
 
 #define TIME_IN_MICROSECONDS(code, message)  \
-   StopWatch<std::chrono::microseconds>(     \
+   Stopwatch<std::chrono::microseconds>(     \
       [&] { code; },                         \
       message);
 
 #define TIME_IN_MILLISECONDS(code, message)  \
-   StopWatch<std::chrono::milliseconds>(     \
+   Stopwatch<std::chrono::milliseconds>(     \
       [&] { code; },                         \
       message);
 
 #define TIME_IN_SECONDS(code, message)       \
-   StopWatch<std::chrono::seconds>(          \
+   Stopwatch<std::chrono::seconds>(          \
       [&] { code; },                         \
       message);
 
 #define TIME_IN_MINUTES(code, message)       \
-   StopWatch<std::chrono::minutes>(          \
+   Stopwatch<std::chrono::minutes>(          \
       [&] { code; },                         \
       message);
 
 #define TIME_IN_HOURS(code, message)         \
-   StopWatch<std::chrono::hours>(            \
+   Stopwatch<std::chrono::hours>(            \
       [&] { code; },                         \
       message);
 

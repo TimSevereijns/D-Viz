@@ -7,6 +7,8 @@
 #include "Visualizations/squarifiedTreemap.h"
 #include "Utilities/scopeExit.hpp"
 
+#include <QApplication>
+
 #include <sstream>
 #include <utility>
 
@@ -273,10 +275,9 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
       [&, vizParameters] (const std::uintmax_t numberOfFilesScanned,
       std::shared_ptr<Tree<VizNode>> fileTree)
    {
-      const bool previousSuspensionState = m_isPaintingSuspended;
-      m_isPaintingSuspended = true;
-
-      ON_SCOPE_EXIT(m_isPaintingSuspended = previousSuspensionState);
+      setCursor(Qt::WaitCursor);
+      QApplication::processEvents();
+      ON_SCOPE_EXIT(setCursor(Qt::ArrowCursor));
 
       std::wstringstream message;
       message.imbue(std::locale(""));
@@ -288,6 +289,7 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
 
       ClearAssetBuffersAndReload(*m_sceneAssets[Asset::HIGHLIGHT], m_camera);
 
+      //PerformSanityCheckOnUserSettings();
       ReloadVisualization(vizParameters);
    };
 
@@ -305,7 +307,6 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
 {
    const bool previousSuspensionState = m_isPaintingSuspended;
    m_isPaintingSuspended = true;
-
    ON_SCOPE_EXIT(m_isPaintingSuspended = previousSuspensionState);
 
    m_visualizationParameters = parameters;
