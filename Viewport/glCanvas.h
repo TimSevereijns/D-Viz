@@ -38,7 +38,7 @@ class GLCanvas : public QOpenGLWidget
        *
        * @param[in] parameters      @see VisualizationParameters
        */
-      void CreateNewVisualization(const VisualizationParameters& parameters);
+      void CreateNewVisualization(VisualizationParameters& parameters);
 
       /**
        * @brief ReloadVisualization
@@ -67,7 +67,7 @@ class GLCanvas : public QOpenGLWidget
       void wheelEvent(QWheelEvent* event) override;
 
    private:
-      void ScanDrive(const VisualizationParameters& vizParameters);
+      void ScanDrive(VisualizationParameters& vizParameters);
 
       void UpdateFPS();
 
@@ -81,6 +81,9 @@ class GLCanvas : public QOpenGLWidget
 
       void PrepareVisualizationVertexBuffers();
       void PrepareOriginMarkerVertexBuffers();
+
+      void AskUserToLimitFileSize(std::uintmax_t numberOfFilesScanned,
+         VisualizationParameters& parameters);
 
       bool m_isPaintingSuspended;
       bool m_isVisualizationLoaded;
@@ -98,7 +101,7 @@ class GLCanvas : public QOpenGLWidget
 
       DriveScanner m_scanner;
 
-      Light m_light;
+      std::vector<Light> m_lights;
 
       KeyboardManager m_keyboardManager;
 

@@ -8,6 +8,7 @@
 #include "Utilities/scopeExit.hpp"
 
 #include <QApplication>
+#include <QMessageBox>
 
 #include <sstream>
 #include <utility>
@@ -182,6 +183,14 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_isPaintingSuspended(false),
      m_isVisualizationLoaded(false),
      m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
+     m_lights(
+     {
+        Light{},
+        Light{QVector3D{Visualization::ROOT_BLOCK_WIDTH, 10.0f, 0.0f}},
+        Light{QVector3D{0.0f, 10.0f, Visualization::ROOT_BLOCK_DEPTH}},
+        Light{QVector3D{Visualization::ROOT_BLOCK_WIDTH, 10.0f, Visualization::ROOT_BLOCK_DEPTH}},
+        Light{QVector3D{0.0f, Visualization::ROOT_BLOCK_DEPTH, 0.0f}}
+     }),
      m_lastFrameTimeStamp(std::chrono::system_clock::now())
 {
    if (!m_mainWindow)
@@ -246,7 +255,7 @@ void GLCanvas::resizeGL(int width, int height)
 }
 
 
-void GLCanvas::CreateNewVisualization(const VisualizationParameters& parameters)
+void GLCanvas::CreateNewVisualization(VisualizationParameters& parameters)
 {
    if (parameters.rootDirectory.empty())
    {
@@ -260,7 +269,7 @@ void GLCanvas::CreateNewVisualization(const VisualizationParameters& parameters)
    }
 }
 
-void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
+void GLCanvas::ScanDrive(VisualizationParameters& vizParameters)
 {
    const auto& progressHandler =
       [&] (const std::uintmax_t numberOfFilesScanned)
@@ -273,7 +282,7 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
 
    const auto& completionHandler =
       [&, vizParameters] (const std::uintmax_t numberOfFilesScanned,
-      std::shared_ptr<Tree<VizNode>> fileTree)
+      std::shared_ptr<Tree<VizNode>> fileTree) mutable
    {
       setCursor(Qt::WaitCursor);
       QApplication::processEvents();
@@ -289,7 +298,7 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
 
       ClearAssetBuffersAndReload(*m_sceneAssets[Asset::HIGHLIGHT], m_camera);
 
-      //PerformSanityCheckOnUserSettings();
+      AskUserToLimitFileSize(numberOfFilesScanned, vizParameters);
       ReloadVisualization(vizParameters);
    };
 
@@ -301,6 +310,38 @@ void GLCanvas::ScanDrive(const VisualizationParameters& vizParameters)
    };
 
    m_scanner.StartScanning(scanningParameters);
+}
+
+void GLCanvas::AskUserToLimitFileSize(
+   const std::uintmax_t numberOfFilesScanned,
+   VisualizationParameters& parameters)
+{
+   if (numberOfFilesScanned < 250000)
+   {
+      return;
+   }
+
+   const unsigned int oneMebibyte = std::pow(2, 20);
+   if (parameters.minimumFileSize < oneMebibyte)
+   {
+      QMessageBox messageBox;
+      messageBox.setText("More than a quarter million files were scanned. " \
+         "Would you like to limit the visualized files to those 1 MiB or larger in " \
+         "order to reduce the load on the GPU and system memory?");
+      messageBox.setIcon(QMessageBox::Warning);
+      messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+      const int election = messageBox.exec();
+
+      switch (election)
+      {
+         case QMessageBox::Yes:
+            parameters.minimumFileSize = oneMebibyte;
+            m_mainWindow->SetFilePruningComboBoxValue(oneMebibyte);
+            return;
+         case QMessageBox::No:
+            return;
+      }
+   }
 }
 
 void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
@@ -658,13 +699,15 @@ void GLCanvas::paintGL()
    assert(m_settings);
    if (m_settings->m_isLightAttachedToCamera)
    {
-      m_light.position = m_camera.GetPosition();
+      assert(m_lights.size() > 0);
+      m_lights.front().position = m_camera.GetPosition();
    }
 
    m_graphicsDevice->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    for (const auto& asset : m_sceneAssets)
    {
-      asset->Render(m_camera, m_light, *m_settings);
+      assert(asset);
+      asset->Render(m_camera, m_lights, *m_settings);
    }
 }

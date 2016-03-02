@@ -73,7 +73,9 @@ bool VisualizationAsset::PrepareColorBuffers(const Camera& camera)
    return true;
 }
 
-bool VisualizationAsset::Render(const Camera& camera, const Light& light,
+bool VisualizationAsset::Render(
+   const Camera& camera,
+   const std::vector<Light>& lights,
    const OptionsManager& settings)
 {
    const static QMatrix4x4 DEFAULT_MATRIX = QMatrix4x4{};
@@ -99,8 +101,8 @@ bool VisualizationAsset::Render(const Camera& camera, const Light& light,
 
    m_shader.setUniformValue("materialSpecularColor",     specularColor);
 
-   m_shader.setUniformValue("light.position",            light.position);
-   m_shader.setUniformValue("light.intensity",           light.intensity);
+   m_shader.setUniformValue("light.position",            lights.front().position);
+   m_shader.setUniformValue("light.intensity",           lights.front().intensity);
    m_shader.setUniformValue("light.attenuation",         settings.m_lightAttenuationFactor);
    m_shader.setUniformValue("light.ambientCoefficient",  settings.m_ambientCoefficient);
 

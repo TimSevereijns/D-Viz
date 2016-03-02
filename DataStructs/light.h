@@ -14,13 +14,15 @@ struct Light
    float attenuation;               ///< The factor with which the light falls off with distance.
    float ambientCoefficient;        ///< The light's contribution to ambient.
 
-   Light();
+   explicit Light();
 
-   Light(const QVector3D& lightPosition,
-         const QVector3D& lightIntensity,
-         const float lightAttenuation,
-         const float lightAmbientCoefficient);
+   explicit Light(
+      const QVector3D& lightPosition,
+      const QVector3D& lightIntensity,
+      const float lightAttenuation,
+      const float lightAmbientCoefficient);
+
+   explicit Light(const QVector3D& lightPosition);
 };
-
 
 #endif // LIGHT_H

@@ -51,11 +51,12 @@ class Visualization
       explicit Visualization(const VisualizationParameters& parameters);
       virtual ~Visualization();
 
-      static const double BLOCK_HEIGHT;
       static const double PADDING_RATIO;
       static const double MAX_PADDING;
-      static const double ROOT_BLOCK_WIDTH;
-      static const double ROOT_BLOCK_DEPTH;
+
+      static const float BLOCK_HEIGHT;
+      static const float ROOT_BLOCK_WIDTH;
+      static const float ROOT_BLOCK_DEPTH;
 
       /**
        * Parses the specified directory scan into vertex and color data.

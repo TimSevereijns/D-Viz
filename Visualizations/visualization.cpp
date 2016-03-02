@@ -9,6 +9,8 @@
 #include <Qt3DCore/QRay3D>
 #include <QRectF>
 
+#include "../Utilities/stopwatch.hpp"
+
 namespace
 {
    const double EPSILON = 0.0001;
@@ -183,13 +185,69 @@ namespace
          }
       }
    }
+
+   using IntersectionPointAndNode = std::pair<QVector3D, TreeNode<VizNode>>;
+
+   /**
+    * @brief GetAllIntersections
+    *
+    * @param[in] ray
+    * @param[in] camera
+    * @param[in] parameters
+    * @param[in] node
+    */
+   std::vector<IntersectionPointAndNode> FindAllIntersections(
+      const Qt3D::QRay3D& ray,
+      const Camera& camera,
+      const VisualizationParameters& parameters,
+      std::shared_ptr<TreeNode<VizNode>> node)
+   {
+      std::vector<IntersectionPointAndNode> allIntersections;
+
+      assert(node);
+      while (node)
+      {
+         if (node->GetData().file.size < parameters.minimumFileSize ||
+             (parameters.onlyShowDirectories && node->GetData().file.type != FILE_TYPE::DIRECTORY))
+         {
+            AdvanceToNextNonDescendant(node);
+            continue;
+         }
+
+         const auto& boundingBoxIntersection = DoesRayIntersectBlock(ray, node->GetData().boundingBox);
+         if (boundingBoxIntersection)
+         {
+            const auto& blockIntersection = DoesRayIntersectBlock(ray, node->GetData().block);
+            if (blockIntersection && camera.IsPointInFrontOfCamera(*blockIntersection))
+            {
+               allIntersections.emplace_back(std::make_pair(*blockIntersection, *node));
+            }
+
+            if (node->HasChildren())
+            {
+               node = node->GetFirstChild();
+            }
+            else
+            {
+               AdvanceToNextNonDescendant(node);
+            }
+         }
+         else
+         {
+            AdvanceToNextNonDescendant(node);
+         }
+      }
+
+      return allIntersections;
+   }
 }
 
-const double Visualization::BLOCK_HEIGHT = 2.0;
 const double Visualization::PADDING_RATIO = 0.9;
 const double Visualization::MAX_PADDING = 0.75;
-const double Visualization::ROOT_BLOCK_WIDTH = 1000.0;
-const double Visualization::ROOT_BLOCK_DEPTH = 1000.0;
+
+const float Visualization::BLOCK_HEIGHT = 2.0;
+const float Visualization::ROOT_BLOCK_WIDTH = 1000.0;
+const float Visualization::ROOT_BLOCK_DEPTH = 1000.0;
 
 Visualization::Visualization(const VisualizationParameters& parameters)
    : m_vizParameters(parameters),
@@ -308,63 +366,26 @@ boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersection(
       return boost::none;
    }
 
-   using namespace std::chrono;
-   const auto startTime = system_clock::now();
+   boost::optional<TreeNode<VizNode>> nearestIntersection = boost::none;
 
-   using PointNodePair = std::pair<QVector3D, TreeNode<VizNode>>;
-   std::vector<PointNodePair> allIntersections;
+   Stopwatch<std::chrono::milliseconds>([&]{
+      auto allIntersections = FindAllIntersections(ray, camera, parameters, m_theTree->GetHead());
 
-   auto node = m_theTree->GetHead();
-
-   while (node)
-   {
-      if (node->GetData().file.size < parameters.minimumFileSize ||
-          (parameters.onlyShowDirectories && node->GetData().file.type != FILE_TYPE::DIRECTORY))
+      if (allIntersections.empty())
       {
-         AdvanceToNextNonDescendant(node);
-         continue;
+         return;
       }
 
-      const auto& boundingBoxIntersection = DoesRayIntersectBlock(ray, node->GetData().boundingBox);
-      if (boundingBoxIntersection)
+      std::sort(std::begin(allIntersections), std::end(allIntersections),
+         [&ray] (const IntersectionPointAndNode& lhs, const IntersectionPointAndNode& rhs)
       {
-         const auto& blockIntersection = DoesRayIntersectBlock(ray, node->GetData().block);
-         if (blockIntersection && camera.IsPointInFrontOfCamera(*blockIntersection))
-         {
-            allIntersections.emplace_back(std::make_pair(*blockIntersection, *node));
-         }
+         return (ray.origin().distanceToPoint(lhs.first) < ray.origin().distanceToPoint(rhs.first));
+      });
 
-         if (node->HasChildren())
-         {
-            node = node->GetFirstChild();
-         }
-         else
-         {
-            AdvanceToNextNonDescendant(node);
-         }
-      }
-      else
-      {
-         AdvanceToNextNonDescendant(node);
-      }
-   }
+      nearestIntersection = allIntersections.front().second;
+   }, "Node selected in ");
 
-   if (allIntersections.empty())
-   {
-      return boost::none;
-   }
-
-   std::sort(std::begin(allIntersections), std::end(allIntersections),
-      [&ray] (const PointNodePair& lhs, const PointNodePair& rhs)
-   {
-      return (ray.origin().distanceToPoint(lhs.first) < ray.origin().distanceToPoint(rhs.first));
-   });
-
-   const auto endTime = system_clock::now();
-   const auto selectionTime = duration_cast<std::chrono::milliseconds>(endTime - startTime);
-   std::cout << "Node selected in time: " << selectionTime.count() << "ms" << std::endl;
-
-   return allIntersections.front().second;
+   return nearestIntersection;
 }
 
 QVector<QVector3D>& Visualization::GetVertexData()

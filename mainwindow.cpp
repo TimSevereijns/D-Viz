@@ -65,9 +65,9 @@ MainWindow::~MainWindow()
 void MainWindow::SetupSidebar()
 {
    std::for_each(std::begin(m_sizePruningOptions), std::end(m_sizePruningOptions),
-      [&] (const std::pair<std::uintmax_t, QString>& pair)
+      [&] (std::vector<std::pair<std::uintmax_t, QString>>::const_reference pair)
    {
-      m_ui->pruneSizeComboBox->addItem(pair.second);
+      m_ui->pruneSizeComboBox->addItem(pair.second, pair.first);
    });
 
    connect(m_ui->directoriesOnlyCheckbox, &QCheckBox::stateChanged,
@@ -251,14 +251,34 @@ void MainWindow::OnFieldOfViewChanged(const int fieldOfView)
    m_glCanvas->SetFieldOfView(static_cast<float>(fieldOfView));
 }
 
-void MainWindow::SetFieldOfViewSlider(const int fieldOfView)
+void MainWindow::SetFieldOfViewSlider(int fieldOfView)
 {
    m_ui->fieldOfViewSlider->setValue(fieldOfView);
 }
 
-void MainWindow::SetCameraSpeedSpinner(const double speed)
+void MainWindow::SetCameraSpeedSpinner(double speed)
 {
    m_ui->cameraSpeedSpinner->setValue(speed);
+}
+
+void MainWindow::SetFilePruningComboBoxValue(std::uintmax_t minimum)
+{
+   const auto match = std::find_if(std::begin(m_sizePruningOptions), std::end(m_sizePruningOptions),
+      [minimum](std::vector<std::pair<std::uintmax_t, QString>>::const_reference pair)
+   {
+      return pair.first >= minimum;
+   });
+
+   if (match == std::end(m_sizePruningOptions))
+   {
+      return;
+   }
+
+   const int targetIndex = m_ui->pruneSizeComboBox->findData(match->first);
+   if (targetIndex != -1)
+   {
+      m_ui->pruneSizeComboBox->setCurrentIndex(targetIndex);
+   }
 }
 
 XboxController::State& MainWindow::GetXboxControllerState() const

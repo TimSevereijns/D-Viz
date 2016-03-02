@@ -99,7 +99,10 @@ GridAsset::GridAsset(GraphicsDevice& device)
    m_rawColors = CreateOriginMarkerAndGridColors();
 }
 
-bool GridAsset::Render(const Camera& camera, const Light&, const OptionsManager&)
+bool GridAsset::Render(
+   const Camera& camera,
+   const std::vector<Light>&,
+   const OptionsManager&)
 {
    m_shader.bind();
    m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());

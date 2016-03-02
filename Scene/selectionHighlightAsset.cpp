@@ -5,7 +5,10 @@ SelectionHighlightAsset::SelectionHighlightAsset(GraphicsDevice& device)
 {
 }
 
-bool SelectionHighlightAsset::Render(const Camera& camera, const Light&, const OptionsManager&)
+bool SelectionHighlightAsset::Render(
+   const Camera& camera,
+   const std::vector<Light>&,
+   const OptionsManager&)
 {
    m_shader.bind();
    m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());

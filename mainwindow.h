@@ -33,13 +33,19 @@ class MainWindow : public QMainWindow
        * @brief UpdateFieldOfViewSlider
        * @param fieldOfView
        */
-      void SetFieldOfViewSlider(const int fieldOfView);
+      void SetFieldOfViewSlider(int fieldOfView);
 
       /**
        * @brief UpdateCameraSpeedComboBox
        * @param speed
        */
-      void SetCameraSpeedSpinner(const double speed);
+      void SetCameraSpeedSpinner(double speed);
+
+      /**
+       * @brief SetFilePruningComboBox
+       * @param index
+       */
+      void SetFilePruningComboBoxValue(uintmax_t minimum);
 
       /**
        * @brief GetXboxController

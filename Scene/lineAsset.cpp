@@ -66,7 +66,10 @@ bool LineAsset::PrepareColorBuffers(const Camera& camera)
    return true;
 }
 
-bool LineAsset::Render(const Camera& camera, const Light&, const OptionsManager&)
+bool LineAsset::Render(
+   const Camera& camera,
+   const std::vector<Light>&,
+   const OptionsManager&)
 {
    m_shader.bind();
    m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());

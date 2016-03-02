@@ -8,7 +8,9 @@ class SelectionHighlightAsset : public LineAsset
    public:
       explicit SelectionHighlightAsset(GraphicsDevice& device);
 
-      virtual bool Render(const Camera& camera, const Light& light,
+      virtual bool Render(
+         const Camera& camera,
+         const std::vector<Light>&,
          const OptionsManager& settings) override;
 };
 
