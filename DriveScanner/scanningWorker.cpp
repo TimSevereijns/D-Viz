@@ -91,9 +91,18 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
       Visualization::ROOT_BLOCK_DEPTH
    };
 
+   std::wstring sanitizedPath{m_parameters.path};
+
+   const auto stringLength = m_parameters.path.length();
+   if (stringLength > 1 &&
+       m_parameters.path.compare(stringLength - 1, stringLength, std::wstring(L"/")) == 0)
+   {
+      sanitizedPath = m_parameters.path.substr(0, stringLength - 1);
+   }
+
    const FileInfo fileInfo
    {
-      m_parameters.path,
+      sanitizedPath,
       ScanningWorker::SIZE_UNDEFINED,
       FILE_TYPE::DIRECTORY
    };

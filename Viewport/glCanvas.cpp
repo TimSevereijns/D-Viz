@@ -98,6 +98,7 @@ namespace
          return path + (!path.empty() ? L"/" : L"") + file;
       });
 
+      assert(completePath.size() > 0);
       return completePath;
    }
 
@@ -108,7 +109,9 @@ namespace
     * @param[in] highlightAsset     The visual asset representing the outline.
     * @param[in] camera             The camera from which the selection was made.
     */
-   void HighlightSelection(const TreeNode<VizNode>& node, SceneAsset& highlightAsset,
+   void HighlightSelection(
+      const TreeNode<VizNode>& node,
+      SceneAsset& highlightAsset,
       const Camera& camera)
    {
       QVector<QVector3D> nodeVertices;
@@ -293,12 +296,13 @@ void GLCanvas::ScanDrive(VisualizationParameters& vizParameters)
       message << std::fixed << L"Total Files Scanned: " << numberOfFilesScanned;
       m_mainWindow->SetStatusBarMessage(message.str());
 
+      AskUserToLimitFileSize(numberOfFilesScanned, vizParameters);
+
       m_theVisualization->Parse(fileTree);
       m_theVisualization->UpdateBoundingBoxes();
 
       ClearAssetBuffersAndReload(*m_sceneAssets[Asset::HIGHLIGHT], m_camera);
 
-      AskUserToLimitFileSize(numberOfFilesScanned, vizParameters);
       ReloadVisualization(vizParameters);
    };
 
@@ -316,6 +320,7 @@ void GLCanvas::AskUserToLimitFileSize(
    const std::uintmax_t numberOfFilesScanned,
    VisualizationParameters& parameters)
 {
+   assert(numberOfFilesScanned > 0);
    if (numberOfFilesScanned < 250000)
    {
       return;
@@ -340,6 +345,8 @@ void GLCanvas::AskUserToLimitFileSize(
             return;
          case QMessageBox::No:
             return;
+         default:
+            assert(false);
       }
    }
 }
@@ -431,6 +438,7 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
       HighlightSelection(*selection, *m_sceneAssets[Asset::HIGHLIGHT], m_camera);
 
       const auto fileSize = selection->GetData().file.size;
+      assert(fileSize > 0);
 
       std::wstringstream message;
       message.imbue(std::locale{""});
@@ -440,6 +448,7 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
       message << GetFullNodePath(*selection) << L"  |  "
          << std::fixed << sizeAndUnits.first << sizeAndUnits.second;
 
+      assert(message.str().size() > 0);
       m_mainWindow->SetStatusBarMessage(message.str());
    }
    else
@@ -666,6 +675,7 @@ void GLCanvas::UpdateFPS()
    {
       m_frameRateDeque.pop_front();
    }
+   assert(m_frameRateDeque.size() <= 32);
 
    m_frameRateDeque.emplace_back(1000 / millisecondsElapsed);
 
@@ -675,6 +685,7 @@ void GLCanvas::UpdateFPS()
       return runningTotal + fps;
    });
 
+   assert(m_frameRateDeque.size() > 0);
    const auto averageFps = fpsSum / m_frameRateDeque.size();
 
    if (m_mainWindow)

@@ -2,8 +2,6 @@
 
 #include <algorithm>
 #include <assert.h>
-#include <chrono>
-#include <iostream>
 #include <limits>
 #include <numeric>
 
@@ -12,29 +10,12 @@
 namespace
 {
    /**
-    * @brief PrintRow prints the items in the current row.
-    *
-    * @param[in] row                The row to be printed.
-    */
-   void PrintRow(const std::vector<TreeNode<VizNode>*>& row)
-   {
-      std::cout << "\tRow: ";
-
-      for (const TreeNode<VizNode>* const node : row)
-      {
-         std::wcout << (*node)->file.name << L" ";
-      }
-
-      std::cout << std::endl;
-   }
-
-   /**
     * @brief RowSizeInBytes computes the total disk space represented by the nodes in the row.
     *
     * @param[in] row                The nodes in the whose size is to contribute to total row size.
     * @param[in] candidateItem      An optional additional item to be included in the row.
     *
-    * @returns a total row size in bytes of disk space occupied.
+    * @returns A total row size in bytes of disk space occupied.
     */
    std::uintmax_t ComputeBytesInRow(const std::vector<TreeNode<VizNode>*>& row,
       const std::uintmax_t candidateSize)
@@ -54,7 +35,7 @@ namespace
     * @brief ComputeRemainingArea computes the area of the specified block that remains available
     * to be built upon.
     *
-    * @param block                  The block to build upon.
+    * @param[in] block              The block to build upon.
     */
    Block ComputeRemainingArea(const Block& block)
    {
@@ -95,12 +76,12 @@ namespace
     * @param[in] row                The nodes to be laid out as blocks in the current row.
     * @param[in] candidateSize      The size of the latest candidate to be considered for inclusion
     *                               in the row.
-    * @param[in] parentNode         The node on top of which the new row is to be placed.
+    * @param[in, out] parentNode    The node on top of which the new row is to be placed.
     * @param[in] updateOffset       Whether the origin of the next row should be computed. This
     *                               should only be set to true only when the row bounds are computed
     *                               for the last time as part of row layout.
     *
-    * @returns a block representing the outer dimensions of the row boundary.
+    * @returns A block representing the outer dimensions of the row boundary.
     */
    Block CalculateRowBounds(
       const std::vector<TreeNode<VizNode>*>& row,
@@ -177,23 +158,7 @@ namespace
          }
       }
 
-      if (!rowRealEstate.HasVolume())
-      {
-         if (!row.empty())
-         {
-            auto smallestElement = std::min((*row.front())->file.size,
-               (*row.back())->file.size);
-
-            if (candidateSize)
-            {
-               smallestElement = std::min(smallestElement, candidateSize);
-            }
-
-            std::cout << "Smallest Element: " << smallestElement << std::endl;
-         }
-
-         assert(!"No real estate created!");
-      }
+      assert(rowRealEstate.HasVolume());
 
       return rowRealEstate;
    }
@@ -201,17 +166,18 @@ namespace
    /**
     * @brief SlicePerpendicularToWidth
     *
-    * @param land
-    * @param percentageOfParent
-    * @param data
-    * @param nodeCount
+    * @param[in] land               The node, or "land," to lay the current node out upon.
+    * @param[in] percentageOfParent The percentage of the parent node that the current node will
+    *                               consume.
+    * @param[in, out] node          The node to be laid out upon the land.
+    * @param[in] nodeCount          The number of sibling nodes that the node has in its row.
     *
-    * @return
+    * @returns The additional coverage, as a percentage, of total parent area.
     */
    double SlicePerpendicularToWidth(
-      Block& land,
+      const Block& land,
       const double percentageOfParent,
-      VizNode& data,
+      VizNode& node,
       const size_t nodeCount)
    {
       const double blockWidthPlusPadding = land.width * percentageOfParent;
@@ -240,7 +206,7 @@ namespace
          -depthPaddingPerSide
       };
 
-      data.block = Block
+      node.block = Block
       {
          land.origin + offset,
          finalBlockWidth,
@@ -255,17 +221,18 @@ namespace
    /**
     * @brief SlicePerpendicularToDepth
     *
-    * @param land
-    * @param percentageOfParent
-    * @param data
-    * @param nodeCount
+    * @param[in] land               The node, or "land," to lay the current node out upon.
+    * @param[in] percentageOfParent The percentage of the parent node that the current node will
+    *                               consume.
+    * @param[in, out] node          The node to be laid out upon the land.
+    * @param[in] nodeCount          The number of sibling nodes that the node has in its row.
     *
-    * @return
+    * @return The additional coverage, as a percentage, of total parent area.
     */
    double SlicePerpendicularToDepth(
-      Block& land,
+      const Block& land,
       const double percentageOfParent,
-      VizNode& data,
+      VizNode& node,
       const size_t nodeCount)
    {
       const double blockDepthPlusPadding = std::abs(land.depth * percentageOfParent);
@@ -294,7 +261,7 @@ namespace
          -(land.depth * land.percentCovered) - depthPaddingPerSide
       };
 
-      data.block = Block
+      node.block = Block
       {
          land.origin + offset,
          finalBlockWidth,
@@ -311,7 +278,7 @@ namespace
     * constructs the individual blocks representing the nodes in that row so that the bounds of the
     * row are subdivided along the longest axis of available space.
     *
-    * @param row                    The nodes to include in a single row.
+    * @param[in, out] row           The nodes to include in a single row.
     */
    void LayoutRow(std::vector<TreeNode<VizNode>*>& row)
    {
@@ -324,11 +291,7 @@ namespace
       Block& land = CalculateRowBounds(row, /*candidateSize =*/ 0,
          row.front()->GetParent()->GetData(), /*updateOffset =*/ true);
 
-      if (!land.HasVolume())
-      {
-         assert(!"No land to build upon!");
-         return;
-      }
+      assert(land.HasVolume());
 
       const size_t nodeCount = row.size();
       const std::uintmax_t rowFileSize = ComputeBytesInRow(row, /*candidateSize =*/ 0);
@@ -353,10 +316,8 @@ namespace
             ? SlicePerpendicularToWidth(land, percentageOfParent, data, nodeCount)
             : SlicePerpendicularToDepth(land, percentageOfParent, data, nodeCount);
 
-         if (!data.block.HasVolume())
-         {
-            assert(!"Block is not defined!");
-         }
+         assert(additionalCoverage > 0);
+         assert(data.block.HasVolume() > 0);
 
          land.percentCovered += additionalCoverage;
       }
@@ -366,14 +327,18 @@ namespace
     * @brief ComputeShortestEdgeOfRemainingArea calculates the shortest dimension (width or depth)
     * of the remaining bounds available to build within.
     *
-    * @param node                   The node being built upon.
+    * @param[in] node               The node being built upon.
     *
-    * @returns a double respresent the length of the shortest edge.
+    * @returns A double respresent the length of the shortest edge.
     */
-   double ComputeShortestEdgeOfRemainingBounds(VizNode& node)
+   double ComputeShortestEdgeOfRemainingBounds(const VizNode& node)
    {
       const Block remainingRealEstate = ComputeRemainingArea(node.block);
-      return std::min(std::abs(remainingRealEstate.depth), std::abs(remainingRealEstate.width));
+      const auto shortestEdge = std::min(std::abs(remainingRealEstate.depth),
+         std::abs(remainingRealEstate.width));
+
+      assert(shortestEdge > 0);
+      return shortestEdge;
    }
 
    /**
@@ -385,7 +350,7 @@ namespace
     *                                  inclusion in the current row. Zero is no candidate necessary.
     * @param[in] shortestEdgeOfBounds  Length of shortest side of the enclosing row's boundary.
     *
-    * @returns a double representing the least square aspect ratio.
+    * @returns A double representing the least square aspect ratio.
     */
    double ComputeWorstAspectRatio(
       const std::vector<TreeNode<VizNode>*>& row,
@@ -444,6 +409,8 @@ namespace
       }
 
       assert(smallestNodeInBytes > 0);
+      assert(totalRowSize > 0);
+      assert(totalRowArea > 0);
 
       const double smallestArea =
          (static_cast<double>(smallestNodeInBytes) / static_cast<double>(totalRowSize)) *
@@ -464,7 +431,7 @@ namespace
     * @brief SquarifyAndLayoutRows represents the heart of the algorithm and decides which nodes
     * ought to be added to which row in order to acheive an acceptable layout.
     *
-    * @param nodes                  The sibling nodes to be laid out within the available bounds
+    * @param[in, out] nodes         The sibling nodes to be laid out within the available bounds
     *                               of the parent node.
     */
    void SquarifyAndLayoutRows(const std::vector<TreeNode<VizNode>*>& nodes)
@@ -524,7 +491,7 @@ namespace
     * performs a recursive breadth-first traversal of the node tree and lays out the children of
     * each node with the aid of various helper functions.
     *
-    * @param root                   The node whose children to lay out.
+    * @param[in, out] root          The node whose children to lay out.
     */
    void SquarifyRecursively(const TreeNode<VizNode>& root)
    {

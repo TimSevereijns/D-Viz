@@ -186,12 +186,7 @@ void MainWindow::OnFileMenuNewScan()
       return;
    }
 
-   const int stringLength = selectedDirectory.length();
-   m_directoryToVisualize = (selectedDirectory.endsWith("/") && stringLength > 1)
-      ? selectedDirectory.left(stringLength - 1).toStdWString()
-      : selectedDirectory.toStdWString();
-
-   assert(selectedDirectory.length());
+   m_directoryToVisualize = selectedDirectory.toStdWString();
 
    const auto comboBoxIndex = m_ui->pruneSizeComboBox->currentIndex();
 
