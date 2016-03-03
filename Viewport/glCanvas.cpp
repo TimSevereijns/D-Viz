@@ -1,5 +1,6 @@
 #include "glCanvas.h"
 
+#include "../constants.h"
 #include "Scene/debuggingRayAsset.h"
 #include "Scene/gridAsset.h"
 #include "Scene/selectionHighlightAsset.h"
@@ -42,33 +43,27 @@ namespace
     */
    std::pair<double, std::wstring> GetFileSizeInMostAppropriateUnits(double sizeInBytes)
    {
-      // @todo UPGRADE TO C++11: constexpr instead of const
-      const static double oneKibibyte = std::pow(2, 10);
-      const static double oneMebibyte = std::pow(2, 20);
-      const static double oneGibibyte = std::pow(2, 30);
-      const static double oneTebibyte = std::pow(2, 40);
-
-      if (sizeInBytes < oneKibibyte)
+      if (sizeInBytes < Constants::oneKibibyte)
       {
          return std::make_pair<double, std::wstring>(std::move(sizeInBytes), L" bytes");
       }
 
-      if (sizeInBytes < oneMebibyte)
+      if (sizeInBytes < Constants::oneMebibyte)
       {
-         return std::make_pair<double, std::wstring>(sizeInBytes / oneKibibyte, L" KiB");
+         return std::make_pair<double, std::wstring>(sizeInBytes / Constants::oneKibibyte, L" KiB");
       }
 
-      if (sizeInBytes < oneGibibyte)
+      if (sizeInBytes < Constants::oneGibibyte)
       {
-         return std::make_pair<double, std::wstring>(sizeInBytes / oneMebibyte, L" MiB");
+         return std::make_pair<double, std::wstring>(sizeInBytes / Constants::oneMebibyte, L" MiB");
       }
 
-      if (sizeInBytes < oneTebibyte)
+      if (sizeInBytes < Constants::oneTebibyte)
       {
-         return std::make_pair<double, std::wstring>(sizeInBytes / oneGibibyte, L" GiB");
+         return std::make_pair<double, std::wstring>(sizeInBytes / Constants::oneGibibyte, L" GiB");
       }
 
-      return std::make_pair<double, std::wstring>(sizeInBytes / oneTebibyte, L" TiB");
+      return std::make_pair<double, std::wstring>(sizeInBytes / Constants::oneTebibyte, L" TiB");
    }
 
    /**
@@ -189,10 +184,10 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_lights(
      {
         Light{},
-        Light{QVector3D{Visualization::ROOT_BLOCK_WIDTH, 10.0f, 0.0f}},
-        Light{QVector3D{0.0f, 10.0f, Visualization::ROOT_BLOCK_DEPTH}},
-        Light{QVector3D{Visualization::ROOT_BLOCK_WIDTH, 10.0f, Visualization::ROOT_BLOCK_DEPTH}},
-        Light{QVector3D{0.0f, Visualization::ROOT_BLOCK_DEPTH, 0.0f}}
+        Light{QVector3D{0.0f, 80.0f, 0.0f}},
+        Light{QVector3D{0.0f, 80.0f, -Visualization::ROOT_BLOCK_DEPTH}},
+        Light{QVector3D{Visualization::ROOT_BLOCK_WIDTH, 80.0f, 0.0f}},
+        Light{QVector3D{Visualization::ROOT_BLOCK_WIDTH, 80.0f, -Visualization::ROOT_BLOCK_DEPTH}}
      }),
      m_lastFrameTimeStamp(std::chrono::system_clock::now())
 {
@@ -326,8 +321,7 @@ void GLCanvas::AskUserToLimitFileSize(
       return;
    }
 
-   const unsigned int oneMebibyte = std::pow(2, 20);
-   if (parameters.minimumFileSize < oneMebibyte)
+   if (parameters.minimumFileSize < Constants::oneMebibyte)
    {
       QMessageBox messageBox;
       messageBox.setText("More than a quarter million files were scanned. " \
@@ -340,8 +334,8 @@ void GLCanvas::AskUserToLimitFileSize(
       switch (election)
       {
          case QMessageBox::Yes:
-            parameters.minimumFileSize = oneMebibyte;
-            m_mainWindow->SetFilePruningComboBoxValue(oneMebibyte);
+            parameters.minimumFileSize = Constants::oneMebibyte;
+            m_mainWindow->SetFilePruningComboBoxValue(Constants::oneMebibyte);
             return;
          case QMessageBox::No:
             return;

@@ -13,7 +13,7 @@ uniform struct Light
    vec3 intensity;
    float ambientCoefficient;
    float attenuation;
-} light;
+} allLights[5];
 
 in vec3 fragmentVertex;
 in vec3 fragmentColor;
@@ -21,22 +21,21 @@ in vec3 fragmentNormal;
 
 out vec4 pixelColor;
 
-void main(void)
+vec3 GetContributionOfLight(
+   Light light,
+   vec3 surfaceColor,
+   vec3 normal,
+   vec3 surfacePosition,
+   vec3 surfaceToCamera)
 {
-   // Transform normal to world coordinates:
-   vec3 normal = normalize(transpose(inverse(mat3(model))) * fragmentNormal);
-
-   // Compute vectors from the fragment (in world coordinates) to important objects in the scene:
-   vec3 surfacePosition = vec3(model * vec4(fragmentVertex, 1));
    vec3 surfaceToLight = normalize(light.position - surfacePosition);
-   vec3 surfaceToCamera = normalize(cameraPosition - surfacePosition);
 
    // Ambient:
-   vec3 ambient = light.ambientCoefficient * fragmentColor * light.intensity;
+   vec3 ambient = light.ambientCoefficient * surfaceColor * light.intensity;
 
    // Diffuse:
    float diffuseCoefficient = max(0.0, dot(normal, surfaceToLight));
-   vec3 diffuse = diffuseCoefficient * fragmentColor * light.intensity;
+   vec3 diffuse = diffuseCoefficient * surfaceColor * light.intensity;
 
    // Specular:
    float specularCoefficient = 0.0;
@@ -53,12 +52,34 @@ void main(void)
 
    // Linear color (before gamma correction):
    vec3 linearColor = ambient + attenuation * (diffuse + specular);
+   return linearColor;
+}
+
+void main(void)
+{
+   // Transform normal to world coordinates:
+   vec3 normal = normalize(transpose(inverse(mat3(model))) * fragmentNormal);
+
+   // Compute vectors from the fragment (in world coordinates) to important objects in the scene:
+   vec3 surfacePosition = vec3(model * vec4(fragmentVertex, 1));
+
+   vec3 surfaceToCamera = normalize(cameraPosition - surfacePosition);
+
+   // Calculate the contribution of each light:
+   vec3 linearColor = vec3(0);
+   for (int i = 0; i < 5; i++)
+   {
+      linearColor += GetContributionOfLight(
+         allLights[i],
+         fragmentColor,
+         normal,
+         surfacePosition,
+         surfaceToCamera);
+   }
 
    // Gamma correction:
    vec3 gamma = vec3(1.0 / 2.2);
 
    // Final pixel color:
    pixelColor = vec4(pow(linearColor, gamma), 1);
-
-   //pixelColor = vec4(diffuse * light.intensity * fragmentColor, 1);
 }

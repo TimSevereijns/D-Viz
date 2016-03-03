@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
@@ -260,6 +260,9 @@
      </item>
      <item>
       <widget class="QDoubleSpinBox" name="shininesSpinner">
+       <property name="minimum">
+        <double>1.000000000000000</double>
+       </property>
        <property name="maximum">
         <double>100.000000000000000</double>
        </property>

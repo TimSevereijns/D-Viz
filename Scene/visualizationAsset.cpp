@@ -1,5 +1,44 @@
 #include "visualizationAsset.h"
 
+namespace
+{
+   /**
+    * @brief SetUniformLights is a helper function to easily set all values of the GLSL defined
+    * struct.
+    *
+    * @param[in] lights             Vector of lights to be loaded into the shader program.
+    * @param[in] settings           Additional scene rendering settings.
+    * @param[out] shader            The shader program to load the light data into.
+    */
+   void SetUniformLights(
+      const std::vector<Light>& lights,
+      const OptionsManager& settings,
+      QOpenGLShaderProgram& shader)
+   {
+      for (size_t i = 0; i < lights.size(); i++)
+      {
+         const auto index = std::to_string(i);
+
+         std::string position{"allLights["};
+         position.append(index).append("].position");
+
+         std::string intensity{"allLights["};
+         intensity.append(index).append("].intensity");
+
+         std::string attenuation{"allLights["};
+         attenuation.append(index).append("].attenuation");
+
+         std::string ambientCoefficient{"allLights["};
+         ambientCoefficient.append(index).append("].ambientCoefficient");
+
+         shader.setUniformValue(position.c_str(), lights[i].position);
+         shader.setUniformValue(intensity.c_str(), lights[i].intensity);
+         shader.setUniformValue(attenuation.c_str(), settings.m_lightAttenuationFactor);
+         shader.setUniformValue(ambientCoefficient.c_str(), settings.m_ambientCoefficient);
+      }
+   }
+}
+
 VisualizationAsset::VisualizationAsset(GraphicsDevice& device)
    : SceneAsset(device)
 {
@@ -86,11 +125,12 @@ bool VisualizationAsset::Render(
    }
 
    m_shader.bind();
-   m_shader.setUniformValue("model",                     DEFAULT_MATRIX);
-   m_shader.setUniformValue("mvpMatrix",                 camera.GetProjectionViewMatrix());
-   m_shader.setUniformValue("cameraPosition",            camera.GetPosition());
+   m_shader.setUniformValue("model", DEFAULT_MATRIX);
+   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
+   m_shader.setUniformValue("cameraPosition", camera.GetPosition());
+   m_shader.setUniformValue("materialShininess", settings.m_materialShininess);
 
-   m_shader.setUniformValue("materialShininess",         settings.m_materialShininess);
+   SetUniformLights(lights, settings, m_shader);
 
    const QVector3D specularColor
    {
@@ -99,12 +139,7 @@ bool VisualizationAsset::Render(
       settings.m_blueLightComponent
    };
 
-   m_shader.setUniformValue("materialSpecularColor",     specularColor);
-
-   m_shader.setUniformValue("light.position",            lights.front().position);
-   m_shader.setUniformValue("light.intensity",           lights.front().intensity);
-   m_shader.setUniformValue("light.attenuation",         settings.m_lightAttenuationFactor);
-   m_shader.setUniformValue("light.ambientCoefficient",  settings.m_ambientCoefficient);
+   m_shader.setUniformValue("materialSpecularColor", specularColor);
 
    m_VAO.bind();
 
@@ -123,4 +158,3 @@ bool VisualizationAsset::Reload(const Camera& camera)
 
    return true;
 }
-

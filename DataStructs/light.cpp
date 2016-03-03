@@ -22,9 +22,8 @@ Light::Light(
 
 Light::Light(const QVector3D& lightPosition)
    : position(lightPosition),
-     intensity(QVector3D{1.0f, 1.0f, 1.0f}),
-     attenuation(0.75f),
+     intensity(QVector3D{0.1f, 0.1f, 0.1f}),
+     attenuation(0.1f),
      ambientCoefficient(0.01f)
 {
 }
-

@@ -63,7 +63,8 @@ HEADERS  += mainwindow.h \
     Viewport/graphicsDevice.h \
     Visualizations/squarifiedTreemap.h \
     Visualizations/visualization.h \
-    Utilities/stopwatch.hpp
+    Utilities/stopwatch.hpp \
+    constants.h
 
 FORMS    += mainwindow.ui
 
