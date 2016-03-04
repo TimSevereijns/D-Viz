@@ -16,7 +16,9 @@ class LineAsset : public SceneAsset
       virtual bool PrepareVertexBuffers(const Camera& camera) override;
       virtual bool PrepareColorBuffers(const Camera& camera) override;
 
-      virtual bool Render(const Camera& camera, const std::vector<Light>& light,
+      virtual bool Render(
+         const Camera& camera,
+         const std::vector<Light>& light,
          const OptionsManager& settings) override;
 
       virtual bool Reload(const Camera& camera) override;

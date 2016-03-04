@@ -68,7 +68,9 @@ class SceneAsset
        *
        * @returns true if the operation succeeded.
        */
-      virtual bool Render(const Camera& camera, const std::vector<Light>& light,
+      virtual bool Render(
+         const Camera& camera,
+         const std::vector<Light>& light,
          const OptionsManager& settings) = 0;
 
       /**
