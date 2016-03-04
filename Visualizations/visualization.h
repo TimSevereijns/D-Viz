@@ -110,17 +110,26 @@ class Visualization
 
       /**
        * @brief CreateBlockColors creates the vertex colors needed to color a single block.
-       * 
+       *
        * @returns a vector of vertex colors.
        */
       static QVector<QVector3D> CreateFileColors();
 
       /**
        * @brief CreateBlockColors creates the vertex colors needed to color a single block.
-       * 
+       *
        * @returns a vector of vertex colors.
        */
       static QVector<QVector3D> CreateDirectoryColors();
+
+      /**
+       * @brief CreateHighlightColors
+       *
+       * @todo Document this
+       *
+       * @return
+       */
+      static QVector<QVector3D> CreateHighlightColors();
 
       /**
        * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each

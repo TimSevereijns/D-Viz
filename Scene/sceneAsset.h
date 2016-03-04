@@ -10,6 +10,9 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 
+struct VizNode;
+template<typename DataType> class TreeNode;
+
 /**
  * @brief The SceneAsset class is an abstract base class that can be used to simplify the management
  * and rendering of assets in the scene.
@@ -113,6 +116,15 @@ class SceneAsset
        * @returns the count of color entries used to present the asset's color.
        */
       unsigned int GetColorCount() const;
+
+      /**
+       * @brief UpdateVBO
+       *
+       * @todo Document this
+       *
+       * @param data
+       */
+      virtual void UpdateVBO(const TreeNode<VizNode>& node);
 
    protected:
       bool LoadShaders(const QString& vertexShaderName, const QString& fragmentShaderName);

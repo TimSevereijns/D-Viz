@@ -8,7 +8,10 @@ Block::Block()
 {
 }
 
-Block::Block(const DoublePoint3D& origin, const double width, const double height,
+Block::Block(
+   const DoublePoint3D& origin,
+   const double width,
+   const double height,
    const double depth)
    : width(width),
      height(height),
@@ -85,6 +88,18 @@ Block::Block(const DoublePoint3D& origin, const double width, const double heigh
       << BlockFace(topFace,   BlockFace::Side::TOP);
 }
 
+//Block::Block(const Block& other)
+//   : width(other.width),
+//     height(other.height),
+//     depth(other.depth),
+//     percentCovered(other.percentCovered),
+//     origin(other.origin),
+//     nextRowOrigin(other.nextRowOrigin),
+//     colors(other.colors),
+//     blockFaces(other.blockFaces)
+//{
+//}
+
 Block::FaceIterator Block::begin() const
 {
    Block::FaceIterator iterator{this};
@@ -104,6 +119,8 @@ bool Block::HasVolume() const
 
 bool Block::IsNotInverted() const
 {
+   // @todo Implement
+
    // The indices used are keyed off of the vertex order used in the constructor above.
    //return m_vertices[36].x() < m_vertices[12].x();
 

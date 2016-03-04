@@ -317,7 +317,7 @@ namespace
             : SlicePerpendicularToDepth(land, percentageOfParent, data, nodeCount);
 
          assert(additionalCoverage > 0);
-         assert(data.block.HasVolume() > 0);
+         assert(data.block.HasVolume());
 
          land.percentCovered += additionalCoverage;
       }

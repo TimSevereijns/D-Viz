@@ -444,6 +444,11 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
 
       assert(message.str().size() > 0);
       m_mainWindow->SetStatusBarMessage(message.str());
+
+      std::cout << "Offset of selected node into the VBO: "
+         << selection->GetData().offsetIntoVBO << std::endl;
+
+      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*selection);
    }
    else
    {

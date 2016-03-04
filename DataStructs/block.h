@@ -26,12 +26,12 @@ struct BlockFace
       TOP            ///< Normal points towards +Y in OpenGL.
    };
 
-   BlockFace()
+   explicit BlockFace()
       : side(Side::FRONT)
    {
    }
 
-   BlockFace(const QVector<QVector3D>& vertices, const Side side)
+   explicit BlockFace(const QVector<QVector3D>& vertices, const Side side)
       : vertices(vertices),
         side(side)
    {
@@ -67,7 +67,7 @@ struct Block
    double height;
    double depth;
 
-   Block();
+   explicit Block();
 
    /**
     * @brief Block creates the vertices needed to represent a single block. Each face consists of
@@ -80,7 +80,8 @@ struct Block
     * @param[in] height             The desired block height; height grows along positive y-axis.
     * @param[in] depth              The desired block depth; depth grows along negative z-axis.
     */
-   Block(const DoublePoint3D& origin,
+   explicit Block(
+      const DoublePoint3D& origin,
       const double width,
       const double height,
       const double depth);

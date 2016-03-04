@@ -1,5 +1,7 @@
 #include "visualization.h"
 
+#include <algorithm>
+
 #include <boost/optional.hpp>
 
 #include <algorithm>
@@ -304,21 +306,19 @@ void Visualization::UpdateBoundingBoxes()
 
 void Visualization::ComputeVertexAndColorData(const VisualizationParameters& parameters)
 {
-   assert(m_hasDataBeenParsed);
    assert(m_theTree);
 
-   m_visualizationColors.clear();
-   m_visualizationVertices.clear();
-
+   assert(m_hasDataBeenParsed);
    if (!m_hasDataBeenParsed)
    {
       return;
    }
 
-   int vertexCount = 0;
+   m_visualizationColors.clear();
+   m_visualizationVertices.clear();
 
    std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
-      [&] (const TreeNode<VizNode>& node)
+      [&] (TreeNode<VizNode>& node)
    {
       if ((parameters.onlyShowDirectories && node->file.type != FILE_TYPE::DIRECTORY) ||
           node->file.size < parameters.minimumFileSize)
@@ -326,7 +326,8 @@ void Visualization::ComputeVertexAndColorData(const VisualizationParameters& par
          return;
       }
 
-      vertexCount = m_visualizationVertices.size();
+      const int vertexCount = m_visualizationVertices.size();
+      node->offsetIntoVBO = vertexCount;
 
       std::for_each(std::begin(node->block), std::end(node->block),
          [&] (const BlockFace& face)
@@ -345,9 +346,14 @@ void Visualization::ComputeVertexAndColorData(const VisualizationParameters& par
 
       if (vertexCount + Block::VERTICES_PER_BLOCK != m_visualizationVertices.size())
       {
-         std::cout << "Buffer data mismatch detected!" << std::endl;
+         assert(!"Buffer data mismatch detected!");
       }
    });
+
+   // All offsets must be properly set; the default initialized state is invalid:
+   assert(std::all_of(std::begin(*m_theTree), std::end(*m_theTree),
+      [](const TreeNode<VizNode>& node)
+      { return node->offsetIntoVBO != VizNode::INVALID_OFFSET; }));
 }
 
 QVector<QVector3D>& Visualization::GetColorData()
@@ -438,6 +444,20 @@ QVector<QVector3D> Visualization::CreateDirectoryColors()
       // Top:
       << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
       << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f);
+
+   return blockColors;
+}
+
+QVector<QVector3D> Visualization::CreateHighlightColors()
+{
+   QVector<QVector3D> blockColors;
+   blockColors.reserve(30);
+
+   const auto hotPink = QVector3D{1.0f, 105.0f / 255.0f, 180.0f / 255.0f};
+   for (int i = 0; i < 30; i++)
+   {
+      blockColors << hotPink;
+   }
 
    return blockColors;
 }

@@ -1,5 +1,9 @@
 #include "visualizationAsset.h"
 
+#include "../DataStructs/vizNode.h"
+#include "../tree.h"
+#include "../Visualizations/visualization.h"
+
 namespace
 {
    /**
@@ -83,7 +87,7 @@ bool VisualizationAsset::PrepareVertexBuffers(const Camera& camera)
    return true;
 }
 
-bool VisualizationAsset::PrepareColorBuffers(const Camera& camera)
+bool VisualizationAsset::PrepareColorBuffers(const Camera&)
 {
    if (!m_VAO.isCreated())
    {
@@ -97,16 +101,10 @@ bool VisualizationAsset::PrepareColorBuffers(const Camera& camera)
    m_colorBuffer.bind();
    m_colorBuffer.allocate(m_rawColors.constData(), m_rawColors.size() * 3 * sizeof(GLfloat));
 
-   m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
-
-   m_colorBuffer.bind();
-
    m_shader.enableAttributeArray("color");
    m_shader.setAttributeBuffer("color", GL_FLOAT, /* offset = */ 0, /* tupleSize = */ 3);
 
    m_colorBuffer.release();
-   m_shader.release();
    m_VAO.release();
 
    return true;
@@ -157,4 +155,31 @@ bool VisualizationAsset::Reload(const Camera& camera)
    PrepareColorBuffers(camera);
 
    return true;
+}
+
+void VisualizationAsset::UpdateVBO(const TreeNode<VizNode>& node)
+{
+   // @todo const -> constexpr
+   const int tupleSize = 3 * sizeof(GLfloat);
+   const int vertexBufferOffset = node->offsetIntoVBO * tupleSize;
+   const int colorBufferOffset = vertexBufferOffset / 2;
+
+   const auto newColor = Visualization::CreateHighlightColors();
+
+   assert(m_VAO.isCreated());
+   assert(m_colorBuffer.isCreated());
+
+   m_VAO.bind();
+   m_colorBuffer.bind();
+
+   assert(m_colorBuffer.size() >= colorBufferOffset / (3 * sizeof(GLfloat)));
+
+   m_graphicsDevice.glBufferSubData(
+      GL_ARRAY_BUFFER,
+      colorBufferOffset,
+      newColor.size() * tupleSize,
+      newColor.constData());
+
+   m_colorBuffer.release();
+   m_VAO.release();
 }

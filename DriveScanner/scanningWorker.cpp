@@ -113,7 +113,7 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
       rootBlock
    };
 
-   return std::make_shared<Tree<VizNode>>(Tree<VizNode>{rootNode});
+   return std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
 }
 
 void ScanningWorker::IterateOverDirectory(

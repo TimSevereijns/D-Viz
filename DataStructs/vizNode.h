@@ -1,6 +1,8 @@
 #ifndef VIZNODE_H
 #define VIZNODE_H
 
+#include <limits>
+
 #include "fileInfo.h"
 #include "block.h"
 
@@ -10,9 +12,12 @@
  */
 struct VizNode
 {
+   static std::uint32_t INVALID_OFFSET;
+
    FileInfo file;       ///< The file that the block represents.
    Block block;         ///< The actual block as rendered to the OpenGL canvas.
    Block boundingBox;   ///< Minimum axis-aligned bounding box for node and all descendents.
+   std::uint32_t offsetIntoVBO; ///< The offset of this node's representation into the VBO.
 
    /**
     * @brief VizNode constructs a new VizNode to represent the specified file. The block, and its
