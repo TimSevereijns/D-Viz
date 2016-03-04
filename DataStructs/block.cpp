@@ -88,18 +88,6 @@ Block::Block(
       << BlockFace(topFace,   BlockFace::Side::TOP);
 }
 
-//Block::Block(const Block& other)
-//   : width(other.width),
-//     height(other.height),
-//     depth(other.depth),
-//     percentCovered(other.percentCovered),
-//     origin(other.origin),
-//     nextRowOrigin(other.nextRowOrigin),
-//     colors(other.colors),
-//     blockFaces(other.blockFaces)
-//{
-//}
-
 Block::FaceIterator Block::begin() const
 {
    Block::FaceIterator iterator{this};

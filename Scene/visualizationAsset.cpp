@@ -161,8 +161,10 @@ void VisualizationAsset::UpdateVBO(const TreeNode<VizNode>& node)
 {
    // @todo const -> constexpr
    const int tupleSize = 3 * sizeof(GLfloat);
-   const int vertexBufferOffset = node->offsetIntoVBO * tupleSize;
-   const int colorBufferOffset = vertexBufferOffset / 2;
+   const int offsetIntoVertexBuffer = node->offsetIntoVBO * tupleSize;
+
+   // We have to divide by two, because there's a vertex plus a normal for every color:
+   const int offsetIntoColorBuffer = offsetIntoVertexBuffer / 2;
 
    const auto newColor = Visualization::CreateHighlightColors();
 
@@ -172,11 +174,11 @@ void VisualizationAsset::UpdateVBO(const TreeNode<VizNode>& node)
    m_VAO.bind();
    m_colorBuffer.bind();
 
-   assert(m_colorBuffer.size() >= colorBufferOffset / (3 * sizeof(GLfloat)));
+   assert(m_colorBuffer.size() >= offsetIntoColorBuffer / (3 * sizeof(GLfloat)));
 
    m_graphicsDevice.glBufferSubData(
       GL_ARRAY_BUFFER,
-      colorBufferOffset,
+      offsetIntoColorBuffer,
       newColor.size() * tupleSize,
       newColor.constData());
 

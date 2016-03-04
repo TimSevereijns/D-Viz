@@ -38,7 +38,7 @@ bool LineAsset::PrepareVertexBuffers(const Camera& camera)
    return true;
 }
 
-bool LineAsset::PrepareColorBuffers(const Camera& camera)
+bool LineAsset::PrepareColorBuffers(const Camera&)
 {
    if (!m_VAO.isCreated())
    {
@@ -52,15 +52,11 @@ bool LineAsset::PrepareColorBuffers(const Camera& camera)
    m_colorBuffer.bind();
    m_colorBuffer.allocate(m_rawColors.constData(), m_rawColors.size() * 3 * sizeof(GLfloat));
 
-   m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
-
    m_colorBuffer.bind();
    m_shader.enableAttributeArray("color");
    m_shader.setAttributeBuffer("color", GL_FLOAT, /* offset = */ 0, /* tupleSize = */ 3);
 
    m_colorBuffer.release();
-   m_shader.release();
    m_VAO.release();
 
    return true;
