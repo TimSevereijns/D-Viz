@@ -27,7 +27,7 @@ class VisualizationAsset : public SceneAsset
 
       virtual bool Reload(const Camera& camera) override;
 
-      void UpdateVBO(const TreeNode<VizNode>& node) override;
+      void UpdateVBO(const TreeNode<VizNode>& node, UpdateAction action) override;
 };
 
 #endif // VISUALIZATIONASSET_H

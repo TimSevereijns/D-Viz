@@ -65,6 +65,6 @@ unsigned int SceneAsset::GetColorCount() const
    return static_cast<unsigned int>(m_rawColors.size());
 }
 
-void SceneAsset::UpdateVBO(const TreeNode<VizNode>&)
+void SceneAsset::UpdateVBO(const TreeNode<VizNode>&, UpdateAction)
 {
 }

@@ -13,6 +13,8 @@
 #include "Viewport/graphicsDevice.h"
 #include "Visualizations/visualization.h"
 
+#include <boost/optional.hpp>
+
 #include <chrono>
 #include <memory>
 #include <deque>
@@ -72,6 +74,7 @@ class GLCanvas : public QOpenGLWidget
       void UpdateFPS();
 
       void HandleRightClick(const QMouseEvent& event);
+      void HandleNodeSelection(const boost::optional<TreeNode<VizNode>>& selectedNode);
 
       void HandleInput();
       void HandleXBoxControllerInput();
@@ -116,6 +119,8 @@ class GLCanvas : public QOpenGLWidget
       std::deque<const int> m_frameRateDeque;
 
       std::unique_ptr<GraphicsDevice> m_graphicsDevice;
+
+      boost::optional<TreeNode<VizNode>> m_selectedNode;
 };
 
 #endif // GLCANVAS_H

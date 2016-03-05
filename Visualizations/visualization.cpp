@@ -11,6 +11,7 @@
 #include <Qt3DCore/QRay3D>
 #include <QRectF>
 
+#include "../constants.h"
 #include "../Utilities/stopwatch.hpp"
 
 namespace
@@ -191,12 +192,13 @@ namespace
    using IntersectionPointAndNode = std::pair<QVector3D, TreeNode<VizNode>>;
 
    /**
-    * @brief GetAllIntersections
+    * @brief GetAllIntersections iterates over all nodes in the scene, placing all intersections
+    * in a vector.
     *
-    * @param[in] ray
-    * @param[in] camera
-    * @param[in] parameters
-    * @param[in] node
+    * @param[in] ray                The ray to be shot into the scene.
+    * @param[in] camera             The camera from which the ray is shot.
+    * @param[in] parameters         Additional visualization parameters.
+    * @param[in] node               The current node being hit-tested.
     */
    std::vector<IntersectionPointAndNode> FindAllIntersections(
       const Qt3D::QRay3D& ray,
@@ -307,7 +309,6 @@ void Visualization::UpdateBoundingBoxes()
 void Visualization::ComputeVertexAndColorData(const VisualizationParameters& parameters)
 {
    assert(m_theTree);
-
    assert(m_hasDataBeenParsed);
    if (!m_hasDataBeenParsed)
    {
@@ -351,9 +352,9 @@ void Visualization::ComputeVertexAndColorData(const VisualizationParameters& par
    });
 
    // All offsets must be properly set; the default initialized state is invalid:
-   assert(std::all_of(std::begin(*m_theTree), std::end(*m_theTree),
+   assert(std::none_of(std::begin(*m_theTree), std::end(*m_theTree),
       [](const TreeNode<VizNode>& node)
-      { return node->offsetIntoVBO != VizNode::INVALID_OFFSET; }));
+      { return node->offsetIntoVBO == VizNode::INVALID_OFFSET; }));
 }
 
 QVector<QVector3D>& Visualization::GetColorData()
@@ -376,7 +377,6 @@ boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersection(
 
    Stopwatch<std::chrono::milliseconds>([&]{
       auto allIntersections = FindAllIntersections(ray, camera, parameters, m_theTree->GetHead());
-
       if (allIntersections.empty())
       {
          return;
@@ -453,10 +453,9 @@ QVector<QVector3D> Visualization::CreateHighlightColors()
    QVector<QVector3D> blockColors;
    blockColors.reserve(30);
 
-   const auto hotPink = QVector3D{1.0f, 105.0f / 255.0f, 180.0f / 255.0f};
    for (int i = 0; i < 30; i++)
    {
-      blockColors << hotPink;
+      blockColors << Constants::Colors::metallicSeaweed;
    }
 
    return blockColors;

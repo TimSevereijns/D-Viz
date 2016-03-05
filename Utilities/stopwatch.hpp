@@ -77,9 +77,9 @@ struct TypeName<std::chrono::hours>
 };
 
 /**
- * @brief The StopWatch class will wrap the function to be timed in a timing block, and then
- * pass the time taken to execute said block to the specified callback so that the user may specify
- * how to handle the result.
+ * @brief The Stopwatch class will wrap the function to be timed in a timing block, and then, based
+ * on which constructor was called, pass the resulting timing information to either std::cout or a
+ * user-defined function upon destruction of the class.
  *
  * @tparam ChronoType               One of the following std::chrono time representations:
  *                                     @li std::chrono::nanoseconds
@@ -96,7 +96,7 @@ class Stopwatch
       using LoggingFunction = std::function<void (std::uint64_t, const std::string&)>;
 
       /**
-       * @brief StopWatch constructor that executes the code to be timed after starting the timer.
+       * @brief Stopwatch constructor that executes the code to be timed after starting the timer.
        * Once the targed code has completed execution, the timing results and corresponding units
        * will be passed to the specified callback function.
        *
@@ -112,10 +112,10 @@ class Stopwatch
       }
 
       /**
-       * @brief StopWatch constructor that executes the code to be timed after starting the timer.
-       * Once the targeted code has completed execution, the timing result will be written out to
+       * @brief Stopwatch constructor that executes the code to be timed after starting the timer.
+       * Once the targeted code has completed execution, the timing results will be written out to
        * std::cout, along with the message. Specifically, the message will be written out first,
-       * followed by the elapsed time and its corresponding units.
+       * followed by the elapsed time and the corresponding units.
        *
        * @param[in] functionToTime  std::function encapsulating the code to be timed.
        * @param[in] message         Output message.

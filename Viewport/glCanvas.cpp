@@ -43,27 +43,33 @@ namespace
     */
    std::pair<double, std::wstring> GetFileSizeInMostAppropriateUnits(double sizeInBytes)
    {
-      if (sizeInBytes < Constants::oneKibibyte)
+      if (sizeInBytes < Constants::FileSizeUnits::oneKibibyte)
       {
-         return std::make_pair<double, std::wstring>(std::move(sizeInBytes), L" bytes");
+         // @todo Needing to use std::move is likely a bug in MSVC 2013:
+         return std::make_pair<double, std::wstring>(
+            std::move(sizeInBytes), L" bytes");
       }
 
-      if (sizeInBytes < Constants::oneMebibyte)
+      if (sizeInBytes < Constants::FileSizeUnits::oneMebibyte)
       {
-         return std::make_pair<double, std::wstring>(sizeInBytes / Constants::oneKibibyte, L" KiB");
+         return std::make_pair<double, std::wstring>(
+            sizeInBytes / Constants::FileSizeUnits::oneKibibyte, L" KiB");
       }
 
-      if (sizeInBytes < Constants::oneGibibyte)
+      if (sizeInBytes < Constants::FileSizeUnits::oneGibibyte)
       {
-         return std::make_pair<double, std::wstring>(sizeInBytes / Constants::oneMebibyte, L" MiB");
+         return std::make_pair<double, std::wstring>(
+            sizeInBytes / Constants::FileSizeUnits::oneMebibyte, L" MiB");
       }
 
-      if (sizeInBytes < Constants::oneTebibyte)
+      if (sizeInBytes < Constants::FileSizeUnits::oneTebibyte)
       {
-         return std::make_pair<double, std::wstring>(sizeInBytes / Constants::oneGibibyte, L" GiB");
+         return std::make_pair<double, std::wstring>(
+            sizeInBytes / Constants::FileSizeUnits::oneGibibyte, L" GiB");
       }
 
-      return std::make_pair<double, std::wstring>(sizeInBytes / Constants::oneTebibyte, L" TiB");
+      return std::make_pair<double, std::wstring>(
+         sizeInBytes / Constants::FileSizeUnits::oneTebibyte, L" TiB");
    }
 
    /**
@@ -118,8 +124,6 @@ namespace
       });
 
       QVector<QVector3D> vertices;
-      QVector<QVector3D> colors;
-
       vertices
          // Top:
          << nodeVertices[48] << nodeVertices[50]
@@ -137,6 +141,7 @@ namespace
          << nodeVertices[26] << nodeVertices[30]
          << nodeVertices[24] << nodeVertices[28];
 
+      QVector<QVector3D> colors;
       const auto hotPink = QVector3D{1.0f, 105.0f / 255.0f, 180.0f / 255.0f};
       for (int index = 0; index < vertices.size(); index++)
       {
@@ -183,12 +188,13 @@ GLCanvas::GLCanvas(QWidget* parent)
      m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
      m_lights(
      {
-        Light{},
-        Light{QVector3D{0.0f, 80.0f, 0.0f}},
-        Light{QVector3D{0.0f, 80.0f, -Visualization::ROOT_BLOCK_DEPTH}},
-        Light{QVector3D{Visualization::ROOT_BLOCK_WIDTH, 80.0f, 0.0f}},
-        Light{QVector3D{Visualization::ROOT_BLOCK_WIDTH, 80.0f, -Visualization::ROOT_BLOCK_DEPTH}}
+        Light{ },
+        Light{ QVector3D{ 0.0f, 80.0f, 0.0f } },
+        Light{ QVector3D{ 0.0f, 80.0f, -Visualization::ROOT_BLOCK_DEPTH } },
+        Light{ QVector3D{ Visualization::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
+        Light{ QVector3D{ Visualization::ROOT_BLOCK_WIDTH, 80.0f, -Visualization::ROOT_BLOCK_DEPTH } }
      }),
+     m_selectedNode(boost::none),
      m_lastFrameTimeStamp(std::chrono::system_clock::now())
 {
    if (!m_mainWindow)
@@ -284,7 +290,7 @@ void GLCanvas::ScanDrive(VisualizationParameters& vizParameters)
    {
       setCursor(Qt::WaitCursor);
       QApplication::processEvents();
-      ON_SCOPE_EXIT(setCursor(Qt::ArrowCursor));
+      ON_SCOPE_EXIT{ setCursor(Qt::ArrowCursor); };
 
       std::wstringstream message;
       message.imbue(std::locale(""));
@@ -321,7 +327,7 @@ void GLCanvas::AskUserToLimitFileSize(
       return;
    }
 
-   if (parameters.minimumFileSize < Constants::oneMebibyte)
+   if (parameters.minimumFileSize < Constants::FileSizeUnits::oneMebibyte)
    {
       QMessageBox messageBox;
       messageBox.setText("More than a quarter million files were scanned. " \
@@ -329,13 +335,13 @@ void GLCanvas::AskUserToLimitFileSize(
          "order to reduce the load on the GPU and system memory?");
       messageBox.setIcon(QMessageBox::Warning);
       messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-      const int election = messageBox.exec();
 
+      const int election = messageBox.exec();
       switch (election)
       {
          case QMessageBox::Yes:
-            parameters.minimumFileSize = Constants::oneMebibyte;
-            m_mainWindow->SetFilePruningComboBoxValue(Constants::oneMebibyte);
+            parameters.minimumFileSize = Constants::FileSizeUnits::oneMebibyte;
+            m_mainWindow->SetFilePruningComboBoxValue(Constants::FileSizeUnits::oneMebibyte);
             return;
          case QMessageBox::No:
             return;
@@ -349,7 +355,7 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
 {
    const bool previousSuspensionState = m_isPaintingSuspended;
    m_isPaintingSuspended = true;
-   ON_SCOPE_EXIT(m_isPaintingSuspended = previousSuspensionState);
+   ON_SCOPE_EXIT{ m_isPaintingSuspended = previousSuspensionState; };
 
    m_visualizationParameters = parameters;
    m_theVisualization->ComputeVertexAndColorData(parameters);
@@ -415,6 +421,36 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
    event->accept();
 }
 
+void GLCanvas::HandleNodeSelection(const boost::optional<TreeNode<VizNode>>& selectedNode)
+{
+   HighlightSelection(*selectedNode, *m_sceneAssets[Asset::HIGHLIGHT], m_camera);
+
+   const auto fileSize = selectedNode->GetData().file.size;
+   assert(fileSize > 0);
+
+   std::wstringstream message;
+   message.imbue(std::locale{""});
+   message.precision(2);
+
+   const auto sizeAndUnits = GetFileSizeInMostAppropriateUnits(fileSize);
+   message << GetFullNodePath(*selectedNode) << L"  |  "
+      << std::fixed << sizeAndUnits.first << sizeAndUnits.second;
+
+   assert(message.str().size() > 0);
+   m_mainWindow->SetStatusBarMessage(message.str());
+
+   if (m_selectedNode)
+   {
+      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*m_selectedNode,
+         SceneAsset::UpdateAction::DESELECT_NODE);
+   }
+
+   m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*selectedNode,
+      SceneAsset::UpdateAction::SELECT_NODE);
+
+   m_selectedNode = selectedNode;
+}
+
 void GLCanvas::HandleRightClick(const QMouseEvent& event)
 {
    if (!m_isVisualizationLoaded)
@@ -429,26 +465,7 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
 
    if (selection)
    {
-      HighlightSelection(*selection, *m_sceneAssets[Asset::HIGHLIGHT], m_camera);
-
-      const auto fileSize = selection->GetData().file.size;
-      assert(fileSize > 0);
-
-      std::wstringstream message;
-      message.imbue(std::locale{""});
-      message.precision(2);
-
-      const auto sizeAndUnits = GetFileSizeInMostAppropriateUnits(fileSize);
-      message << GetFullNodePath(*selection) << L"  |  "
-         << std::fixed << sizeAndUnits.first << sizeAndUnits.second;
-
-      assert(message.str().size() > 0);
-      m_mainWindow->SetStatusBarMessage(message.str());
-
-      std::cout << "Offset of selected node into the VBO: "
-         << selection->GetData().offsetIntoVBO << std::endl;
-
-      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*selection);
+      HandleNodeSelection(selection);
    }
    else
    {

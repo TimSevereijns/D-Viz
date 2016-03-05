@@ -20,6 +20,12 @@ template<typename DataType> class TreeNode;
 class SceneAsset
 {
    public:
+      enum class UpdateAction
+      {
+         SELECT_NODE = 0,
+         DESELECT_NODE
+      };
+
       explicit SceneAsset(GraphicsDevice& device);
       virtual ~SceneAsset();
 
@@ -126,7 +132,7 @@ class SceneAsset
        *
        * @param data
        */
-      virtual void UpdateVBO(const TreeNode<VizNode>& node);
+      virtual void UpdateVBO(const TreeNode<VizNode>& node, UpdateAction action);
 
    protected:
       bool LoadShaders(const QString& vertexShaderName, const QString& fragmentShaderName);

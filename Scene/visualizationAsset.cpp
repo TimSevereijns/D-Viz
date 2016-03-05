@@ -72,13 +72,13 @@ bool VisualizationAsset::PrepareVertexBuffers(const Camera& camera)
 
    m_vertexBuffer.bind();
 
-   m_shader.enableAttributeArray("normal");
-   m_shader.setAttributeBuffer("normal", GL_FLOAT,
-      /* offset = */ 3 * sizeof(GLfloat), /* tupleSize = */ 3, /* stride = */ 6 * sizeof(GLfloat));
-
    m_shader.enableAttributeArray("vertex");
    m_shader.setAttributeBuffer("vertex", GL_FLOAT, /* offset = */ 0,
       /* tupleSize = */ 3, /* stride = */ 6 * sizeof(GLfloat));
+
+   m_shader.enableAttributeArray("normal");
+   m_shader.setAttributeBuffer("normal", GL_FLOAT,
+      /* offset = */ 3 * sizeof(GLfloat), /* tupleSize = */ 3, /* stride = */ 6 * sizeof(GLfloat));
 
    m_vertexBuffer.release();
    m_shader.release();
@@ -157,7 +157,7 @@ bool VisualizationAsset::Reload(const Camera& camera)
    return true;
 }
 
-void VisualizationAsset::UpdateVBO(const TreeNode<VizNode>& node)
+void VisualizationAsset::UpdateVBO(const TreeNode<VizNode>& node, SceneAsset::UpdateAction action)
 {
    // @todo const -> constexpr
    const int tupleSize = 3 * sizeof(GLfloat);
@@ -166,7 +166,11 @@ void VisualizationAsset::UpdateVBO(const TreeNode<VizNode>& node)
    // We have to divide by two, because there's a vertex plus a normal for every color:
    const int offsetIntoColorBuffer = offsetIntoVertexBuffer / 2;
 
-   const auto newColor = Visualization::CreateHighlightColors();
+   const auto newColor = (action == SceneAsset::UpdateAction::DESELECT_NODE)
+      ? (node->file.type == FILE_TYPE::DIRECTORY)
+         ? Visualization::CreateDirectoryColors()
+         : Visualization::CreateFileColors()
+      : Visualization::CreateHighlightColors();
 
    assert(m_VAO.isCreated());
    assert(m_colorBuffer.isCreated());
