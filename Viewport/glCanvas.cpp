@@ -3,7 +3,6 @@
 #include "../constants.h"
 #include "Scene/debuggingRayAsset.h"
 #include "Scene/gridAsset.h"
-#include "Scene/selectionHighlightAsset.h"
 #include "Scene/visualizationAsset.h"
 #include "Visualizations/squarifiedTreemap.h"
 #include "Utilities/scopeExit.hpp"
@@ -104,56 +103,6 @@ namespace
    }
 
    /**
-    * @brief HighlightSelectedFile will outline the selected node.
-    *
-    * @param[in] node               The selected node.
-    * @param[in] highlightAsset     The visual asset representing the outline.
-    * @param[in] camera             The camera from which the selection was made.
-    */
-   void HighlightSelection(
-      const TreeNode<VizNode>& node,
-      SceneAsset& highlightAsset,
-      const Camera& camera)
-   {
-      QVector<QVector3D> nodeVertices;
-
-      std::for_each(std::begin(node->block), std::end(node->block),
-         [&] (const BlockFace& face)
-      {
-         nodeVertices << face.vertices;
-      });
-
-      QVector<QVector3D> vertices;
-      vertices
-         // Top:
-         << nodeVertices[48] << nodeVertices[50]
-         << nodeVertices[50] << nodeVertices[54]
-         << nodeVertices[54] << nodeVertices[56]
-         << nodeVertices[56] << nodeVertices[48]
-         // Bottom:
-         << nodeVertices[ 0] << nodeVertices[ 2]
-         << nodeVertices[ 2] << nodeVertices[14]
-         << nodeVertices[14] << nodeVertices[26]
-         << nodeVertices[26] << nodeVertices[ 0]
-         // Sides:
-         << nodeVertices[ 0] << nodeVertices[ 4]
-         << nodeVertices[ 2] << nodeVertices[ 6]
-         << nodeVertices[26] << nodeVertices[30]
-         << nodeVertices[24] << nodeVertices[28];
-
-      QVector<QVector3D> colors;
-      const auto hotPink = QVector3D{1.0f, 105.0f / 255.0f, 180.0f / 255.0f};
-      for (int index = 0; index < vertices.size(); index++)
-      {
-         colors << hotPink;
-      }
-
-      highlightAsset.SetVertexData(std::move(vertices));
-      highlightAsset.SetColorData(std::move(colors));
-      highlightAsset.Reload(camera);
-   }
-
-   /**
     * @brief ClearHighlightSelection will clear the vertex and color data buffers from the specified
     * asset, and will then reload the now empty asset.
     *
@@ -175,7 +124,6 @@ namespace
       GRID = 0,      ///< GridAsset
       TREEMAP,       ///< VisualizationAsset
       PICKING_RAY,   ///< DebuggingRayAsset
-      HIGHLIGHT      ///< SelectionHighlightAsset
    };
 }
 
@@ -233,7 +181,6 @@ void GLCanvas::initializeGL()
    m_sceneAssets.emplace_back(std::make_unique<GridAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<DebuggingRayAsset>(*m_graphicsDevice));
-   m_sceneAssets.emplace_back(std::make_unique<SelectionHighlightAsset>(*m_graphicsDevice));
 
    for (const auto& asset : m_sceneAssets)
    {
@@ -301,8 +248,6 @@ void GLCanvas::ScanDrive(VisualizationParameters& vizParameters)
 
       m_theVisualization->Parse(fileTree);
       m_theVisualization->UpdateBoundingBoxes();
-
-      ClearAssetBuffersAndReload(*m_sceneAssets[Asset::HIGHLIGHT], m_camera);
 
       ReloadVisualization(vizParameters);
    };
@@ -423,8 +368,6 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
 
 void GLCanvas::HandleNodeSelection(const boost::optional<TreeNode<VizNode>>& selectedNode)
 {
-   HighlightSelection(*selectedNode, *m_sceneAssets[Asset::HIGHLIGHT], m_camera);
-
    const auto fileSize = selectedNode->GetData().file.size;
    assert(fileSize > 0);
 
@@ -442,11 +385,11 @@ void GLCanvas::HandleNodeSelection(const boost::optional<TreeNode<VizNode>>& sel
    if (m_selectedNode)
    {
       m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*m_selectedNode,
-         SceneAsset::UpdateAction::DESELECT_NODE);
+         SceneAsset::UpdateAction::DESELECT);
    }
 
    m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*selectedNode,
-      SceneAsset::UpdateAction::SELECT_NODE);
+      SceneAsset::UpdateAction::SELECT);
 
    m_selectedNode = selectedNode;
 }
@@ -469,7 +412,9 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
    }
    else
    {
-      ClearAssetBuffersAndReload(*m_sceneAssets[Asset::HIGHLIGHT], m_camera);
+      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*m_selectedNode,
+         SceneAsset::UpdateAction::DESELECT);
+
       PrintMetadataToStatusBar(m_sceneAssets[Asset::TREEMAP]->GetVertexCount(), *m_mainWindow);
    }
 }

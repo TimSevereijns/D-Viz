@@ -455,7 +455,7 @@ QVector<QVector3D> Visualization::CreateHighlightColors()
 
    for (int i = 0; i < 30; i++)
    {
-      blockColors << Constants::Colors::metallicSeaweed;
+      blockColors << Constants::Colors::canaryYellow;
    }
 
    return blockColors;

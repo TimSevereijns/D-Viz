@@ -166,7 +166,7 @@ void VisualizationAsset::UpdateVBO(const TreeNode<VizNode>& node, SceneAsset::Up
    // We have to divide by two, because there's a vertex plus a normal for every color:
    const int offsetIntoColorBuffer = offsetIntoVertexBuffer / 2;
 
-   const auto newColor = (action == SceneAsset::UpdateAction::DESELECT_NODE)
+   const auto newColor = (action == SceneAsset::UpdateAction::DESELECT)
       ? (node->file.type == FILE_TYPE::DIRECTORY)
          ? Visualization::CreateDirectoryColors()
          : Visualization::CreateFileColors()

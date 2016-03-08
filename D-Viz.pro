@@ -29,7 +29,6 @@ SOURCES += main.cpp\
     Scene/gridAsset.cpp \
     Scene/lineAsset.cpp \
     Scene/sceneAsset.cpp \
-    Scene/selectionHighlightAsset.cpp \
     Scene/visualizationAsset.cpp \
     Viewport/camera.cpp \
     Viewport/glCanvas.cpp \
@@ -55,7 +54,6 @@ HEADERS  += mainwindow.h \
     Scene/gridAsset.h \
     Scene/lineAsset.h \
     Scene/sceneAsset.h \
-    Scene/selectionHighlightAsset.h \
     Scene/visualizationAsset.h \
     Utilities/scopeExit.hpp \
     Viewport/camera.h \

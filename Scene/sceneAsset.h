@@ -22,8 +22,8 @@ class SceneAsset
    public:
       enum class UpdateAction
       {
-         SELECT_NODE = 0,
-         DESELECT_NODE
+         SELECT = 0,
+         DESELECT
       };
 
       explicit SceneAsset(GraphicsDevice& device);
