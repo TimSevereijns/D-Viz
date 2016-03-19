@@ -3,6 +3,8 @@
 
 #include "../Utilities/stopwatch.hpp"
 
+#include <iostream>
+
 namespace
 {
    /**
@@ -15,20 +17,21 @@ namespace
     */
    void PruneEmptyFilesAndDirectories(Tree<VizNode>& tree)
    {
-      std::cout << "Nodes before pruning: " << tree.Size(*tree.GetHead()) << std::endl;
+      std::cout << "Nodes before pruning: " << tree.Size() << std::endl;
 
       unsigned int nodesRemoved = 0;
       for (auto&& node : tree)
       {
          if (node->file.size == 0)
          {
-            node.RemoveFromTree();
+            //node.DeleteFromTree();
+            node.DetachFromTree();
             nodesRemoved++;
          }
       }
 
       std::cout << "Nodes removed: " << nodesRemoved << std::endl;
-      std::cout << "Nodes after pruning: " << tree.Size(*tree.GetHead()) << std::endl;
+      std::cout << "Nodes after pruning: " << tree.Size() << std::endl;
    }
 
    /**
@@ -43,7 +46,7 @@ namespace
       {
          const FileInfo fileInfo = node->file;
 
-         std::shared_ptr<TreeNode<VizNode>>& parent = node.GetParent();
+         TreeNode<VizNode>* parent = node.GetParent();
          if (!parent)
          {
             return;

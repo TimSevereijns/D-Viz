@@ -29,8 +29,10 @@ namespace
     * @returns the point of intersection if there is an intersection greater than the margin of
     * error, or boost::none if no such intersection exists.
     */
-   boost::optional<QVector3D> DoesRayIntersectPlane(const Qt3D::QRay3D& ray,
-      const QVector3D& pointOnPlane, const QVector3D& planeNormal)
+   boost::optional<QVector3D> DoesRayIntersectPlane(
+      const Qt3D::QRay3D& ray,
+      const QVector3D& pointOnPlane,
+      const QVector3D& planeNormal)
    {
       const double denominator = QVector3D::dotProduct(ray.direction(), planeNormal);
       if (std::abs(denominator) < EPSILON)
@@ -165,7 +167,7 @@ namespace
     *
     * @param[out] node              The node to advance.
     */
-   void AdvanceToNextNonDescendant(std::shared_ptr<TreeNode<VizNode>>& node)
+   void AdvanceToNextNonDescendant(TreeNode<VizNode>*& node)
    {
       if (node->GetNextSibling())
       {
@@ -189,7 +191,7 @@ namespace
       }
    }
 
-   using IntersectionPointAndNode = std::pair<QVector3D, TreeNode<VizNode>>;
+   using IntersectionPointAndNode = std::pair<QVector3D, TreeNode<VizNode>*>;
 
    /**
     * @brief GetAllIntersections iterates over all nodes in the scene, placing all intersections
@@ -204,7 +206,7 @@ namespace
       const Qt3D::QRay3D& ray,
       const Camera& camera,
       const VisualizationParameters& parameters,
-      std::shared_ptr<TreeNode<VizNode>> node)
+      TreeNode<VizNode>* node)
    {
       std::vector<IntersectionPointAndNode> allIntersections;
 
@@ -224,7 +226,7 @@ namespace
             const auto& blockIntersection = DoesRayIntersectBlock(ray, node->GetData().block);
             if (blockIntersection && camera.IsPointInFrontOfCamera(*blockIntersection))
             {
-               allIntersections.emplace_back(std::make_pair(*blockIntersection, *node));
+               allIntersections.emplace_back(std::make_pair(*blockIntersection, node));
             }
 
             if (node->HasChildren())
@@ -285,7 +287,7 @@ void Visualization::UpdateBoundingBoxes()
 
       double tallestDescendant = 0.0;
 
-      std::shared_ptr<TreeNode<VizNode>> currentChild = node.GetFirstChild();
+      TreeNode<VizNode>* currentChild = node.GetFirstChild();
       while (currentChild)
       {
          if (currentChild->GetData().boundingBox.height > tallestDescendant)
@@ -388,7 +390,7 @@ boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersection(
          return (ray.origin().distanceToPoint(lhs.first) < ray.origin().distanceToPoint(rhs.first));
       });
 
-      nearestIntersection = allIntersections.front().second;
+      nearestIntersection = *(allIntersections.front().second);
    }, "Node selected in ");
 
    return nearestIntersection;

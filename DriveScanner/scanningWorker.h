@@ -19,7 +19,8 @@
 
 #include "../Visualizations/visualization.h"
 
-#include "../tree.h"
+//#include "../tree.h"
+#include "../ThirdParty/Tree.hpp"
 
 /**
  * @brief The ScanningWorker class

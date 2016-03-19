@@ -55,6 +55,7 @@ HEADERS  += mainwindow.h \
     Scene/lineAsset.h \
     Scene/sceneAsset.h \
     Scene/visualizationAsset.h \
+    ThirdParty/Tree.hpp \
     Utilities/scopeExit.hpp \
     Viewport/camera.h \
     Viewport/glCanvas.h \

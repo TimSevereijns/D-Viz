@@ -441,7 +441,7 @@ namespace
          return;
       }
 
-      TreeNode<VizNode>* parentNode = nodes.front()->GetParent().get();
+      TreeNode<VizNode>* parentNode = nodes.front()->GetParent();
       assert(parentNode);
 
       VizNode& parentVizNode = parentNode->GetData();
@@ -495,7 +495,7 @@ namespace
     */
    void SquarifyRecursively(const TreeNode<VizNode>& root)
    {
-      const std::shared_ptr<TreeNode<VizNode>>& firstChild = root.GetFirstChild();
+      TreeNode<VizNode>* firstChild = root.GetFirstChild();
       if (!firstChild)
       {
          return;
@@ -503,12 +503,12 @@ namespace
 
       std::vector<TreeNode<VizNode>*> children;
       children.reserve(root.GetChildCount());
-      children.emplace_back(firstChild.get());
+      children.emplace_back(firstChild);
 
-      std::shared_ptr<TreeNode<VizNode>> nextChild = firstChild->GetNextSibling();
+      TreeNode<VizNode>* nextChild = firstChild->GetNextSibling();
       while (nextChild)
       {
-         children.emplace_back(nextChild.get());
+         children.emplace_back(nextChild);
          nextChild = nextChild->GetNextSibling();
       }
 

@@ -84,16 +84,16 @@ namespace
       reversePath.reserve(Tree<VizNode>::Depth(node));
       reversePath.emplace_back(node->file.name);
 
-      auto currentNode = node;
+      const TreeNode<VizNode>* currentNode = &node;
 
-      while (currentNode.GetParent())
+      while (currentNode->GetParent())
       {
-         currentNode = *currentNode.GetParent();
-         reversePath.emplace_back(currentNode->file.name);
+         currentNode = currentNode->GetParent();
+         reversePath.emplace_back(currentNode->GetData().file.name);
       }
 
       const auto completePath = std::accumulate(std::rbegin(reversePath), std::rend(reversePath),
-         std::wstring{}, [] (const std::wstring path, const std::wstring file)
+         std::wstring{}, [] (const std::wstring& path, const std::wstring& file)
       {
          return path + (!path.empty() ? L"/" : L"") + file;
       });
