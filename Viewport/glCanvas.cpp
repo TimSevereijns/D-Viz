@@ -408,6 +408,7 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
 
    if (selection)
    {
+      // @todo pass the TreeNode and not the optional:
       HandleNodeSelection(selection);
    }
    else

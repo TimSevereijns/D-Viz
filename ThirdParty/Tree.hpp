@@ -170,11 +170,12 @@ public:
    }
 
    /**
-   *
+   * @brief Assignment operator.
    */
-   void DeleteFromTree()
+   TreeNode<DataType>& operator=(TreeNode<DataType> other)
    {
-      delete this;
+      swap(*this, other);
+      return *this;
    }
 
    /**
@@ -193,6 +194,14 @@ public:
       swap(lhs.m_data, rhs.m_data);
       swap(lhs.m_childCount, rhs.m_childCount);
       swap(lhs.m_visited, rhs.m_visited);
+   }
+
+   /**
+   * @brief Detaches and then deletes the TreeNode from the Tree it's part of.
+   */
+   void DeleteFromTree()
+   {
+      delete this;
    }
 
    /**
@@ -639,19 +648,34 @@ private:
       }
    }
 
-public:
-
    /**
    * @brief Removes the TreeNode from the tree structure, updating all surrounding links
    * as appropriate.
    *
    * @note This function does not actually delete the node.
+   *
+   * @returns A pointer to the detached TreeNode. This returned TreeNode can safely be deleted
+   * once detached.
    */
-   void DetachFromTree()
+   TreeNode<DataType>* DetachFromTree()
    {
+      if (m_previousSibling && m_nextSibling)
+      {
+         m_previousSibling->m_nextSibling = m_nextSibling;
+         m_nextSibling->m_previousSibling = m_previousSibling;
+      }
+      else if (m_previousSibling)
+      {
+         m_previousSibling->m_nextSibling = nullptr;
+      }
+      else if (m_nextSibling)
+      {
+         m_nextSibling->m_previousSibling = nullptr;
+      }
+
       if (!m_parent)
       {
-         return;
+         return this;
       }
 
       if (m_parent->m_firstChild == m_parent->m_lastChild)
@@ -672,22 +696,8 @@ public:
 
       m_parent->m_childCount--;
 
-      if (m_previousSibling && m_nextSibling)
-      {
-         m_previousSibling->m_nextSibling = m_nextSibling;
-         m_nextSibling->m_previousSibling = m_previousSibling;
-      }
-      else if (m_previousSibling)
-      {
-         m_previousSibling->m_nextSibling = nullptr;
-      }
-      else if (m_nextSibling)
-      {
-         m_nextSibling->m_previousSibling = nullptr;
-      }
+      return this;
    }
-
-private:
 
    TreeNode<DataType>* m_parent;
    TreeNode<DataType>* m_firstChild;

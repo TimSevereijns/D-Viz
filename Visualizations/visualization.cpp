@@ -377,7 +377,8 @@ boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersection(
 
    boost::optional<TreeNode<VizNode>> nearestIntersection = boost::none;
 
-   Stopwatch<std::chrono::milliseconds>([&]{
+   Stopwatch<std::chrono::milliseconds>([&]
+   {
       auto allIntersections = FindAllIntersections(ray, camera, parameters, m_theTree->GetHead());
       if (allIntersections.empty())
       {

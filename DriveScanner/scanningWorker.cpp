@@ -17,21 +17,24 @@ namespace
     */
    void PruneEmptyFilesAndDirectories(Tree<VizNode>& tree)
    {
-      std::cout << "Nodes before pruning: " << tree.Size() << std::endl;
+      std::vector<TreeNode<VizNode>*> toBeDeleted;
 
-      unsigned int nodesRemoved = 0;
       for (auto&& node : tree)
       {
          if (node->file.size == 0)
          {
-            //node.DeleteFromTree();
-            node.DetachFromTree();
-            nodesRemoved++;
+            toBeDeleted.emplace_back(&node);
          }
       }
 
-      std::cout << "Nodes removed: " << nodesRemoved << std::endl;
-      std::cout << "Nodes after pruning: " << tree.Size() << std::endl;
+      const size_t nodesRemoved = toBeDeleted.size();
+
+      for (auto* node : toBeDeleted)
+      {
+         node->DeleteFromTree();
+      }
+
+      std::cout << "Number of Sizeless Files Removed: " << nodesRemoved << std::endl;
    }
 
    /**
