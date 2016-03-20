@@ -104,7 +104,7 @@ class Visualization
        *
        * @returns the node that was clicked on; boost::none otherwise.
        */
-      boost::optional<TreeNode<VizNode>> FindNearestIntersection(
+      TreeNode<VizNode>* FindNearestIntersection(
          const Camera& camera,
          const Qt3D::QRay3D& ray,
          const VisualizationParameters& parameters) const;

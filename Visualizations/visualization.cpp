@@ -62,7 +62,8 @@ namespace
     *
     * @return the closest intersection point, or boost::none should anything weird occur.
     */
-   boost::optional<QVector3D> FindClosestIntersectionPoint(const Qt3D::QRay3D& ray,
+   boost::optional<QVector3D> FindClosestIntersectionPoint(
+      const Qt3D::QRay3D& ray,
       const std::vector<QVector3D>& allIntersections)
    {
       const auto& closest = std::min_element(std::begin(allIntersections), std::end(allIntersections),
@@ -88,7 +89,9 @@ namespace
     *
     * @returns the point of intersection should it exist; boost::none otherwise.
     */
-   boost::optional<QVector3D> DoesRayIntersectBlock(const Qt3D::QRay3D& ray, const Block& block)
+   boost::optional<QVector3D> DoesRayIntersectBlock(
+      const Qt3D::QRay3D& ray,
+      const Block& block)
    {
       std::vector<QVector3D> allIntersections;
 
@@ -365,17 +368,17 @@ QVector<QVector3D>& Visualization::GetColorData()
    return m_visualizationColors;
 }
 
-boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersection(
+TreeNode<VizNode>* Visualization::FindNearestIntersection(
    const Camera& camera,
    const Qt3D::QRay3D& ray,
    const VisualizationParameters& parameters) const
 {
    if (!m_hasDataBeenParsed)
    {
-      return boost::none;
+      return nullptr;
    }
 
-   boost::optional<TreeNode<VizNode>> nearestIntersection = boost::none;
+   TreeNode<VizNode>* nearestIntersection = nullptr;
 
    Stopwatch<std::chrono::milliseconds>([&]
    {
@@ -391,7 +394,7 @@ boost::optional<TreeNode<VizNode>> Visualization::FindNearestIntersection(
          return (ray.origin().distanceToPoint(lhs.first) < ray.origin().distanceToPoint(rhs.first));
       });
 
-      nearestIntersection = *(allIntersections.front().second);
+      nearestIntersection = allIntersections.front().second;
    }, "Node selected in ");
 
    return nearestIntersection;

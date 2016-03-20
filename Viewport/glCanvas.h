@@ -74,7 +74,7 @@ class GLCanvas : public QOpenGLWidget
       void UpdateFPS();
 
       void HandleRightClick(const QMouseEvent& event);
-      void HandleNodeSelection(const boost::optional<TreeNode<VizNode>>& selectedNode);
+      void HandleNodeSelection(const TreeNode<VizNode>* const selectedNode);
 
       void HandleInput();
       void HandleXBoxControllerInput();
@@ -120,7 +120,8 @@ class GLCanvas : public QOpenGLWidget
 
       std::unique_ptr<GraphicsDevice> m_graphicsDevice;
 
-      boost::optional<TreeNode<VizNode>> m_selectedNode;
+      // This has to be a raw pointer, since we don't want to assume ownership:
+      const TreeNode<VizNode>* m_selectedNode;
 };
 
 #endif // GLCANVAS_H

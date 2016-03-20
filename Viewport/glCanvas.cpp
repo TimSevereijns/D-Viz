@@ -142,7 +142,7 @@ GLCanvas::GLCanvas(QWidget* parent)
         Light{ QVector3D{ Visualization::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
         Light{ QVector3D{ Visualization::ROOT_BLOCK_WIDTH, 80.0f, -Visualization::ROOT_BLOCK_DEPTH } }
      }),
-     m_selectedNode(boost::none),
+     m_selectedNode(nullptr),
      m_lastFrameTimeStamp(std::chrono::system_clock::now())
 {
    if (!m_mainWindow)
@@ -366,7 +366,7 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
    event->accept();
 }
 
-void GLCanvas::HandleNodeSelection(const boost::optional<TreeNode<VizNode>>& selectedNode)
+void GLCanvas::HandleNodeSelection(const TreeNode<VizNode>* selectedNode)
 {
    const auto fileSize = selectedNode->GetData().file.size;
    assert(fileSize > 0);
@@ -403,12 +403,11 @@ void GLCanvas::HandleRightClick(const QMouseEvent& event)
 
    const auto canvasCoordinates = QPoint{event.x(), event.y()};
    const auto ray = m_camera.ShootRayIntoScene(canvasCoordinates);
-   const auto selection = m_theVisualization->FindNearestIntersection(m_camera, ray,
+   const auto* selection = m_theVisualization->FindNearestIntersection(m_camera, ray,
       m_visualizationParameters);
 
    if (selection)
    {
-      // @todo pass the TreeNode and not the optional:
       HandleNodeSelection(selection);
    }
    else

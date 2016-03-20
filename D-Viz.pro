@@ -37,7 +37,6 @@ SOURCES += main.cpp\
     Visualizations/visualization.cpp
 
 HEADERS  += mainwindow.h \
-    tree.h \
     optionsManager.h \
     DataStructs/block.h \
     DataStructs/fileInfo.h \
