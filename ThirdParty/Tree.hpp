@@ -432,7 +432,7 @@ public:
    *
    * @param[in] comparator          The function to be used as the basis for the sorting comparison.
    */
-   void SortChildren(const std::function<bool(TreeNode<DataType>, TreeNode<DataType>)>& comparator)
+   void SortChildren(const std::function<bool(const TreeNode<DataType>&, const TreeNode<DataType>&)>& comparator)
    {
       if (!m_firstChild)
       {
@@ -453,7 +453,7 @@ private:
    */
    void MergeSort(
       TreeNode<DataType>*& list,
-      const std::function<bool(TreeNode<DataType>, TreeNode<DataType>)>& comparator)
+      const std::function<bool(const TreeNode<DataType>&, const TreeNode<DataType>&)>& comparator)
    {
       if (!list || !list->m_nextSibling)
       {
@@ -522,7 +522,7 @@ private:
    TreeNode<DataType>* MergeSortedHalves(
       TreeNode<DataType>*& lhs,
       TreeNode<DataType>*& rhs,
-      const std::function<bool(TreeNode<DataType>, TreeNode<DataType>)>& comparator)
+      const std::function<bool(const TreeNode<DataType>&, const TreeNode<DataType>&)>& comparator)
    {
       TreeNode<DataType>* result = nullptr;
       if (comparator(*lhs, *rhs))
