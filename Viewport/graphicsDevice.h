@@ -4,12 +4,17 @@
 #include <QOpenGLFunctions>
 
 /**
- * @brief The GraphicsDevice class represents the main OpenGL state machine. In other words, all
- * OpenGL function calls for a given canvas have to go through a single "graphics device" object.
+ * @brief The GraphicsDevice class represents the main OpenGL state machine.
+ *
+ * In other words, all OpenGL function calls for a given GLCanvas have to go through a single
+ * "graphics device" object.
  */
 class GraphicsDevice : public QOpenGLFunctions
 {
    public:
+      /**
+       * @brief Initializes the OpenGL state machine.
+       */
       GraphicsDevice();
 };
 

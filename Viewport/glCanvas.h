@@ -13,8 +13,6 @@
 #include "Viewport/graphicsDevice.h"
 #include "Visualizations/visualization.h"
 
-#include <boost/optional.hpp>
-
 #include <chrono>
 #include <memory>
 #include <deque>
@@ -24,35 +22,42 @@
 #include <QVector3D>
 
 /**
- * @brief The GLCanvas class represents the canvas object on which the visualization
- * is to be drawn. This class contains the central rendering code that invokes the render functions
- * on the individual scene assets that make up the entire visualization.
+ * @brief The GLCanvas class represents the canvas object on which the visualization is to be drawn.
+ *
+ * This class contains the central rendering code that invokes the render functions on the
+ * individual scene assets that make up the entire visualization. Camera movement and scene
+ * interaction are also handled by this class.
  */
 class GLCanvas : public QOpenGLWidget
 {
    Q_OBJECT
 
    public:
+      /**
+       * @brief Default constructor.
+       *
+       * @param[in] parent          Pointer to the parent UI element.
+       */
       explicit GLCanvas(QWidget* parent = nullptr);
 
       /**
-       * @brief CreateNewVisualization
+       * @brief Creates a new visualization.
        *
        * @param[in] parameters      @see VisualizationParameters
        */
       void CreateNewVisualization(VisualizationParameters& parameters);
 
       /**
-       * @brief ReloadVisualization
+       * @brief Reloads the current visualization.
        *
        * @param[in] parameters      @see VisualizationParameters
        */
       void ReloadVisualization(const VisualizationParameters& parameters);
 
       /**
-       * @brief setFieldOfView sets the current field of view for the camera.
+       * @brief Sets the current field of view for the camera.
        *
-       * @param[in] fieldOfView  The new field of view.
+       * @param[in] fieldOfView     The new field of view.
        */
       void SetFieldOfView(const float fieldOfView);
 
@@ -69,23 +74,72 @@ class GLCanvas : public QOpenGLWidget
       void wheelEvent(QWheelEvent* event) override;
 
    private:
+      /**
+       * @brief Initiates a drive scan.
+       *
+       * @param[in] vizParameters   @see VisualizationParameters
+       */
       void ScanDrive(VisualizationParameters& vizParameters);
 
+      /**
+       * @brief Computes and updates the running average of the visualization's frame rate.
+       */
       void UpdateFPS();
 
+      /**
+       * @brief Handles mouse right-click mouse events.
+       *
+       * @param[in] event           Details of the mouse click event.
+       */
       void HandleRightClick(const QMouseEvent& event);
+
+      /**
+       * @brief Handler for TreeNode selection.
+       *
+       * @param[in] selectedNode    Pointer to the TreeNode that the user clicked on, and nullptr if
+       *                            the user's click didn't hit a TreeNode.
+       */
       void HandleNodeSelection(const TreeNode<VizNode>* const selectedNode);
 
+      /**
+       * @brief Handles keyboard and mouse input.
+       */
       void HandleInput();
+
+      /**
+       * @brief Handles the input from the Xbox controller.
+       */
       void HandleXBoxControllerInput();
 
+      /**
+       * @brief Compiles and loads the OpenGL shader program for the visualization.
+       */
       void PrepareVisualizationShaderProgram();
+
+      /**
+       * @brief Compiles and loads the OpenGL shader program for the origin marker.
+       */
       void PrepareOriginMarkerShaderProgram();
 
+      /**
+       * @brief Initializes the vertex buffer for the visualization.
+       */
       void PrepareVisualizationVertexBuffers();
+
+      /**
+       * @brief Initializes the vertex buffer for the origin marker.
+       */
       void PrepareOriginMarkerVertexBuffers();
 
-      void AskUserToLimitFileSize(std::uintmax_t numberOfFilesScanned,
+      /**
+       * @brief Prompts the user if he or she would like to set a lower bound on which files are
+       * visualized.
+       *
+       * @param[in] numberOfFilesScanned     The number of scanned files that can be visualized.
+       * @param[in] parameters               @see VisualizationParameters
+       */
+      void AskUserToLimitFileSize(
+         std::uintmax_t numberOfFilesScanned,
          VisualizationParameters& parameters);
 
       bool m_isPaintingSuspended;

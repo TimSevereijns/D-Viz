@@ -432,7 +432,8 @@ public:
    *
    * @param[in] comparator          The function to be used as the basis for the sorting comparison.
    */
-   void SortChildren(const std::function<bool(const TreeNode<DataType>&, const TreeNode<DataType>&)>& comparator)
+   void SortChildren(
+      const std::function<bool(const TreeNode<DataType>&, const TreeNode<DataType>&)>& comparator)
    {
       if (!m_firstChild)
       {

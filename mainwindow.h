@@ -81,7 +81,7 @@ class MainWindow : public QMainWindow
        * @brief OnFieldOfViewChanged
        * @param fieldOfView
        *
-       * TODO: Move to GLCanvas...
+       * @todo Move to GLCanvas...
        */
       void OnFieldOfViewChanged(int fieldOfView);
 

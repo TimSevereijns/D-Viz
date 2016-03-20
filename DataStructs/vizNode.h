@@ -20,8 +20,9 @@ struct VizNode
    std::uint32_t offsetIntoVBO; ///< The offset of this node's representation into the VBO.
 
    /**
-    * @brief VizNode constructs a new VizNode to represent the specified file. The block, and its
-    * bounding box will be default constructed.
+    * @brief VizNode constructs a new VizNode to represent the specified file.
+    *
+    * The block, and its bounding box will be default constructed.
     *
     * @param[in] file               The file that the VizNode represents.
     */
@@ -29,7 +30,9 @@ struct VizNode
 
    /**
     * @brief VizNode constructs a new VizNode to represent the specified file using the specified
-    * block. The bounding box will be initialized to the same size as the block.
+    * block.
+    *
+    * The bounding box will be initialized to the same size as the block.
     *
     * @param[in] file               The file that the VizNode represents.
     * @param[in] block              The visual representation of the file in question.

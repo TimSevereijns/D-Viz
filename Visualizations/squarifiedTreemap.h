@@ -3,6 +3,9 @@
 
 #include "visualization.h"
 
+/**
+ * @brief The SquarifiedTreeMap class represents the squarified treemap visualization.
+ */
 class SquarifiedTreeMap : public Visualization
 {
    public:

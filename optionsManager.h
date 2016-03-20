@@ -15,78 +15,79 @@ class OptionsManager : public QObject
 
    public slots:
       /**
-       * @brief OnCameraMovementSpeedChanged should be called when the camera's movement speed
-       * changes.
+       * @brief Should be called when the camera's movement speed changes.
        *
        * @param[in] newSpeed        The new speed.
        */
       void OnCameraMovementSpeedChanged(const double newSpeed);
 
       /**
-       * @brief OnMouseSensitivityChanged should be called when the mouse's movement sensitivity
-       * changes.
+       * @brief Should be called when the mouse's movement sensitivity changes.
        *
        * @param[in] newSensitivity  The new sensitivity value.
        */
       void OnMouseSensitivityChanged(const double newSensitivity);
 
       /**
-       * @brief OnAmbientCoefficientChanged should be called when the scene's minimum ambient
-       * lighting changes.
+       * @brief Should be called when the scene's minimum ambient lighting changes.
        *
        * @param[in] newCoefficient  The new ambient lighting coefficient.
        */
       void OnAmbientCoefficientChanged(const double newCoefficient);
 
       /**
-       * @brief OnAttenuationChanged should be called when the point light's attentuation changes.
+       * @brief Should be called when the point light's attentuation changes.
        *
        * @param[in] newAttenuation  The new attenuation factor.
        */
       void OnAttenuationChanged(const double newAttenuation);
 
       /**
-       * @brief OnShininessChanged should be called when the block material shininess changes.
+       * @brief Should be called when the block material shininess changes.
        *
        * @param[in] newShininess    The new shininess value.
        */
       void OnShininessChanged(const double newShininess);
 
       /**
-       * @brief OnUseXBoxControllerStateChanged sets whether the XBox controller is to be used.
+       * @brief Sets whether the XBox controller is to be used.
        *
        * @param[in] useController   Pass in true to enable the use of the XBox controller.
        */
       void OnUseXBoxControllerStateChanged(const bool useController);
 
       /**
-       * @brief OnAttachLightToCameraStateChanged
-       * @param attached
+       * @brief Updates the attachment of the primary light to the camera.
+       *
+       * @param[in] attached        Pass in true to attach light number one to the camera.
        */
       void OnAttachLightToCameraStateChanged(const bool attached);
 
       /**
-       * @brief OnFieldOfViewChanged
-       * @param fieldOfView
+       * @brief Handles changes in the field of view.
        *
+       * @param[in] fieldOfView     Field of view in degrees.
        */
       void OnFieldOfViewChanged(int fieldOfView);
 
       /**
-       * @brief OnRedLightComponentChanged
-       * @param value
+       * @brief Handles changes in the red color of the light.
+       *
+       * @param[in] value           New 8-bit value.
        */
       void OnRedLightComponentChanged(const int value);
 
       /**
-       * @brief OnGreenLightComponentChanged
-       * @param value
+       * @brief Handles changes in the green color of the light.
+       *
+       * @param[in] value           New 8-bit value.
        */
       void OnGreenLightComponentChanged(const int value);
 
       /**
-       * @brief OnBlueLightComponentChanged
-       * @param value
+       * @brief Handles changes in the blue color of the light.
+       *
+       * @param[in] value           New 8-bit value.
        */
       void OnBlueLightComponentChanged(const int value);
 

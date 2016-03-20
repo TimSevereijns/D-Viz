@@ -44,7 +44,7 @@ struct VisualizationParameters
 };
 
 /**
- * @brief The Visualization class
+ * @brief Base visualization class.
  */
 class Visualization
 {
@@ -60,15 +60,17 @@ class Visualization
       static const float ROOT_BLOCK_DEPTH;
 
       /**
-       * Parses the specified directory scan into vertex and color data.
+       * @brief Parses the specified directory scan into vertex and color data.
        *
-       * @param[in, out] theTree         The unparsed scan results.
+       * @param[in, out] theTree    The unparsed scan results.
        */
       virtual void Parse(const std::shared_ptr<Tree<VizNode>>& theTree) = 0;
 
       /**
-       * @brief UpdateBoundingBoxes will compute the minimum Axis-Aligned Bounding Boxes (AABB) for
-       * each node in the tree. Each node's bounding box will not only minimally enclose the block
+       * @brief Will update the minimum Axis-Aligned Bounding Boxes (AABB) for each node in the
+       * tree.
+       *
+       * Each node's bounding box will not only minimally enclose the block
        * of the node to which it belongs, but also all descendants of the node in question.
        */
       virtual void UpdateBoundingBoxes();
@@ -81,28 +83,30 @@ class Visualization
       /**
        * @brief GetVertexData
        *
-       * @returns the vertices that represent the entire visualization.
+       * @returns The vertices that represent the entire visualization.
        */
       QVector<QVector3D>& GetVertexData();
 
       /**
        * @brief GetColorData
        *
-       * @returns the color data that is associated with the vertex data. @see GetVertexData
+       * @returns The color data that is associated with the vertex data. @see GetVertexData
        */
       QVector<QVector3D>& GetColorData();
 
       /**
-       * @brief FindNearestIntersectionUsingAABB will attempt to identify the closest node in front
-       * of the camera that the specified ray intersects with. This search operation is carried out
-       * with aid of the minimum Axis-Aligned Bounding Boxes (AABB) that surround each node and its
-       * descendants.
+       * @brief Attempts to identify the closest node in front of the camera that the specified ray
+       * intersects with.
+       *
+       * This search operation is carried out with aid of the minimum Axis-Aligned Bounding Boxes
+       * (AABB) that surround each node and its descendants.
        *
        * @param[in] camera          The camera from which the ray originated.
        * @param[in] ray             The picking ray.
        * @param[in] parameters      @see VisualizationParameters. Used to prune disqualified nodes.
        *
-       * @returns the node that was clicked on; boost::none otherwise.
+       * @returns Pointer to the TreeNode that was clicked on, and nullptr if no intersection
+       * exists.
        */
       TreeNode<VizNode>* FindNearestIntersection(
          const Camera& camera,
@@ -110,25 +114,23 @@ class Visualization
          const VisualizationParameters& parameters) const;
 
       /**
-       * @brief CreateBlockColors creates the vertex colors needed to color a single block.
+       * @brief Creates the vertex colors needed to color a single block.
        *
-       * @returns a vector of vertex colors.
+       * @returns A vector of colors.
        */
       static QVector<QVector3D> CreateFileColors();
 
       /**
-       * @brief CreateBlockColors creates the vertex colors needed to color a single block.
+       * @brief Creates the vertex colors needed to color a single block.
        *
-       * @returns a vector of vertex colors.
+       * @returns A vector of colors.
        */
       static QVector<QVector3D> CreateDirectoryColors();
 
       /**
-       * @brief CreateHighlightColors
+       * @brief Create the vertex colors needed to color the selected file.
        *
-       * @todo Document this
-       *
-       * @return
+       * @return A vector of colors.
        */
       static QVector<QVector3D> CreateHighlightColors();
 

@@ -26,53 +26,57 @@ class SceneAsset
          DESELECT
       };
 
+      /**
+       * @brief Constructor
+       *
+       * @param[in] device          @see GraphicsDevice
+       */
       explicit SceneAsset(GraphicsDevice& device);
+
       virtual ~SceneAsset();
 
       /**
-       * @brief PrepareVertexBuffers loads the vertex data into the OpenGL buffer. Use
-       * SceneAsset::SetVertexData() to set the data before calling this function.
+       * @brief Loads the vertex data into the OpenGL buffer. Use SceneAsset::SetVertexData() to set
+       * the data before calling this function.
        *
        * @param[in] camera          The camera associated with the OpenGL context.
        *
-       * @returns true if the operation succeeded.
+       * @returns True if the operation succeeded.
        */
       virtual bool PrepareVertexBuffers(const Camera& camera) = 0;
 
       /**
-       * @brief PrepareColorBuffers loads the color data into the OpenGL buffer. Use
-       * SceneAsset::SetColorData() to set the data before calling this function.
+       * @brief Loads the color data into the OpenGL buffer. Use SceneAsset::SetColorData() to set
+       * the data before calling this function.
        *
        * @param[in] camera          The camera associated with the OpenGL context.
        *
-       * @returns true if the operation succeeded.
+       * @returns True if the operation succeeded.
        */
       virtual bool PrepareColorBuffers(const Camera& camera) = 0;
 
       /**
-       * @brief ClearBuffers clears the OpenGL buffer objects that contain the vertex and
-       * color data.
+       * @brief Clears the OpenGL buffer objects that contain the vertex and color data.
        *
-       * @returns true if the operation succeeded.
+       * @returns True if the operation succeeded.
        */
       bool ClearBuffers();
 
       /**
-       * @brief LoadShaders loads the vertex and fragment shaders.
+       * @brief Loads the vertex and fragment shaders.
        *
-       * @returns true if the operation succeeded.
+       * @returns True if the operation succeeded.
        */
       virtual bool LoadShaders() = 0;
 
       /**
-       * @brief Render performs the necessary actions to render the asset in question to the
-       * OpenGL canvas.
+       * @brief Performs the necessary actions to render the asset in question to the OpenGL canvas.
        *
        * @param[in] camera          The camera associated with the OpenGL context.
        * @param[in] light           The light source for the scene.
        * @param[in] settings        Any additional settings relevant to rendering.
        *
-       * @returns true if the operation succeeded.
+       * @returns True if the operation succeeded.
        */
       virtual bool Render(
          const Camera& camera,
@@ -80,61 +84,66 @@ class SceneAsset
          const OptionsManager& settings) = 0;
 
       /**
-       * @brief IsAssetLoaded
+       * @brief Determines whether the scene asset has been loaded.
        *
-       * @returns true if the OpenGL buffers have been properly populated.
+       * @returns True if the OpenGL buffers have been properly populated.
        */
       bool IsAssetLoaded() const;
 
       /**
-       * @brief Reload performs all actions necessary to update the data in the OpenGL buffers.
+       * @brief Performs all actions necessary to update the data in the OpenGL buffers.
        *
        * @param[in] camera          The camera associated with the OpenGL context.
        *
-       * @returns true if the operation succeeded.
+       * @returns True if the operation succeeded.
        */
       virtual bool Reload(const Camera& camera) = 0;
 
       /**
-       * @brief SetVertexData is the primary function to set the vertex data associated with the
-       * asset in question.
+       * @brief Sets the vertex data associated with the asset in question.
        *
        * @param[in] data            The asset vertices and normals.
        */
       void SetVertexData(QVector<QVector3D>&& data);
 
       /**
-       * @brief SetColorData is the primary function to set the color data associated with the
-       * asset in question.
+       * @brief Set the color data associated with the asset in question.
        *
        * @param[in] data            The vertex colors.
        */
       void SetColorData(QVector<QVector3D>&& data);
 
       /**
-       * @brief GetVertexCount
+       * @brief Retrieves vizualization vertex count.
        *
-       * @returns the count of vertices used to represent the asset.
+       * @returns The count of vertices used to represent the asset.
        */
       unsigned int GetVertexCount() const;
 
       /**
-       * @brief GetColorCount
+       * @brief Retrieves vizualization color count.
        *
-       * @returns the count of color entries used to present the asset's color.
+       * @returns The count of color entries used to present the asset's color.
        */
       unsigned int GetColorCount() const;
 
       /**
-       * @brief UpdateVBO
+       * @brief Updates the portion of the VBO associated with the specified TreeNode.
        *
-       * @todo Document this
-       *
-       * @param data
+       * @param[in] node            The TreeNode whose visualization should be updated.
+       * @param[in] action          The type of update to perform on the target VBO segment.
        */
       virtual void UpdateVBO(const TreeNode<VizNode>& node, UpdateAction action);
 
    protected:
+      /**
+       * @brief Helper function to compile and load the specified OpenGL shaders.
+       *
+       * @param[in] vertexShaderName      Filename of the vertex shader.
+       * @param[in] fragmentShaderName    Filename of the fragment shader.
+       *
+       * @returns True if compilation and loading suceeded.
+       */
       bool LoadShaders(const QString& vertexShaderName, const QString& fragmentShaderName);
 
       QOpenGLBuffer m_vertexBuffer;

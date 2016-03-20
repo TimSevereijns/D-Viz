@@ -19,7 +19,6 @@
 
 #include "../Visualizations/visualization.h"
 
-//#include "../tree.h"
 #include "../ThirdParty/Tree.hpp"
 
 /**
@@ -37,9 +36,11 @@ class ScanningWorker : public QObject
 
    public slots:
       /**
-       * @brief Start kicks off the drive scanning process. As part of the scanning process, the
-       * ProgressUpdate signal will be fired to signal progress updates, and the Finish signal will
-       * be fired once the scanning process completes successfully.
+       * @brief Start kicks off the drive scanning process.
+       *
+       * As part of the scanning process, the ProgressUpdate signal will be fired to signal progress
+       * updates, and the Finish signal will be fired once the scanning process completes
+       * successfully.
        *
        * @see Finished
        * @see ProgressUpdate
@@ -48,7 +49,7 @@ class ScanningWorker : public QObject
 
    signals:
       /**
-       * @brief Finished signals that the drive scanning has finished.
+       * @brief Signals that the drive scanning has finished.
        *
        * @param[in] filesScanned    The total number of files that were scanned.
        * @param[in] fileTree        A pointer to the final tree representing the scanned drive.
@@ -56,14 +57,14 @@ class ScanningWorker : public QObject
       void Finished(const std::uintmax_t filesScanned, std::shared_ptr<Tree<VizNode>> fileTree);
 
       /**
-       * @brief ProgressUpdate signals drive scanning progress updates.
+       * @brief Signals drive scanning progress updates.
        *
        * @param[in] filesScanned    The number of files scanned so far.
        */
       void ProgressUpdate(const std::uintmax_t filesScanned);
 
       /**
-       * @brief ShowMessageBox allows for cross-thread signaling show the user a standard message
+       * @brief Allows for cross-thread signaling show the user a standard message
        * box.
        *
        * @param[in] message         The message to be shown in the message box.
@@ -72,13 +73,12 @@ class ScanningWorker : public QObject
 
    private:
       /**
-       * @brief IterateOverDirectory is a helper function to facilitate exception-free iteration
-       * over a directory.
+       * @brief Helper function to facilitate exception-free iteration over a directory.
        *
        * @todo UPGRADE TO C++11: noexcept
        *
-       * @param itr
-       * @param treeNode
+       * @param[in] itr             Reference to the iterator to iterate over.
+       * @param[in] treeNode        The TreeNode to append the contents of the directory to.
        */
       void IterateOverDirectory(
          boost::filesystem::directory_iterator& itr,
