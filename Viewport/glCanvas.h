@@ -91,7 +91,7 @@ class GLCanvas : public QOpenGLWidget
        *
        * @param[in] event           Details of the mouse click event.
        */
-      void HandleRightClick(const QMouseEvent& event);
+      void HandleRightClick(const QPoint& point);
 
       /**
        * @brief Handler for TreeNode selection.

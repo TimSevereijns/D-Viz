@@ -5,7 +5,10 @@ DebuggingRayAsset::DebuggingRayAsset(GraphicsDevice& device)
 {
 }
 
-bool DebuggingRayAsset::Render(const Camera& camera, const std::vector<Light>&, const OptionsManager&)
+bool DebuggingRayAsset::Render(
+   const Camera& camera,
+   const std::vector<Light>&,
+   const OptionsManager&)
 {
    m_shader.bind();
    m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());

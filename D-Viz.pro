@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     Viewport/glCanvas.cpp \
     Viewport/graphicsDevice.cpp \
     Visualizations/squarifiedTreemap.cpp \
-    Visualizations/visualization.cpp
+    Visualizations/visualization.cpp \
+    Scene/nodeSelectionCrosshair.cpp
 
 HEADERS  += mainwindow.h \
     optionsManager.h \
@@ -43,7 +44,7 @@ HEADERS  += mainwindow.h \
     DataStructs/light.h \
     DataStructs/vizNode.h \
     DataStructs/doublePoint3d.h \
-    DataStructs/driveScanningParameters.cpp \
+    DataStructs/driveScanningParameters.h \
     DriveScanner/driveScanner.h \
     DriveScanner/scanningWorker.h \
     HID/keyboardManager.h \
@@ -62,7 +63,8 @@ HEADERS  += mainwindow.h \
     Visualizations/squarifiedTreemap.h \
     Visualizations/visualization.h \
     Utilities/stopwatch.hpp \
-    constants.h
+    constants.h \
+    Scene/nodeSelectionCrosshair.h
 
 FORMS    += mainwindow.ui
 

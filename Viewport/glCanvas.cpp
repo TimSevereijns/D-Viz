@@ -1,9 +1,12 @@
 #include "glCanvas.h"
 
 #include "../constants.h"
+
 #include "Scene/debuggingRayAsset.h"
 #include "Scene/gridAsset.h"
+#include "Scene/nodeSelectionCrosshair.h"
 #include "Scene/visualizationAsset.h"
+
 #include "Visualizations/squarifiedTreemap.h"
 #include "Utilities/scopeExit.hpp"
 
@@ -124,6 +127,7 @@ namespace
       GRID = 0,      ///< GridAsset
       TREEMAP,       ///< VisualizationAsset
       PICKING_RAY,   ///< DebuggingRayAsset
+      CROSSHAIR      ///< NodeSelectionCrosshair
    };
 }
 
@@ -181,6 +185,7 @@ void GLCanvas::initializeGL()
    m_sceneAssets.emplace_back(std::make_unique<GridAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<DebuggingRayAsset>(*m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<NodeSelectionCrosshair>(*m_graphicsDevice));
 
    for (const auto& asset : m_sceneAssets)
    {
@@ -394,27 +399,24 @@ void GLCanvas::HandleNodeSelection(const TreeNode<VizNode>* selectedNode)
    m_selectedNode = selectedNode;
 }
 
-void GLCanvas::HandleRightClick(const QMouseEvent& event)
+void GLCanvas::HandleRightClick(const QPoint& point)
 {
    if (!m_isVisualizationLoaded)
    {
       return;
    }
 
-   const auto canvasCoordinates = QPoint{event.x(), event.y()};
-   const auto ray = m_camera.ShootRayIntoScene(canvasCoordinates);
+   const auto ray = m_camera.ShootRayIntoScene(point);
    const auto* selection = m_theVisualization->FindNearestIntersection(m_camera, ray,
       m_visualizationParameters);
 
    if (selection)
    {
-      HandleNodeSelection(selection);
+      //HandleNodeSelection(selection);
    }
    else
    {
-      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*m_selectedNode,
-         SceneAsset::UpdateAction::DESELECT);
-
+      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*m_selectedNode, SceneAsset::UpdateAction::DESELECT);
       PrintMetadataToStatusBar(m_sceneAssets[Asset::TREEMAP]->GetVertexCount(), *m_mainWindow);
    }
 }
@@ -431,7 +433,7 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
 
    if (event->button() == Qt::RightButton)
    {
-      HandleRightClick(*event);
+      HandleRightClick(event->pos());
    }
 
    event->accept();
@@ -620,6 +622,34 @@ void GLCanvas::HandleXBoxControllerInput()
       m_camera.OffsetPosition(
          MOVEMENT_AMPLIFICATION_FACTOR * m_settings->m_cameraMovementSpeed * controllerState.leftThumbX
          * m_camera.Right());
+   }
+
+//   if (controllerState.leftTrigger > 0.20f)
+//   {
+//      NodeSelectionCrosshair* crosshairAsset =
+//         dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
+
+//      assert(crosshairAsset);
+//      if (crosshairAsset)
+//      {
+//         crosshairAsset->SetCrosshairPosition(m_camera.GetViewport().center());
+//      }
+//   }
+//   else
+//   {
+//      NodeSelectionCrosshair* crosshairAsset =
+//         dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
+
+//      assert(crosshairAsset);
+//      if (crosshairAsset)
+//      {
+//         crosshairAsset->HideCrosshair();
+//      }
+//   }
+
+   if (controllerState.rightTrigger)
+   {
+      HandleRightClick(m_camera.GetViewport().center());
    }
 }
 
