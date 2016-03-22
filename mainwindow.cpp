@@ -238,6 +238,7 @@ bool MainWindow::IsXboxControllerConnected() const
 
 void MainWindow::XboxControllerStateChanged(XboxController::State state)
 {
+   // @todo Put this on the stack.
    m_xboxControllerState.reset(new XboxController::State{state});
 }
 

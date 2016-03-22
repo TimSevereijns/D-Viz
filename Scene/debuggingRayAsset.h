@@ -8,7 +8,7 @@ class DebuggingRayAsset : public LineAsset
    public:
       DebuggingRayAsset(GraphicsDevice& device);
 
-      virtual bool Render(
+      bool Render(
          const Camera& camera,
          const std::vector<Light>& lights,
          const OptionsManager& settings) override;

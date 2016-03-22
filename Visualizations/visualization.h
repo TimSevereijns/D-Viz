@@ -10,7 +10,6 @@
 #include <memory>
 #include <numeric>
 
-//#include "../tree.h"
 #include "../ThirdParty/Tree.hpp"
 
 #include "../DataStructs/vizNode.h"
@@ -67,8 +66,7 @@ class Visualization
       virtual void Parse(const std::shared_ptr<Tree<VizNode>>& theTree) = 0;
 
       /**
-       * @brief Will update the minimum Axis-Aligned Bounding Boxes (AABB) for each node in the
-       * tree.
+       * @brief Updates the minimum Axis-Aligned Bounding Boxes (AABB) for each node in the tree.
        *
        * Each node's bounding box will not only minimally enclose the block
        * of the node to which it belongs, but also all descendants of the node in question.
@@ -76,19 +74,21 @@ class Visualization
       virtual void UpdateBoundingBoxes();
 
       /**
-       * @brief ComputeVertexAndColorData
+       * @brief Uses the specified parameters to populate the vertex and color buffers.
+       *
+       * @param[in] parameters      @see VisualizationParameters
        */
       void ComputeVertexAndColorData(const VisualizationParameters& parameters);
 
       /**
-       * @brief GetVertexData
+       * @brief Retrieves the data in the vertex buffer.
        *
        * @returns The vertices that represent the entire visualization.
        */
       QVector<QVector3D>& GetVertexData();
 
       /**
-       * @brief GetColorData
+       * @brief Retrieves the data in the color buffer.
        *
        * @returns The color data that is associated with the vertex data. @see GetVertexData
        */
@@ -105,7 +105,7 @@ class Visualization
        * @param[in] ray             The picking ray.
        * @param[in] parameters      @see VisualizationParameters. Used to prune disqualified nodes.
        *
-       * @returns Pointer to the TreeNode that was clicked on, and nullptr if no intersection
+       * @returns A pointer to the TreeNode that was clicked on, and nullptr if no intersection
        * exists.
        */
       TreeNode<VizNode>* FindNearestIntersection(

@@ -145,6 +145,9 @@ class GLCanvas : public QOpenGLWidget
       bool m_isPaintingSuspended;
       bool m_isVisualizationLoaded;
 
+      bool m_isLeftTriggerDown;
+      bool m_isRightTriggerDown;
+
       VisualizationParameters m_visualizationParameters;
 
       MainWindow* m_mainWindow;

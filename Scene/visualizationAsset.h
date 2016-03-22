@@ -15,17 +15,17 @@ class VisualizationAsset : public SceneAsset
    public:
       VisualizationAsset(GraphicsDevice& device);
 
-      virtual bool LoadShaders() override;
+      bool LoadShaders() override;
 
-      virtual bool PrepareVertexBuffers(const Camera& camera) override;
-      virtual bool PrepareColorBuffers(const Camera& camera) override;
+      bool PrepareVertexBuffers(const Camera& camera) override;
+      bool PrepareColorBuffers(const Camera& camera) override;
 
-      virtual bool Render(
+      bool Render(
          const Camera& camera,
          const std::vector<Light>& lights,
          const OptionsManager& settings) override;
 
-      virtual bool Reload(const Camera& camera) override;
+      bool Reload(const Camera& camera) override;
 
       void UpdateVBO(const TreeNode<VizNode>& node, UpdateAction action) override;
 };

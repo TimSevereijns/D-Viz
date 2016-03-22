@@ -147,7 +147,7 @@ class Camera
        *                            view plane.
        * @param[in] modelMatrix     The matrix of transformations applied to the model.
        *
-       * @returns a 3D point representing the 2D canvas coordinates in 3D world coordinates.
+       * @returns A 3D point representing the 2D canvas coordinates in 3D world coordinates.
        */
       QVector3D Unproject(const QPoint& point, float viewDepth, QMatrix4x4 modelMatrix) const;
 
@@ -178,9 +178,11 @@ class Camera
       void SetViewport(const QRect& size);
 
       /**
-       * @brief GetViewport
+       * @brief Retrieves the dimensions of the viewport.
        *
-       * @returns the size of the current viewport.
+       * These will be the same dimensions as the OpenGL canvas.
+       *
+       * @returns the size of the current viewport represented as a rectangle.
        */
       QRect GetViewport() const;
 
@@ -194,7 +196,7 @@ class Camera
       /**
        * @brief Retrives the camera's current field of view.
        *
-       * @returns the current field of view in degrees.
+       * @returns The current field of view in degrees.
        */
       float GetFieldOfView() const;
 

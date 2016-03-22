@@ -13,6 +13,7 @@
 #include <QApplication>
 #include <QMessageBox>
 
+#include <iostream>
 #include <sstream>
 #include <utility>
 
@@ -412,7 +413,7 @@ void GLCanvas::HandleRightClick(const QPoint& point)
 
    if (selection)
    {
-      //HandleNodeSelection(selection);
+      HandleNodeSelection(selection);
    }
    else
    {
@@ -624,32 +625,42 @@ void GLCanvas::HandleXBoxControllerInput()
          * m_camera.Right());
    }
 
-//   if (controllerState.leftTrigger > 0.20f)
-//   {
-//      NodeSelectionCrosshair* crosshairAsset =
-//         dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
-
-//      assert(crosshairAsset);
-//      if (crosshairAsset)
-//      {
-//         crosshairAsset->SetCrosshairPosition(m_camera.GetViewport().center());
-//      }
-//   }
-//   else
-//   {
-//      NodeSelectionCrosshair* crosshairAsset =
-//         dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
-
-//      assert(crosshairAsset);
-//      if (crosshairAsset)
-//      {
-//         crosshairAsset->HideCrosshair();
-//      }
-//   }
-
-   if (controllerState.rightTrigger)
+   if (controllerState.leftTrigger > 0.20f && !m_isLeftTriggerDown)
    {
+      m_isLeftTriggerDown = true;
+
+      NodeSelectionCrosshair* crosshairAsset =
+         dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
+
+      assert(crosshairAsset);
+      if (crosshairAsset)
+      {
+         crosshairAsset->ShowCrosshair();
+      }
+   }
+   else if (controllerState.leftTrigger <= 0.20f && m_isLeftTriggerDown)
+   {
+      m_isLeftTriggerDown = false;
+
+      NodeSelectionCrosshair* crosshairAsset =
+         dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
+
+      assert(crosshairAsset);
+      if (crosshairAsset)
+      {
+         crosshairAsset->HideCrosshair();
+      }
+   }
+
+   if (controllerState.rightTrigger > 0.20f && !m_isRightTriggerDown)
+   {
+      m_isRightTriggerDown = true;
+
       HandleRightClick(m_camera.GetViewport().center());
+   }
+   else if (controllerState.rightTrigger <= 0.20f && m_isRightTriggerDown)
+   {
+      m_isRightTriggerDown = false;
    }
 }
 

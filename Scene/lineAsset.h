@@ -11,17 +11,17 @@ class LineAsset : public SceneAsset
    public:
       explicit LineAsset(GraphicsDevice& device);
 
-      virtual bool LoadShaders() override;
+      bool LoadShaders() override;
 
-      virtual bool PrepareVertexBuffers(const Camera& camera) override;
-      virtual bool PrepareColorBuffers(const Camera& camera) override;
+      bool PrepareVertexBuffers(const Camera& camera) override;
+      bool PrepareColorBuffers(const Camera& camera) override;
 
-      virtual bool Render(
+      bool Render(
          const Camera& camera,
          const std::vector<Light>& light,
          const OptionsManager& settings) override;
 
-      virtual bool Reload(const Camera& camera) override;
+      bool Reload(const Camera& camera) override;
 };
 
 #endif // LINEASSET_H

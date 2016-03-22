@@ -6,13 +6,13 @@ namespace
     * @brief CreateCrosshairVertices
     * @return
     */
-   QVector<QVector3D> CreateCrosshairVertices(QPoint center)
+   QVector<QVector3D> CreateCrosshairVertices()
    {
       QVector<QVector3D> vertices;
-      vertices << QVector3D(center.x() - 10, 0.0f, -4.0f)
-               << QVector3D(center.x() + 10, 0.0f, -4.0f)
-               << QVector3D(0.0f, center.y() - 10, -4.0f)
-               << QVector3D(0.0f, center.y() + 10, -4.0f);
+      vertices << QVector3D(-100, 0.0f, -4.0f)
+               << QVector3D(+100, 0.0f, -4.0f)
+               << QVector3D(0.0f, - 100, -4.0f)
+               << QVector3D(0.0f, + 100, -4.0f);
 
       return vertices;
    }
@@ -24,10 +24,10 @@ namespace
    QVector<QVector3D> CreateCrosshairColors()
    {
       QVector<QVector3D> colors;
-      colors << QVector3D(0.0f, 0.0f, 0.0f)
-             << QVector3D(0.0f, 0.0f, 0.0f)
-             << QVector3D(0.0f, 0.0f, 0.0f)
-             << QVector3D(0.0f, 0.0f, 0.0f);
+      colors << QVector3D(1.0f, 1.0f, 1.0f)
+             << QVector3D(1.0f, 1.0f, 1.0f)
+             << QVector3D(1.0f, 1.0f, 1.0f)
+             << QVector3D(1.0f, 1.0f, 1.0f);
 
       return colors;
    }
@@ -36,13 +36,14 @@ namespace
 NodeSelectionCrosshair::NodeSelectionCrosshair(GraphicsDevice& device)
    : LineAsset(device)
 {
-   m_rawColors = CreateCrosshairVertices(QPoint{ 400, 300 });
+   m_rawColors = CreateCrosshairVertices();
    m_rawColors = CreateCrosshairColors();
 }
 
-void NodeSelectionCrosshair::ShowCrosshairPosition(const QPoint& crosshairCenter)
+void NodeSelectionCrosshair::ShowCrosshair()
 {
-   m_rawVertices = CreateCrosshairVertices(crosshairCenter);
+   // @todo Write a HUD shader to just keep these points in front of the camera at all times.
+   m_rawVertices = CreateCrosshairVertices();
 }
 
 void NodeSelectionCrosshair::HideCrosshair()
@@ -55,9 +56,10 @@ bool NodeSelectionCrosshair::Render(
    const std::vector<Light>&,
    const OptionsManager&)
 {
-   m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
+   // @todo Add an early return to "hide" the crosshair, instead of clearing the buffer.
+   return true;
 
+   m_shader.bind();
    m_VAO.bind();
 
    m_graphicsDevice.glLineWidth(3);

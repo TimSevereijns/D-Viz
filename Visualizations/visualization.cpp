@@ -1,13 +1,12 @@
 #include "visualization.h"
 
-#include <algorithm>
-
 #include <boost/optional.hpp>
 
 #include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <string>
+
 #include <Qt3DCore/QRay3D>
 #include <QRectF>
 
@@ -19,14 +18,14 @@ namespace
    const double EPSILON = 0.0001;
 
    /**
-    * @brief DoRayAndPlaneIntersect calculates whether the specified ray hits the specified plane,
-    * given a margin of error, epsilon.
+    * @brief Calculates whether the specified ray hits the specified plane, given a margin of error,
+    * epsilon.
     *
     * @param[in] ray                The ray to be fired at the plane.
     * @param[in] pointOnPlane       Any point on the plane.
     * @param[in] planeNormal        The normal for that point on the plane.
     *
-    * @returns the point of intersection if there is an intersection greater than the margin of
+    * @returns The point of intersection if there is an intersection greater than the margin of
     * error, or boost::none if no such intersection exists.
     */
    boost::optional<QVector3D> DoesRayIntersectPlane(
@@ -54,13 +53,12 @@ namespace
    }
 
    /**
-    * @brief FindClosestIntersectionPoint will return the intersection point that is closest to the
-    * origin of the ray.
+    * @brief Returns the intersection point that is closest to the origin of the ray.
     *
     * @param[in] ray                The ray that caused the intersections.
     * @param[in] intersections      All the intersections caused by the ray.
     *
-    * @return the closest intersection point, or boost::none should anything weird occur.
+    * @return The closest intersection point, or boost::none should anything weird occur.
     */
    boost::optional<QVector3D> FindClosestIntersectionPoint(
       const Qt3D::QRay3D& ray,
@@ -81,13 +79,12 @@ namespace
    }
 
    /**
-    * @brief DoesRayIntersectBlock will find the point at which the given ray intersects the given
-    * block.
+    * @brief Finds the point at which the given ray intersects the given block.
     *
     * @param[in] ray                The ray fired at the block.
     * @param[in] block              The block to be tested for intersection.
     *
-    * @returns the point of intersection should it exist; boost::none otherwise.
+    * @returns The point of intersection should it exist; boost::none otherwise.
     */
    boost::optional<QVector3D> DoesRayIntersectBlock(
       const Qt3D::QRay3D& ray,
@@ -165,8 +162,8 @@ namespace
    }
 
    /**
-    * @brief AdvanceToNextNonDescendant is a helper function that will advance the passed-in node
-    * to the next node in the tree that is not a descendant of said node.
+    * @brief Helper function that will advance the passed-in node to the next node in the tree that
+    * is not a descendant of said node.
     *
     * @param[out] node              The node to advance.
     */
@@ -197,8 +194,7 @@ namespace
    using IntersectionPointAndNode = std::pair<QVector3D, TreeNode<VizNode>*>;
 
    /**
-    * @brief GetAllIntersections iterates over all nodes in the scene, placing all intersections
-    * in a vector.
+    * @brief Iterates over all nodes in the scene, placing all intersections in a vector.
     *
     * @param[in] ray                The ray to be shot into the scene.
     * @param[in] camera             The camera from which the ray is shot.
