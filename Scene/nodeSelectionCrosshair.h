@@ -10,7 +10,7 @@ class NodeSelectionCrosshair: public LineAsset
    public:
       NodeSelectionCrosshair(GraphicsDevice& device);
 
-      void ShowCrosshair();
+      void ShowCrosshair(const Camera& camera);
 
       void HideCrosshair();
 

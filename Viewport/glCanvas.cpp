@@ -12,8 +12,8 @@
 
 #include <QApplication>
 #include <QMessageBox>
+#include <QPainter>
 
-#include <iostream>
 #include <sstream>
 #include <utility>
 
@@ -113,11 +113,11 @@ namespace
     * @param[in] highlightAsset     The asset to be nuked and reloaded.
     * @param[in] camera             The camera used to view the asset in the scene.
     */
-   void ClearAssetBuffersAndReload(SceneAsset& highlightAsset, const Camera& camera)
+   void ClearAssetBuffersAndReload(SceneAsset& asset, const Camera& camera)
    {
-      highlightAsset.SetVertexData(QVector<QVector3D>{});
-      highlightAsset.SetColorData(QVector<QVector3D>{});
-      highlightAsset.Reload(camera);
+      asset.SetVertexData(QVector<QVector3D>{ });
+      asset.SetColorData(QVector<QVector3D>{ });
+      asset.Reload(camera);
    }
 
    /**
@@ -232,7 +232,7 @@ void GLCanvas::ScanDrive(VisualizationParameters& vizParameters)
       [&] (const std::uintmax_t numberOfFilesScanned)
    {
       std::wstringstream message;
-      message.imbue(std::locale{""});
+      message.imbue(std::locale{ "" });
       message << std::fixed << L"Files Scanned: " << numberOfFilesScanned;
       m_mainWindow->SetStatusBarMessage(message.str());
    };
@@ -281,11 +281,12 @@ void GLCanvas::AskUserToLimitFileSize(
    if (parameters.minimumFileSize < Constants::FileSizeUnits::oneMebibyte)
    {
       QMessageBox messageBox;
+      messageBox.setIcon(QMessageBox::Warning);
+      messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+
       messageBox.setText("More than a quarter million files were scanned. " \
          "Would you like to limit the visualized files to those 1 MiB or larger in " \
          "order to reduce the load on the GPU and system memory?");
-      messageBox.setIcon(QMessageBox::Warning);
-      messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 
       const int election = messageBox.exec();
       switch (election)
@@ -378,7 +379,7 @@ void GLCanvas::HandleNodeSelection(const TreeNode<VizNode>* selectedNode)
    assert(fileSize > 0);
 
    std::wstringstream message;
-   message.imbue(std::locale{""});
+   message.imbue(std::locale{ "" });
    message.precision(2);
 
    const auto sizeAndUnits = GetFileSizeInMostAppropriateUnits(fileSize);
@@ -390,12 +391,10 @@ void GLCanvas::HandleNodeSelection(const TreeNode<VizNode>* selectedNode)
 
    if (m_selectedNode)
    {
-      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*m_selectedNode,
-         SceneAsset::UpdateAction::DESELECT);
+      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*m_selectedNode, SceneAsset::UpdateAction::DESELECT);
    }
 
-   m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*selectedNode,
-      SceneAsset::UpdateAction::SELECT);
+   m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*selectedNode, SceneAsset::UpdateAction::SELECT);
 
    m_selectedNode = selectedNode;
 }
@@ -635,7 +634,8 @@ void GLCanvas::HandleXBoxControllerInput()
       assert(crosshairAsset);
       if (crosshairAsset)
       {
-         crosshairAsset->ShowCrosshair();
+         crosshairAsset->ShowCrosshair(m_camera);
+         crosshairAsset->Reload(m_camera);
       }
    }
    else if (controllerState.leftTrigger <= 0.20f && m_isLeftTriggerDown)
@@ -649,6 +649,7 @@ void GLCanvas::HandleXBoxControllerInput()
       if (crosshairAsset)
       {
          crosshairAsset->HideCrosshair();
+         crosshairAsset->Reload(m_camera);
       }
    }
 
@@ -656,7 +657,9 @@ void GLCanvas::HandleXBoxControllerInput()
    {
       m_isRightTriggerDown = true;
 
-      HandleRightClick(m_camera.GetViewport().center());
+      // @bug Executing this function as part of the Xbox input handler causes the canvas to
+      // flicker black momentarily. Perhaps this is an indication that I need to double buffer.
+      //HandleRightClick(m_camera.GetViewport().center());
    }
    else if (controllerState.rightTrigger <= 0.20f && m_isRightTriggerDown)
    {

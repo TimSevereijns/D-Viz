@@ -231,6 +231,10 @@ class Camera
        */
       bool IsPointInFrontOfCamera(const QVector3D& point) const;
 
+      float GetNearPlane() const;
+
+      float GetFarPlane() const;
+
    private:
       QVector3D m_position;
 

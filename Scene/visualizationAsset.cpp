@@ -1,7 +1,6 @@
 #include "visualizationAsset.h"
 
 #include "../DataStructs/vizNode.h"
-//#include "../tree.h"
 #include "../ThirdParty/Tree.hpp"
 #include "../Visualizations/visualization.h"
 

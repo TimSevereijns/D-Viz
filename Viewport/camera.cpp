@@ -205,6 +205,16 @@ void Camera::SetViewport(const QRect& size)
    m_viewport = size;
 }
 
+float Camera::GetNearPlane() const
+{
+   return m_nearPlane;
+}
+
+float Camera::GetFarPlane() const
+{
+   return m_farPlane;
+}
+
 QRect Camera::GetViewport() const
 {
    return m_viewport;
