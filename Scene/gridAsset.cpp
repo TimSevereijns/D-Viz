@@ -110,10 +110,16 @@ bool GridAsset::Render(
    m_VAO.bind();
 
    m_graphicsDevice.glLineWidth(2);
-   m_graphicsDevice.glDrawArrays(GL_LINES, /* first = */ 0, /* count = */ 6);
+   m_graphicsDevice.glDrawArrays(
+      /* mode = */ GL_LINES,
+      /* first = */ 0,
+      /* count = */ 6);
 
    m_graphicsDevice.glLineWidth(1);
-   m_graphicsDevice.glDrawArrays(GL_LINES, /* first = */ 6, /* count = */ m_rawVertices.size());
+   m_graphicsDevice.glDrawArrays(
+      /* mode = */ GL_LINES,
+      /* first = */ 6,
+      /* count = */ m_rawVertices.size());
 
    m_shader.release();
    m_VAO.release();

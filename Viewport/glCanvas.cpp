@@ -127,7 +127,6 @@ namespace
    {
       GRID = 0,      ///< GridAsset
       TREEMAP,       ///< VisualizationAsset
-      PICKING_RAY,   ///< DebuggingRayAsset
       CROSSHAIR      ///< NodeSelectionCrosshair
    };
 }
@@ -152,13 +151,13 @@ GLCanvas::GLCanvas(QWidget* parent)
 {
    if (!m_mainWindow)
    {
-      throw std::invalid_argument("Parent couldn't be interpreted as a MainWindow instance.");
+      throw std::invalid_argument{ "Parent couldn't be interpreted as a MainWindow instance." };
    }
 
    m_settings = m_mainWindow->GetOptionsManager();
 
    // Set up the camera:
-   m_camera.SetPosition(QVector3D{500, 100, 0});
+   m_camera.SetPosition(QVector3D{ 500, 100, 0 });
 
    // Set keyboard and mouse focus:
    setFocusPolicy(Qt::StrongFocus);
@@ -166,10 +165,11 @@ GLCanvas::GLCanvas(QWidget* parent)
    QSurfaceFormat format;
    format.setDepthBufferSize(24);
    format.setSamples(8);
+   format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
    setFormat(format);
 
    // Set the target frame rate:
-   m_frameRedrawTimer.reset(new QTimer{this});
+   m_frameRedrawTimer.reset(new QTimer{ this });
    connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
    m_frameRedrawTimer->start(20);
 }
@@ -185,7 +185,6 @@ void GLCanvas::initializeGL()
 
    m_sceneAssets.emplace_back(std::make_unique<GridAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(*m_graphicsDevice));
-   m_sceneAssets.emplace_back(std::make_unique<DebuggingRayAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<NodeSelectionCrosshair>(*m_graphicsDevice));
 
    for (const auto& asset : m_sceneAssets)
@@ -208,7 +207,7 @@ void GLCanvas::resizeGL(int width, int height)
    m_graphicsDevice->glViewport(0, 0, width, height);
 
    m_camera.SetAspectRatio(static_cast<float>(width) / static_cast<float>(height));
-   m_camera.SetViewport(QRect{QPoint{0,0}, QPoint{width, height}});
+   m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
 }
 
 
@@ -221,7 +220,7 @@ void GLCanvas::CreateNewVisualization(VisualizationParameters& parameters)
 
    if (!m_theVisualization || parameters.forceNewScan)
    {
-      m_theVisualization.reset(new SquarifiedTreeMap{parameters});
+      m_theVisualization.reset(new SquarifiedTreeMap{ parameters });
       ScanDrive(parameters);
    }
 }
@@ -387,6 +386,8 @@ void GLCanvas::HandleNodeSelection(const TreeNode<VizNode>* selectedNode)
       << std::fixed << sizeAndUnits.first << sizeAndUnits.second;
 
    assert(message.str().size() > 0);
+
+   // @bug Updating the status bar is the cause of the flickering:
    m_mainWindow->SetStatusBarMessage(message.str());
 
    if (m_selectedNode)
@@ -452,7 +453,8 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 
    if (event->buttons() & Qt::LeftButton)
    {
-      m_camera.OffsetOrientation(m_settings->m_mouseSensitivity * deltaY,
+      m_camera.OffsetOrientation(
+         m_settings->m_mouseSensitivity * deltaY,
          m_settings->m_mouseSensitivity * deltaX);
    }
 
@@ -657,9 +659,7 @@ void GLCanvas::HandleXBoxControllerInput()
    {
       m_isRightTriggerDown = true;
 
-      // @bug Executing this function as part of the Xbox input handler causes the canvas to
-      // flicker black momentarily. Perhaps this is an indication that I need to double buffer.
-      //HandleRightClick(m_camera.GetViewport().center());
+      HandleRightClick(m_camera.GetViewport().center());
    }
    else if (controllerState.rightTrigger <= 0.20f && m_isRightTriggerDown)
    {

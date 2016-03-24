@@ -14,8 +14,8 @@
 #include "Visualizations/visualization.h"
 
 #include <chrono>
-#include <memory>
 #include <deque>
+#include <memory>
 
 #include <QOpenGLWidget>
 #include <QTimer>

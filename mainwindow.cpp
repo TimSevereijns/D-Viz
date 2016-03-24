@@ -51,7 +51,7 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/)
 
    assert(m_optionsManager);
 
-   m_glCanvas.reset(new GLCanvas(this));
+   m_glCanvas.reset(new GLCanvas{ this });
    m_ui->canvasLayout->addWidget(m_glCanvas.get());
 
    SetupSidebar();
@@ -239,7 +239,7 @@ bool MainWindow::IsXboxControllerConnected() const
 void MainWindow::XboxControllerStateChanged(XboxController::State state)
 {
    // @todo Put this on the stack.
-   m_xboxControllerState.reset(new XboxController::State{state});
+   m_xboxControllerState.reset(new XboxController::State{ state });
 }
 
 void MainWindow::OnFieldOfViewChanged(const int fieldOfView)

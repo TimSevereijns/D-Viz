@@ -97,7 +97,8 @@ class XboxController : public QObject
           bool operator!=(const XboxController::State& rhs);
       };
 
-      explicit XboxController(unsigned int m_controllerNumber = 0,
+      explicit XboxController(
+         unsigned int m_controllerNumber = 0,
          int16_t m_leftStickDeadZone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE,
          int16_t m_rightStickDeadZone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE,
          uint8_t m_triggerThreshold = XINPUT_GAMEPAD_TRIGGER_THRESHOLD,

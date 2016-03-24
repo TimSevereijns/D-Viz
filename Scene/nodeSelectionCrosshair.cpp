@@ -11,10 +11,10 @@ namespace
    QVector<QVector3D> CreateCrosshairVertices(const QPoint center)
    {
       QVector<QVector3D> vertices;
-      vertices << QVector3D(center.x() - 100, center.y(), -4.0f)
-               << QVector3D(center.x() + 100, center.y(), -4.0f)
-               << QVector3D(center.x(), center.y() - 100, -4.0f)
-               << QVector3D(center.x(), center.y() + 100, -4.0f);
+      vertices << QVector3D(center.x() - 20, center.y(), -4.0f)
+               << QVector3D(center.x() + 20, center.y(), -4.0f)
+               << QVector3D(center.x(), center.y() - 20, -4.0f)
+               << QVector3D(center.x(), center.y() + 20, -4.0f);
 
       return vertices;
    }
@@ -56,15 +56,6 @@ bool NodeSelectionCrosshair::Render(
    const std::vector<Light>&,
    const OptionsManager&)
 {
-   // @bug Returning early for now, since there is something wrong with the rendering code
-   // that will cause the entire application to render as a black void. As of yet, I have no
-   // clue what's going on. On the plus side, the code below does appear to work for rendering
-   // a usable HUD.
-   //return true;
-
-   m_graphicsDevice.glDepthMask(GL_FALSE);
-   m_graphicsDevice.glDisable(GL_DEPTH_TEST);
-
    const auto& viewPort = camera.GetViewport();
    QMatrix4x4 orthoMatrix;
    orthoMatrix.ortho(
@@ -85,7 +76,7 @@ bool NodeSelectionCrosshair::Render(
 
    m_VAO.bind();
 
-   m_graphicsDevice.glLineWidth(3);
+   m_graphicsDevice.glLineWidth(2);
    m_graphicsDevice.glDrawArrays(
       /* mode = */ GL_LINES,
       /* first = */ 0,
@@ -93,9 +84,6 @@ bool NodeSelectionCrosshair::Render(
 
    m_VAO.release();
    m_shader.release();
-
-   m_graphicsDevice.glEnable(GL_DEPTH_TEST);
-   m_graphicsDevice.glDepthMask(GL_TRUE);
 
    return true;
 }

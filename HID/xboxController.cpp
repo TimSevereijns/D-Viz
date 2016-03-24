@@ -172,7 +172,7 @@ XboxController::XboxController(unsigned int controllerNumber, int16_t leftStickD
      m_leftStickDeadZone(std::min(leftStickDeadZone, XboxController::MAX_STICK_VALUE)),
      m_rightStickDeadZone(std::min(rightStickDeadZone, XboxController::MAX_STICK_VALUE)),
      m_triggerThreshold(std::min(triggerThreshold, XboxController::MAX_TRIGGER_VALUE)),
-     m_pollingTimer(new QTimer{}),
+     m_pollingTimer(new QTimer{ }),
      m_buttonMap(
         {
            { XINPUT_GAMEPAD_A, StateAndHandlers(XboxController::KEY_STATE::UP) },
