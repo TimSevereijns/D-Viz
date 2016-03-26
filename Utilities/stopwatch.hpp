@@ -3,8 +3,8 @@
 
 #include <chrono>
 #include <cstdint>
-#include <functional>
 #include <iostream>
+#include <functional>
 #include <string>
 
 template<typename Type>
@@ -78,79 +78,98 @@ struct TypeName<std::chrono::hours>
 };
 
 /**
- * @brief The Stopwatch class will wrap the function to be timed in a timing block, and then, based
- * on which constructor was called, pass the resulting timing information to either std::cout or a
- * user-defined function upon destruction of the class.
- *
- * @tparam ChronoType               One of the following std::chrono time representations:
- *                                     @li std::chrono::nanoseconds
- *                                     @li std::chrono::microseconds
- *                                     @li std::chrono::milliseconds
- *                                     @li std::chrono::seconds
- *                                     @li std::chrono::minutes
- *                                     @li std::chrono::hours
- */
+* @brief The Stopwatch class will wrap the function to be timed in a timing block, and then, based
+* on which constructor was called, pass the resulting timing information to either std::cout or a
+* user-defined function upon completion of the targeted function.
+*
+* @tparam ChronoType               One of the following std::chrono time representations:
+*                                     @li std::chrono::nanoseconds
+*                                     @li std::chrono::microseconds
+*                                     @li std::chrono::milliseconds
+*                                     @li std::chrono::seconds
+*                                     @li std::chrono::minutes
+*                                     @li std::chrono::hours
+*/
 template<typename ChronoType>
 class Stopwatch
 {
-   public:
-      using LoggingFunction = std::function<void (std::uint64_t, const std::string&)>;
+public:
+   using LoggingFunction = std::function<void(std::uint64_t, const std::string&)>;
 
-      /**
-       * @brief Stopwatch constructor that executes the code to be timed after starting the timer.
-       * Once the targed code has completed execution, the timing results and corresponding units
-       * will be passed to the specified callback function.
-       *
-       * @param[in] functionToTime  std::function encapsulating the code to be timed.
-       * @param[in] logger          Callback to handle the timing result.
-       */
-      Stopwatch(const std::function<void ()>& functionToTime,
-                const LoggingFunction&& logger)
-         : m_logger(std::move(logger)),
-           m_start(std::chrono::high_resolution_clock::now())
+   /**
+   * @brief This Stopwatch constructor executes and times the code encapsulated within the
+   * std::function object.
+   *
+   * Once the std::function has completed execution, the timing results and corresponding units
+   * will be passed to the specified callback function.
+   *
+   * @param[in] functionToTime  std::function encapsulating the code to be timed.
+   * @param[in] logger          Callback to handle the timing result.
+   */
+   Stopwatch(
+      const std::function<void()>& functionToTime,
+      const LoggingFunction&& logger)
+   {
+      Time(functionToTime);
+
+      if (logger)
       {
-         functionToTime();
+         logger(m_elapsed.count(), TypeName<ChronoType>::Resolve());
       }
+   }
 
-      /**
-       * @brief Stopwatch constructor that executes the code to be timed after starting the timer.
-       * Once the targeted code has completed execution, the timing results will be written out to
-       * std::cout, along with the message. Specifically, the message will be written out first,
-       * followed by the elapsed time and the corresponding units.
-       *
-       * @param[in] functionToTime  std::function encapsulating the code to be timed.
-       * @param[in] message         Output message.
-       */
-      Stopwatch(const std::function<void ()>& functionToTime,
-         const char* message)
-         : m_logger(LoggingFunction()),
-           m_message(message),
-           m_start(std::chrono::high_resolution_clock::now())
-      {
-         functionToTime();
-      }
+   /**
+   * @brief This Stopwatch constructor will execute and time the code encapsulated within the
+   * std::function object.
+   *
+   * Once the targeted code has completed execution, the timing results will be written out to
+   * std::cout, along with the specified message. Specifically, the message will be written out
+   * first, followed immediately by the elapsed time and the corresponding units.
+   *
+   * @param[in] functionToTime  std::function encapsulating the code to be timed.
+   * @param[in] message         Output message.
+   */
+   Stopwatch(
+      const std::function<void()>& functionToTime,
+      const char* const message)
+   {
+      Time(functionToTime);
 
-      ~Stopwatch()
-      {
-         const auto end = std::chrono::high_resolution_clock::now();
-         const auto delta = std::chrono::duration_cast<ChronoType>(end - m_start);
+      std::cout << message << m_elapsed.count() << " "
+         << TypeName<ChronoType>::Resolve() << "." << std::endl;
+   }
 
-         if (m_logger)
-         {
-            m_logger(delta.count(), TypeName<ChronoType>::Resolve());
-         }
-         else
-         {
-            std::cout << m_message << delta.count() << " "
-               << TypeName<ChronoType>::Resolve() << std::endl;
-         }
-      }
+   /**
+   * @brief This Stopwatch constructor will time the code encapsulated in the std::function object
+   * and then save the result to a member variable.
+   *
+   * In order to retrieve the elapsed time, call GetElapsedTime().
+   */
+   Stopwatch(const std::function<void()>& functionToTime)
+   {
+      Time(functionToTime);
+   }
 
-   private:
-      const LoggingFunction m_logger;
-      const char* m_message;
+   /**
+   * @returns The elapsed time in ChronoType units.
+   */
+   std::uint64_t GetElapsedTime()
+   {
+      return m_elapsed.count();
+   }
 
-      std::chrono::high_resolution_clock::time_point m_start;
+private:
+   void Time(const std::function<void()>& functionToTime)
+   {
+      const auto start = std::chrono::high_resolution_clock::now();
+
+      functionToTime();
+
+      const auto end = std::chrono::high_resolution_clock::now();
+      m_elapsed = std::chrono::duration_cast<ChronoType>(end - start);
+   }
+
+   ChronoType m_elapsed;
 };
 
 #define TIME_IN_NANOSECONDS(code, message)   \

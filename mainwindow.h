@@ -146,7 +146,7 @@ class MainWindow : public QMainWindow
 
       std::shared_ptr<OptionsManager> m_optionsManager;
 
-      Ui::MainWindow* m_ui; // Unfortunately it would appear as if this has to remain a raw pointer.
+      Ui::MainWindow* m_ui;
 
       std::wstring m_directoryToVisualize;
 

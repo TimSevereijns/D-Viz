@@ -12,36 +12,36 @@
 #include <QFileDialog>
 #include <QMenuBar>
 
-MainWindow::MainWindow(QWidget* parent /*= 0*/)
-   : QMainWindow(parent),
-     m_showDirectoriesOnly(false),
-     m_xboxControllerConnected(false),
-     m_xboxController(new XboxController(0)),
-     m_xboxControllerState(nullptr),
-     m_glCanvas(nullptr),
-     m_optionsManager(new OptionsManager()),
-     m_fileMenu(nullptr),
-     m_fileMenuNewScan(nullptr),
-     m_fileMenuPreferences(nullptr),
-     m_fileMenuExit(nullptr),
-     m_directoryToVisualize(L""),
-     m_permanentStatusBarMessage(nullptr),
-     m_ui(new Ui::MainWindow),
-     m_sizePruningComboBoxIndex(0),
-     m_sizePruningOptions(
-        {  // Need the "ull" (unsigned long long) prefix to avoid integral constant overflows!
-           std::pair<std::uintmax_t, QString>(0, "Show All"),
-           std::pair<std::uintmax_t, QString>(1024ull,            "< 1 Kib"),
-           std::pair<std::uintmax_t, QString>(1048576ull,         "< 1 MiB"),
-           std::pair<std::uintmax_t, QString>(1048576ull * 10,    "< 10 MiB"),
-           std::pair<std::uintmax_t, QString>(1048576ull * 100,   "< 100 MiB"),
-           std::pair<std::uintmax_t, QString>(1048576ull * 250,   "< 250 MiB"),
-           std::pair<std::uintmax_t, QString>(1048576ull * 500,   "< 500 MiB"),
-           std::pair<std::uintmax_t, QString>(1048576ull * 1000,  "< 1 GiB"),
-           std::pair<std::uintmax_t, QString>(1048576ull * 2500,  "< 2.5 GiB"),
-           std::pair<std::uintmax_t, QString>(1048576ull * 5000,  "< 5 GiB"),
-           std::pair<std::uintmax_t, QString>(1048576ull * 10000, "< 10 GiB")
-        })
+MainWindow::MainWindow(QWidget* parent /*= 0*/) :
+   QMainWindow(parent),
+   m_showDirectoriesOnly(false),
+   m_xboxControllerConnected(false),
+   m_xboxController(new XboxController(0)),
+   m_xboxControllerState(nullptr),
+   m_glCanvas(nullptr),
+   m_optionsManager(new OptionsManager()),
+   m_fileMenu(nullptr),
+   m_fileMenuNewScan(nullptr),
+   m_fileMenuPreferences(nullptr),
+   m_fileMenuExit(nullptr),
+   m_directoryToVisualize(L""),
+   m_permanentStatusBarMessage(nullptr),
+   m_ui(new Ui::MainWindow),
+   m_sizePruningComboBoxIndex(0),
+   m_sizePruningOptions(
+      {  // Need the "ull" (unsigned long long) prefix to avoid integral constant overflows!
+         std::pair<std::uintmax_t, QString>(0, "Show All"),
+         std::pair<std::uintmax_t, QString>(1024ull,            "< 1 Kib"),
+         std::pair<std::uintmax_t, QString>(1048576ull,         "< 1 MiB"),
+         std::pair<std::uintmax_t, QString>(1048576ull * 10,    "< 10 MiB"),
+         std::pair<std::uintmax_t, QString>(1048576ull * 100,   "< 100 MiB"),
+         std::pair<std::uintmax_t, QString>(1048576ull * 250,   "< 250 MiB"),
+         std::pair<std::uintmax_t, QString>(1048576ull * 500,   "< 500 MiB"),
+         std::pair<std::uintmax_t, QString>(1048576ull * 1000,  "< 1 GiB"),
+         std::pair<std::uintmax_t, QString>(1048576ull * 2500,  "< 2.5 GiB"),
+         std::pair<std::uintmax_t, QString>(1048576ull * 5000,  "< 5 GiB"),
+         std::pair<std::uintmax_t, QString>(1048576ull * 10000, "< 10 GiB")
+      })
 {
    SetupXboxController();
 
@@ -289,7 +289,13 @@ XboxController& MainWindow::GetXboxControllerManager()
 
 void MainWindow::SetStatusBarMessage(const std::wstring& message)
 {
-   statusBar()->showMessage(QString::fromStdWString(message));
+   auto* statusBar = this->statusBar();
+   if (!statusBar)
+   {
+      return;
+   }
+
+   statusBar->showMessage(QString::fromStdWString(message));
 }
 
 std::shared_ptr<OptionsManager> MainWindow::GetOptionsManager()

@@ -176,7 +176,7 @@ void ScanningWorker::ScanRecursively(
          FILE_TYPE::REGULAR
       };
 
-      treeNode.AppendChild(VizNode{fileInfo});
+      treeNode.AppendChild(VizNode{ fileInfo });
 
       ++m_filesScanned;
    }
@@ -205,12 +205,12 @@ void ScanningWorker::ScanRecursively(
          FILE_TYPE::DIRECTORY
       };
 
-      treeNode.AppendChild(VizNode{directoryInfo});
+      treeNode.AppendChild(VizNode{ directoryInfo });
 
       ++m_filesScanned;
 
       boost::system::error_code errorCode;
-      auto itr = boost::filesystem::directory_iterator{path, errorCode};
+      auto itr = boost::filesystem::directory_iterator{ path, errorCode };
       if (errorCode)
       {
          emit ShowMessageBox("Could not create iterator!");

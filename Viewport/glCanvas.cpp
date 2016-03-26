@@ -12,7 +12,6 @@
 
 #include <QApplication>
 #include <QMessageBox>
-#include <QPainter>
 
 #include <sstream>
 #include <utility>
@@ -88,7 +87,7 @@ namespace
       reversePath.reserve(Tree<VizNode>::Depth(node));
       reversePath.emplace_back(node->file.name);
 
-      const TreeNode<VizNode>* currentNode = &node;
+      const auto* currentNode = &node;
 
       while (currentNode->GetParent())
       {
@@ -131,23 +130,23 @@ namespace
    };
 }
 
-GLCanvas::GLCanvas(QWidget* parent)
-   : QOpenGLWidget(parent),
-     m_graphicsDevice(nullptr),
-     m_theVisualization(nullptr),
-     m_isPaintingSuspended(false),
-     m_isVisualizationLoaded(false),
-     m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
-     m_lights(
-     {
-        Light{ },
-        Light{ QVector3D{ 0.0f, 80.0f, 0.0f } },
-        Light{ QVector3D{ 0.0f, 80.0f, -Visualization::ROOT_BLOCK_DEPTH } },
-        Light{ QVector3D{ Visualization::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
-        Light{ QVector3D{ Visualization::ROOT_BLOCK_WIDTH, 80.0f, -Visualization::ROOT_BLOCK_DEPTH } }
-     }),
-     m_selectedNode(nullptr),
-     m_lastFrameTimeStamp(std::chrono::system_clock::now())
+GLCanvas::GLCanvas(QWidget* parent) :
+   QOpenGLWidget(parent),
+   m_graphicsDevice(nullptr),
+   m_theVisualization(nullptr),
+   m_isPaintingSuspended(false),
+   m_isVisualizationLoaded(false),
+   m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
+   m_lights(
+   {
+      Light{ },
+      Light{ QVector3D{ 0.0f, 80.0f, 0.0f } },
+      Light{ QVector3D{ 0.0f, 80.0f, -Visualization::ROOT_BLOCK_DEPTH } },
+      Light{ QVector3D{ Visualization::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
+      Light{ QVector3D{ Visualization::ROOT_BLOCK_WIDTH, 80.0f, -Visualization::ROOT_BLOCK_DEPTH } }
+   }),
+   m_selectedNode(nullptr),
+   m_lastFrameTimeStamp(std::chrono::system_clock::now())
 {
    if (!m_mainWindow)
    {
@@ -172,6 +171,10 @@ GLCanvas::GLCanvas(QWidget* parent)
    m_frameRedrawTimer.reset(new QTimer{ this });
    connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
    m_frameRedrawTimer->start(20);
+
+   m_cameraPositionTimer.reset(new QTimer{ this });
+   connect(m_cameraPositionTimer.get(), SIGNAL(timeout()), this, SLOT(HandleInput()));
+   m_cameraPositionTimer->start(20);
 }
 
 void GLCanvas::initializeGL()
@@ -556,76 +559,8 @@ void GLCanvas::HandleInput()
    }
 }
 
-void GLCanvas::HandleXBoxControllerInput()
+void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerState)
 {
-   static const int MOVEMENT_AMPLIFICATION_FACTOR = 8;
-
-   const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::system_clock::now() - m_lastFrameTimeStamp);
-
-   const XboxController::State& controllerState = m_mainWindow->GetXboxControllerState();
-   const XboxController& controller = m_mainWindow->GetXboxControllerManager();
-
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_UP))
-   {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
-         * m_camera.Forward());
-   }
-
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_LEFT))
-   {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
-         * m_camera.Left());
-   }
-
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_DOWN))
-   {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
-         * m_camera.Backward());
-   }
-
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_RIGHT))
-   {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
-         * m_camera.Right());
-   }
-
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_LEFT_SHOULDER))
-   {
-      m_camera.OffsetPosition(millisecondsElapsed.count() *
-         (m_settings->m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION_FACTOR) * m_camera.Down());
-   }
-
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_RIGHT_SHOULDER))
-   {
-      m_camera.OffsetPosition(millisecondsElapsed.count() *
-         (m_settings->m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION_FACTOR) * m_camera.Up());
-   }
-
-   // Handle camera orientation via right thumb stick:
-   if (controllerState.rightThumbX || controllerState.rightThumbY)
-   {
-      m_camera.OffsetOrientation(
-         MOVEMENT_AMPLIFICATION_FACTOR * m_settings->m_mouseSensitivity * -controllerState.rightThumbY,
-         MOVEMENT_AMPLIFICATION_FACTOR * m_settings->m_mouseSensitivity * controllerState.rightThumbX);
-   }
-
-   // Handle camera forward/backward movement via left thumb stick:
-   if (controllerState.leftThumbY)
-   {
-      m_camera.OffsetPosition(
-         MOVEMENT_AMPLIFICATION_FACTOR * m_settings->m_cameraMovementSpeed * controllerState.leftThumbY
-         * m_camera.Forward());
-   }
-
-   // Handle camera left/right movement via left thumb stick:
-   if (controllerState.leftThumbX)
-   {
-      m_camera.OffsetPosition(
-         MOVEMENT_AMPLIFICATION_FACTOR * m_settings->m_cameraMovementSpeed * controllerState.leftThumbX
-         * m_camera.Right());
-   }
-
    if (controllerState.leftTrigger > 0.20f && !m_isLeftTriggerDown)
    {
       m_isLeftTriggerDown = true;
@@ -665,6 +600,82 @@ void GLCanvas::HandleXBoxControllerInput()
    {
       m_isRightTriggerDown = false;
    }
+}
+
+void GLCanvas::HandleXboxJoystickInput(const XboxController::State& controllerState)
+{
+   static const int MOVEMENT_AMPLIFICATION = 8;
+
+   if (controllerState.rightThumbX || controllerState.rightThumbY)
+   {
+      m_camera.OffsetOrientation(
+         MOVEMENT_AMPLIFICATION * m_settings->m_mouseSensitivity * -controllerState.rightThumbY,
+         MOVEMENT_AMPLIFICATION * m_settings->m_mouseSensitivity * controllerState.rightThumbX);
+   }
+
+   if (controllerState.leftThumbY)
+   {
+      m_camera.OffsetPosition(
+         MOVEMENT_AMPLIFICATION * m_settings->m_cameraMovementSpeed * controllerState.leftThumbY
+         * m_camera.Forward());
+   }
+
+   if (controllerState.leftThumbX)
+   {
+      m_camera.OffsetPosition(
+         MOVEMENT_AMPLIFICATION * m_settings->m_cameraMovementSpeed * controllerState.leftThumbX
+         * m_camera.Right());
+   }
+}
+
+void GLCanvas::HandleXBoxControllerInput()
+{
+   static const int MOVEMENT_AMPLIFICATION = 8;
+
+   const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::system_clock::now() - m_lastFrameTimeStamp);
+
+   const XboxController::State& controllerState = m_mainWindow->GetXboxControllerState();
+   const XboxController& controller = m_mainWindow->GetXboxControllerManager();
+
+   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_UP))
+   {
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
+         * m_camera.Forward());
+   }
+
+   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_LEFT))
+   {
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
+         * m_camera.Left());
+   }
+
+   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_DOWN))
+   {
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
+         * m_camera.Backward());
+   }
+
+   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_RIGHT))
+   {
+      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
+         * m_camera.Right());
+   }
+
+   if (controller.IsButtonDown(XINPUT_GAMEPAD_LEFT_SHOULDER))
+   {
+      m_camera.OffsetPosition(millisecondsElapsed.count() *
+         (m_settings->m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION) * m_camera.Down());
+   }
+
+   if (controller.IsButtonDown(XINPUT_GAMEPAD_RIGHT_SHOULDER))
+   {
+      m_camera.OffsetPosition(millisecondsElapsed.count() *
+         (m_settings->m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION) * m_camera.Up());
+   }
+
+   HandleXboxJoystickInput(controllerState);
+   HandleXboxTriggerInput(controllerState);
 }
 
 void GLCanvas::UpdateFPS()
@@ -709,7 +720,8 @@ void GLCanvas::paintGL()
       return;
    }
 
-   HandleInput();
+   m_graphicsDevice->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
    UpdateFPS();
 
    assert(m_settings);
@@ -718,8 +730,6 @@ void GLCanvas::paintGL()
       assert(m_lights.size() > 0);
       m_lights.front().position = m_camera.GetPosition();
    }
-
-   m_graphicsDevice->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    for (const auto& asset : m_sceneAssets)
    {

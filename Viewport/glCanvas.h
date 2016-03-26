@@ -73,6 +73,12 @@ class GLCanvas : public QOpenGLWidget
       void mouseMoveEvent(QMouseEvent* event) override;
       void wheelEvent(QWheelEvent* event) override;
 
+   private slots:
+      /**
+       * @brief Handles keyboard, mouse, and Xbox controller input.
+       */
+      void HandleInput();
+
    private:
       /**
        * @brief Initiates a drive scan.
@@ -102,14 +108,23 @@ class GLCanvas : public QOpenGLWidget
       void HandleNodeSelection(const TreeNode<VizNode>* const selectedNode);
 
       /**
-       * @brief Handles keyboard and mouse input.
-       */
-      void HandleInput();
-
-      /**
        * @brief Handles the input from the Xbox controller.
        */
       void HandleXBoxControllerInput();
+
+      /**
+       * @brief Handles Xbox left and right trigger input.
+       *
+       * @param[in] controllerState
+       */
+      void HandleXboxTriggerInput(const XboxController::State& controllerState);
+
+      /**
+       * @brief Handles Xbox thumb stick input.
+       *
+       * @param[in] controllerState
+       */
+      void HandleXboxJoystickInput(const XboxController::State& controllerState);
 
       /**
        * @brief Compiles and loads the OpenGL shader program for the visualization.
@@ -153,7 +168,9 @@ class GLCanvas : public QOpenGLWidget
       MainWindow* m_mainWindow;
 
       std::unique_ptr<Visualization> m_theVisualization;
+
       std::unique_ptr<QTimer> m_frameRedrawTimer;
+      std::unique_ptr<QTimer> m_cameraPositionTimer;
 
       std::shared_ptr<OptionsManager> m_settings;
 
