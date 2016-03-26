@@ -26,14 +26,14 @@ struct BlockFace
       TOP            ///< Normal points towards +Y in OpenGL.
    };
 
-   explicit BlockFace()
-      : side(Side::FRONT)
+   explicit BlockFace() :
+      side(Side::FRONT)
    {
    }
 
-   explicit BlockFace(const QVector<QVector3D>& vertices, const Side side)
-      : vertices(vertices),
-        side(side)
+   explicit BlockFace(const QVector<QVector3D>& vertices, const Side side) :
+      vertices(vertices),
+      side(side)
    {
    }
 
@@ -53,7 +53,7 @@ struct Block
    friend class FaceIterator;
 
    const static int FACES_PER_BLOCK = 5;
-   const static int VERTICES_PER_BLOCK = 60;
+   const static int VERTICES_PER_BLOCK = 30;
 
    QVector<QVector3D> colors;
 

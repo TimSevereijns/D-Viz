@@ -90,13 +90,13 @@ Block::Block(
 
 Block::FaceIterator Block::begin() const
 {
-   Block::FaceIterator iterator{this};
+   Block::FaceIterator iterator{ this };
    return iterator;
 }
 
 Block::FaceIterator Block::end() const
 {
-   Block::FaceIterator iterator{this, Block::FACES_PER_BLOCK};
+   Block::FaceIterator iterator{ this, Block::FACES_PER_BLOCK };
    return iterator;
 }
 
@@ -118,5 +118,5 @@ bool Block::IsNotInverted() const
 
 DoublePoint3D Block::GetNextChildOrigin() const
 {
-   return origin + DoublePoint3D{0, height, 0};
+   return origin + DoublePoint3D{ 0, height, 0 };
 }

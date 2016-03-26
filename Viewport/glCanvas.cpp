@@ -45,33 +45,33 @@ namespace
     */
    std::pair<double, std::wstring> GetFileSizeInMostAppropriateUnits(double sizeInBytes)
    {
-      if (sizeInBytes < Constants::FileSizeUnits::oneKibibyte)
+      if (sizeInBytes < Constants::FileSize::oneKibibyte)
       {
          // @todo Needing to use std::move is likely a bug in MSVC 2013:
          return std::make_pair<double, std::wstring>(
             std::move(sizeInBytes), L" bytes");
       }
 
-      if (sizeInBytes < Constants::FileSizeUnits::oneMebibyte)
+      if (sizeInBytes < Constants::FileSize::oneMebibyte)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSizeUnits::oneKibibyte, L" KiB");
+            sizeInBytes / Constants::FileSize::oneKibibyte, L" KiB");
       }
 
-      if (sizeInBytes < Constants::FileSizeUnits::oneGibibyte)
+      if (sizeInBytes < Constants::FileSize::oneGibibyte)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSizeUnits::oneMebibyte, L" MiB");
+            sizeInBytes / Constants::FileSize::oneMebibyte, L" MiB");
       }
 
-      if (sizeInBytes < Constants::FileSizeUnits::oneTebibyte)
+      if (sizeInBytes < Constants::FileSize::oneTebibyte)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSizeUnits::oneGibibyte, L" GiB");
+            sizeInBytes / Constants::FileSize::oneGibibyte, L" GiB");
       }
 
       return std::make_pair<double, std::wstring>(
-         sizeInBytes / Constants::FileSizeUnits::oneTebibyte, L" TiB");
+         sizeInBytes / Constants::FileSize::oneTebibyte, L" TiB");
    }
 
    /**
@@ -155,10 +155,8 @@ GLCanvas::GLCanvas(QWidget* parent) :
 
    m_settings = m_mainWindow->GetOptionsManager();
 
-   // Set up the camera:
    m_camera.SetPosition(QVector3D{ 500, 100, 0 });
 
-   // Set keyboard and mouse focus:
    setFocusPolicy(Qt::StrongFocus);
 
    QSurfaceFormat format;
@@ -167,14 +165,13 @@ GLCanvas::GLCanvas(QWidget* parent) :
    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
    setFormat(format);
 
-   // Set the target frame rate:
    m_frameRedrawTimer.reset(new QTimer{ this });
    connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
-   m_frameRedrawTimer->start(20);
+   m_frameRedrawTimer->start(Constants::TIME_BETWEEN_FRAMES);
 
    m_cameraPositionTimer.reset(new QTimer{ this });
    connect(m_cameraPositionTimer.get(), SIGNAL(timeout()), this, SLOT(HandleInput()));
-   m_cameraPositionTimer->start(20);
+   m_cameraPositionTimer->start(Constants::TIME_BETWEEN_FRAMES);
 }
 
 void GLCanvas::initializeGL()
@@ -248,7 +245,7 @@ void GLCanvas::ScanDrive(VisualizationParameters& vizParameters)
       ON_SCOPE_EXIT{ setCursor(Qt::ArrowCursor); };
 
       std::wstringstream message;
-      message.imbue(std::locale(""));
+      message.imbue(std::locale{ "" });
       message << std::fixed << L"Total Files Scanned: " << numberOfFilesScanned;
       m_mainWindow->SetStatusBarMessage(message.str());
 
@@ -280,7 +277,7 @@ void GLCanvas::AskUserToLimitFileSize(
       return;
    }
 
-   if (parameters.minimumFileSize < Constants::FileSizeUnits::oneMebibyte)
+   if (parameters.minimumFileSize < Constants::FileSize::oneMebibyte)
    {
       QMessageBox messageBox;
       messageBox.setIcon(QMessageBox::Warning);
@@ -294,8 +291,8 @@ void GLCanvas::AskUserToLimitFileSize(
       switch (election)
       {
          case QMessageBox::Yes:
-            parameters.minimumFileSize = Constants::FileSizeUnits::oneMebibyte;
-            m_mainWindow->SetFilePruningComboBoxValue(Constants::FileSizeUnits::oneMebibyte);
+            parameters.minimumFileSize = Constants::FileSize::oneMebibyte;
+            m_mainWindow->SetFilePruningComboBoxValue(Constants::FileSize::oneMebibyte);
             return;
          case QMessageBox::No:
             return;
@@ -389,8 +386,6 @@ void GLCanvas::HandleNodeSelection(const TreeNode<VizNode>* selectedNode)
       << std::fixed << sizeAndUnits.first << sizeAndUnits.second;
 
    assert(message.str().size() > 0);
-
-   // @bug Updating the status bar is the cause of the flickering:
    m_mainWindow->SetStatusBarMessage(message.str());
 
    if (m_selectedNode)
@@ -559,79 +554,8 @@ void GLCanvas::HandleInput()
    }
 }
 
-void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerState)
-{
-   if (controllerState.leftTrigger > 0.20f && !m_isLeftTriggerDown)
-   {
-      m_isLeftTriggerDown = true;
-
-      NodeSelectionCrosshair* crosshairAsset =
-         dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
-
-      assert(crosshairAsset);
-      if (crosshairAsset)
-      {
-         crosshairAsset->ShowCrosshair(m_camera);
-         crosshairAsset->Reload(m_camera);
-      }
-   }
-   else if (controllerState.leftTrigger <= 0.20f && m_isLeftTriggerDown)
-   {
-      m_isLeftTriggerDown = false;
-
-      NodeSelectionCrosshair* crosshairAsset =
-         dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
-
-      assert(crosshairAsset);
-      if (crosshairAsset)
-      {
-         crosshairAsset->HideCrosshair();
-         crosshairAsset->Reload(m_camera);
-      }
-   }
-
-   if (controllerState.rightTrigger > 0.20f && !m_isRightTriggerDown)
-   {
-      m_isRightTriggerDown = true;
-
-      HandleRightClick(m_camera.GetViewport().center());
-   }
-   else if (controllerState.rightTrigger <= 0.20f && m_isRightTriggerDown)
-   {
-      m_isRightTriggerDown = false;
-   }
-}
-
-void GLCanvas::HandleXboxJoystickInput(const XboxController::State& controllerState)
-{
-   static const int MOVEMENT_AMPLIFICATION = 8;
-
-   if (controllerState.rightThumbX || controllerState.rightThumbY)
-   {
-      m_camera.OffsetOrientation(
-         MOVEMENT_AMPLIFICATION * m_settings->m_mouseSensitivity * -controllerState.rightThumbY,
-         MOVEMENT_AMPLIFICATION * m_settings->m_mouseSensitivity * controllerState.rightThumbX);
-   }
-
-   if (controllerState.leftThumbY)
-   {
-      m_camera.OffsetPosition(
-         MOVEMENT_AMPLIFICATION * m_settings->m_cameraMovementSpeed * controllerState.leftThumbY
-         * m_camera.Forward());
-   }
-
-   if (controllerState.leftThumbX)
-   {
-      m_camera.OffsetPosition(
-         MOVEMENT_AMPLIFICATION * m_settings->m_cameraMovementSpeed * controllerState.leftThumbX
-         * m_camera.Right());
-   }
-}
-
 void GLCanvas::HandleXBoxControllerInput()
 {
-   static const int MOVEMENT_AMPLIFICATION = 8;
-
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastFrameTimeStamp);
 
@@ -665,17 +589,100 @@ void GLCanvas::HandleXBoxControllerInput()
    if (controller.IsButtonDown(XINPUT_GAMEPAD_LEFT_SHOULDER))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() *
-         (m_settings->m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION) * m_camera.Down());
+         (m_settings->m_cameraMovementSpeed / Constants::MOVEMENT_AMPLIFICATION) * m_camera.Down());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_RIGHT_SHOULDER))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() *
-         (m_settings->m_cameraMovementSpeed / MOVEMENT_AMPLIFICATION) * m_camera.Up());
+         (m_settings->m_cameraMovementSpeed / Constants::MOVEMENT_AMPLIFICATION) * m_camera.Up());
    }
 
-   HandleXboxJoystickInput(controllerState);
+   HandleXboxThumbstickInput(controllerState);
    HandleXboxTriggerInput(controllerState);
+}
+
+void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controllerState)
+{
+   if (controllerState.rightThumbX || controllerState.rightThumbY)
+   {
+      const auto pitch =
+         Constants::MOVEMENT_AMPLIFICATION *
+         m_settings->m_mouseSensitivity *
+         -controllerState.rightThumbY;
+
+      const auto yaw =
+         Constants::MOVEMENT_AMPLIFICATION *
+         m_settings->m_mouseSensitivity *
+         controllerState.rightThumbX;
+
+      m_camera.OffsetOrientation(pitch, yaw);
+   }
+
+   if (controllerState.leftThumbY)
+   {
+      m_camera.OffsetPosition(
+         Constants::MOVEMENT_AMPLIFICATION *
+         m_settings->m_cameraMovementSpeed *
+         controllerState.leftThumbY *
+         m_camera.Forward());
+   }
+
+   if (controllerState.leftThumbX)
+   {
+      m_camera.OffsetPosition(
+         Constants::MOVEMENT_AMPLIFICATION *
+         m_settings->m_cameraMovementSpeed *
+         controllerState.leftThumbX *
+         m_camera.Right());
+   }
+}
+
+void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerState)
+{
+   if (controllerState.leftTrigger > Constants::XBOX_TRIGGER_ACTUATION_THRESHOLD &&
+      !m_isLeftTriggerDown)
+   {
+      m_isLeftTriggerDown = true;
+
+      NodeSelectionCrosshair* crosshairAsset =
+         dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
+
+      assert(crosshairAsset);
+      if (crosshairAsset)
+      {
+         crosshairAsset->ShowCrosshair(m_camera);
+         crosshairAsset->Reload(m_camera);
+      }
+   }
+   else if (controllerState.leftTrigger <= Constants::XBOX_TRIGGER_ACTUATION_THRESHOLD &&
+      m_isLeftTriggerDown)
+   {
+      m_isLeftTriggerDown = false;
+
+      NodeSelectionCrosshair* crosshairAsset =
+         dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
+
+      assert(crosshairAsset);
+      if (crosshairAsset)
+      {
+         crosshairAsset->HideCrosshair();
+         crosshairAsset->Reload(m_camera);
+      }
+   }
+
+   if (controllerState.rightTrigger > Constants::XBOX_TRIGGER_ACTUATION_THRESHOLD &&
+      !m_isRightTriggerDown)
+   {
+      m_isRightTriggerDown = true;
+
+      HandleRightClick(m_camera.GetViewport().center());
+   }
+   else if (controllerState.rightTrigger <= Constants::XBOX_TRIGGER_ACTUATION_THRESHOLD &&
+      m_isRightTriggerDown)
+   {
+      m_isRightTriggerDown = false;
+   }
 }
 
 void GLCanvas::UpdateFPS()

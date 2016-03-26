@@ -1,16 +1,23 @@
 #include "mainwindow.h"
 
+#include "constants.h"
 #include "optionsManager.h"
-#include "ui_mainwindow.h"
 #include "Viewport/glCanvas.h"
 
 #include <cassert>
 #include <iostream>
 #include <limits>
 
+#include "ui_mainwindow.h"
+
 #include <QAction>
 #include <QFileDialog>
 #include <QMenuBar>
+
+namespace
+{
+   //using MB = Constants::FileSizeUnits::oneMebibyte;
+}
 
 MainWindow::MainWindow(QWidget* parent /*= 0*/) :
    QMainWindow(parent),
@@ -29,18 +36,17 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/) :
    m_ui(new Ui::MainWindow),
    m_sizePruningComboBoxIndex(0),
    m_sizePruningOptions(
-      {  // Need the "ull" (unsigned long long) prefix to avoid integral constant overflows!
-         std::pair<std::uintmax_t, QString>(0, "Show All"),
-         std::pair<std::uintmax_t, QString>(1024ull,            "< 1 Kib"),
-         std::pair<std::uintmax_t, QString>(1048576ull,         "< 1 MiB"),
-         std::pair<std::uintmax_t, QString>(1048576ull * 10,    "< 10 MiB"),
-         std::pair<std::uintmax_t, QString>(1048576ull * 100,   "< 100 MiB"),
-         std::pair<std::uintmax_t, QString>(1048576ull * 250,   "< 250 MiB"),
-         std::pair<std::uintmax_t, QString>(1048576ull * 500,   "< 500 MiB"),
-         std::pair<std::uintmax_t, QString>(1048576ull * 1000,  "< 1 GiB"),
-         std::pair<std::uintmax_t, QString>(1048576ull * 2500,  "< 2.5 GiB"),
-         std::pair<std::uintmax_t, QString>(1048576ull * 5000,  "< 5 GiB"),
-         std::pair<std::uintmax_t, QString>(1048576ull * 10000, "< 10 GiB")
+      {
+         std::pair<std::uintmax_t, QString>(0,                                      "Show All"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneKibibyte,       "< 1 Kib"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte,       "< 1 MiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 10,  "< 10 MiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 100, "< 100 MiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 250, "< 250 MiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 500, "< 500 MiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte,       "< 1 GiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte * 5,   "< 5 GiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte * 10,  "< 10 GiB")
       })
 {
    SetupXboxController();
@@ -119,13 +125,7 @@ void MainWindow::SetupSidebar()
 
 void MainWindow::SetupXboxController()
 {
-   m_xboxController->StartAutoPolling(20);
-
-   m_xboxController->SetDownHandler(XINPUT_GAMEPAD_Y,
-      [] () { std::cout << "Button Y pressed..." << std::endl; });
-
-   m_xboxController->SetUpHandler(XINPUT_GAMEPAD_Y,
-      [] () { std::cout << "Button Y released..." << std::endl; });
+   m_xboxController->StartAutoPolling(Constants::TIME_BETWEEN_FRAMES);
 
    connect(m_xboxController.get(), SIGNAL(ControllerConnected(uint)),
       this, SLOT(XboxControllerConnected()));
@@ -141,7 +141,6 @@ std::wstring MainWindow::GetDirectoryToVisualize() const
 {
    return m_directoryToVisualize;
 }
-
 void MainWindow::CreateMenus()
 {
    CreateFileMenu();
@@ -154,11 +153,6 @@ void MainWindow::CreateFileMenu()
    m_fileMenuNewScan->setStatusTip("Start a new visualization");
    connect(m_fileMenuNewScan.get(), &QAction::triggered, this, &MainWindow::OnFileMenuNewScan);
 
-   m_fileMenuPreferences.reset(new QAction("Preferences...", this));
-   m_fileMenuPreferences->setShortcuts(QKeySequence::Preferences);
-   m_fileMenuPreferences->setStatusTip("Tweak program settings");
-   connect(m_fileMenuPreferences.get(), &QAction::triggered, this, [](){});
-
    m_fileMenuExit.reset(new QAction("Exit", this));
    m_fileMenuExit->setShortcuts(QKeySequence::Quit);
    m_fileMenuExit->setStatusTip("Exit the program");
@@ -166,13 +160,7 @@ void MainWindow::CreateFileMenu()
 
    m_fileMenu.reset(menuBar()->addMenu("File"));
    m_fileMenu->addAction(m_fileMenuNewScan.get());
-   m_fileMenu->addAction(m_fileMenuPreferences.get());
    m_fileMenu->addAction(m_fileMenuExit.get());
-}
-
-void MainWindow::CreateWindowMenu()
-{
-   // TODO
 }
 
 void MainWindow::OnFileMenuNewScan()
@@ -238,7 +226,6 @@ bool MainWindow::IsXboxControllerConnected() const
 
 void MainWindow::XboxControllerStateChanged(XboxController::State state)
 {
-   // @todo Put this on the stack.
    m_xboxControllerState.reset(new XboxController::State{ state });
 }
 

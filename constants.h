@@ -3,16 +3,18 @@
 
 #include <QVector3D>
 
+#include <limits>
+
 namespace Constants
 {
    // @todo UPGRADE TO C++11: constexpr instead of const
 
-   namespace FileSizeUnits
+   namespace FileSize
    {
-      const static double oneKibibyte = std::pow(2, 10);
-      const static double oneMebibyte = std::pow(2, 20);
-      const static double oneGibibyte = std::pow(2, 30);
-      const static double oneTebibyte = std::pow(2, 40);
+      const static auto oneKibibyte = static_cast<std::uintmax_t>(std::pow(2, 10));
+      const static auto oneMebibyte = static_cast<std::uintmax_t>(std::pow(2, 20));
+      const static auto oneGibibyte = static_cast<std::uintmax_t>(std::pow(2, 30));
+      const static auto oneTebibyte = static_cast<std::uintmax_t>(std::pow(2, 40));
    }
 
    namespace Colors
@@ -21,6 +23,12 @@ namespace Constants
       const static QVector3D hotPink            {1.0f,            105.0f / 255.0f, 180.0f / 255.0f};
       const static QVector3D metallicSeaweed    {8.0f / 255.0f,   0.0f,            126.0f / 255.0f};
    }
+
+   const static int TIME_BETWEEN_FRAMES = 20;
+
+   const static int MOVEMENT_AMPLIFICATION = 8;
+
+   const static float XBOX_TRIGGER_ACTUATION_THRESHOLD = 0.2f;
 }
 
 #endif // CONSTANTS

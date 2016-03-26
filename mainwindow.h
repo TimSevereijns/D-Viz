@@ -121,7 +121,6 @@ class MainWindow : public QMainWindow
    private:
       void CreateMenus();
       void CreateFileMenu();
-      void CreateWindowMenu();
 
       void SetupSidebar();
       void SetupXboxController();

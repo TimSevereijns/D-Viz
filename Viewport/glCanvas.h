@@ -124,7 +124,7 @@ class GLCanvas : public QOpenGLWidget
        *
        * @param[in] controllerState
        */
-      void HandleXboxJoystickInput(const XboxController::State& controllerState);
+      void HandleXboxThumbstickInput(const XboxController::State& controllerState);
 
       /**
        * @brief Compiles and loads the OpenGL shader program for the visualization.
