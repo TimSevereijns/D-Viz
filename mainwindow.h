@@ -92,6 +92,12 @@ class MainWindow : public QMainWindow
       void OnDirectoryOnlyStateChanged(int state);
 
       /**
+       * @brief OnDirectoryGradientStateChanged
+       * @param state
+       */
+      void OnDirectoryGradientStateChanged(int state);
+
+      /**
        * @brief OnPruneTreeButtonClicked
        */
       void OnPruneTreeButtonClicked();
@@ -126,6 +132,7 @@ class MainWindow : public QMainWindow
       void SetupXboxController();
 
       bool m_showDirectoriesOnly;
+      bool m_useDirectoryGradient;
       bool m_xboxControllerConnected;
 
       int m_sizePruningComboBoxIndex;

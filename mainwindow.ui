@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1200</width>
-    <height>800</height>
+    <height>814</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -67,7 +67,7 @@
   <widget class="QDockWidget" name="dockWidget">
    <property name="minimumSize">
     <size>
-     <width>180</width>
+     <width>204</width>
      <height>781</height>
     </size>
    </property>
@@ -100,6 +100,13 @@
       <widget class="QCheckBox" name="directoriesOnlyCheckbox">
        <property name="text">
         <string>Show Directories Only</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="directoryGradientCheckBox">
+       <property name="text">
+        <string>Use Directory Gradient</string>
        </property>
       </widget>
      </item>

@@ -64,7 +64,8 @@ HEADERS  += mainwindow.h \
     Visualizations/visualization.h \
     Utilities/stopwatch.hpp \
     constants.h \
-    Scene/nodeSelectionCrosshair.h
+    Scene/nodeSelectionCrosshair.h \
+    Utilities/colorGradient.hpp
 
 FORMS    += mainwindow.ui
 

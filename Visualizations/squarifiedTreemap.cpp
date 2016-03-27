@@ -541,6 +541,9 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
 
    TIME_IN_MILLISECONDS(Visualization::SortNodes(*m_theTree), "Sorted tree in ");
 
+   TIME_IN_MILLISECONDS(FindSmallestandLargestDirectory(*m_theTree),
+      "Found smallest and largest directories in ");
+
    const Block rootBlock
    {
       DoublePoint3D{},

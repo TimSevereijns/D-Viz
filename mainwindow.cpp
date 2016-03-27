@@ -22,6 +22,7 @@ namespace
 MainWindow::MainWindow(QWidget* parent /*= 0*/) :
    QMainWindow(parent),
    m_showDirectoriesOnly(false),
+   m_useDirectoryGradient(false),
    m_xboxControllerConnected(false),
    m_xboxController(new XboxController(0)),
    m_xboxControllerState(nullptr),
@@ -35,19 +36,19 @@ MainWindow::MainWindow(QWidget* parent /*= 0*/) :
    m_permanentStatusBarMessage(nullptr),
    m_ui(new Ui::MainWindow),
    m_sizePruningComboBoxIndex(0),
-   m_sizePruningOptions(
-      {
-         std::pair<std::uintmax_t, QString>(0,                                      "Show All"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneKibibyte,       "< 1 Kib"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte,       "< 1 MiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 10,  "< 10 MiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 100, "< 100 MiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 250, "< 250 MiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 500, "< 500 MiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte,       "< 1 GiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte * 5,   "< 5 GiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte * 10,  "< 10 GiB")
-      })
+   m_sizePruningOptions
+   ({
+      std::pair<std::uintmax_t, QString>(0,                                      "Show All"),
+      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneKibibyte,       "< 1 Kib"),
+      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte,       "< 1 MiB"),
+      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 10,  "< 10 MiB"),
+      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 100, "< 100 MiB"),
+      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 250, "< 250 MiB"),
+      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 500, "< 500 MiB"),
+      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte,       "< 1 GiB"),
+      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte * 5,   "< 5 GiB"),
+      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte * 10,  "< 10 GiB")
+   })
 {
    SetupXboxController();
 
@@ -78,6 +79,9 @@ void MainWindow::SetupSidebar()
 
    connect(m_ui->directoriesOnlyCheckbox, &QCheckBox::stateChanged,
       this, &MainWindow::OnDirectoryOnlyStateChanged);
+
+   connect(m_ui->directoryGradientCheckBox, &QCheckBox::stateChanged,
+      this, &MainWindow::OnDirectoryGradientStateChanged);
 
    connect(m_ui->pruneTreeButton, &QPushButton::clicked,
       this, &MainWindow::OnPruneTreeButtonClicked);
@@ -192,6 +196,11 @@ void MainWindow::OnDirectoryOnlyStateChanged(int state)
    m_showDirectoriesOnly = (state == Qt::Checked);
 }
 
+void MainWindow::OnDirectoryGradientStateChanged(int state)
+{
+   m_useDirectoryGradient = (state == Qt::Checked);
+}
+
 void MainWindow::OnPruneTreeButtonClicked()
 {
    const auto pruneSizeIndex = m_ui->pruneSizeComboBox->currentIndex();
@@ -199,6 +208,7 @@ void MainWindow::OnPruneTreeButtonClicked()
    VisualizationParameters parameters;
    parameters.rootDirectory = m_directoryToVisualize;
    parameters.onlyShowDirectories = m_showDirectoriesOnly;
+   parameters.useDirectoryGradient = m_useDirectoryGradient;
    parameters.forceNewScan = false;
    parameters.minimumFileSize = m_sizePruningOptions[pruneSizeIndex].first;
 

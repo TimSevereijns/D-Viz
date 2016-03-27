@@ -15,6 +15,8 @@
 #include "../DataStructs/vizNode.h"
 #include "../Viewport/camera.h"
 
+#include "../Utilities/colorGradient.hpp"
+
 namespace Qt3D
 {
    class QRay3D;
@@ -32,12 +34,14 @@ struct VisualizationParameters
 
    bool forceNewScan;               ///< Whether a new scan of the rootDirectory should take place.
    bool onlyShowDirectories;        ///< Whether only directories should be shown.
+   bool useDirectoryGradient;
 
    VisualizationParameters()
       : rootDirectory(L""),
         minimumFileSize(0),
         onlyShowDirectories(false),
-        forceNewScan(true)
+        forceNewScan(true),
+        useDirectoryGradient(false)
    {
    }
 };
@@ -114,6 +118,15 @@ class Visualization
          const VisualizationParameters& parameters) const;
 
       /**
+       * @brief FindSmallestandLargestDirectory
+       *
+       * @param tree
+       *
+       * @return
+       */
+      void FindSmallestandLargestDirectory(const Tree<VizNode>& tree);
+
+      /**
        * @brief Creates the vertex colors needed to color a single block.
        *
        * @returns A vector of colors.
@@ -126,6 +139,13 @@ class Visualization
        * @returns A vector of colors.
        */
       static QVector<QVector3D> CreateDirectoryColors();
+
+      /**
+       * @brief Computes the TreeNode's color based on the heatmap gradient.
+       *
+       * @return
+       */
+      QVector<QVector3D> ComputeGradientColor(const TreeNode<VizNode>& node);
 
       /**
        * @brief Create the vertex colors needed to color the selected file.
@@ -151,6 +171,10 @@ class Visualization
 
       QVector<QVector3D> m_visualizationVertices;
       QVector<QVector3D> m_visualizationColors;
+
+      std::uintmax_t m_largestDirectorySize;
+
+      ColorGradient m_directoryColorGradient;
 };
 
 #endif // VISUALIZATION_H
