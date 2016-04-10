@@ -151,11 +151,11 @@ GLCanvas::GLCanvas(QWidget* parent) :
 
    m_frameRedrawTimer.reset(new QTimer{ this });
    connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
-   m_frameRedrawTimer->start(Constants::TIME_BETWEEN_FRAMES);
+   m_frameRedrawTimer->start(Constants::DESIRED_TIME_BETWEEN_FRAMES);
 
    m_cameraPositionTimer.reset(new QTimer{ this });
    connect(m_cameraPositionTimer.get(), SIGNAL(timeout()), this, SLOT(HandleInput()));
-   m_cameraPositionTimer->start(Constants::TIME_BETWEEN_FRAMES);
+   m_cameraPositionTimer->start(Constants::DESIRED_TIME_BETWEEN_FRAMES);
 }
 
 void GLCanvas::initializeGL()
@@ -253,7 +253,7 @@ void GLCanvas::ScanDrive(VisualizationParameters& vizParameters)
 
 void GLCanvas::AskUserToLimitFileSize(
    const std::uintmax_t numberOfFilesScanned,
-   VisualizationParameters& parameters)
+   VisualizationParameters& parameters) const
 {
    assert(numberOfFilesScanned > 0);
    if (numberOfFilesScanned < 250'000)
@@ -373,12 +373,21 @@ void GLCanvas::HandleNodeSelection(const TreeNode<VizNode>* selectedNode)
    assert(message.str().size() > 0);
    m_mainWindow->SetStatusBarMessage(message.str());
 
+   VisualizationParameters vizParameters;
+   //vizParameters.useDirectoryGradient = m_mainWindow->
+
    if (m_selectedNode)
    {
-      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*m_selectedNode, SceneAsset::UpdateAction::DESELECT);
+      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
+         *m_selectedNode,
+         SceneAsset::UpdateAction::DESELECT,
+         m_visualizationParameters);
    }
 
-   m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*selectedNode, SceneAsset::UpdateAction::SELECT);
+   m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
+      *selectedNode,
+      SceneAsset::UpdateAction::SELECT,
+      m_visualizationParameters);
 
    m_selectedNode = selectedNode;
 }
@@ -400,8 +409,12 @@ void GLCanvas::HandleRightClick(const QPoint& point)
    }
    else
    {
-      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(*m_selectedNode, SceneAsset::UpdateAction::DESELECT);
-      PrintMetadataToStatusBar(m_sceneAssets[Asset::TREEMAP]->GetVertexCount(), *m_mainWindow);
+      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
+         *m_selectedNode,
+         SceneAsset::UpdateAction::DESELECT,
+         m_visualizationParameters);
+
+       PrintMetadataToStatusBar(m_sceneAssets[Asset::TREEMAP]->GetVertexCount(), *m_mainWindow);
    }
 }
 

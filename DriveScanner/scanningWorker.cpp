@@ -63,21 +63,15 @@ namespace
       }
    }
 
-   const unsigned int UPDATE_FREQUENCY = 1000;
+   constexpr unsigned int UPDATE_FREQUENCY = 1000;
 }
 
 const std::uintmax_t ScanningWorker::SIZE_UNDEFINED = 0;
 
 ScanningWorker::ScanningWorker(const DriveScanningParameters& parameters)
    : QObject(),
-     m_parameters(parameters),
-     m_filesScanned(0)
+     m_parameters(parameters)
 {
-}
-
-ScanningWorker::~ScanningWorker()
-{
-   std::cout << "The worker is dead..." << std::endl;
 }
 
 std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
@@ -91,7 +85,7 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
 
    const Block rootBlock
    {
-      DoublePoint3D{},
+      DoublePoint3D{ },
       Visualization::ROOT_BLOCK_WIDTH,
       Visualization::BLOCK_HEIGHT,
       Visualization::ROOT_BLOCK_DEPTH
@@ -124,9 +118,9 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
 
 void ScanningWorker::IterateOverDirectory(
    boost::filesystem::directory_iterator& itr,
-   TreeNode<VizNode>& treeNode)
+   TreeNode<VizNode>& treeNode) noexcept
 {
-   const auto end = boost::filesystem::directory_iterator{};
+   const auto end = boost::filesystem::directory_iterator{ };
    while (itr != end)
    {
       ScanRecursively(itr->path(), treeNode);
@@ -236,7 +230,7 @@ void ScanningWorker::Start()
    Stopwatch<std::chrono::seconds>([&]
    {
       boost::system::error_code errorCode;
-      auto itr = boost::filesystem::directory_iterator{m_parameters.path, errorCode};
+      auto itr = boost::filesystem::directory_iterator{ m_parameters.path, errorCode };
       if (errorCode)
       {
          emit ShowMessageBox("Could not create iterator!");

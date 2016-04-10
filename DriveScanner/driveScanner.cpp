@@ -6,17 +6,13 @@
 
 #include <QMessageBox>
 
-DriveScanner::~DriveScanner()
-{
-   std::cout << "Drive Scanner is dead..." << std::endl;
-}
-
 void DriveScanner::HandleProgressUpdates(const std::uintmax_t filesScanned)
 {
    m_parameters.onProgressUpdateCallback(filesScanned);
 }
 
-void DriveScanner::HandleCompletion(const std::uintmax_t filesScanned,
+void DriveScanner::HandleCompletion(
+   const std::uintmax_t filesScanned,
    std::shared_ptr<Tree<VizNode>> fileTree)
 {
    m_parameters.onScanCompletedCallback(filesScanned, fileTree);
@@ -36,7 +32,7 @@ void DriveScanner::StartScanning(const DriveScanningParameters& parameters)
    m_parameters = parameters;
 
    QThread* thread = new QThread;
-   ScanningWorker* worker = new ScanningWorker{m_parameters};
+   ScanningWorker* worker = new ScanningWorker{ m_parameters };
    worker->moveToThread(thread);
 
    connect(worker, SIGNAL(Finished(const std::uintmax_t, std::shared_ptr<Tree<VizNode>>)),

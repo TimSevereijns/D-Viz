@@ -40,7 +40,7 @@ MainWindow::~MainWindow()
 void MainWindow::SetupSidebar()
 {
    std::for_each(std::begin(m_sizePruningOptions), std::end(m_sizePruningOptions),
-      [&] (std::vector<std::pair<std::uintmax_t, QString>>::const_reference pair)
+      [&] (const auto& pair)
    {
       m_ui->pruneSizeComboBox->addItem(pair.second, pair.first);
    });
@@ -97,7 +97,7 @@ void MainWindow::SetupSidebar()
 
 void MainWindow::SetupXboxController()
 {
-   m_xboxController->StartAutoPolling(Constants::TIME_BETWEEN_FRAMES);
+   m_xboxController->StartAutoPolling(Constants::DESIRED_TIME_BETWEEN_FRAMES);
 
    connect(m_xboxController.get(), SIGNAL(ControllerConnected(uint)),
       this, SLOT(XboxControllerConnected()));
@@ -180,7 +180,6 @@ void MainWindow::OnPruneTreeButtonClicked()
    parameters.forceNewScan = false;
    parameters.minimumFileSize = m_sizePruningOptions[pruneSizeIndex].first;
 
-   // Allow the "Apply" button to be clicked even if nothing is loaded:
    if (!m_directoryToVisualize.empty())
    {
       m_glCanvas->ReloadVisualization(parameters);
@@ -225,7 +224,7 @@ void MainWindow::SetCameraSpeedSpinner(double speed)
 void MainWindow::SetFilePruningComboBoxValue(std::uintmax_t minimum)
 {
    const auto match = std::find_if(std::begin(m_sizePruningOptions), std::end(m_sizePruningOptions),
-      [minimum](std::vector<std::pair<std::uintmax_t, QString>>::const_reference pair)
+      [minimum] (const auto& pair)
    {
       return pair.first >= minimum;
    });

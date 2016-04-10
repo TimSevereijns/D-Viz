@@ -22,7 +22,7 @@ namespace Constants
       const static QVector3D metallicSeaweed { 8.0f / 255.0f,   0.0f,             126.0f / 255.0f };
    }
 
-   constexpr static int TIME_BETWEEN_FRAMES = 20;
+   constexpr static int DESIRED_TIME_BETWEEN_FRAMES = 20;
 
    constexpr static int MOVEMENT_AMPLIFICATION = 8;
 

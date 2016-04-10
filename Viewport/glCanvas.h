@@ -155,7 +155,7 @@ class GLCanvas : public QOpenGLWidget
        */
       void AskUserToLimitFileSize(
          std::uintmax_t numberOfFilesScanned,
-         VisualizationParameters& parameters);
+         VisualizationParameters& parameters) const;
 
       bool m_isPaintingSuspended{ false };
       bool m_isVisualizationLoaded{ false };
@@ -166,6 +166,7 @@ class GLCanvas : public QOpenGLWidget
       MainWindow* m_mainWindow{ nullptr };
 
       const TreeNode<VizNode>* m_selectedNode{ nullptr };
+      const std::pair<TreeNode<VizNode>*, QVector3D> m_selectedNodeAndColor;
 
       std::unique_ptr<GraphicsDevice> m_graphicsDevice{ nullptr };
 

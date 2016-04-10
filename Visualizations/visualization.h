@@ -29,7 +29,7 @@ struct VisualizationParameters
 
    bool forceNewScan{ true };          ///< Whether a new scan should take place.
    bool onlyShowDirectories{ false };  ///< Whether only directories should be shown.
-   bool useDirectoryGradient{ false };
+   bool useDirectoryGradient{ false }; ///< Whether to use gradient coloring for the directories.
 };
 
 /**

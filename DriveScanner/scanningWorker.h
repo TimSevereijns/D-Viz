@@ -32,7 +32,6 @@ class ScanningWorker : public QObject
       static const std::uintmax_t SIZE_UNDEFINED;
 
       explicit ScanningWorker(const DriveScanningParameters& parameters);
-      ~ScanningWorker();
 
    public slots:
       /**
@@ -75,14 +74,12 @@ class ScanningWorker : public QObject
       /**
        * @brief Helper function to facilitate exception-free iteration over a directory.
        *
-       * @todo UPGRADE TO C++11: noexcept
-       *
        * @param[in] itr             Reference to the iterator to iterate over.
        * @param[in] treeNode        The TreeNode to append the contents of the directory to.
        */
       void IterateOverDirectory(
          boost::filesystem::directory_iterator& itr,
-         TreeNode<VizNode>& treeNode);
+         TreeNode<VizNode>& treeNode) noexcept;
 
       /**
        * Max path length in Windows is 260 characters, so if that includes slashes, then the maximum
@@ -95,7 +92,7 @@ class ScanningWorker : public QObject
 
       std::shared_ptr<Tree<VizNode>> CreateTreeAndRootNode();
 
-      std::uintmax_t m_filesScanned;
+      std::uintmax_t m_filesScanned{ 0 };
 
       std::chrono::high_resolution_clock::time_point m_lastProgressUpdate;
 

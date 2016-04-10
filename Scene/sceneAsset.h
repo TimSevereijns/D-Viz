@@ -5,6 +5,7 @@
 #include "../optionsManager.h"
 #include "../Viewport/camera.h"
 #include "../Viewport/graphicsDevice.h"
+#include "../Visualizations/visualization.h"
 
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>
@@ -133,7 +134,10 @@ class SceneAsset
        * @param[in] node            The TreeNode whose visualization should be updated.
        * @param[in] action          The type of update to perform on the target VBO segment.
        */
-      virtual void UpdateVBO(const TreeNode<VizNode>& node, UpdateAction action);
+      virtual void UpdateVBO(
+         const TreeNode<VizNode>& node,
+         UpdateAction action,
+         const VisualizationParameters& options);
 
    protected:
       /**

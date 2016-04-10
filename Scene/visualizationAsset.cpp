@@ -2,6 +2,7 @@
 
 #include "../DataStructs/vizNode.h"
 #include "../ThirdParty/Tree.hpp"
+#include "../Utilities/colorGradient.hpp"
 #include "../Visualizations/visualization.h"
 
 namespace
@@ -42,6 +43,50 @@ namespace
          shader.setUniformValue(attenuation.c_str(), settings.m_lightAttenuationFactor);
          shader.setUniformValue(ambientCoefficient.c_str(), settings.m_ambientCoefficient);
       }
+   }
+
+   /**
+    * @brief RestoreColor
+    *
+    * @param node
+    * @param params
+    *
+    * @return
+    */
+   QVector<QVector3D> RestoreColor(
+      const TreeNode<VizNode>& node,
+      const VisualizationParameters& params)
+   {
+      if (node.GetData().file.type == FILE_TYPE::DIRECTORY)
+      {
+         if (!params.useDirectoryGradient)
+         {
+            return Visualization::CreateDirectoryColors();
+         }
+
+         auto* rootNode = &node;
+         while (rootNode->GetParent())
+         {
+            rootNode = rootNode->GetParent();
+         }
+
+         const auto ratio =
+            static_cast<double>(rootNode->GetData().file.size / node.GetData().file.size);
+
+         ColorGradient gradient;
+
+         QVector<QVector3D> blockColors;
+         blockColors.reserve(Block::VERTICES_PER_BLOCK);
+
+         for (int i = 0; i < Block::VERTICES_PER_BLOCK; i++)
+         {
+            blockColors << gradient.GetColorAtValue(static_cast<float>(ratio));
+         }
+
+         return blockColors;
+      }
+
+      return Visualization::CreateFileColors();
    }
 }
 
@@ -174,7 +219,10 @@ bool VisualizationAsset::Reload(const Camera& camera)
    return true;
 }
 
-void VisualizationAsset::UpdateVBO(const TreeNode<VizNode>& node, SceneAsset::UpdateAction action)
+void VisualizationAsset::UpdateVBO(
+   const TreeNode<VizNode>& node,
+   SceneAsset::UpdateAction action,
+   const VisualizationParameters& options)
 {
    constexpr int tupleSize = 3 * sizeof(GLfloat);
    const int offsetIntoVertexBuffer = node->offsetIntoVBO * tupleSize;
@@ -182,11 +230,15 @@ void VisualizationAsset::UpdateVBO(const TreeNode<VizNode>& node, SceneAsset::Up
    // We have to divide by two, because there's a vertex plus a normal for every color:
    const int offsetIntoColorBuffer = offsetIntoVertexBuffer / 2;
 
-   const auto newColor = (action == SceneAsset::UpdateAction::DESELECT)
-      ? (node->file.type == FILE_TYPE::DIRECTORY)
-         ? Visualization::CreateDirectoryColors()
-         : Visualization::CreateFileColors()
-      : Visualization::CreateHighlightColors();
+   QVector<QVector3D> newColor;
+   if (action == SceneAsset::UpdateAction::DESELECT)
+   {
+      newColor = RestoreColor(node, options);
+   }
+   else
+   {
+      newColor = Visualization::CreateHighlightColors();
+   }
 
    assert(m_VAO.isCreated());
    assert(m_colorBuffer.isCreated());

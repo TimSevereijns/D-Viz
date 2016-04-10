@@ -20,8 +20,6 @@ class DriveScanner : public QObject
    Q_OBJECT
 
    public:
-      ~DriveScanner();
-
       /**
        * @brief Kicks off the drive scanning process in a separate thread using the specified
        * parameters.

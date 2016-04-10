@@ -147,8 +147,6 @@ class MainWindow : public QMainWindow
       std::unique_ptr<QAction> m_fileMenuPreferences{ nullptr };
       std::unique_ptr<QAction> m_fileMenuExit{ nullptr };
 
-      std::unique_ptr<QLabel> m_permanentStatusBarMessage{ nullptr };
-
       std::unique_ptr<GLCanvas> m_glCanvas{ nullptr };
 
       std::shared_ptr<OptionsManager> m_optionsManager{ nullptr };
