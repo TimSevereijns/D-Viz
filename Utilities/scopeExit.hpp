@@ -9,19 +9,24 @@
 template<typename LambdaType>
 struct ScopeExit
 {
-  template<typename LambdaType>
-  ScopeExit(LambdaType&& lambda)
-     : m_lambda(std::forward<LambdaType>(lambda))
-  {
-  }
+   ScopeExit(LambdaType&& lambda) noexcept :
+      m_lambda(std::move(lambda))
+   {
+   }
 
-  ~ScopeExit()
-  {
-     m_lambda();
-  }
+   ~ScopeExit()
+   {
+      m_lambda();
+   }
 
-private:
-  LambdaType m_lambda;
+   ScopeExit(const ScopeExit&) = delete;
+   ScopeExit& operator=(const ScopeExit&) = delete;
+
+   ScopeExit(ScopeExit&&) = default;
+   ScopeExit& operator=(ScopeExit&&) = default;
+
+   private:
+      LambdaType m_lambda;
 };
 
 namespace
@@ -30,7 +35,6 @@ namespace
    {
    };
 }
-
 
 /**
  * Enables the use of braces to define the contents of the RAII object.

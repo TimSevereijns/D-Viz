@@ -1,17 +1,39 @@
-#ifndef STOPWATCH_H
-#define STOPWATCH_H
+/**
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2016 Tim Severeijns
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#pragma once
 
 #include <chrono>
 #include <cstdint>
-#include <iostream>
 #include <functional>
 #include <string>
+#include <iostream>
 
 template<typename Type>
 struct TypeName
 {
-   // @todo constexpr
-   static const char* Resolve()
+   inline static constexpr const char* Resolve() noexcept
    {
       return typeid(Type).name();
    }
@@ -20,8 +42,7 @@ struct TypeName
 template<>
 struct TypeName<std::chrono::nanoseconds>
 {
-   // @todo UPGRADE TO C++11: constexpr
-   static const char* Resolve()
+   inline static constexpr const char* Resolve() noexcept
    {
       return "nanoseconds";
    }
@@ -30,8 +51,7 @@ struct TypeName<std::chrono::nanoseconds>
 template<>
 struct TypeName<std::chrono::microseconds>
 {
-   // @todo UPGRADE TO C++11: constexpr
-   static const char* Resolve()
+   inline static constexpr const char* Resolve() noexcept
    {
       return "microseconds";
    }
@@ -40,8 +60,7 @@ struct TypeName<std::chrono::microseconds>
 template<>
 struct TypeName<std::chrono::milliseconds>
 {
-   // @todo UPGRADE TO C++11: constexpr
-   static const char* Resolve()
+   inline static constexpr const char* Resolve() noexcept
    {
       return "milliseconds";
    }
@@ -50,8 +69,7 @@ struct TypeName<std::chrono::milliseconds>
 template<>
 struct TypeName<std::chrono::seconds>
 {
-   // @todo UPGRADE TO C++11: constexpr
-   static const char* Resolve()
+   inline static constexpr const char* Resolve() noexcept
    {
       return "seconds";
    }
@@ -60,8 +78,7 @@ struct TypeName<std::chrono::seconds>
 template<>
 struct TypeName<std::chrono::minutes>
 {
-   // @todo UPGRADE TO C++11: constexpr
-   static const char* Resolve()
+   inline static constexpr const char* Resolve() noexcept
    {
       return "minutes";
    }
@@ -70,8 +87,7 @@ struct TypeName<std::chrono::minutes>
 template<>
 struct TypeName<std::chrono::hours>
 {
-   // @todo UPGRADE TO C++11: constexpr
-   static const char* Resolve()
+   inline static constexpr const char* Resolve() noexcept
    {
       return "hours";
    }
@@ -108,7 +124,7 @@ public:
    */
    Stopwatch(
       const std::function<void()>& functionToTime,
-      const LoggingFunction&& logger)
+      const LoggingFunction& logger)
    {
       Time(functionToTime);
 
@@ -201,5 +217,3 @@ private:
    Stopwatch<std::chrono::hours>(            \
       [&] { code; },                         \
       message);
-
-#endif // STOPWATCH_H

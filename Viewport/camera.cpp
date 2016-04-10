@@ -5,7 +5,7 @@
 #include <math.h>
 
 // Keep vertical angle less than 90 degrees to avoid gimbal lock:
-static const double MAX_VERTICAL_ANGLE = 85.0;
+static constexpr double MAX_VERTICAL_ANGLE = 85.0;
 
 namespace
 {
@@ -29,17 +29,6 @@ namespace
          verticalAngle = -MAX_VERTICAL_ANGLE;
       }
    }
-}
-
-Camera::Camera()
-   : m_verticalAngle(0),
-     m_horizontalAngle(0),
-     m_position(0, 0, 0),
-     m_aspectRatio(1.0f),
-     m_nearPlane(1.0f),
-     m_farPlane(2000.0f),
-     m_fieldOfView(45.0f)
-{
 }
 
 const QVector3D& Camera::GetPosition() const
@@ -87,7 +76,7 @@ void Camera::LookAt(const QVector3D& point)
 
 QVector3D Camera::Forward() const
 {
-   const QVector4D forwardVector = GetOrientation().inverted() * QVector4D{0, 0, -1, 1};
+   const QVector4D forwardVector = GetOrientation().inverted() * QVector4D{ 0, 0, -1, 1 };
    return QVector3D{ forwardVector };
 }
 
@@ -98,7 +87,7 @@ QVector3D Camera::Backward() const
 
 QVector3D Camera::Right() const
 {
-   const QVector4D rightVector = GetOrientation().inverted() * QVector4D{1, 0, 0, 1};
+   const QVector4D rightVector = GetOrientation().inverted() * QVector4D{ 1, 0, 0, 1 };
    return QVector3D{ rightVector };
 }
 
@@ -109,7 +98,7 @@ QVector3D Camera::Left() const
 
 QVector3D Camera::Up() const
 {
-   const QVector4D upVector = GetOrientation().inverted() * QVector4D{0, 1, 0, 1};
+   const QVector4D upVector = GetOrientation().inverted() * QVector4D{ 0, 1, 0, 1 };
    return QVector3D{ upVector };
 }
 
@@ -140,7 +129,7 @@ QMatrix4x4 Camera::GetProjectionViewMatrix() const
 
 QVector3D Camera::Unproject(const QPoint& point, float viewDepth, QMatrix4x4 modelMatrix) const
 {
-   const QMatrix4x4 modelViewProjectionMatrix = GetProjectionMatrix() * GetViewMatrix() * modelMatrix;
+   const auto modelViewProjectionMatrix = GetProjectionMatrix() * GetViewMatrix() * modelMatrix;
 
    bool wasMatrixInvertible = false;
    const QMatrix4x4 inverseMatrix = modelViewProjectionMatrix.inverted(&wasMatrixInvertible);
@@ -164,10 +153,10 @@ QVector3D Camera::Unproject(const QPoint& point, float viewDepth, QMatrix4x4 mod
 QPoint Camera::MapToOpenGLViewport(const QPoint& widgetCoordinates) const
 {
    const int invertedY = m_viewport.y() + (m_viewport.height() - widgetCoordinates.y());
-   return {widgetCoordinates.x(), invertedY};
+   return { widgetCoordinates.x(), invertedY };
 }
 
-Qt3D::QRay3D Camera::ShootRayIntoScene(const QPoint& widgetCoordinates) const
+Qt3DCore::QRay3D Camera::ShootRayIntoScene(const QPoint& widgetCoordinates) const
 {
    const QPoint glCoordinates = MapToOpenGLViewport(widgetCoordinates);
 
@@ -176,7 +165,7 @@ Qt3D::QRay3D Camera::ShootRayIntoScene(const QPoint& widgetCoordinates) const
 
    const QVector3D direction = QVector3D(nearPlanePoint - farPlanePoint).normalized();
 
-   const Qt3D::QRay3D ray
+   const Qt3DCore::QRay3D ray
    {
       nearPlanePoint,
       -direction

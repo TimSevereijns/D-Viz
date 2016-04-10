@@ -7,9 +7,7 @@
 
 #include <QVector3D>
 
-//
 // Inspired by: http://www.andrewnoske.com/wiki/Code_-_heatmaps_and_color_gradients
-//
 
 namespace
 {
@@ -41,18 +39,6 @@ namespace
 class ColorGradient
 {
    public:
-      ColorGradient() :
-         m_colorPoints
-         ({
-            ColorPoint( 0, 0, 1, 0.0000f ), // Blue
-            ColorPoint( 0, 1, 1, 0.0005f ), // Cyan
-            ColorPoint( 0, 1, 0, 0.0010f ), // Green
-            ColorPoint( 1, 1, 0, 0.0020f ), // Yellow
-            ColorPoint( 1, 0, 0, 1.0000f )  // Red
-         })
-      {
-      }
-
       /**
        * @brief Inserts a new ColorPoint at the correct poisition into the gradient.
        *
@@ -67,7 +53,9 @@ class ColorGradient
          {
             if (value < m_colorPoints[i].normalizedValue)
             {
-               m_colorPoints.insert(std::begin(m_colorPoints) + i, ColorPoint{ red, green, blue, value });
+               m_colorPoints.insert(std::begin(m_colorPoints) + i,
+                  ColorPoint{ red, green, blue, value });
+
                return;
             }
          }
@@ -98,15 +86,17 @@ class ColorGradient
             return { 1.0f, 1.0f, 1.0f };
          }
 
-         for (int i = 0; i < m_colorPoints.size(); i++)
+         for (size_t i = 0; i < m_colorPoints.size(); i++)
          {
-            const ColorPoint& currentColor = m_colorPoints[i];
+            const auto& currentColor = m_colorPoints[i];
 
             if (value < currentColor.normalizedValue)
             {
-               const ColorPoint& previousColor  = m_colorPoints[std::max(0, i - 1)];
-               const float delta    = previousColor.normalizedValue - currentColor.normalizedValue;
-               const float fractBetween = (delta == 0) ? 0 : (value - currentColor.normalizedValue) / delta;
+               const auto& previousColor  = m_colorPoints[std::max(0, static_cast<int>(i) - 1)];
+               const auto delta = previousColor.normalizedValue - currentColor.normalizedValue;
+               const auto fractBetween = (delta == 0.0f)
+                  ? 0.0f
+                  : (value - currentColor.normalizedValue) / delta;
 
                const QVector3D finalColor
                {
@@ -120,17 +110,22 @@ class ColorGradient
              }
          }
 
-         const QVector3D finalColor
+         return
          {
             m_colorPoints.back().red,
             m_colorPoints.back().green,
             m_colorPoints.back().blue
          };
-
-         return finalColor;
       }
 
-      std::vector<ColorPoint> m_colorPoints;      ///< Contains the points in ascending order.
+      std::vector<ColorPoint> m_colorPoints ///< Contains the points in ascending order.
+      {
+         ColorPoint( 0, 0, 1, 0.0000f ), ///< Blue
+         ColorPoint( 0, 1, 1, 0.0005f ), ///< Cyan
+         ColorPoint( 0, 1, 0, 0.0010f ), ///< Green
+         ColorPoint( 1, 1, 0, 0.0020f ), ///< Yellow
+         ColorPoint( 1, 0, 0, 1.0000f )  ///< Red
+      };
 };
 
 #endif // COLORGRADIENT

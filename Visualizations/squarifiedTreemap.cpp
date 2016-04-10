@@ -5,7 +5,7 @@
 #include <limits>
 #include <numeric>
 
-#include "../Utilities/stopwatch.hpp"
+#include "../ThirdParty/stopwatch.hpp"
 
 namespace
 {
@@ -21,7 +21,7 @@ namespace
       const std::uintmax_t candidateSize)
    {
       std::uintmax_t sumOfFileSizes = std::accumulate(std::begin(row), std::end(row),
-         std::uintmax_t{0}, [] (const std::uintmax_t result, const TreeNode<VizNode>* node)
+         std::uintmax_t{ 0 }, [] (const std::uintmax_t result, const TreeNode<VizNode>* node)
       {
          return result + (*node)->file.size;
       });
@@ -505,7 +505,7 @@ namespace
       children.reserve(root.GetChildCount());
       children.emplace_back(firstChild);
 
-      TreeNode<VizNode>* nextChild = firstChild->GetNextSibling();
+      auto* nextChild = firstChild->GetNextSibling();
       while (nextChild)
       {
          children.emplace_back(nextChild);
@@ -514,7 +514,7 @@ namespace
 
       SquarifyAndLayoutRows(children);
 
-      for (TreeNode<VizNode>* const child : children)
+      for (auto* const child : children)
       {
          if (child)
          {

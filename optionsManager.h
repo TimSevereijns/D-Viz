@@ -10,9 +10,6 @@ class OptionsManager : public QObject
 {
    Q_OBJECT;
 
-   public:
-      OptionsManager();
-
    public slots:
       /**
        * @brief Should be called when the camera's movement speed changes.
@@ -92,22 +89,22 @@ class OptionsManager : public QObject
       void OnBlueLightComponentChanged(const int value);
 
    public:
-      double m_cameraMovementSpeed;
-      double m_mouseSensitivity;
+      double m_cameraMovementSpeed{ 0.25 };
+      double m_mouseSensitivity{ 0.20 };
 
-      float m_ambientCoefficient;
-      float m_lightAttenuationFactor;
-      float m_materialShininess;
+      float m_ambientCoefficient{ 0.1f };
+      float m_lightAttenuationFactor{ 0.005f };
+      float m_materialShininess{ 80.0f };
 
-      float m_redLightComponent;
-      float m_greenLightComponent;
-      float m_blueLightComponent;
+      float m_redLightComponent{ 1.0f };
+      float m_greenLightComponent{ 1.0f };
+      float m_blueLightComponent{ 1.0f };
 
-      int m_fieldOfView;
+      int m_fieldOfView{ 45 };
 
-      bool m_isXboxControllerConnected;
-      bool m_useXBoxController;
-      bool m_isLightAttachedToCamera;
+      bool m_isXboxControllerConnected{ false };
+      bool m_useXBoxController{ false };
+      bool m_isLightAttachedToCamera{ true };
 };
 
 #endif // OPTIONSMANAGER_H

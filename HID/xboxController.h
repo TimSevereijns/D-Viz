@@ -10,7 +10,7 @@
 #include <QObject>
 #include <QTimer>
 
-#include "xInput.h"
+#include "../ThirdParty/xInput.h"
 
 /**
  * @brief The XboxController class tracks and manages the state of the attached Xbox controller(s).
@@ -44,32 +44,26 @@ class XboxController : public QObject
        */
       struct StateAndHandlers
       {
-         StateAndHandlers()
-            : state(XboxController::KEY_STATE::UP),
-              onButtonDown(nullptr),
-              onButtonUp(nullptr)
+         StateAndHandlers() = default;
+
+         explicit StateAndHandlers(XboxController::KEY_STATE startingState) :
+            state(startingState)
          {
          }
 
-         explicit StateAndHandlers(XboxController::KEY_STATE startingState)
-            : state(startingState),
-              onButtonDown(nullptr),
-              onButtonUp(nullptr)
-         {
-         }
-
-         StateAndHandlers(XboxController::KEY_STATE startingState,
+         StateAndHandlers(
+            XboxController::KEY_STATE startingState,
             const std::function<void ()>& downHandler,
-            const std::function<void ()>& upHandler)
-            : state(startingState),
-              onButtonDown(downHandler),
-              onButtonUp(upHandler)
+            const std::function<void ()>& upHandler) :
+            state(startingState),
+            onButtonDown(downHandler),
+            onButtonUp(upHandler)
          {
          }
 
-         XboxController::KEY_STATE state;
-         std::function<void ()> onButtonDown;
-         std::function<void ()> onButtonUp;
+         XboxController::KEY_STATE state{ XboxController::KEY_STATE::UP };
+         std::function<void ()> onButtonDown{ nullptr };
+         std::function<void ()> onButtonUp{ nullptr };
       };
 
       /**
@@ -77,27 +71,25 @@ class XboxController : public QObject
        */
       struct State
       {
-         explicit State();
+          uint8_t batteryType{ BATTERY_TYPE_DISCONNECTED };
+          uint8_t batteryLevel{ BATTERY_LEVEL_EMPTY };
 
-          uint8_t batteryType;
-          uint8_t batteryLevel;
+          uint16_t buttons{ 0 };
 
-          uint16_t buttons;
-
-          float leftTrigger;
-          float rightTrigger;
-          float leftThumbX;
-          float leftThumbY;
-          float rightThumbX;
-          float rightThumbY;
+          float leftTrigger{ 0.0f };
+          float rightTrigger{ 0.0f };
+          float leftThumbX{ 0.0f };
+          float leftThumbY{ 0.0f };
+          float rightThumbX{ 0.0f };
+          float rightThumbY{ 0.0f };
 
           static bool BatteryEquals(const State& lhs, const State& rhs);
 
-          bool operator==(const XboxController::State& rhs);
-          bool operator!=(const XboxController::State& rhs);
+          bool operator==(const XboxController::State& rhs) const;
+          bool operator!=(const XboxController::State& rhs) const;
       };
 
-      explicit XboxController(
+      XboxController(
          unsigned int m_controllerNumber = 0,
          int16_t m_leftStickDeadZone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE,
          int16_t m_rightStickDeadZone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE,
@@ -106,25 +98,25 @@ class XboxController : public QObject
 
       ~XboxController();
 
-      bool HasStateChanged(void);
-      bool IsConnected(void);
+      bool HasStateChanged() const;
+      bool IsConnected() const;
       bool IsButtonDown(const unsigned int button) const;
 
-      const XboxController::State& GetCurrentState(void);
+      const XboxController::State& GetCurrentState() const;
 
       void SetDownHandler(const unsigned int targetButton, const std::function<void ()>& handler);
       void SetUpHandler(const unsigned int targetButton, const std::function<void ()>& handler);
 
    signals:
-      void NewControllerState(XboxController::State);
+      void NewControllerState(XboxController::State state);
       void NewControllerBatteryState(uint8_t newBatteryType, uint8_t newBatteryLevel);
       void ControllerConnected(unsigned int m_controllerNumber);
       void ControllerDisconnected(unsigned int m_controllerNumber);
 
    public slots:
       void StartAutoPolling(unsigned int interval);
-      void StopAutoPolling(void);
-      void Update(void);
+      void StopAutoPolling();
+      void Update();
       void SetVibration(float leftVibration, float rightVibration);
 
       // The following methods allows you to change the deadzones values, although the default
@@ -134,20 +126,36 @@ class XboxController : public QObject
       void SetTriggerThreshold(uint8_t newThreshold);
 
    private:
-      bool m_isCurrentControllerConnected;
-      bool m_isPreviousControllerConnected;
+      bool m_isCurrentControllerConnected{ false };
+      bool m_isPreviousControllerConnected{ false };
 
-      int m_controllerNumber;
-      int m_leftStickDeadZone;
-      int m_rightStickDeadZone;
-      int m_triggerThreshold;
+      int m_controllerNumber{ 1 };
+      int m_leftStickDeadZone{ XboxController::MAX_STICK_VALUE };
+      int m_rightStickDeadZone{ XboxController::MAX_STICK_VALUE };
+      int m_triggerThreshold{ XboxController::MAX_TRIGGER_VALUE };
 
       std::unique_ptr<QTimer> m_pollingTimer;
 
       State m_previousState;
       State m_currentState;
 
-      std::unordered_map<unsigned int, StateAndHandlers> m_buttonMap;
+      std::unordered_map<unsigned int, StateAndHandlers> m_buttonMap
+      {
+         { XINPUT_GAMEPAD_A, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XINPUT_GAMEPAD_B, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XINPUT_GAMEPAD_X, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XINPUT_GAMEPAD_Y, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XINPUT_GAMEPAD_LEFT_SHOULDER, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XINPUT_GAMEPAD_RIGHT_SHOULDER, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XINPUT_GAMEPAD_LEFT_THUMB, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XINPUT_GAMEPAD_RIGHT_THUMB, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XINPUT_GAMEPAD_BACK, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XINPUT_GAMEPAD_START, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XINPUT_GAMEPAD_DPAD_UP, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XINPUT_GAMEPAD_DPAD_LEFT, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XINPUT_GAMEPAD_DPAD_RIGHT, StateAndHandlers(XboxController::KEY_STATE::UP) },
+         { XINPUT_GAMEPAD_DPAD_DOWN, StateAndHandlers(XboxController::KEY_STATE::UP) }
+      };
 };
 
 #endif // XBOXCONTROLLER_H

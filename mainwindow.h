@@ -4,6 +4,7 @@
 #include <QLabel>
 #include <QMainWindow>
 
+#include "constants.h"
 #include "HID/xboxController.h"
 
 namespace Ui
@@ -131,32 +132,44 @@ class MainWindow : public QMainWindow
       void SetupSidebar();
       void SetupXboxController();
 
-      bool m_showDirectoriesOnly;
-      bool m_useDirectoryGradient;
-      bool m_xboxControllerConnected;
+      bool m_showDirectoriesOnly{ false };
+      bool m_useDirectoryGradient{ false };
+      bool m_xboxControllerConnected{ false };
 
-      int m_sizePruningComboBoxIndex;
+      int m_sizePruningComboBoxIndex{ 0 };
 
-      std::unique_ptr<XboxController> m_xboxController;
-      std::unique_ptr<XboxController::State> m_xboxControllerState;
+      std::unique_ptr<XboxController> m_xboxController{ new XboxController{ 0 } };
+      std::unique_ptr<XboxController::State> m_xboxControllerState{ nullptr };
 
-      std::unique_ptr<QMenu> m_fileMenu;
+      std::unique_ptr<QMenu> m_fileMenu{ nullptr };
 
-      std::unique_ptr<QAction> m_fileMenuNewScan;
-      std::unique_ptr<QAction> m_fileMenuPreferences;
-      std::unique_ptr<QAction> m_fileMenuExit;
+      std::unique_ptr<QAction> m_fileMenuNewScan{ nullptr };
+      std::unique_ptr<QAction> m_fileMenuPreferences{ nullptr };
+      std::unique_ptr<QAction> m_fileMenuExit{ nullptr };
 
-      std::unique_ptr<QLabel> m_permanentStatusBarMessage;
+      std::unique_ptr<QLabel> m_permanentStatusBarMessage{ nullptr };
 
-      std::unique_ptr<GLCanvas> m_glCanvas;
+      std::unique_ptr<GLCanvas> m_glCanvas{ nullptr };
 
-      std::shared_ptr<OptionsManager> m_optionsManager;
+      std::shared_ptr<OptionsManager> m_optionsManager{ nullptr };
 
-      Ui::MainWindow* m_ui;
+      Ui::MainWindow* m_ui{ nullptr };
 
-      std::wstring m_directoryToVisualize;
+      std::wstring m_directoryToVisualize{ L"" };
 
-      std::vector<std::pair<std::uintmax_t, QString>> m_sizePruningOptions;
+      std::vector<std::pair<std::uintmax_t, QString>> m_sizePruningOptions
+      {
+         std::pair<std::uintmax_t, QString>(0,                                      "Show All"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneKibibyte,       "< 1 Kib"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte,       "< 1 MiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 10,  "< 10 MiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 100, "< 100 MiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 250, "< 250 MiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 500, "< 500 MiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte,       "< 1 GiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte * 5,   "< 5 GiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte * 10,  "< 10 GiB")
+      };
 };
 
 #endif // MAINWINDOW_H

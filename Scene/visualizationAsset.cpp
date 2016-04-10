@@ -19,20 +19,22 @@ namespace
       const OptionsManager& settings,
       QOpenGLShaderProgram& shader)
    {
+      using namespace std::string_literals;
+
       for (size_t i = 0; i < lights.size(); i++)
       {
          const auto index = std::to_string(i);
 
-         std::string position{"allLights["};
+         std::string position{ "allLights[" };
          position.append(index).append("].position");
 
-         std::string intensity{"allLights["};
+         std::string intensity{ "allLights[" };
          intensity.append(index).append("].intensity");
 
-         std::string attenuation{"allLights["};
+         std::string attenuation{ "allLights[" };
          attenuation.append(index).append("].attenuation");
 
-         std::string ambientCoefficient{"allLights["};
+         std::string ambientCoefficient{ "allLights[" };
          ambientCoefficient.append(index).append("].ambientCoefficient");
 
          shader.setUniformValue(position.c_str(), lights[i].position);
@@ -73,12 +75,20 @@ bool VisualizationAsset::PrepareVertexBuffers(const Camera& camera)
    m_vertexBuffer.bind();
 
    m_shader.enableAttributeArray("vertex");
-   m_shader.setAttributeBuffer("vertex", GL_FLOAT, /* offset = */ 0,
-      /* tupleSize = */ 3, /* stride = */ 6 * sizeof(GLfloat));
+   m_shader.setAttributeBuffer(
+      /* location = */ "vertex",
+      /* type = */ GL_FLOAT,
+      /* offset = */ 0,
+      /* tupleSize = */ 3,
+      /* stride = */ 6 * sizeof(GLfloat));
 
    m_shader.enableAttributeArray("normal");
-   m_shader.setAttributeBuffer("normal", GL_FLOAT,
-      /* offset = */ 3 * sizeof(GLfloat), /* tupleSize = */ 3, /* stride = */ 6 * sizeof(GLfloat));
+   m_shader.setAttributeBuffer(
+      /* location = */ "normal",
+      /* type = */ GL_FLOAT,
+      /* offset = */ 3 * sizeof(GLfloat),
+      /* tupleSize = */ 3,
+      /* stride = */ 6 * sizeof(GLfloat));
 
    m_vertexBuffer.release();
    m_shader.release();
@@ -102,7 +112,11 @@ bool VisualizationAsset::PrepareColorBuffers(const Camera&)
    m_colorBuffer.allocate(m_rawColors.constData(), m_rawColors.size() * 3 * sizeof(GLfloat));
 
    m_shader.enableAttributeArray("color");
-   m_shader.setAttributeBuffer("color", GL_FLOAT, /* offset = */ 0, /* tupleSize = */ 3);
+   m_shader.setAttributeBuffer(
+      /* location = */"color",
+      /* type = */ GL_FLOAT,
+      /* offset = */ 0,
+      /* tupleSize = */ 3);
 
    m_colorBuffer.release();
    m_VAO.release();
@@ -115,7 +129,7 @@ bool VisualizationAsset::Render(
    const std::vector<Light>& lights,
    const OptionsManager& settings)
 {
-   const static QMatrix4x4 DEFAULT_MATRIX = QMatrix4x4{};
+   const static auto DEFAULT_MATRIX = QMatrix4x4{ };
 
    if (!IsAssetLoaded())
    {
@@ -141,7 +155,10 @@ bool VisualizationAsset::Render(
 
    m_VAO.bind();
 
-   m_graphicsDevice.glDrawArrays(GL_TRIANGLES, /* first = */ 0, /* count = */ m_rawVertices.size());
+   m_graphicsDevice.glDrawArrays(
+      /* mode = */ GL_TRIANGLES,
+      /* first = */ 0,
+      /* count = */ m_rawVertices.size());
 
    m_shader.release();
    m_VAO.release();
@@ -159,8 +176,7 @@ bool VisualizationAsset::Reload(const Camera& camera)
 
 void VisualizationAsset::UpdateVBO(const TreeNode<VizNode>& node, SceneAsset::UpdateAction action)
 {
-   // @todo const -> constexpr
-   const int tupleSize = 3 * sizeof(GLfloat);
+   constexpr int tupleSize = 3 * sizeof(GLfloat);
    const int offsetIntoVertexBuffer = node->offsetIntoVBO * tupleSize;
 
    // We have to divide by two, because there's a vertex plus a normal for every color:

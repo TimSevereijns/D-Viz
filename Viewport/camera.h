@@ -14,11 +14,6 @@ class Camera
 {
    public:
       /**
-       * @brief Default constructor.
-       */
-      Camera();
-
-      /**
        * @brief Retrieves the camera's current position within 3D space.
        *
        * @returns The position of the camera within the scene.
@@ -218,7 +213,7 @@ class Camera
        *
        * @returns A ray extending into the scene from the near plane to the far plane.
        */
-      Qt3D::QRay3D ShootRayIntoScene(const QPoint& widgetCoordinates) const;
+      Qt3DCore::QRay3D ShootRayIntoScene(const QPoint& widgetCoordinates) const;
 
       /**
        * @brief Determines whether a point is in front of the camera plane.
@@ -240,13 +235,13 @@ class Camera
 
       QRect m_viewport;
 
-      double m_horizontalAngle;
-      double m_verticalAngle;
+      double m_horizontalAngle{ 0.0 };
+      double m_verticalAngle{ 0.0 };
 
-      float m_fieldOfView;
-      float m_aspectRatio;
-      float m_nearPlane;
-      float m_farPlane;
+      float m_fieldOfView{ 45.0f };
+      float m_aspectRatio{ 1.0f };
+      float m_nearPlane{ 1.0f };
+      float m_farPlane{ 2000.0f };
 };
 
 #endif // CAMERA_H

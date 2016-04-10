@@ -17,33 +17,19 @@
 
 #include "../Utilities/colorGradient.hpp"
 
-namespace Qt3D
-{
-   class QRay3D;
-}
-
 /**
  * @brief The VisualizationParameters struct represents the gamut of visualization parameters that
  * can be set to control when visualization updates occur, as well as what nodes get included.
  */
 struct VisualizationParameters
 {
-   std::wstring rootDirectory;      ///< The path to the directory at the root of the visualization.
+   std::wstring rootDirectory{ L"" };  ///< The path to the root directory
 
-   std::uint64_t minimumFileSize;   ///< The minimum size a file should be before it shows up.
+   std::uint64_t minimumFileSize{ 0 }; ///< The minimum size a file should be before it shows up.
 
-   bool forceNewScan;               ///< Whether a new scan of the rootDirectory should take place.
-   bool onlyShowDirectories;        ///< Whether only directories should be shown.
-   bool useDirectoryGradient;
-
-   VisualizationParameters()
-      : rootDirectory(L""),
-        minimumFileSize(0),
-        onlyShowDirectories(false),
-        forceNewScan(true),
-        useDirectoryGradient(false)
-   {
-   }
+   bool forceNewScan{ true };          ///< Whether a new scan should take place.
+   bool onlyShowDirectories{ false };  ///< Whether only directories should be shown.
+   bool useDirectoryGradient{ false };
 };
 
 /**
@@ -53,7 +39,11 @@ class Visualization
 {
    public:
       explicit Visualization(const VisualizationParameters& parameters);
-      virtual ~Visualization();
+
+      virtual ~Visualization() = default;
+
+      Visualization(const Visualization&) = delete;
+      Visualization& operator=(const Visualization&) = delete;
 
       static const double PADDING_RATIO;
       static const double MAX_PADDING;
@@ -114,7 +104,7 @@ class Visualization
        */
       TreeNode<VizNode>* FindNearestIntersection(
          const Camera& camera,
-         const Qt3D::QRay3D& ray,
+         const Qt3DCore::QRay3D& ray,
          const VisualizationParameters& parameters) const;
 
       /**
@@ -163,16 +153,16 @@ class Visualization
       static void SortNodes(Tree<VizNode>& tree);
 
    protected:
-      std::shared_ptr<Tree<VizNode>> m_theTree;
+      std::shared_ptr<Tree<VizNode>> m_theTree{ nullptr };
+
+      std::uintmax_t m_largestDirectorySize{ 0 };
+
+      bool m_hasDataBeenParsed{ false };
 
       VisualizationParameters m_vizParameters;
 
-      bool m_hasDataBeenParsed;
-
       QVector<QVector3D> m_visualizationVertices;
       QVector<QVector3D> m_visualizationColors;
-
-      std::uintmax_t m_largestDirectorySize;
 
       ColorGradient m_directoryColorGradient;
 };

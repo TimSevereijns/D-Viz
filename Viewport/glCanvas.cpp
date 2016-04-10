@@ -47,9 +47,7 @@ namespace
    {
       if (sizeInBytes < Constants::FileSize::oneKibibyte)
       {
-         // @todo Needing to use std::move is likely a bug in MSVC 2013:
-         return std::make_pair<double, std::wstring>(
-            std::move(sizeInBytes), L" bytes");
+         return std::make_pair<double, std::wstring>(std::move(sizeInBytes), L" bytes");
       }
 
       if (sizeInBytes < Constants::FileSize::oneMebibyte)
@@ -132,21 +130,7 @@ namespace
 
 GLCanvas::GLCanvas(QWidget* parent) :
    QOpenGLWidget(parent),
-   m_graphicsDevice(nullptr),
-   m_theVisualization(nullptr),
-   m_isPaintingSuspended(false),
-   m_isVisualizationLoaded(false),
-   m_mainWindow(reinterpret_cast<MainWindow*>(parent)),
-   m_lights(
-   {
-      Light{ },
-      Light{ QVector3D{ 0.0f, 80.0f, 0.0f } },
-      Light{ QVector3D{ 0.0f, 80.0f, -Visualization::ROOT_BLOCK_DEPTH } },
-      Light{ QVector3D{ Visualization::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
-      Light{ QVector3D{ Visualization::ROOT_BLOCK_WIDTH, 80.0f, -Visualization::ROOT_BLOCK_DEPTH } }
-   }),
-   m_selectedNode(nullptr),
-   m_lastFrameTimeStamp(std::chrono::system_clock::now())
+   m_mainWindow(reinterpret_cast<MainWindow*>(parent))
 {
    if (!m_mainWindow)
    {
@@ -272,7 +256,7 @@ void GLCanvas::AskUserToLimitFileSize(
    VisualizationParameters& parameters)
 {
    assert(numberOfFilesScanned > 0);
-   if (numberOfFilesScanned < 250000)
+   if (numberOfFilesScanned < 250'000)
    {
       return;
    }
@@ -283,8 +267,9 @@ void GLCanvas::AskUserToLimitFileSize(
       messageBox.setIcon(QMessageBox::Warning);
       messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 
-      messageBox.setText("More than a quarter million files were scanned. " \
-         "Would you like to limit the visualized files to those 1 MiB or larger in " \
+      messageBox.setText(
+         "More than a quarter million files were scanned. "                            \
+         "Would you like to limit the visualized files to those 1 MiB or larger in "   \
          "order to reduce the load on the GPU and system memory?");
 
       const int election = messageBox.exec();
@@ -529,28 +514,26 @@ void GLCanvas::HandleInput()
       return;
    }
 
+   const auto cameraSpeed = m_settings->m_cameraMovementSpeed;
+
    if (isKeyWDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed *
-         m_camera.Forward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Forward());
    }
 
    if (isKeyADown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed *
-         m_camera.Left());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Left());
    }
 
    if (isKeySDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed *
-         m_camera.Backward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Backward());
    }
 
    if (isKeyDDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed *
-         m_camera.Right());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Right());
    }
 }
 
@@ -562,40 +545,38 @@ void GLCanvas::HandleXBoxControllerInput()
    const XboxController::State& controllerState = m_mainWindow->GetXboxControllerState();
    const XboxController& controller = m_mainWindow->GetXboxControllerManager();
 
+   const auto cameraSpeed = m_settings->m_cameraMovementSpeed;
+
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_UP))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
-         * m_camera.Forward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Forward());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_LEFT))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
-         * m_camera.Left());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Left());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_DOWN))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
-         * m_camera.Backward());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Backward());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_RIGHT))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * m_settings->m_cameraMovementSpeed
-         * m_camera.Right());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Right());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_LEFT_SHOULDER))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() *
-         (m_settings->m_cameraMovementSpeed / Constants::MOVEMENT_AMPLIFICATION) * m_camera.Down());
+         (cameraSpeed / Constants::MOVEMENT_AMPLIFICATION) * m_camera.Down());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_RIGHT_SHOULDER))
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() *
-         (m_settings->m_cameraMovementSpeed / Constants::MOVEMENT_AMPLIFICATION) * m_camera.Up());
+         (cameraSpeed / Constants::MOVEMENT_AMPLIFICATION) * m_camera.Up());
    }
 
    HandleXboxThumbstickInput(controllerState);
@@ -645,7 +626,7 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
    {
       m_isLeftTriggerDown = true;
 
-      NodeSelectionCrosshair* crosshairAsset =
+      auto* crosshairAsset =
          dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
 
       assert(crosshairAsset);
@@ -660,7 +641,7 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
    {
       m_isLeftTriggerDown = false;
 
-      NodeSelectionCrosshair* crosshairAsset =
+      auto* crosshairAsset =
          dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
 
       assert(crosshairAsset);

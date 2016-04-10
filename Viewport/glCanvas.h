@@ -157,28 +157,44 @@ class GLCanvas : public QOpenGLWidget
          std::uintmax_t numberOfFilesScanned,
          VisualizationParameters& parameters);
 
-      bool m_isPaintingSuspended;
-      bool m_isVisualizationLoaded;
+      bool m_isPaintingSuspended{ false };
+      bool m_isVisualizationLoaded{ false };
 
-      bool m_isLeftTriggerDown;
-      bool m_isRightTriggerDown;
+      bool m_isLeftTriggerDown{ false };
+      bool m_isRightTriggerDown{ false };
 
-      VisualizationParameters m_visualizationParameters;
+      MainWindow* m_mainWindow{ nullptr };
 
-      MainWindow* m_mainWindow;
+      const TreeNode<VizNode>* m_selectedNode{ nullptr };
 
-      std::unique_ptr<Visualization> m_theVisualization;
+      std::unique_ptr<GraphicsDevice> m_graphicsDevice{ nullptr };
 
-      std::unique_ptr<QTimer> m_frameRedrawTimer;
-      std::unique_ptr<QTimer> m_cameraPositionTimer;
+      std::unique_ptr<Visualization> m_theVisualization{ nullptr };
+
+      std::unique_ptr<QTimer> m_frameRedrawTimer{ nullptr };
+      std::unique_ptr<QTimer> m_cameraPositionTimer{ nullptr };
+
+      std::chrono::system_clock::time_point m_lastFrameTimeStamp
+      {
+         std::chrono::system_clock::now()
+      };
+
+      std::vector<Light> m_lights
+      {
+         Light{ },
+         Light{ QVector3D{ 0.0f, 80.0f, 0.0f } },
+         Light{ QVector3D{ 0.0f, 80.0f, -Visualization::ROOT_BLOCK_DEPTH } },
+         Light{ QVector3D{ Visualization::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
+         Light{ QVector3D{ Visualization::ROOT_BLOCK_WIDTH, 80.0f, -Visualization::ROOT_BLOCK_DEPTH } }
+      };
+
+     VisualizationParameters m_visualizationParameters;
 
       std::shared_ptr<OptionsManager> m_settings;
 
       Camera m_camera;
 
       DriveScanner m_scanner;
-
-      std::vector<Light> m_lights;
 
       KeyboardManager m_keyboardManager;
 
@@ -188,14 +204,7 @@ class GLCanvas : public QOpenGLWidget
 
       std::vector<std::unique_ptr<SceneAsset>> m_sceneAssets;
 
-      std::chrono::system_clock::time_point m_lastFrameTimeStamp;
-
-      std::deque<const int> m_frameRateDeque;
-
-      std::unique_ptr<GraphicsDevice> m_graphicsDevice;
-
-      // This has to be a raw pointer, since we don't want to assume ownership:
-      const TreeNode<VizNode>* m_selectedNode;
+      std::deque<int> m_frameRateDeque;
 };
 
 #endif // GLCANVAS_H

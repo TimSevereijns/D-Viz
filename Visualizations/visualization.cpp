@@ -12,7 +12,7 @@
 #include <QRectF>
 
 #include "../constants.h"
-#include "../Utilities/stopwatch.hpp"
+#include "../ThirdParty/stopwatch.hpp"
 
 namespace
 {
@@ -30,14 +30,14 @@ namespace
     * error, or boost::none if no such intersection exists.
     */
    boost::optional<QVector3D> DoesRayIntersectPlane(
-      const Qt3D::QRay3D& ray,
+      const Qt3DCore::QRay3D& ray,
       const QVector3D& pointOnPlane,
       const QVector3D& planeNormal)
    {
       const double denominator = QVector3D::dotProduct(ray.direction(), planeNormal);
       if (std::abs(denominator) < EPSILON)
       {
-         return false;
+         return boost::none;
       }
 
       const double numerator = QVector3D::dotProduct(pointOnPlane - ray.origin(), planeNormal);
@@ -62,7 +62,7 @@ namespace
     * @return The closest intersection point, or boost::none should anything weird occur.
     */
    boost::optional<QVector3D> FindClosestIntersectionPoint(
-      const Qt3D::QRay3D& ray,
+      const Qt3DCore::QRay3D& ray,
       const std::vector<QVector3D>& allIntersections)
    {
       const auto& closest = std::min_element(std::begin(allIntersections), std::end(allIntersections),
@@ -88,7 +88,7 @@ namespace
     * @returns The point of intersection should it exist; boost::none otherwise.
     */
    boost::optional<QVector3D> DoesRayIntersectBlock(
-      const Qt3D::QRay3D& ray,
+      const Qt3DCore::QRay3D& ray,
       const Block& block)
    {
       std::vector<QVector3D> allIntersections;
@@ -203,7 +203,7 @@ namespace
     * @param[in] node               The current node being hit-tested.
     */
    std::vector<IntersectionPointAndNode> FindAllIntersections(
-      const Qt3D::QRay3D& ray,
+      const Qt3DCore::QRay3D& ray,
       const Camera& camera,
       const VisualizationParameters& parameters,
       TreeNode<VizNode>* node)
@@ -251,18 +251,12 @@ namespace
 const double Visualization::PADDING_RATIO = 0.9;
 const double Visualization::MAX_PADDING = 0.75;
 
-const float Visualization::BLOCK_HEIGHT = 2.0;
-const float Visualization::ROOT_BLOCK_WIDTH = 1000.0;
-const float Visualization::ROOT_BLOCK_DEPTH = 1000.0;
+const float Visualization::BLOCK_HEIGHT = 2.0f;
+const float Visualization::ROOT_BLOCK_WIDTH = 1000.0f;
+const float Visualization::ROOT_BLOCK_DEPTH = 1000.0f;
 
 Visualization::Visualization(const VisualizationParameters& parameters)
-   : m_vizParameters(parameters),
-     m_theTree(nullptr),
-     m_hasDataBeenParsed(false)
-{
-}
-
-Visualization::~Visualization()
+   : m_vizParameters(parameters)
 {
 }
 
@@ -277,7 +271,7 @@ void Visualization::UpdateBoundingBoxes()
    }
 
    std::for_each(std::begin(*m_theTree), std::end(*m_theTree),
-      [&] (TreeNode<VizNode>& node)
+      [] (auto& node)
    {
       if (!node.HasChildren())
       {
@@ -287,7 +281,7 @@ void Visualization::UpdateBoundingBoxes()
 
       double tallestDescendant = 0.0;
 
-      TreeNode<VizNode>* currentChild = node.GetFirstChild();
+      auto* currentChild = node.GetFirstChild();
       while (currentChild)
       {
          if (currentChild->GetData().boundingBox.height > tallestDescendant)
@@ -371,7 +365,7 @@ void Visualization::ComputeVertexAndColorData(const VisualizationParameters& par
 
 TreeNode<VizNode>* Visualization::FindNearestIntersection(
    const Camera& camera,
-   const Qt3D::QRay3D& ray,
+   const Qt3DCore::QRay3D& ray,
    const VisualizationParameters& parameters) const
 {
    if (!m_hasDataBeenParsed)

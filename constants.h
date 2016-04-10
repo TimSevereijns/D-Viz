@@ -7,8 +7,6 @@
 
 namespace Constants
 {
-   // @todo UPGRADE TO C++11: constexpr instead of const
-
    namespace FileSize
    {
       const static auto oneKibibyte = static_cast<std::uintmax_t>(std::pow(2, 10));
@@ -19,16 +17,16 @@ namespace Constants
 
    namespace Colors
    {                                          // Red,             Green,           Blue
-      const static QVector3D canaryYellow       {1.0f,            239.0f / 255.0f, 0.0f};
-      const static QVector3D hotPink            {1.0f,            105.0f / 255.0f, 180.0f / 255.0f};
-      const static QVector3D metallicSeaweed    {8.0f / 255.0f,   0.0f,            126.0f / 255.0f};
+      const static QVector3D canaryYellow    { 1.0f,            239.0f / 255.0f,  0.0f };
+      const static QVector3D hotPink         { 1.0f,            105.0f / 255.0f,  180.0f / 255.0f };
+      const static QVector3D metallicSeaweed { 8.0f / 255.0f,   0.0f,             126.0f / 255.0f };
    }
 
-   const static int TIME_BETWEEN_FRAMES = 20;
+   constexpr static int TIME_BETWEEN_FRAMES = 20;
 
-   const static int MOVEMENT_AMPLIFICATION = 8;
+   constexpr static int MOVEMENT_AMPLIFICATION = 8;
 
-   const static float XBOX_TRIGGER_ACTUATION_THRESHOLD = 0.2f;
+   constexpr static float XBOX_TRIGGER_ACTUATION_THRESHOLD = 0.2f;
 }
 
 #endif // CONSTANTS

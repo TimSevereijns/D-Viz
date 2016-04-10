@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 
-#include "constants.h"
 #include "optionsManager.h"
 #include "Viewport/glCanvas.h"
 
@@ -14,41 +13,10 @@
 #include <QFileDialog>
 #include <QMenuBar>
 
-namespace
-{
-   //using MB = Constants::FileSizeUnits::oneMebibyte;
-}
-
 MainWindow::MainWindow(QWidget* parent /*= 0*/) :
    QMainWindow(parent),
-   m_showDirectoriesOnly(false),
-   m_useDirectoryGradient(false),
-   m_xboxControllerConnected(false),
-   m_xboxController(new XboxController(0)),
-   m_xboxControllerState(nullptr),
-   m_glCanvas(nullptr),
-   m_optionsManager(new OptionsManager()),
-   m_fileMenu(nullptr),
-   m_fileMenuNewScan(nullptr),
-   m_fileMenuPreferences(nullptr),
-   m_fileMenuExit(nullptr),
-   m_directoryToVisualize(L""),
-   m_permanentStatusBarMessage(nullptr),
-   m_ui(new Ui::MainWindow),
-   m_sizePruningComboBoxIndex(0),
-   m_sizePruningOptions
-   ({
-      std::pair<std::uintmax_t, QString>(0,                                      "Show All"),
-      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneKibibyte,       "< 1 Kib"),
-      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte,       "< 1 MiB"),
-      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 10,  "< 10 MiB"),
-      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 100, "< 100 MiB"),
-      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 250, "< 250 MiB"),
-      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 500, "< 500 MiB"),
-      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte,       "< 1 GiB"),
-      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte * 5,   "< 5 GiB"),
-      std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte * 10,  "< 10 GiB")
-   })
+   m_optionsManager(new OptionsManager),
+   m_ui(new Ui::MainWindow)
 {
    SetupXboxController();
 
