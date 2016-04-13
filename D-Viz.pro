@@ -95,3 +95,17 @@ else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/..
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../boost_1_60_0/stage/lib/boost_filesystem-vc140-mt-gd-1_60.lib
 
 win32: LIBS += -lXInput
+
+CONFIG(release, debug|release) {
+   library_files.path += $$OUT_PWD/release
+   library_files.files += $$PWD/../boost_1_60_0/stage/lib/boost_filesystem-vc140-mt-1_60*
+   library_files.files += $$PWD/../boost_1_60_0/stage/lib/boost_system-vc140-mt-1_60*
+}
+CONFIG(debug, debug|release) {
+   library_files.path += $$OUT_PWD/debug
+   library_files.files += $$PWD/../boost_1_60_0/stage/lib/boost_filesystem-vc140-mt-gd-1_60*
+   library_files.files += $$PWD/../boost_1_60_0/stage/lib/boost_system-vc140-mt-gd-1_60*
+}
+
+library_files.files += $$PWD/Resources/XInput1_4.dll
+INSTALLS += library_files
