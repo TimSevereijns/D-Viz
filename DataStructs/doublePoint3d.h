@@ -8,7 +8,8 @@
 class DoublePoint3D
 {
    public:
-      explicit DoublePoint3D();
+      DoublePoint3D() = default;
+
       explicit DoublePoint3D(double x, double y, double z);
 
       double x() const;
@@ -26,9 +27,9 @@ class DoublePoint3D
       }
 
    private:
-      double m_x;
-      double m_y;
-      double m_z;
+      double m_x{ 0.0 };
+      double m_y{ 0.0 };
+      double m_z{ 0.0 };
 };
 
 #endif // DOUBLEPOINT3D_H

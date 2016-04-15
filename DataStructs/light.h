@@ -9,14 +9,14 @@
  */
 struct Light
 {
-   QVector3D position;              ///< The position of the light in 3D space.
-   QVector3D intensity;             ///< The intensity of the RGB values, i.e., the light color.
-   float attenuation;               ///< The factor with which the light falls off with distance.
-   float ambientCoefficient;        ///< The light's contribution to ambient.
+   QVector3D position{ QVector3D{0.0f, 0.0f, 0.0f} };    ///< The position of the light in 3D space.
+   QVector3D intensity{ QVector3D{1.0f, 1.0f, 1.0f} };   ///< The light color.
+   float attenuation{ 0.75f };         ///< The factor with which the light falls off with distance.
+   float ambientCoefficient{ 0.01f };  ///< The light's contribution to ambient.
 
-   explicit Light();
+   Light() = default;
 
-   explicit Light(
+   Light(
       const QVector3D& lightPosition,
       const QVector3D& lightIntensity,
       const float lightAttenuation,

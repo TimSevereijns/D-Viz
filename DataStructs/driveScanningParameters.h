@@ -10,7 +10,9 @@ namespace std
    template<typename T> class shared_ptr;
 }
 
-template<typename T> class Tree;
+template<typename T>
+class Tree;
+
 struct VizNode;
 
 /**
@@ -22,12 +24,12 @@ struct DriveScanningParameters
    using ScanCompleteCallback = std::function<void (const std::uintmax_t filesScanned,
       std::shared_ptr<Tree<VizNode>> fileTree)>;
 
-   ProgressCallback onProgressUpdateCallback;
-   ScanCompleteCallback onScanCompletedCallback;
+   ProgressCallback onProgressUpdateCallback{ };
+   ScanCompleteCallback onScanCompletedCallback{ };
 
-   std::wstring path;
+   std::wstring path{ };
 
-   DriveScanningParameters();
+   DriveScanningParameters() = default;
 
    DriveScanningParameters(
       const std::wstring& startingPath,

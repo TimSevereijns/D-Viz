@@ -120,11 +120,11 @@ class ColorGradient
 
       std::vector<ColorPoint> m_colorPoints ///< Contains the points in ascending order.
       {
-         ColorPoint( 0, 0, 1, 0.0000f ), ///< Blue
-         ColorPoint( 0, 1, 1, 0.0005f ), ///< Cyan
-         ColorPoint( 0, 1, 0, 0.0010f ), ///< Green
-         ColorPoint( 1, 1, 0, 0.0020f ), ///< Yellow
-         ColorPoint( 1, 0, 0, 1.0000f )  ///< Red
+         ColorPoint{ 0, 0, 1, 0.0000f }, ///< Blue
+         ColorPoint{ 0, 1, 1, 0.0005f }, ///< Cyan
+         ColorPoint{ 0, 1, 0, 0.0010f }, ///< Green
+         ColorPoint{ 1, 1, 0, 0.0020f }, ///< Yellow
+         ColorPoint{ 1, 0, 0, 1.0000f }  ///< Red
       };
 };
 

@@ -33,6 +33,7 @@ namespace
 {
    struct DummyStruct
    {
+      // Left intentionally empty.
    };
 }
 

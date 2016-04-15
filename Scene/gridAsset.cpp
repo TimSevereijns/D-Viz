@@ -92,8 +92,8 @@ namespace
    }
 }
 
-GridAsset::GridAsset(GraphicsDevice& device)
-   : LineAsset(device)
+GridAsset::GridAsset(GraphicsDevice& device) :
+   LineAsset{ device }
 {
    m_rawVertices = CreateOriginMarkerAndGridVertices();
    m_rawColors = CreateOriginMarkerAndGridColors();

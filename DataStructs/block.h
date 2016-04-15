@@ -26,10 +26,7 @@ struct BlockFace
       TOP            ///< Normal points towards +Y in OpenGL.
    };
 
-   explicit BlockFace() :
-      side(Side::FRONT)
-   {
-   }
+   BlockFace() = default;
 
    explicit BlockFace(const QVector<QVector3D>& vertices, const Side side) :
       vertices(vertices),
@@ -38,7 +35,7 @@ struct BlockFace
    }
 
    QVector<QVector3D> vertices;
-   Side side;
+   Side side{ Side::FRONT };
 };
 
 /**
@@ -52,8 +49,8 @@ struct Block
    class FaceIterator;
    friend class FaceIterator;
 
-   const static int FACES_PER_BLOCK = 5;
-   const static int VERTICES_PER_BLOCK = 30;
+   constexpr static int FACES_PER_BLOCK = 5;
+   constexpr static int VERTICES_PER_BLOCK = 30;
 
    QVector<QVector3D> colors;
 
@@ -62,12 +59,12 @@ struct Block
    DoublePoint3D origin;
    DoublePoint3D nextRowOrigin; ///< Specific to the Squarified Treemap.
 
-   double percentCovered;
-   double width;
-   double height;
-   double depth;
+   double percentCovered{ 0.0 };
+   double width{ 0.0 };
+   double height{ 0.0 };
+   double depth{ 0.0 };
 
-   explicit Block();
+   Block() = default;
 
    /**
     * @brief Block creates the vertices needed to represent a single block. Each face consists of

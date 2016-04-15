@@ -19,7 +19,7 @@ namespace
    {
       std::vector<TreeNode<VizNode>*> toBeDeleted;
 
-      for (auto&& node : tree)
+      for (auto& node : tree)
       {
          if (node->file.size == 0)
          {
@@ -45,7 +45,7 @@ namespace
     */
    void ComputeDirectorySizes(Tree<VizNode>& tree)
    {
-      for (auto&& node : tree)
+      for (auto& node : tree)
       {
          const FileInfo fileInfo = node->file;
 
@@ -68,9 +68,9 @@ namespace
 
 const std::uintmax_t ScanningWorker::SIZE_UNDEFINED = 0;
 
-ScanningWorker::ScanningWorker(const DriveScanningParameters& parameters)
-   : QObject(),
-     m_parameters(parameters)
+ScanningWorker::ScanningWorker(const DriveScanningParameters& parameters) :
+   QObject{ },
+   m_parameters{ parameters }
 {
 }
 

@@ -167,16 +167,17 @@ XboxController::XboxController(
    int16_t leftStickDeadZone,
    int16_t rightStickDeadZone,
    uint8_t triggerThreshold,
-   QObject* parent) :
-   QObject(parent),
-   m_isCurrentControllerConnected(false),
-   m_isPreviousControllerConnected(false),
-   m_leftStickDeadZone(std::min(leftStickDeadZone, XboxController::MAX_STICK_VALUE)),
-   m_rightStickDeadZone(std::min(rightStickDeadZone, XboxController::MAX_STICK_VALUE)),
-   m_triggerThreshold(std::min(triggerThreshold, XboxController::MAX_TRIGGER_VALUE)),
-   m_pollingTimer(new QTimer)
+   QObject* parent)
+   :
+   QObject{ parent },
+   m_isCurrentControllerConnected{ false },
+   m_isPreviousControllerConnected{ false },
+   m_leftStickDeadZone{ std::min(leftStickDeadZone, XboxController::MAX_STICK_VALUE) },
+   m_rightStickDeadZone{ std::min(rightStickDeadZone, XboxController::MAX_STICK_VALUE) },
+   m_triggerThreshold{ std::min(triggerThreshold, XboxController::MAX_TRIGGER_VALUE) },
+   m_pollingTimer{ new QTimer }
 {
-   m_controllerNumber = qMin(controllerNumber, 3u);
+   m_controllerNumber = std::min(controllerNumber, 3u);
    connect(m_pollingTimer.get(), SIGNAL(timeout()), this, SLOT(Update()));
 }
 

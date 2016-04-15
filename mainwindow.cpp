@@ -13,7 +13,7 @@
 #include <QFileDialog>
 #include <QMenuBar>
 
-MainWindow::MainWindow(QWidget* parent /*= 0*/) :
+MainWindow::MainWindow(QWidget* parent /* = 0 */) :
    QMainWindow(parent),
    m_optionsManager(new OptionsManager),
    m_ui(new Ui::MainWindow)
@@ -137,8 +137,10 @@ void MainWindow::CreateFileMenu()
 
 void MainWindow::OnFileMenuNewScan()
 {
-   QString selectedDirectory = QFileDialog::getExistingDirectory(this,
-      "Select a Directory to Visualize", "/home",
+   QString selectedDirectory = QFileDialog::getExistingDirectory(
+      this,
+      "Select a Directory to Visualize",
+      "/home",
       QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
    if (selectedDirectory.isEmpty())

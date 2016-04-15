@@ -1,13 +1,5 @@
 #include "block.h"
 
-Block::Block()
-   : width(0.0),
-     height(0.0),
-     depth(0.0),
-     percentCovered(0.0)
-{
-}
-
 Block::Block(
    const DoublePoint3D& origin,
    const double width,

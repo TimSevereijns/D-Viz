@@ -524,8 +524,8 @@ namespace
    }
 }
 
-SquarifiedTreeMap::SquarifiedTreeMap(const VisualizationParameters& parameters)
-   : Visualization(parameters)
+SquarifiedTreeMap::SquarifiedTreeMap(const VisualizationParameters& parameters) :
+   Visualization{ parameters }
 {
 }
 
@@ -539,14 +539,17 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
 
    m_theTree = theTree;
 
-   TIME_IN_MILLISECONDS(Visualization::SortNodes(*m_theTree), "Sorted tree in ");
+   TIME_IN_MILLISECONDS(
+      Visualization::SortNodes(*m_theTree),
+      "Sorted tree in ");
 
-   TIME_IN_MILLISECONDS(FindSmallestandLargestDirectory(*m_theTree),
+   TIME_IN_MILLISECONDS(
+      FindSmallestandLargestDirectory(*m_theTree),
       "Found smallest and largest directories in ");
 
    const Block rootBlock
    {
-      DoublePoint3D{},
+      DoublePoint3D{ },
       Visualization::ROOT_BLOCK_WIDTH,
       Visualization::BLOCK_HEIGHT,
       Visualization::ROOT_BLOCK_DEPTH
@@ -554,7 +557,9 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
 
    theTree->GetHead()->GetData().block = rootBlock;
 
-   TIME_IN_MILLISECONDS(SquarifyRecursively(*theTree->GetHead()), "Visualization generated in ");
+   TIME_IN_MILLISECONDS(
+      SquarifyRecursively(*theTree->GetHead()),
+      "Visualization generated in ");
 
    m_hasDataBeenParsed = true;
 }

@@ -66,7 +66,7 @@ namespace
       const std::vector<QVector3D>& allIntersections)
    {
       const auto& closest = std::min_element(std::begin(allIntersections), std::end(allIntersections),
-         [&ray] (const QVector3D& lhs, const QVector3D& rhs)
+         [&ray] (const auto& lhs, const auto& rhs) noexcept
       {
          return (ray.origin().distanceToPoint(lhs) < ray.origin().distanceToPoint(rhs));
       });
@@ -217,6 +217,7 @@ namespace
              (parameters.onlyShowDirectories && node->GetData().file.type != FILE_TYPE::DIRECTORY))
          {
             AdvanceToNextNonDescendant(node);
+
             continue;
          }
 
@@ -255,8 +256,8 @@ const float Visualization::BLOCK_HEIGHT = 2.0f;
 const float Visualization::ROOT_BLOCK_WIDTH = 1000.0f;
 const float Visualization::ROOT_BLOCK_DEPTH = 1000.0f;
 
-Visualization::Visualization(const VisualizationParameters& parameters)
-   : m_vizParameters(parameters)
+Visualization::Visualization(const VisualizationParameters& parameters) :
+   m_vizParameters(parameters)
 {
 }
 
@@ -359,8 +360,7 @@ void Visualization::ComputeVertexAndColorData(const VisualizationParameters& par
 
    // All offsets must be properly set; the default initialized state is invalid:
    assert(std::none_of(std::begin(*m_theTree), std::end(*m_theTree),
-      [](const TreeNode<VizNode>& node)
-      { return node->offsetIntoVBO == VizNode::INVALID_OFFSET; }));
+      [] (const auto& node) { return node->offsetIntoVBO == VizNode::INVALID_OFFSET; }));
 }
 
 TreeNode<VizNode>* Visualization::FindNearestIntersection(
@@ -384,7 +384,7 @@ TreeNode<VizNode>* Visualization::FindNearestIntersection(
       }
 
       std::sort(std::begin(allIntersections), std::end(allIntersections),
-         [&ray] (const IntersectionPointAndNode& lhs, const IntersectionPointAndNode& rhs)
+         [&ray] (const IntersectionPointAndNode& lhs, const IntersectionPointAndNode& rhs) noexcept
       {
          return (ray.origin().distanceToPoint(lhs.first) < ray.origin().distanceToPoint(rhs.first));
       });
@@ -400,7 +400,7 @@ void Visualization::FindSmallestandLargestDirectory(const Tree<VizNode>& tree)
    std::uintmax_t smallestDirectory = std::numeric_limits<std::uintmax_t>::max();
    std::uintmax_t largestDirectory = std::numeric_limits<std::uintmax_t>::min();
 
-   for (auto&& node : tree)
+   for (auto& node : tree)
    {
       if (node.GetData().file.type != FILE_TYPE::DIRECTORY)
       {
@@ -513,10 +513,10 @@ QVector<QVector3D> Visualization::CreateHighlightColors()
 
 void Visualization::SortNodes(Tree<VizNode>& tree)
 {
-   for (auto&& node : tree)
+   for (auto& node : tree)
    {
       node.SortChildren(
-         [] (const TreeNode<VizNode>& lhs, const TreeNode<VizNode>& rhs)
+         [] (const auto& lhs, const auto& rhs) noexcept
       {
          return lhs->file.size > rhs->file.size;
       });

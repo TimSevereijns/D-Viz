@@ -11,10 +11,11 @@ namespace
    QVector<QVector3D> CreateCrosshairVertices(const QPoint center)
    {
       QVector<QVector3D> vertices;
-      vertices << QVector3D(center.x() - 20, center.y(), -4.0f)
-               << QVector3D(center.x() + 20, center.y(), -4.0f)
-               << QVector3D(center.x(), center.y() - 20, -4.0f)
-               << QVector3D(center.x(), center.y() + 20, -4.0f);
+      vertices
+         << QVector3D(center.x() - 20, center.y(), -4.0f)
+         << QVector3D(center.x() + 20, center.y(), -4.0f)
+         << QVector3D(center.x(), center.y() - 20, -4.0f)
+         << QVector3D(center.x(), center.y() + 20, -4.0f);
 
       return vertices;
    }
@@ -26,17 +27,18 @@ namespace
    QVector<QVector3D> CreateCrosshairColors()
    {
       QVector<QVector3D> colors;
-      colors << QVector3D(1.0f, 1.0f, 1.0f)
-             << QVector3D(1.0f, 1.0f, 1.0f)
-             << QVector3D(1.0f, 1.0f, 1.0f)
-             << QVector3D(1.0f, 1.0f, 1.0f);
+      colors
+         << QVector3D(1.0f, 1.0f, 1.0f)
+         << QVector3D(1.0f, 1.0f, 1.0f)
+         << QVector3D(1.0f, 1.0f, 1.0f)
+         << QVector3D(1.0f, 1.0f, 1.0f);
 
       return colors;
    }
 }
 
-NodeSelectionCrosshair::NodeSelectionCrosshair(GraphicsDevice& device)
-   : LineAsset(device)
+NodeSelectionCrosshair::NodeSelectionCrosshair(GraphicsDevice& device) :
+   LineAsset{ device }
 {
    m_rawColors = CreateCrosshairColors();
 }

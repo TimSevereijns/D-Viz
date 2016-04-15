@@ -1,7 +1,7 @@
 #include "lineAsset.h"
 
-LineAsset::LineAsset(GraphicsDevice& device)
-   : SceneAsset(device)
+LineAsset::LineAsset(GraphicsDevice& device) :
+   SceneAsset{ device }
 {
 }
 

@@ -90,8 +90,8 @@ namespace
    }
 }
 
-VisualizationAsset::VisualizationAsset(GraphicsDevice& device)
-   : SceneAsset(device)
+VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
+   SceneAsset{ device }
 {
 }
 
@@ -249,10 +249,10 @@ void VisualizationAsset::UpdateVBO(
    assert(m_colorBuffer.size() >= offsetIntoColorBuffer / (3 * sizeof(GLfloat)));
 
    m_graphicsDevice.glBufferSubData(
-      GL_ARRAY_BUFFER,
-      offsetIntoColorBuffer,
-      newColor.size() * tupleSize,
-      newColor.constData());
+      /* target = */ GL_ARRAY_BUFFER,
+      /* offset = */ offsetIntoColorBuffer,
+      /* size = */ newColor.size() * tupleSize,
+      /* data = */ newColor.constData());
 
    m_colorBuffer.release();
    m_VAO.release();

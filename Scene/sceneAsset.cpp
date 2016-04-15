@@ -3,8 +3,8 @@
 #include <iostream>
 #include <utility>
 
-SceneAsset::SceneAsset(GraphicsDevice& device)
-   : m_graphicsDevice(device)
+SceneAsset::SceneAsset(GraphicsDevice& device) :
+   m_graphicsDevice{ device }
 {
 }
 

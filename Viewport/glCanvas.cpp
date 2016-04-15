@@ -129,8 +129,8 @@ namespace
 }
 
 GLCanvas::GLCanvas(QWidget* parent) :
-   QOpenGLWidget(parent),
-   m_mainWindow(reinterpret_cast<MainWindow*>(parent))
+   QOpenGLWidget{ parent },
+   m_mainWindow{ reinterpret_cast<MainWindow*>(parent) }
 {
    if (!m_mainWindow)
    {
