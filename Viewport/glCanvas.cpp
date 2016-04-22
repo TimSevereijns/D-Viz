@@ -367,14 +367,15 @@ void GLCanvas::HandleNodeSelection(const TreeNode<VizNode>* selectedNode)
    message.precision(2);
 
    const auto sizeAndUnits = GetFileSizeInMostAppropriateUnits(fileSize);
-   message << GetFullNodePath(*selectedNode) << L"  |  "
-      << std::fixed << sizeAndUnits.first << sizeAndUnits.second;
+   message
+      << GetFullNodePath(*selectedNode)
+      << L"  |  "
+      << std::fixed
+      << sizeAndUnits.first
+      << sizeAndUnits.second;
 
    assert(message.str().size() > 0);
    m_mainWindow->SetStatusBarMessage(message.str());
-
-   VisualizationParameters vizParameters;
-   //vizParameters.useDirectoryGradient = m_mainWindow->
 
    if (m_selectedNode)
    {

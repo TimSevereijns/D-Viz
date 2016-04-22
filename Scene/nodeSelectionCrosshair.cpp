@@ -5,10 +5,13 @@
 namespace
 {
    /**
-    * @brief CreateCrosshairVertices
-    * @return
+    * @brief Generates the vertices needed to represent the crosshair.
+    *
+    * @param[in] center             The location at which to center the crosshair.
+    *
+    * @returns All the vertices needed to draw the crosshair.
     */
-   QVector<QVector3D> CreateCrosshairVertices(const QPoint center)
+   auto CreateCrosshairVertices(const QPoint center)
    {
       QVector<QVector3D> vertices;
       vertices
@@ -21,10 +24,12 @@ namespace
    }
 
    /**
-    * @brief CreateCrosshairColors
-    * @return
+    * @brief Generates the color data needed to color the crosshair.
+    *
+    * @returns The color of each vertex needed to represent the crosshair.
+    * @see CreateCrosshairVertices
     */
-   QVector<QVector3D> CreateCrosshairColors()
+   auto CreateCrosshairColors()
    {
       QVector<QVector3D> colors;
       colors

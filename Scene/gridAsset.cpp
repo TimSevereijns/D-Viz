@@ -5,12 +5,11 @@
 namespace
 {
    /**
-    * @brief CreateOriginMarkerVertices returns the vertices needed to render the coordinate
-    * system origin marker.
+    * @brief Creates the vertices needed to render the coordinate system origin marker.
     *
-    * @returns a vector of vertices.
+    * @returns A vector of vertices.
     */
-   QVector<QVector3D> CreateOriginMarkerAndGridVertices()
+   auto CreateOriginMarkerAndGridVertices()
    {
       const float axisLength = Visualization::ROOT_BLOCK_WIDTH;
 
@@ -48,11 +47,11 @@ namespace
    }
 
    /**
-    * @brief CreateOriginMarkerColors returns the vertex colors needed to paint the origin marker.
+    * @brief Creates the vertex colors needed to paint the origin marker.
     *
-    * @returns a vector of vertex colors.
+    * @returns A vector of vertex colors.
     */
-   QVector<QVector3D> CreateOriginMarkerAndGridColors()
+   auto CreateOriginMarkerAndGridColors()
    {
       QVector<QVector3D> colors;
       colors

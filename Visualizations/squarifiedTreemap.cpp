@@ -17,11 +17,12 @@ namespace
     *
     * @returns A total row size in bytes of disk space occupied.
     */
-   std::uintmax_t ComputeBytesInRow(const std::vector<TreeNode<VizNode>*>& row,
+   auto ComputeBytesInRow(
+      const std::vector<TreeNode<VizNode>*>& row,
       const std::uintmax_t candidateSize)
    {
-      std::uintmax_t sumOfFileSizes = std::accumulate(std::begin(row), std::end(row),
-         std::uintmax_t{ 0 }, [] (const std::uintmax_t result, const TreeNode<VizNode>* node)
+      auto sumOfFileSizes = std::accumulate(std::begin(row), std::end(row),
+         std::uintmax_t{ 0 }, [] (const auto result, const auto* node)
       {
          return result + (*node)->file.size;
       });
@@ -180,22 +181,22 @@ namespace
       VizNode& node,
       const size_t nodeCount)
    {
-      const double blockWidthPlusPadding = land.width * percentageOfParent;
-      const double ratioBasedPadding = ((land.width * 0.1) / nodeCount) / 2.0;
+      const auto blockWidthPlusPadding = land.width * percentageOfParent;
+      const auto ratioBasedPadding = ((land.width * 0.1) / nodeCount) / 2.0;
 
-      double widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
-      double finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPaddingPerSide);
-      if (finalBlockWidth < 0)
+      auto widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
+      auto finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPaddingPerSide);
+      if (finalBlockWidth < 0.0)
       {
          finalBlockWidth = blockWidthPlusPadding * Visualization::PADDING_RATIO;
          widthPaddingPerSide = (blockWidthPlusPadding * (1.0 - Visualization::PADDING_RATIO)) / 2.0;
       }
 
-      const double ratioBasedBlockDepth = std::abs(land.depth * Visualization::PADDING_RATIO);
-      const double depthPaddingPerSide = std::min((land.depth - ratioBasedBlockDepth) / 2.0,
+      const auto ratioBasedBlockDepth = std::abs(land.depth * Visualization::PADDING_RATIO);
+      const auto depthPaddingPerSide = std::min((land.depth - ratioBasedBlockDepth) / 2.0,
          Visualization::MAX_PADDING);
 
-      const double finalBlockDepth = (depthPaddingPerSide == Visualization::MAX_PADDING)
+      const auto finalBlockDepth = (depthPaddingPerSide == Visualization::MAX_PADDING)
          ? std::abs(land.depth) - (2.0 * Visualization::MAX_PADDING)
          : ratioBasedBlockDepth;
 
@@ -214,7 +215,7 @@ namespace
          finalBlockDepth
       };
 
-      const double additionalCoverage = blockWidthPlusPadding / land.width;
+      const auto additionalCoverage = blockWidthPlusPadding / land.width;
       return additionalCoverage;
    }
 
@@ -235,22 +236,22 @@ namespace
       VizNode& node,
       const size_t nodeCount)
    {
-      const double blockDepthPlusPadding = std::abs(land.depth * percentageOfParent);
-      const double ratioBasedPadding = (land.depth * 0.1) / nodeCount / 2.0;
+      const auto blockDepthPlusPadding = std::abs(land.depth * percentageOfParent);
+      const auto ratioBasedPadding = (land.depth * 0.1) / nodeCount / 2.0;
 
-      double depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
-      double finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPaddingPerSide);
+      auto depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
+      auto finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPaddingPerSide);
       if (finalBlockDepth < 0)
       {
          finalBlockDepth = blockDepthPlusPadding * Visualization::PADDING_RATIO;
          depthPaddingPerSide = (blockDepthPlusPadding * (1.0 - Visualization::PADDING_RATIO)) / 2.0;
       }
 
-      const double ratioBasedWidth = land.width * Visualization::PADDING_RATIO;
-      const double widthPaddingPerSide = std::min((land.width - ratioBasedWidth) / 2.0,
+      const auto ratioBasedWidth = land.width * Visualization::PADDING_RATIO;
+      const auto widthPaddingPerSide = std::min((land.width - ratioBasedWidth) / 2.0,
          Visualization::MAX_PADDING);
 
-      const double finalBlockWidth = (widthPaddingPerSide == Visualization::MAX_PADDING)
+      const auto finalBlockWidth = (widthPaddingPerSide == Visualization::MAX_PADDING)
          ? land.width - (2.0 * Visualization::MAX_PADDING)
          : ratioBasedWidth;
 
@@ -269,7 +270,7 @@ namespace
          std::abs(finalBlockDepth)
       };
 
-      const double additionalCoverage = blockDepthPlusPadding / land.depth;
+      const auto additionalCoverage = blockDepthPlusPadding / land.depth;
       return additionalCoverage;
    }
 
@@ -293,12 +294,12 @@ namespace
 
       assert(land.HasVolume());
 
-      const size_t nodeCount = row.size();
+      const auto nodeCount = row.size();
       const std::uintmax_t rowFileSize = ComputeBytesInRow(row, /*candidateSize =*/ 0);
 
       double additionalCoverage = 0.0;
 
-      for (TreeNode<VizNode>* const node : row)
+      for (auto* const node : row)
       {
          VizNode& data = node->GetData();
 
@@ -331,13 +332,13 @@ namespace
     *
     * @returns A double respresent the length of the shortest edge.
     */
-   double ComputeShortestEdgeOfRemainingBounds(const VizNode& node)
+   auto ComputeShortestEdgeOfRemainingBounds(const VizNode& node)
    {
       const Block remainingRealEstate = ComputeRemainingArea(node.block);
       const auto shortestEdge = std::min(std::abs(remainingRealEstate.depth),
          std::abs(remainingRealEstate.width));
 
-      assert(shortestEdge > 0);
+      assert(shortestEdge > 0.0);
       return shortestEdge;
    }
 
@@ -381,14 +382,14 @@ namespace
 
       assert(largestNodeInBytes > 0);
 
-      const bool updateOffset = false;
+      const auto updateOffset = false;
       const Block rowBounds = CalculateRowBounds(row, candidateSize, parentNode, updateOffset);
 
-      const double totalRowArea = std::abs(rowBounds.width * rowBounds.depth);
+      const auto totalRowArea = std::abs(rowBounds.width * rowBounds.depth);
 
       const std::uintmax_t totalRowSize = ComputeBytesInRow(row, candidateSize);
 
-      const double largestArea =
+      const auto largestArea =
          (static_cast<double>(largestNodeInBytes) / static_cast<double>(totalRowSize)) *
          totalRowArea;
 
@@ -418,10 +419,10 @@ namespace
 
       // Now compute the worst aspect ratio between the two choices above:
 
-      const double lengthSquared = shortestEdgeOfBounds * shortestEdgeOfBounds;
-      const double areaSquared = totalRowArea * totalRowArea;
+      const auto lengthSquared = shortestEdgeOfBounds * shortestEdgeOfBounds;
+      const auto areaSquared = totalRowArea * totalRowArea;
 
-      const double worstRatio = std::max((lengthSquared * largestArea) / (areaSquared),
+      const auto worstRatio = std::max((lengthSquared * largestArea) / (areaSquared),
          (areaSquared) / (lengthSquared * smallestArea));
 
       return worstRatio;

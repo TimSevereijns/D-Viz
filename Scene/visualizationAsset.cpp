@@ -20,23 +20,21 @@ namespace
       const OptionsManager& settings,
       QOpenGLShaderProgram& shader)
    {
-      using namespace std::string_literals;
-
       for (size_t i = 0; i < lights.size(); i++)
       {
-         const auto index = std::to_string(i);
+         const auto indexString = std::to_string(i);
 
          std::string position{ "allLights[" };
-         position.append(index).append("].position");
+         position.append(indexString).append("].position");
 
          std::string intensity{ "allLights[" };
-         intensity.append(index).append("].intensity");
+         intensity.append(indexString).append("].intensity");
 
          std::string attenuation{ "allLights[" };
-         attenuation.append(index).append("].attenuation");
+         attenuation.append(indexString).append("].attenuation");
 
          std::string ambientCoefficient{ "allLights[" };
-         ambientCoefficient.append(index).append("].ambientCoefficient");
+         ambientCoefficient.append(indexString).append("].ambientCoefficient");
 
          shader.setUniformValue(position.c_str(), lights[i].position);
          shader.setUniformValue(intensity.c_str(), lights[i].intensity);
@@ -46,47 +44,48 @@ namespace
    }
 
    /**
-    * @brief RestoreColor
+    * @brief Restores the previously selected node to its non-selected color based on the rendering
+    * settings.
     *
-    * @param node
-    * @param params
+    * @param[in] node               The node whose color needs to be restored.
+    * @param[in] params             The rendering settings that will determine the color.
     *
-    * @return
+    * @returns The color to restore the node to.
     */
    QVector<QVector3D> RestoreColor(
       const TreeNode<VizNode>& node,
       const VisualizationParameters& params)
    {
-      if (node.GetData().file.type == FILE_TYPE::DIRECTORY)
+      if (node.GetData().file.type != FILE_TYPE::DIRECTORY)
       {
-         if (!params.useDirectoryGradient)
-         {
-            return Visualization::CreateDirectoryColors();
-         }
-
-         auto* rootNode = &node;
-         while (rootNode->GetParent())
-         {
-            rootNode = rootNode->GetParent();
-         }
-
-         const auto ratio =
-            static_cast<double>(rootNode->GetData().file.size / node.GetData().file.size);
-
-         ColorGradient gradient;
-
-         QVector<QVector3D> blockColors;
-         blockColors.reserve(Block::VERTICES_PER_BLOCK);
-
-         for (int i = 0; i < Block::VERTICES_PER_BLOCK; i++)
-         {
-            blockColors << gradient.GetColorAtValue(static_cast<float>(ratio));
-         }
-
-         return blockColors;
+         return Visualization::CreateFileColors();
       }
 
-      return Visualization::CreateFileColors();
+      if (!params.useDirectoryGradient)
+      {
+         return Visualization::CreateDirectoryColors();
+      }
+
+      auto* rootNode = &node;
+      while (rootNode->GetParent())
+      {
+         rootNode = rootNode->GetParent();
+      }
+
+      const auto ratio =
+         static_cast<float>(node->file.size) / static_cast<float>((*rootNode)->file.size);
+
+      ColorGradient gradient;
+      const auto nodeColor = gradient.GetColorAtValue(ratio);
+
+      QVector<QVector3D> blockColors;
+      blockColors.reserve(Block::VERTICES_PER_BLOCK);
+      for (int i = 0; i < Block::VERTICES_PER_BLOCK; i++)
+      {
+         blockColors << nodeColor;
+      }
+
+      return blockColors;
    }
 }
 
@@ -112,7 +111,9 @@ bool VisualizationAsset::PrepareVertexBuffers(const Camera& camera)
    m_vertexBuffer.create();
    m_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
    m_vertexBuffer.bind();
-   m_vertexBuffer.allocate(m_rawVertices.constData(), m_rawVertices.size() * 3 * sizeof(GLfloat));
+   m_vertexBuffer.allocate(
+      /* data = */ m_rawVertices.constData(),
+      /* count = */ m_rawVertices.size() * 3 * sizeof(GLfloat));
 
    m_shader.bind();
    m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
@@ -154,7 +155,9 @@ bool VisualizationAsset::PrepareColorBuffers(const Camera&)
    m_colorBuffer.create();
    m_colorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
    m_colorBuffer.bind();
-   m_colorBuffer.allocate(m_rawColors.constData(), m_rawColors.size() * 3 * sizeof(GLfloat));
+   m_colorBuffer.allocate(
+      /* data = */ m_rawColors.constData(),
+      /* count = */ m_rawColors.size() * 3 * sizeof(GLfloat));
 
    m_shader.enableAttributeArray("color");
    m_shader.setAttributeBuffer(
@@ -224,21 +227,15 @@ void VisualizationAsset::UpdateVBO(
    SceneAsset::UpdateAction action,
    const VisualizationParameters& options)
 {
-   constexpr int tupleSize = 3 * sizeof(GLfloat);
-   const int offsetIntoVertexBuffer = node->offsetIntoVBO * tupleSize;
+   constexpr auto tupleSize = 3 * sizeof(GLfloat);
+   const auto offsetIntoVertexBuffer = node->offsetIntoVBO * tupleSize;
 
    // We have to divide by two, because there's a vertex plus a normal for every color:
-   const int offsetIntoColorBuffer = offsetIntoVertexBuffer / 2;
+   const auto offsetIntoColorBuffer = offsetIntoVertexBuffer / 2;
 
-   QVector<QVector3D> newColor;
-   if (action == SceneAsset::UpdateAction::DESELECT)
-   {
-      newColor = RestoreColor(node, options);
-   }
-   else
-   {
-      newColor = Visualization::CreateHighlightColors();
-   }
+   const auto newColor = (action == SceneAsset::UpdateAction::DESELECT)
+      ? RestoreColor(node, options)
+      : Visualization::CreateHighlightColors();
 
    assert(m_VAO.isCreated());
    assert(m_colorBuffer.isCreated());

@@ -316,10 +316,8 @@ void Visualization::ComputeVertexAndColorData(const VisualizationParameters& par
    m_visualizationColors.clear();
    m_visualizationVertices.clear();
 
-
-
    std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
-      [&] (TreeNode<VizNode>& node)
+      [&] (auto& node)
    {
       if ((parameters.onlyShowDirectories && node->file.type != FILE_TYPE::DIRECTORY) ||
           node->file.size < parameters.minimumFileSize)
@@ -331,7 +329,7 @@ void Visualization::ComputeVertexAndColorData(const VisualizationParameters& par
       node->offsetIntoVBO = vertexCount;
 
       std::for_each(std::begin(node->block), std::end(node->block),
-         [&] (const BlockFace& face)
+         [&] (const auto& face)
       {
          m_visualizationVertices << face.vertices;
       });

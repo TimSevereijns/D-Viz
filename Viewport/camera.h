@@ -18,14 +18,14 @@ class Camera
        *
        * @returns The position of the camera within the scene.
        */
-      const QVector3D& GetPosition() const;
+      const QVector3D& GetPosition() const noexcept;
 
       /**
        * @brief Sets the position of the camera in the scene.
        *
        * @param[in] newPosition     The new location of the camera.
        */
-      void SetPosition(const QVector3D& newPosition);
+      void SetPosition(const QVector3D& newPosition) noexcept;
 
       /**
        * @brief Offsets the position of the camera by the specified amount relative to the current
@@ -33,7 +33,7 @@ class Camera
        *
        * @param[in] offset          The relative offset to apply.
        */
-      void OffsetPosition(const QVector3D& offset);
+      void OffsetPosition(const QVector3D& offset) noexcept;
 
       /**
        * @brief Retrieves the camera's current orientation matrix.
@@ -50,7 +50,7 @@ class Camera
        * @param[in] pitch           In degrees.
        * @param[in] yaw             In degrees.
        */
-      void OffsetOrientation(float pitch, float yaw);
+      void OffsetOrientation(float pitch, float yaw) noexcept;
 
       /**
        * @brief Will orient the camera so that the specified point is within view.
@@ -163,14 +163,14 @@ class Camera
        *
        * @param[in] ratio           The aspect ratio of the viewport.
        */
-      void SetAspectRatio(const float ratio);
+      void SetAspectRatio(const float ratio) noexcept;
 
       /**
        * @brief Sets the size of the OpenGL canvas viewport.
        *
        * @param[in] bounds          The current size of the viewport.
        */
-      void SetViewport(const QRect& size);
+      void SetViewport(const QRect& size) noexcept;
 
       /**
        * @brief Retrieves the dimensions of the viewport.
@@ -179,31 +179,31 @@ class Camera
        *
        * @returns the size of the current viewport represented as a rectangle.
        */
-      QRect GetViewport() const;
+      QRect GetViewport() const noexcept;
 
       /**
        * @brief Sets the field of view that will factor into the perspective matrix.
        *
        * @param[in] angle           In degrees.
        */
-      void SetFieldOfView(const float angle);
+      void SetFieldOfView(const float angle) noexcept;
 
       /**
        * @brief Retrives the camera's current field of view.
        *
        * @returns The current field of view in degrees.
        */
-      float GetFieldOfView() const;
+      float GetFieldOfView() const noexcept;
 
       /**
        * @brief Increases the field of view by five degrees.
        */
-      void IncreaseFieldOfView();
+      void IncreaseFieldOfView() noexcept;
 
       /**
        * @brief Decreases the field of view by five degrees.
        */
-      void DecreaseFieldOfView();
+      void DecreaseFieldOfView() noexcept;
 
       /**
        * @brief Shoots a ray into the scene starting at the specified point on the
@@ -226,9 +226,9 @@ class Camera
        */
       bool IsPointInFrontOfCamera(const QVector3D& point) const;
 
-      float GetNearPlane() const;
+      float GetNearPlane() const noexcept;
 
-      float GetFarPlane() const;
+      float GetFarPlane() const noexcept;
 
    private:
       QVector3D m_position;

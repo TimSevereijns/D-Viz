@@ -9,7 +9,7 @@ static constexpr double MAX_VERTICAL_ANGLE = 85.0;
 
 namespace
 {
-   void NormalizeAngles(double& horizontalAngle, double& verticalAngle)
+   void NormalizeAngles(double& horizontalAngle, double& verticalAngle) noexcept
    {
       // Calculate floating point remainder:
       horizontalAngle = std::fmod(horizontalAngle, 360.0f);
@@ -31,17 +31,17 @@ namespace
    }
 }
 
-const QVector3D& Camera::GetPosition() const
+const QVector3D& Camera::GetPosition() const noexcept
 {
    return m_position;
 }
 
-void Camera::SetPosition(const QVector3D& newPosition)
+void Camera::SetPosition(const QVector3D& newPosition) noexcept
 {
    m_position = newPosition;
 }
 
-void Camera::OffsetPosition(const QVector3D& offset)
+void Camera::OffsetPosition(const QVector3D& offset) noexcept
 {
    m_position += offset;
 }
@@ -54,7 +54,7 @@ QMatrix4x4 Camera::GetOrientation() const
    return orientation;
 }
 
-void Camera::OffsetOrientation(float pitch, float yaw)
+void Camera::OffsetOrientation(float pitch, float yaw) noexcept
 {
    m_horizontalAngle += yaw;
    m_verticalAngle += pitch;
@@ -137,7 +137,7 @@ QVector3D Camera::Unproject(const QPoint& point, float viewDepth, QMatrix4x4 mod
    if (!wasMatrixInvertible)
    {
       std::cout << "Matrix was not invertible!" << std::endl;
-      return {};
+      return { };
    }
 
    const float x = 2.0f * (float)(point.x() - m_viewport.x()) / (float)m_viewport.width() - 1.0f;
@@ -163,7 +163,7 @@ Qt3DCore::QRay3D Camera::ShootRayIntoScene(const QPoint& widgetCoordinates) cons
    const QVector3D nearPlanePoint = Unproject(glCoordinates, 0.0f, QMatrix4x4{ });
    const QVector3D farPlanePoint = Unproject(glCoordinates, 1.0f, QMatrix4x4{ });
 
-   const QVector3D direction = QVector3D(nearPlanePoint - farPlanePoint).normalized();
+   const auto direction = QVector3D(nearPlanePoint - farPlanePoint).normalized();
 
    const Qt3DCore::QRay3D ray
    {
@@ -184,32 +184,32 @@ bool Camera::IsPointInFrontOfCamera(const QVector3D& point) const
    return result.z() > 0;
 }
 
-void Camera::SetAspectRatio(const float ratio)
+void Camera::SetAspectRatio(const float ratio) noexcept
 {
    m_aspectRatio = ratio;
 }
 
-void Camera::SetViewport(const QRect& size)
+void Camera::SetViewport(const QRect& size) noexcept
 {
    m_viewport = size;
 }
 
-float Camera::GetNearPlane() const
+float Camera::GetNearPlane() const noexcept
 {
    return m_nearPlane;
 }
 
-float Camera::GetFarPlane() const
+float Camera::GetFarPlane() const noexcept
 {
    return m_farPlane;
 }
 
-QRect Camera::GetViewport() const
+QRect Camera::GetViewport() const noexcept
 {
    return m_viewport;
 }
 
-void Camera::SetFieldOfView(const float angle)
+void Camera::SetFieldOfView(const float angle) noexcept
 {
    if (angle > 85.0f)
    {
@@ -225,12 +225,12 @@ void Camera::SetFieldOfView(const float angle)
    }
 }
 
-float Camera::GetFieldOfView() const
+float Camera::GetFieldOfView() const noexcept
 {
    return m_fieldOfView;
 }
 
-void Camera::IncreaseFieldOfView()
+void Camera::IncreaseFieldOfView() noexcept
 {
    m_fieldOfView += 5.0f;
 
@@ -240,7 +240,7 @@ void Camera::IncreaseFieldOfView()
    }
 }
 
-void Camera::DecreaseFieldOfView()
+void Camera::DecreaseFieldOfView() noexcept
 {
    m_fieldOfView -= 5.0f;
 
