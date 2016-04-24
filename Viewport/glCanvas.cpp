@@ -43,7 +43,7 @@ namespace
     * @returns A std::pair encapsulating the converted file size, and corresponding unit readout
     * string.
     */
-   std::pair<double, std::wstring> GetFileSizeInMostAppropriateUnits(double sizeInBytes)
+   auto GetFileSizeInMostAppropriateUnits(double sizeInBytes)
    {
       if (sizeInBytes < Constants::FileSize::oneKibibyte)
       {
@@ -94,7 +94,7 @@ namespace
       }
 
       const auto completePath = std::accumulate(std::rbegin(reversePath), std::rend(reversePath),
-         std::wstring{}, [] (const std::wstring& path, const std::wstring& file)
+         std::wstring{ }, [] (const std::wstring& path, const std::wstring& file)
       {
          return path + (!path.empty() ? L"/" : L"") + file;
       });

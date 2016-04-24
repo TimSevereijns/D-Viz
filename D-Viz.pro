@@ -100,12 +100,27 @@ CONFIG(release, debug|release) {
    library_files.path += $$OUT_PWD/release
    library_files.files += $$PWD/../boost_1_60_0/stage/lib/boost_filesystem-vc140-mt-1_60*
    library_files.files += $$PWD/../boost_1_60_0/stage/lib/boost_system-vc140-mt-1_60*
+   library_files.files += $$(QTDIR)/bin/Qt53DCore.dll
+   library_files.files += $$(QTDIR)/bin/Qt5Widgets.dll
+   library_files.files += $$(QTDIR)/bin/Qt5Gui.dll
+   library_files.files += $$(QTDIR)/bin/Qt5Core.dll
+
+   plugin_files.path += $$OUT_PWD/release/platforms
+   plugin_files.files += $$(QTDIR)/plugins/platforms/qwindows.dll
 }
 CONFIG(debug, debug|release) {
    library_files.path += $$OUT_PWD/debug
    library_files.files += $$PWD/../boost_1_60_0/stage/lib/boost_filesystem-vc140-mt-gd-1_60*
    library_files.files += $$PWD/../boost_1_60_0/stage/lib/boost_system-vc140-mt-gd-1_60*
+   library_files.files += $$(QTDIR)/bin/Qt53DCore.dll
+   library_files.files += $$(QTDIR)/bin/Qt5Widgets.dll
+   library_files.files += $$(QTDIR)/bin/Qt5Gui.dll
+   library_files.files += $$(QTDIR)/bin/Qt5Core.dll
+
+   plugin_files.path += $$OUT_PWD/release/platforms
+   plugin_files.files += $$(QTDIR)/plugins/platforms/qwindows.dll
 }
 
 library_files.files += $$PWD/Resources/XInput1_4.dll
 INSTALLS += library_files
+INSTALLS += plugin_files
