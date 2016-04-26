@@ -19,8 +19,7 @@
 namespace
 {
    /**
-    * @brief UpdateVertexCountInStatusBar is a helper function to set the specifed vertex and block
-    * count in the bottom status bar.
+    * @brief Helper function to set the specifed vertex and block count in the bottom status bar.
     *
     * @param[in] vertexCount        The readout value.
     * @param[in] mainWindow         The main window that contains the status bar.
@@ -36,7 +35,7 @@ namespace
    }
 
    /**
-    * @brief FileSizeInMostAppropriateUnits
+    * @brief Converts the given size of the file from bytes to the most human readable units.
     *
     * @param[in] sizeInBytes        The size (in bytes) to be converted to a more appropriate unit.
     *
@@ -73,11 +72,11 @@ namespace
    }
 
    /**
-    * @brief GetFullNodePath
+    * @brief Computes the absolute file path of the selected node by traveling up tree.
     *
     * @param[in] node               The selected node.
     *
-    * @returns the complete path as created by following the current node up to the root.
+    * @returns The absolute file path.
     */
    std::wstring GetFullNodePath(const TreeNode<VizNode>& node)
    {
@@ -104,8 +103,8 @@ namespace
    }
 
    /**
-    * @brief ClearHighlightSelection will clear the vertex and color data buffers from the specified
-    * asset, and will then reload the now empty asset.
+    * @brief Clear sthe vertex and color data buffers from the specified asset, and will then reload
+    * the now empty asset.
     *
     * @param[in] highlightAsset     The asset to be nuked and reloaded.
     * @param[in] camera             The camera used to view the asset in the scene.
@@ -118,7 +117,7 @@ namespace
    }
 
    /**
-    * @brief The Asset enum provides an easier way to index into the asset vector.
+    * @brief Provides an easier way to index into the asset vector, than memorizing indices.
     */
    enum Asset
    {
@@ -516,7 +515,7 @@ void GLCanvas::HandleInput()
    }
 
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::system_clock::now() - m_lastFrameTimeStamp);
+      std::chrono::system_clock::now() - m_lastXboxControllerPollTime);
 
    const bool isKeyWDown = m_keyboardManager.IsKeyDown(Qt::Key_W);
    const bool isKeyADown = m_keyboardManager.IsKeyDown(Qt::Key_A);
@@ -554,7 +553,7 @@ void GLCanvas::HandleInput()
 void GLCanvas::HandleXBoxControllerInput()
 {
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::system_clock::now() - m_lastFrameTimeStamp);
+      std::chrono::system_clock::now() - m_lastXboxControllerPollTime);
 
    const XboxController::State& controllerState = m_mainWindow->GetXboxControllerState();
    const XboxController& controller = m_mainWindow->GetXboxControllerManager();
@@ -684,10 +683,10 @@ void GLCanvas::UpdateFPS()
 {
    const auto now = std::chrono::system_clock::now();
    const auto millisecondsElapsed = std::max<unsigned int>(
-      std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastFrameTimeStamp).count(),
+      std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastFrameDrawTime).count(),
       1); // This will avoid division by zero.
 
-   m_lastFrameTimeStamp = now;
+   m_lastFrameDrawTime = now;
 
    if (m_frameRateDeque.size() > 32)
    {

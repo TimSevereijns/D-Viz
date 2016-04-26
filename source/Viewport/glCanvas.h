@@ -100,7 +100,7 @@ class GLCanvas : public QOpenGLWidget
       void HandleRightClick(const QPoint& point);
 
       /**
-       * @brief Handler for TreeNode selection.
+       * @brief Handles TreeNode selection events.
        *
        * @param[in] selectedNode    Pointer to the TreeNode that the user clicked on, and nullptr if
        *                            the user's click didn't hit a TreeNode.
@@ -175,7 +175,12 @@ class GLCanvas : public QOpenGLWidget
       std::unique_ptr<QTimer> m_frameRedrawTimer{ nullptr };
       std::unique_ptr<QTimer> m_cameraPositionTimer{ nullptr };
 
-      std::chrono::system_clock::time_point m_lastFrameTimeStamp
+      std::chrono::system_clock::time_point m_lastFrameDrawTime
+      {
+         std::chrono::system_clock::now()
+      };
+
+      std::chrono::system_clock::time_point m_lastXboxControllerPollTime
       {
          std::chrono::system_clock::now()
       };
