@@ -14,6 +14,7 @@ namespace
       const float axisLength = Visualization::ROOT_BLOCK_WIDTH;
 
       QVector<QVector3D> vertices;
+      vertices.reserve(46);
       vertices
          << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(axisLength, 0.0f, 0.0f)   // X-axis
          << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 100.0f, 0.0f)       // Y-axis
@@ -54,6 +55,7 @@ namespace
    auto CreateOriginMarkerAndGridColors()
    {
       QVector<QVector3D> colors;
+      colors.reserve(46);
       colors
          << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)  // X-axis (red)
          << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)  // Y-axis (green)

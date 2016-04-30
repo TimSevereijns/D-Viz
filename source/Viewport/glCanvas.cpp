@@ -43,7 +43,7 @@ namespace
     * @returns A std::pair encapsulating the converted file size, and corresponding unit readout
     * string.
     */
-   auto GetFileSizeInMostAppropriateUnits(double sizeInBytes)
+   auto ConvertFileSizeToMostAppropriateUnits(double sizeInBytes)
    {
       if (sizeInBytes < Constants::FileSize::ONE_KIBIBYTE)
       {
@@ -182,7 +182,6 @@ void GLCanvas::initializeGL()
 
 void GLCanvas::resizeGL(int width, int height)
 {
-   // Avoid a divide-by-zero situation:
    if (height == 0)
    {
       height = 1;
@@ -366,7 +365,7 @@ void GLCanvas::HandleNodeSelection(const TreeNode<VizNode>* selectedNode)
    message.imbue(std::locale{ "" });
    message.precision(2);
 
-   const auto sizeAndUnits = GetFileSizeInMostAppropriateUnits(fileSize);
+   const auto sizeAndUnits = ConvertFileSizeToMostAppropriateUnits(fileSize);
    message
       << GetFullNodePath(*selectedNode)
       << L"  |  "

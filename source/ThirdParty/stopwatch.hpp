@@ -188,6 +188,8 @@ private:
    ChronoType m_elapsed;
 };
 
+#ifdef ENABLE_STOPWATCH
+
 #define TIME_IN_NANOSECONDS(code, message)   \
    Stopwatch<std::chrono::nanoseconds>(      \
       [&] { code; },                         \
@@ -217,3 +219,25 @@ private:
    Stopwatch<std::chrono::hours>(            \
       [&] { code; },                         \
       message);
+
+#else
+
+#define TIME_IN_NANOSECONDS(code, message)   \
+   code;
+
+#define TIME_IN_MICROSECONDS(code, message)  \
+   code;
+
+#define TIME_IN_MILLISECONDS(code, message)  \
+   code;
+
+#define TIME_IN_SECONDS(code, message)       \
+   code;
+
+#define TIME_IN_MINUTES(code, message)       \
+   code;
+
+#define TIME_IN_HOURS(code, message)         \
+   code;
+
+#endif

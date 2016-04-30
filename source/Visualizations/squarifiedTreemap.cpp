@@ -5,6 +5,10 @@
 #include <limits>
 #include <numeric>
 
+#ifndef ENABLE_STOPWATCH
+#define ENABLE_STOPWATCH
+#endif
+
 #include "../ThirdParty/stopwatch.hpp"
 
 namespace
@@ -74,9 +78,7 @@ namespace
     * @brief CalculateRowBounds computes the outer bounds (including the necessary boundary padding)
     * needed to properly contain the row once laid out on top of its parent node.
     *
-    * @param[in] row                The nodes to be laid out as blocks in the current row.
-    * @param[in] candidateSize      The size of the latest candidate to be considered for inclusion
-    *                               in the row.
+    * @param[in] bytesInRow         The total size of the row in bytes.
     * @param[in, out] parentNode    The node on top of which the new row is to be placed.
     * @param[in] updateOffset       Whether the origin of the next row should be computed. This
     *                               should only be set to true only when the row bounds are computed
@@ -85,8 +87,7 @@ namespace
     * @returns A block representing the outer dimensions of the row boundary.
     */
    Block CalculateRowBounds(
-      const std::vector<TreeNode<VizNode>*>& row,
-      const std::uintmax_t candidateSize,
+      std::uintmax_t bytesInRow,
       VizNode& parentNode,
       const bool updateOffset)
    {
@@ -103,8 +104,7 @@ namespace
       const double remainingArea = std::abs(remainingLand.width * remainingLand.depth);
       const double remainingBytes = (remainingArea / parentArea) * parentNode.file.size;
 
-      const std::uintmax_t rowSizeInBytes = ComputeBytesInRow(row, candidateSize);
-      const double rowToParentRatio = rowSizeInBytes / remainingBytes;
+      const double rowToParentRatio = bytesInRow / remainingBytes;
 
       const DoublePoint3D nearCorner
       {
@@ -289,13 +289,14 @@ namespace
          return;
       }
 
-      Block& land = CalculateRowBounds(row, /*candidateSize =*/ 0,
-         row.front()->GetParent()->GetData(), /*updateOffset =*/ true);
+      const std::uintmax_t bytesInRow = ComputeBytesInRow(row, /*candidateSize =*/ 0);
+
+      Block& land = CalculateRowBounds(bytesInRow, row.front()->GetParent()->GetData(),
+         /*updateOffset =*/ true);
 
       assert(land.HasVolume());
 
       const auto nodeCount = row.size();
-      const std::uintmax_t rowFileSize = ComputeBytesInRow(row, /*candidateSize =*/ 0);
 
       double additionalCoverage = 0.0;
 
@@ -311,7 +312,7 @@ namespace
          }
 
          const double percentageOfParent =
-            static_cast<double>(nodeFileSize) / static_cast<double>(rowFileSize);
+            static_cast<double>(nodeFileSize) / static_cast<double>(bytesInRow);
 
          additionalCoverage = (land.width > std::abs(land.depth))
             ? SlicePerpendicularToWidth(land, percentageOfParent, data, nodeCount)
@@ -382,15 +383,14 @@ namespace
 
       assert(largestNodeInBytes > 0);
 
-      const auto updateOffset = false;
-      const Block rowBounds = CalculateRowBounds(row, candidateSize, parentNode, updateOffset);
+      const auto updateOffset{ false };
+      const std::uintmax_t bytesInRow = ComputeBytesInRow(row, candidateSize);
+      const Block rowBounds = CalculateRowBounds(bytesInRow, parentNode, updateOffset);
 
       const auto totalRowArea = std::abs(rowBounds.width * rowBounds.depth);
 
-      const std::uintmax_t totalRowSize = ComputeBytesInRow(row, candidateSize);
-
       const auto largestArea =
-         (static_cast<double>(largestNodeInBytes) / static_cast<double>(totalRowSize)) *
+         (static_cast<double>(largestNodeInBytes) / static_cast<double>(bytesInRow)) *
          totalRowArea;
 
       // Find the smallest surface area if the row and candidate were laid out:
@@ -414,7 +414,7 @@ namespace
       assert(totalRowArea > 0);
 
       const double smallestArea =
-         (static_cast<double>(smallestNodeInBytes) / static_cast<double>(totalRowSize)) *
+         (static_cast<double>(smallestNodeInBytes) / static_cast<double>(bytesInRow)) *
          totalRowArea;
 
       // Now compute the worst aspect ratio between the two choices above:
@@ -449,6 +449,7 @@ namespace
       assert(parentVizNode.block.HasVolume() && parentVizNode.block.IsNotInverted());
 
       std::vector<TreeNode<VizNode>*> row;
+      row.reserve(nodes.size());
 
       double shortestEdgeOfBounds = ComputeShortestEdgeOfRemainingBounds(parentVizNode);
       assert(shortestEdgeOfBounds > 0.0);
