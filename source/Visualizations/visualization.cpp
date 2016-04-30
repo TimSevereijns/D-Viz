@@ -503,7 +503,7 @@ QVector<QVector3D> Visualization::CreateHighlightColors()
 
    for (int i = 0; i < Block::VERTICES_PER_BLOCK; i++)
    {
-      blockColors << Constants::Colors::canaryYellow;
+      blockColors << Constants::Colors::CANARY_YELLOW;
    }
 
    return blockColors;

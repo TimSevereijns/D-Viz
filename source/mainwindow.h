@@ -158,15 +158,15 @@ class MainWindow : public QMainWindow
       std::vector<std::pair<std::uintmax_t, QString>> m_sizePruningOptions
       {
          std::pair<std::uintmax_t, QString>(0,                                      "Show All"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneKibibyte,       "< 1 Kib"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte,       "< 1 MiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 10,  "< 10 MiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 100, "< 100 MiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 250, "< 250 MiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneMebibyte * 500, "< 500 MiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte,       "< 1 GiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte * 5,   "< 5 GiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::oneGibibyte * 10,  "< 10 GiB")
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_KIBIBYTE,       "< 1 Kib"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_MEBIBYTE,       "< 1 MiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_MEBIBYTE * 10,  "< 10 MiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_MEBIBYTE * 100, "< 100 MiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_MEBIBYTE * 250, "< 250 MiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_MEBIBYTE * 500, "< 500 MiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_GIBIBYTE,       "< 1 GiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_GIBIBYTE * 5,   "< 5 GiB"),
+         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_GIBIBYTE * 10,  "< 10 GiB")
       };
 };
 

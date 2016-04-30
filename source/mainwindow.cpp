@@ -97,7 +97,7 @@ void MainWindow::SetupSidebar()
 
 void MainWindow::SetupXboxController()
 {
-   m_xboxController->StartAutoPolling(Constants::DESIRED_TIME_BETWEEN_FRAMES);
+   m_xboxController->StartAutoPolling(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
 
    connect(m_xboxController.get(), SIGNAL(ControllerConnected(uint)),
       this, SLOT(XboxControllerConnected()));

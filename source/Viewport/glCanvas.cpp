@@ -45,31 +45,31 @@ namespace
     */
    auto GetFileSizeInMostAppropriateUnits(double sizeInBytes)
    {
-      if (sizeInBytes < Constants::FileSize::oneKibibyte)
+      if (sizeInBytes < Constants::FileSize::ONE_KIBIBYTE)
       {
          return std::make_pair<double, std::wstring>(std::move(sizeInBytes), L" bytes");
       }
 
-      if (sizeInBytes < Constants::FileSize::oneMebibyte)
+      if (sizeInBytes < Constants::FileSize::ONE_MEBIBYTE)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::oneKibibyte, L" KiB");
+            sizeInBytes / Constants::FileSize::ONE_KIBIBYTE, L" KiB");
       }
 
-      if (sizeInBytes < Constants::FileSize::oneGibibyte)
+      if (sizeInBytes < Constants::FileSize::ONE_GIBIBYTE)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::oneMebibyte, L" MiB");
+            sizeInBytes / Constants::FileSize::ONE_MEBIBYTE, L" MiB");
       }
 
-      if (sizeInBytes < Constants::FileSize::oneTebibyte)
+      if (sizeInBytes < Constants::FileSize::ONE_TEBIBYTE)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::oneGibibyte, L" GiB");
+            sizeInBytes / Constants::FileSize::ONE_GIBIBYTE, L" GiB");
       }
 
       return std::make_pair<double, std::wstring>(
-         sizeInBytes / Constants::FileSize::oneTebibyte, L" TiB");
+         sizeInBytes / Constants::FileSize::ONE_TEBIBYTE, L" TiB");
    }
 
    /**
@@ -151,11 +151,11 @@ GLCanvas::GLCanvas(QWidget* parent) :
 
    m_frameRedrawTimer.reset(new QTimer{ this });
    connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
-   m_frameRedrawTimer->start(Constants::DESIRED_TIME_BETWEEN_FRAMES);
+   m_frameRedrawTimer->start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
 
    m_cameraPositionTimer.reset(new QTimer{ this });
    connect(m_cameraPositionTimer.get(), SIGNAL(timeout()), this, SLOT(HandleInput()));
-   m_cameraPositionTimer->start(Constants::DESIRED_TIME_BETWEEN_FRAMES);
+   m_cameraPositionTimer->start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
 }
 
 void GLCanvas::initializeGL()
@@ -261,7 +261,7 @@ void GLCanvas::AskUserToLimitFileSize(
       return;
    }
 
-   if (parameters.minimumFileSize < Constants::FileSize::oneMebibyte)
+   if (parameters.minimumFileSize < Constants::FileSize::ONE_MEBIBYTE)
    {
       QMessageBox messageBox;
       messageBox.setIcon(QMessageBox::Warning);
@@ -276,8 +276,8 @@ void GLCanvas::AskUserToLimitFileSize(
       switch (election)
       {
          case QMessageBox::Yes:
-            parameters.minimumFileSize = Constants::FileSize::oneMebibyte;
-            m_mainWindow->SetFilePruningComboBoxValue(Constants::FileSize::oneMebibyte);
+            parameters.minimumFileSize = Constants::FileSize::ONE_MEBIBYTE;
+            m_mainWindow->SetFilePruningComboBoxValue(Constants::FileSize::ONE_MEBIBYTE);
             return;
          case QMessageBox::No:
             return;
@@ -563,7 +563,8 @@ void GLCanvas::HandleXBoxControllerInput()
    const XboxController::State& controllerState = m_mainWindow->GetXboxControllerState();
    const XboxController& controller = m_mainWindow->GetXboxControllerManager();
 
-   const auto cameraSpeed = m_settings->m_cameraMovementSpeed / Constants::MOVEMENT_AMPLIFICATION;
+   const auto cameraSpeed =
+       m_settings->m_cameraMovementSpeed / Constants::Xbox::MOVEMENT_AMPLIFICATION;
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_UP))
    {
@@ -604,12 +605,12 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
    if (controllerState.rightThumbX || controllerState.rightThumbY)
    {
       const auto pitch =
-         Constants::MOVEMENT_AMPLIFICATION *
+         Constants::Xbox::MOVEMENT_AMPLIFICATION *
          m_settings->m_mouseSensitivity *
          -controllerState.rightThumbY;
 
       const auto yaw =
-         Constants::MOVEMENT_AMPLIFICATION *
+         Constants::Xbox::MOVEMENT_AMPLIFICATION *
          m_settings->m_mouseSensitivity *
          controllerState.rightThumbX;
 
@@ -619,7 +620,7 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
    if (controllerState.leftThumbY)
    {
       m_camera.OffsetPosition(
-         Constants::MOVEMENT_AMPLIFICATION *
+         Constants::Xbox::MOVEMENT_AMPLIFICATION *
          m_settings->m_cameraMovementSpeed *
          controllerState.leftThumbY *
          m_camera.Forward());
@@ -628,7 +629,7 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
    if (controllerState.leftThumbX)
    {
       m_camera.OffsetPosition(
-         Constants::MOVEMENT_AMPLIFICATION *
+         Constants::Xbox::MOVEMENT_AMPLIFICATION *
          m_settings->m_cameraMovementSpeed *
          controllerState.leftThumbX *
          m_camera.Right());
@@ -637,7 +638,7 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
 
 void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerState)
 {
-   if (controllerState.leftTrigger > Constants::XBOX_TRIGGER_ACTUATION_THRESHOLD &&
+   if (controllerState.leftTrigger > Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD &&
       !m_isLeftTriggerDown)
    {
       m_isLeftTriggerDown = true;
@@ -652,7 +653,7 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
          crosshairAsset->Reload(m_camera);
       }
    }
-   else if (controllerState.leftTrigger <= Constants::XBOX_TRIGGER_ACTUATION_THRESHOLD &&
+   else if (controllerState.leftTrigger <= Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD &&
       m_isLeftTriggerDown)
    {
       m_isLeftTriggerDown = false;
@@ -668,14 +669,14 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
       }
    }
 
-   if (controllerState.rightTrigger > Constants::XBOX_TRIGGER_ACTUATION_THRESHOLD &&
+   if (controllerState.rightTrigger > Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD &&
       !m_isRightTriggerDown)
    {
       m_isRightTriggerDown = true;
 
       HandleRightClick(m_camera.GetViewport().center());
    }
-   else if (controllerState.rightTrigger <= Constants::XBOX_TRIGGER_ACTUATION_THRESHOLD &&
+   else if (controllerState.rightTrigger <= Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD &&
       m_isRightTriggerDown)
    {
       m_isRightTriggerDown = false;
