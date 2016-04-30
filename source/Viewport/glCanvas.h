@@ -93,6 +93,13 @@ class GLCanvas : public QOpenGLWidget
       void UpdateFPS();
 
       /**
+       * @brief Generates and displays the context menu.
+       *
+       * @param[in] point           The location at which to place the top left corner of the menu.
+       */
+      void ShowContextMenu(const QPoint& point);
+
+      /**
        * @brief Handles mouse right-click mouse events.
        *
        * @param[in] event           Details of the mouse click event.

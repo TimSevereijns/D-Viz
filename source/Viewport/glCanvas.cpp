@@ -7,15 +7,20 @@
 #include "Scene/nodeSelectionCrosshair.h"
 #include "Scene/visualizationAsset.h"
 
+#include "canvasContextMenu.h"
 #include "Visualizations/squarifiedTreemap.h"
 #include "Utilities/scopeExit.hpp"
 
 #include <QApplication>
+#include <QMenu>
 #include <QMessageBox>
 
 #include <iostream>
 #include <sstream>
 #include <utility>
+
+#include <ShlObj.h>
+#include <Objbase.h>
 
 namespace
 {
@@ -104,6 +109,27 @@ namespace
    }
 
    /**
+    * @brief Opens the selected file in Windows File Explorer.
+    *
+    * @param[in] selectedNode       The node that represents the file to open.
+    */
+   void OpenFileInExplorer(const TreeNode<VizNode>& selectedNode)
+   {
+      CoInitializeEx(NULL, COINIT_MULTITHREADED);
+      ON_SCOPE_EXIT{ CoUninitialize(); };
+
+      std::wstring filePath = GetFullNodePath(selectedNode);
+      std::replace(std::begin(filePath), std::end(filePath), L'/', L'\\');
+
+      ITEMIDLIST __unaligned * idList = ILCreateFromPath(filePath.c_str());
+      if (idList)
+      {
+         SHOpenFolderAndSelectItems(idList, 0, 0, 0);
+         ILFree(idList);
+      }
+   }
+
+   /**
     * @brief Clear sthe vertex and color data buffers from the specified asset, and will then reload
     * the now empty asset.
     *
@@ -148,6 +174,10 @@ GLCanvas::GLCanvas(QWidget* parent) :
    format.setSamples(8);
    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
    setFormat(format);
+
+//   setContextMenuPolicy(Qt::CustomContextMenu);
+//   connect(this, SIGNAL(customContextMenuRequested(QPoint)),
+//      this, SLOT(ShowContextMenu(const QPoint&)));
 
    m_frameRedrawTimer.reset(new QTimer{ this });
    connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
@@ -430,7 +460,14 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
 
    if (event->button() == Qt::RightButton)
    {
-      HandleRightClick(event->pos());
+      if (m_keyboardManager.IsKeyDown(Qt::Key_Control))
+      {
+         ShowContextMenu(m_lastMousePosition);
+      }
+      else
+      {
+         HandleRightClick(event->pos());
+      }
    }
 
    event->accept();
@@ -502,6 +539,25 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
       m_mainWindow->SetFieldOfViewSlider(static_cast<float>(m_camera.GetFieldOfView()));
    }
+}
+
+void GLCanvas::ShowContextMenu(const QPoint& point)
+{
+   QPoint globalPoint = mapToGlobal(point);
+
+   CanvasContextMenu contextMenu{ m_keyboardManager };
+   contextMenu.addAction("Highlight Ancestors",
+      [&]
+   {
+      // @todo
+   });
+
+   if (m_selectedNode)
+   {
+      contextMenu.addAction("Show in Explorer", [&] { OpenFileInExplorer(*m_selectedNode); });
+   }
+
+   contextMenu.exec(globalPoint);
 }
 
 void GLCanvas::HandleInput()

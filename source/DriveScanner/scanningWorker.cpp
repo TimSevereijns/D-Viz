@@ -91,7 +91,7 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
       Visualization::ROOT_BLOCK_DEPTH
    };
 
-   std::wstring sanitizedPath{m_parameters.path};
+   std::wstring sanitizedPath{ m_parameters.path };
 
    const auto stringLength = m_parameters.path.length();
    if (stringLength > 1 &&

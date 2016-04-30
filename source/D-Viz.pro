@@ -36,7 +36,8 @@ SOURCES += \
     Viewport/glCanvas.cpp \
     Viewport/graphicsDevice.cpp \
     Visualizations/squarifiedTreemap.cpp \
-    Visualizations/visualization.cpp
+    Visualizations/visualization.cpp \
+    Viewport/canvasContextMenu.cpp
 
 HEADERS  += \
     constants.h \
@@ -66,7 +67,8 @@ HEADERS  += \
     Viewport/glCanvas.h \
     Viewport/graphicsDevice.h \
     Visualizations/squarifiedTreemap.h \
-    Visualizations/visualization.h
+    Visualizations/visualization.h \
+    Viewport/canvasContextMenu.h
 
 FORMS    += mainwindow.ui
 
@@ -93,7 +95,10 @@ else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../boost
 else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../boost_1_60_0/stage/lib/boost_filesystem-vc140-mt-1_60.lib
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../boost_1_60_0/stage/lib/boost_filesystem-vc140-mt-gd-1_60.lib
 
-win32: LIBS += -lxinput
+win32:
+   LIBS += -lxinput
+   LIBS += -lShell32
+   LIBS += -lOle32
 
 CONFIG(release, debug|release) {
    library_files.path += $$OUT_PWD/release
