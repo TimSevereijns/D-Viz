@@ -24,8 +24,7 @@ namespace Constants
 
    constexpr static int DESIRED_TIME_BETWEEN_FRAMES = 20;
 
-   constexpr static double TRANSLATION_AMPLIFICATION = 500.0;
-   constexpr static double LOOK_AMPLIFICATION = 10.0;
+   constexpr static double MOVEMENT_AMPLIFICATION = 10.0;
 
    constexpr static float XBOX_TRIGGER_ACTUATION_THRESHOLD = 0.2f;
 }

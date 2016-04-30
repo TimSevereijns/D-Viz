@@ -505,21 +505,22 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    }
 }
 
-static bool printedMessage = false;
-
 void GLCanvas::HandleInput()
 {
    assert(m_settings && m_mainWindow);
+
+   const auto now = std::chrono::system_clock::now();
+   ON_SCOPE_EXIT{ m_lastCameraPositionUpdatelTime = now; };
 
    if (m_settings->m_useXBoxController && m_mainWindow->IsXboxControllerConnected())
    {
       HandleXBoxControllerInput();
 
-      return;
+       return;
    }
 
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::system_clock::now() - m_lastCameraPositionUpdatelTime);
+      now - m_lastCameraPositionUpdatelTime);
 
    const bool isKeyWDown = m_keyboardManager.IsKeyDown(Qt::Key_W);
    const bool isKeyADown = m_keyboardManager.IsKeyDown(Qt::Key_A);
@@ -562,7 +563,7 @@ void GLCanvas::HandleXBoxControllerInput()
    const XboxController::State& controllerState = m_mainWindow->GetXboxControllerState();
    const XboxController& controller = m_mainWindow->GetXboxControllerManager();
 
-   const auto cameraSpeed = m_settings->m_cameraMovementSpeed / Constants::TRANSLATION_AMPLIFICATION;
+   const auto cameraSpeed = m_settings->m_cameraMovementSpeed / Constants::MOVEMENT_AMPLIFICATION;
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_UP))
    {
@@ -603,12 +604,12 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
    if (controllerState.rightThumbX || controllerState.rightThumbY)
    {
       const auto pitch =
-         Constants::LOOK_AMPLIFICATION *
+         Constants::MOVEMENT_AMPLIFICATION *
          m_settings->m_mouseSensitivity *
          -controllerState.rightThumbY;
 
       const auto yaw =
-         Constants::LOOK_AMPLIFICATION *
+         Constants::MOVEMENT_AMPLIFICATION *
          m_settings->m_mouseSensitivity *
          controllerState.rightThumbX;
 
@@ -618,7 +619,7 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
    if (controllerState.leftThumbY)
    {
       m_camera.OffsetPosition(
-         Constants::LOOK_AMPLIFICATION *
+         Constants::MOVEMENT_AMPLIFICATION *
          m_settings->m_cameraMovementSpeed *
          controllerState.leftThumbY *
          m_camera.Forward());
@@ -627,7 +628,7 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
    if (controllerState.leftThumbX)
    {
       m_camera.OffsetPosition(
-         Constants::LOOK_AMPLIFICATION *
+         Constants::MOVEMENT_AMPLIFICATION *
          m_settings->m_cameraMovementSpeed *
          controllerState.leftThumbX *
          m_camera.Right());
