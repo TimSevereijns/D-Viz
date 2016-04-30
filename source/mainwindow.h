@@ -138,7 +138,7 @@ class MainWindow : public QMainWindow
 
       int m_sizePruningComboBoxIndex{ 0 };
 
-      std::unique_ptr<XboxController> m_xboxController{ new XboxController{ 0 } };
+      std::unique_ptr<XboxController> m_xboxController{ new XboxController };
       std::unique_ptr<XboxController::State> m_xboxControllerState{ nullptr };
 
       std::unique_ptr<QMenu> m_fileMenu{ nullptr };

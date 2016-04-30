@@ -10,7 +10,11 @@
 #include <QObject>
 #include <QTimer>
 
-#include "../ThirdParty/xInput.h"
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+
+#include <Windows.h>
+#include <Xinput.h>
 
 /**
  * @brief The XboxController class tracks and manages the state of the attached Xbox controller(s).
@@ -90,7 +94,7 @@ class XboxController : public QObject
       };
 
       XboxController(
-         unsigned int m_controllerNumber = 0,
+         int m_controllerNumber = 0,
          int16_t m_leftStickDeadZone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE,
          int16_t m_rightStickDeadZone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE,
          uint8_t m_triggerThreshold = XINPUT_GAMEPAD_TRIGGER_THRESHOLD,
@@ -129,7 +133,7 @@ class XboxController : public QObject
       bool m_isCurrentControllerConnected{ false };
       bool m_isPreviousControllerConnected{ false };
 
-      int m_controllerNumber{ 1 };
+      int m_controllerNumber{ 0 };
       int m_leftStickDeadZone{ XboxController::MAX_STICK_VALUE };
       int m_rightStickDeadZone{ XboxController::MAX_STICK_VALUE };
       int m_triggerThreshold{ XboxController::MAX_TRIGGER_VALUE };

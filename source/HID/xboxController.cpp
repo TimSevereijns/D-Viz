@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 
 const uint8_t XboxController::MAX_TRIGGER_VALUE = std::numeric_limits<int8_t>::max();
 const uint8_t XboxController::MIN_TRIGGER_VALUE = std::numeric_limits<int8_t>::min();
@@ -163,7 +162,7 @@ bool XboxController::State::BatteryEquals(const State& lhs, const State& rhs)
 }
 
 XboxController::XboxController(
-   unsigned int controllerNumber,
+   int controllerNumber,
    int16_t leftStickDeadZone,
    int16_t rightStickDeadZone,
    uint8_t triggerThreshold,
@@ -177,7 +176,7 @@ XboxController::XboxController(
    m_triggerThreshold{ std::min(triggerThreshold, XboxController::MAX_TRIGGER_VALUE) },
    m_pollingTimer{ new QTimer }
 {
-   m_controllerNumber = std::min(controllerNumber, 3u);
+   m_controllerNumber = std::min(controllerNumber, XUSER_MAX_COUNT - 1);
    connect(m_pollingTimer.get(), SIGNAL(timeout()), this, SLOT(Update()));
 }
 
@@ -219,9 +218,10 @@ bool XboxController::IsButtonDown(const unsigned int button) const
 void XboxController::Update()
 {
    XINPUT_STATE inputState;
-   memset(&inputState, 0, sizeof(XINPUT_STATE));
-   m_isCurrentControllerConnected =
-      (XInputGetState(m_controllerNumber, &inputState) == ERROR_SUCCESS);
+   ZeroMemory(&inputState, sizeof(XINPUT_STATE));
+
+   const auto stateRetrievalResult = XInputGetState(m_controllerNumber, &inputState);
+   m_isCurrentControllerConnected = (stateRetrievalResult == ERROR_SUCCESS);
 
    // Handle gamepad connection/deconnection:
    if (m_isPreviousControllerConnected == false && m_isCurrentControllerConnected == true)

@@ -13,6 +13,7 @@
 #include <QApplication>
 #include <QMessageBox>
 
+#include <iostream>
 #include <sstream>
 #include <utility>
 
@@ -210,7 +211,7 @@ void GLCanvas::CreateNewVisualization(VisualizationParameters& parameters)
 
 void GLCanvas::ScanDrive(VisualizationParameters& vizParameters)
 {
-   const auto& progressHandler =
+   const auto progressHandler =
       [&] (const std::uintmax_t numberOfFilesScanned)
    {
       std::wstringstream message;
@@ -219,7 +220,7 @@ void GLCanvas::ScanDrive(VisualizationParameters& vizParameters)
       m_mainWindow->SetStatusBarMessage(message.str());
    };
 
-   const auto& completionHandler =
+   const auto completionHandler =
       [&, vizParameters] (const std::uintmax_t numberOfFilesScanned,
       std::shared_ptr<Tree<VizNode>> fileTree) mutable
    {
@@ -504,9 +505,12 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    }
 }
 
+static bool printedMessage = false;
+
 void GLCanvas::HandleInput()
 {
    assert(m_settings && m_mainWindow);
+
    if (m_settings->m_useXBoxController && m_mainWindow->IsXboxControllerConnected())
    {
       HandleXBoxControllerInput();
@@ -515,7 +519,7 @@ void GLCanvas::HandleInput()
    }
 
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::system_clock::now() - m_lastXboxControllerPollTime);
+      std::chrono::system_clock::now() - m_lastCameraPositionUpdatelTime);
 
    const bool isKeyWDown = m_keyboardManager.IsKeyDown(Qt::Key_W);
    const bool isKeyADown = m_keyboardManager.IsKeyDown(Qt::Key_A);
@@ -553,12 +557,12 @@ void GLCanvas::HandleInput()
 void GLCanvas::HandleXBoxControllerInput()
 {
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::system_clock::now() - m_lastXboxControllerPollTime);
+      std::chrono::system_clock::now() - m_lastCameraPositionUpdatelTime);
 
    const XboxController::State& controllerState = m_mainWindow->GetXboxControllerState();
    const XboxController& controller = m_mainWindow->GetXboxControllerManager();
 
-   const auto cameraSpeed = m_settings->m_cameraMovementSpeed;
+   const auto cameraSpeed = m_settings->m_cameraMovementSpeed / Constants::TRANSLATION_AMPLIFICATION;
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_UP))
    {
@@ -582,14 +586,12 @@ void GLCanvas::HandleXBoxControllerInput()
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_LEFT_SHOULDER))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() *
-         (cameraSpeed / Constants::MOVEMENT_AMPLIFICATION) * m_camera.Down());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * 0.4 * m_camera.Down());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_RIGHT_SHOULDER))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() *
-         (cameraSpeed / Constants::MOVEMENT_AMPLIFICATION) * m_camera.Up());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * 0.4 * m_camera.Up());
    }
 
    HandleXboxThumbstickInput(controllerState);
@@ -601,12 +603,12 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
    if (controllerState.rightThumbX || controllerState.rightThumbY)
    {
       const auto pitch =
-         Constants::MOVEMENT_AMPLIFICATION *
+         Constants::LOOK_AMPLIFICATION *
          m_settings->m_mouseSensitivity *
          -controllerState.rightThumbY;
 
       const auto yaw =
-         Constants::MOVEMENT_AMPLIFICATION *
+         Constants::LOOK_AMPLIFICATION *
          m_settings->m_mouseSensitivity *
          controllerState.rightThumbX;
 
@@ -616,7 +618,7 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
    if (controllerState.leftThumbY)
    {
       m_camera.OffsetPosition(
-         Constants::MOVEMENT_AMPLIFICATION *
+         Constants::LOOK_AMPLIFICATION *
          m_settings->m_cameraMovementSpeed *
          controllerState.leftThumbY *
          m_camera.Forward());
@@ -625,7 +627,7 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
    if (controllerState.leftThumbX)
    {
       m_camera.OffsetPosition(
-         Constants::MOVEMENT_AMPLIFICATION *
+         Constants::LOOK_AMPLIFICATION *
          m_settings->m_cameraMovementSpeed *
          controllerState.leftThumbX *
          m_camera.Right());

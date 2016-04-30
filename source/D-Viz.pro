@@ -60,7 +60,6 @@ HEADERS  += \
     Scene/visualizationAsset.h \
     ThirdParty/stopwatch.hpp \
     ThirdParty/Tree.hpp \
-    ThirdParty/xInput.h \
     Utilities/colorGradient.hpp \
     Utilities/scopeExit.hpp \
     Viewport/camera.h \
@@ -77,8 +76,8 @@ DISTFILES += \
     Shaders/visualizationFragmentShader.frag \
     Shaders/visualizationVertexShader.vert \
     Shaders/simpleLineFragmentShader.frag \
-    Shaders/simpleLineVertexShader.vert \
-    Resources/XInput1_4.dll
+    Shaders/simpleLineVertexShader.vert
+    Lib/XInput1_4.dll
 
 RESOURCES += \
     resources.qrc
@@ -94,7 +93,7 @@ else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../boost
 else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../boost_1_60_0/stage/lib/boost_filesystem-vc140-mt-1_60.lib
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../boost_1_60_0/stage/lib/boost_filesystem-vc140-mt-gd-1_60.lib
 
-win32: LIBS += -lXInput
+win32: LIBS += -lxinput
 
 CONFIG(release, debug|release) {
    library_files.path += $$OUT_PWD/release
@@ -121,6 +120,6 @@ CONFIG(debug, debug|release) {
    plugin_files.files += $$(QTDIR)/plugins/platforms/qwindows.dll
 }
 
-library_files.files += $$PWD/Resources/XInput1_4.dll
+library_files.files += $$PWD/Lib/XInput1_4.dll
 INSTALLS += library_files
 INSTALLS += plugin_files

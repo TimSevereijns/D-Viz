@@ -180,7 +180,7 @@ class GLCanvas : public QOpenGLWidget
          std::chrono::system_clock::now()
       };
 
-      std::chrono::system_clock::time_point m_lastXboxControllerPollTime
+      std::chrono::system_clock::time_point m_lastCameraPositionUpdatelTime
       {
          std::chrono::system_clock::now()
       };
