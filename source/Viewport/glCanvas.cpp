@@ -175,10 +175,6 @@ GLCanvas::GLCanvas(QWidget* parent) :
    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
    setFormat(format);
 
-//   setContextMenuPolicy(Qt::CustomContextMenu);
-//   connect(this, SIGNAL(customContextMenuRequested(QPoint)),
-//      this, SLOT(ShowContextMenu(const QPoint&)));
-
    m_frameRedrawTimer.reset(new QTimer{ this });
    connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
    m_frameRedrawTimer->start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
@@ -386,7 +382,7 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
    event->accept();
 }
 
-void GLCanvas::HandleNodeSelection(const TreeNode<VizNode>* selectedNode)
+void GLCanvas::HandleNodeSelection(TreeNode<VizNode>* selectedNode)
 {
    const auto fileSize = selectedNode->GetData().file.size;
    assert(fileSize > 0);
@@ -405,6 +401,8 @@ void GLCanvas::HandleNodeSelection(const TreeNode<VizNode>* selectedNode)
 
    assert(message.str().size() > 0);
    m_mainWindow->SetStatusBarMessage(message.str());
+
+   ClearHighlightedNodes();
 
    if (m_selectedNode)
    {
@@ -430,7 +428,7 @@ void GLCanvas::HandleRightClick(const QPoint& point)
    }
 
    const auto ray = m_camera.ShootRayIntoScene(point);
-   const auto* selection = m_theVisualization->FindNearestIntersection(m_camera, ray,
+   auto* selection = m_theVisualization->FindNearestIntersection(m_camera, ray,
       m_visualizationParameters);
 
    if (selection)
@@ -439,6 +437,8 @@ void GLCanvas::HandleRightClick(const QPoint& point)
    }
    else
    {
+      ClearHighlightedNodes();
+
       m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
          *m_selectedNode,
          SceneAsset::UpdateAction::DESELECT,
@@ -541,23 +541,89 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    }
 }
 
-void GLCanvas::ShowContextMenu(const QPoint& point)
+void GLCanvas::ClearHighlightedNodes()
 {
-   QPoint globalPoint = mapToGlobal(point);
-
-   CanvasContextMenu contextMenu{ m_keyboardManager };
-   contextMenu.addAction("Highlight Ancestors",
-      [&]
+   for (auto* node : m_highlightedNodes)
    {
-      // @todo
-   });
-
-   if (m_selectedNode)
-   {
-      contextMenu.addAction("Show in Explorer", [&] { OpenFileInExplorer(*m_selectedNode); });
+      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
+         *node,
+         SceneAsset::UpdateAction::DESELECT,
+         m_visualizationParameters);
    }
 
-   contextMenu.exec(globalPoint);
+   m_highlightedNodes.clear();
+}
+
+void GLCanvas::HighlightAncestors(TreeNode<VizNode>& selectedNode)
+{
+   ClearHighlightedNodes();
+
+   auto* currentNode = &selectedNode;
+   do
+   {
+      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
+         *currentNode,
+         SceneAsset::UpdateAction::SELECT,
+         m_visualizationParameters);
+
+      currentNode = currentNode->GetParent();
+      if (currentNode)
+      {
+         m_highlightedNodes.emplace_back(currentNode);
+      }
+   }
+   while (currentNode);
+}
+
+void GLCanvas::HighlightDescendants(TreeNode<VizNode>& selectedNode)
+{
+   ClearHighlightedNodes();
+
+   std::for_each(
+      Tree<VizNode>::PostOrderIterator(&selectedNode),
+      Tree<VizNode>::PostOrderIterator(),
+      [&] (Tree<VizNode>::reference node)
+   {
+      if (m_visualizationParameters.onlyShowDirectories && node->file.type == FILE_TYPE::REGULAR)
+      {
+         return;
+      }
+
+      m_highlightedNodes.emplace_back(&node);
+   });
+
+   // Remove the currently selected node from the highlight list since it's not technically a
+   // descendant, and it should already be highlighted as the current selection.
+   if (!m_highlightedNodes.empty())
+   {
+      m_highlightedNodes.pop_back();
+   }
+
+   for (auto* node : m_highlightedNodes)
+   {
+      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
+         *node,
+         SceneAsset::UpdateAction::SELECT,
+         m_visualizationParameters);
+   }
+}
+
+void GLCanvas::ShowContextMenu(const QPoint& point)
+{
+    if (!m_selectedNode)
+    {
+       return;
+    }
+
+    QPoint globalPoint = mapToGlobal(point);
+
+    CanvasContextMenu contextMenu{ m_keyboardManager };
+    contextMenu.addAction("Highlight Ancestors", [&] { HighlightAncestors(*m_selectedNode); });
+    contextMenu.addAction("Highlight Descendants", [&] { HighlightDescendants(*m_selectedNode); });
+    contextMenu.addSeparator();
+    contextMenu.addAction("Show in Explorer", [&] { OpenFileInExplorer(*m_selectedNode); });
+
+    contextMenu.exec(globalPoint);
 }
 
 void GLCanvas::HandleInput()

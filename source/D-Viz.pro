@@ -33,11 +33,11 @@ SOURCES += \
     Scene/sceneAsset.cpp \
     Scene/visualizationAsset.cpp \
     Viewport/camera.cpp \
+    Viewport/canvasContextMenu.cpp \
     Viewport/glCanvas.cpp \
     Viewport/graphicsDevice.cpp \
     Visualizations/squarifiedTreemap.cpp \
-    Visualizations/visualization.cpp \
-    Viewport/canvasContextMenu.cpp
+    Visualizations/visualization.cpp
 
 HEADERS  += \
     constants.h \
@@ -64,11 +64,11 @@ HEADERS  += \
     Utilities/colorGradient.hpp \
     Utilities/scopeExit.hpp \
     Viewport/camera.h \
+    Viewport/canvasContextMenu.h \
     Viewport/glCanvas.h \
     Viewport/graphicsDevice.h \
     Visualizations/squarifiedTreemap.h \
-    Visualizations/visualization.h \
-    Viewport/canvasContextMenu.h
+    Visualizations/visualization.h
 
 FORMS    += mainwindow.ui
 

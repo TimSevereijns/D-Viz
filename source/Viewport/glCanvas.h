@@ -112,7 +112,7 @@ class GLCanvas : public QOpenGLWidget
        * @param[in] selectedNode    Pointer to the TreeNode that the user clicked on, and nullptr if
        *                            the user's click didn't hit a TreeNode.
        */
-      void HandleNodeSelection(const TreeNode<VizNode>* const selectedNode);
+      void HandleNodeSelection(TreeNode<VizNode>* const selectedNode);
 
       /**
        * @brief Handles the input from the Xbox controller.
@@ -164,6 +164,25 @@ class GLCanvas : public QOpenGLWidget
          std::uintmax_t numberOfFilesScanned,
          VisualizationParameters& parameters) const;
 
+      /**
+       * @brief Highlights the ancestors of the node.
+       *
+       * @param[in] selectedNode    The node whose ancestors are to be highlighted.
+       */
+      void HighlightAncestors(TreeNode<VizNode>& selectedNode);
+
+      /**
+       * @brief HighlightDescendants
+       *
+       * @param selectedNode
+       */
+      void HighlightDescendants(TreeNode<VizNode>& selectedNode);
+
+      /**
+       * @brief Returns any highlighted nodes back to their unhighlighted colors.
+       */
+      void ClearHighlightedNodes();
+
       bool m_isPaintingSuspended{ false };
       bool m_isVisualizationLoaded{ false };
 
@@ -172,8 +191,9 @@ class GLCanvas : public QOpenGLWidget
 
       MainWindow* m_mainWindow{ nullptr };
 
-      const TreeNode<VizNode>* m_selectedNode{ nullptr };
-      const std::pair<TreeNode<VizNode>*, QVector3D> m_selectedNodeAndColor;
+      TreeNode<VizNode>* m_selectedNode{ nullptr };
+
+      std::vector<TreeNode<VizNode>*> m_highlightedNodes;
 
       std::unique_ptr<GraphicsDevice> m_graphicsDevice{ nullptr };
 
