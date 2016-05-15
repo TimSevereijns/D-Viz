@@ -250,8 +250,8 @@ void GLCanvas::ScanDrive(VisualizationParameters& vizParameters)
       std::shared_ptr<Tree<VizNode>> fileTree) mutable
    {
       setCursor(Qt::WaitCursor);
-      QApplication::processEvents();
       ON_SCOPE_EXIT{ setCursor(Qt::ArrowCursor); };
+      QApplication::processEvents();
 
       std::wstringstream message;
       message.imbue(std::locale{ "" });
@@ -709,12 +709,12 @@ void GLCanvas::HandleXBoxControllerInput()
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_LEFT_SHOULDER))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * 0.4 * m_camera.Down());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Down());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_RIGHT_SHOULDER))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * 0.4 * m_camera.Up());
+      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Up());
    }
 
    HandleXboxThumbstickInput(controllerState);

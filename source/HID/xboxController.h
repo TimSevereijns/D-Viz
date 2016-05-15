@@ -19,7 +19,7 @@
 /**
  * @brief The XboxController class tracks and manages the state of the attached Xbox controller(s).
  *
- * Start life as a class based on SimpleXbox360Controller by pilatomic:
+ * Inspired by Pilatomic's SimpleXbox360Controller:
  * https://www.gitorious.org/simple-xbox-360-controller/pages/Home
  */
 class XboxController : public QObject
@@ -75,9 +75,6 @@ class XboxController : public QObject
        */
       struct State
       {
-          uint8_t batteryType{ BATTERY_TYPE_DISCONNECTED };
-          uint8_t batteryLevel{ BATTERY_LEVEL_EMPTY };
-
           uint16_t buttons{ 0 };
 
           float leftTrigger{ 0.0f };
@@ -86,8 +83,6 @@ class XboxController : public QObject
           float leftThumbY{ 0.0f };
           float rightThumbX{ 0.0f };
           float rightThumbY{ 0.0f };
-
-          static bool BatteryEquals(const State& lhs, const State& rhs);
 
           bool operator==(const XboxController::State& rhs) const;
           bool operator!=(const XboxController::State& rhs) const;
@@ -113,7 +108,6 @@ class XboxController : public QObject
 
    signals:
       void NewControllerState(XboxController::State state);
-      void NewControllerBatteryState(uint8_t newBatteryType, uint8_t newBatteryLevel);
       void ControllerConnected(unsigned int m_controllerNumber);
       void ControllerDisconnected(unsigned int m_controllerNumber);
 
@@ -163,4 +157,3 @@ class XboxController : public QObject
 };
 
 #endif // XBOXCONTROLLER_H
-

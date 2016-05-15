@@ -15,12 +15,12 @@ const int32_t XboxController::MIN_VIBRATION_VALUE = std::numeric_limits<int32_t>
 namespace
 {
    /**
-    * @brief UpdateSingleButton
+    * @brief Updates the state of a single controller button.
     *
-    * @param targetButton
-    * @param buttonMap
-    * @param currentState
-    * @param previousState
+    * @param[in] targetButton       The specific button to be targeted for a state update.
+    * @param[in] buttonMap          The button map containing the button state to be updated.
+    * @param[in] currentState       The current state of the controller buttons.
+    * @param[in] previousState      The previous state of the controller buttons.
     */
    void UpdateSingleButton(
       const unsigned int targetButton,
@@ -49,11 +49,12 @@ namespace
    }
 
    /**
-    * @brief UpdateAllButtons
+    * @brief Extracts the state of all the buttons from the passed in button state mask.
     *
-    * @param currentState
-    * @param previousState
-    * @param buttonMap
+    * @param[in] currentState       The current state of the controller buttons.
+    * @param[in] previousState      The previous state of the controller buttons.
+    * @param[in, out] buttonMap     The button map to be updated if any of the buttons have changed
+    *                               state.
     */
    void UpdateAllButtons(
       const uint16_t currentState,
@@ -70,12 +71,14 @@ namespace
    /**
     * @brief XboxController::processStickDeadZone
     *
-    * @param rawXValue
-    * @param rawYValue
-    * @param xValue
-    * @param yValue
-    * @param deadZoneRadius
-    * @return
+    * @param[in] rawXValue          The raw x-value input to be processed.
+    * @param[in] rawYValue          The raw y-value inpput to be processed.
+    * @param[out] xValue            The new x-value, assuming the raw input exceeds the dead zone.
+    * @param[out] yValue            The new y-value, assiming the raw input exceeds the dead zone.
+    * @param[in] deadZoneRadius     The dead zone radius that must be exceeded before a new value is
+    *                               considered valid.
+    *
+    * @returns True if the processed thumbstick value exceeds the dead zone radius; false otherwise.
     */
    bool ProcessStickDeadZone(
       int rawXValue,
@@ -115,10 +118,11 @@ namespace
    /**
     * @brief XboxController::processTriggerThreshold
     *
-    * @param rawValue
-    * @param value
-    * @param triggerThreshold
-    * @return
+    * @param[in] rawValue           Raw trigger input value.
+    * @param[out] value             The new trigger value, assuming the threshold is met.
+    * @param[in] triggerThreshold   The threshold value to be met.
+    *
+    * @returns True if the trigger threshold was met.
     */
    bool ProcessTriggerThreshold(
       const uint8_t rawValue,
@@ -146,19 +150,12 @@ bool XboxController::State::operator==(const XboxController::State& rhs) const
       && (leftTrigger == rhs.leftTrigger)
       && (rightThumbX == rhs.rightThumbX)
       && (rightThumbY == rhs.rightThumbY)
-      && (rightTrigger == rhs.rightTrigger)
-      && (batteryType == rhs.batteryType)
-      && (batteryLevel == rhs.batteryLevel);
+      && (rightTrigger == rhs.rightTrigger);
 }
 
 bool XboxController::State::operator!=(const XboxController::State& rhs) const
 {
    return !(*this == rhs);
-}
-
-bool XboxController::State::BatteryEquals(const State& lhs, const State& rhs)
-{
-   return (lhs.batteryType == rhs.batteryType) && (lhs.batteryLevel == rhs.batteryLevel);
 }
 
 XboxController::XboxController(
@@ -271,34 +268,9 @@ void XboxController::Update()
       m_currentState.rightTrigger,
       m_triggerThreshold);
 
-   // Update battery states:
-   XINPUT_BATTERY_INFORMATION inputBattery;
-   memset(&inputBattery, 0, sizeof(XINPUT_BATTERY_INFORMATION));
-
-   const auto batteryDataFetchResult = XInputGetBatteryInformation(
-      m_controllerNumber,
-      BATTERY_DEVTYPE_GAMEPAD,
-      &inputBattery);
-
-   if ( batteryDataFetchResult == ERROR_SUCCESS)
-   {
-      m_currentState.batteryType = inputBattery.BatteryType;
-      m_currentState.batteryLevel = inputBattery.BatteryLevel;
-   }
-   else
-   {
-      m_currentState.batteryType = BATTERY_TYPE_UNKNOWN;
-      m_currentState.batteryLevel = BATTERY_LEVEL_EMPTY;
-   }
-
    if (m_currentState != m_previousState)
    {
       emit NewControllerState(m_currentState);
-   }
-
-   if (!State::BatteryEquals(m_previousState, m_currentState))
-   {
-      emit NewControllerBatteryState(m_currentState.batteryType, m_currentState.batteryLevel);
    }
 
    m_previousState = m_currentState;

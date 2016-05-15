@@ -410,7 +410,6 @@ namespace
       }
 
       assert(smallestNodeInBytes > 0);
-      assert(totalRowSize > 0);
       assert(totalRowArea > 0);
 
       const double smallestArea =

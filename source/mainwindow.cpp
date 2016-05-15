@@ -205,7 +205,7 @@ bool MainWindow::IsXboxControllerConnected() const
 
 void MainWindow::XboxControllerStateChanged(XboxController::State state)
 {
-   m_xboxControllerState.reset(new XboxController::State{ state });
+   m_xboxControllerState = std::make_unique<XboxController::State>(std::move(state));
 }
 
 void MainWindow::OnFieldOfViewChanged(const int fieldOfView)

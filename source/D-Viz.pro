@@ -79,7 +79,6 @@ DISTFILES += \
     Shaders/visualizationVertexShader.vert \
     Shaders/simpleLineFragmentShader.frag \
     Shaders/simpleLineVertexShader.vert
-    Lib/XInput1_4.dll
 
 RESOURCES += \
     resources.qrc
@@ -96,7 +95,7 @@ else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/..
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../boost_1_60_0/stage/lib/boost_filesystem-vc140-mt-gd-1_60.lib
 
 win32:
-   LIBS += -lxinput
+   LIBS += -lXInput9_1_0
    LIBS += -lShell32
    LIBS += -lOle32
 
