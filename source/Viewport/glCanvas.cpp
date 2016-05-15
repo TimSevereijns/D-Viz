@@ -40,6 +40,8 @@ namespace
       mainWindow.SetStatusBarMessage(message.str());
    }
 
+   const auto* const BYTES_READOUT_STRING = L" bytes";
+
    /**
     * @brief Converts the given size of the file from bytes to the most human readable units.
     *
@@ -52,7 +54,7 @@ namespace
    {
       if (sizeInBytes < Constants::FileSize::ONE_KIBIBYTE)
       {
-         return std::make_pair<double, std::wstring>(std::move(sizeInBytes), L" bytes");
+         return std::make_pair<double, std::wstring>(std::move(sizeInBytes), BYTES_READOUT_STRING);
       }
 
       if (sizeInBytes < Constants::FileSize::ONE_MEBIBYTE)
@@ -387,11 +389,12 @@ void GLCanvas::HandleNodeSelection(TreeNode<VizNode>* selectedNode)
    const auto fileSize = selectedNode->GetData().file.size;
    assert(fileSize > 0);
 
+   const auto sizeAndUnits = ConvertFileSizeToMostAppropriateUnits(fileSize);
+   const auto isInBytes = (sizeAndUnits.second == BYTES_READOUT_STRING);
+
    std::wstringstream message;
    message.imbue(std::locale{ "" });
-   message.precision(2);
-
-   const auto sizeAndUnits = ConvertFileSizeToMostAppropriateUnits(fileSize);
+   message.precision(isInBytes ? 0: 2);
    message
       << GetFullNodePath(*selectedNode)
       << L"  |  "
