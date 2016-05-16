@@ -63,8 +63,7 @@ class ScanningWorker : public QObject
       void ProgressUpdate(const std::uintmax_t filesScanned);
 
       /**
-       * @brief Allows for cross-thread signaling show the user a standard message
-       * box.
+       * @brief Allows for cross-thread signaling to show the user a standard Qt message box.
        *
        * @param[in] message         The message to be shown in the message box.
        */
@@ -82,9 +81,10 @@ class ScanningWorker : public QObject
          TreeNode<VizNode>& treeNode) noexcept;
 
       /**
-       * Max path length in Windows is 260 characters, so if that includes slashes, then the maximum
-       * depth of a directory or file is no more than 130, or so. Given that the default stack size
-       * in MSVC is 1MB, and I only pass in references, this recursive version may be fine---maybe!
+       * @brief Performs a recursive depth-first exploration of the file system.
+       *
+       * @param[in] path            The location on disk to scan.
+       * @param[in] fileNode        The TreeNode in Tree to append newly discoved files to.
        */
       void ScanRecursively(
          const boost::filesystem::path& path,

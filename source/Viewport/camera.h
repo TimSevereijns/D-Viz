@@ -159,7 +159,7 @@ class Camera
       QPoint MapToOpenGLViewport(const QPoint& widgetCoordinates) const;
 
       /**
-       * @brief Sets the current aspect ratio that factors into the perspective matrix.
+       * @brief Sets the current aspect ratio used in the perspective matrix.
        *
        * @param[in] ratio           The aspect ratio of the viewport.
        */
@@ -182,7 +182,7 @@ class Camera
       QRect GetViewport() const noexcept;
 
       /**
-       * @brief Sets the field of view that will factor into the perspective matrix.
+       * @brief Sets the field of view used in the perspective matrix.
        *
        * @param[in] angle           In degrees.
        */
@@ -220,7 +220,7 @@ class Camera
        *
        * @param[in] point           The point being targeted.
        *
-       * @returns True if the point in question lies in front of the camera's positional plane. Note
+       * @returns True if the point in question lies in front of the camera's focal plane. Note
        * that the near plane still lies a little bit in front of positional plane. Returns false if
        * the point lies behind the camera.
        */
