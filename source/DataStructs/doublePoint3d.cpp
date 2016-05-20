@@ -1,9 +1,13 @@
 #include "doublePoint3d.h"
 
-DoublePoint3D::DoublePoint3D(double x, double y, double z) :
-   m_x(x),
-   m_y(y),
-   m_z(z)
+DoublePoint3D::DoublePoint3D(
+   double x,
+   double y,
+   double z)
+   :
+   m_x{ x },
+   m_y{ y },
+   m_z{ z }
 {
 }
 

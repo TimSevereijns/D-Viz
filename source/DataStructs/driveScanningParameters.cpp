@@ -5,8 +5,8 @@ DriveScanningParameters::DriveScanningParameters(
    ProgressCallback progressCallback,
    ScanCompleteCallback completionCallback)
    :
-   path(startingPath),
-   onProgressUpdateCallback(progressCallback),
-   onScanCompletedCallback(completionCallback)
+   path{ startingPath },
+   onProgressUpdateCallback{ progressCallback },
+   onScanCompletedCallback{ completionCallback }
 {
 }

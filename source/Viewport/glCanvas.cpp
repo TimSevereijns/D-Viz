@@ -118,7 +118,7 @@ namespace
    void OpenFileInExplorer(const TreeNode<VizNode>& selectedNode)
    {
       CoInitializeEx(NULL, COINIT_MULTITHREADED);
-      ON_SCOPE_EXIT{ CoUninitialize(); };
+      ON_SCOPE_EXIT noexcept { CoUninitialize(); };
 
       std::wstring filePath = GetFullNodePath(selectedNode);
       std::replace(std::begin(filePath), std::end(filePath), L'/', L'\\');
@@ -318,7 +318,7 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
 {
    const bool previousSuspensionState = m_isPaintingSuspended;
    m_isPaintingSuspended = true;
-   ON_SCOPE_EXIT{ m_isPaintingSuspended = previousSuspensionState; };
+   ON_SCOPE_EXIT noexcept { m_isPaintingSuspended = previousSuspensionState; };
 
    m_visualizationParameters = parameters;
    m_theVisualization->ComputeVertexAndColorData(parameters);
@@ -394,7 +394,7 @@ void GLCanvas::HandleNodeSelection(TreeNode<VizNode>* selectedNode)
 
    std::wstringstream message;
    message.imbue(std::locale{ "" });
-   message.precision(isInBytes ? 0: 2);
+   message.precision(isInBytes ? 0 : 2);
    message
       << GetFullNodePath(*selectedNode)
       << L"  |  "
@@ -634,7 +634,7 @@ void GLCanvas::HandleInput()
    assert(m_settings && m_mainWindow);
 
    const auto now = std::chrono::system_clock::now();
-   ON_SCOPE_EXIT{ m_lastCameraPositionUpdatelTime = now; };
+   ON_SCOPE_EXIT noexcept { m_lastCameraPositionUpdatelTime = now; };
 
    if (m_settings->m_useXBoxController && m_mainWindow->IsXboxControllerConnected())
    {

@@ -54,6 +54,6 @@ inline ScopeExit<LambdaType> operator+(const DummyStruct&, LambdaType&& lambda)
 #define JOIN_TWO_STRINGS(str1, str2) str1 ## str2
 
 #define ON_SCOPE_EXIT \
-   auto JOIN_TWO_STRINGS(scope_exit_, __LINE__) = DummyStruct{ } + [=]
+   auto JOIN_TWO_STRINGS(scope_exit_, __LINE__) = DummyStruct{ } + [=] ()
 
 #endif // SCOPEEXIT_HPP

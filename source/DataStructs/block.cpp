@@ -5,12 +5,13 @@ Block::Block(
    const double width,
    const double height,
    const double depth)
-   : width(width),
-     height(height),
-     depth(depth),
-     percentCovered(0.0),
-     origin(origin),
-     nextRowOrigin(origin.x(), origin.y() + height, origin.z())
+   :
+   width{ width },
+   height{ height },
+   depth{ depth },
+   percentCovered{ 0.0 },
+   origin{ origin },
+   nextRowOrigin{ origin.x(), origin.y() + height, origin.z() }
 {
    const auto x = static_cast<float>(origin.x());
    const auto y = static_cast<float>(origin.y());

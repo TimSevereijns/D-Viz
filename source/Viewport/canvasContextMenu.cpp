@@ -10,7 +10,7 @@ CanvasContextMenu::CanvasContextMenu(KeyboardManager& keyboardManager)
 void CanvasContextMenu::keyReleaseEvent(QKeyEvent* event)
 {
    assert(event);
-   if (!event || event->key() != Qt::Key_Control)
+   if (!event)
    {
       return;
    }

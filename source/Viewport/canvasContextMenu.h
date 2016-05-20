@@ -13,8 +13,8 @@ class CanvasContextMenu : public QMenu
    protected:
       /**
        * @note Overriding this function ensures that we'll still be able to properly track the
-       * release of the control keys, even when that release occurs while the context menu is open.
-       * Without this override, if the user released the control key while the context menu is still
+       * release of the keys, even when that release occurs when the context menu is open.
+       * Without this override, if the user released a key while the context menu is still
        * open, we would never be notified of this release due to the modal nature of the menu.
        */
       void keyReleaseEvent(QKeyEvent* event) override;
