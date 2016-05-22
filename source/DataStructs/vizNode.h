@@ -39,7 +39,9 @@ struct VizNode
     * @param[in] file               The file that the VizNode represents.
     * @param[in] block              The visual representation of the file in question.
     */
-   explicit VizNode(const FileInfo& file, const Block& block);
+   explicit VizNode(
+      const FileInfo& file,
+      const Block& block);
 };
 
 #endif // VIZNODE_H

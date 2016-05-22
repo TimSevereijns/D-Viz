@@ -124,6 +124,5 @@ CONFIG(debug, debug|release) {
    plugin_files.files += $$(QTDIR)/plugins/platforms/qwindows.dll
 }
 
-library_files.files += $$PWD/Lib/XInput1_4.dll
 INSTALLS += library_files
 INSTALLS += plugin_files

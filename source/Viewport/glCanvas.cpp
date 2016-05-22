@@ -587,7 +587,7 @@ void GLCanvas::HighlightDescendants(TreeNode<VizNode>& selectedNode)
       Tree<VizNode>::PostOrderIterator(),
       [&] (Tree<VizNode>::reference node)
    {
-      if (m_visualizationParameters.onlyShowDirectories && node->file.type == FILE_TYPE::REGULAR)
+      if (m_visualizationParameters.onlyShowDirectories && node->file.type == FileType::REGULAR)
       {
          return;
       }

@@ -214,7 +214,7 @@ namespace
       while (node)
       {
          if (node->GetData().file.size < parameters.minimumFileSize ||
-             (parameters.onlyShowDirectories && node->GetData().file.type != FILE_TYPE::DIRECTORY))
+             (parameters.onlyShowDirectories && node->GetData().file.type != FileType::DIRECTORY))
          {
             AdvanceToNextNonDescendant(node);
 
@@ -319,7 +319,7 @@ void Visualization::ComputeVertexAndColorData(const VisualizationParameters& par
    std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
       [&] (auto& node)
    {
-      if ((parameters.onlyShowDirectories && node->file.type != FILE_TYPE::DIRECTORY) ||
+      if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY) ||
           node->file.size < parameters.minimumFileSize)
       {
          return;
@@ -334,7 +334,7 @@ void Visualization::ComputeVertexAndColorData(const VisualizationParameters& par
          m_visualizationVertices << face.vertices;
       });
 
-      if (node->file.type == FILE_TYPE::DIRECTORY)
+      if (node->file.type == FileType::DIRECTORY)
       {
          if (parameters.useDirectoryGradient)
          {
@@ -345,7 +345,7 @@ void Visualization::ComputeVertexAndColorData(const VisualizationParameters& par
             m_visualizationColors << Visualization::CreateDirectoryColors();
          }
       }
-      else if (node->file.type == FILE_TYPE::REGULAR)
+      else if (node->file.type == FileType::REGULAR)
       {
          m_visualizationColors << Visualization::CreateFileColors();
       }
@@ -400,7 +400,7 @@ void Visualization::FindSmallestandLargestDirectory(const Tree<VizNode>& tree)
 
    for (auto& node : tree)
    {
-      if (node.GetData().file.type != FILE_TYPE::DIRECTORY)
+      if (node.GetData().file.type != FileType::DIRECTORY)
       {
          continue;
       }

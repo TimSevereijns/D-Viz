@@ -56,7 +56,7 @@ namespace
          }
 
          FileInfo& parentInfo = parent->GetData().file;
-         if (parentInfo.type == FILE_TYPE::DIRECTORY)
+         if (parentInfo.type == FileType::DIRECTORY)
          {
             parentInfo.size += fileInfo.size;
          }
@@ -99,7 +99,7 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
    {
       sanitizedPath,
       ScanningWorker::SIZE_UNDEFINED,
-      FILE_TYPE::DIRECTORY
+      FileType::DIRECTORY
    };
 
    const VizNode rootNode
@@ -162,7 +162,7 @@ void ScanningWorker::ScanRecursively(
       {
          path.filename().wstring(),
          boost::filesystem::file_size(path),
-         FILE_TYPE::REGULAR
+         FileType::REGULAR
       };
 
       treeNode.AppendChild(VizNode{ fileInfo });
@@ -191,7 +191,7 @@ void ScanningWorker::ScanRecursively(
       {
          path.filename().wstring(),
          ScanningWorker::SIZE_UNDEFINED,
-         FILE_TYPE::DIRECTORY
+         FileType::DIRECTORY
       };
 
       treeNode.AppendChild(VizNode{ directoryInfo });

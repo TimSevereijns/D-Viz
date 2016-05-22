@@ -3,7 +3,7 @@
 FileInfo::FileInfo(
    const std::wstring& name,
    std::uintmax_t size,
-   FILE_TYPE type)
+   FileType type)
    :
    name{ name },
    size{ size },

@@ -56,7 +56,7 @@ namespace
       const TreeNode<VizNode>& node,
       const VisualizationParameters& params)
    {
-      if (node.GetData().file.type != FILE_TYPE::DIRECTORY)
+      if (node.GetData().file.type != FileType::DIRECTORY)
       {
          return Visualization::CreateFileColors();
       }
