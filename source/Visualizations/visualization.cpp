@@ -393,7 +393,7 @@ TreeNode<VizNode>* Visualization::FindNearestIntersection(
    return nearestIntersection;
 }
 
-void Visualization::FindSmallestandLargestDirectory(const Tree<VizNode>& tree)
+void Visualization::FindSmallestAndLargestDirectory(const Tree<VizNode>& tree)
 {
    std::uintmax_t smallestDirectory = std::numeric_limits<std::uintmax_t>::max();
    std::uintmax_t largestDirectory = std::numeric_limits<std::uintmax_t>::min();
