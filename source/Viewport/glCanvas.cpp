@@ -18,6 +18,7 @@
 #include <iostream>
 #include <sstream>
 #include <utility>
+#include <fstream>
 
 #include <ShlObj.h>
 #include <Objbase.h>
@@ -583,24 +584,19 @@ void GLCanvas::HighlightDescendants(TreeNode<VizNode>& selectedNode)
    ClearHighlightedNodes();
 
    std::for_each(
-      Tree<VizNode>::PostOrderIterator(&selectedNode),
-      Tree<VizNode>::PostOrderIterator(),
+      Tree<VizNode>::LeafIterator{ &selectedNode },
+      Tree<VizNode>::LeafIterator{ },
       [&] (Tree<VizNode>::reference node)
    {
-      if (m_visualizationParameters.onlyShowDirectories && node->file.type == FileType::REGULAR)
+      if (m_visualizationParameters.onlyShowDirectories
+         && node->file.type == FileType::REGULAR
+         && node->file.size < m_visualizationParameters.minimumFileSize)
       {
          return;
       }
 
       m_highlightedNodes.emplace_back(&node);
    });
-
-   // Remove the currently selected node from the highlight list since it's not technically a
-   // descendant, and it should already be highlighted as the current selection.
-   if (!m_highlightedNodes.empty())
-   {
-      m_highlightedNodes.pop_back();
-   }
 
    for (auto* node : m_highlightedNodes)
    {
