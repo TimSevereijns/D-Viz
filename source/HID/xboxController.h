@@ -58,7 +58,8 @@ class XboxController : public QObject
          StateAndHandlers(
             XboxController::KEY_STATE startingState,
             const std::function<void ()>& downHandler,
-            const std::function<void ()>& upHandler) :
+            const std::function<void ()>& upHandler)
+            :
             state(startingState),
             onButtonDown(downHandler),
             onButtonUp(upHandler)
@@ -66,6 +67,7 @@ class XboxController : public QObject
          }
 
          XboxController::KEY_STATE state{ XboxController::KEY_STATE::UP };
+
          std::function<void ()> onButtonDown{ nullptr };
          std::function<void ()> onButtonUp{ nullptr };
       };

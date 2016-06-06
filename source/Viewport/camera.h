@@ -159,13 +159,6 @@ class Camera
       QPoint MapToOpenGLViewport(const QPoint& widgetCoordinates) const;
 
       /**
-       * @brief Sets the current aspect ratio used in the perspective matrix.
-       *
-       * @param[in] ratio           The aspect ratio of the viewport.
-       */
-      void SetAspectRatio(const float ratio) noexcept;
-
-      /**
        * @brief Sets the size of the OpenGL canvas viewport.
        *
        * @param[in] bounds          The current size of the viewport.
@@ -226,8 +219,18 @@ class Camera
        */
       bool IsPointInFrontOfCamera(const QVector3D& point) const;
 
+      /**
+       * @brief Retrieves the distance from the camera's focal plane to the near viewing plane.
+       *
+       * @returns Distance to near plane.
+       */
       float GetNearPlane() const noexcept;
 
+      /**
+       * @brief Retrieves the distance from the camera's focal plane to the far viewing plane.
+       *
+       * @returns Distance to far plane.
+       */
       float GetFarPlane() const noexcept;
 
    private:

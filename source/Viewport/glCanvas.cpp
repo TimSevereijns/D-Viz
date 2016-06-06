@@ -18,7 +18,6 @@
 #include <iostream>
 #include <sstream>
 #include <utility>
-#include <fstream>
 
 #include <ShlObj.h>
 #include <Objbase.h>
@@ -35,8 +34,12 @@ namespace
    {
       std::wstringstream message;
       message.imbue(std::locale(""));
-      message << std::fixed << vertexCount << L" vertices in "
-         << (vertexCount / Block::VERTICES_PER_BLOCK) << L" blocks";
+      message
+         << std::fixed
+         << vertexCount
+         << L" vertices in "
+         << (vertexCount / Block::VERTICES_PER_BLOCK)
+         << L" blocks";
 
       mainWindow.SetStatusBarMessage(message.str());
    }
@@ -218,7 +221,6 @@ void GLCanvas::resizeGL(int width, int height)
 
    m_graphicsDevice->glViewport(0, 0, width, height);
 
-   m_camera.SetAspectRatio(static_cast<float>(width) / static_cast<float>(height));
    m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
 }
 
@@ -296,8 +298,8 @@ void GLCanvas::AskUserToLimitFileSize(
       messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 
       messageBox.setText(
-         "More than a quarter million files were scanned. "                            \
-         "Would you like to limit the visualized files to those 1 MiB or larger in "   \
+         "More than a quarter million files were scanned. "
+         "Would you like to limit the visualized files to those 1 MiB or larger in "
          "order to reduce the load on the GPU and system memory?");
 
       const int election = messageBox.exec();
@@ -724,14 +726,14 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
    if (controllerState.rightThumbX || controllerState.rightThumbY)
    {
       const auto pitch =
-         Constants::Xbox::MOVEMENT_AMPLIFICATION *
-         m_settings->m_mouseSensitivity *
-         -controllerState.rightThumbY;
+         Constants::Xbox::MOVEMENT_AMPLIFICATION
+         * m_settings->m_mouseSensitivity
+         * -controllerState.rightThumbY;
 
       const auto yaw =
-         Constants::Xbox::MOVEMENT_AMPLIFICATION *
-         m_settings->m_mouseSensitivity *
-         controllerState.rightThumbX;
+         Constants::Xbox::MOVEMENT_AMPLIFICATION
+         * m_settings->m_mouseSensitivity
+         * controllerState.rightThumbX;
 
       m_camera.OffsetOrientation(pitch, yaw);
    }
@@ -739,26 +741,26 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
    if (controllerState.leftThumbY)
    {
       m_camera.OffsetPosition(
-         Constants::Xbox::MOVEMENT_AMPLIFICATION *
-         m_settings->m_cameraMovementSpeed *
-         controllerState.leftThumbY *
-         m_camera.Forward());
+         Constants::Xbox::MOVEMENT_AMPLIFICATION
+         * m_settings->m_cameraMovementSpeed
+         * controllerState.leftThumbY
+         * m_camera.Forward());
    }
 
    if (controllerState.leftThumbX)
    {
       m_camera.OffsetPosition(
-         Constants::Xbox::MOVEMENT_AMPLIFICATION *
-         m_settings->m_cameraMovementSpeed *
-         controllerState.leftThumbX *
-         m_camera.Right());
+         Constants::Xbox::MOVEMENT_AMPLIFICATION
+         * m_settings->m_cameraMovementSpeed
+         * controllerState.leftThumbX
+         * m_camera.Right());
    }
 }
 
 void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerState)
 {
-   if (controllerState.leftTrigger > Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD &&
-      !m_isLeftTriggerDown)
+   if (!m_isLeftTriggerDown
+       && controllerState.leftTrigger > Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD)
    {
       m_isLeftTriggerDown = true;
 
@@ -772,8 +774,8 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
          crosshairAsset->Reload(m_camera);
       }
    }
-   else if (controllerState.leftTrigger <= Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD &&
-      m_isLeftTriggerDown)
+   else if (m_isLeftTriggerDown
+      && controllerState.leftTrigger <= Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD)
    {
       m_isLeftTriggerDown = false;
 
@@ -788,15 +790,15 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
       }
    }
 
-   if (controllerState.rightTrigger > Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD &&
-      !m_isRightTriggerDown)
+   if (!m_isRightTriggerDown
+      && controllerState.rightTrigger > Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD)
    {
       m_isRightTriggerDown = true;
 
       HandleRightClick(m_camera.GetViewport().center());
    }
-   else if (controllerState.rightTrigger <= Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD &&
-      m_isRightTriggerDown)
+   else if (m_isRightTriggerDown
+      && controllerState.rightTrigger <= Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD)
    {
       m_isRightTriggerDown = false;
    }

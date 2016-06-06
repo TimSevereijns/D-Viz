@@ -184,14 +184,10 @@ bool Camera::IsPointInFrontOfCamera(const QVector3D& point) const
    return result.z() > 0;
 }
 
-void Camera::SetAspectRatio(const float ratio) noexcept
-{
-   m_aspectRatio = ratio;
-}
-
 void Camera::SetViewport(const QRect& size) noexcept
 {
    m_viewport = size;
+   m_aspectRatio = static_cast<float>(size.width()) / static_cast<float>(size.height());
 }
 
 float Camera::GetNearPlane() const noexcept

@@ -34,6 +34,9 @@ class SceneAsset
        */
       explicit SceneAsset(GraphicsDevice& device);
 
+      /**
+       * @brief Destructor.
+       */
       virtual ~SceneAsset();
 
       /**

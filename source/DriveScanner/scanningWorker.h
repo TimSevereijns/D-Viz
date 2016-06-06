@@ -35,7 +35,7 @@ class ScanningWorker : public QObject
 
    public slots:
       /**
-       * @brief Start kicks off the drive scanning process.
+       * @brief Kicks off the drive scanning process.
        *
        * As part of the scanning process, the ProgressUpdate signal will be fired to signal progress
        * updates, and the Finish signal will be fired once the scanning process completes
