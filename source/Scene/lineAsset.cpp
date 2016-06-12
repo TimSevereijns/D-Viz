@@ -10,7 +10,18 @@ bool LineAsset::LoadShaders()
    return SceneAsset::LoadShaders("simpleLineVertexShader", "simpleLineFragmentShader");
 }
 
-bool LineAsset::PrepareVertexBuffers(const Camera& camera)
+bool LineAsset::Initialize(const Camera &camera)
+{
+   const bool vertexBuffersLoadedSuccessfully = InitializeVertexBuffers(camera);
+   const bool colorBuffersLoadedSuccessfully = InitializeColorBuffers(camera);
+
+   const bool overallSuccess = vertexBuffersLoadedSuccessfully && colorBuffersLoadedSuccessfully;
+   assert(overallSuccess);
+
+   return overallSuccess;
+}
+
+bool LineAsset::InitializeVertexBuffers(const Camera& camera)
 {
    if (!m_VAO.isCreated())
    {
@@ -44,7 +55,7 @@ bool LineAsset::PrepareVertexBuffers(const Camera& camera)
    return true;
 }
 
-bool LineAsset::PrepareColorBuffers(const Camera&)
+bool LineAsset::InitializeColorBuffers(const Camera&)
 {
    if (!m_VAO.isCreated())
    {
@@ -97,8 +108,8 @@ bool LineAsset::Render(
 
 bool LineAsset::Reload(const Camera& camera)
 {
-   PrepareVertexBuffers(camera);
-   PrepareColorBuffers(camera);
+   InitializeVertexBuffers(camera);
+   InitializeColorBuffers(camera);
 
    return true;
 }

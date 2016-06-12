@@ -40,24 +40,15 @@ class SceneAsset
       virtual ~SceneAsset();
 
       /**
-       * @brief Loads the vertex data into the OpenGL buffer. Use SceneAsset::SetVertexData() to set
-       * the data before calling this function.
+       * @brief Loads the vertex and color data into the OpenGL buffers. Use
+       * SceneAsset::SetVertexData() and SceneAsset::SetColorData() to set the data before calling
+       * this function.
        *
        * @param[in] camera          The camera associated with the OpenGL context.
        *
        * @returns True if the operation succeeded.
        */
-      virtual bool PrepareVertexBuffers(const Camera& camera) = 0;
-
-      /**
-       * @brief Loads the color data into the OpenGL buffer. Use SceneAsset::SetColorData() to set
-       * the data before calling this function.
-       *
-       * @param[in] camera          The camera associated with the OpenGL context.
-       *
-       * @returns True if the operation succeeded.
-       */
-      virtual bool PrepareColorBuffers(const Camera& camera) = 0;
+      virtual bool Initialize(const Camera& camera) = 0;
 
       /**
        * @brief Clears the OpenGL buffer objects that contain the vertex and color data.

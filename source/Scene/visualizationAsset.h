@@ -17,8 +17,7 @@ class VisualizationAsset : public SceneAsset
 
       bool LoadShaders() override;
 
-      bool PrepareVertexBuffers(const Camera& camera) override;
-      bool PrepareColorBuffers(const Camera& camera) override;
+      bool Initialize(const Camera& camera) override;
 
       bool Render(
          const Camera& camera,
@@ -31,6 +30,14 @@ class VisualizationAsset : public SceneAsset
          const TreeNode<VizNode>& node,
          UpdateAction action,
          const VisualizationParameters& options) override;
+
+   private:
+
+      bool InitializeVertexBuffers(const Camera& camera);
+      bool InitializeColorBuffers(const Camera& camera);
+
+      QVector<QVector3D> m_blockPositions;
+      QVector<QVector3D> m_blockDimensions;
 };
 
 #endif // VISUALIZATIONASSET_H

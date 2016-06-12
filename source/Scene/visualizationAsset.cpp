@@ -99,7 +99,18 @@ bool VisualizationAsset::LoadShaders()
    return SceneAsset::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
 }
 
-bool VisualizationAsset::PrepareVertexBuffers(const Camera& camera)
+bool VisualizationAsset::Initialize(const Camera &camera)
+{
+   const bool vertexBuffersLoadedSuccessfully = InitializeVertexBuffers(camera);
+   const bool colorBuffersLoadedSuccessfully = InitializeColorBuffers(camera);
+
+   const bool overallSuccess = vertexBuffersLoadedSuccessfully && colorBuffersLoadedSuccessfully;
+   assert(overallSuccess);
+
+   return overallSuccess;
+}
+
+bool VisualizationAsset::InitializeVertexBuffers(const Camera& camera)
 {
    if (!m_VAO.isCreated())
    {
@@ -143,7 +154,7 @@ bool VisualizationAsset::PrepareVertexBuffers(const Camera& camera)
    return true;
 }
 
-bool VisualizationAsset::PrepareColorBuffers(const Camera&)
+bool VisualizationAsset::InitializeColorBuffers(const Camera&)
 {
    if (!m_VAO.isCreated())
    {
@@ -216,8 +227,8 @@ bool VisualizationAsset::Render(
 
 bool VisualizationAsset::Reload(const Camera& camera)
 {
-   PrepareVertexBuffers(camera);
-   PrepareColorBuffers(camera);
+   InitializeVertexBuffers(camera);
+   InitializeColorBuffers(camera);
 
    return true;
 }

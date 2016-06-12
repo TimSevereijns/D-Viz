@@ -206,9 +206,7 @@ void GLCanvas::initializeGL()
    for (const auto& asset : m_sceneAssets)
    {
       asset->LoadShaders();
-
-      asset->PrepareVertexBuffers(m_camera);
-      asset->PrepareColorBuffers(m_camera);
+      asset->Initialize(m_camera);
    }
 }
 

@@ -13,8 +13,7 @@ class LineAsset : public SceneAsset
 
       bool LoadShaders() override;
 
-      bool PrepareVertexBuffers(const Camera& camera) override;
-      bool PrepareColorBuffers(const Camera& camera) override;
+      bool Initialize(const Camera &camera) override;
 
       bool Render(
          const Camera& camera,
@@ -22,6 +21,13 @@ class LineAsset : public SceneAsset
          const OptionsManager& settings) override;
 
       bool Reload(const Camera& camera) override;
+
+   private:
+
+      bool InitializeVertexBuffers(const Camera& camera);
+
+      bool InitializeColorBuffers(const Camera& camera);
+
 };
 
 #endif // LINEASSET_H
