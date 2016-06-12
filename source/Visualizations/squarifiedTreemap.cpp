@@ -545,7 +545,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
       "Sorted tree in ");
 
    TIME_IN_MILLISECONDS(
-      FindSmallestAndLargestDirectory(*m_theTree),
+      FindLargestDirectory(*m_theTree),
       "Found smallest and largest directories in ");
 
    const Block rootBlock

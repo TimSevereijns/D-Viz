@@ -37,9 +37,9 @@ namespace
       message
          << std::fixed
          << vertexCount
-         << L" vertices in "
+         << L" vertices, representing "
          << (vertexCount / Block::VERTICES_PER_BLOCK)
-         << L" blocks";
+         << L" files.";
 
       mainWindow.SetStatusBarMessage(message.str());
    }

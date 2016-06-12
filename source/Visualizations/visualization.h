@@ -114,7 +114,7 @@ class Visualization
        *
        * @return
        */
-      void FindSmallestAndLargestDirectory(const Tree<VizNode>& tree);
+      void FindLargestDirectory(const Tree<VizNode>& tree);
 
       /**
        * @brief Creates the vertex colors needed to color a single block.

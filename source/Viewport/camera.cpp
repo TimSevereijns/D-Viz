@@ -4,9 +4,6 @@
 #include <iostream>
 #include <math.h>
 
-// Keep vertical angle less than 90 degrees to avoid gimbal lock:
-static constexpr double MAX_VERTICAL_ANGLE = 85.0;
-
 namespace
 {
    void NormalizeAngles(double& horizontalAngle, double& verticalAngle) noexcept
@@ -20,13 +17,15 @@ namespace
          horizontalAngle += 360.0f;
       }
 
-      if (verticalAngle > MAX_VERTICAL_ANGLE)
+      const double maxVertical{ 90.0 };
+
+      if (verticalAngle > maxVertical)
       {
-         verticalAngle = MAX_VERTICAL_ANGLE;
+         verticalAngle = maxVertical;
       }
-      else if (verticalAngle < -MAX_VERTICAL_ANGLE)
+      else if (verticalAngle < -maxVertical)
       {
-         verticalAngle = -MAX_VERTICAL_ANGLE;
+         verticalAngle = -maxVertical;
       }
    }
 }
@@ -136,7 +135,7 @@ QVector3D Camera::Unproject(const QPoint& point, float viewDepth, QMatrix4x4 mod
 
    if (!wasMatrixInvertible)
    {
-      std::cout << "Matrix was not invertible!" << std::endl;
+      assert(!"Matrix was not invertible!");
       return { };
    }
 
