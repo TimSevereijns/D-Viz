@@ -33,11 +33,17 @@ class VisualizationAsset : public SceneAsset
 
    private:
 
-      bool InitializeVertexBuffers(const Camera& camera);
-      bool InitializeColorBuffers(const Camera& camera);
+      bool InitializeUnitBlock();
+      bool InitializeColors();
+      bool InitializeBlockTransformations();
 
-      QVector<QVector3D> m_blockPositions;
-      QVector<QVector3D> m_blockDimensions;
+      QOpenGLBuffer m_unitBlockBuffer;
+      QOpenGLBuffer m_blockTransformationBuffer;
+      QOpenGLBuffer m_blockColorBuffer;
+
+      QVector<QVector3D> m_unitBlockVertices;
+      QVector<QVector3D> m_blockTransformations;
+      QVector<QVector3D> m_blockColors;
 };
 
 #endif // VISUALIZATIONASSET_H

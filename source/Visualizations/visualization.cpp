@@ -352,13 +352,13 @@ void Visualization::ComputeVertexAndColorData(const VisualizationParameters& par
 
       if (vertexCount + Block::VERTICES_PER_BLOCK != m_visualizationVertices.size())
       {
-         assert(!"Buffer data mismatch detected!");
+         //assert(!"Buffer data mismatch detected!");
       }
    });
 
    // All offsets must be properly set; the default initialized state is invalid:
-   assert(std::none_of(std::begin(*m_theTree), std::end(*m_theTree),
-      [] (const auto& node) { return node->offsetIntoVBO == VizNode::INVALID_OFFSET; }));
+//   assert(std::none_of(std::begin(*m_theTree), std::end(*m_theTree),
+//      [] (const auto& node) { return node->offsetIntoVBO == VizNode::INVALID_OFFSET; }));
 }
 
 TreeNode<VizNode>* Visualization::FindNearestIntersection(

@@ -99,37 +99,55 @@ bool VisualizationAsset::LoadShaders()
    return SceneAsset::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
 }
 
-bool VisualizationAsset::Initialize(const Camera &camera)
+bool VisualizationAsset::Initialize(const Camera&)
 {
-   const bool vertexBuffersLoadedSuccessfully = InitializeVertexBuffers(camera);
-   const bool colorBuffersLoadedSuccessfully = InitializeColorBuffers(camera);
+   const bool unitBlockInitialized = InitializeUnitBlock();
+   const bool colorsInitialized = InitializeColors();
+   const bool transformationsInitialized = InitializeBlockTransformations();
 
-   const bool overallSuccess = vertexBuffersLoadedSuccessfully && colorBuffersLoadedSuccessfully;
+   const bool overallSuccess =
+      unitBlockInitialized
+      && colorsInitialized
+      && transformationsInitialized;
+
    assert(overallSuccess);
-
    return overallSuccess;
 }
 
-bool VisualizationAsset::InitializeVertexBuffers(const Camera& camera)
+bool VisualizationAsset::InitializeUnitBlock()
 {
    if (!m_VAO.isCreated())
    {
       m_VAO.create();
    }
 
+   const auto unitBlock = Block
+   {
+      DoublePoint3D{ 0.0, 0.0, 0.0 },
+      1.0,
+      1.0,
+      1.0
+   };
+
+   m_unitBlockVertices.clear();
+
+   // @todo Wrap this in a function to be placed on the Block class.
+   std::for_each(std::begin(unitBlock), std::end(unitBlock),
+      [&] (const auto& face)
+   {
+      m_unitBlockVertices << face.vertices;
+   });
+
    m_VAO.bind();
 
-   m_vertexBuffer.create();
-   m_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-   m_vertexBuffer.bind();
-   m_vertexBuffer.allocate(
-      /* data = */ m_rawVertices.constData(),
-      /* count = */ m_rawVertices.size() * 3 * sizeof(GLfloat));
+   m_unitBlockBuffer.create();
+   m_unitBlockBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+   m_unitBlockBuffer.bind();
+   m_unitBlockBuffer.allocate(
+      /* data = */ m_unitBlockVertices.constData(),
+      /* count = */ m_unitBlockVertices.size() * 3 * sizeof(GLfloat));
 
-   m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
-
-   m_vertexBuffer.bind();
+   m_unitBlockBuffer.bind();
 
    m_shader.enableAttributeArray("vertex");
    m_shader.setAttributeBuffer(
@@ -147,14 +165,14 @@ bool VisualizationAsset::InitializeVertexBuffers(const Camera& camera)
       /* tupleSize = */ 3,
       /* stride = */ 6 * sizeof(GLfloat));
 
-   m_vertexBuffer.release();
+   m_unitBlockBuffer.release();
    m_shader.release();
    m_VAO.release();
 
    return true;
 }
 
-bool VisualizationAsset::InitializeColorBuffers(const Camera&)
+bool VisualizationAsset::InitializeColors()
 {
    if (!m_VAO.isCreated())
    {
@@ -163,12 +181,15 @@ bool VisualizationAsset::InitializeColorBuffers(const Camera&)
 
    m_VAO.bind();
 
-   m_colorBuffer.create();
-   m_colorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-   m_colorBuffer.bind();
-   m_colorBuffer.allocate(
-      /* data = */ m_rawColors.constData(),
-      /* count = */ m_rawColors.size() * 3 * sizeof(GLfloat));
+   // @todo FOR DEBUG USE
+   m_blockColors = Visualization::CreateDirectoryColors();
+
+   m_blockColorBuffer.create();
+   m_blockColorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+   m_blockColorBuffer.bind();
+   m_blockColorBuffer.allocate(
+      /* data = */ m_blockColors.constData(),
+      /* count = */ m_blockColors.size() * 3 * sizeof(GLfloat));
 
    m_shader.enableAttributeArray("color");
    m_shader.setAttributeBuffer(
@@ -177,9 +198,14 @@ bool VisualizationAsset::InitializeColorBuffers(const Camera&)
       /* offset = */ 0,
       /* tupleSize = */ 3);
 
-   m_colorBuffer.release();
+   m_blockColorBuffer.release();
    m_VAO.release();
 
+   return true;
+}
+
+bool VisualizationAsset::InitializeBlockTransformations()
+{
    return true;
 }
 
@@ -214,10 +240,17 @@ bool VisualizationAsset::Render(
 
    m_VAO.bind();
 
-   m_graphicsDevice.glDrawArrays(
-      /* mode = */ GL_TRIANGLES,
-      /* first = */ 0,
-      /* count = */ m_rawVertices.size());
+//   m_graphicsDevice.glDrawArrays(
+//      /* mode = */ GL_TRIANGLES,
+//      /* first = */ 0,
+//      /* count = */ m_unitBlockVertices.size());
+
+   m_graphicsDevice.glDrawArraysInstanced(
+      GL_TRIANGLES,
+      0,
+      m_unitBlockVertices.size(),
+      1
+   );
 
    m_shader.release();
    m_VAO.release();
@@ -225,10 +258,11 @@ bool VisualizationAsset::Render(
    return true;
 }
 
-bool VisualizationAsset::Reload(const Camera& camera)
+bool VisualizationAsset::Reload(const Camera&)
 {
-   InitializeVertexBuffers(camera);
-   InitializeColorBuffers(camera);
+   InitializeUnitBlock();
+   InitializeColors();
+   InitializeBlockTransformations();
 
    return true;
 }
