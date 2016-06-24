@@ -129,25 +129,24 @@ bool VisualizationAsset::InitializeUnitBlock()
       1.0
    };
 
-   m_unitBlockVertices.clear();
-
    // @todo Wrap this in a function to be placed on the Block class.
+   m_referenceBlockVertices.clear();
    std::for_each(std::begin(unitBlock), std::end(unitBlock),
       [&] (const auto& face)
    {
-      m_unitBlockVertices << face.vertices;
+      m_referenceBlockVertices << face.vertices;
    });
 
    m_VAO.bind();
 
-   m_unitBlockBuffer.create();
-   m_unitBlockBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-   m_unitBlockBuffer.bind();
-   m_unitBlockBuffer.allocate(
-      /* data = */ m_unitBlockVertices.constData(),
-      /* count = */ m_unitBlockVertices.size() * 3 * sizeof(GLfloat));
+   m_referenceBlockBuffer.create();
+   m_referenceBlockBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+   m_referenceBlockBuffer.bind();
+   m_referenceBlockBuffer.allocate(
+      /* data = */ m_referenceBlockVertices.constData(),
+      /* count = */ m_referenceBlockVertices.size() * 3 * sizeof(GLfloat));
 
-   m_unitBlockBuffer.bind();
+   m_referenceBlockBuffer.bind();
 
    m_shader.enableAttributeArray("vertex");
    m_shader.setAttributeBuffer(
@@ -165,12 +164,13 @@ bool VisualizationAsset::InitializeUnitBlock()
       /* tupleSize = */ 3,
       /* stride = */ 6 * sizeof(GLfloat));
 
-   m_unitBlockBuffer.release();
-   m_shader.release();
+   m_referenceBlockBuffer.release();
    m_VAO.release();
 
    return true;
 }
+
+const auto BLOCK_COUNT{ 1 };
 
 bool VisualizationAsset::InitializeColors()
 {
@@ -182,7 +182,10 @@ bool VisualizationAsset::InitializeColors()
    m_VAO.bind();
 
    // @todo FOR DEBUG USE
-   m_blockColors = Visualization::CreateDirectoryColors();
+   for (int i = 0; i < BLOCK_COUNT; i++)
+   {
+      m_blockColors << QVector3D{ 0.5, 1, 0.5 };
+   }
 
    m_blockColorBuffer.create();
    m_blockColorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -191,12 +194,11 @@ bool VisualizationAsset::InitializeColors()
       /* data = */ m_blockColors.constData(),
       /* count = */ m_blockColors.size() * 3 * sizeof(GLfloat));
 
-   m_shader.enableAttributeArray("color");
-   m_shader.setAttributeBuffer(
-      /* location = */"color",
-      /* type = */ GL_FLOAT,
-      /* offset = */ 0,
-      /* tupleSize = */ 3);
+   m_graphicsDevice.glEnableVertexAttribArray(0);
+   m_graphicsDevice.glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+   m_graphicsDevice.glVertexAttribDivisor(0, 1);
+
+   m_graphicsDevice.glBindVertexArray(0);
 
    m_blockColorBuffer.release();
    m_VAO.release();
@@ -206,6 +208,46 @@ bool VisualizationAsset::InitializeColors()
 
 bool VisualizationAsset::InitializeBlockTransformations()
 {
+   if (!m_VAO.isCreated())
+   {
+      m_VAO.create();
+   }
+
+   m_VAO.bind();
+
+   for (int i = 0; i < BLOCK_COUNT; i++)
+   {
+      QMatrix4x4 transformationMatrix{ };
+      transformationMatrix.translate(i, i + 10, -i);
+      m_blockTransformations << transformationMatrix;
+   }
+
+   constexpr auto sizeOfVector = 4 * sizeof(GLfloat);
+   constexpr auto sizeOfMatrix = 4 * sizeOfVector;
+
+   m_blockTransformationBuffer.create();
+   m_blockTransformationBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+   m_blockTransformationBuffer.bind();
+   m_blockTransformationBuffer.allocate(
+      /* data = */ m_blockTransformations.constData(),
+      /* count = */ m_blockTransformations.size() * sizeOfMatrix);
+
+   m_graphicsDevice.glEnableVertexAttribArray(2);
+   m_graphicsDevice.glVertexAttribPointer(2, 4, GL_FLOAT, false, sizeOfMatrix, (GLvoid*)(0 * sizeOfVector));
+   m_graphicsDevice.glVertexAttribPointer(3, 4, GL_FLOAT, false, sizeOfMatrix, (GLvoid*)(1 * sizeOfVector));
+   m_graphicsDevice.glVertexAttribPointer(4, 4, GL_FLOAT, false, sizeOfMatrix, (GLvoid*)(2 * sizeOfVector));
+   m_graphicsDevice.glVertexAttribPointer(5, 4, GL_FLOAT, false, sizeOfMatrix, (GLvoid*)(3 * sizeOfVector));
+
+   m_graphicsDevice.glVertexAttribDivisor(2, 1);
+   m_graphicsDevice.glVertexAttribDivisor(3, 1);
+   m_graphicsDevice.glVertexAttribDivisor(4, 1);
+   m_graphicsDevice.glVertexAttribDivisor(5, 1);
+
+   m_graphicsDevice.glBindVertexArray(0);
+
+   m_blockTransformationBuffer.release();
+   m_VAO.release();
+
    return true;
 }
 
@@ -222,8 +264,10 @@ bool VisualizationAsset::Render(
    }
 
    m_shader.bind();
-   m_shader.setUniformValue("model", DEFAULT_MATRIX);
-   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
+   m_shader.setUniformValue("modelMatrix", DEFAULT_MATRIX);
+   m_shader.setUniformValue("viewMatrix", camera.GetViewMatrix());
+   m_shader.setUniformValue("projectionMatrix", camera.GetProjectionMatrix());
+
    m_shader.setUniformValue("cameraPosition", camera.GetPosition());
    m_shader.setUniformValue("materialShininess", settings.m_materialShininess);
 
@@ -240,16 +284,11 @@ bool VisualizationAsset::Render(
 
    m_VAO.bind();
 
-//   m_graphicsDevice.glDrawArrays(
-//      /* mode = */ GL_TRIANGLES,
-//      /* first = */ 0,
-//      /* count = */ m_unitBlockVertices.size());
-
    m_graphicsDevice.glDrawArraysInstanced(
-      GL_TRIANGLES,
-      0,
-      m_unitBlockVertices.size(),
-      1
+      /* mode = */ GL_TRIANGLES,
+      /* first = */ 0,
+      /* count = */ m_referenceBlockVertices.size(),
+      /* instanceCount = */ BLOCK_COUNT
    );
 
    m_shader.release();

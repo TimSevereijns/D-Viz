@@ -65,13 +65,13 @@ bool NodeSelectionCrosshair::Render(
    const std::vector<Light>&,
    const OptionsManager&)
 {
-   const auto& viewPort = camera.GetViewport();
+   const auto& viewport = camera.GetViewport();
    QMatrix4x4 orthoMatrix;
    orthoMatrix.ortho(
-      viewPort.left(),
-      viewPort.right(),
-      viewPort.bottom(),
-      viewPort.top(),
+      viewport.left(),
+      viewport.right(),
+      viewport.bottom(),
+      viewport.top(),
       camera.GetNearPlane(),
       camera.GetFarPlane());
 

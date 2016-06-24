@@ -37,12 +37,12 @@ class VisualizationAsset : public SceneAsset
       bool InitializeColors();
       bool InitializeBlockTransformations();
 
-      QOpenGLBuffer m_unitBlockBuffer;
+      QOpenGLBuffer m_referenceBlockBuffer;
       QOpenGLBuffer m_blockTransformationBuffer;
       QOpenGLBuffer m_blockColorBuffer;
 
-      QVector<QVector3D> m_unitBlockVertices;
-      QVector<QVector3D> m_blockTransformations;
+      QVector<QVector3D> m_referenceBlockVertices;
+      QVector<QMatrix4x4> m_blockTransformations;
       QVector<QVector3D> m_blockColors;
 };
 

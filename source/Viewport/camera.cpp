@@ -6,7 +6,9 @@
 
 namespace
 {
-   void NormalizeAngles(double& horizontalAngle, double& verticalAngle) noexcept
+   void NormalizeAngles(
+      double& horizontalAngle,
+      double& verticalAngle) noexcept
    {
       // Calculate floating point remainder:
       horizontalAngle = std::fmod(horizontalAngle, 360.0f);
@@ -126,7 +128,10 @@ QMatrix4x4 Camera::GetProjectionViewMatrix() const
    return GetProjectionMatrix() * GetViewMatrix();
 }
 
-QVector3D Camera::Unproject(const QPoint& point, float viewDepth, QMatrix4x4 modelMatrix) const
+QVector3D Camera::Unproject(
+   const QPoint& point,
+   float viewDepth,
+   QMatrix4x4 modelMatrix) const
 {
    const auto modelViewProjectionMatrix = GetProjectionMatrix() * GetViewMatrix() * modelMatrix;
 
