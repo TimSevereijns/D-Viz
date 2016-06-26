@@ -170,7 +170,7 @@ bool VisualizationAsset::InitializeUnitBlock()
    return true;
 }
 
-const auto BLOCK_COUNT{ 1 };
+constexpr auto BLOCK_COUNT{ 1 };
 
 bool VisualizationAsset::InitializeColors()
 {
@@ -195,7 +195,7 @@ bool VisualizationAsset::InitializeColors()
       /* count = */ m_blockColors.size() * 3 * sizeof(GLfloat));
 
    m_graphicsDevice.glEnableVertexAttribArray(0);
-   m_graphicsDevice.glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+   m_graphicsDevice.glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(QVector3D), (GLvoid*)0);
    m_graphicsDevice.glVertexAttribDivisor(0, 1);
 
    m_graphicsDevice.glBindVertexArray(0);
@@ -218,12 +218,13 @@ bool VisualizationAsset::InitializeBlockTransformations()
    for (int i = 0; i < BLOCK_COUNT; i++)
    {
       QMatrix4x4 transformationMatrix{ };
-      transformationMatrix.translate(i, i + 10, -i);
+      transformationMatrix.translate(10, 0, -10);
+      transformationMatrix.scale(10, 10, 10);
       m_blockTransformations << transformationMatrix;
    }
 
-   constexpr auto sizeOfVector = 4 * sizeof(GLfloat);
-   constexpr auto sizeOfMatrix = 4 * sizeOfVector;
+   constexpr auto sizeOfVector = sizeof(QVector4D);
+   constexpr auto sizeOfMatrix = sizeof(QMatrix4x4);
 
    m_blockTransformationBuffer.create();
    m_blockTransformationBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -232,16 +233,21 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* data = */ m_blockTransformations.constData(),
       /* count = */ m_blockTransformations.size() * sizeOfMatrix);
 
-   m_graphicsDevice.glEnableVertexAttribArray(2);
-   m_graphicsDevice.glVertexAttribPointer(2, 4, GL_FLOAT, false, sizeOfMatrix, (GLvoid*)(0 * sizeOfVector));
-   m_graphicsDevice.glVertexAttribPointer(3, 4, GL_FLOAT, false, sizeOfMatrix, (GLvoid*)(1 * sizeOfVector));
-   m_graphicsDevice.glVertexAttribPointer(4, 4, GL_FLOAT, false, sizeOfMatrix, (GLvoid*)(2 * sizeOfVector));
-   m_graphicsDevice.glVertexAttribPointer(5, 4, GL_FLOAT, false, sizeOfMatrix, (GLvoid*)(3 * sizeOfVector));
+   m_graphicsDevice.glEnableVertexAttribArray(1);
+   m_graphicsDevice.glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix, (GLvoid*)(0 * sizeOfVector));
+   m_graphicsDevice.glVertexAttribDivisor(1, 1);
 
+   m_graphicsDevice.glEnableVertexAttribArray(2);
+   m_graphicsDevice.glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix, (GLvoid*)(1 * sizeOfVector));
    m_graphicsDevice.glVertexAttribDivisor(2, 1);
-   m_graphicsDevice.glVertexAttribDivisor(3, 1);
+
+   m_graphicsDevice.glEnableVertexAttribArray(3);
+   m_graphicsDevice.glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix, (GLvoid*)(2 * sizeOfVector));
+   m_graphicsDevice.glVertexAttribDivisor(2, 1);
+
+   m_graphicsDevice.glEnableVertexAttribArray(4);
+   m_graphicsDevice.glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix, (GLvoid*)(3 * sizeOfVector));
    m_graphicsDevice.glVertexAttribDivisor(4, 1);
-   m_graphicsDevice.glVertexAttribDivisor(5, 1);
 
    m_graphicsDevice.glBindVertexArray(0);
 
@@ -256,15 +262,12 @@ bool VisualizationAsset::Render(
    const std::vector<Light>& lights,
    const OptionsManager& settings)
 {
-   const static auto DEFAULT_MATRIX = QMatrix4x4{ };
-
    if (!IsAssetLoaded())
    {
       return true;
    }
 
    m_shader.bind();
-   m_shader.setUniformValue("modelMatrix", DEFAULT_MATRIX);
    m_shader.setUniformValue("viewMatrix", camera.GetViewMatrix());
    m_shader.setUniformValue("projectionMatrix", camera.GetProjectionMatrix());
 

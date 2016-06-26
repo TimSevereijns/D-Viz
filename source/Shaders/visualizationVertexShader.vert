@@ -1,9 +1,8 @@
 #version 410 core
 
 layout (location = 0) in vec3 color;
-layout (location = 2) in mat4 instanceMatrix;
+layout (location = 1) in mat4 instanceMatrix;
 
-uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
@@ -22,6 +21,5 @@ void main(void)
    fragmentColor = color;
 
    // Apply project, view, model, and transformation matrices:
-   //gl_Position = projectionMatrix * viewMatrix * vec4(vertex + vec3(instanceMatrix[3]), 1);
-   gl_Position = projectionMatrix * viewMatrix * vec4(vertex + vec3(10, 0, 0), 1);
+   gl_Position = projectionMatrix * viewMatrix * instanceMatrix * vec4(vertex, 1);
 }
