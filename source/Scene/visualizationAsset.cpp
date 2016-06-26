@@ -87,6 +87,62 @@ namespace
 
       return blockColors;
    }
+
+   /**
+    * @brief CreateReferenceCube
+    * @return
+    */
+   QVector<QVector3D> CreateReferenceCube()
+   {
+      QVector<QVector3D> referenceCube{};
+      referenceCube.reserve(36);
+
+      referenceCube
+         // Bottom:
+         << QVector3D{ -1, -1, -1 }
+         << QVector3D{  1, -1, -1 }
+         << QVector3D{ -1, -1,  1 }
+         << QVector3D{  1, -1, -1 }
+         << QVector3D{  1, -1,  1 }
+         << QVector3D{ -1, -1,  1 }
+         // Top:
+         << QVector3D{ -1,  1, -1 }
+         << QVector3D{ -1,  1,  1 }
+         << QVector3D{  1,  1, -1 }
+         << QVector3D{  1,  1, -1 }
+         << QVector3D{ -1,  1,  1 }
+         << QVector3D{  1,  1,  1 }
+         // Front:
+         << QVector3D{ -1, -1,  1 }
+         << QVector3D{  1, -1,  1 }
+         << QVector3D{ -1,  1,  1 }
+         << QVector3D{  1, -1,  1 }
+         << QVector3D{  1,  1,  1 }
+         << QVector3D{ -1,  1,  1 }
+         // Back:
+         << QVector3D{ -1, -1, -1 }
+         << QVector3D{ -1,  1, -1 }
+         << QVector3D{  1, -1, -1 }
+         << QVector3D{  1, -1, -1 }
+         << QVector3D{ -1,  1, -1 }
+         << QVector3D{  1,  1, -1 }
+         // Left:
+         << QVector3D{ -1, -1,  1 }
+         << QVector3D{ -1,  1, -1 }
+         << QVector3D{ -1, -1, -1 }
+         << QVector3D{ -1, -1,  1 }
+         << QVector3D{ -1,  1,  1 }
+         << QVector3D{ -1,  1, -1 }
+         // Right:
+         << QVector3D{  1, -1,  1 }
+         << QVector3D{  1, -1, -1 }
+         << QVector3D{  1,  1, -1 }
+         << QVector3D{  1, -1,  1 }
+         << QVector3D{  1,  1, -1 }
+         << QVector3D{  1,  1,  1 };
+
+      return referenceCube;
+   }
 }
 
 VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
@@ -121,21 +177,7 @@ bool VisualizationAsset::InitializeUnitBlock()
       m_VAO.create();
    }
 
-   const auto unitBlock = Block
-   {
-      DoublePoint3D{ 0.0, 0.0, 0.0 },
-      1.0,
-      1.0,
-      1.0
-   };
-
-   // @todo Wrap this in a function to be placed on the Block class.
-   m_referenceBlockVertices.clear();
-   std::for_each(std::begin(unitBlock), std::end(unitBlock),
-      [&] (const auto& face)
-   {
-      m_referenceBlockVertices << face.vertices;
-   });
+   m_referenceBlockVertices = CreateReferenceCube();
 
    m_VAO.bind();
 
@@ -144,7 +186,7 @@ bool VisualizationAsset::InitializeUnitBlock()
    m_referenceBlockBuffer.bind();
    m_referenceBlockBuffer.allocate(
       /* data = */ m_referenceBlockVertices.constData(),
-      /* count = */ m_referenceBlockVertices.size() * 3 * sizeof(GLfloat));
+      /* count = */ m_referenceBlockVertices.size() * sizeof(QVector3D));
 
    m_referenceBlockBuffer.bind();
 
@@ -154,15 +196,7 @@ bool VisualizationAsset::InitializeUnitBlock()
       /* type = */ GL_FLOAT,
       /* offset = */ 0,
       /* tupleSize = */ 3,
-      /* stride = */ 6 * sizeof(GLfloat));
-
-   m_shader.enableAttributeArray("normal");
-   m_shader.setAttributeBuffer(
-      /* location = */ "normal",
-      /* type = */ GL_FLOAT,
-      /* offset = */ 3 * sizeof(GLfloat),
-      /* tupleSize = */ 3,
-      /* stride = */ 6 * sizeof(GLfloat));
+      /* stride = */ sizeof(QVector3D));
 
    m_referenceBlockBuffer.release();
    m_VAO.release();
@@ -170,7 +204,7 @@ bool VisualizationAsset::InitializeUnitBlock()
    return true;
 }
 
-constexpr auto BLOCK_COUNT{ 1 };
+constexpr auto BLOCK_COUNT{ 100 };
 
 bool VisualizationAsset::InitializeColors()
 {
@@ -182,9 +216,9 @@ bool VisualizationAsset::InitializeColors()
    m_VAO.bind();
 
    // @todo FOR DEBUG USE
-   for (int i = 0; i < BLOCK_COUNT; i++)
+   for (double i = 0; i < BLOCK_COUNT; i++)
    {
-      m_blockColors << QVector3D{ 0.5, 1, 0.5 };
+      m_blockColors << QVector3D( 0.5 * i, 1 * i, 0.5 * i );
    }
 
    m_blockColorBuffer.create();
@@ -218,8 +252,8 @@ bool VisualizationAsset::InitializeBlockTransformations()
    for (int i = 0; i < BLOCK_COUNT; i++)
    {
       QMatrix4x4 transformationMatrix{ };
-      transformationMatrix.translate(10, 0, -10);
-      transformationMatrix.scale(10, 10, 10);
+      transformationMatrix.translate(2 * i, 1, -2 * i);
+      transformationMatrix.scale(1);
       m_blockTransformations << transformationMatrix;
    }
 
@@ -243,7 +277,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
 
    m_graphicsDevice.glEnableVertexAttribArray(3);
    m_graphicsDevice.glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix, (GLvoid*)(2 * sizeOfVector));
-   m_graphicsDevice.glVertexAttribDivisor(2, 1);
+   m_graphicsDevice.glVertexAttribDivisor(3, 1);
 
    m_graphicsDevice.glEnableVertexAttribArray(4);
    m_graphicsDevice.glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix, (GLvoid*)(3 * sizeOfVector));
