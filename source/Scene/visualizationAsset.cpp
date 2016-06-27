@@ -155,7 +155,7 @@ bool VisualizationAsset::LoadShaders()
    return SceneAsset::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
 }
 
-bool VisualizationAsset::Initialize(const Camera&)
+bool VisualizationAsset::Initialize()
 {
    const bool unitBlockInitialized = InitializeUnitBlock();
    const bool colorsInitialized = InitializeColors();
@@ -177,7 +177,21 @@ bool VisualizationAsset::InitializeUnitBlock()
       m_VAO.create();
    }
 
-   m_referenceBlockVertices = CreateReferenceCube();
+   const auto unitBlock = Block
+   {
+      DoublePoint3D{ 0.0, 0.0, 0.0 },
+      1.0,
+      1.0,
+      1.0
+   };
+
+   // @todo Wrap this in a function to be placed on the Block class.
+   m_referenceBlockVertices.clear();
+   std::for_each(std::begin(unitBlock), std::end(unitBlock),
+      [&] (const auto& face)
+   {
+      m_referenceBlockVertices << face.vertices;
+   });
 
    m_VAO.bind();
 
@@ -196,7 +210,15 @@ bool VisualizationAsset::InitializeUnitBlock()
       /* type = */ GL_FLOAT,
       /* offset = */ 0,
       /* tupleSize = */ 3,
-      /* stride = */ sizeof(QVector3D));
+      /* stride = */ 2 * sizeof(QVector3D));
+
+   m_shader.enableAttributeArray("normal");
+   m_shader.setAttributeBuffer(
+      /* location = */ "normal",
+      /* type = */ GL_FLOAT,
+      /* offset = */ sizeof(QVector3D),
+      /* tupleSize = */ 3,
+      /* stride = */ 2 * sizeof(QVector3D));
 
    m_referenceBlockBuffer.release();
    m_VAO.release();
@@ -216,9 +238,9 @@ bool VisualizationAsset::InitializeColors()
    m_VAO.bind();
 
    // @todo FOR DEBUG USE
-   for (double i = 0; i < BLOCK_COUNT; i++)
+   for (int i = 0; i < BLOCK_COUNT; i++)
    {
-      m_blockColors << QVector3D( 0.5 * i, 1 * i, 0.5 * i );
+      m_blockColors << QVector3D( 0.5, 1, 0.5);
    }
 
    m_blockColorBuffer.create();
@@ -252,8 +274,8 @@ bool VisualizationAsset::InitializeBlockTransformations()
    for (int i = 0; i < BLOCK_COUNT; i++)
    {
       QMatrix4x4 transformationMatrix{ };
-      transformationMatrix.translate(2 * i, 1, -2 * i);
-      transformationMatrix.scale(1);
+      transformationMatrix.translate(2 * i, 0, -2 * i);
+      transformationMatrix.scale(2);
       m_blockTransformations << transformationMatrix;
    }
 
@@ -296,12 +318,15 @@ bool VisualizationAsset::Render(
    const std::vector<Light>& lights,
    const OptionsManager& settings)
 {
+   const static auto DEFAULT_MATRIX = QMatrix4x4{ };
+
    if (!IsAssetLoaded())
    {
       return true;
    }
 
    m_shader.bind();
+   m_shader.setUniformValue("model", DEFAULT_MATRIX);
    m_shader.setUniformValue("viewMatrix", camera.GetViewMatrix());
    m_shader.setUniformValue("projectionMatrix", camera.GetProjectionMatrix());
 
@@ -334,7 +359,7 @@ bool VisualizationAsset::Render(
    return true;
 }
 
-bool VisualizationAsset::Reload(const Camera&)
+bool VisualizationAsset::Reload()
 {
    InitializeUnitBlock();
    InitializeColors();

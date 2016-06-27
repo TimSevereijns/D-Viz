@@ -142,11 +142,11 @@ namespace
     * @param[in] highlightAsset     The asset to be nuked and reloaded.
     * @param[in] camera             The camera used to view the asset in the scene.
     */
-   void ClearAssetBuffersAndReload(SceneAsset& asset, const Camera& camera)
+   void ClearAssetBuffersAndReload(SceneAsset& asset)
    {
       asset.SetVertexData(QVector<QVector3D>{ });
       asset.SetColorData(QVector<QVector3D>{ });
-      asset.Reload(camera);
+      asset.Reload();
    }
 
    /**
@@ -206,7 +206,7 @@ void GLCanvas::initializeGL()
    for (const auto& asset : m_sceneAssets)
    {
       asset->LoadShaders();
-      asset->Initialize(m_camera);
+      asset->Initialize();
    }
 }
 
@@ -333,7 +333,7 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
    {
       for (const auto& asset : m_sceneAssets)
       {
-         asset->Reload(m_camera);
+         asset->Reload();
       }
    }
 
@@ -768,8 +768,7 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
       assert(crosshairAsset);
       if (crosshairAsset)
       {
-         crosshairAsset->ShowCrosshair(m_camera);
-         crosshairAsset->Reload(m_camera);
+         crosshairAsset->Show(m_camera);
       }
    }
    else if (m_isLeftTriggerDown
@@ -783,8 +782,7 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
       assert(crosshairAsset);
       if (crosshairAsset)
       {
-         crosshairAsset->HideCrosshair();
-         crosshairAsset->Reload(m_camera);
+         crosshairAsset->Hide();
       }
    }
 

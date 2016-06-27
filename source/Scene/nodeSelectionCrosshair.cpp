@@ -50,14 +50,18 @@ NodeSelectionCrosshair::NodeSelectionCrosshair(GraphicsDevice& device) :
    m_rawColors = CreateCrosshairColors();
 }
 
-void NodeSelectionCrosshair::ShowCrosshair(const Camera& camera)
+void NodeSelectionCrosshair::Show(const Camera& camera)
 {
    m_rawVertices = CreateCrosshairVertices(camera.GetViewport().center());
+
+   Reload();
 }
 
-void NodeSelectionCrosshair::HideCrosshair()
+void NodeSelectionCrosshair::Hide()
 {
    m_rawVertices.clear();
+
+   Reload();
 }
 
 bool NodeSelectionCrosshair::Render(

@@ -17,14 +17,16 @@ class VisualizationAsset : public SceneAsset
 
       bool LoadShaders() override;
 
-      bool Initialize(const Camera& camera) override;
+      // @todo Pass in the visualization and then call the init functions to load the transformation
+      // matrices and the block colors.
+      bool Initialize() override;
 
       bool Render(
          const Camera& camera,
          const std::vector<Light>& lights,
          const OptionsManager& settings) override;
 
-      bool Reload(const Camera& camera) override;
+      bool Reload() override;
 
       void UpdateVBO(
          const TreeNode<VizNode>& node,

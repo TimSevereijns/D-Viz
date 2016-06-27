@@ -13,21 +13,20 @@ class LineAsset : public SceneAsset
 
       bool LoadShaders() override;
 
-      bool Initialize(const Camera &camera) override;
+      bool Initialize() override;
 
       bool Render(
          const Camera& camera,
          const std::vector<Light>& light,
          const OptionsManager& settings) override;
 
-      bool Reload(const Camera& camera) override;
+      bool Reload() override;
 
    private:
 
-      bool InitializeVertexBuffers(const Camera& camera);
+      bool InitializeVertexBuffers();
 
-      bool InitializeColorBuffers(const Camera& camera);
-
+      bool InitializeColorBuffers();
 };
 
 #endif // LINEASSET_H

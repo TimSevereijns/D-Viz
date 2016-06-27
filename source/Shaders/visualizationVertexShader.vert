@@ -7,17 +7,17 @@ uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
 in vec3 vertex;
-//in vec3 normal;
+in vec3 normal;
 
 out vec3 fragmentVertex;
 out vec3 fragmentColor;
-//out vec3 fragmentNormal;
+out vec3 fragmentNormal;
 
 void main(void)
 {
    // Pass color and normal values along without modification.
    fragmentVertex = vertex;
-   //fragmentNormal = normal;
+   fragmentNormal = normal;
    fragmentColor = color;
 
    // @debug Verify that the correct color is passed in.

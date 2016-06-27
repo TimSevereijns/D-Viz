@@ -128,7 +128,7 @@ bool GridAsset::Render(
    return true;
 }
 
-bool GridAsset::Reload(const Camera&)
+bool GridAsset::Reload()
 {
    return true;
 }

@@ -48,7 +48,7 @@ class SceneAsset
        *
        * @returns True if the operation succeeded.
        */
-      virtual bool Initialize(const Camera& camera) = 0;
+      virtual bool Initialize() = 0;
 
       /**
        * @brief Clears the OpenGL buffer objects that contain the vertex and color data.
@@ -92,7 +92,7 @@ class SceneAsset
        *
        * @returns True if the operation succeeded.
        */
-      virtual bool Reload(const Camera& camera) = 0;
+      virtual bool Reload() = 0;
 
       /**
        * @brief Sets the vertex data associated with the asset in question.
