@@ -15,9 +15,9 @@ uniform struct Light
    float attenuation;
 } allLights[5];
 
-in vec3 fragmentVertex;
-in vec3 fragmentColor;
-in vec3 fragmentNormal;
+//in vec3 vertexPosition;
+in vec3 vertexColor;
+in vec3 vertexNormal;
 
 out vec4 pixelColor;
 
@@ -58,12 +58,12 @@ vec3 GetContributionOfLight(
 void main(void)
 {
    // Transform normal to world coordinates:
-   vec3 normal = normalize(transpose(inverse(mat3(model))) * fragmentNormal);
+   //vec3 fragmentNormal = normalize(transpose(inverse(mat3(model))) * vertexNormal);
 
    // Compute vectors from the fragment (in world coordinates) to important objects in the scene:
-   vec3 surfacePosition = vec3(model * vec4(fragmentVertex, 1));
+   //vec3 surfacePosition = vec3(model * vec4(vertexPosition, 1));
 
-   vec3 surfaceToCamera = normalize(cameraPosition - surfacePosition);
+   vec3 fragmentToCamera = normalize(cameraPosition - vec3(gl_FragCoord));
 
    // Calculate the contribution of each light:
    vec3 linearColor = vec3(0);
@@ -71,10 +71,10 @@ void main(void)
    {
       linearColor += GetContributionOfLight(
          allLights[i],
-         fragmentColor,
-         normal,
-         surfacePosition,
-         surfaceToCamera);
+         vertexColor,
+         vertexNormal,
+         gl_FragCoord.xyz,
+         fragmentToCamera);
    }
 
    // Gamma correction:

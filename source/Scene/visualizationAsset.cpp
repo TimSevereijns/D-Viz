@@ -226,7 +226,7 @@ bool VisualizationAsset::InitializeUnitBlock()
    return true;
 }
 
-constexpr auto BLOCK_COUNT{ 100 };
+constexpr auto BLOCK_COUNT{ 1 };
 
 bool VisualizationAsset::InitializeColors()
 {
@@ -275,7 +275,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
    {
       QMatrix4x4 transformationMatrix{ };
       transformationMatrix.translate(2 * i, 0, -2 * i);
-      transformationMatrix.scale(2);
+      transformationMatrix.scale(200);
       m_blockTransformations << transformationMatrix;
    }
 
