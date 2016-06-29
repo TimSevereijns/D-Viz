@@ -226,7 +226,7 @@ bool VisualizationAsset::InitializeUnitBlock()
    return true;
 }
 
-constexpr auto BLOCK_COUNT{ 1 };
+constexpr auto BLOCK_COUNT{ 100 };
 
 bool VisualizationAsset::InitializeColors()
 {
@@ -274,7 +274,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
    for (int i = 0; i < BLOCK_COUNT; i++)
    {
       QMatrix4x4 transformationMatrix{ };
-      transformationMatrix.translate(2 * i, 0, -2 * i);
+      transformationMatrix.translate(400, 0, -400);
       transformationMatrix.scale(200);
       m_blockTransformations << transformationMatrix;
    }
@@ -318,15 +318,12 @@ bool VisualizationAsset::Render(
    const std::vector<Light>& lights,
    const OptionsManager& settings)
 {
-   const static auto DEFAULT_MATRIX = QMatrix4x4{ };
-
    if (!IsAssetLoaded())
    {
       return true;
    }
 
    m_shader.bind();
-   m_shader.setUniformValue("model", DEFAULT_MATRIX);
    m_shader.setUniformValue("viewMatrix", camera.GetViewMatrix());
    m_shader.setUniformValue("projectionMatrix", camera.GetProjectionMatrix());
 

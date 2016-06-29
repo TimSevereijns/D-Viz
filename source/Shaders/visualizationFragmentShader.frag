@@ -1,7 +1,5 @@
 #version 410 core
 
-uniform mat4 model;
-
 uniform vec3 cameraPosition;
 uniform vec3 materialSpecularColor;
 
@@ -15,13 +13,13 @@ uniform struct Light
    float attenuation;
 } allLights[5];
 
-//in vec3 vertexPosition;
+in vec3 vertexPosition;
 in vec3 vertexColor;
 in vec3 vertexNormal;
 
 out vec4 pixelColor;
 
-vec3 GetContributionOfLight(
+vec3 ComputeLightContribution(
    Light light,
    vec3 surfaceColor,
    vec3 normal,
@@ -57,23 +55,17 @@ vec3 GetContributionOfLight(
 
 void main(void)
 {
-   // Transform normal to world coordinates:
-   //vec3 fragmentNormal = normalize(transpose(inverse(mat3(model))) * vertexNormal);
-
-   // Compute vectors from the fragment (in world coordinates) to important objects in the scene:
-   //vec3 surfacePosition = vec3(model * vec4(vertexPosition, 1));
-
-   vec3 fragmentToCamera = normalize(cameraPosition - vec3(gl_FragCoord));
+   vec3 fragmentToCamera = normalize(cameraPosition - vec3(vertexPosition));
 
    // Calculate the contribution of each light:
    vec3 linearColor = vec3(0);
    for (int i = 0; i < 5; i++)
    {
-      linearColor += GetContributionOfLight(
+      linearColor += ComputeLightContribution(
          allLights[i],
          vertexColor,
          vertexNormal,
-         gl_FragCoord.xyz,
+         vertexPosition.xyz,
          fragmentToCamera);
    }
 

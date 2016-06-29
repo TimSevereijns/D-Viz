@@ -9,18 +9,20 @@ uniform mat4 projectionMatrix;
 in vec3 vertex;
 in vec3 normal;
 
-//out vec3 fragmentVertex;
+out vec3 vertexPosition;
 out vec3 vertexColor;
 out vec3 vertexNormal;
 
 void main(void)
 {
-   // Pass color and normal values along without modification.
-   //fragmentVertex = vertex;
-   vertexNormal = normal;
+   // Pass the vertex position and vertex along without modification:
+   vertexPosition = vec3(instanceMatrix * vec4(vertex, 1));
    vertexColor = color;
 
-   vertexNormal = normalize(vec3(instanceMatrix * vec4(normal, 1)));
+   // Transform normal to world coordinates:
+   mat4 transposedInverseInstance = transpose(inverse(instanceMatrix));
+   vec3 rawVertexNormal = vec3(transposedInverseInstance * vec4(normal, 1));
+   vertexNormal = normalize(rawVertexNormal);
 
    // Apply project, view, model, and transformation matrices:
    gl_Position = projectionMatrix * viewMatrix * instanceMatrix * vec4(vertex, 1);
