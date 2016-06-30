@@ -83,7 +83,7 @@ class SceneAsset
        *
        * @returns True if the OpenGL buffers have been properly populated.
        */
-      bool IsAssetLoaded() const;
+      virtual bool IsAssetLoaded() const;
 
       /**
        * @brief Performs all actions necessary to update the data in the OpenGL buffers.

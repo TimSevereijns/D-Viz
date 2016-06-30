@@ -226,8 +226,6 @@ bool VisualizationAsset::InitializeUnitBlock()
    return true;
 }
 
-constexpr auto BLOCK_COUNT{ 100 };
-
 bool VisualizationAsset::InitializeColors()
 {
    if (!m_VAO.isCreated())
@@ -236,12 +234,6 @@ bool VisualizationAsset::InitializeColors()
    }
 
    m_VAO.bind();
-
-   // @todo FOR DEBUG USE
-   for (int i = 0; i < BLOCK_COUNT; i++)
-   {
-      m_blockColors << QVector3D( 0.5, 1, 0.5);
-   }
 
    m_blockColorBuffer.create();
    m_blockColorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -270,14 +262,6 @@ bool VisualizationAsset::InitializeBlockTransformations()
    }
 
    m_VAO.bind();
-
-   for (int i = 0; i < BLOCK_COUNT; i++)
-   {
-      QMatrix4x4 transformationMatrix{ };
-      transformationMatrix.translate(400, 0, -400);
-      transformationMatrix.scale(200);
-      m_blockTransformations << transformationMatrix;
-   }
 
    constexpr auto sizeOfVector = sizeof(QVector4D);
    constexpr auto sizeOfMatrix = sizeof(QMatrix4x4);
@@ -311,6 +295,40 @@ bool VisualizationAsset::InitializeBlockTransformations()
    m_VAO.release();
 
    return true;
+}
+
+bool VisualizationAsset::LoadBufferData(const Tree<VizNode>& tree)
+{
+   m_blockTransformations.clear();
+   m_blockColors.clear();
+
+   const auto directoryColor = QVector3D{ 1.0f, 1.0f, 1.0f };
+   const auto regularFileColor = QVector3D{ 0.5f, 1.0f, 0.5f };
+
+   for (const TreeNode<VizNode>& node : tree)
+   {
+      const auto& block = node->block;
+
+      QMatrix4x4 instanceMatrix{ };
+      instanceMatrix.translate(block.origin.x(), block.origin.y(), block.origin.z());
+      instanceMatrix.scale(block.width, block.height, block.depth);
+      m_blockTransformations << instanceMatrix;
+
+      m_blockColors << ((node->file.type == FileType::DIRECTORY)
+         ? directoryColor
+         : regularFileColor);
+   }
+
+   assert(m_blockColors.size() == m_blockTransformations.size());
+
+   //Initialize();
+
+   return m_blockColors.size();
+}
+
+bool VisualizationAsset::IsAssetLoaded() const
+{
+   return !(m_blockTransformations.empty() && m_blockColors.empty());
 }
 
 bool VisualizationAsset::Render(
@@ -347,7 +365,7 @@ bool VisualizationAsset::Render(
       /* mode = */ GL_TRIANGLES,
       /* first = */ 0,
       /* count = */ m_referenceBlockVertices.size(),
-      /* instanceCount = */ BLOCK_COUNT
+      /* instanceCount = */ m_blockColors.size()
    );
 
    m_shader.release();

@@ -303,58 +303,58 @@ void Visualization::UpdateBoundingBoxes()
    });
 }
 
-void Visualization::ComputeVertexAndColorData(const VisualizationParameters& parameters)
+void Visualization::ComputeVertexAndColorData(const VisualizationParameters& /*parameters*/)
 {
-   assert(m_theTree);
-   assert(m_hasDataBeenParsed);
+//   assert(m_theTree);
+//   assert(m_hasDataBeenParsed);
 
-   if (!m_hasDataBeenParsed)
-   {
-      return;
-   }
+//   if (!m_hasDataBeenParsed)
+//   {
+//      return;
+//   }
 
-   m_visualizationColors.clear();
-   m_visualizationVertices.clear();
+//   m_visualizationColors.clear();
+//   m_visualizationVertices.clear();
 
-   std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
-      [&] (auto& node)
-   {
-      if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY) ||
-          node->file.size < parameters.minimumFileSize)
-      {
-         return;
-      }
+//   std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
+//      [&] (auto& node)
+//   {
+//      if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY) ||
+//          node->file.size < parameters.minimumFileSize)
+//      {
+//         return;
+//      }
 
-      const int vertexCount = m_visualizationVertices.size();
-      node->offsetIntoVBO = vertexCount;
+//      const int vertexCount = m_visualizationVertices.size();
+//      node->offsetIntoVBO = vertexCount;
 
-      std::for_each(std::begin(node->block), std::end(node->block),
-         [&] (const auto& face)
-      {
-         m_visualizationVertices << face.vertices;
-      });
+//      std::for_each(std::begin(node->block), std::end(node->block),
+//         [&] (const auto& face)
+//      {
+//         m_visualizationVertices << face.vertices;
+//      });
 
-      if (node->file.type == FileType::DIRECTORY)
-      {
-         if (parameters.useDirectoryGradient)
-         {
-            m_visualizationColors << ComputeGradientColor(node);
-         }
-         else
-         {
-            m_visualizationColors << Visualization::CreateDirectoryColors();
-         }
-      }
-      else if (node->file.type == FileType::REGULAR)
-      {
-         m_visualizationColors << Visualization::CreateFileColors();
-      }
+//      if (node->file.type == FileType::DIRECTORY)
+//      {
+//         if (parameters.useDirectoryGradient)
+//         {
+//            m_visualizationColors << ComputeGradientColor(node);
+//         }
+//         else
+//         {
+//            m_visualizationColors << Visualization::CreateDirectoryColors();
+//         }
+//      }
+//      else if (node->file.type == FileType::REGULAR)
+//      {
+//         m_visualizationColors << Visualization::CreateFileColors();
+//      }
 
-      if (vertexCount + Block::VERTICES_PER_BLOCK != m_visualizationVertices.size())
-      {
-         //assert(!"Buffer data mismatch detected!");
-      }
-   });
+//      if (vertexCount + Block::VERTICES_PER_BLOCK != m_visualizationVertices.size())
+//      {
+//         //assert(!"Buffer data mismatch detected!");
+//      }
+//   });
 
    // All offsets must be properly set; the default initialized state is invalid:
 //   assert(std::none_of(std::begin(*m_theTree), std::end(*m_theTree),
@@ -393,12 +393,12 @@ TreeNode<VizNode>* Visualization::FindNearestIntersection(
    return nearestIntersection;
 }
 
-void Visualization::FindLargestDirectory(const Tree<VizNode>& tree)
+void Visualization::FindLargestDirectory()
 {
    std::uintmax_t smallestDirectory = std::numeric_limits<std::uintmax_t>::max();
    std::uintmax_t largestDirectory = std::numeric_limits<std::uintmax_t>::min();
 
-   for (auto& node : tree)
+   for (auto& node : *m_theTree)
    {
       if (node.GetData().file.type != FileType::DIRECTORY)
       {
@@ -420,6 +420,12 @@ void Visualization::FindLargestDirectory(const Tree<VizNode>& tree)
    m_largestDirectorySize = largestDirectory;
 }
 
+const Tree<VizNode>& Visualization::GetTree() const
+{
+   assert(m_theTree);
+   return *m_theTree;
+}
+
 QVector<QVector3D>& Visualization::GetColorData()
 {
    assert(!m_visualizationColors.empty());
@@ -435,23 +441,23 @@ QVector<QVector3D>& Visualization::GetVertexData()
 QVector<QVector3D> Visualization::CreateFileColors()
 {
    QVector<QVector3D> blockColors;
-   blockColors.reserve(Block::VERTICES_PER_BLOCK);
-   blockColors
-      // Front:
-      << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)
-      << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)
-      // Right:
-      << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)
-      << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)
-      // Back:
-      << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)
-      << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)
-      // Left:
-      << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)
-      << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)
-      // Top:
-      << QVector3D(0.0f, 0.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f)
-      << QVector3D(0.0f, 0.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f);
+//   blockColors.reserve(Block::VERTICES_PER_BLOCK);
+//   blockColors
+//      // Front:
+//      << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)
+//      << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)
+//      // Right:
+//      << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)
+//      << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)
+//      // Back:
+//      << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)
+//      << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)
+//      // Left:
+//      << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)
+//      << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)
+//      // Top:
+//      << QVector3D(0.0f, 0.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f)
+//      << QVector3D(0.0f, 0.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f);
 
    return blockColors;
 }
@@ -459,23 +465,23 @@ QVector<QVector3D> Visualization::CreateFileColors()
 QVector<QVector3D> Visualization::CreateDirectoryColors()
 {
    QVector<QVector3D> blockColors;
-   blockColors.reserve(Block::VERTICES_PER_BLOCK);
-   blockColors
-      // Front:
-      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-      // Right:
-      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-      // Back:
-      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-      // Left:
-      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-      // Top:
-      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f);
+//   blockColors.reserve(Block::VERTICES_PER_BLOCK);
+//   blockColors
+//      // Front:
+//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
+//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
+//      // Right:
+//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
+//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
+//      // Back:
+//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
+//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
+//      // Left:
+//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
+//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
+//      // Top:
+//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
+//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f);
 
    return blockColors;
 }

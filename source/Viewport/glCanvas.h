@@ -200,7 +200,7 @@ class GLCanvas : public QOpenGLWidget
       std::unique_ptr<Visualization> m_theVisualization{ nullptr };
 
       std::unique_ptr<QTimer> m_frameRedrawTimer{ nullptr };
-      std::unique_ptr<QTimer> m_cameraPositionTimer{ nullptr };
+      std::unique_ptr<QTimer> m_inputCaptureTimer{ nullptr };
 
       std::chrono::system_clock::time_point m_lastFrameDrawTime
       {

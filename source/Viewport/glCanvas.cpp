@@ -185,9 +185,9 @@ GLCanvas::GLCanvas(QWidget* parent) :
    connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
    m_frameRedrawTimer->start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
 
-   m_cameraPositionTimer.reset(new QTimer{ this });
-   connect(m_cameraPositionTimer.get(), SIGNAL(timeout()), this, SLOT(HandleInput()));
-   m_cameraPositionTimer->start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
+   m_inputCaptureTimer.reset(new QTimer{ this });
+   connect(m_inputCaptureTimer.get(), SIGNAL(timeout()), this, SLOT(HandleInput()));
+   m_inputCaptureTimer->start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
 }
 
 void GLCanvas::initializeGL()
@@ -324,8 +324,10 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
    m_visualizationParameters = parameters;
    m_theVisualization->ComputeVertexAndColorData(parameters);
 
-   m_sceneAssets[Asset::TREEMAP]->SetVertexData(std::move(m_theVisualization->GetVertexData()));
-   m_sceneAssets[Asset::TREEMAP]->SetColorData(std::move(m_theVisualization->GetColorData()));
+   auto* vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
+   assert(vizAsset);
+
+   vizAsset->LoadBufferData(m_theVisualization->GetTree());
 
    m_isVisualizationLoaded = m_sceneAssets[Asset::TREEMAP]->IsAssetLoaded();
 

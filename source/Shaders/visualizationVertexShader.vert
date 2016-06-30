@@ -15,15 +15,15 @@ out vec3 vertexNormal;
 
 void main(void)
 {
-   // Pass the vertex position and vertex along without modification:
-   vertexPosition = vec3(instanceMatrix * vec4(vertex, 1));
    vertexColor = color;
 
+   vertexPosition = vec3(instanceMatrix * vec4(vertex, 1));
+
    // Transform normal to world coordinates:
-   mat4 transposedInverseInstance = transpose(inverse(instanceMatrix));
-   vec3 rawVertexNormal = vec3(transposedInverseInstance * vec4(normal, 1));
+   mat4 normalMatrix = transpose(inverse(instanceMatrix));
+   vec3 rawVertexNormal = vec3(normalMatrix * vec4(normal, 1));
    vertexNormal = normalize(rawVertexNormal);
 
-   // Apply project, view, model, and transformation matrices:
+   // Apply projection, view, and instance matrices:
    gl_Position = projectionMatrix * viewMatrix * instanceMatrix * vec4(vertex, 1);
 }
