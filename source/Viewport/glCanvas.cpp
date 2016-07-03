@@ -321,25 +321,19 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
    m_isPaintingSuspended = true;
    ON_SCOPE_EXIT noexcept { m_isPaintingSuspended = previousSuspensionState; };
 
-   m_visualizationParameters = parameters;
-   m_theVisualization->ComputeVertexAndColorData(parameters);
-
    auto* vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
    assert(vizAsset);
 
-   vizAsset->LoadBufferData(m_theVisualization->GetTree());
+   m_visualizationParameters = parameters;
+   vizAsset->LoadBufferData(m_theVisualization->GetTree(), parameters);
 
-   m_isVisualizationLoaded = m_sceneAssets[Asset::TREEMAP]->IsAssetLoaded();
-
-   if (m_isVisualizationLoaded)
+   for (const auto& asset : m_sceneAssets)
    {
-      for (const auto& asset : m_sceneAssets)
-      {
-         asset->Reload();
-      }
+      asset->Reload();
    }
 
-   PrintMetadataToStatusBar(m_sceneAssets[Asset::TREEMAP]->GetVertexCount(), *m_mainWindow);
+   // @todo Get vertex count.
+   //PrintMetadataToStatusBar(m_theVisualization->GetTree(), *m_mainWindow);
 }
 
 void GLCanvas::SetFieldOfView(const float fieldOfView)
@@ -428,7 +422,7 @@ void GLCanvas::HandleNodeSelection(TreeNode<VizNode>* selectedNode)
 
 void GLCanvas::HandleRightClick(const QPoint& point)
 {
-   if (!m_isVisualizationLoaded)
+   if (!m_theVisualization)
    {
       return;
    }

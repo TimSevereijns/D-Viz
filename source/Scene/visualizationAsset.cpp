@@ -58,12 +58,14 @@ namespace
    {
       if (node.GetData().file.type != FileType::DIRECTORY)
       {
-         return Visualization::CreateFileColors();
+         return {};
+         //return Visualization::CreateFileColors();
       }
 
       if (!params.useDirectoryGradient)
       {
-         return Visualization::CreateDirectoryColors();
+         return {};
+         //return Visualization::CreateDirectoryColors();
       }
 
       auto* rootNode = &node;
@@ -86,62 +88,6 @@ namespace
       }
 
       return blockColors;
-   }
-
-   /**
-    * @brief CreateReferenceCube
-    * @return
-    */
-   QVector<QVector3D> CreateReferenceCube()
-   {
-      QVector<QVector3D> referenceCube{};
-      referenceCube.reserve(36);
-
-      referenceCube
-         // Bottom:
-         << QVector3D{ -1, -1, -1 }
-         << QVector3D{  1, -1, -1 }
-         << QVector3D{ -1, -1,  1 }
-         << QVector3D{  1, -1, -1 }
-         << QVector3D{  1, -1,  1 }
-         << QVector3D{ -1, -1,  1 }
-         // Top:
-         << QVector3D{ -1,  1, -1 }
-         << QVector3D{ -1,  1,  1 }
-         << QVector3D{  1,  1, -1 }
-         << QVector3D{  1,  1, -1 }
-         << QVector3D{ -1,  1,  1 }
-         << QVector3D{  1,  1,  1 }
-         // Front:
-         << QVector3D{ -1, -1,  1 }
-         << QVector3D{  1, -1,  1 }
-         << QVector3D{ -1,  1,  1 }
-         << QVector3D{  1, -1,  1 }
-         << QVector3D{  1,  1,  1 }
-         << QVector3D{ -1,  1,  1 }
-         // Back:
-         << QVector3D{ -1, -1, -1 }
-         << QVector3D{ -1,  1, -1 }
-         << QVector3D{  1, -1, -1 }
-         << QVector3D{  1, -1, -1 }
-         << QVector3D{ -1,  1, -1 }
-         << QVector3D{  1,  1, -1 }
-         // Left:
-         << QVector3D{ -1, -1,  1 }
-         << QVector3D{ -1,  1, -1 }
-         << QVector3D{ -1, -1, -1 }
-         << QVector3D{ -1, -1,  1 }
-         << QVector3D{ -1,  1,  1 }
-         << QVector3D{ -1,  1, -1 }
-         // Right:
-         << QVector3D{  1, -1,  1 }
-         << QVector3D{  1, -1, -1 }
-         << QVector3D{  1,  1, -1 }
-         << QVector3D{  1, -1,  1 }
-         << QVector3D{  1,  1, -1 }
-         << QVector3D{  1,  1,  1 };
-
-      return referenceCube;
    }
 }
 
@@ -274,20 +220,24 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* count = */ m_blockTransformations.size() * sizeOfMatrix);
 
    m_graphicsDevice.glEnableVertexAttribArray(1);
-   m_graphicsDevice.glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix, (GLvoid*)(0 * sizeOfVector));
    m_graphicsDevice.glVertexAttribDivisor(1, 1);
+   m_graphicsDevice.glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix,
+      (GLvoid*)(0 * sizeOfVector));
 
    m_graphicsDevice.glEnableVertexAttribArray(2);
-   m_graphicsDevice.glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix, (GLvoid*)(1 * sizeOfVector));
    m_graphicsDevice.glVertexAttribDivisor(2, 1);
+   m_graphicsDevice.glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix,
+      (GLvoid*)(1 * sizeOfVector));
 
    m_graphicsDevice.glEnableVertexAttribArray(3);
-   m_graphicsDevice.glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix, (GLvoid*)(2 * sizeOfVector));
    m_graphicsDevice.glVertexAttribDivisor(3, 1);
+   m_graphicsDevice.glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix,
+      (GLvoid*)(2 * sizeOfVector));
 
    m_graphicsDevice.glEnableVertexAttribArray(4);
-   m_graphicsDevice.glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix, (GLvoid*)(3 * sizeOfVector));
    m_graphicsDevice.glVertexAttribDivisor(4, 1);
+   m_graphicsDevice.glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix,
+      (GLvoid*)(3 * sizeOfVector));
 
    m_graphicsDevice.glBindVertexArray(0);
 
@@ -297,7 +247,9 @@ bool VisualizationAsset::InitializeBlockTransformations()
    return true;
 }
 
-bool VisualizationAsset::LoadBufferData(const Tree<VizNode>& tree)
+bool VisualizationAsset::LoadBufferData(
+   const Tree<VizNode>& tree,
+   const VisualizationParameters& parameters)
 {
    m_blockTransformations.clear();
    m_blockColors.clear();
@@ -307,6 +259,13 @@ bool VisualizationAsset::LoadBufferData(const Tree<VizNode>& tree)
 
    for (const TreeNode<VizNode>& node : tree)
    {
+      const bool fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
+      if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
+         || fileIsTooSmall)
+      {
+         continue;
+      }
+
       const auto& block = node->block;
 
       QMatrix4x4 instanceMatrix{ };
@@ -320,8 +279,6 @@ bool VisualizationAsset::LoadBufferData(const Tree<VizNode>& tree)
    }
 
    assert(m_blockColors.size() == m_blockTransformations.size());
-
-   //Initialize();
 
    return m_blockColors.size();
 }
@@ -388,30 +345,30 @@ void VisualizationAsset::UpdateVBO(
    SceneAsset::UpdateAction action,
    const VisualizationParameters& options)
 {
-   constexpr auto tupleSize = 3 * sizeof(GLfloat);
-   const auto offsetIntoVertexBuffer = node->offsetIntoVBO * tupleSize;
+//   constexpr auto tupleSize = 3 * sizeof(GLfloat);
+//   const auto offsetIntoVertexBuffer = node->offsetIntoVBO * tupleSize;
 
-   // We have to divide by two, because there's a vertex plus a normal for every color:
-   const auto offsetIntoColorBuffer = offsetIntoVertexBuffer / 2;
+//   // We have to divide by two, because there's a vertex plus a normal for every color:
+//   const auto offsetIntoColorBuffer = offsetIntoVertexBuffer / 2;
 
-   const auto newColor = (action == SceneAsset::UpdateAction::DESELECT)
-      ? RestoreColor(node, options)
-      : Visualization::CreateHighlightColors();
+//   const auto newColor = (action == SceneAsset::UpdateAction::DESELECT)
+//      ? RestoreColor(node, options)
+//      : Visualization::CreateHighlightColors();
 
-   assert(m_VAO.isCreated());
-   assert(m_colorBuffer.isCreated());
+//   assert(m_VAO.isCreated());
+//   assert(m_colorBuffer.isCreated());
 
-   m_VAO.bind();
-   m_colorBuffer.bind();
+//   m_VAO.bind();
+//   m_colorBuffer.bind();
 
-   assert(m_colorBuffer.size() >= offsetIntoColorBuffer / (3 * sizeof(GLfloat)));
+//   assert(m_colorBuffer.size() >= offsetIntoColorBuffer / (3 * sizeof(GLfloat)));
 
-   m_graphicsDevice.glBufferSubData(
-      /* target = */ GL_ARRAY_BUFFER,
-      /* offset = */ offsetIntoColorBuffer,
-      /* size = */ newColor.size() * tupleSize,
-      /* data = */ newColor.constData());
+//   m_graphicsDevice.glBufferSubData(
+//      /* target = */ GL_ARRAY_BUFFER,
+//      /* offset = */ offsetIntoColorBuffer,
+//      /* size = */ newColor.size() * tupleSize,
+//      /* data = */ newColor.constData());
 
-   m_colorBuffer.release();
-   m_VAO.release();
+//   m_colorBuffer.release();
+//   m_VAO.release();
 }

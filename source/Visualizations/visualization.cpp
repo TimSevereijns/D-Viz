@@ -16,7 +16,7 @@
 
 namespace
 {
-   const double EPSILON = 0.0001;
+   constexpr double EPSILON = 0.0001;
 
    /**
     * @brief Calculates whether the specified ray hits the specified plane, given a margin of error,
@@ -303,64 +303,6 @@ void Visualization::UpdateBoundingBoxes()
    });
 }
 
-void Visualization::ComputeVertexAndColorData(const VisualizationParameters& /*parameters*/)
-{
-//   assert(m_theTree);
-//   assert(m_hasDataBeenParsed);
-
-//   if (!m_hasDataBeenParsed)
-//   {
-//      return;
-//   }
-
-//   m_visualizationColors.clear();
-//   m_visualizationVertices.clear();
-
-//   std::for_each(m_theTree->beginPreOrder(), m_theTree->endPreOrder(),
-//      [&] (auto& node)
-//   {
-//      if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY) ||
-//          node->file.size < parameters.minimumFileSize)
-//      {
-//         return;
-//      }
-
-//      const int vertexCount = m_visualizationVertices.size();
-//      node->offsetIntoVBO = vertexCount;
-
-//      std::for_each(std::begin(node->block), std::end(node->block),
-//         [&] (const auto& face)
-//      {
-//         m_visualizationVertices << face.vertices;
-//      });
-
-//      if (node->file.type == FileType::DIRECTORY)
-//      {
-//         if (parameters.useDirectoryGradient)
-//         {
-//            m_visualizationColors << ComputeGradientColor(node);
-//         }
-//         else
-//         {
-//            m_visualizationColors << Visualization::CreateDirectoryColors();
-//         }
-//      }
-//      else if (node->file.type == FileType::REGULAR)
-//      {
-//         m_visualizationColors << Visualization::CreateFileColors();
-//      }
-
-//      if (vertexCount + Block::VERTICES_PER_BLOCK != m_visualizationVertices.size())
-//      {
-//         //assert(!"Buffer data mismatch detected!");
-//      }
-//   });
-
-   // All offsets must be properly set; the default initialized state is invalid:
-//   assert(std::none_of(std::begin(*m_theTree), std::end(*m_theTree),
-//      [] (const auto& node) { return node->offsetIntoVBO == VizNode::INVALID_OFFSET; }));
-}
-
 TreeNode<VizNode>* Visualization::FindNearestIntersection(
    const Camera& camera,
    const Qt3DCore::QRay3D& ray,
@@ -424,66 +366,6 @@ const Tree<VizNode>& Visualization::GetTree() const
 {
    assert(m_theTree);
    return *m_theTree;
-}
-
-QVector<QVector3D>& Visualization::GetColorData()
-{
-   assert(!m_visualizationColors.empty());
-   return m_visualizationColors;
-}
-
-QVector<QVector3D>& Visualization::GetVertexData()
-{
-   assert(!m_visualizationVertices.empty());
-   return m_visualizationVertices;
-}
-
-QVector<QVector3D> Visualization::CreateFileColors()
-{
-   QVector<QVector3D> blockColors;
-//   blockColors.reserve(Block::VERTICES_PER_BLOCK);
-//   blockColors
-//      // Front:
-//      << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)
-//      << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)
-//      // Right:
-//      << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)
-//      << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)
-//      // Back:
-//      << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)
-//      << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)
-//      // Left:
-//      << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)
-//      << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)
-//      // Top:
-//      << QVector3D(0.0f, 0.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f)
-//      << QVector3D(0.0f, 0.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f);
-
-   return blockColors;
-}
-
-QVector<QVector3D> Visualization::CreateDirectoryColors()
-{
-   QVector<QVector3D> blockColors;
-//   blockColors.reserve(Block::VERTICES_PER_BLOCK);
-//   blockColors
-//      // Front:
-//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-//      // Right:
-//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-//      // Back:
-//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-//      // Left:
-//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-//      // Top:
-//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f)
-//      << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f) << QVector3D(1.0f, 1.0f, 1.0f);
-
-   return blockColors;
 }
 
 QVector<QVector3D> Visualization::ComputeGradientColor(const TreeNode<VizNode>& node)

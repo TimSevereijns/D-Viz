@@ -68,27 +68,6 @@ class Visualization
       virtual void UpdateBoundingBoxes();
 
       /**
-       * @brief Uses the specified parameters to populate the vertex and color buffers.
-       *
-       * @param[in] parameters      @see VisualizationParameters
-       */
-      void ComputeVertexAndColorData(const VisualizationParameters& parameters);
-
-      /**
-       * @brief Retrieves the data in the vertex buffer.
-       *
-       * @returns The vertices that represent the entire visualization.
-       */
-      QVector<QVector3D>& GetVertexData();
-
-      /**
-       * @brief Retrieves the data in the color buffer.
-       *
-       * @returns The color data that is associated with the vertex data. @see GetVertexData
-       */
-      QVector<QVector3D>& GetColorData();
-
-      /**
        * @brief Attempts to identify the closest node in front of the camera that the specified ray
        * intersects with.
        *
@@ -121,20 +100,6 @@ class Visualization
        * @return
        */
       const Tree<VizNode>& GetTree() const;
-
-      /**
-       * @brief Creates the vertex colors needed to color a single block.
-       *
-       * @returns A vector of colors.
-       */
-      static QVector<QVector3D> CreateFileColors();
-
-      /**
-       * @brief Creates the vertex colors needed to color a single block.
-       *
-       * @returns A vector of colors.
-       */
-      static QVector<QVector3D> CreateDirectoryColors();
 
       /**
        * @brief Computes the TreeNode's color based on the heatmap gradient.

@@ -21,7 +21,9 @@ class VisualizationAsset : public SceneAsset
       // matrices and the block colors.
       bool Initialize() override;
 
-      bool LoadBufferData(const Tree<VizNode>& tree);
+      bool LoadBufferData(
+         const Tree<VizNode>& tree,
+         const VisualizationParameters& parameters);
 
       bool Render(
          const Camera& camera,
