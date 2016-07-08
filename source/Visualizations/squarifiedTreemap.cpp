@@ -62,7 +62,7 @@ namespace
       {
          nearCorner,                         // Origin
          farCorner.x() - nearCorner.x(),     // Width
-         VisualizationModel::BLOCK_HEIGHT,        // Height
+         VisualizationModel::BLOCK_HEIGHT,   // Height
          farCorner.z() - nearCorner.z()      // Depth
       };
 
