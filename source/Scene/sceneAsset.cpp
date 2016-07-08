@@ -21,7 +21,9 @@ bool SceneAsset::ClearBuffers()
    return true;
 }
 
-bool SceneAsset::LoadShaders(const QString& vertexShaderName, const QString& fragmentShaderName)
+bool SceneAsset::LoadShaders(
+   const QString& vertexShaderName,
+   const QString& fragmentShaderName)
 {
    if (!m_shader.addShaderFromSourceFile(QOpenGLShader::Vertex,
       ":/Shaders/" + vertexShaderName + ".vert"))
@@ -65,6 +67,9 @@ unsigned int SceneAsset::GetColorCount() const
    return static_cast<unsigned int>(m_rawColors.size());
 }
 
-void SceneAsset::UpdateVBO(const TreeNode<VizNode>&, UpdateAction, const VisualizationParameters&)
+void SceneAsset::UpdateVBO(
+   const TreeNode<VizNode>&,
+   UpdateAction,
+   const VisualizationParameters&)
 {
 }

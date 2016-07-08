@@ -142,7 +142,9 @@ class SceneAsset
        *
        * @returns True if compilation and loading suceeded.
        */
-      bool LoadShaders(const QString& vertexShaderName, const QString& fragmentShaderName);
+      bool LoadShaders(
+         const QString& vertexShaderName,
+         const QString& fragmentShaderName);
 
       QOpenGLBuffer m_vertexBuffer;
       QOpenGLBuffer m_colorBuffer;

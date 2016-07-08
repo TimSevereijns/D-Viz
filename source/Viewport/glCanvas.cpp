@@ -30,15 +30,15 @@ namespace
     * @param[in] vertexCount        The readout value.
     * @param[in] mainWindow         The main window that contains the status bar.
     */
-   void PrintMetadataToStatusBar(const unsigned int vertexCount, MainWindow& mainWindow)
+   void PrintMetadataToStatusBar(const std::uint32_t blockCount, MainWindow& mainWindow)
    {
       std::wstringstream message;
       message.imbue(std::locale(""));
       message
          << std::fixed
-         << vertexCount
+         << blockCount * Block::VERTICES_PER_BLOCK
          << L" vertices, representing "
-         << (vertexCount / Block::VERTICES_PER_BLOCK)
+         << blockCount
          << L" files.";
 
       mainWindow.SetStatusBarMessage(message.str());
@@ -321,19 +321,19 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
    m_isPaintingSuspended = true;
    ON_SCOPE_EXIT noexcept { m_isPaintingSuspended = previousSuspensionState; };
 
-   auto* vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
+   auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
    assert(vizAsset);
 
    m_visualizationParameters = parameters;
-   vizAsset->LoadBufferData(m_theVisualization->GetTree(), parameters);
+   const auto blockCount = vizAsset->LoadBufferData(m_theVisualization->GetTree(), parameters);
 
    for (const auto& asset : m_sceneAssets)
    {
       asset->Reload();
    }
 
-   // @todo Get vertex count.
-   //PrintMetadataToStatusBar(m_theVisualization->GetTree(), *m_mainWindow);
+   assert (blockCount == vizAsset->GetBlockCount());
+   PrintMetadataToStatusBar(blockCount, *m_mainWindow);
 }
 
 void GLCanvas::SetFieldOfView(const float fieldOfView)
@@ -444,7 +444,10 @@ void GLCanvas::HandleRightClick(const QPoint& point)
          SceneAsset::UpdateAction::DESELECT,
          m_visualizationParameters);
 
-       PrintMetadataToStatusBar(m_sceneAssets[Asset::TREEMAP]->GetVertexCount(), *m_mainWindow);
+       auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
+       assert(vizAsset);
+
+       PrintMetadataToStatusBar(vizAsset->GetBlockCount(), *m_mainWindow);
    }
 }
 
@@ -758,7 +761,7 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
    {
       m_isLeftTriggerDown = true;
 
-      auto* crosshairAsset =
+      auto* const crosshairAsset =
          dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
 
       assert(crosshairAsset);
@@ -772,7 +775,7 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
    {
       m_isLeftTriggerDown = false;
 
-      auto* crosshairAsset =
+      auto* const crosshairAsset =
          dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
 
       assert(crosshairAsset);
@@ -805,11 +808,12 @@ void GLCanvas::UpdateFPS()
 
    m_lastFrameDrawTime = now;
 
-   if (m_frameRateDeque.size() > 32)
+   constexpr auto movingAverageWindow{ 32 };
+   if (m_frameRateDeque.size() > movingAverageWindow)
    {
       m_frameRateDeque.pop_front();
    }
-   assert(m_frameRateDeque.size() <= 32);
+   assert(m_frameRateDeque.size() <= movingAverageWindow);
 
    m_frameRateDeque.emplace_back(1000 / millisecondsElapsed);
 

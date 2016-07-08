@@ -249,19 +249,19 @@ namespace
    }
 }
 
-const double Visualization::PADDING_RATIO = 0.9;
-const double Visualization::MAX_PADDING = 0.75;
+const double VisualizationModel::PADDING_RATIO = 0.9;
+const double VisualizationModel::MAX_PADDING = 0.75;
 
-const float Visualization::BLOCK_HEIGHT = 2.0f;
-const float Visualization::ROOT_BLOCK_WIDTH = 1000.0f;
-const float Visualization::ROOT_BLOCK_DEPTH = 1000.0f;
+const float VisualizationModel::BLOCK_HEIGHT = 2.0f;
+const float VisualizationModel::ROOT_BLOCK_WIDTH = 1000.0f;
+const float VisualizationModel::ROOT_BLOCK_DEPTH = 1000.0f;
 
-Visualization::Visualization(const VisualizationParameters& parameters) :
+VisualizationModel::VisualizationModel(const VisualizationParameters& parameters) :
    m_vizParameters(parameters)
 {
 }
 
-void Visualization::UpdateBoundingBoxes()
+void VisualizationModel::UpdateBoundingBoxes()
 {
    assert(m_hasDataBeenParsed);
    assert(m_theTree);
@@ -303,7 +303,7 @@ void Visualization::UpdateBoundingBoxes()
    });
 }
 
-TreeNode<VizNode>* Visualization::FindNearestIntersection(
+TreeNode<VizNode>* VisualizationModel::FindNearestIntersection(
    const Camera& camera,
    const Qt3DCore::QRay3D& ray,
    const VisualizationParameters& parameters) const
@@ -335,7 +335,7 @@ TreeNode<VizNode>* Visualization::FindNearestIntersection(
    return nearestIntersection;
 }
 
-void Visualization::FindLargestDirectory()
+void VisualizationModel::FindLargestDirectory()
 {
    std::uintmax_t smallestDirectory = std::numeric_limits<std::uintmax_t>::max();
    std::uintmax_t largestDirectory = std::numeric_limits<std::uintmax_t>::min();
@@ -362,13 +362,13 @@ void Visualization::FindLargestDirectory()
    m_largestDirectorySize = largestDirectory;
 }
 
-const Tree<VizNode>& Visualization::GetTree() const
+Tree<VizNode>& VisualizationModel::GetTree()
 {
    assert(m_theTree);
    return *m_theTree;
 }
 
-QVector<QVector3D> Visualization::ComputeGradientColor(const TreeNode<VizNode>& node)
+QVector<QVector3D> VisualizationModel::ComputeGradientColor(const TreeNode<VizNode>& node)
 {
    QVector<QVector3D> blockColors;
    blockColors.reserve(Block::VERTICES_PER_BLOCK);
@@ -384,20 +384,7 @@ QVector<QVector3D> Visualization::ComputeGradientColor(const TreeNode<VizNode>& 
    return blockColors;
 }
 
-QVector<QVector3D> Visualization::CreateHighlightColors()
-{
-   QVector<QVector3D> blockColors;
-   blockColors.reserve(Block::VERTICES_PER_BLOCK);
-
-   for (int i = 0; i < Block::VERTICES_PER_BLOCK; i++)
-   {
-      blockColors << Constants::Colors::CANARY_YELLOW;
-   }
-
-   return blockColors;
-}
-
-void Visualization::SortNodes(Tree<VizNode>& tree)
+void VisualizationModel::SortNodes(Tree<VizNode>& tree)
 {
    for (auto& node : tree)
    {

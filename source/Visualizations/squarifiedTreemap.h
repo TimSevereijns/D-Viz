@@ -6,7 +6,7 @@
 /**
  * @brief The SquarifiedTreeMap class represents the squarified treemap visualization.
  */
-class SquarifiedTreeMap : public Visualization
+class SquarifiedTreeMap : public VisualizationModel
 {
    public:
       SquarifiedTreeMap(const VisualizationParameters& parameters);

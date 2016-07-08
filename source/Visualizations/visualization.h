@@ -35,15 +35,15 @@ struct VisualizationParameters
 /**
  * @brief Base visualization class.
  */
-class Visualization
+class VisualizationModel
 {
    public:
-      explicit Visualization(const VisualizationParameters& parameters);
+      explicit VisualizationModel(const VisualizationParameters& parameters);
 
-      virtual ~Visualization() = default;
+      virtual ~VisualizationModel() = default;
 
-      Visualization(const Visualization&) = delete;
-      Visualization& operator=(const Visualization&) = delete;
+      VisualizationModel(const VisualizationModel&) = delete;
+      VisualizationModel& operator=(const VisualizationModel&) = delete;
 
       static const double PADDING_RATIO;
       static const double MAX_PADDING;
@@ -99,7 +99,7 @@ class Visualization
        * @brief GetTree
        * @return
        */
-      const Tree<VizNode>& GetTree() const;
+      Tree<VizNode>& GetTree();
 
       /**
        * @brief Computes the TreeNode's color based on the heatmap gradient.
@@ -107,13 +107,6 @@ class Visualization
        * @return
        */
       QVector<QVector3D> ComputeGradientColor(const TreeNode<VizNode>& node);
-
-      /**
-       * @brief Create the vertex colors needed to color the selected file.
-       *
-       * @return A vector of colors.
-       */
-      static QVector<QVector3D> CreateHighlightColors();
 
       /**
        * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each
@@ -131,9 +124,6 @@ class Visualization
       bool m_hasDataBeenParsed{ false };
 
       VisualizationParameters m_vizParameters;
-
-      QVector<QVector3D> m_visualizationVertices;
-      QVector<QVector3D> m_visualizationColors;
 
       ColorGradient m_directoryColorGradient;
 };

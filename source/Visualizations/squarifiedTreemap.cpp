@@ -62,7 +62,7 @@ namespace
       {
          nearCorner,                         // Origin
          farCorner.x() - nearCorner.x(),     // Width
-         Visualization::BLOCK_HEIGHT,        // Height
+         VisualizationModel::BLOCK_HEIGHT,        // Height
          farCorner.z() - nearCorner.z()      // Depth
       };
 
@@ -184,20 +184,20 @@ namespace
       const auto blockWidthPlusPadding = land.width * percentageOfParent;
       const auto ratioBasedPadding = ((land.width * 0.1) / nodeCount) / 2.0;
 
-      auto widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
+      auto widthPaddingPerSide = std::min(ratioBasedPadding, VisualizationModel::MAX_PADDING);
       auto finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPaddingPerSide);
       if (finalBlockWidth < 0.0)
       {
-         finalBlockWidth = blockWidthPlusPadding * Visualization::PADDING_RATIO;
-         widthPaddingPerSide = (blockWidthPlusPadding * (1.0 - Visualization::PADDING_RATIO)) / 2.0;
+         finalBlockWidth = blockWidthPlusPadding * VisualizationModel::PADDING_RATIO;
+         widthPaddingPerSide = (blockWidthPlusPadding * (1.0 - VisualizationModel::PADDING_RATIO)) / 2.0;
       }
 
-      const auto ratioBasedBlockDepth = std::abs(land.depth * Visualization::PADDING_RATIO);
+      const auto ratioBasedBlockDepth = std::abs(land.depth * VisualizationModel::PADDING_RATIO);
       const auto depthPaddingPerSide = std::min((land.depth - ratioBasedBlockDepth) / 2.0,
-         Visualization::MAX_PADDING);
+         VisualizationModel::MAX_PADDING);
 
-      const auto finalBlockDepth = (depthPaddingPerSide == Visualization::MAX_PADDING)
-         ? std::abs(land.depth) - (2.0 * Visualization::MAX_PADDING)
+      const auto finalBlockDepth = (depthPaddingPerSide == VisualizationModel::MAX_PADDING)
+         ? std::abs(land.depth) - (2.0 * VisualizationModel::MAX_PADDING)
          : ratioBasedBlockDepth;
 
       const DoublePoint3D offset
@@ -211,7 +211,7 @@ namespace
       {
          land.origin + offset,
          finalBlockWidth,
-         Visualization::BLOCK_HEIGHT,
+         VisualizationModel::BLOCK_HEIGHT,
          finalBlockDepth
       };
 
@@ -239,20 +239,20 @@ namespace
       const auto blockDepthPlusPadding = std::abs(land.depth * percentageOfParent);
       const auto ratioBasedPadding = (land.depth * 0.1) / nodeCount / 2.0;
 
-      auto depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
+      auto depthPaddingPerSide = std::min(ratioBasedPadding, VisualizationModel::MAX_PADDING);
       auto finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPaddingPerSide);
       if (finalBlockDepth < 0)
       {
-         finalBlockDepth = blockDepthPlusPadding * Visualization::PADDING_RATIO;
-         depthPaddingPerSide = (blockDepthPlusPadding * (1.0 - Visualization::PADDING_RATIO)) / 2.0;
+         finalBlockDepth = blockDepthPlusPadding * VisualizationModel::PADDING_RATIO;
+         depthPaddingPerSide = (blockDepthPlusPadding * (1.0 - VisualizationModel::PADDING_RATIO)) / 2.0;
       }
 
-      const auto ratioBasedWidth = land.width * Visualization::PADDING_RATIO;
+      const auto ratioBasedWidth = land.width * VisualizationModel::PADDING_RATIO;
       const auto widthPaddingPerSide = std::min((land.width - ratioBasedWidth) / 2.0,
-         Visualization::MAX_PADDING);
+         VisualizationModel::MAX_PADDING);
 
-      const auto finalBlockWidth = (widthPaddingPerSide == Visualization::MAX_PADDING)
-         ? land.width - (2.0 * Visualization::MAX_PADDING)
+      const auto finalBlockWidth = (widthPaddingPerSide == VisualizationModel::MAX_PADDING)
+         ? land.width - (2.0 * VisualizationModel::MAX_PADDING)
          : ratioBasedWidth;
 
       const DoublePoint3D offset
@@ -266,7 +266,7 @@ namespace
       {
          land.origin + offset,
          finalBlockWidth,
-         Visualization::BLOCK_HEIGHT,
+         VisualizationModel::BLOCK_HEIGHT,
          std::abs(finalBlockDepth)
       };
 
@@ -526,7 +526,7 @@ namespace
 }
 
 SquarifiedTreeMap::SquarifiedTreeMap(const VisualizationParameters& parameters) :
-   Visualization{ parameters }
+   VisualizationModel{ parameters }
 {
 }
 
@@ -541,7 +541,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
    m_theTree = theTree;
 
    TIME_IN_MILLISECONDS(
-      Visualization::SortNodes(*m_theTree),
+      VisualizationModel::SortNodes(*m_theTree),
       "Sorted tree in ");
 
    TIME_IN_MILLISECONDS(
@@ -551,9 +551,9 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
    const Block rootBlock
    {
       DoublePoint3D{ },
-      Visualization::ROOT_BLOCK_WIDTH,
-      Visualization::BLOCK_HEIGHT,
-      Visualization::ROOT_BLOCK_DEPTH
+      VisualizationModel::ROOT_BLOCK_WIDTH,
+      VisualizationModel::BLOCK_HEIGHT,
+      VisualizationModel::ROOT_BLOCK_DEPTH
    };
 
    theTree->GetHead()->GetData().block = rootBlock;

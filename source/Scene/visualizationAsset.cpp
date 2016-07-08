@@ -1,5 +1,6 @@
 #include "visualizationAsset.h"
 
+#include "../constants.h"
 #include "../DataStructs/vizNode.h"
 #include "../ThirdParty/Tree.hpp"
 #include "../Utilities/colorGradient.hpp"
@@ -52,20 +53,18 @@ namespace
     *
     * @returns The color to restore the node to.
     */
-   QVector<QVector3D> RestoreColor(
+   QVector3D RestoreColor(
       const TreeNode<VizNode>& node,
       const VisualizationParameters& params)
    {
       if (node.GetData().file.type != FileType::DIRECTORY)
       {
-         return {};
-         //return Visualization::CreateFileColors();
+         return Constants::Colors::GREEN;
       }
 
       if (!params.useDirectoryGradient)
       {
-         return {};
-         //return Visualization::CreateDirectoryColors();
+         return Constants::Colors::WHITE;
       }
 
       auto* rootNode = &node;
@@ -79,15 +78,7 @@ namespace
 
       ColorGradient gradient;
       const auto nodeColor = gradient.GetColorAtValue(ratio);
-
-      QVector<QVector3D> blockColors;
-      blockColors.reserve(Block::VERTICES_PER_BLOCK);
-      for (int i = 0; i < Block::VERTICES_PER_BLOCK; i++)
-      {
-         blockColors << nodeColor;
-      }
-
-      return blockColors;
+      return nodeColor;
    }
 }
 
@@ -247,24 +238,27 @@ bool VisualizationAsset::InitializeBlockTransformations()
    return true;
 }
 
-bool VisualizationAsset::LoadBufferData(
-   const Tree<VizNode>& tree,
+std::uint32_t VisualizationAsset::LoadBufferData(
+   Tree<VizNode>& tree,
    const VisualizationParameters& parameters)
 {
    m_blockTransformations.clear();
    m_blockColors.clear();
 
-   const auto directoryColor = QVector3D{ 1.0f, 1.0f, 1.0f };
-   const auto regularFileColor = QVector3D{ 0.5f, 1.0f, 0.5f };
+   m_blockCount = 0;
 
-   for (const TreeNode<VizNode>& node : tree)
+   for (TreeNode<VizNode>& node : tree)
    {
       const bool fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
-      if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
-         || fileIsTooSmall)
+      const bool notTheRightFileType =
+            parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY;
+
+      if (notTheRightFileType || fileIsTooSmall)
       {
          continue;
       }
+
+      node->offsetIntoVBO = m_blockCount++;
 
       const auto& block = node->block;
 
@@ -273,14 +267,33 @@ bool VisualizationAsset::LoadBufferData(
       instanceMatrix.scale(block.width, block.height, block.depth);
       m_blockTransformations << instanceMatrix;
 
-      m_blockColors << ((node->file.type == FileType::DIRECTORY)
-         ? directoryColor
-         : regularFileColor);
+      if (node->file.type == FileType::DIRECTORY)
+      {
+         if (parameters.useDirectoryGradient)
+         {
+            // @todo Fix gradient colorization
+            m_blockColors << Constants::Colors::HOT_PINK; //ComputeGradientColor(node);
+         }
+         else
+         {
+            m_blockColors << Constants::Colors::WHITE;
+         }
+      }
+      else if (node->file.type == FileType::REGULAR)
+      {
+         m_blockColors << Constants::Colors::GREEN;
+      }
    }
 
    assert(m_blockColors.size() == m_blockTransformations.size());
+   assert(m_blockColors.size() == m_blockCount);
 
-   return m_blockColors.size();
+   return m_blockCount;
+}
+
+std::uint32_t VisualizationAsset::GetBlockCount() const
+{
+   return m_blockCount;
 }
 
 bool VisualizationAsset::IsAssetLoaded() const
@@ -345,30 +358,26 @@ void VisualizationAsset::UpdateVBO(
    SceneAsset::UpdateAction action,
    const VisualizationParameters& options)
 {
-//   constexpr auto tupleSize = 3 * sizeof(GLfloat);
-//   const auto offsetIntoVertexBuffer = node->offsetIntoVBO * tupleSize;
+   constexpr auto sizeOfColorData{ sizeof(QVector3D) };
+   const auto offsetIntoColorBuffer = node->offsetIntoVBO * sizeOfColorData;
 
-//   // We have to divide by two, because there's a vertex plus a normal for every color:
-//   const auto offsetIntoColorBuffer = offsetIntoVertexBuffer / 2;
+   const auto newColor = (action == SceneAsset::UpdateAction::DESELECT)
+      ? RestoreColor(node, options)
+      : Constants::Colors::CANARY_YELLOW;
 
-//   const auto newColor = (action == SceneAsset::UpdateAction::DESELECT)
-//      ? RestoreColor(node, options)
-//      : Visualization::CreateHighlightColors();
+   assert(m_VAO.isCreated());
+   assert(m_blockColorBuffer.isCreated());
+   assert(m_blockColorBuffer.size() >= offsetIntoColorBuffer / sizeOfColorData);
 
-//   assert(m_VAO.isCreated());
-//   assert(m_colorBuffer.isCreated());
+   m_VAO.bind();
+   m_blockColorBuffer.bind();
 
-//   m_VAO.bind();
-//   m_colorBuffer.bind();
+   m_graphicsDevice.glBufferSubData(
+      /* target = */ GL_ARRAY_BUFFER,
+      /* offset = */ offsetIntoColorBuffer,
+      /* size = */ sizeOfColorData,
+      /* data = */ &newColor);
 
-//   assert(m_colorBuffer.size() >= offsetIntoColorBuffer / (3 * sizeof(GLfloat)));
-
-//   m_graphicsDevice.glBufferSubData(
-//      /* target = */ GL_ARRAY_BUFFER,
-//      /* offset = */ offsetIntoColorBuffer,
-//      /* size = */ newColor.size() * tupleSize,
-//      /* data = */ newColor.constData());
-
-//   m_colorBuffer.release();
-//   m_VAO.release();
+   m_blockColorBuffer.release();
+   m_VAO.release();
 }

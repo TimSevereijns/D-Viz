@@ -17,13 +17,13 @@ class VisualizationAsset : public SceneAsset
 
       bool LoadShaders() override;
 
-      // @todo Pass in the visualization and then call the init functions to load the transformation
-      // matrices and the block colors.
       bool Initialize() override;
 
-      bool LoadBufferData(
-         const Tree<VizNode>& tree,
+      std::uint32_t LoadBufferData(
+         Tree<VizNode>& tree,
          const VisualizationParameters& parameters);
+
+      std::uint32_t GetBlockCount() const;
 
       bool Render(
          const Camera& camera,
@@ -40,6 +40,8 @@ class VisualizationAsset : public SceneAsset
       bool IsAssetLoaded() const override;
 
    private:
+
+      std::uint32_t m_blockCount{ 0 };
 
       bool InitializeUnitBlock();
       bool InitializeColors();

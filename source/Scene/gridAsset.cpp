@@ -11,7 +11,7 @@ namespace
     */
    auto CreateOriginMarkerAndGridVertices()
    {
-      const float axisLength = Visualization::ROOT_BLOCK_WIDTH;
+      const float axisLength = VisualizationModel::ROOT_BLOCK_WIDTH;
 
       QVector<QVector3D> vertices;
       vertices.reserve(46);
