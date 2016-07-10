@@ -3,6 +3,8 @@
 
 #include "sceneAsset.h"
 
+#include "../Utilities/colorGradient.hpp"
+
 struct VizNode;
 template<typename DataType> class TreeNode;
 
@@ -41,7 +43,14 @@ class VisualizationAsset : public SceneAsset
 
    private:
 
+      QVector3D ComputeGradientColor(const TreeNode<VizNode>& node);
+
+      void FindLargestDirectory(const Tree<VizNode>& tree);
+
+      ColorGradient m_directoryColorGradient;
+
       std::uint32_t m_blockCount{ 0 };
+      std::uintmax_t m_largestDirectorySize{ 0 };
 
       bool InitializeUnitBlock();
       bool InitializeColors();
@@ -54,6 +63,7 @@ class VisualizationAsset : public SceneAsset
       QVector<QVector3D> m_referenceBlockVertices;
       QVector<QMatrix4x4> m_blockTransformations;
       QVector<QVector3D> m_blockColors;
+
 };
 
 #endif // VISUALIZATIONASSET_H

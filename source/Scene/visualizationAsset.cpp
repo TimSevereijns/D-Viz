@@ -251,7 +251,7 @@ std::uint32_t VisualizationAsset::LoadBufferData(
    {
       const bool fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
       const bool notTheRightFileType =
-            parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY;
+         parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY;
 
       if (notTheRightFileType || fileIsTooSmall)
       {
@@ -271,8 +271,7 @@ std::uint32_t VisualizationAsset::LoadBufferData(
       {
          if (parameters.useDirectoryGradient)
          {
-            // @todo Fix gradient colorization
-            m_blockColors << Constants::Colors::HOT_PINK; //ComputeGradientColor(node);
+            m_blockColors << ComputeGradientColor(node);
          }
          else
          {
@@ -285,10 +284,43 @@ std::uint32_t VisualizationAsset::LoadBufferData(
       }
    }
 
+   FindLargestDirectory(tree);
+
    assert(m_blockColors.size() == m_blockTransformations.size());
    assert(m_blockColors.size() == m_blockCount);
 
    return m_blockCount;
+}
+
+void VisualizationAsset::FindLargestDirectory(const Tree<VizNode>& tree)
+{
+   std::uintmax_t largestDirectory = std::numeric_limits<std::uintmax_t>::min();
+
+   for (auto& node : tree)
+   {
+      if (node.GetData().file.type != FileType::DIRECTORY)
+      {
+         continue;
+      }
+
+      const auto directorySize = node.GetData().file.size;
+
+      if (directorySize > largestDirectory)
+      {
+         largestDirectory = directorySize;
+      }
+   }
+
+   m_largestDirectorySize = largestDirectory;
+}
+
+QVector3D VisualizationAsset::ComputeGradientColor(const TreeNode<VizNode>& node)
+{
+   const auto blockSize = node.GetData().file.size;
+   const auto ratio = static_cast<double>(blockSize) / static_cast<double>(m_largestDirectorySize);
+
+   const auto finalColor = m_directoryColorGradient.GetColorAtValue(static_cast<float>(ratio));
+   return finalColor;
 }
 
 std::uint32_t VisualizationAsset::GetBlockCount() const

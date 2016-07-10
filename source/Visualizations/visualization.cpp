@@ -335,53 +335,10 @@ TreeNode<VizNode>* VisualizationModel::FindNearestIntersection(
    return nearestIntersection;
 }
 
-void VisualizationModel::FindLargestDirectory()
-{
-   std::uintmax_t smallestDirectory = std::numeric_limits<std::uintmax_t>::max();
-   std::uintmax_t largestDirectory = std::numeric_limits<std::uintmax_t>::min();
-
-   for (auto& node : *m_theTree)
-   {
-      if (node.GetData().file.type != FileType::DIRECTORY)
-      {
-         continue;
-      }
-
-      const auto directorySize = node.GetData().file.size;
-
-      if (directorySize < smallestDirectory)
-      {
-         smallestDirectory = directorySize;
-      }
-      else if (directorySize > largestDirectory)
-      {
-         largestDirectory = directorySize;
-      }
-   }
-
-   m_largestDirectorySize = largestDirectory;
-}
-
 Tree<VizNode>& VisualizationModel::GetTree()
 {
    assert(m_theTree);
    return *m_theTree;
-}
-
-QVector<QVector3D> VisualizationModel::ComputeGradientColor(const TreeNode<VizNode>& node)
-{
-   QVector<QVector3D> blockColors;
-   blockColors.reserve(Block::VERTICES_PER_BLOCK);
-
-   const auto blockSize = node.GetData().file.size;
-   const auto ratio = static_cast<double>(blockSize) / static_cast<double>(m_largestDirectorySize);
-
-   for (int i = 0; i < Block::VERTICES_PER_BLOCK; i++)
-   {
-      blockColors << m_directoryColorGradient.GetColorAtValue(static_cast<float>(ratio));
-   }
-
-   return blockColors;
 }
 
 void VisualizationModel::SortNodes(Tree<VizNode>& tree)

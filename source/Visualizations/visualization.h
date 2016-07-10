@@ -15,8 +15,6 @@
 #include "../DataStructs/vizNode.h"
 #include "../Viewport/camera.h"
 
-#include "../Utilities/colorGradient.hpp"
-
 /**
  * @brief The VisualizationParameters struct represents the gamut of visualization parameters that
  * can be set to control when visualization updates occur, as well as what nodes get included.
@@ -87,26 +85,10 @@ class VisualizationModel
          const VisualizationParameters& parameters) const;
 
       /**
-       * @brief FindSmallestandLargestDirectory
-       *
-       * @param tree
-       *
-       * @return
-       */
-      void FindLargestDirectory();
-
-      /**
        * @brief GetTree
        * @return
        */
       Tree<VizNode>& GetTree();
-
-      /**
-       * @brief Computes the TreeNode's color based on the heatmap gradient.
-       *
-       * @return
-       */
-      QVector<QVector3D> ComputeGradientColor(const TreeNode<VizNode>& node);
 
       /**
        * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each
@@ -119,13 +101,9 @@ class VisualizationModel
    protected:
       std::shared_ptr<Tree<VizNode>> m_theTree{ nullptr };
 
-      std::uintmax_t m_largestDirectorySize{ 0 };
-
       bool m_hasDataBeenParsed{ false };
 
       VisualizationParameters m_vizParameters;
-
-      ColorGradient m_directoryColorGradient;
 };
 
 #endif // VISUALIZATION_H
