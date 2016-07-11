@@ -119,7 +119,8 @@ bool VisualizationAsset::InitializeUnitBlock()
       DoublePoint3D{ 0.0, 0.0, 0.0 },
       1.0,
       1.0,
-      1.0
+      1.0,
+      /* generateVertices = */ true
    };
 
    // @todo Wrap this in a function to be placed on the Block class.

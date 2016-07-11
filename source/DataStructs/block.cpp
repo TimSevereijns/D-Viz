@@ -1,10 +1,10 @@
 #include "block.h"
 
-Block::Block(
-   const DoublePoint3D& origin,
+Block::Block(const DoublePoint3D& origin,
    const double width,
    const double height,
-   const double depth)
+   const double depth,
+   const bool generateVertices /* = false */)
    :
    width{ width },
    height{ height },
@@ -13,6 +13,11 @@ Block::Block(
    origin{ origin },
    nextRowOrigin{ origin.x(), origin.y() + height, origin.z() }
 {
+   if (!generateVertices)
+   {
+      return;
+   }
+
    const auto x = static_cast<float>(origin.x());
    const auto y = static_cast<float>(origin.y());
    const auto z = static_cast<float>(origin.z());

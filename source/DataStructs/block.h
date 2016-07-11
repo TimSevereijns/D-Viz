@@ -81,7 +81,8 @@ struct Block
       const DoublePoint3D& origin,
       const double width,
       const double height,
-      const double depth);
+      const double depth,
+      const bool generateVertices = false);
 
    /**
     * @brief begin
