@@ -30,15 +30,15 @@ namespace
     * @param[in] vertexCount        The readout value.
     * @param[in] mainWindow         The main window that contains the status bar.
     */
-   void PrintMetadataToStatusBar(const unsigned int vertexCount, MainWindow& mainWindow)
+   void PrintMetadataToStatusBar(const std::uint32_t blockCount, MainWindow& mainWindow)
    {
       std::wstringstream message;
       message.imbue(std::locale(""));
       message
          << std::fixed
-         << vertexCount
+         << blockCount * Block::VERTICES_PER_BLOCK
          << L" vertices, representing "
-         << (vertexCount / Block::VERTICES_PER_BLOCK)
+         << blockCount
          << L" files.";
 
       mainWindow.SetStatusBarMessage(message.str());
@@ -142,11 +142,11 @@ namespace
     * @param[in] highlightAsset     The asset to be nuked and reloaded.
     * @param[in] camera             The camera used to view the asset in the scene.
     */
-   void ClearAssetBuffersAndReload(SceneAsset& asset, const Camera& camera)
+   void ClearAssetBuffersAndReload(SceneAsset& asset)
    {
       asset.SetVertexData(QVector<QVector3D>{ });
       asset.SetColorData(QVector<QVector3D>{ });
-      asset.Reload(camera);
+      asset.Reload();
    }
 
    /**
@@ -185,9 +185,9 @@ GLCanvas::GLCanvas(QWidget* parent) :
    connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
    m_frameRedrawTimer->start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
 
-   m_cameraPositionTimer.reset(new QTimer{ this });
-   connect(m_cameraPositionTimer.get(), SIGNAL(timeout()), this, SLOT(HandleInput()));
-   m_cameraPositionTimer->start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
+   m_inputCaptureTimer.reset(new QTimer{ this });
+   connect(m_inputCaptureTimer.get(), SIGNAL(timeout()), this, SLOT(HandleInput()));
+   m_inputCaptureTimer->start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
 }
 
 void GLCanvas::initializeGL()
@@ -206,9 +206,7 @@ void GLCanvas::initializeGL()
    for (const auto& asset : m_sceneAssets)
    {
       asset->LoadShaders();
-
-      asset->PrepareVertexBuffers(m_camera);
-      asset->PrepareColorBuffers(m_camera);
+      asset->Initialize();
    }
 }
 
@@ -323,23 +321,19 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
    m_isPaintingSuspended = true;
    ON_SCOPE_EXIT noexcept { m_isPaintingSuspended = previousSuspensionState; };
 
+   auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
+   assert(vizAsset);
+
    m_visualizationParameters = parameters;
-   m_theVisualization->ComputeVertexAndColorData(parameters);
+   const auto blockCount = vizAsset->LoadBufferData(m_theVisualization->GetTree(), parameters);
 
-   m_sceneAssets[Asset::TREEMAP]->SetVertexData(std::move(m_theVisualization->GetVertexData()));
-   m_sceneAssets[Asset::TREEMAP]->SetColorData(std::move(m_theVisualization->GetColorData()));
-
-   m_isVisualizationLoaded = m_sceneAssets[Asset::TREEMAP]->IsAssetLoaded();
-
-   if (m_isVisualizationLoaded)
+   for (const auto& asset : m_sceneAssets)
    {
-      for (const auto& asset : m_sceneAssets)
-      {
-         asset->Reload(m_camera);
-      }
+      asset->Reload();
    }
 
-   PrintMetadataToStatusBar(m_sceneAssets[Asset::TREEMAP]->GetVertexCount(), *m_mainWindow);
+   assert (blockCount == vizAsset->GetBlockCount());
+   PrintMetadataToStatusBar(blockCount, *m_mainWindow);
 }
 
 void GLCanvas::SetFieldOfView(const float fieldOfView)
@@ -428,7 +422,7 @@ void GLCanvas::HandleNodeSelection(TreeNode<VizNode>* selectedNode)
 
 void GLCanvas::HandleRightClick(const QPoint& point)
 {
-   if (!m_isVisualizationLoaded)
+   if (!m_theVisualization)
    {
       return;
    }
@@ -450,7 +444,10 @@ void GLCanvas::HandleRightClick(const QPoint& point)
          SceneAsset::UpdateAction::DESELECT,
          m_visualizationParameters);
 
-       PrintMetadataToStatusBar(m_sceneAssets[Asset::TREEMAP]->GetVertexCount(), *m_mainWindow);
+       auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
+       assert(vizAsset);
+
+       PrintMetadataToStatusBar(vizAsset->GetBlockCount(), *m_mainWindow);
    }
 }
 
@@ -764,14 +761,13 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
    {
       m_isLeftTriggerDown = true;
 
-      auto* crosshairAsset =
+      auto* const crosshairAsset =
          dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
 
       assert(crosshairAsset);
       if (crosshairAsset)
       {
-         crosshairAsset->ShowCrosshair(m_camera);
-         crosshairAsset->Reload(m_camera);
+         crosshairAsset->Show(m_camera);
       }
    }
    else if (m_isLeftTriggerDown
@@ -779,14 +775,13 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
    {
       m_isLeftTriggerDown = false;
 
-      auto* crosshairAsset =
+      auto* const crosshairAsset =
          dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
 
       assert(crosshairAsset);
       if (crosshairAsset)
       {
-         crosshairAsset->HideCrosshair();
-         crosshairAsset->Reload(m_camera);
+         crosshairAsset->Hide();
       }
    }
 
@@ -813,11 +808,12 @@ void GLCanvas::UpdateFPS()
 
    m_lastFrameDrawTime = now;
 
-   if (m_frameRateDeque.size() > 32)
+   constexpr auto movingAverageWindow{ 32 };
+   if (m_frameRateDeque.size() > movingAverageWindow)
    {
       m_frameRateDeque.pop_front();
    }
-   assert(m_frameRateDeque.size() <= 32);
+   assert(m_frameRateDeque.size() <= movingAverageWindow);
 
    m_frameRateDeque.emplace_back(1000 / millisecondsElapsed);
 

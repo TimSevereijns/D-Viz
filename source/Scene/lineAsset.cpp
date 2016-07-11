@@ -10,7 +10,18 @@ bool LineAsset::LoadShaders()
    return SceneAsset::LoadShaders("simpleLineVertexShader", "simpleLineFragmentShader");
 }
 
-bool LineAsset::PrepareVertexBuffers(const Camera& camera)
+bool LineAsset::Initialize()
+{
+   const bool vertexBuffersLoadedSuccessfully = InitializeVertexBuffers();
+   const bool colorBuffersLoadedSuccessfully = InitializeColorBuffers();
+
+   const bool overallSuccess = vertexBuffersLoadedSuccessfully && colorBuffersLoadedSuccessfully;
+   assert(overallSuccess);
+
+   return overallSuccess;
+}
+
+bool LineAsset::InitializeVertexBuffers()
 {
    if (!m_VAO.isCreated())
    {
@@ -27,9 +38,8 @@ bool LineAsset::PrepareVertexBuffers(const Camera& camera)
       /* count = */ m_rawVertices.size() * 3 * sizeof(GLfloat));
 
    m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
-
    m_vertexBuffer.bind();
+
    m_shader.enableAttributeArray("vertex");
    m_shader.setAttributeBuffer(
       /* name = */ "vertex",
@@ -44,7 +54,7 @@ bool LineAsset::PrepareVertexBuffers(const Camera& camera)
    return true;
 }
 
-bool LineAsset::PrepareColorBuffers(const Camera&)
+bool LineAsset::InitializeColorBuffers()
 {
    if (!m_VAO.isCreated())
    {
@@ -95,10 +105,10 @@ bool LineAsset::Render(
    return true;
 }
 
-bool LineAsset::Reload(const Camera& camera)
+bool LineAsset::Reload()
 {
-   PrepareVertexBuffers(camera);
-   PrepareColorBuffers(camera);
+   InitializeVertexBuffers();
+   InitializeColorBuffers();
 
    return true;
 }

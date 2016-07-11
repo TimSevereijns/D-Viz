@@ -1,5 +1,6 @@
 #include "visualizationAsset.h"
 
+#include "../constants.h"
 #include "../DataStructs/vizNode.h"
 #include "../ThirdParty/Tree.hpp"
 #include "../Utilities/colorGradient.hpp"
@@ -52,18 +53,18 @@ namespace
     *
     * @returns The color to restore the node to.
     */
-   QVector<QVector3D> RestoreColor(
+   QVector3D RestoreColor(
       const TreeNode<VizNode>& node,
       const VisualizationParameters& params)
    {
       if (node.GetData().file.type != FileType::DIRECTORY)
       {
-         return Visualization::CreateFileColors();
+         return Constants::Colors::GREEN;
       }
 
       if (!params.useDirectoryGradient)
       {
-         return Visualization::CreateDirectoryColors();
+         return Constants::Colors::WHITE;
       }
 
       auto* rootNode = &node;
@@ -77,15 +78,7 @@ namespace
 
       ColorGradient gradient;
       const auto nodeColor = gradient.GetColorAtValue(ratio);
-
-      QVector<QVector3D> blockColors;
-      blockColors.reserve(Block::VERTICES_PER_BLOCK);
-      for (int i = 0; i < Block::VERTICES_PER_BLOCK; i++)
-      {
-         blockColors << nodeColor;
-      }
-
-      return blockColors;
+      return nodeColor;
    }
 }
 
@@ -99,26 +92,54 @@ bool VisualizationAsset::LoadShaders()
    return SceneAsset::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
 }
 
-bool VisualizationAsset::PrepareVertexBuffers(const Camera& camera)
+bool VisualizationAsset::Initialize()
+{
+   const bool unitBlockInitialized = InitializeUnitBlock();
+   const bool colorsInitialized = InitializeColors();
+   const bool transformationsInitialized = InitializeBlockTransformations();
+
+   const bool overallSuccess =
+      unitBlockInitialized
+      && colorsInitialized
+      && transformationsInitialized;
+
+   assert(overallSuccess);
+   return overallSuccess;
+}
+
+bool VisualizationAsset::InitializeUnitBlock()
 {
    if (!m_VAO.isCreated())
    {
       m_VAO.create();
    }
 
+   const auto unitBlock = Block
+   {
+      DoublePoint3D{ 0.0, 0.0, 0.0 },
+      1.0,
+      1.0,
+      1.0
+   };
+
+   // @todo Wrap this in a function to be placed on the Block class.
+   m_referenceBlockVertices.clear();
+   std::for_each(std::begin(unitBlock), std::end(unitBlock),
+      [&] (const auto& face)
+   {
+      m_referenceBlockVertices << face.vertices;
+   });
+
    m_VAO.bind();
 
-   m_vertexBuffer.create();
-   m_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-   m_vertexBuffer.bind();
-   m_vertexBuffer.allocate(
-      /* data = */ m_rawVertices.constData(),
-      /* count = */ m_rawVertices.size() * 3 * sizeof(GLfloat));
+   m_referenceBlockBuffer.create();
+   m_referenceBlockBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+   m_referenceBlockBuffer.bind();
+   m_referenceBlockBuffer.allocate(
+      /* data = */ m_referenceBlockVertices.constData(),
+      /* count = */ m_referenceBlockVertices.size() * sizeof(QVector3D));
 
-   m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
-
-   m_vertexBuffer.bind();
+   m_referenceBlockBuffer.bind();
 
    m_shader.enableAttributeArray("vertex");
    m_shader.setAttributeBuffer(
@@ -126,24 +147,23 @@ bool VisualizationAsset::PrepareVertexBuffers(const Camera& camera)
       /* type = */ GL_FLOAT,
       /* offset = */ 0,
       /* tupleSize = */ 3,
-      /* stride = */ 6 * sizeof(GLfloat));
+      /* stride = */ 2 * sizeof(QVector3D));
 
    m_shader.enableAttributeArray("normal");
    m_shader.setAttributeBuffer(
       /* location = */ "normal",
       /* type = */ GL_FLOAT,
-      /* offset = */ 3 * sizeof(GLfloat),
+      /* offset = */ sizeof(QVector3D),
       /* tupleSize = */ 3,
-      /* stride = */ 6 * sizeof(GLfloat));
+      /* stride = */ 2 * sizeof(QVector3D));
 
-   m_vertexBuffer.release();
-   m_shader.release();
+   m_referenceBlockBuffer.release();
    m_VAO.release();
 
    return true;
 }
 
-bool VisualizationAsset::PrepareColorBuffers(const Camera&)
+bool VisualizationAsset::InitializeColors()
 {
    if (!m_VAO.isCreated())
    {
@@ -152,24 +172,165 @@ bool VisualizationAsset::PrepareColorBuffers(const Camera&)
 
    m_VAO.bind();
 
-   m_colorBuffer.create();
-   m_colorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-   m_colorBuffer.bind();
-   m_colorBuffer.allocate(
-      /* data = */ m_rawColors.constData(),
-      /* count = */ m_rawColors.size() * 3 * sizeof(GLfloat));
+   m_blockColorBuffer.create();
+   m_blockColorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+   m_blockColorBuffer.bind();
+   m_blockColorBuffer.allocate(
+      /* data = */ m_blockColors.constData(),
+      /* count = */ m_blockColors.size() * 3 * sizeof(GLfloat));
 
-   m_shader.enableAttributeArray("color");
-   m_shader.setAttributeBuffer(
-      /* location = */"color",
-      /* type = */ GL_FLOAT,
-      /* offset = */ 0,
-      /* tupleSize = */ 3);
+   m_graphicsDevice.glEnableVertexAttribArray(0);
+   m_graphicsDevice.glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(QVector3D), (GLvoid*)0);
+   m_graphicsDevice.glVertexAttribDivisor(0, 1);
 
-   m_colorBuffer.release();
+   m_graphicsDevice.glBindVertexArray(0);
+
+   m_blockColorBuffer.release();
    m_VAO.release();
 
    return true;
+}
+
+bool VisualizationAsset::InitializeBlockTransformations()
+{
+   if (!m_VAO.isCreated())
+   {
+      m_VAO.create();
+   }
+
+   m_VAO.bind();
+
+   constexpr auto sizeOfVector = sizeof(QVector4D);
+   constexpr auto sizeOfMatrix = sizeof(QMatrix4x4);
+
+   m_blockTransformationBuffer.create();
+   m_blockTransformationBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+   m_blockTransformationBuffer.bind();
+   m_blockTransformationBuffer.allocate(
+      /* data = */ m_blockTransformations.constData(),
+      /* count = */ m_blockTransformations.size() * sizeOfMatrix);
+
+   m_graphicsDevice.glEnableVertexAttribArray(1);
+   m_graphicsDevice.glVertexAttribDivisor(1, 1);
+   m_graphicsDevice.glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix,
+      (GLvoid*)(0 * sizeOfVector));
+
+   m_graphicsDevice.glEnableVertexAttribArray(2);
+   m_graphicsDevice.glVertexAttribDivisor(2, 1);
+   m_graphicsDevice.glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix,
+      (GLvoid*)(1 * sizeOfVector));
+
+   m_graphicsDevice.glEnableVertexAttribArray(3);
+   m_graphicsDevice.glVertexAttribDivisor(3, 1);
+   m_graphicsDevice.glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix,
+      (GLvoid*)(2 * sizeOfVector));
+
+   m_graphicsDevice.glEnableVertexAttribArray(4);
+   m_graphicsDevice.glVertexAttribDivisor(4, 1);
+   m_graphicsDevice.glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix,
+      (GLvoid*)(3 * sizeOfVector));
+
+   m_graphicsDevice.glBindVertexArray(0);
+
+   m_blockTransformationBuffer.release();
+   m_VAO.release();
+
+   return true;
+}
+
+std::uint32_t VisualizationAsset::LoadBufferData(
+   Tree<VizNode>& tree,
+   const VisualizationParameters& parameters)
+{
+   m_blockTransformations.clear();
+   m_blockColors.clear();
+
+   m_blockCount = 0;
+
+   for (TreeNode<VizNode>& node : tree)
+   {
+      const bool fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
+      const bool notTheRightFileType =
+         parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY;
+
+      if (notTheRightFileType || fileIsTooSmall)
+      {
+         continue;
+      }
+
+      node->offsetIntoVBO = m_blockCount++;
+
+      const auto& block = node->block;
+
+      QMatrix4x4 instanceMatrix{ };
+      instanceMatrix.translate(block.origin.x(), block.origin.y(), block.origin.z());
+      instanceMatrix.scale(block.width, block.height, block.depth);
+      m_blockTransformations << instanceMatrix;
+
+      if (node->file.type == FileType::DIRECTORY)
+      {
+         if (parameters.useDirectoryGradient)
+         {
+            m_blockColors << ComputeGradientColor(node);
+         }
+         else
+         {
+            m_blockColors << Constants::Colors::WHITE;
+         }
+      }
+      else if (node->file.type == FileType::REGULAR)
+      {
+         m_blockColors << Constants::Colors::GREEN;
+      }
+   }
+
+   FindLargestDirectory(tree);
+
+   assert(m_blockColors.size() == m_blockTransformations.size());
+   assert(m_blockColors.size() == m_blockCount);
+
+   return m_blockCount;
+}
+
+void VisualizationAsset::FindLargestDirectory(const Tree<VizNode>& tree)
+{
+   std::uintmax_t largestDirectory = std::numeric_limits<std::uintmax_t>::min();
+
+   for (auto& node : tree)
+   {
+      if (node.GetData().file.type != FileType::DIRECTORY)
+      {
+         continue;
+      }
+
+      const auto directorySize = node.GetData().file.size;
+
+      if (directorySize > largestDirectory)
+      {
+         largestDirectory = directorySize;
+      }
+   }
+
+   m_largestDirectorySize = largestDirectory;
+}
+
+QVector3D VisualizationAsset::ComputeGradientColor(const TreeNode<VizNode>& node)
+{
+   const auto blockSize = node.GetData().file.size;
+   const auto ratio = static_cast<double>(blockSize) / static_cast<double>(m_largestDirectorySize);
+
+   const auto finalColor = m_directoryColorGradient.GetColorAtValue(static_cast<float>(ratio));
+   return finalColor;
+}
+
+std::uint32_t VisualizationAsset::GetBlockCount() const
+{
+   return m_blockCount;
+}
+
+bool VisualizationAsset::IsAssetLoaded() const
+{
+   return !(m_blockTransformations.empty() && m_blockColors.empty());
 }
 
 bool VisualizationAsset::Render(
@@ -177,16 +338,15 @@ bool VisualizationAsset::Render(
    const std::vector<Light>& lights,
    const OptionsManager& settings)
 {
-   const static auto DEFAULT_MATRIX = QMatrix4x4{ };
-
    if (!IsAssetLoaded())
    {
       return true;
    }
 
    m_shader.bind();
-   m_shader.setUniformValue("model", DEFAULT_MATRIX);
-   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
+   m_shader.setUniformValue("viewMatrix", camera.GetViewMatrix());
+   m_shader.setUniformValue("projectionMatrix", camera.GetProjectionMatrix());
+
    m_shader.setUniformValue("cameraPosition", camera.GetPosition());
    m_shader.setUniformValue("materialShininess", settings.m_materialShininess);
 
@@ -203,10 +363,12 @@ bool VisualizationAsset::Render(
 
    m_VAO.bind();
 
-   m_graphicsDevice.glDrawArrays(
+   m_graphicsDevice.glDrawArraysInstanced(
       /* mode = */ GL_TRIANGLES,
       /* first = */ 0,
-      /* count = */ m_rawVertices.size());
+      /* count = */ m_referenceBlockVertices.size(),
+      /* instanceCount = */ m_blockColors.size()
+   );
 
    m_shader.release();
    m_VAO.release();
@@ -214,10 +376,11 @@ bool VisualizationAsset::Render(
    return true;
 }
 
-bool VisualizationAsset::Reload(const Camera& camera)
+bool VisualizationAsset::Reload()
 {
-   PrepareVertexBuffers(camera);
-   PrepareColorBuffers(camera);
+   InitializeUnitBlock();
+   InitializeColors();
+   InitializeBlockTransformations();
 
    return true;
 }
@@ -227,30 +390,26 @@ void VisualizationAsset::UpdateVBO(
    SceneAsset::UpdateAction action,
    const VisualizationParameters& options)
 {
-   constexpr auto tupleSize = 3 * sizeof(GLfloat);
-   const auto offsetIntoVertexBuffer = node->offsetIntoVBO * tupleSize;
-
-   // We have to divide by two, because there's a vertex plus a normal for every color:
-   const auto offsetIntoColorBuffer = offsetIntoVertexBuffer / 2;
+   constexpr auto sizeOfColorData{ sizeof(QVector3D) };
+   const auto offsetIntoColorBuffer = node->offsetIntoVBO * sizeOfColorData;
 
    const auto newColor = (action == SceneAsset::UpdateAction::DESELECT)
       ? RestoreColor(node, options)
-      : Visualization::CreateHighlightColors();
+      : Constants::Colors::CANARY_YELLOW;
 
    assert(m_VAO.isCreated());
-   assert(m_colorBuffer.isCreated());
+   assert(m_blockColorBuffer.isCreated());
+   assert(m_blockColorBuffer.size() >= offsetIntoColorBuffer / sizeOfColorData);
 
    m_VAO.bind();
-   m_colorBuffer.bind();
-
-   assert(m_colorBuffer.size() >= offsetIntoColorBuffer / (3 * sizeof(GLfloat)));
+   m_blockColorBuffer.bind();
 
    m_graphicsDevice.glBufferSubData(
       /* target = */ GL_ARRAY_BUFFER,
       /* offset = */ offsetIntoColorBuffer,
-      /* size = */ newColor.size() * tupleSize,
-      /* data = */ newColor.constData());
+      /* size = */ sizeOfColorData,
+      /* data = */ &newColor);
 
-   m_colorBuffer.release();
+   m_blockColorBuffer.release();
    m_VAO.release();
 }

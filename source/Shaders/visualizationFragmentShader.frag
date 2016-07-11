@@ -1,6 +1,4 @@
-#version 150
-
-uniform mat4 model;
+#version 410 core
 
 uniform vec3 cameraPosition;
 uniform vec3 materialSpecularColor;
@@ -21,7 +19,7 @@ in vec3 vertexNormal;
 
 out vec4 pixelColor;
 
-vec3 GetContributionOfLight(
+vec3 ComputeLightContribution(
    Light light,
    vec3 surfaceColor,
    vec3 normal,
@@ -57,18 +55,18 @@ vec3 GetContributionOfLight(
 
 void main(void)
 {
-   vec3 surfaceToCamera = normalize(cameraPosition - vertexPosition);
+   vec3 fragmentToCamera = normalize(cameraPosition - vec3(vertexPosition));
 
    // Calculate the contribution of each light:
    vec3 linearColor = vec3(0);
    for (int i = 0; i < 5; i++)
    {
-      linearColor += GetContributionOfLight(
+      linearColor += ComputeLightContribution(
          allLights[i],
          vertexColor,
          vertexNormal,
          vertexPosition.xyz,
-         surfaceToCamera);
+         fragmentToCamera);
    }
 
    // Gamma correction:

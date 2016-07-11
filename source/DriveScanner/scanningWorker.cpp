@@ -86,9 +86,9 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
    const Block rootBlock
    {
       DoublePoint3D{ },
-      Visualization::ROOT_BLOCK_WIDTH,
-      Visualization::BLOCK_HEIGHT,
-      Visualization::ROOT_BLOCK_DEPTH
+      VisualizationModel::ROOT_BLOCK_WIDTH,
+      VisualizationModel::BLOCK_HEIGHT,
+      VisualizationModel::ROOT_BLOCK_DEPTH
    };
 
    boost::filesystem::path rawPath{ m_parameters.path };

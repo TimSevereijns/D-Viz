@@ -15,8 +15,6 @@
 #include "../DataStructs/vizNode.h"
 #include "../Viewport/camera.h"
 
-#include "../Utilities/colorGradient.hpp"
-
 /**
  * @brief The VisualizationParameters struct represents the gamut of visualization parameters that
  * can be set to control when visualization updates occur, as well as what nodes get included.
@@ -35,15 +33,15 @@ struct VisualizationParameters
 /**
  * @brief Base visualization class.
  */
-class Visualization
+class VisualizationModel
 {
    public:
-      explicit Visualization(const VisualizationParameters& parameters);
+      explicit VisualizationModel(const VisualizationParameters& parameters);
 
-      virtual ~Visualization() = default;
+      virtual ~VisualizationModel() = default;
 
-      Visualization(const Visualization&) = delete;
-      Visualization& operator=(const Visualization&) = delete;
+      VisualizationModel(const VisualizationModel&) = delete;
+      VisualizationModel& operator=(const VisualizationModel&) = delete;
 
       static const double PADDING_RATIO;
       static const double MAX_PADDING;
@@ -68,27 +66,6 @@ class Visualization
       virtual void UpdateBoundingBoxes();
 
       /**
-       * @brief Uses the specified parameters to populate the vertex and color buffers.
-       *
-       * @param[in] parameters      @see VisualizationParameters
-       */
-      void ComputeVertexAndColorData(const VisualizationParameters& parameters);
-
-      /**
-       * @brief Retrieves the data in the vertex buffer.
-       *
-       * @returns The vertices that represent the entire visualization.
-       */
-      QVector<QVector3D>& GetVertexData();
-
-      /**
-       * @brief Retrieves the data in the color buffer.
-       *
-       * @returns The color data that is associated with the vertex data. @see GetVertexData
-       */
-      QVector<QVector3D>& GetColorData();
-
-      /**
        * @brief Attempts to identify the closest node in front of the camera that the specified ray
        * intersects with.
        *
@@ -108,41 +85,10 @@ class Visualization
          const VisualizationParameters& parameters) const;
 
       /**
-       * @brief FindSmallestandLargestDirectory
-       *
-       * @param tree
-       *
+       * @brief GetTree
        * @return
        */
-      void FindLargestDirectory(const Tree<VizNode>& tree);
-
-      /**
-       * @brief Creates the vertex colors needed to color a single block.
-       *
-       * @returns A vector of colors.
-       */
-      static QVector<QVector3D> CreateFileColors();
-
-      /**
-       * @brief Creates the vertex colors needed to color a single block.
-       *
-       * @returns A vector of colors.
-       */
-      static QVector<QVector3D> CreateDirectoryColors();
-
-      /**
-       * @brief Computes the TreeNode's color based on the heatmap gradient.
-       *
-       * @return
-       */
-      QVector<QVector3D> ComputeGradientColor(const TreeNode<VizNode>& node);
-
-      /**
-       * @brief Create the vertex colors needed to color the selected file.
-       *
-       * @return A vector of colors.
-       */
-      static QVector<QVector3D> CreateHighlightColors();
+      Tree<VizNode>& GetTree();
 
       /**
        * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each
@@ -155,16 +101,9 @@ class Visualization
    protected:
       std::shared_ptr<Tree<VizNode>> m_theTree{ nullptr };
 
-      std::uintmax_t m_largestDirectorySize{ 0 };
-
       bool m_hasDataBeenParsed{ false };
 
       VisualizationParameters m_vizParameters;
-
-      QVector<QVector3D> m_visualizationVertices;
-      QVector<QVector3D> m_visualizationColors;
-
-      ColorGradient m_directoryColorGradient;
 };
 
 #endif // VISUALIZATION_H

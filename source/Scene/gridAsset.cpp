@@ -11,7 +11,7 @@ namespace
     */
    auto CreateOriginMarkerAndGridVertices()
    {
-      const float axisLength = Visualization::ROOT_BLOCK_WIDTH;
+      const float axisLength = VisualizationModel::ROOT_BLOCK_WIDTH;
 
       QVector<QVector3D> vertices;
       vertices.reserve(46);
@@ -128,7 +128,7 @@ bool GridAsset::Render(
    return true;
 }
 
-bool GridAsset::Reload(const Camera&)
+bool GridAsset::Reload()
 {
    return true;
 }

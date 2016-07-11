@@ -197,10 +197,10 @@ class GLCanvas : public QOpenGLWidget
 
       std::unique_ptr<GraphicsDevice> m_graphicsDevice{ nullptr };
 
-      std::unique_ptr<Visualization> m_theVisualization{ nullptr };
+      std::unique_ptr<VisualizationModel> m_theVisualization{ nullptr };
 
       std::unique_ptr<QTimer> m_frameRedrawTimer{ nullptr };
-      std::unique_ptr<QTimer> m_cameraPositionTimer{ nullptr };
+      std::unique_ptr<QTimer> m_inputCaptureTimer{ nullptr };
 
       std::chrono::system_clock::time_point m_lastFrameDrawTime
       {
@@ -216,9 +216,9 @@ class GLCanvas : public QOpenGLWidget
       {
          Light{ },
          Light{ QVector3D{ 0.0f, 80.0f, 0.0f } },
-         Light{ QVector3D{ 0.0f, 80.0f, -Visualization::ROOT_BLOCK_DEPTH } },
-         Light{ QVector3D{ Visualization::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
-         Light{ QVector3D{ Visualization::ROOT_BLOCK_WIDTH, 80.0f, -Visualization::ROOT_BLOCK_DEPTH } }
+         Light{ QVector3D{ 0.0f, 80.0f, -VisualizationModel::ROOT_BLOCK_DEPTH } },
+         Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
+         Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, -VisualizationModel::ROOT_BLOCK_DEPTH } }
       };
 
      VisualizationParameters m_visualizationParameters;

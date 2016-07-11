@@ -40,24 +40,15 @@ class SceneAsset
       virtual ~SceneAsset();
 
       /**
-       * @brief Loads the vertex data into the OpenGL buffer. Use SceneAsset::SetVertexData() to set
-       * the data before calling this function.
+       * @brief Loads the vertex and color data into the OpenGL buffers. Use
+       * SceneAsset::SetVertexData() and SceneAsset::SetColorData() to set the data before calling
+       * this function.
        *
        * @param[in] camera          The camera associated with the OpenGL context.
        *
        * @returns True if the operation succeeded.
        */
-      virtual bool PrepareVertexBuffers(const Camera& camera) = 0;
-
-      /**
-       * @brief Loads the color data into the OpenGL buffer. Use SceneAsset::SetColorData() to set
-       * the data before calling this function.
-       *
-       * @param[in] camera          The camera associated with the OpenGL context.
-       *
-       * @returns True if the operation succeeded.
-       */
-      virtual bool PrepareColorBuffers(const Camera& camera) = 0;
+      virtual bool Initialize() = 0;
 
       /**
        * @brief Clears the OpenGL buffer objects that contain the vertex and color data.
@@ -92,7 +83,7 @@ class SceneAsset
        *
        * @returns True if the OpenGL buffers have been properly populated.
        */
-      bool IsAssetLoaded() const;
+      virtual bool IsAssetLoaded() const;
 
       /**
        * @brief Performs all actions necessary to update the data in the OpenGL buffers.
@@ -101,7 +92,7 @@ class SceneAsset
        *
        * @returns True if the operation succeeded.
        */
-      virtual bool Reload(const Camera& camera) = 0;
+      virtual bool Reload() = 0;
 
       /**
        * @brief Sets the vertex data associated with the asset in question.
@@ -151,7 +142,9 @@ class SceneAsset
        *
        * @returns True if compilation and loading suceeded.
        */
-      bool LoadShaders(const QString& vertexShaderName, const QString& fragmentShaderName);
+      bool LoadShaders(
+         const QString& vertexShaderName,
+         const QString& fragmentShaderName);
 
       QOpenGLBuffer m_vertexBuffer;
       QOpenGLBuffer m_colorBuffer;
