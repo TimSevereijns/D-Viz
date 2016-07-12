@@ -123,13 +123,8 @@ bool VisualizationAsset::InitializeUnitBlock()
       /* generateVertices = */ true
    };
 
-   // @todo Wrap this in a function to be placed on the Block class.
    m_referenceBlockVertices.clear();
-   std::for_each(std::begin(unitBlock), std::end(unitBlock),
-      [&] (const auto& face)
-   {
-      m_referenceBlockVertices << face.vertices;
-   });
+   m_referenceBlockVertices = unitBlock.GetVertices();
 
    m_VAO.bind();
 
@@ -264,8 +259,8 @@ std::uint32_t VisualizationAsset::LoadBufferData(
       const auto& block = node->block;
 
       QMatrix4x4 instanceMatrix{ };
-      instanceMatrix.translate(block.origin.x(), block.origin.y(), block.origin.z());
-      instanceMatrix.scale(block.width, block.height, block.depth);
+      instanceMatrix.translate(block.GetOrigin().x(), block.GetOrigin().y(), block.GetOrigin().z());
+      instanceMatrix.scale(block.GetWidth(), block.GetHeight(), block.GetDepth());
       m_blockTransformations << instanceMatrix;
 
       if (node->file.type == FileType::DIRECTORY)

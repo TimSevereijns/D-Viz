@@ -46,16 +46,16 @@ namespace
    {
       const DoublePoint3D nearCorner
       {
-         block.nextRowOrigin.x(),
-         block.nextRowOrigin.y(),
-         block.nextRowOrigin.z()
+         block.GetNextRowOrigin().x(),
+         block.GetNextRowOrigin().y(),
+         block.GetNextRowOrigin().z()
       };
 
       const DoublePoint3D farCorner
       {
-         block.GetNextChildOrigin().x() + block.width,
-         block.GetNextChildOrigin().y(),
-         block.GetNextChildOrigin().z() - block.depth
+         block.ComputeNextChildOrigin().x() + block.GetWidth(),
+         block.ComputeNextChildOrigin().y(),
+         block.ComputeNextChildOrigin().z() - block.GetDepth()
       };
 
       const Block remainingArea
@@ -100,40 +100,40 @@ namespace
 
       Block remainingLand = ComputeRemainingArea(parentBlock);
 
-      const double parentArea = parentBlock.width * parentBlock.depth;
-      const double remainingArea = std::abs(remainingLand.width * remainingLand.depth);
+      const double parentArea = parentBlock.GetWidth() * parentBlock.GetDepth();
+      const double remainingArea = std::abs(remainingLand.GetWidth() * remainingLand.GetDepth());
       const double remainingBytes = (remainingArea / parentArea) * parentNode.file.size;
 
       const double rowToParentRatio = bytesInRow / remainingBytes;
 
       const DoublePoint3D nearCorner
       {
-         parentBlock.nextRowOrigin.x(),
-         parentBlock.nextRowOrigin.y(),
-         parentBlock.nextRowOrigin.z()
+         parentBlock.GetNextRowOrigin().x(),
+         parentBlock.GetNextRowOrigin().y(),
+         parentBlock.GetNextRowOrigin().z()
       };
 
       Block rowRealEstate;
-      if (remainingLand.width > std::abs(remainingLand.depth))
+      if (remainingLand.GetWidth() > std::abs(remainingLand.GetDepth()))
       {
          rowRealEstate = Block
          {
             nearCorner,
-            remainingLand.width * rowToParentRatio,
-            remainingLand.height,
-            -remainingLand.depth
+            remainingLand.GetWidth() * rowToParentRatio,
+            remainingLand.GetHeight(),
+            -remainingLand.GetDepth()
          };
 
          if (updateOffset)
          {
             const DoublePoint3D nextRowOffset
             {
-               rowRealEstate.width,
+               rowRealEstate.GetWidth(),
                0.0, // Height
                0.0  // Depth
             };
 
-            parentNode.block.nextRowOrigin = nearCorner + nextRowOffset;
+            parentNode.block.SetNextRowOrigin(nearCorner + nextRowOffset);
          }
       }
       else
@@ -141,9 +141,9 @@ namespace
          rowRealEstate = Block
          {
             DoublePoint3D(nearCorner),
-            remainingLand.width,
-            remainingLand.height,
-            -remainingLand.depth * rowToParentRatio
+            remainingLand.GetWidth(),
+            remainingLand.GetHeight(),
+            -remainingLand.GetDepth() * rowToParentRatio
          };
 
          if (updateOffset)
@@ -152,10 +152,10 @@ namespace
             {
                0.0, // Width
                0.0, // Height
-               -rowRealEstate.depth
+               -rowRealEstate.GetDepth()
             };
 
-            parentNode.block.nextRowOrigin = nearCorner + nextRowOffset;
+            parentNode.block.SetNextRowOrigin(nearCorner + nextRowOffset);
          }
       }
 
@@ -181,8 +181,8 @@ namespace
       VizNode& node,
       const size_t nodeCount)
    {
-      const auto blockWidthPlusPadding = land.width * percentageOfParent;
-      const auto ratioBasedPadding = ((land.width * 0.1) / nodeCount) / 2.0;
+      const auto blockWidthPlusPadding = land.GetWidth() * percentageOfParent;
+      const auto ratioBasedPadding = ((land.GetWidth() * 0.1) / nodeCount) / 2.0;
 
       auto widthPaddingPerSide = std::min(ratioBasedPadding, VisualizationModel::MAX_PADDING);
       auto finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPaddingPerSide);
@@ -192,30 +192,30 @@ namespace
          widthPaddingPerSide = (blockWidthPlusPadding * (1.0 - VisualizationModel::PADDING_RATIO)) / 2.0;
       }
 
-      const auto ratioBasedBlockDepth = std::abs(land.depth * VisualizationModel::PADDING_RATIO);
-      const auto depthPaddingPerSide = std::min((land.depth - ratioBasedBlockDepth) / 2.0,
+      const auto ratioBasedBlockDepth = std::abs(land.GetDepth() * VisualizationModel::PADDING_RATIO);
+      const auto depthPaddingPerSide = std::min((land.GetDepth() - ratioBasedBlockDepth) / 2.0,
          VisualizationModel::MAX_PADDING);
 
       const auto finalBlockDepth = (depthPaddingPerSide == VisualizationModel::MAX_PADDING)
-         ? std::abs(land.depth) - (2.0 * VisualizationModel::MAX_PADDING)
+         ? std::abs(land.GetDepth()) - (2.0 * VisualizationModel::MAX_PADDING)
          : ratioBasedBlockDepth;
 
       const DoublePoint3D offset
       {
-         (land.width * land.percentCovered) + widthPaddingPerSide,
+         (land.GetWidth() * land.GetCoverage()) + widthPaddingPerSide,
          0.0,
          -depthPaddingPerSide
       };
 
       node.block = Block
       {
-         land.origin + offset,
+         land.GetOrigin() + offset,
          finalBlockWidth,
          VisualizationModel::BLOCK_HEIGHT,
          finalBlockDepth
       };
 
-      const auto additionalCoverage = blockWidthPlusPadding / land.width;
+      const auto additionalCoverage = blockWidthPlusPadding / land.GetWidth();
       return additionalCoverage;
    }
 
@@ -236,8 +236,8 @@ namespace
       VizNode& node,
       const size_t nodeCount)
    {
-      const auto blockDepthPlusPadding = std::abs(land.depth * percentageOfParent);
-      const auto ratioBasedPadding = (land.depth * 0.1) / nodeCount / 2.0;
+      const auto blockDepthPlusPadding = std::abs(land.GetDepth() * percentageOfParent);
+      const auto ratioBasedPadding = (land.GetDepth() * 0.1) / nodeCount / 2.0;
 
       auto depthPaddingPerSide = std::min(ratioBasedPadding, VisualizationModel::MAX_PADDING);
       auto finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPaddingPerSide);
@@ -247,30 +247,30 @@ namespace
          depthPaddingPerSide = (blockDepthPlusPadding * (1.0 - VisualizationModel::PADDING_RATIO)) / 2.0;
       }
 
-      const auto ratioBasedWidth = land.width * VisualizationModel::PADDING_RATIO;
-      const auto widthPaddingPerSide = std::min((land.width - ratioBasedWidth) / 2.0,
+      const auto ratioBasedWidth = land.GetWidth() * VisualizationModel::PADDING_RATIO;
+      const auto widthPaddingPerSide = std::min((land.GetWidth() - ratioBasedWidth) / 2.0,
          VisualizationModel::MAX_PADDING);
 
       const auto finalBlockWidth = (widthPaddingPerSide == VisualizationModel::MAX_PADDING)
-         ? land.width - (2.0 * VisualizationModel::MAX_PADDING)
+         ? land.GetWidth() - (2.0 * VisualizationModel::MAX_PADDING)
          : ratioBasedWidth;
 
       const DoublePoint3D offset
       {
          widthPaddingPerSide,
          0.0,
-         -(land.depth * land.percentCovered) - depthPaddingPerSide
+         -(land.GetDepth() * land.GetCoverage()) - depthPaddingPerSide
       };
 
       node.block = Block
       {
-         land.origin + offset,
+         land.GetOrigin() + offset,
          finalBlockWidth,
          VisualizationModel::BLOCK_HEIGHT,
          std::abs(finalBlockDepth)
       };
 
-      const auto additionalCoverage = blockDepthPlusPadding / land.depth;
+      const auto additionalCoverage = blockDepthPlusPadding / land.GetDepth();
       return additionalCoverage;
    }
 
@@ -314,14 +314,14 @@ namespace
          const double percentageOfParent =
             static_cast<double>(nodeFileSize) / static_cast<double>(bytesInRow);
 
-         additionalCoverage = (land.width > std::abs(land.depth))
+         additionalCoverage = (land.GetWidth() > std::abs(land.GetDepth()))
             ? SlicePerpendicularToWidth(land, percentageOfParent, data, nodeCount)
             : SlicePerpendicularToDepth(land, percentageOfParent, data, nodeCount);
 
          assert(additionalCoverage > 0);
          assert(data.block.HasVolume());
 
-         land.percentCovered += additionalCoverage;
+         land.IncreaseCoverageBy(additionalCoverage);
       }
    }
 
@@ -336,8 +336,8 @@ namespace
    auto ComputeShortestEdgeOfRemainingBounds(const VizNode& node)
    {
       const Block remainingRealEstate = ComputeRemainingArea(node.block);
-      const auto shortestEdge = std::min(std::abs(remainingRealEstate.depth),
-         std::abs(remainingRealEstate.width));
+      const auto shortestEdge = std::min(std::abs(remainingRealEstate.GetDepth()),
+         std::abs(remainingRealEstate.GetWidth()));
 
       assert(shortestEdge > 0.0);
       return shortestEdge;
@@ -387,7 +387,7 @@ namespace
       const std::uintmax_t bytesInRow = ComputeBytesInRow(row, candidateSize);
       const Block rowBounds = CalculateRowBounds(bytesInRow, parentNode, updateOffset);
 
-      const auto totalRowArea = std::abs(rowBounds.width * rowBounds.depth);
+      const auto totalRowArea = std::abs(rowBounds.GetWidth() * rowBounds.GetDepth());
 
       const auto largestArea =
          (static_cast<double>(largestNodeInBytes) / static_cast<double>(bytesInRow)) *
@@ -445,7 +445,7 @@ namespace
       assert(parentNode);
 
       VizNode& parentVizNode = parentNode->GetData();
-      assert(parentVizNode.block.HasVolume() && parentVizNode.block.IsNotInverted());
+      assert(parentVizNode.block.HasVolume());
 
       std::vector<TreeNode<VizNode>*> row;
       row.reserve(nodes.size());

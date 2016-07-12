@@ -93,73 +93,75 @@ namespace
    {
       std::vector<QVector3D> allIntersections;
 
-      std::for_each(std::begin(block), std::end(block),
-         [&ray, &allIntersections] (const BlockFace& face)
-      {
-         const QVector3D& randomPointOnFace = face.vertices[0];
-         const QVector3D& normalForRandomPoint = face.vertices[1];
+      return boost::none;
 
-         const boost::optional<QVector3D> intersectionPoint =
-            DoesRayIntersectPlane(ray, randomPointOnFace, normalForRandomPoint);
+//      std::for_each(std::begin(block), std::end(block),
+//         [&ray, &allIntersections] (const BlockFace& face)
+//      {
+//         const QVector3D& randomPointOnFace = face.vertices[0];
+//         const QVector3D& normalForRandomPoint = face.vertices[1];
 
-         if (!intersectionPoint)
-         {
-            return;
-         }
+//         const boost::optional<QVector3D> intersectionPoint =
+//            DoesRayIntersectPlane(ray, randomPointOnFace, normalForRandomPoint);
 
-         if (face.side == BlockFace::Side::TOP)
-         {
-            if (face.vertices[0].x() < intersectionPoint->x() &&
-                face.vertices[2].x() > intersectionPoint->x() &&
-                face.vertices[0].z() > intersectionPoint->z() &&
-                face.vertices[4].z() < intersectionPoint->z())
-            {
-               allIntersections.emplace_back(*intersectionPoint);
-            }
-         }
-         else if (face.side == BlockFace::Side::FRONT)
-         {
-            if (face.vertices[0].x() < intersectionPoint->x() &&
-                face.vertices[2].x() > intersectionPoint->x() &&
-                face.vertices[0].y() < intersectionPoint->y() &&
-                face.vertices[4].y() > intersectionPoint->y())
-            {
-               allIntersections.emplace_back(*intersectionPoint);
-            }
-         }
-         else if (face.side == BlockFace::Side::BACK)
-         {
-            if (face.vertices[2].x() < intersectionPoint->x() &&
-                face.vertices[0].x() > intersectionPoint->x() &&
-                face.vertices[2].y() < intersectionPoint->y() &&
-                face.vertices[6].y() > intersectionPoint->y())
-            {
-               allIntersections.emplace_back(*intersectionPoint);
-            }
-         }
-         else if (face.side == BlockFace::Side::LEFT)
-         {
-            if (face.vertices[2].z() > intersectionPoint->z() &&
-                face.vertices[0].z() < intersectionPoint->z() &&
-                face.vertices[0].y() < intersectionPoint->y() &&
-                face.vertices[4].y() > intersectionPoint->y())
-            {
-               allIntersections.emplace_back(*intersectionPoint);
-            }
-         }
-         else if (face.side == BlockFace::Side::RIGHT)
-         {
-            if (face.vertices[0].z() > intersectionPoint->z() &&
-                face.vertices[2].z() < intersectionPoint->z() &&
-                face.vertices[0].y() < intersectionPoint->y() &&
-                face.vertices[4].y() > intersectionPoint->y())
-            {
-               allIntersections.emplace_back(*intersectionPoint);
-            }
-         }
-      });
+//         if (!intersectionPoint)
+//         {
+//            return;
+//         }
 
-      return FindClosestIntersectionPoint(ray, allIntersections);
+//         if (face.side == BlockFace::Side::TOP)
+//         {
+//            if (face.vertices[0].x() < intersectionPoint->x() &&
+//                face.vertices[2].x() > intersectionPoint->x() &&
+//                face.vertices[0].z() > intersectionPoint->z() &&
+//                face.vertices[4].z() < intersectionPoint->z())
+//            {
+//               allIntersections.emplace_back(*intersectionPoint);
+//            }
+//         }
+//         else if (face.side == BlockFace::Side::FRONT)
+//         {
+//            if (face.vertices[0].x() < intersectionPoint->x() &&
+//                face.vertices[2].x() > intersectionPoint->x() &&
+//                face.vertices[0].y() < intersectionPoint->y() &&
+//                face.vertices[4].y() > intersectionPoint->y())
+//            {
+//               allIntersections.emplace_back(*intersectionPoint);
+//            }
+//         }
+//         else if (face.side == BlockFace::Side::BACK)
+//         {
+//            if (face.vertices[2].x() < intersectionPoint->x() &&
+//                face.vertices[0].x() > intersectionPoint->x() &&
+//                face.vertices[2].y() < intersectionPoint->y() &&
+//                face.vertices[6].y() > intersectionPoint->y())
+//            {
+//               allIntersections.emplace_back(*intersectionPoint);
+//            }
+//         }
+//         else if (face.side == BlockFace::Side::LEFT)
+//         {
+//            if (face.vertices[2].z() > intersectionPoint->z() &&
+//                face.vertices[0].z() < intersectionPoint->z() &&
+//                face.vertices[0].y() < intersectionPoint->y() &&
+//                face.vertices[4].y() > intersectionPoint->y())
+//            {
+//               allIntersections.emplace_back(*intersectionPoint);
+//            }
+//         }
+//         else if (face.side == BlockFace::Side::RIGHT)
+//         {
+//            if (face.vertices[0].z() > intersectionPoint->z() &&
+//                face.vertices[2].z() < intersectionPoint->z() &&
+//                face.vertices[0].y() < intersectionPoint->y() &&
+//                face.vertices[4].y() > intersectionPoint->y())
+//            {
+//               allIntersections.emplace_back(*intersectionPoint);
+//            }
+//         }
+//      });
+
+//      return FindClosestIntersectionPoint(ray, allIntersections);
    }
 
    /**
@@ -285,9 +287,9 @@ void VisualizationModel::UpdateBoundingBoxes()
       auto* currentChild = node.GetFirstChild();
       while (currentChild)
       {
-         if (currentChild->GetData().boundingBox.height > tallestDescendant)
+         if (currentChild->GetData().boundingBox.GetHeight() > tallestDescendant)
          {
-            tallestDescendant = currentChild->GetData().boundingBox.height;
+            tallestDescendant = currentChild->GetData().boundingBox.GetHeight();
          }
 
          currentChild = currentChild->GetNextSibling();
@@ -295,10 +297,10 @@ void VisualizationModel::UpdateBoundingBoxes()
 
       node->boundingBox = Block
       {
-         node->block.origin,
-         node->block.width,
-         node->block.height + tallestDescendant,
-         node->block.depth
+         node->block.GetOrigin(),
+         node->block.GetWidth(),
+         node->block.GetHeight() + tallestDescendant,
+         node->block.GetDepth()
       };
    });
 }
