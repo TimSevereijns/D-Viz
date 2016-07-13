@@ -18,6 +18,13 @@ namespace
 {
    constexpr double EPSILON = 0.0001;
 
+   const QVector3D POSITIVE_X_NORMAL{  1,  0,  0 };
+   const QVector3D POSITIVE_Y_NORMAL{  0,  1,  0 };
+   const QVector3D POSITIVE_Z_NORMAL{  0,  0,  1 };
+   const QVector3D NEGATIVE_X_NORMAL{ -1,  0,  0 };
+   const QVector3D NEGATIVE_Y_NORMAL{  0, -1,  0 };
+   const QVector3D NEGATIVE_Z_NORMAL{  0,  0, -1 };
+
    /**
     * @brief Calculates whether the specified ray hits the specified plane, given a margin of error,
     * epsilon.
@@ -45,12 +52,12 @@ namespace
       const double scalar = numerator / denominator;
       const bool doesRayHitPlane = std::abs(scalar) > EPSILON;
 
-      if (doesRayHitPlane)
+      if (!doesRayHitPlane)
       {
-         return scalar * ray.direction().normalized() + ray.origin();
+         return boost::none;
       }
 
-      return boost::none;
+      return scalar * ray.direction().normalized() + ray.origin();
    }
 
    /**
@@ -71,12 +78,12 @@ namespace
          return (ray.origin().distanceToPoint(lhs) < ray.origin().distanceToPoint(rhs));
       });
 
-      if (closest != std::end(allIntersections))
+      if (closest == std::end(allIntersections))
       {
-         return *closest;
+         return boost::none;
       }
 
-      return boost::none;
+      return *closest;
    }
 
    /**
@@ -91,77 +98,145 @@ namespace
       const Qt3DCore::QRay3D& ray,
       const Block& block)
    {
+      // @todo Replace with a stack allocated container.
       std::vector<QVector3D> allIntersections;
 
-      return boost::none;
+      const auto blockOrigin = block.GetOrigin();
+      const auto blockHeight = block.GetHeight();
+      const auto blockWidth = block.GetWidth();
+      const auto blockDepth = block.GetDepth();
 
-//      std::for_each(std::begin(block), std::end(block),
-//         [&ray, &allIntersections] (const BlockFace& face)
-//      {
-//         const QVector3D& randomPointOnFace = face.vertices[0];
-//         const QVector3D& normalForRandomPoint = face.vertices[1];
+      { // Perform hit detection on the top face:
+         const auto randomPointOnTopFace = blockOrigin + DoublePoint3D{ 0, blockHeight, 0 };
+         const QVector3D topFacePoint
+         {
+            static_cast<float>(randomPointOnTopFace.x()),
+            static_cast<float>(randomPointOnTopFace.y()),
+            static_cast<float>(randomPointOnTopFace.z())
+         };
 
-//         const boost::optional<QVector3D> intersectionPoint =
-//            DoesRayIntersectPlane(ray, randomPointOnFace, normalForRandomPoint);
+         const boost::optional<QVector3D> intersectionPoint =
+            DoesRayIntersectPlane(ray, topFacePoint, POSITIVE_Y_NORMAL);
 
-//         if (!intersectionPoint)
-//         {
-//            return;
-//         }
+         if (!intersectionPoint)
+         {
+            return boost::none;
+         }
 
-//         if (face.side == BlockFace::Side::TOP)
-//         {
-//            if (face.vertices[0].x() < intersectionPoint->x() &&
-//                face.vertices[2].x() > intersectionPoint->x() &&
-//                face.vertices[0].z() > intersectionPoint->z() &&
-//                face.vertices[4].z() < intersectionPoint->z())
-//            {
-//               allIntersections.emplace_back(*intersectionPoint);
-//            }
-//         }
-//         else if (face.side == BlockFace::Side::FRONT)
-//         {
-//            if (face.vertices[0].x() < intersectionPoint->x() &&
-//                face.vertices[2].x() > intersectionPoint->x() &&
-//                face.vertices[0].y() < intersectionPoint->y() &&
-//                face.vertices[4].y() > intersectionPoint->y())
-//            {
-//               allIntersections.emplace_back(*intersectionPoint);
-//            }
-//         }
-//         else if (face.side == BlockFace::Side::BACK)
-//         {
-//            if (face.vertices[2].x() < intersectionPoint->x() &&
-//                face.vertices[0].x() > intersectionPoint->x() &&
-//                face.vertices[2].y() < intersectionPoint->y() &&
-//                face.vertices[6].y() > intersectionPoint->y())
-//            {
-//               allIntersections.emplace_back(*intersectionPoint);
-//            }
-//         }
-//         else if (face.side == BlockFace::Side::LEFT)
-//         {
-//            if (face.vertices[2].z() > intersectionPoint->z() &&
-//                face.vertices[0].z() < intersectionPoint->z() &&
-//                face.vertices[0].y() < intersectionPoint->y() &&
-//                face.vertices[4].y() > intersectionPoint->y())
-//            {
-//               allIntersections.emplace_back(*intersectionPoint);
-//            }
-//         }
-//         else if (face.side == BlockFace::Side::RIGHT)
-//         {
-//            if (face.vertices[0].z() > intersectionPoint->z() &&
-//                face.vertices[2].z() < intersectionPoint->z() &&
-//                face.vertices[0].y() < intersectionPoint->y() &&
-//                face.vertices[4].y() > intersectionPoint->y())
-//            {
-//               allIntersections.emplace_back(*intersectionPoint);
-//            }
-//         }
-//      });
+         if (blockOrigin.x()                 < intersectionPoint->x() &&
+             blockOrigin.x() + blockWidth    > intersectionPoint->x() &&
+             blockOrigin.z()                 > intersectionPoint->z() &&
+             blockOrigin.z() - blockDepth    < intersectionPoint->z())
+         {
+            allIntersections.emplace_back(*intersectionPoint);
+         }
+      }
 
-//      return FindClosestIntersectionPoint(ray, allIntersections);
+      { // Perform hit detection on the front face:
+         const auto randomPointOnFrontFace = blockOrigin;
+         const QVector3D frontFacePoint
+         {
+            static_cast<float>(randomPointOnFrontFace.x()),
+            static_cast<float>(randomPointOnFrontFace.y()),
+            static_cast<float>(randomPointOnFrontFace.z())
+         };
+
+         const boost::optional<QVector3D> intersectionPoint =
+            DoesRayIntersectPlane(ray, frontFacePoint, POSITIVE_Z_NORMAL);
+
+         if (!intersectionPoint)
+         {
+            return boost::none;
+         }
+
+         if (blockOrigin.x()                 < intersectionPoint->x() &&
+             blockOrigin.x() + blockWidth    > intersectionPoint->x() &&
+             blockOrigin.y()                 < intersectionPoint->y() &&
+             blockOrigin.y() + blockHeight   > intersectionPoint->y())
+         {
+            allIntersections.emplace_back(*intersectionPoint);
+         }
+      }
+
+      { // Perform hit detection on the back face:
+         const auto randomPointOnBackFace = blockOrigin + DoublePoint3D{ 0, 0, -blockDepth};
+         const QVector3D backFacePoint
+         {
+            static_cast<float>(randomPointOnBackFace.x()),
+            static_cast<float>(randomPointOnBackFace.y()),
+            static_cast<float>(randomPointOnBackFace.z())
+         };
+
+         const boost::optional<QVector3D> intersectionPoint =
+            DoesRayIntersectPlane(ray, backFacePoint, NEGATIVE_Z_NORMAL);
+
+         if (!intersectionPoint)
+         {
+            return boost::none;
+         }
+
+         if (blockOrigin.x()                 < intersectionPoint->x() &&
+             blockOrigin.x() + blockWidth    > intersectionPoint->x() &&
+             blockOrigin.y()                 < intersectionPoint->y() &&
+             blockOrigin.y() + blockHeight   > intersectionPoint->y())
+         {
+            allIntersections.emplace_back(*intersectionPoint);
+         }
+      }
+
+      { // Perform hit detection on the left face:
+         const auto randomPointOnLeftFace = blockOrigin;
+         const QVector3D leftFacePoint
+         {
+            static_cast<float>(randomPointOnLeftFace.x()),
+            static_cast<float>(randomPointOnLeftFace.y()),
+            static_cast<float>(randomPointOnLeftFace.z())
+         };
+
+         const boost::optional<QVector3D> intersectionPoint =
+            DoesRayIntersectPlane(ray, leftFacePoint, NEGATIVE_X_NORMAL);
+
+         if (!intersectionPoint)
+         {
+            return boost::none;
+         }
+
+         if (blockOrigin.z()                 > intersectionPoint->z() &&
+             blockOrigin.z() - blockDepth    < intersectionPoint->z() &&
+             blockOrigin.y()                 < intersectionPoint->y() &&
+             blockOrigin.y() + blockHeight   > intersectionPoint->y())
+         {
+            allIntersections.emplace_back(*intersectionPoint);
+         }
+      }
+
+      { // Perform hit detection on the right face:
+         const auto randomPointOnRightFace = blockOrigin + DoublePoint3D{ blockWidth, 0, 0 };
+         const QVector3D rightFacePoint
+         {
+            static_cast<float>(randomPointOnRightFace.x()),
+            static_cast<float>(randomPointOnRightFace.y()),
+            static_cast<float>(randomPointOnRightFace.z())
+         };
+
+         const boost::optional<QVector3D> intersectionPoint =
+            DoesRayIntersectPlane(ray, rightFacePoint, POSITIVE_X_NORMAL);
+
+         if (!intersectionPoint)
+         {
+            return boost::none;
+         }
+
+         if (blockOrigin.z()                 > intersectionPoint->z() &&
+             blockOrigin.z() - blockDepth    < intersectionPoint->z() &&
+             blockOrigin.y()                 < intersectionPoint->y() &&
+             blockOrigin.y() + blockHeight   > intersectionPoint->y())
+         {
+            allIntersections.emplace_back(*intersectionPoint);
+         }
+      }
+
+      return FindClosestIntersectionPoint(ray, allIntersections);
    }
 
    /**
@@ -216,7 +291,7 @@ namespace
       while (node)
       {
          if (node->GetData().file.size < parameters.minimumFileSize ||
-             (parameters.onlyShowDirectories && node->GetData().file.type != FileType::DIRECTORY))
+            (parameters.onlyShowDirectories && node->GetData().file.type != FileType::DIRECTORY))
          {
             AdvanceToNextNonDescendant(node);
 
@@ -325,13 +400,13 @@ TreeNode<VizNode>* VisualizationModel::FindNearestIntersection(
          return;
       }
 
-      std::sort(std::begin(allIntersections), std::end(allIntersections),
+      const auto& closest = std::min_element(std::begin(allIntersections), std::end(allIntersections),
          [&ray] (const IntersectionPointAndNode& lhs, const IntersectionPointAndNode& rhs) noexcept
       {
          return (ray.origin().distanceToPoint(lhs.first) < ray.origin().distanceToPoint(rhs.first));
       });
 
-      nearestIntersection = allIntersections.front().second;
+      nearestIntersection = closest->second;
    }, "Node selected in ");
 
    return nearestIntersection;

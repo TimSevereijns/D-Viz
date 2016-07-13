@@ -423,7 +423,7 @@ void GLCanvas::HandleNodeSelection(TreeNode<VizNode>* selectedNode)
 void GLCanvas::HandleRightClick(const QPoint& point)
 {
    // @todo Fix block picking logic now that the vertices are no longer stored with each block.
-   return;
+   //return;
 
    if (!m_theVisualization)
    {
