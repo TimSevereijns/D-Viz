@@ -5,10 +5,10 @@
 
 #include <QPoint>
 
-class NodeSelectionCrosshair: public LineAsset
+class CrosshairAsset: public LineAsset
 {
    public:
-      NodeSelectionCrosshair(GraphicsDevice& device);
+      CrosshairAsset(GraphicsDevice& device);
 
       void Show(const Camera& camera);
 

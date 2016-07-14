@@ -72,6 +72,12 @@ class MainWindow : public QMainWindow
        */
       void SetStatusBarMessage(const std::wstring& message);
 
+      /**
+       * @brief ShouldShowFPS
+       * @return
+       */
+      bool ShouldShowFPS() const;
+
    public slots:
       /**
        * @brief OnFileMenuNewScan
@@ -79,10 +85,13 @@ class MainWindow : public QMainWindow
       void OnFileMenuNewScan();
 
       /**
+       * @brief OnFPSReadoutToggled
+       */
+      void OnFPSReadoutToggled(bool isEnabled);
+
+      /**
        * @brief OnFieldOfViewChanged
        * @param fieldOfView
-       *
-       * @todo Move to GLCanvas...
        */
       void OnFieldOfViewChanged(int fieldOfView);
 
@@ -128,6 +137,10 @@ class MainWindow : public QMainWindow
    private:
       void CreateMenus();
       void CreateFileMenu();
+      void CreateViewMenu();
+      void CreateHelpMenu();
+
+      void LaunchAboutDialog();
 
       void SetupSidebar();
       void SetupXboxController();
@@ -142,10 +155,14 @@ class MainWindow : public QMainWindow
       std::unique_ptr<XboxController::State> m_xboxControllerState{ new XboxController::State };
 
       std::unique_ptr<QMenu> m_fileMenu{ nullptr };
+      std::unique_ptr<QMenu> m_viewMenu{ nullptr };
+      std::unique_ptr<QMenu> m_helpMenu{ nullptr };
 
       std::unique_ptr<QAction> m_fileMenuNewScan{ nullptr };
       std::unique_ptr<QAction> m_fileMenuPreferences{ nullptr };
       std::unique_ptr<QAction> m_fileMenuExit{ nullptr };
+      std::unique_ptr<QAction> m_viewMenuToggleFPS{ nullptr };
+      std::unique_ptr<QAction> m_helpMenuAboutDialog{ nullptr };
 
       std::unique_ptr<GLCanvas> m_glCanvas{ nullptr };
 

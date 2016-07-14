@@ -4,7 +4,7 @@
 
 #include "Scene/debuggingRayAsset.h"
 #include "Scene/gridAsset.h"
-#include "Scene/nodeSelectionCrosshair.h"
+#include "Scene/crosshairAsset.h"
 #include "Scene/visualizationAsset.h"
 
 #include "canvasContextMenu.h"
@@ -201,7 +201,7 @@ void GLCanvas::initializeGL()
 
    m_sceneAssets.emplace_back(std::make_unique<GridAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(*m_graphicsDevice));
-   m_sceneAssets.emplace_back(std::make_unique<NodeSelectionCrosshair>(*m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<CrosshairAsset>(*m_graphicsDevice));
 
    for (const auto& asset : m_sceneAssets)
    {
@@ -765,7 +765,7 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
       m_isLeftTriggerDown = true;
 
       auto* const crosshairAsset =
-         dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
+         dynamic_cast<CrosshairAsset*>(m_sceneAssets[Asset::CROSSHAIR].get());
 
       assert(crosshairAsset);
       if (crosshairAsset)
@@ -779,7 +779,7 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
       m_isLeftTriggerDown = false;
 
       auto* const crosshairAsset =
-         dynamic_cast<NodeSelectionCrosshair*>(m_sceneAssets[Asset::CROSSHAIR].get());
+         dynamic_cast<CrosshairAsset*>(m_sceneAssets[Asset::CROSSHAIR].get());
 
       assert(crosshairAsset);
       if (crosshairAsset)
@@ -847,7 +847,10 @@ void GLCanvas::paintGL()
 
    m_graphicsDevice->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-   UpdateFPS();
+   if (m_mainWindow->ShouldShowFPS())
+   {
+      UpdateFPS();
+   }
 
    assert(m_settings);
    if (m_settings->m_isLightAttachedToCamera)

@@ -10,7 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets 3dcore
 
 TARGET = D-Viz
 TEMPLATE = app
-CONFIG += c++11 console
+CONFIG += c++11
 
 SOURCES += \
     DataStructs/block.cpp \
@@ -24,12 +24,11 @@ SOURCES += \
     HID/keyboardManager.cpp \
     HID/xboxController.cpp \
     main.cpp \
-    mainwindow.cpp \
+    mainWindow.cpp \
     optionsManager.cpp \
     Scene/debuggingRayAsset.cpp \
     Scene/gridAsset.cpp \
     Scene/lineAsset.cpp \
-    Scene/nodeSelectionCrosshair.cpp \
     Scene/sceneAsset.cpp \
     Scene/visualizationAsset.cpp \
     Viewport/camera.cpp \
@@ -37,7 +36,8 @@ SOURCES += \
     Viewport/glCanvas.cpp \
     Viewport/graphicsDevice.cpp \
     Visualizations/squarifiedTreemap.cpp \
-    Visualizations/visualization.cpp
+    Visualizations/visualization.cpp \
+    Scene/crosshairAsset.cpp
 
 HEADERS  += \
     constants.h \
@@ -51,12 +51,11 @@ HEADERS  += \
     DriveScanner/scanningWorker.h \
     HID/keyboardManager.h \
     HID/xboxController.h \
-    mainwindow.h \
+    mainWindow.h \
     optionsManager.h \
     Scene/debuggingRayAsset.h \
     Scene/gridAsset.h \
     Scene/lineAsset.h \
-    Scene/nodeSelectionCrosshair.h \
     Scene/sceneAsset.h \
     Scene/visualizationAsset.h \
     ThirdParty/stopwatch.hpp \
@@ -68,9 +67,11 @@ HEADERS  += \
     Viewport/glCanvas.h \
     Viewport/graphicsDevice.h \
     Visualizations/squarifiedTreemap.h \
-    Visualizations/visualization.h
+    Visualizations/visualization.h \
+    Scene/crosshairAsset.h
 
-FORMS    += mainwindow.ui
+FORMS    += \
+    mainWindow.ui
 
 INCLUDEPATH += ../../boost_1_60_0
 

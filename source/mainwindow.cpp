@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "mainWindow.h"
 
 #include "optionsManager.h"
 #include "Viewport/glCanvas.h"
@@ -12,6 +12,7 @@
 #include <QAction>
 #include <QFileDialog>
 #include <QMenuBar>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget* parent /* = 0 */) :
    QMainWindow(parent),
@@ -116,6 +117,8 @@ std::wstring MainWindow::GetDirectoryToVisualize() const
 void MainWindow::CreateMenus()
 {
    CreateFileMenu();
+   CreateViewMenu();
+   CreateHelpMenu();
 }
 
 void MainWindow::CreateFileMenu()
@@ -133,6 +136,27 @@ void MainWindow::CreateFileMenu()
    m_fileMenu.reset(menuBar()->addMenu("File"));
    m_fileMenu->addAction(m_fileMenuNewScan.get());
    m_fileMenu->addAction(m_fileMenuExit.get());
+}
+
+void MainWindow::CreateViewMenu()
+{
+   m_viewMenuToggleFPS.reset(new QAction("Show FPS", this));
+   m_viewMenuToggleFPS->setCheckable(true);
+   m_viewMenuToggleFPS->setStatusTip("Toggle FPS Readout");
+   connect(m_viewMenuToggleFPS.get(), &QAction::toggled, this, &MainWindow::OnFPSReadoutToggled);
+
+   m_viewMenu.reset(menuBar()->addMenu("View"));
+   m_viewMenu->addAction(m_viewMenuToggleFPS.get());
+}
+
+void MainWindow::CreateHelpMenu()
+{
+   m_helpMenuAboutDialog.reset(new QAction("About", this));
+   m_helpMenuAboutDialog->setStatusTip("About D-Viz");
+   connect(m_helpMenuAboutDialog.get(), &QAction::triggered, this, &MainWindow::LaunchAboutDialog);
+
+   m_helpMenu.reset(menuBar()->addMenu("Help"));
+   m_helpMenu->addAction(m_helpMenuAboutDialog.get());
 }
 
 void MainWindow::OnFileMenuNewScan()
@@ -159,6 +183,24 @@ void MainWindow::OnFileMenuNewScan()
    parameters.minimumFileSize = m_sizePruningOptions[comboBoxIndex].first;
 
    m_glCanvas->CreateNewVisualization(parameters);
+}
+
+void MainWindow::OnFPSReadoutToggled(bool isEnabled)
+{
+   if (!isEnabled)
+   {
+      setWindowTitle("D-Viz [*]");
+   }
+}
+
+bool MainWindow::ShouldShowFPS() const
+{
+   return m_viewMenuToggleFPS->isChecked();
+}
+
+void MainWindow::LaunchAboutDialog()
+{
+   QMessageBox::about(this, "About", "Version: 0.1.0");
 }
 
 void MainWindow::OnDirectoryOnlyStateChanged(int state)

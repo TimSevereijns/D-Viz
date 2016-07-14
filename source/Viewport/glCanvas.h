@@ -2,7 +2,7 @@
 #define GLCANVAS_H
 
 #include "camera.h"
-#include "mainwindow.h"
+#include "mainWindow.h"
 #include "optionsManager.h"
 
 #include "HID/keyboardManager.h"

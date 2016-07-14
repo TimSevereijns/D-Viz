@@ -5,4 +5,3 @@ GraphicsDevice::GraphicsDevice() :
 {
    initializeOpenGLFunctions();
 }
-

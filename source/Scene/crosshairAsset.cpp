@@ -1,4 +1,4 @@
-#include "nodeSelectionCrosshair.h"
+#include "crosshairAsset.h"
 
 #include <iostream>
 
@@ -44,27 +44,27 @@ namespace
    }
 }
 
-NodeSelectionCrosshair::NodeSelectionCrosshair(GraphicsDevice& device) :
+CrosshairAsset::CrosshairAsset(GraphicsDevice& device) :
    LineAsset{ device }
 {
    m_rawColors = CreateCrosshairColors();
 }
 
-void NodeSelectionCrosshair::Show(const Camera& camera)
+void CrosshairAsset::Show(const Camera& camera)
 {
    m_rawVertices = CreateCrosshairVertices(camera.GetViewport().center());
 
    Reload();
 }
 
-void NodeSelectionCrosshair::Hide()
+void CrosshairAsset::Hide()
 {
    m_rawVertices.clear();
 
    Reload();
 }
 
-bool NodeSelectionCrosshair::Render(
+bool CrosshairAsset::Render(
    const Camera& camera,
    const std::vector<Light>&,
    const OptionsManager&)

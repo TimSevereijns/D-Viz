@@ -118,12 +118,8 @@ namespace
          const boost::optional<QVector3D> intersectionPoint =
             DoesRayIntersectPlane(ray, topFacePoint, POSITIVE_Y_NORMAL);
 
-         if (!intersectionPoint)
-         {
-            return boost::none;
-         }
-
-         if (blockOrigin.x()                 < intersectionPoint->x() &&
+         if (intersectionPoint &&
+             blockOrigin.x()                 < intersectionPoint->x() &&
              blockOrigin.x() + blockWidth    > intersectionPoint->x() &&
              blockOrigin.z()                 > intersectionPoint->z() &&
              blockOrigin.z() - blockDepth    < intersectionPoint->z())
@@ -144,12 +140,8 @@ namespace
          const boost::optional<QVector3D> intersectionPoint =
             DoesRayIntersectPlane(ray, frontFacePoint, POSITIVE_Z_NORMAL);
 
-         if (!intersectionPoint)
-         {
-            return boost::none;
-         }
-
-         if (blockOrigin.x()                 < intersectionPoint->x() &&
+         if (intersectionPoint &&
+             blockOrigin.x()                 < intersectionPoint->x() &&
              blockOrigin.x() + blockWidth    > intersectionPoint->x() &&
              blockOrigin.y()                 < intersectionPoint->y() &&
              blockOrigin.y() + blockHeight   > intersectionPoint->y())
@@ -170,12 +162,8 @@ namespace
          const boost::optional<QVector3D> intersectionPoint =
             DoesRayIntersectPlane(ray, backFacePoint, NEGATIVE_Z_NORMAL);
 
-         if (!intersectionPoint)
-         {
-            return boost::none;
-         }
-
-         if (blockOrigin.x()                 < intersectionPoint->x() &&
+         if (intersectionPoint &&
+             blockOrigin.x()                 < intersectionPoint->x() &&
              blockOrigin.x() + blockWidth    > intersectionPoint->x() &&
              blockOrigin.y()                 < intersectionPoint->y() &&
              blockOrigin.y() + blockHeight   > intersectionPoint->y())
@@ -196,12 +184,8 @@ namespace
          const boost::optional<QVector3D> intersectionPoint =
             DoesRayIntersectPlane(ray, leftFacePoint, NEGATIVE_X_NORMAL);
 
-         if (!intersectionPoint)
-         {
-            return boost::none;
-         }
-
-         if (blockOrigin.z()                 > intersectionPoint->z() &&
+         if (intersectionPoint &&
+             blockOrigin.z()                 > intersectionPoint->z() &&
              blockOrigin.z() - blockDepth    < intersectionPoint->z() &&
              blockOrigin.y()                 < intersectionPoint->y() &&
              blockOrigin.y() + blockHeight   > intersectionPoint->y())
@@ -222,12 +206,8 @@ namespace
          const boost::optional<QVector3D> intersectionPoint =
             DoesRayIntersectPlane(ray, rightFacePoint, POSITIVE_X_NORMAL);
 
-         if (!intersectionPoint)
-         {
-            return boost::none;
-         }
-
-         if (blockOrigin.z()                 > intersectionPoint->z() &&
+         if (intersectionPoint &&
+             blockOrigin.z()                 > intersectionPoint->z() &&
              blockOrigin.z() - blockDepth    < intersectionPoint->z() &&
              blockOrigin.y()                 < intersectionPoint->y() &&
              blockOrigin.y() + blockHeight   > intersectionPoint->y())
