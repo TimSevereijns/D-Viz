@@ -60,17 +60,13 @@ namespace
 
       const Block remainingArea
       {
-         nearCorner,                         // Origin
-         farCorner.x() - nearCorner.x(),     // Width
-         VisualizationModel::BLOCK_HEIGHT,   // Height
-         farCorner.z() - nearCorner.z()      // Depth
+         /* origin = */ nearCorner,
+         /* width = */ farCorner.x() - nearCorner.x(),
+         /* height = */ VisualizationModel::BLOCK_HEIGHT,
+         /* depth = */ farCorner.z() - nearCorner.z()
       };
 
-      if (!remainingArea.HasVolume())
-      {
-         assert(!"Whoops. No remaining area left.");
-      }
-
+      assert(remainingArea.HasVolume());
       return remainingArea;
    }
 
@@ -92,11 +88,7 @@ namespace
       const bool updateOffset)
    {
       const Block& parentBlock = parentNode.block;
-
-      if (!parentBlock.HasVolume())
-      {
-         assert(!"Parent block is not defined!");
-      }
+      assert(parentBlock.HasVolume());
 
       Block remainingLand = ComputeRemainingArea(parentBlock);
 
@@ -129,8 +121,8 @@ namespace
             const DoublePoint3D nextRowOffset
             {
                rowRealEstate.GetWidth(),
-               0.0, // Height
-               0.0  // Depth
+               0.0,
+               0.0
             };
 
             parentNode.block.SetNextRowOrigin(nearCorner + nextRowOffset);
@@ -150,8 +142,8 @@ namespace
          {
             const DoublePoint3D nextRowOffset
             {
-               0.0, // Width
-               0.0, // Height
+               0.0,
+               0.0,
                -rowRealEstate.GetDepth()
             };
 
@@ -216,6 +208,8 @@ namespace
       };
 
       const auto additionalCoverage = blockWidthPlusPadding / land.GetWidth();
+      assert(additionalCoverage);
+
       return additionalCoverage;
    }
 
@@ -271,6 +265,8 @@ namespace
       };
 
       const auto additionalCoverage = blockDepthPlusPadding / land.GetDepth();
+      assert(additionalCoverage);
+
       return additionalCoverage;
    }
 
@@ -424,6 +420,7 @@ namespace
       const auto worstRatio = std::max((lengthSquared * largestArea) / (areaSquared),
          (areaSquared) / (lengthSquared * smallestArea));
 
+      assert(worstRatio > 0);
       return worstRatio;
    }
 

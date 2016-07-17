@@ -48,7 +48,6 @@ void DriveScanner::StartScanning(const DriveScanningParameters& parameters)
       worker, SLOT(deleteLater()));
 
    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-   connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
    connect(thread, SIGNAL(started()), worker, SLOT(Start()));
 
    thread->start();
