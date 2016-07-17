@@ -422,9 +422,6 @@ void GLCanvas::HandleNodeSelection(TreeNode<VizNode>* selectedNode)
 
 void GLCanvas::HandleRightClick(const QPoint& point)
 {
-   // @todo Fix block picking logic now that the vertices are no longer stored with each block.
-   //return;
-
    if (!m_theVisualization)
    {
       return;
@@ -442,10 +439,13 @@ void GLCanvas::HandleRightClick(const QPoint& point)
    {
       ClearHighlightedNodes();
 
-      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
-         *m_selectedNode,
-         SceneAsset::UpdateAction::DESELECT,
-         m_visualizationParameters);
+      if (m_selectedNode)
+      {
+         m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
+            *m_selectedNode,
+            SceneAsset::UpdateAction::DESELECT,
+            m_visualizationParameters);
+      }
 
        auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
        assert(vizAsset);

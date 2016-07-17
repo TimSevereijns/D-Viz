@@ -151,7 +151,7 @@ namespace
       }
 
       { // Perform hit detection on the back face:
-         const auto randomPointOnBackFace = blockOrigin + DoublePoint3D{ 0, 0, -blockDepth};
+         const auto randomPointOnBackFace = blockOrigin + DoublePoint3D{ 0, 0, -blockDepth };
          const QVector3D backFacePoint
          {
             static_cast<float>(randomPointOnBackFace.x()),
@@ -372,7 +372,7 @@ TreeNode<VizNode>* VisualizationModel::FindNearestIntersection(
 
    TreeNode<VizNode>* nearestIntersection = nullptr;
 
-   Stopwatch<std::chrono::milliseconds>([&]
+   Stopwatch<std::chrono::microseconds>([&]
    {
       auto allIntersections = FindAllIntersections(ray, camera, parameters, m_theTree->GetHead());
       if (allIntersections.empty())

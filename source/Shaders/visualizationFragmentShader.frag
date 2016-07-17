@@ -39,8 +39,9 @@ vec3 ComputeLightContribution(
    float specularCoefficient = 0.0;
    if (diffuseCoefficient > 0.0)
    {
-      specularCoefficient = pow(max(0.0, dot(surfaceToCamera,
-         reflect(-surfaceToLight, normal))), materialShininess);
+      specularCoefficient = pow(
+         max(0.0, dot(surfaceToCamera, reflect(-surfaceToLight, normal))),
+         materialShininess);
    }
    vec3 specular = specularCoefficient * materialSpecularColor * light.intensity;
 
@@ -58,7 +59,7 @@ void main(void)
    vec3 fragmentToCamera = normalize(cameraPosition - vec3(vertexPosition));
 
    // Calculate the contribution of each light:
-   vec3 linearColor = vec3(0);
+   vec3 linearColor = vec3(0, 0, 0);
    for (int i = 0; i < 5; i++)
    {
       linearColor += ComputeLightContribution(

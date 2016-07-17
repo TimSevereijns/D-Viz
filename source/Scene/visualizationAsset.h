@@ -63,7 +63,6 @@ class VisualizationAsset : public SceneAsset
       QVector<QVector3D> m_referenceBlockVertices;
       QVector<QMatrix4x4> m_blockTransformations;
       QVector<QVector3D> m_blockColors;
-
 };
 
 #endif // VISUALIZATIONASSET_H
