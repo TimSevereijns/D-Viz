@@ -6,6 +6,7 @@
 class DebuggingRayAsset : public LineAsset
 {
    public:
+
       DebuggingRayAsset(GraphicsDevice& device);
 
       bool Render(

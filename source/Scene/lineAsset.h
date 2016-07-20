@@ -9,6 +9,7 @@
 class LineAsset : public SceneAsset
 {
    public:
+
       explicit LineAsset(GraphicsDevice& device);
 
       bool LoadShaders() override;

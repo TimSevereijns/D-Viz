@@ -4,6 +4,7 @@
 #include <QLabel>
 #include <QMainWindow>
 
+#include "aboutDialog.h"
 #include "constants.h"
 #include "HID/xboxController.h"
 
@@ -165,6 +166,8 @@ class MainWindow : public QMainWindow
       std::unique_ptr<QAction> m_helpMenuAboutDialog{ nullptr };
 
       std::unique_ptr<GLCanvas> m_glCanvas{ nullptr };
+
+      std::unique_ptr<AboutDialog> m_aboutDialog{ nullptr };
 
       std::shared_ptr<OptionsManager> m_optionsManager{ nullptr };
 

@@ -12,6 +12,7 @@
 class KeyboardManager
 {
    public:
+
       enum class KEY_STATE
       {
          UP,
@@ -46,6 +47,7 @@ class KeyboardManager
       void UpdateKeyState(const Qt::Key, const KEY_STATE state);
 
    private:
+
       std::unordered_map<Qt::Key, KEY_STATE> m_keyMap
       {
          { Qt::Key_A, KEY_STATE::UP },

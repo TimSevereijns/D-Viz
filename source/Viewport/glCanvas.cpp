@@ -136,20 +136,6 @@ namespace
    }
 
    /**
-    * @brief Clear sthe vertex and color data buffers from the specified asset, and will then reload
-    * the now empty asset.
-    *
-    * @param[in] highlightAsset     The asset to be nuked and reloaded.
-    * @param[in] camera             The camera used to view the asset in the scene.
-    */
-   void ClearAssetBuffersAndReload(SceneAsset& asset)
-   {
-      asset.SetVertexData(QVector<QVector3D>{ });
-      asset.SetColorData(QVector<QVector3D>{ });
-      asset.Reload();
-   }
-
-   /**
     * @brief Provides an easier way to index into the asset vector, than memorizing indices.
     */
    enum Asset
@@ -252,8 +238,9 @@ void GLCanvas::ScanDrive(VisualizationParameters& vizParameters)
       [&, vizParameters] (const std::uintmax_t numberOfFilesScanned,
       std::shared_ptr<Tree<VizNode>> fileTree) mutable
    {
+      QCursor previousCursor = cursor();
       setCursor(Qt::WaitCursor);
-      ON_SCOPE_EXIT{ setCursor(Qt::ArrowCursor); };
+      ON_SCOPE_EXIT{ setCursor(previousCursor); };
       QApplication::processEvents();
 
       std::wstringstream message;
@@ -294,7 +281,6 @@ void GLCanvas::AskUserToLimitFileSize(
       QMessageBox messageBox;
       messageBox.setIcon(QMessageBox::Warning);
       messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-
       messageBox.setText(
          "More than a quarter million files were scanned. "
          "Would you like to limit the visualized files to those 1 MiB or larger in "
@@ -807,16 +793,16 @@ void GLCanvas::UpdateFPS()
    const auto now = std::chrono::system_clock::now();
    const auto millisecondsElapsed = std::max<unsigned int>(
       std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastFrameDrawTime).count(),
-      1); // This will avoid division by zero.
+      1); ///< This will avoid division by zero.
 
    m_lastFrameDrawTime = now;
 
-   constexpr auto movingAverageWindow{ 32 };
-   if (m_frameRateDeque.size() > movingAverageWindow)
+   constexpr auto movingAverageWindowSize{ 32 };
+   if (m_frameRateDeque.size() > movingAverageWindowSize)
    {
       m_frameRateDeque.pop_front();
    }
-   assert(m_frameRateDeque.size() <= movingAverageWindow);
+   assert(m_frameRateDeque.size() <= movingAverageWindowSize);
 
    m_frameRateDeque.emplace_back(1000 / millisecondsElapsed);
 

@@ -33,6 +33,7 @@ class GLCanvas : public QOpenGLWidget
    Q_OBJECT
 
    public:
+
       /**
        * @brief Default constructor.
        *
@@ -62,6 +63,7 @@ class GLCanvas : public QOpenGLWidget
       void SetFieldOfView(const float fieldOfView);
 
     protected:
+
       void initializeGL() override;
       void resizeGL(int width, int height) override;
       void paintGL() override;
@@ -74,12 +76,14 @@ class GLCanvas : public QOpenGLWidget
       void wheelEvent(QWheelEvent* event) override;
 
    private slots:
+
       /**
        * @brief Handles keyboard, mouse, and Xbox controller input.
        */
       void HandleInput();
 
    private:
+
       /**
        * @brief Initiates a drive scan.
        *

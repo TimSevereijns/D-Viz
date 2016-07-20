@@ -37,7 +37,8 @@ SOURCES += \
     Viewport/graphicsDevice.cpp \
     Visualizations/squarifiedTreemap.cpp \
     Visualizations/visualization.cpp \
-    Scene/crosshairAsset.cpp
+    Scene/crosshairAsset.cpp \
+    aboutDialog.cpp
 
 HEADERS  += \
     constants.h \
@@ -68,10 +69,12 @@ HEADERS  += \
     Viewport/graphicsDevice.h \
     Visualizations/squarifiedTreemap.h \
     Visualizations/visualization.h \
-    Scene/crosshairAsset.h
+    Scene/crosshairAsset.h \
+    aboutDialog.h
 
 FORMS    += \
-    mainWindow.ui
+    mainWindow.ui \
+    aboutDialog.ui
 
 INCLUDEPATH += ../../boost_1_60_0
 

@@ -124,7 +124,7 @@ bool VisualizationAsset::InitializeUnitBlock()
    };
 
    m_referenceBlockVertices.clear();
-   m_referenceBlockVertices = unitBlock.GetVertices();
+   m_referenceBlockVertices = unitBlock.GetVerticesAndNormals();
 
    m_VAO.bind();
 
@@ -176,8 +176,14 @@ bool VisualizationAsset::InitializeColors()
       /* count = */ m_blockColors.size() * 3 * sizeof(GLfloat));
 
    m_graphicsDevice.glEnableVertexAttribArray(0);
-   m_graphicsDevice.glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(QVector3D), (GLvoid*)0);
    m_graphicsDevice.glVertexAttribDivisor(0, 1);
+   m_graphicsDevice.glVertexAttribPointer(
+      /* indx = */ 0,
+      /* size = */ 3,
+      /* type =  */ GL_FLOAT,
+      /* normalized = */ GL_FALSE,
+      /* stride = */ sizeof(QVector3D),
+      /* ptr = */ (GLvoid*)0);
 
    m_graphicsDevice.glBindVertexArray(0);
 
@@ -208,23 +214,43 @@ bool VisualizationAsset::InitializeBlockTransformations()
 
    m_graphicsDevice.glEnableVertexAttribArray(1);
    m_graphicsDevice.glVertexAttribDivisor(1, 1);
-   m_graphicsDevice.glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix,
-      (GLvoid*)(0 * sizeOfVector));
+   m_graphicsDevice.glVertexAttribPointer(
+      /* indx = */ 1,
+      /* size = */ 4,
+      /* type =  */ GL_FLOAT,
+      /* normalized = */ GL_FALSE,
+      /* stride = */ sizeOfMatrix,
+      /* ptr = */ (GLvoid*)(0 * sizeOfVector));
 
    m_graphicsDevice.glEnableVertexAttribArray(2);
    m_graphicsDevice.glVertexAttribDivisor(2, 1);
-   m_graphicsDevice.glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix,
-      (GLvoid*)(1 * sizeOfVector));
+   m_graphicsDevice.glVertexAttribPointer(
+      /* indx = */ 2,
+      /* size = */ 4,
+      /* type =  */ GL_FLOAT,
+      /* normalized = */ GL_FALSE,
+      /* stride = */ sizeOfMatrix,
+      /* ptr = */ (GLvoid*)(1 * sizeOfVector));
 
    m_graphicsDevice.glEnableVertexAttribArray(3);
    m_graphicsDevice.glVertexAttribDivisor(3, 1);
-   m_graphicsDevice.glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix,
-      (GLvoid*)(2 * sizeOfVector));
+   m_graphicsDevice.glVertexAttribPointer(
+      /* indx = */ 3,
+      /* size = */ 4,
+      /* type =  */ GL_FLOAT,
+      /* normalized = */ GL_FALSE,
+      /* stride = */ sizeOfMatrix,
+      /* ptr = */ (GLvoid*)(2 * sizeOfVector));
 
    m_graphicsDevice.glEnableVertexAttribArray(4);
    m_graphicsDevice.glVertexAttribDivisor(4, 1);
-   m_graphicsDevice.glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeOfMatrix,
-      (GLvoid*)(3 * sizeOfVector));
+   m_graphicsDevice.glVertexAttribPointer(
+      /* indx = */ 4,
+      /* size = */ 4,
+      /* type =  */ GL_FLOAT,
+      /* normalized = */ GL_FALSE,
+      /* stride = */ sizeOfMatrix,
+      /* ptr = */ (GLvoid*)(3 * sizeOfVector));
 
    m_graphicsDevice.glBindVertexArray(0);
 

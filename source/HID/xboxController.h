@@ -27,6 +27,7 @@ class XboxController : public QObject
    Q_OBJECT
 
    public:
+
       static const uint8_t MAX_TRIGGER_VALUE;
       static const uint8_t MIN_TRIGGER_VALUE;
 
@@ -109,11 +110,13 @@ class XboxController : public QObject
       void SetUpHandler(const unsigned int targetButton, const std::function<void ()>& handler);
 
    signals:
+
       void NewControllerState(XboxController::State state);
       void ControllerConnected(unsigned int m_controllerNumber);
       void ControllerDisconnected(unsigned int m_controllerNumber);
 
    public slots:
+
       void StartAutoPolling(unsigned int interval);
       void StopAutoPolling();
       void Update();
@@ -126,6 +129,7 @@ class XboxController : public QObject
       void SetTriggerThreshold(uint8_t newThreshold);
 
    private:
+
       bool m_isCurrentControllerConnected{ false };
       bool m_isPreviousControllerConnected{ false };
 

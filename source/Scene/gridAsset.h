@@ -10,6 +10,7 @@
 class GridAsset : public LineAsset
 {
    public:
+
       explicit GridAsset(GraphicsDevice& device);
 
       bool Render(

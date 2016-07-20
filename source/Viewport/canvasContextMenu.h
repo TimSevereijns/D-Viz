@@ -8,9 +8,11 @@
 class CanvasContextMenu : public QMenu
 {
    public:
+
       CanvasContextMenu(KeyboardManager& keyboardManager);
 
    protected:
+
       /**
        * @note Overriding this function ensures that we'll still be able to properly track the
        * release of the keys, even when that release occurs when the context menu is open.
@@ -20,6 +22,7 @@ class CanvasContextMenu : public QMenu
       void keyReleaseEvent(QKeyEvent* event) override;
 
    private:
+
       KeyboardManager& m_keyboardManager;
 };
 

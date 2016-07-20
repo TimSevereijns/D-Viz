@@ -131,7 +131,7 @@ QMatrix4x4 Camera::GetProjectionViewMatrix() const
 QVector3D Camera::Unproject(
    const QPoint& point,
    float viewDepth,
-   QMatrix4x4 modelMatrix) const
+   const QMatrix4x4& modelMatrix) const
 {
    const auto modelViewProjectionMatrix = GetProjectionMatrix() * GetViewMatrix() * modelMatrix;
 

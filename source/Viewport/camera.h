@@ -13,6 +13,7 @@
 class Camera
 {
    public:
+
       /**
        * @brief Retrieves the camera's current position within 3D space.
        *
@@ -133,9 +134,6 @@ class Camera
        * @brief Translates a 2D point on the viewport into a 3D point at a specified distance
        * from the near view plane.
        *
-       * @note Source: https://github.com/Cavewhere/cavewhere/blob/
-       *               9121490139b3e0f046fc0086b86f0e1659d3bc8e/src/cwCamera.cpp
-       *
        * @param[in] point           The 2D coordinates that represent the location on the GL canvas.
        * @param[in] viewDepth       The normalized depth by which to extend the 2D coordinate into
        *                            the scene. Zero is on the near view plane, and one is on the far
@@ -144,7 +142,10 @@ class Camera
        *
        * @returns A 3D point representing the 2D canvas coordinates in 3D world coordinates.
        */
-      QVector3D Unproject(const QPoint& point, float viewDepth, QMatrix4x4 modelMatrix) const;
+      QVector3D Unproject(
+         const QPoint& point,
+         float viewDepth,
+         const QMatrix4x4& modelMatrix) const;
 
       /**
        * @brief Maps the 2D coordinates of the OpenGL Qt widget to the coordinates used by OpenGL.
@@ -234,6 +235,7 @@ class Camera
       float GetFarPlane() const noexcept;
 
    private:
+
       QVector3D m_position;
 
       QRect m_viewport;

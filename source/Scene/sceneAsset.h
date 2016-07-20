@@ -21,6 +21,7 @@ template<typename DataType> class TreeNode;
 class SceneAsset
 {
    public:
+
       enum class UpdateAction
       {
          SELECT = 0,
@@ -134,6 +135,7 @@ class SceneAsset
          const VisualizationParameters& options);
 
    protected:
+
       /**
        * @brief Helper function to compile and load the specified OpenGL shaders.
        *

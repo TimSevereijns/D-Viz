@@ -116,7 +116,7 @@ void Block::IncreaseCoverageBy(double additionalCoverage)
    m_percentCovered += additionalCoverage;
 }
 
-const QVector<QVector3D>& Block::GetVertices() const
+const QVector<QVector3D>& Block::GetVerticesAndNormals() const
 {
    return m_vertices;
 }

@@ -36,6 +36,7 @@ struct VisualizationParameters
 class VisualizationModel
 {
    public:
+
       explicit VisualizationModel(const VisualizationParameters& parameters);
 
       virtual ~VisualizationModel() = default;
@@ -66,8 +67,8 @@ class VisualizationModel
       virtual void UpdateBoundingBoxes();
 
       /**
-       * @brief Attempts to identify the closest node in front of the camera that the specified ray
-       * intersects with.
+       * @brief Identifies the closest node in front of the camera that the specified ray intersects
+       * with.
        *
        * This search operation is carried out with aid of the minimum Axis-Aligned Bounding Boxes
        * (AABB) that surround each node and its descendants.
@@ -99,6 +100,7 @@ class VisualizationModel
       static void SortNodes(Tree<VizNode>& tree);
 
    protected:
+
       std::shared_ptr<Tree<VizNode>> m_theTree{ nullptr };
 
       bool m_hasDataBeenParsed{ false };

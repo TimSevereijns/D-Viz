@@ -15,17 +15,12 @@ template<typename DataType> class TreeNode;
 class VisualizationAsset : public SceneAsset
 {
    public:
+
       VisualizationAsset(GraphicsDevice& device);
 
       bool LoadShaders() override;
 
       bool Initialize() override;
-
-      std::uint32_t LoadBufferData(
-         Tree<VizNode>& tree,
-         const VisualizationParameters& parameters);
-
-      std::uint32_t GetBlockCount() const;
 
       bool Render(
          const Camera& camera,
@@ -40,6 +35,24 @@ class VisualizationAsset : public SceneAsset
          const VisualizationParameters& options) override;
 
       bool IsAssetLoaded() const override;
+
+      /**
+       * @brief Loads the TreeMap nodes into the necessary graphics buffers.
+       *
+       * @param[in] tree            The tree to pull the visualized TreeMap information from.
+       * @param[in] parameters      The current visualization parameters that will govern what nodes
+       *                            will be visualized.
+       *
+       * @returns The number of blocks that have been loaded into the buffer.
+       */
+      std::uint32_t LoadBufferData(
+         Tree<VizNode>& tree,
+         const VisualizationParameters& parameters);
+
+      /**
+       * @returns The number of blocks that are currently loaded into the visualization asset.
+       */
+      std::uint32_t GetBlockCount() const;
 
    private:
 

@@ -200,7 +200,12 @@ bool MainWindow::ShouldShowFPS() const
 
 void MainWindow::LaunchAboutDialog()
 {
-   QMessageBox::about(this, "About", "Version: 0.1.0");
+   if (!m_aboutDialog)
+   {
+      m_aboutDialog = std::make_unique<AboutDialog>(this);
+   }
+
+   m_aboutDialog->show();
 }
 
 void MainWindow::OnDirectoryOnlyStateChanged(int state)

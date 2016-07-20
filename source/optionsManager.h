@@ -11,6 +11,7 @@ class OptionsManager : public QObject
    Q_OBJECT;
 
    public slots:
+
       /**
        * @brief Should be called when the camera's movement speed changes.
        *
@@ -89,6 +90,7 @@ class OptionsManager : public QObject
       void OnBlueLightComponentChanged(const int value);
 
    public:
+
       double m_cameraMovementSpeed{ 0.25 };
       double m_mouseSensitivity{ 0.20 };
 

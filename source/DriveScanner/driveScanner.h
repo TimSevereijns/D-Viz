@@ -20,6 +20,7 @@ class DriveScanner : public QObject
    Q_OBJECT
 
    public:
+
       /**
        * @brief Kicks off the drive scanning process in a separate thread using the specified
        * parameters.
@@ -29,6 +30,7 @@ class DriveScanner : public QObject
       void StartScanning(const DriveScanningParameters& parameters);
 
    public slots:
+
       /**
        * @brief Handles the ScanningWorker::Finished signal.
        *
@@ -61,6 +63,7 @@ class DriveScanner : public QObject
       void HandleMessageBox(const QString& message);
 
    private:
+
       DriveScanningParameters m_parameters;
 };
 

@@ -12,6 +12,7 @@
 class GraphicsDevice : public QOpenGLExtraFunctions
 {
    public:
+
       /**
        * @brief Initializes the OpenGL state machine.
        */

@@ -29,11 +29,13 @@ class ScanningWorker : public QObject
    Q_OBJECT
 
    public:
+
       static const std::uintmax_t SIZE_UNDEFINED;
 
       explicit ScanningWorker(const DriveScanningParameters& parameters);
 
    public slots:
+
       /**
        * @brief Kicks off the drive scanning process.
        *
@@ -47,13 +49,16 @@ class ScanningWorker : public QObject
       void Start();
 
    signals:
+
       /**
        * @brief Signals that the drive scanning has finished.
        *
        * @param[in] filesScanned    The total number of files that were scanned.
        * @param[in] fileTree        A pointer to the final tree representing the scanned drive.
        */
-      void Finished(const std::uintmax_t filesScanned, std::shared_ptr<Tree<VizNode>> fileTree);
+      void Finished(
+         const std::uintmax_t filesScanned,
+         std::shared_ptr<Tree<VizNode>> fileTree);
 
       /**
        * @brief Signals drive scanning progress updates.
@@ -70,6 +75,7 @@ class ScanningWorker : public QObject
       void ShowMessageBox(const QString& message);
 
    private:
+
       /**
        * @brief Helper function to facilitate exception-free iteration over a directory.
        *

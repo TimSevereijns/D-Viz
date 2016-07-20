@@ -8,15 +8,21 @@
 class DoublePoint3D
 {
    public:
+
       DoublePoint3D() = default;
 
-      explicit DoublePoint3D(double x, double y, double z);
+      DoublePoint3D(
+         double x,
+         double y,
+         double z);
 
       double x() const;
       double y() const;
       double z() const;
 
-      friend inline DoublePoint3D operator+(const DoublePoint3D& lhs, const DoublePoint3D& rhs)
+      friend inline auto operator+(
+         const DoublePoint3D& lhs,
+         const DoublePoint3D& rhs)
       {
          return DoublePoint3D
          {
@@ -27,6 +33,7 @@ class DoublePoint3D
       }
 
    private:
+
       double m_x{ 0.0 };
       double m_y{ 0.0 };
       double m_z{ 0.0 };

@@ -39,6 +39,7 @@ namespace
 class ColorGradient
 {
    public:
+
       /**
        * @brief Inserts a new ColorPoint at the correct poisition into the gradient.
        *
