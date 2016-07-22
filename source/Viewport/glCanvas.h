@@ -126,14 +126,14 @@ class GLCanvas : public QOpenGLWidget
       /**
        * @brief Handles Xbox left and right trigger input.
        *
-       * @param[in] controllerState
+       * @param[in] controllerState    The current state of the controller.
        */
       void HandleXboxTriggerInput(const XboxController::State& controllerState);
 
       /**
        * @brief Handles Xbox thumb stick input.
        *
-       * @param[in] controllerState
+       * @param[in] controllerState    The current state of the controller.
        */
       void HandleXboxThumbstickInput(const XboxController::State& controllerState);
 
@@ -169,18 +169,26 @@ class GLCanvas : public QOpenGLWidget
          VisualizationParameters& parameters) const;
 
       /**
-       * @brief Highlights the ancestors of the node.
+       * @brief Highlights the ancestors of the passed in node.
        *
        * @param[in] selectedNode    The node whose ancestors are to be highlighted.
        */
-      void HighlightAncestors(TreeNode<VizNode>& selectedNode);
+      void HighlightAncestors(const TreeNode<VizNode>& selectedNode);
 
       /**
-       * @brief HighlightDescendants
+       * @brief Highlight the descendants of the passed in node.
        *
-       * @param selectedNode
+       * @param[in] selectedNode    The node whose descendants are to be highlighted.
        */
-      void HighlightDescendants(TreeNode<VizNode>& selectedNode);
+      void HighlightDescendants(const TreeNode<VizNode>& selectedNode);
+
+      /**
+       * @brief Highlights all nodes in the tree that have the same file extension as the passed in
+       * node.
+       *
+       * @param[in] selectedNode    The file whose extension should be highlighted in the tree.
+       */
+      void HighlightSimilarExtensions(const TreeNode<VizNode>& selectedNode);
 
       /**
        * @brief Returns any highlighted nodes back to their unhighlighted colors.
@@ -197,7 +205,7 @@ class GLCanvas : public QOpenGLWidget
 
       TreeNode<VizNode>* m_selectedNode{ nullptr };
 
-      std::vector<TreeNode<VizNode>*> m_highlightedNodes;
+      std::vector<const TreeNode<VizNode>*> m_highlightedNodes;
 
       std::unique_ptr<GraphicsDevice> m_graphicsDevice{ nullptr };
 

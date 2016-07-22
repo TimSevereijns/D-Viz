@@ -92,12 +92,12 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
    };
 
    boost::filesystem::path rawPath{ m_parameters.path };
-   auto pathWithoutTrailingSeparator = rawPath.remove_trailing_separator();
-   std::wstring sanitizedPath{ pathWithoutTrailingSeparator.wstring() };
+   auto sanitizedPath = rawPath.remove_trailing_separator();
 
    const FileInfo fileInfo
    {
-      sanitizedPath,
+      sanitizedPath.stem().wstring(),
+      sanitizedPath.extension().wstring(),
       ScanningWorker::SIZE_UNDEFINED,
       FileType::DIRECTORY
    };
@@ -160,7 +160,8 @@ void ScanningWorker::ScanRecursively(
    {
       const FileInfo fileInfo
       {
-         path.filename().wstring(),
+         path.filename().stem().wstring(),
+         path.filename().extension().wstring(),
          boost::filesystem::file_size(path),
          FileType::REGULAR
       };
@@ -189,7 +190,8 @@ void ScanningWorker::ScanRecursively(
 
       const FileInfo directoryInfo
       {
-         path.filename().wstring(),
+         path.filename().stem().wstring(),
+         path.filename().extension().wstring(),
          ScanningWorker::SIZE_UNDEFINED,
          FileType::DIRECTORY
       };

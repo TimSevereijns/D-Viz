@@ -111,7 +111,7 @@ namespace
       });
 
       assert(completePath.size() > 0);
-      return completePath;
+      return completePath + node->file.extension;
    }
 
    /**
@@ -546,7 +546,7 @@ void GLCanvas::ClearHighlightedNodes()
    m_highlightedNodes.clear();
 }
 
-void GLCanvas::HighlightAncestors(TreeNode<VizNode>& selectedNode)
+void GLCanvas::HighlightAncestors(const TreeNode<VizNode>& selectedNode)
 {
    ClearHighlightedNodes();
 
@@ -567,7 +567,7 @@ void GLCanvas::HighlightAncestors(TreeNode<VizNode>& selectedNode)
    while (currentNode);
 }
 
-void GLCanvas::HighlightDescendants(TreeNode<VizNode>& selectedNode)
+void GLCanvas::HighlightDescendants(const TreeNode<VizNode>& selectedNode)
 {
    ClearHighlightedNodes();
 
@@ -585,7 +585,35 @@ void GLCanvas::HighlightDescendants(TreeNode<VizNode>& selectedNode)
       m_highlightedNodes.emplace_back(&node);
    });
 
-   for (auto* node : m_highlightedNodes)
+   for (const auto* node : m_highlightedNodes)
+   {
+      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
+         *node,
+         SceneAsset::UpdateAction::SELECT,
+         m_visualizationParameters);
+   }
+}
+
+void GLCanvas::HighlightSimilarExtensions(const TreeNode<VizNode>& selectedNode)
+{
+   ClearHighlightedNodes();
+
+   std::for_each(
+      Tree<VizNode>::LeafIterator{ m_theVisualization->GetTree().GetHead() },
+      Tree<VizNode>::LeafIterator{ },
+      [&] (Tree<VizNode>::reference node)
+   {
+      if ((m_visualizationParameters.onlyShowDirectories && node->file.type == FileType::REGULAR)
+         || node->file.size < m_visualizationParameters.minimumFileSize
+         || node->file.extension != selectedNode->file.extension)
+      {
+         return;
+      }
+
+      m_highlightedNodes.emplace_back(&node);
+   });
+
+   for (const auto* node : m_highlightedNodes)
    {
       m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
          *node,
@@ -596,20 +624,31 @@ void GLCanvas::HighlightDescendants(TreeNode<VizNode>& selectedNode)
 
 void GLCanvas::ShowContextMenu(const QPoint& point)
 {
-    if (!m_selectedNode)
-    {
-       return;
-    }
+   if (!m_selectedNode)
+   {
+      return;
+   }
 
-    QPoint globalPoint = mapToGlobal(point);
+   const QPoint globalPoint = mapToGlobal(point);
 
-    CanvasContextMenu contextMenu{ m_keyboardManager };
-    contextMenu.addAction("Highlight Ancestors", [&] { HighlightAncestors(*m_selectedNode); });
-    contextMenu.addAction("Highlight Descendants", [&] { HighlightDescendants(*m_selectedNode); });
-    contextMenu.addSeparator();
-    contextMenu.addAction("Show in Explorer", [&] { OpenFileInExplorer(*m_selectedNode); });
+   CanvasContextMenu menu{ m_keyboardManager };
+   menu.addAction("Highlight Ancestors", [&] { HighlightAncestors(*m_selectedNode); });
+   menu.addAction("Highlight Descendants", [&] { HighlightDescendants(*m_selectedNode); });
 
-    contextMenu.exec(globalPoint);
+   if (m_selectedNode->GetData().file.type == FileType::REGULAR)
+   {
+      const auto entryText =
+         QString::fromStdWString(L"Highlight All ")
+         + QString::fromStdWString(m_selectedNode->GetData().file.extension)
+         + QString::fromStdWString(L" Files");
+
+      menu.addAction(entryText, [&] { HighlightSimilarExtensions(*m_selectedNode); });
+   }
+
+   menu.addSeparator();
+   menu.addAction("Show in Explorer", [&] { OpenFileInExplorer(*m_selectedNode); });
+
+   menu.exec(globalPoint);
 }
 
 void GLCanvas::HandleInput()
@@ -629,34 +668,34 @@ void GLCanvas::HandleInput()
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       now - m_lastCameraPositionUpdatelTime);
 
-   const bool isKeyWDown = m_keyboardManager.IsKeyDown(Qt::Key_W);
-   const bool isKeyADown = m_keyboardManager.IsKeyDown(Qt::Key_A);
-   const bool isKeySDown = m_keyboardManager.IsKeyDown(Qt::Key_S);
-   const bool isKeyDDown = m_keyboardManager.IsKeyDown(Qt::Key_D);
+   const bool isWKeyDown = m_keyboardManager.IsKeyDown(Qt::Key_W);
+   const bool isAKeyDown = m_keyboardManager.IsKeyDown(Qt::Key_A);
+   const bool isSKeyDown = m_keyboardManager.IsKeyDown(Qt::Key_S);
+   const bool isDKeyDown = m_keyboardManager.IsKeyDown(Qt::Key_D);
 
-   if ((isKeyWDown && isKeySDown) || (isKeyADown && isKeyDDown))
+   if ((isWKeyDown && isSKeyDown) || (isAKeyDown && isDKeyDown))
    {
       return;
    }
 
    const auto cameraSpeed = m_settings->m_cameraMovementSpeed;
 
-   if (isKeyWDown)
+   if (isWKeyDown)
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Forward());
    }
 
-   if (isKeyADown)
+   if (isAKeyDown)
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Left());
    }
 
-   if (isKeySDown)
+   if (isSKeyDown)
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Backward());
    }
 
-   if (isKeyDDown)
+   if (isDKeyDown)
    {
       m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Right());
    }
@@ -818,9 +857,9 @@ void GLCanvas::UpdateFPS()
    if (m_mainWindow)
    {
       m_mainWindow->setWindowTitle(
-         QString::fromStdString("D-Viz @ ") +
-         QString::number(averageFps) +
-         QString::fromStdString(" fps [*]"));
+         QString::fromStdString("D-Viz @ ")
+         + QString::number(averageFps)
+         + QString::fromStdString(" fps [*]"));
    }
 }
 

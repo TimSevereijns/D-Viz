@@ -21,13 +21,17 @@ enum class FileType
 struct FileInfo
 {
    std::wstring name{ };
+   std::wstring extension{ };
+
    std::uintmax_t size{ 0 };
+
    FileType type{ FileType::REGULAR };
 
    FileInfo() = default;
 
    FileInfo(
       const std::wstring& name,
+      const std::wstring& extension,
       std::uintmax_t size,
       FileType type);
 };
