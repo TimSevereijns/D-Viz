@@ -68,27 +68,6 @@ class OptionsManager : public QObject
        */
       void OnFieldOfViewChanged(int fieldOfView);
 
-      /**
-       * @brief Handles changes in the red color of the light.
-       *
-       * @param[in] value           New 8-bit value.
-       */
-      void OnRedLightComponentChanged(const int value);
-
-      /**
-       * @brief Handles changes in the green color of the light.
-       *
-       * @param[in] value           New 8-bit value.
-       */
-      void OnGreenLightComponentChanged(const int value);
-
-      /**
-       * @brief Handles changes in the blue color of the light.
-       *
-       * @param[in] value           New 8-bit value.
-       */
-      void OnBlueLightComponentChanged(const int value);
-
    public:
 
       double m_cameraMovementSpeed{ 0.25 };
@@ -97,10 +76,6 @@ class OptionsManager : public QObject
       float m_ambientCoefficient{ 0.1f };
       float m_lightAttenuationFactor{ 0.005f };
       float m_materialShininess{ 80.0f };
-
-      float m_redLightComponent{ 1.0f };
-      float m_greenLightComponent{ 1.0f };
-      float m_blueLightComponent{ 1.0f };
 
       int m_fieldOfView{ 45 };
 

@@ -21,6 +21,7 @@ class MainWindow : public QMainWindow
    Q_OBJECT
 
    public:
+
       explicit MainWindow(QWidget* parent = nullptr);
 
       ~MainWindow();
@@ -79,7 +80,13 @@ class MainWindow : public QMainWindow
        */
       bool ShouldShowFPS() const;
 
+      /**
+       * @returns The current search query.
+       */
+      std::wstring GetSearchQuery() const;
+
    public slots:
+
       /**
        * @brief OnFileMenuNewScan
        */
@@ -136,6 +143,7 @@ class MainWindow : public QMainWindow
       void XboxControllerStateChanged(XboxController::State state);
 
    private:
+
       void CreateMenus();
       void CreateFileMenu();
       void CreateViewMenu();
@@ -151,6 +159,8 @@ class MainWindow : public QMainWindow
       bool m_xboxControllerConnected{ false };
 
       int m_sizePruningComboBoxIndex{ 0 };
+
+      std::wstring m_searchQuery{ };
 
       std::unique_ptr<XboxController> m_xboxController{ new XboxController };
       std::unique_ptr<XboxController::State> m_xboxControllerState{ new XboxController::State };

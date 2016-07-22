@@ -533,6 +533,17 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    }
 }
 
+void GLCanvas::HighlightSelectedNodes()
+{
+   for (const auto* node : m_highlightedNodes)
+   {
+      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
+         *node,
+         SceneAsset::UpdateAction::SELECT,
+         m_visualizationParameters);
+   }
+}
+
 void GLCanvas::ClearHighlightedNodes()
 {
    for (auto* node : m_highlightedNodes)
@@ -544,6 +555,33 @@ void GLCanvas::ClearHighlightedNodes()
    }
 
    m_highlightedNodes.clear();
+}
+
+void GLCanvas::PerformRegexSearch()
+{
+   const auto& searchQuery = m_mainWindow->GetSearchQuery();
+   if (searchQuery.empty())
+   {
+      return;
+   }
+
+   ClearHighlightedNodes();
+
+   std::for_each(
+      Tree<VizNode>::PostOrderIterator{ m_theVisualization->GetTree().GetHead() },
+      Tree<VizNode>::PostOrderIterator{ },
+      [&] (Tree<VizNode>::reference node)
+   {
+      if (node->file.size < m_visualizationParameters.minimumFileSize
+         || node->file.extension != searchQuery)
+      {
+         return;
+      }
+
+      m_highlightedNodes.emplace_back(&node);
+   });
+
+   HighlightSelectedNodes();
 }
 
 void GLCanvas::HighlightAncestors(const TreeNode<VizNode>& selectedNode)
@@ -585,13 +623,7 @@ void GLCanvas::HighlightDescendants(const TreeNode<VizNode>& selectedNode)
       m_highlightedNodes.emplace_back(&node);
    });
 
-   for (const auto* node : m_highlightedNodes)
-   {
-      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
-         *node,
-         SceneAsset::UpdateAction::SELECT,
-         m_visualizationParameters);
-   }
+   HighlightSelectedNodes();
 }
 
 void GLCanvas::HighlightSimilarExtensions(const TreeNode<VizNode>& selectedNode)
@@ -613,13 +645,7 @@ void GLCanvas::HighlightSimilarExtensions(const TreeNode<VizNode>& selectedNode)
       m_highlightedNodes.emplace_back(&node);
    });
 
-   for (const auto* node : m_highlightedNodes)
-   {
-      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
-         *node,
-         SceneAsset::UpdateAction::SELECT,
-         m_visualizationParameters);
-   }
+   HighlightSelectedNodes();
 }
 
 void GLCanvas::ShowContextMenu(const QPoint& point)

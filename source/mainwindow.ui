@@ -120,6 +120,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="useXBoxController">
+       <property name="text">
+        <string>Use XBox Controller</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="cameraSpeedLabel">
        <property name="text">
         <string>Camera Speed:</string>
@@ -274,69 +284,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Light (Red):</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSlider" name="lightRedSlider">
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="value">
-        <number>100</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Light (Green):</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSlider" name="lightGreenSlider">
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="value">
-        <number>100</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>Light (Blue):</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSlider" name="lightBlueSlider">
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="value">
-        <number>100</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QCheckBox" name="attachLightToCameraCheckBox">
        <property name="text">
-        <string>Attach Light to Camera</string>
+        <string>Attach Primary Light to Camera</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -351,12 +301,27 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="useXBoxController">
-       <property name="text">
-        <string>Use XBox Controller</string>
+      <widget class="QLineEdit" name="regexSearchBox">
+       <property name="font">
+        <font>
+         <family>Consolas</family>
+        </font>
        </property>
-       <property name="checked">
-        <bool>false</bool>
+       <property name="contextMenuPolicy">
+        <enum>Qt::PreventContextMenu</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="placeholderText">
+        <string>Extension Search</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="regexSearchButton">
+       <property name="text">
+        <string>Perform Search</string>
        </property>
       </widget>
      </item>

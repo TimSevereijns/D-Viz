@@ -75,6 +75,13 @@ class GLCanvas : public QOpenGLWidget
       void mouseMoveEvent(QMouseEvent* event) override;
       void wheelEvent(QWheelEvent* event) override;
 
+   public slots:
+
+      /**
+       * @brief Reads the input text from the input box and performs the search.
+       */
+      void PerformRegexSearch();
+
    private slots:
 
       /**
@@ -250,6 +257,7 @@ class GLCanvas : public QOpenGLWidget
       std::vector<std::unique_ptr<SceneAsset>> m_sceneAssets;
 
       std::deque<int> m_frameRateDeque;
+      void HighlightSelectedNodes();
 };
 
 #endif // GLCANVAS_H

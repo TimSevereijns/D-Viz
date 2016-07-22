@@ -66,6 +66,10 @@ void MainWindow::SetupSidebar()
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
       m_optionsManager.get(), &OptionsManager::OnMouseSensitivityChanged);
 
+   connect(m_ui->useXBoxController,
+      static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
+      m_optionsManager.get(), &OptionsManager::OnUseXBoxControllerStateChanged);
+
    connect(m_ui->ambientCoefficientSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
       m_optionsManager.get(), &OptionsManager::OnAmbientCoefficientChanged);
@@ -78,22 +82,18 @@ void MainWindow::SetupSidebar()
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
       m_optionsManager.get(), &OptionsManager::OnShininessChanged);
 
-   connect(m_ui->lightRedSlider, &QSlider::valueChanged,
-      m_optionsManager.get(), &OptionsManager::OnRedLightComponentChanged);
-
-   connect(m_ui->lightGreenSlider, &QSlider::valueChanged,
-      m_optionsManager.get(), &OptionsManager::OnGreenLightComponentChanged);
-
-   connect(m_ui->lightBlueSlider, &QSlider::valueChanged,
-      m_optionsManager.get(), &OptionsManager::OnBlueLightComponentChanged);
-
    connect(m_ui->attachLightToCameraCheckBox,
       static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
       m_optionsManager.get(), &OptionsManager::OnAttachLightToCameraStateChanged);
 
-   connect(m_ui->useXBoxController,
-      static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
-      m_optionsManager.get(), &OptionsManager::OnUseXBoxControllerStateChanged);
+   connect(m_ui->regexSearchBox, &QLineEdit::returnPressed,
+      m_glCanvas.get(), &GLCanvas::PerformRegexSearch);
+
+   connect(m_ui->regexSearchButton, &QPushButton::clicked,
+      m_glCanvas.get(), &GLCanvas::PerformRegexSearch);
+
+   connect(m_ui->regexSearchBox, &QLineEdit::textChanged,
+      this, [&] (const auto& newText) { m_searchQuery = newText.toStdWString(); } );
 }
 
 void MainWindow::SetupXboxController()
@@ -196,6 +196,11 @@ void MainWindow::OnFPSReadoutToggled(bool isEnabled)
 bool MainWindow::ShouldShowFPS() const
 {
    return m_viewMenuToggleFPS->isChecked();
+}
+
+std::wstring MainWindow::GetSearchQuery() const
+{
+   return m_searchQuery;
 }
 
 void MainWindow::LaunchAboutDialog()

@@ -374,13 +374,8 @@ bool VisualizationAsset::Render(
 
    SetUniformLights(lights, settings, m_shader);
 
-   const QVector3D specularColor
-   {
-      settings.m_redLightComponent,
-      settings.m_greenLightComponent,
-      settings.m_blueLightComponent
-   };
-
+   // @todo No need to set this repeatedly now that the color isn't controlled by the UI.
+   const QVector3D specularColor{ 0.0f, 0.0f, 0.0f };
    m_shader.setUniformValue("materialSpecularColor", specularColor);
 
    m_VAO.bind();

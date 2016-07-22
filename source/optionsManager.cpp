@@ -39,19 +39,3 @@ void OptionsManager::OnFieldOfViewChanged(int fieldOfView)
 {
    m_fieldOfView = fieldOfView;
 }
-
-void OptionsManager::OnRedLightComponentChanged(const int value)
-{
-   m_redLightComponent = static_cast<float>(value) / 100.0f;
-}
-
-void OptionsManager::OnGreenLightComponentChanged(const int value)
-{
-   m_greenLightComponent = static_cast<float>(value) / 100.0f;
-}
-
-void OptionsManager::OnBlueLightComponentChanged(const int value)
-{
-   m_blueLightComponent = static_cast<float>(value) / 100.0f;
-}
-
