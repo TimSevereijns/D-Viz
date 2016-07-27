@@ -26,6 +26,7 @@ SOURCES += \
     main.cpp \
     mainWindow.cpp \
     optionsManager.cpp \
+    Scene/crosshairAsset.cpp \
     Scene/debuggingRayAsset.cpp \
     Scene/gridAsset.cpp \
     Scene/lineAsset.cpp \
@@ -37,7 +38,6 @@ SOURCES += \
     Viewport/graphicsDevice.cpp \
     Visualizations/squarifiedTreemap.cpp \
     Visualizations/visualization.cpp \
-    Scene/crosshairAsset.cpp \
     aboutDialog.cpp
 
 HEADERS  += \
@@ -54,6 +54,7 @@ HEADERS  += \
     HID/xboxController.h \
     mainWindow.h \
     optionsManager.h \
+    Scene/crosshairAsset.h \
     Scene/debuggingRayAsset.h \
     Scene/gridAsset.h \
     Scene/lineAsset.h \
@@ -69,7 +70,6 @@ HEADERS  += \
     Viewport/graphicsDevice.h \
     Visualizations/squarifiedTreemap.h \
     Visualizations/visualization.h \
-    Scene/crosshairAsset.h \
     aboutDialog.h
 
 FORMS    += \

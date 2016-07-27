@@ -305,7 +305,9 @@ XboxController& MainWindow::GetXboxControllerManager()
    return *m_xboxController.get();
 }
 
-void MainWindow::SetStatusBarMessage(const std::wstring& message)
+void MainWindow::SetStatusBarMessage(
+   const std::wstring& message,
+   int timeout /* = 0*/)
 {
    auto* statusBar = this->statusBar();
    if (!statusBar)
@@ -313,7 +315,7 @@ void MainWindow::SetStatusBarMessage(const std::wstring& message)
       return;
    }
 
-   statusBar->showMessage(QString::fromStdWString(message));
+   statusBar->showMessage(QString::fromStdWString(message), timeout);
 }
 
 std::shared_ptr<OptionsManager> MainWindow::GetOptionsManager()

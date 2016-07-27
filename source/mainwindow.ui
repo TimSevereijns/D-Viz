@@ -314,14 +314,14 @@
         <string/>
        </property>
        <property name="placeholderText">
-        <string>Extension Search</string>
+        <string>Search</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="regexSearchButton">
        <property name="text">
-        <string>Perform Search</string>
+        <string>Search and Highlight</string>
        </property>
       </widget>
      </item>

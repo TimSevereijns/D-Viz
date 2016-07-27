@@ -11,6 +11,8 @@
 #include "Visualizations/squarifiedTreemap.h"
 #include "Utilities/scopeExit.hpp"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 #include <QApplication>
 #include <QMenu>
 #include <QMessageBox>
@@ -313,6 +315,8 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
    m_visualizationParameters = parameters;
    const auto blockCount = vizAsset->LoadBufferData(m_theVisualization->GetTree(), parameters);
 
+   m_isVisualizationLoaded = blockCount > 0;
+
    for (const auto& asset : m_sceneAssets)
    {
       asset->Reload();
@@ -390,14 +394,6 @@ void GLCanvas::HandleNodeSelection(TreeNode<VizNode>* selectedNode)
 
    ClearHighlightedNodes();
 
-   if (m_selectedNode)
-   {
-      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
-         *m_selectedNode,
-         SceneAsset::UpdateAction::DESELECT,
-         m_visualizationParameters);
-   }
-
    m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
       *selectedNode,
       SceneAsset::UpdateAction::SELECT,
@@ -424,14 +420,6 @@ void GLCanvas::HandleRightClick(const QPoint& point)
    else
    {
       ClearHighlightedNodes();
-
-      if (m_selectedNode)
-      {
-         m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
-            *m_selectedNode,
-            SceneAsset::UpdateAction::DESELECT,
-            m_visualizationParameters);
-      }
 
        auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
        assert(vizAsset);
@@ -535,17 +523,47 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
 void GLCanvas::HighlightSelectedNodes()
 {
+   std::uintmax_t selectionSizeInBytes{ 0 };
+
    for (const auto* node : m_highlightedNodes)
    {
+      selectionSizeInBytes += node->GetData().file.size;
+
       m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
          *node,
          SceneAsset::UpdateAction::SELECT,
          m_visualizationParameters);
    }
+
+   const auto sizeAndUnits = ConvertFileSizeToMostAppropriateUnits(selectionSizeInBytes);
+   const auto isInBytes = (sizeAndUnits.second == BYTES_READOUT_STRING);
+
+   std::wstringstream message;
+   message.imbue(std::locale{ "" });
+   message.precision(isInBytes ? 0 : 2);
+   message
+      << L"Found "
+      << m_highlightedNodes.size()
+      << (m_highlightedNodes.size() == 1 ? L" node" : L" nodes")
+      << L", representing "
+      << std::fixed
+      << sizeAndUnits.first
+      << sizeAndUnits.second;
+
+   assert(message.str().size() > 0);
+   m_mainWindow->SetStatusBarMessage(message.str());
 }
 
 void GLCanvas::ClearHighlightedNodes()
 {
+   if (m_selectedNode)
+   {
+      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
+         *m_selectedNode,
+         SceneAsset::UpdateAction::DESELECT,
+         m_visualizationParameters);
+   }
+
    for (auto* node : m_highlightedNodes)
    {
       m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
@@ -560,7 +578,7 @@ void GLCanvas::ClearHighlightedNodes()
 void GLCanvas::PerformRegexSearch()
 {
    const auto& searchQuery = m_mainWindow->GetSearchQuery();
-   if (searchQuery.empty())
+   if (searchQuery.empty() || !m_isVisualizationLoaded)
    {
       return;
    }
@@ -570,10 +588,15 @@ void GLCanvas::PerformRegexSearch()
    std::for_each(
       Tree<VizNode>::PostOrderIterator{ m_theVisualization->GetTree().GetHead() },
       Tree<VizNode>::PostOrderIterator{ },
-      [&] (Tree<VizNode>::reference node)
+      [&] (Tree<VizNode>::const_reference node)
    {
-      if (node->file.size < m_visualizationParameters.minimumFileSize
-         || node->file.extension != searchQuery)
+      if (node->file.size < m_visualizationParameters.minimumFileSize)
+      {
+         return;
+      }
+
+      const auto fullFileName{ node->file.name + node->file.extension };
+      if (!boost::icontains(fullFileName, searchQuery))
       {
          return;
       }
@@ -581,7 +604,14 @@ void GLCanvas::PerformRegexSearch()
       m_highlightedNodes.emplace_back(&node);
    });
 
-   HighlightSelectedNodes();
+   if (m_highlightedNodes.empty())
+   {
+      m_mainWindow->SetStatusBarMessage(L"No Matches Found", 3'000);
+   }
+   else
+   {
+      HighlightSelectedNodes();
+   }
 }
 
 void GLCanvas::HighlightAncestors(const TreeNode<VizNode>& selectedNode)
@@ -612,7 +642,7 @@ void GLCanvas::HighlightDescendants(const TreeNode<VizNode>& selectedNode)
    std::for_each(
       Tree<VizNode>::LeafIterator{ &selectedNode },
       Tree<VizNode>::LeafIterator{ },
-      [&] (Tree<VizNode>::reference node)
+      [&] (Tree<VizNode>::const_reference node)
    {
       if ((m_visualizationParameters.onlyShowDirectories && node->file.type == FileType::REGULAR)
          || node->file.size < m_visualizationParameters.minimumFileSize)
@@ -633,7 +663,7 @@ void GLCanvas::HighlightSimilarExtensions(const TreeNode<VizNode>& selectedNode)
    std::for_each(
       Tree<VizNode>::LeafIterator{ m_theVisualization->GetTree().GetHead() },
       Tree<VizNode>::LeafIterator{ },
-      [&] (Tree<VizNode>::reference node)
+      [&] (Tree<VizNode>::const_reference node)
    {
       if ((m_visualizationParameters.onlyShowDirectories && node->file.type == FileType::REGULAR)
          || node->file.size < m_visualizationParameters.minimumFileSize
@@ -645,7 +675,7 @@ void GLCanvas::HighlightSimilarExtensions(const TreeNode<VizNode>& selectedNode)
       m_highlightedNodes.emplace_back(&node);
    });
 
-   HighlightSelectedNodes();
+    HighlightSelectedNodes();
 }
 
 void GLCanvas::ShowContextMenu(const QPoint& point)

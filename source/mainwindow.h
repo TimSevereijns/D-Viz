@@ -69,10 +69,14 @@ class MainWindow : public QMainWindow
       XboxController& GetXboxControllerManager();
 
       /**
-       * @brief SetPermanentStatusBarMessage
-       * @param message
+       * @brief Sets a temporary message in the status bar.
+       *
+       * @param[in] message         The message to display.
+       * @param[in] timeout         Duration of the message in milliseconds.
        */
-      void SetStatusBarMessage(const std::wstring& message);
+      void SetStatusBarMessage(
+         const std::wstring& message,
+         int timeout = 0);
 
       /**
        * @brief ShouldShowFPS
