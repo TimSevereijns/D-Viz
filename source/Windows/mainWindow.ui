@@ -92,7 +92,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="directoriesOnlyCheckbox">
+      <widget class="QCheckBox" name="directoriesOnlyCheckBox">
        <property name="text">
         <string>Show Directories Only</string>
        </property>
@@ -315,6 +315,23 @@
        </property>
        <property name="placeholderText">
         <string>Search</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="searchDirectoriesCheckBox">
+       <property name="text">
+        <string>Search Directories</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="searchFilesCheckBox">
+       <property name="text">
+        <string>Search Files</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

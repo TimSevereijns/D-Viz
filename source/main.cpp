@@ -1,4 +1,4 @@
-#include "mainWindow.h"
+#include "Windows/mainWindow.h"
 #include <QApplication>
 
 template<typename T>

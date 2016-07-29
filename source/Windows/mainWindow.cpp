@@ -46,17 +46,41 @@ void MainWindow::SetupSidebar()
       m_ui->pruneSizeComboBox->addItem(pair.second, pair.first);
    });
 
-   connect(m_ui->directoriesOnlyCheckbox, &QCheckBox::stateChanged,
-      this, &MainWindow::OnDirectoryOnlyStateChanged);
+   connect(m_ui->directoriesOnlyCheckBox, &QCheckBox::stateChanged, this,
+      [&] (int state)
+   {
+      m_showDirectoriesOnly = (state == Qt::Checked);
+   });
 
-   connect(m_ui->directoryGradientCheckBox, &QCheckBox::stateChanged,
-      this, &MainWindow::OnDirectoryGradientStateChanged);
+   connect(m_ui->directoryGradientCheckBox, &QCheckBox::stateChanged, this,
+      [&] (int state)
+   {
+      m_useDirectoryGradient = (state == Qt::Checked);
+   });
 
-   connect(m_ui->pruneTreeButton, &QPushButton::clicked,
-      this, &MainWindow::OnPruneTreeButtonClicked);
+   connect(m_ui->pruneTreeButton, &QPushButton::clicked, this,
+      [&] ()
+   {
+      const auto pruneSizeIndex = m_ui->pruneSizeComboBox->currentIndex();
 
-   connect(m_ui->fieldOfViewSlider, &QSlider::valueChanged,
-      this, &MainWindow::OnFieldOfViewChanged);
+      VisualizationParameters parameters;
+      parameters.rootDirectory = m_directoryToVisualize;
+      parameters.onlyShowDirectories = m_showDirectoriesOnly;
+      parameters.useDirectoryGradient = m_useDirectoryGradient;
+      parameters.forceNewScan = false;
+      parameters.minimumFileSize = m_sizePruningOptions[pruneSizeIndex].first;
+
+      if (!m_directoryToVisualize.empty())
+      {
+         m_glCanvas->ReloadVisualization(parameters);
+      }
+   });
+
+   connect(m_ui->fieldOfViewSlider, &QSlider::valueChanged, this,
+      [&] (int fieldOfView)
+   {
+      m_glCanvas->SetFieldOfView(static_cast<float>(fieldOfView));
+   });
 
    connect(m_ui->cameraSpeedSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
@@ -92,8 +116,17 @@ void MainWindow::SetupSidebar()
    connect(m_ui->regexSearchButton, &QPushButton::clicked,
       m_glCanvas.get(), &GLCanvas::PerformRegexSearch);
 
-   connect(m_ui->regexSearchBox, &QLineEdit::textChanged,
-      this, [&] (const auto& newText) { m_searchQuery = newText.toStdWString(); } );
+   connect(m_ui->regexSearchBox, &QLineEdit::textChanged, this,
+      [&] (const auto& newText)
+   {
+      m_searchQuery = newText.toStdWString();
+   });
+
+   connect(m_ui->searchDirectoriesCheckBox, &QCheckBox::stateChanged,
+      m_optionsManager.get(), &OptionsManager::OnShouldSearchDirectoriesChanged);
+
+   connect(m_ui->searchFilesCheckBox, &QCheckBox::stateChanged,
+      m_optionsManager.get(), &OptionsManager::OnShouldSearchFilesChanged);
 }
 
 void MainWindow::SetupXboxController()
@@ -213,33 +246,6 @@ void MainWindow::LaunchAboutDialog()
    m_aboutDialog->show();
 }
 
-void MainWindow::OnDirectoryOnlyStateChanged(int state)
-{
-   m_showDirectoriesOnly = (state == Qt::Checked);
-}
-
-void MainWindow::OnDirectoryGradientStateChanged(int state)
-{
-   m_useDirectoryGradient = (state == Qt::Checked);
-}
-
-void MainWindow::OnPruneTreeButtonClicked()
-{
-   const auto pruneSizeIndex = m_ui->pruneSizeComboBox->currentIndex();
-
-   VisualizationParameters parameters;
-   parameters.rootDirectory = m_directoryToVisualize;
-   parameters.onlyShowDirectories = m_showDirectoriesOnly;
-   parameters.useDirectoryGradient = m_useDirectoryGradient;
-   parameters.forceNewScan = false;
-   parameters.minimumFileSize = m_sizePruningOptions[pruneSizeIndex].first;
-
-   if (!m_directoryToVisualize.empty())
-   {
-      m_glCanvas->ReloadVisualization(parameters);
-   }
-}
-
 void MainWindow::XboxControllerConnected()
 {
    m_xboxControllerConnected = true;
@@ -258,11 +264,6 @@ bool MainWindow::IsXboxControllerConnected() const
 void MainWindow::XboxControllerStateChanged(XboxController::State state)
 {
    m_xboxControllerState = std::make_unique<XboxController::State>(std::move(state));
-}
-
-void MainWindow::OnFieldOfViewChanged(const int fieldOfView)
-{
-   m_glCanvas->SetFieldOfView(static_cast<float>(fieldOfView));
 }
 
 void MainWindow::SetFieldOfViewSlider(int fieldOfView)

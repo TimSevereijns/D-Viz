@@ -39,3 +39,13 @@ void OptionsManager::OnFieldOfViewChanged(int fieldOfView)
 {
    m_fieldOfView = fieldOfView;
 }
+
+void OptionsManager::OnShouldSearchFilesChanged(const bool state)
+{
+   m_shouldSearchFiles = state;
+}
+
+void OptionsManager::OnShouldSearchDirectoriesChanged(const bool state)
+{
+   m_shouldSearchDirectories = state;
+}

@@ -69,6 +69,7 @@ class GLCanvas : public QOpenGLWidget
       void keyPressEvent(QKeyEvent* event) override;
       void keyReleaseEvent(QKeyEvent* event) override;
 
+      void mouseReleaseEvent(QMouseEvent *) override;
       void mousePressEvent(QMouseEvent* event) override;
       void mouseMoveEvent(QMouseEvent* event) override;
       void wheelEvent(QWheelEvent* event) override;
@@ -240,7 +241,7 @@ class GLCanvas : public QOpenGLWidget
 
      VisualizationParameters m_visualizationParameters;
 
-      std::shared_ptr<OptionsManager> m_settings;
+      std::shared_ptr<OptionsManager> m_optionsManager;
 
       Camera m_camera;
 
@@ -251,6 +252,7 @@ class GLCanvas : public QOpenGLWidget
       QMatrix4x4 m_projectionMatrix;
 
       QPoint m_lastMousePosition;
+      QPoint m_cursorPositionWhenHidden;
 
       std::vector<std::unique_ptr<SceneAsset>> m_sceneAssets;
 

@@ -79,8 +79,7 @@ class MainWindow : public QMainWindow
          int timeout = 0);
 
       /**
-       * @brief ShouldShowFPS
-       * @return
+       * @returns True if the frames per second (FPS) readout should be shown in the titlebar.
        */
       bool ShouldShowFPS() const;
 
@@ -101,28 +100,6 @@ class MainWindow : public QMainWindow
        */
       void OnFPSReadoutToggled(bool isEnabled);
 
-      /**
-       * @brief OnFieldOfViewChanged
-       * @param fieldOfView
-       */
-      void OnFieldOfViewChanged(int fieldOfView);
-
-      /**
-       * @brief OnDirectoryOnlyStateChanged
-       * @param state
-       */
-      void OnDirectoryOnlyStateChanged(int state);
-
-      /**
-       * @brief OnDirectoryGradientStateChanged
-       * @param state
-       */
-      void OnDirectoryGradientStateChanged(int state);
-
-      /**
-       * @brief OnPruneTreeButtonClicked
-       */
-      void OnPruneTreeButtonClicked();
 
       /**
        * @brief XboxControllerConnected

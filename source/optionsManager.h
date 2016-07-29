@@ -68,6 +68,21 @@ class OptionsManager : public QObject
        */
       void OnFieldOfViewChanged(int fieldOfView);
 
+      /**
+       * @brief OnShouldSearchFilesChanged
+       *
+       * @param[in] state           Pass in true if files should be searched for query matches.
+       */
+      void OnShouldSearchFilesChanged(const bool state);
+
+      /**
+       * @brief OnShouldSearchDirectoriesChanged
+       *
+       * @param[in] state           Pass in true if directories should be searched for query
+       *                            matches.
+       */
+      void OnShouldSearchDirectoriesChanged(const bool state);
+
    public:
 
       double m_cameraMovementSpeed{ 0.25 };
@@ -82,6 +97,8 @@ class OptionsManager : public QObject
       bool m_isXboxControllerConnected{ false };
       bool m_useXBoxController{ false };
       bool m_isLightAttachedToCamera{ true };
+      bool m_shouldSearchDirectories{ false };
+      bool m_shouldSearchFiles{ true };
 };
 
 #endif // OPTIONSMANAGER_H

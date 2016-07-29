@@ -121,7 +121,7 @@ namespace
     *
     * @param[in] selectedNode       The node that represents the file to open.
     */
-   void OpenFileInExplorer(const TreeNode<VizNode>& selectedNode)
+   void ShowInFileExplorer(const TreeNode<VizNode>& selectedNode)
    {
       CoInitializeEx(NULL, COINIT_MULTITHREADED);
       ON_SCOPE_EXIT noexcept { CoUninitialize(); };
@@ -157,7 +157,7 @@ GLCanvas::GLCanvas(QWidget* parent) :
       throw std::invalid_argument{ "Parent couldn't be interpreted as a MainWindow instance." };
    }
 
-   m_settings = m_mainWindow->GetOptionsManager();
+   m_optionsManager = m_mainWindow->GetOptionsManager();
 
    m_camera.SetPosition(QVector3D{ 500, 100, 0 });
 
@@ -436,7 +436,10 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
       return;
    }
 
+   setCursor(Qt::BlankCursor);
+
    m_lastMousePosition = event->pos();
+   m_cursorPositionWhenHidden = event->pos();
 
    if (event->button() == Qt::RightButton)
    {
@@ -453,6 +456,20 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
    event->accept();
 }
 
+void GLCanvas::mouseReleaseEvent(QMouseEvent* const event)
+{
+   assert(event);
+   if (!event)
+   {
+      return;
+   }
+
+   const auto globalCursorPosition = mapToGlobal(m_cursorPositionWhenHidden);
+   cursor().setPos(globalCursorPosition.x(), globalCursorPosition.y());
+
+   setCursor(Qt::ArrowCursor);
+}
+
 void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 {
    assert(event);
@@ -467,8 +484,8 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
    if (event->buttons() & Qt::LeftButton)
    {
       m_camera.OffsetOrientation(
-         m_settings->m_mouseSensitivity * deltaY,
-         m_settings->m_mouseSensitivity * deltaX);
+         m_optionsManager->m_mouseSensitivity * deltaY,
+         m_optionsManager->m_mouseSensitivity * deltaX);
    }
 
    m_lastMousePosition = event->pos();
@@ -495,16 +512,16 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
    if (m_keyboardManager.IsKeyUp(Qt::Key_Shift))
    {
-      if (delta > 0 && m_settings->m_cameraMovementSpeed < 1.0)
+      if (delta > 0 && m_optionsManager->m_cameraMovementSpeed < 1.0)
       {
-         m_settings->m_cameraMovementSpeed += 0.01;
+         m_optionsManager->m_cameraMovementSpeed += 0.01;
       }
-      else if (delta < 0 && m_settings->m_cameraMovementSpeed > 0.01)
+      else if (delta < 0 && m_optionsManager->m_cameraMovementSpeed > 0.01)
       {
-         m_settings->m_cameraMovementSpeed -= 0.01;
+         m_optionsManager->m_cameraMovementSpeed -= 0.01;
       }
 
-      m_mainWindow->SetCameraSpeedSpinner(static_cast<double>(m_settings->m_cameraMovementSpeed));
+      m_mainWindow->SetCameraSpeedSpinner(static_cast<double>(m_optionsManager->m_cameraMovementSpeed));
    }
    else
    {
@@ -577,8 +594,13 @@ void GLCanvas::ClearHighlightedNodes()
 
 void GLCanvas::PerformRegexSearch()
 {
+   const bool shouldSearchFiles{ m_optionsManager->m_shouldSearchFiles };
+   const bool shouldSearchDirectories{ m_optionsManager->m_shouldSearchDirectories };
+
    const auto& searchQuery = m_mainWindow->GetSearchQuery();
-   if (searchQuery.empty() || !m_isVisualizationLoaded)
+   if (searchQuery.empty()
+      || !m_isVisualizationLoaded
+      || (!shouldSearchFiles && !shouldSearchDirectories))
    {
       return;
    }
@@ -591,6 +613,16 @@ void GLCanvas::PerformRegexSearch()
       [&] (Tree<VizNode>::const_reference node)
    {
       if (node->file.size < m_visualizationParameters.minimumFileSize)
+      {
+         return;
+      }
+
+      if (!shouldSearchDirectories && node->file.type == FileType::DIRECTORY)
+      {
+         return;
+      }
+
+      if (!shouldSearchFiles && node->file.type == FileType::REGULAR)
       {
          return;
       }
@@ -702,19 +734,19 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
    }
 
    menu.addSeparator();
-   menu.addAction("Show in Explorer", [&] { OpenFileInExplorer(*m_selectedNode); });
+   menu.addAction("Show in Explorer", [&] { ShowInFileExplorer(*m_selectedNode); });
 
    menu.exec(globalPoint);
 }
 
 void GLCanvas::HandleInput()
 {
-   assert(m_settings && m_mainWindow);
+   assert(m_optionsManager && m_mainWindow);
 
    const auto now = std::chrono::system_clock::now();
    ON_SCOPE_EXIT noexcept { m_lastCameraPositionUpdatelTime = now; };
 
-   if (m_settings->m_useXBoxController && m_mainWindow->IsXboxControllerConnected())
+   if (m_optionsManager->m_useXBoxController && m_mainWindow->IsXboxControllerConnected())
    {
       HandleXBoxControllerInput();
 
@@ -734,7 +766,7 @@ void GLCanvas::HandleInput()
       return;
    }
 
-   const auto cameraSpeed = m_settings->m_cameraMovementSpeed;
+   const auto cameraSpeed = m_optionsManager->m_cameraMovementSpeed;
 
    if (isWKeyDown)
    {
@@ -766,7 +798,7 @@ void GLCanvas::HandleXBoxControllerInput()
    const XboxController& controller = m_mainWindow->GetXboxControllerManager();
 
    const auto cameraSpeed =
-       m_settings->m_cameraMovementSpeed / Constants::Xbox::MOVEMENT_AMPLIFICATION;
+       m_optionsManager->m_cameraMovementSpeed / Constants::Xbox::MOVEMENT_AMPLIFICATION;
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_UP))
    {
@@ -808,12 +840,12 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
    {
       const auto pitch =
          Constants::Xbox::MOVEMENT_AMPLIFICATION
-         * m_settings->m_mouseSensitivity
+         * m_optionsManager->m_mouseSensitivity
          * -controllerState.rightThumbY;
 
       const auto yaw =
          Constants::Xbox::MOVEMENT_AMPLIFICATION
-         * m_settings->m_mouseSensitivity
+         * m_optionsManager->m_mouseSensitivity
          * controllerState.rightThumbX;
 
       m_camera.OffsetOrientation(pitch, yaw);
@@ -823,7 +855,7 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
    {
       m_camera.OffsetPosition(
          Constants::Xbox::MOVEMENT_AMPLIFICATION
-         * m_settings->m_cameraMovementSpeed
+         * m_optionsManager->m_cameraMovementSpeed
          * controllerState.leftThumbY
          * m_camera.Forward());
    }
@@ -832,7 +864,7 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
    {
       m_camera.OffsetPosition(
          Constants::Xbox::MOVEMENT_AMPLIFICATION
-         * m_settings->m_cameraMovementSpeed
+         * m_optionsManager->m_cameraMovementSpeed
          * controllerState.leftThumbX
          * m_camera.Right());
    }
@@ -933,8 +965,8 @@ void GLCanvas::paintGL()
       UpdateFPS();
    }
 
-   assert(m_settings);
-   if (m_settings->m_isLightAttachedToCamera)
+   assert(m_optionsManager);
+   if (m_optionsManager->m_isLightAttachedToCamera)
    {
       assert(m_lights.size() > 0);
       m_lights.front().position = m_camera.GetPosition();
@@ -943,6 +975,6 @@ void GLCanvas::paintGL()
    for (const auto& asset : m_sceneAssets)
    {
       assert(asset);
-      asset->Render(m_camera, m_lights, *m_settings);
+      asset->Render(m_camera, m_lights, *m_optionsManager);
    }
 }

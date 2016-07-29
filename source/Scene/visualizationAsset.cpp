@@ -94,7 +94,7 @@ bool VisualizationAsset::LoadShaders()
 
 bool VisualizationAsset::Initialize()
 {
-   const bool unitBlockInitialized = InitializeUnitBlock();
+   const bool unitBlockInitialized = InitializeReferenceBlock();
    const bool colorsInitialized = InitializeColors();
    const bool transformationsInitialized = InitializeBlockTransformations();
 
@@ -107,14 +107,14 @@ bool VisualizationAsset::Initialize()
    return overallSuccess;
 }
 
-bool VisualizationAsset::InitializeUnitBlock()
+bool VisualizationAsset::InitializeReferenceBlock()
 {
    if (!m_VAO.isCreated())
    {
       m_VAO.create();
    }
 
-   const auto unitBlock = Block
+   const auto referenceBlock = Block
    {
       DoublePoint3D{ 0.0, 0.0, 0.0 },
       1.0,
@@ -124,7 +124,7 @@ bool VisualizationAsset::InitializeUnitBlock()
    };
 
    m_referenceBlockVertices.clear();
-   m_referenceBlockVertices = unitBlock.GetVerticesAndNormals();
+   m_referenceBlockVertices = referenceBlock.GetVerticesAndNormals();
 
    m_VAO.bind();
 
@@ -180,7 +180,7 @@ bool VisualizationAsset::InitializeColors()
    m_graphicsDevice.glVertexAttribPointer(
       /* indx = */ 0,
       /* size = */ 3,
-      /* type =  */ GL_FLOAT,
+      /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeof(QVector3D),
       /* ptr = */ (GLvoid*)0);
@@ -217,7 +217,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
    m_graphicsDevice.glVertexAttribPointer(
       /* indx = */ 1,
       /* size = */ 4,
-      /* type =  */ GL_FLOAT,
+      /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeOfMatrix,
       /* ptr = */ (GLvoid*)(0 * sizeOfVector));
@@ -227,7 +227,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
    m_graphicsDevice.glVertexAttribPointer(
       /* indx = */ 2,
       /* size = */ 4,
-      /* type =  */ GL_FLOAT,
+      /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeOfMatrix,
       /* ptr = */ (GLvoid*)(1 * sizeOfVector));
@@ -237,7 +237,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
    m_graphicsDevice.glVertexAttribPointer(
       /* indx = */ 3,
       /* size = */ 4,
-      /* type =  */ GL_FLOAT,
+      /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeOfMatrix,
       /* ptr = */ (GLvoid*)(2 * sizeOfVector));
@@ -247,7 +247,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
    m_graphicsDevice.glVertexAttribPointer(
       /* indx = */ 4,
       /* size = */ 4,
-      /* type =  */ GL_FLOAT,
+      /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeOfMatrix,
       /* ptr = */ (GLvoid*)(3 * sizeOfVector));
@@ -395,7 +395,7 @@ bool VisualizationAsset::Render(
 
 bool VisualizationAsset::Reload()
 {
-   InitializeUnitBlock();
+   InitializeReferenceBlock();
    InitializeColors();
    InitializeBlockTransformations();
 
@@ -407,8 +407,8 @@ void VisualizationAsset::UpdateVBO(
    SceneAsset::UpdateAction action,
    const VisualizationParameters& options)
 {
-   constexpr auto sizeOfColorData{ sizeof(QVector3D) };
-   const auto offsetIntoColorBuffer = node->offsetIntoVBO * sizeOfColorData;
+   constexpr auto colorDataTupleSize{ sizeof(QVector3D) };
+   const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorDataTupleSize;
 
    const auto newColor = (action == SceneAsset::UpdateAction::DESELECT)
       ? RestoreColor(node, options)
@@ -416,7 +416,7 @@ void VisualizationAsset::UpdateVBO(
 
    assert(m_VAO.isCreated());
    assert(m_blockColorBuffer.isCreated());
-   assert(m_blockColorBuffer.size() >= offsetIntoColorBuffer / sizeOfColorData);
+   assert(m_blockColorBuffer.size() >= offsetIntoColorBuffer / colorDataTupleSize);
 
    m_VAO.bind();
    m_blockColorBuffer.bind();
@@ -424,7 +424,7 @@ void VisualizationAsset::UpdateVBO(
    m_graphicsDevice.glBufferSubData(
       /* target = */ GL_ARRAY_BUFFER,
       /* offset = */ offsetIntoColorBuffer,
-      /* size = */ sizeOfColorData,
+      /* size = */ colorDataTupleSize,
       /* data = */ &newColor);
 
    m_blockColorBuffer.release();

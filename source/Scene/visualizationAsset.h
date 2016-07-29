@@ -65,7 +65,7 @@ class VisualizationAsset : public SceneAsset
       std::uint32_t m_blockCount{ 0 };
       std::uintmax_t m_largestDirectorySize{ 0 };
 
-      bool InitializeUnitBlock();
+      bool InitializeReferenceBlock();
       bool InitializeColors();
       bool InitializeBlockTransformations();
 

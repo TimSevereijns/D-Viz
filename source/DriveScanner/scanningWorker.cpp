@@ -96,8 +96,8 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
 
    const FileInfo fileInfo
    {
-      sanitizedPath.stem().wstring(),
-      sanitizedPath.extension().wstring(),
+      sanitizedPath.wstring(),
+      /* extension = */ L"",
       ScanningWorker::SIZE_UNDEFINED,
       FileType::DIRECTORY
    };
