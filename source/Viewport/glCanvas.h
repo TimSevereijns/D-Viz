@@ -239,7 +239,7 @@ class GLCanvas : public QOpenGLWidget
          Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, -VisualizationModel::ROOT_BLOCK_DEPTH } }
       };
 
-     VisualizationParameters m_visualizationParameters;
+      VisualizationParameters m_visualizationParameters;
 
       std::shared_ptr<OptionsManager> m_optionsManager;
 
@@ -252,7 +252,6 @@ class GLCanvas : public QOpenGLWidget
       QMatrix4x4 m_projectionMatrix;
 
       QPoint m_lastMousePosition;
-      QPoint m_cursorPositionWhenHidden;
 
       std::vector<std::unique_ptr<SceneAsset>> m_sceneAssets;
 

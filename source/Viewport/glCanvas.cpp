@@ -436,10 +436,7 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
       return;
    }
 
-   setCursor(Qt::BlankCursor);
-
    m_lastMousePosition = event->pos();
-   m_cursorPositionWhenHidden = event->pos();
 
    if (event->button() == Qt::RightButton)
    {
@@ -451,6 +448,10 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
       {
          HandleRightClick(event->pos());
       }
+   }
+   else if (event->button() == Qt::LeftButton)
+   {
+      setCursor(Qt::BlankCursor);
    }
 
    event->accept();
@@ -464,8 +465,11 @@ void GLCanvas::mouseReleaseEvent(QMouseEvent* const event)
       return;
    }
 
-   const auto globalCursorPosition = mapToGlobal(m_cursorPositionWhenHidden);
-   cursor().setPos(globalCursorPosition.x(), globalCursorPosition.y());
+   if (event->button() == Qt::LeftButton)
+   {
+      const auto globalCursorPosition = mapToGlobal(m_camera.GetViewport().center());
+      cursor().setPos(globalCursorPosition.x(), globalCursorPosition.y());
+   }
 
    setCursor(Qt::ArrowCursor);
 }
