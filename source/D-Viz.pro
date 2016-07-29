@@ -13,79 +13,79 @@ TEMPLATE = app
 CONFIG += c++11
 
 SOURCES += \
-    DataStructs/block.cpp \
-    DataStructs/fileInfo.cpp \
-    DataStructs/light.cpp \
-    DataStructs/vizNode.cpp \
-    DataStructs/doublePoint3d.cpp \
-    DataStructs/driveScanningParameters.cpp \
-    DriveScanner/driveScanner.cpp \
-    DriveScanner/scanningWorker.cpp \
-    HID/keyboardManager.cpp \
-    HID/xboxController.cpp \
-    main.cpp \
-    mainWindow.cpp \
-    optionsManager.cpp \
-    Scene/crosshairAsset.cpp \
-    Scene/debuggingRayAsset.cpp \
-    Scene/gridAsset.cpp \
-    Scene/lineAsset.cpp \
-    Scene/sceneAsset.cpp \
-    Scene/visualizationAsset.cpp \
-    Viewport/camera.cpp \
-    Viewport/canvasContextMenu.cpp \
-    Viewport/glCanvas.cpp \
-    Viewport/graphicsDevice.cpp \
-    Visualizations/squarifiedTreemap.cpp \
-    Visualizations/visualization.cpp \
-    aboutDialog.cpp
+   DataStructs/block.cpp \
+   DataStructs/fileInfo.cpp \
+   DataStructs/light.cpp \
+   DataStructs/vizNode.cpp \
+   DataStructs/doublePoint3d.cpp \
+   DataStructs/driveScanningParameters.cpp \
+   DriveScanner/driveScanner.cpp \
+   DriveScanner/scanningWorker.cpp \
+   HID/keyboardManager.cpp \
+   HID/xboxController.cpp \
+   main.cpp \
+   optionsManager.cpp \
+   Scene/crosshairAsset.cpp \
+   Scene/debuggingRayAsset.cpp \
+   Scene/gridAsset.cpp \
+   Scene/lineAsset.cpp \
+   Scene/sceneAsset.cpp \
+   Scene/visualizationAsset.cpp \
+   Viewport/camera.cpp \
+   Viewport/canvasContextMenu.cpp \
+   Viewport/glCanvas.cpp \
+   Viewport/graphicsDevice.cpp \
+   Visualizations/squarifiedTreemap.cpp \
+   Visualizations/visualization.cpp \
+   Windows/aboutDialog.cpp \
+   Windows/mainWindow.cpp
 
 HEADERS  += \
-    constants.h \
-    DataStructs/block.h \
-    DataStructs/fileInfo.h \
-    DataStructs/light.h \
-    DataStructs/vizNode.h \
-    DataStructs/doublePoint3d.h \
-    DataStructs/driveScanningParameters.h \
-    DriveScanner/driveScanner.h \
-    DriveScanner/scanningWorker.h \
-    HID/keyboardManager.h \
-    HID/xboxController.h \
-    mainWindow.h \
-    optionsManager.h \
-    Scene/crosshairAsset.h \
-    Scene/debuggingRayAsset.h \
-    Scene/gridAsset.h \
-    Scene/lineAsset.h \
-    Scene/sceneAsset.h \
-    Scene/visualizationAsset.h \
-    ThirdParty/stopwatch.hpp \
-    ThirdParty/Tree.hpp \
-    Utilities/colorGradient.hpp \
-    Utilities/scopeExit.hpp \
-    Viewport/camera.h \
-    Viewport/canvasContextMenu.h \
-    Viewport/glCanvas.h \
-    Viewport/graphicsDevice.h \
-    Visualizations/squarifiedTreemap.h \
-    Visualizations/visualization.h \
-    aboutDialog.h
+   constants.h \
+   DataStructs/block.h \
+   DataStructs/fileInfo.h \
+   DataStructs/light.h \
+   DataStructs/vizNode.h \
+   DataStructs/doublePoint3d.h \
+   DataStructs/driveScanningParameters.h \
+   DriveScanner/driveScanner.h \
+   DriveScanner/scanningWorker.h \
+   HID/keyboardManager.h \
+   HID/xboxController.h \
+   optionsManager.h \
+   Scene/crosshairAsset.h \
+   Scene/debuggingRayAsset.h \
+   Scene/gridAsset.h \
+   Scene/lineAsset.h \
+   Scene/sceneAsset.h \
+   Scene/visualizationAsset.h \
+   ThirdParty/stopwatch.hpp \
+   ThirdParty/Tree.hpp \
+   Utilities/colorGradient.hpp \
+   Utilities/scopeExit.hpp \
+   Viewport/camera.h \
+   Viewport/canvasContextMenu.h \
+   Viewport/glCanvas.h \
+   Viewport/graphicsDevice.h \
+   Visualizations/squarifiedTreemap.h \
+   Visualizations/visualization.h \
+   Windows/aboutDialog.h \
+   Windows/mainWindow.h
 
 FORMS    += \
-    mainWindow.ui \
-    aboutDialog.ui
+   Windows/mainWindow.ui \
+   Windows/aboutDialog.ui
 
 INCLUDEPATH += ../../boost_1_60_0
 
 DISTFILES += \
-    Shaders/visualizationFragmentShader.frag \
-    Shaders/visualizationVertexShader.vert \
-    Shaders/simpleLineFragmentShader.frag \
-    Shaders/simpleLineVertexShader.vert
+   Shaders/visualizationFragmentShader.frag \
+   Shaders/visualizationVertexShader.vert \
+   Shaders/simpleLineFragmentShader.frag \
+   Shaders/simpleLineVertexShader.vert
 
 RESOURCES += \
-    resources.qrc
+   resources.qrc
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../boost_1_60_0/stage/lib/ -lboost_filesystem-vc140-mt-1_60
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../boost_1_60_0/stage/lib/ -lboost_filesystem-vc140-mt-gd-1_60

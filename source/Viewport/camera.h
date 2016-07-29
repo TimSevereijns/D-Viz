@@ -214,9 +214,9 @@ class Camera
        *
        * @param[in] point           The point being targeted.
        *
-       * @returns True if the point in question lies in front of the camera's focal plane. Note
-       * that the near plane still lies a little bit in front of positional plane. Returns false if
-       * the point lies behind the camera.
+       * @returns True if the point in question lies in front of the camera's near view plane. Note
+       * that the near plane still lies a little bit in front of camera's actual position.
+       * Returns false if the point lies behind the camera's near view plane.
        */
       bool IsPointInFrontOfCamera(const QVector3D& point) const;
 

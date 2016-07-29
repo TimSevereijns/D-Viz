@@ -675,7 +675,7 @@ void GLCanvas::HighlightSimilarExtensions(const TreeNode<VizNode>& selectedNode)
       m_highlightedNodes.emplace_back(&node);
    });
 
-    HighlightSelectedNodes();
+   HighlightSelectedNodes();
 }
 
 void GLCanvas::ShowContextMenu(const QPoint& point)

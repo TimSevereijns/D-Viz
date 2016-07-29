@@ -2,11 +2,9 @@
 #define GLCANVAS_H
 
 #include "camera.h"
-#include "mainWindow.h"
-#include "optionsManager.h"
-
 #include "HID/keyboardManager.h"
-
+#include "optionsManager.h"
+#include "Windows/mainWindow.h"
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
 #include "Scene/sceneAsset.h"
