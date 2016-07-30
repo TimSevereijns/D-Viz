@@ -398,6 +398,12 @@ Tree<VizNode>& VisualizationModel::GetTree()
    return *m_theTree;
 }
 
+const Tree<VizNode>& VisualizationModel::GetTree() const
+{
+   assert(m_theTree);
+   return *m_theTree;
+}
+
 void VisualizationModel::SortNodes(Tree<VizNode>& tree)
 {
    for (auto& node : tree)

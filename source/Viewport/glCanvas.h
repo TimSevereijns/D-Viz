@@ -7,6 +7,7 @@
 #include "Windows/mainWindow.h"
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
+#include "mainModel.h"
 #include "Scene/sceneAsset.h"
 #include "Viewport/graphicsDevice.h"
 #include "Visualizations/visualization.h"
@@ -37,14 +38,18 @@ class GLCanvas : public QOpenGLWidget
        *
        * @param[in] parent          Pointer to the parent UI element.
        */
-      explicit GLCanvas(QWidget* parent = nullptr);
+      GLCanvas(
+         MainModel& mainModel,
+         QWidget* parent = nullptr);
 
       /**
        * @brief Creates a new visualization.
        *
        * @param[in] parameters      @see VisualizationParameters
+       *
+       * @todo Move entire function to model.
        */
-      void CreateNewVisualization(VisualizationParameters& parameters);
+      //void CreateNewVisualization(VisualizationParameters& parameters);
 
       /**
        * @brief Reloads the current visualization.
@@ -79,7 +84,7 @@ class GLCanvas : public QOpenGLWidget
       /**
        * @brief Reads the input text from the input box and performs the search.
        */
-      void PerformRegexSearch();
+      void PerformNodeSearch();
 
    private slots:
 
@@ -95,7 +100,7 @@ class GLCanvas : public QOpenGLWidget
        *
        * @param[in] vizParameters   @see VisualizationParameters
        */
-      void ScanDrive(VisualizationParameters& vizParameters);
+      //void ScanDrive(VisualizationParameters& vizParameters);
 
       /**
        * @brief Computes and updates the running average of the visualization's frame rate.
@@ -170,9 +175,9 @@ class GLCanvas : public QOpenGLWidget
        * @param[in] numberOfFilesScanned     The number of scanned files that can be visualized.
        * @param[in] parameters               @see VisualizationParameters
        */
-      void AskUserToLimitFileSize(
-         std::uintmax_t numberOfFilesScanned,
-         VisualizationParameters& parameters) const;
+//      void AskUserToLimitFileSize(
+//         std::uintmax_t numberOfFilesScanned,
+//         VisualizationParameters& parameters) const;
 
       /**
        * @brief Highlights the ancestors of the passed in node.
@@ -197,9 +202,16 @@ class GLCanvas : public QOpenGLWidget
       void HighlightSimilarExtensions(const TreeNode<VizNode>& selectedNode);
 
       /**
+       * @brief HighlightSelectedNodes
+       */
+      void HighlightSelectedNodes();
+
+      /**
        * @brief Returns any highlighted nodes back to their unhighlighted colors.
        */
       void ClearHighlightedNodes();
+
+      MainModel& m_model;
 
       bool m_isPaintingSuspended{ false };
       bool m_isVisualizationLoaded{ false };
@@ -207,15 +219,19 @@ class GLCanvas : public QOpenGLWidget
       bool m_isLeftTriggerDown{ false };
       bool m_isRightTriggerDown{ false };
 
+      // @todo Turn this into a reference:
       MainWindow* m_mainWindow{ nullptr };
 
-      TreeNode<VizNode>* m_selectedNode{ nullptr };
+      // @todo Move to a model class:
+      //TreeNode<VizNode>* m_selectedNode{ nullptr };
 
-      std::vector<const TreeNode<VizNode>*> m_highlightedNodes;
+      // @todo Move to a model class:
+      //std::vector<const TreeNode<VizNode>*> m_highlightedNodes;
 
       std::unique_ptr<GraphicsDevice> m_graphicsDevice{ nullptr };
 
-      std::unique_ptr<VisualizationModel> m_theVisualization{ nullptr };
+      // @todo Move to a model class:
+      //std::unique_ptr<VisualizationModel> m_theVisualization{ nullptr };
 
       std::unique_ptr<QTimer> m_frameRedrawTimer{ nullptr };
       std::unique_ptr<QTimer> m_inputCaptureTimer{ nullptr };
@@ -239,13 +255,15 @@ class GLCanvas : public QOpenGLWidget
          Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, -VisualizationModel::ROOT_BLOCK_DEPTH } }
       };
 
-      VisualizationParameters m_visualizationParameters;
+      // @todo Move to a model class:
+      //VisualizationParameters m_visualizationParameters;
 
       std::shared_ptr<OptionsManager> m_optionsManager;
 
       Camera m_camera;
 
-      DriveScanner m_scanner;
+      // @todo Move to a model class:
+      //DriveScanner m_scanner;
 
       KeyboardManager m_keyboardManager;
 
@@ -256,7 +274,6 @@ class GLCanvas : public QOpenGLWidget
       std::vector<std::unique_ptr<SceneAsset>> m_sceneAssets;
 
       std::deque<int> m_frameRateDeque;
-      void HighlightSelectedNodes();
 };
 
 #endif // GLCANVAS_H

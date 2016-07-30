@@ -148,8 +148,12 @@ namespace
    };
 }
 
-GLCanvas::GLCanvas(QWidget* parent) :
+GLCanvas::GLCanvas(
+   MainModel& mainModel,
+   QWidget* parent)
+   :
    QOpenGLWidget{ parent },
+   m_model{ mainModel },
    m_mainWindow{ reinterpret_cast<MainWindow*>(parent) }
 {
    if (!m_mainWindow)
@@ -210,98 +214,97 @@ void GLCanvas::resizeGL(int width, int height)
    m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
 }
 
+//void GLCanvas::CreateNewVisualization(VisualizationParameters& parameters)
+//{
+//   if (parameters.rootDirectory.empty())
+//   {
+//      return;
+//   }
 
-void GLCanvas::CreateNewVisualization(VisualizationParameters& parameters)
-{
-   if (parameters.rootDirectory.empty())
-   {
-      return;
-   }
+//   if (!m_model.HasVisualizationBeenLoaded() || parameters.forceNewScan)
+//   {
+//      m_theVisualization.reset(new SquarifiedTreeMap{ parameters });
+//      ScanDrive(parameters);
+//   }
+//}
 
-   if (!m_theVisualization || parameters.forceNewScan)
-   {
-      m_theVisualization.reset(new SquarifiedTreeMap{ parameters });
-      ScanDrive(parameters);
-   }
-}
+//void GLCanvas::ScanDrive(VisualizationParameters& vizParameters)
+//{
+//   const auto progressHandler =
+//      [&] (const std::uintmax_t numberOfFilesScanned)
+//   {
+//      std::wstringstream message;
+//      message.imbue(std::locale{ "" });
+//      message << std::fixed << L"Files Scanned: " << numberOfFilesScanned;
+//      m_mainWindow->SetStatusBarMessage(message.str());
+//   };
 
-void GLCanvas::ScanDrive(VisualizationParameters& vizParameters)
-{
-   const auto progressHandler =
-      [&] (const std::uintmax_t numberOfFilesScanned)
-   {
-      std::wstringstream message;
-      message.imbue(std::locale{ "" });
-      message << std::fixed << L"Files Scanned: " << numberOfFilesScanned;
-      m_mainWindow->SetStatusBarMessage(message.str());
-   };
+//   const auto completionHandler =
+//      [&, vizParameters] (const std::uintmax_t numberOfFilesScanned,
+//      std::shared_ptr<Tree<VizNode>> fileTree) mutable
+//   {
+//      QCursor previousCursor = cursor();
+//      setCursor(Qt::WaitCursor);
+//      ON_SCOPE_EXIT{ setCursor(previousCursor); };
+//      QApplication::processEvents();
 
-   const auto completionHandler =
-      [&, vizParameters] (const std::uintmax_t numberOfFilesScanned,
-      std::shared_ptr<Tree<VizNode>> fileTree) mutable
-   {
-      QCursor previousCursor = cursor();
-      setCursor(Qt::WaitCursor);
-      ON_SCOPE_EXIT{ setCursor(previousCursor); };
-      QApplication::processEvents();
+//      std::wstringstream message;
+//      message.imbue(std::locale{ "" });
+//      message << std::fixed << L"Total Files Scanned: " << numberOfFilesScanned;
+//      m_mainWindow->SetStatusBarMessage(message.str());
 
-      std::wstringstream message;
-      message.imbue(std::locale{ "" });
-      message << std::fixed << L"Total Files Scanned: " << numberOfFilesScanned;
-      m_mainWindow->SetStatusBarMessage(message.str());
+//      AskUserToLimitFileSize(numberOfFilesScanned, vizParameters);
 
-      AskUserToLimitFileSize(numberOfFilesScanned, vizParameters);
+//      m_theVisualization->Parse(fileTree);
+//      m_theVisualization->UpdateBoundingBoxes();
 
-      m_theVisualization->Parse(fileTree);
-      m_theVisualization->UpdateBoundingBoxes();
+//      ReloadVisualization(vizParameters);
+//   };
 
-      ReloadVisualization(vizParameters);
-   };
+//   const DriveScanningParameters scanningParameters
+//   {
+//      vizParameters.rootDirectory,
+//      progressHandler,
+//      completionHandler
+//   };
 
-   const DriveScanningParameters scanningParameters
-   {
-      vizParameters.rootDirectory,
-      progressHandler,
-      completionHandler
-   };
+//   m_scanner.StartScanning(scanningParameters);
+//}
 
-   m_scanner.StartScanning(scanningParameters);
-}
+//void GLCanvas::AskUserToLimitFileSize(
+//   const std::uintmax_t numberOfFilesScanned,
+//   VisualizationParameters& parameters) const
+//{
+//   assert(numberOfFilesScanned > 0);
+//   if (numberOfFilesScanned < 250'000)
+//   {
+//      return;
+//   }
 
-void GLCanvas::AskUserToLimitFileSize(
-   const std::uintmax_t numberOfFilesScanned,
-   VisualizationParameters& parameters) const
-{
-   assert(numberOfFilesScanned > 0);
-   if (numberOfFilesScanned < 250'000)
-   {
-      return;
-   }
+//   if (parameters.minimumFileSize < Constants::FileSize::ONE_MEBIBYTE)
+//   {
+//      QMessageBox messageBox;
+//      messageBox.setIcon(QMessageBox::Warning);
+//      messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+//      messageBox.setText(
+//         "More than a quarter million files were scanned. "
+//         "Would you like to limit the visualized files to those 1 MiB or larger in "
+//         "order to reduce the load on the GPU and system memory?");
 
-   if (parameters.minimumFileSize < Constants::FileSize::ONE_MEBIBYTE)
-   {
-      QMessageBox messageBox;
-      messageBox.setIcon(QMessageBox::Warning);
-      messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-      messageBox.setText(
-         "More than a quarter million files were scanned. "
-         "Would you like to limit the visualized files to those 1 MiB or larger in "
-         "order to reduce the load on the GPU and system memory?");
-
-      const int election = messageBox.exec();
-      switch (election)
-      {
-         case QMessageBox::Yes:
-            parameters.minimumFileSize = Constants::FileSize::ONE_MEBIBYTE;
-            m_mainWindow->SetFilePruningComboBoxValue(Constants::FileSize::ONE_MEBIBYTE);
-            return;
-         case QMessageBox::No:
-            return;
-         default:
-            assert(false);
-      }
-   }
-}
+//      const int election = messageBox.exec();
+//      switch (election)
+//      {
+//         case QMessageBox::Yes:
+//            parameters.minimumFileSize = Constants::FileSize::ONE_MEBIBYTE;
+//            m_mainWindow->SetFilePruningComboBoxValue(Constants::FileSize::ONE_MEBIBYTE);
+//            return;
+//         case QMessageBox::No:
+//            return;
+//         default:
+//            assert(false);
+//      }
+//   }
+//}
 
 void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
 {
@@ -312,8 +315,8 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
    auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
    assert(vizAsset);
 
-   m_visualizationParameters = parameters;
-   const auto blockCount = vizAsset->LoadBufferData(m_theVisualization->GetTree(), parameters);
+   //m_visualizationParameters = parameters;
+   const auto blockCount = vizAsset->LoadBufferData(m_model.GetTree(), parameters);
 
    m_isVisualizationLoaded = blockCount > 0;
 
@@ -397,35 +400,35 @@ void GLCanvas::HandleNodeSelection(TreeNode<VizNode>* selectedNode)
    m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
       *selectedNode,
       SceneAsset::UpdateAction::SELECT,
-      m_visualizationParameters);
+      m_model.GetVisualizationParameters());
 
-   m_selectedNode = selectedNode;
+   //m_selectedNode = selectedNode;
 }
 
 void GLCanvas::HandleRightClick(const QPoint& point)
 {
-   if (!m_theVisualization)
+   if (!m_model.HasVisualizationBeenLoaded())
    {
       return;
    }
 
-   const auto ray = m_camera.ShootRayIntoScene(point);
-   auto* selection = m_theVisualization->FindNearestIntersection(m_camera, ray,
-      m_visualizationParameters);
+//   const auto ray = m_camera.ShootRayIntoScene(point);
+//   auto* selection = m_theVisualization->FindNearestIntersection(m_camera, ray,
+//     /m_model.GetVisualizationParameters());
 
-   if (selection)
-   {
-      HandleNodeSelection(selection);
-   }
-   else
-   {
-      ClearHighlightedNodes();
+//   if (selection)
+//   {
+//      HandleNodeSelection(selection);
+//   }
+//   else
+//   {
+//      ClearHighlightedNodes();
 
-       auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
-       assert(vizAsset);
+//       auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
+//       assert(vizAsset);
 
-       PrintMetadataToStatusBar(vizAsset->GetBlockCount(), *m_mainWindow);
-   }
+//       PrintMetadataToStatusBar(vizAsset->GetBlockCount(), *m_mainWindow);
+//   }
 }
 
 void GLCanvas::mousePressEvent(QMouseEvent* const event)
@@ -546,14 +549,14 @@ void GLCanvas::HighlightSelectedNodes()
 {
    std::uintmax_t selectionSizeInBytes{ 0 };
 
-   for (const auto* node : m_highlightedNodes)
+   for (const auto* node : m_model.GetHighlightedNodes())
    {
       selectionSizeInBytes += node->GetData().file.size;
 
       m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
          *node,
          SceneAsset::UpdateAction::SELECT,
-         m_visualizationParameters);
+         m_model.GetVisualizationParameters());
    }
 
    const auto sizeAndUnits = ConvertFileSizeToMostAppropriateUnits(selectionSizeInBytes);
@@ -564,8 +567,8 @@ void GLCanvas::HighlightSelectedNodes()
    message.precision(isInBytes ? 0 : 2);
    message
       << L"Found "
-      << m_highlightedNodes.size()
-      << (m_highlightedNodes.size() == 1 ? L" node" : L" nodes")
+      << m_model.GetHighlightedNodes().size()
+      << (m_model.GetHighlightedNodes().size() == 1 ? L" node" : L" nodes")
       << L", representing "
       << std::fixed
       << sizeAndUnits.first
@@ -577,26 +580,26 @@ void GLCanvas::HighlightSelectedNodes()
 
 void GLCanvas::ClearHighlightedNodes()
 {
-   if (m_selectedNode)
+   if (m_model.GetSelectedNode())
    {
       m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
-         *m_selectedNode,
+         *m_model.GetSelectedNode(),
          SceneAsset::UpdateAction::DESELECT,
-         m_visualizationParameters);
+         m_model.GetVisualizationParameters());
    }
 
-   for (auto* node : m_highlightedNodes)
+   for (auto* node : m_model.GetHighlightedNodes())
    {
       m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
          *node,
          SceneAsset::UpdateAction::DESELECT,
-         m_visualizationParameters);
+         m_model.GetVisualizationParameters());
    }
 
-   m_highlightedNodes.clear();
+   //m_highlightedNodes.clear();
 }
 
-void GLCanvas::PerformRegexSearch()
+void GLCanvas::PerformNodeSearch()
 {
    const bool shouldSearchFiles{ m_optionsManager->m_shouldSearchFiles };
    const bool shouldSearchDirectories{ m_optionsManager->m_shouldSearchDirectories };
@@ -611,12 +614,14 @@ void GLCanvas::PerformRegexSearch()
 
    ClearHighlightedNodes();
 
+   const auto& vizParams = m_model.GetVisualizationParameters();
+
    std::for_each(
-      Tree<VizNode>::PostOrderIterator{ m_theVisualization->GetTree().GetHead() },
+      Tree<VizNode>::PostOrderIterator{ m_model.GetTree().GetHead() },
       Tree<VizNode>::PostOrderIterator{ },
       [&] (Tree<VizNode>::const_reference node)
    {
-      if (node->file.size < m_visualizationParameters.minimumFileSize)
+      if (node->file.size < vizParams.minimumFileSize)
       {
          return;
       }
@@ -637,17 +642,17 @@ void GLCanvas::PerformRegexSearch()
          return;
       }
 
-      m_highlightedNodes.emplace_back(&node);
+      //m_highlightedNodes.emplace_back(&node);
    });
 
-   if (m_highlightedNodes.empty())
-   {
-      m_mainWindow->SetStatusBarMessage(L"No Matches Found", 3'000);
-   }
-   else
-   {
-      HighlightSelectedNodes();
-   }
+//   if (m_highlightedNodes.empty())
+//   {
+//      m_mainWindow->SetStatusBarMessage(L"No Matches Found", 3'000);
+//   }
+//   else
+//   {
+//      HighlightSelectedNodes();
+//   }
 }
 
 void GLCanvas::HighlightAncestors(const TreeNode<VizNode>& selectedNode)
@@ -660,12 +665,12 @@ void GLCanvas::HighlightAncestors(const TreeNode<VizNode>& selectedNode)
       m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
          *currentNode,
          SceneAsset::UpdateAction::SELECT,
-         m_visualizationParameters);
+         m_model.GetVisualizationParameters());
 
       currentNode = currentNode->GetParent();
       if (currentNode)
       {
-         m_highlightedNodes.emplace_back(currentNode);
+         //m_highlightedNodes.emplace_back(currentNode);
       }
    }
    while (currentNode);
@@ -675,18 +680,20 @@ void GLCanvas::HighlightDescendants(const TreeNode<VizNode>& selectedNode)
 {
    ClearHighlightedNodes();
 
+   const auto& vizParams = m_model.GetVisualizationParameters();
+
    std::for_each(
       Tree<VizNode>::LeafIterator{ &selectedNode },
       Tree<VizNode>::LeafIterator{ },
       [&] (Tree<VizNode>::const_reference node)
    {
-      if ((m_visualizationParameters.onlyShowDirectories && node->file.type == FileType::REGULAR)
-         || node->file.size < m_visualizationParameters.minimumFileSize)
+      if ((vizParams.onlyShowDirectories && node->file.type == FileType::REGULAR)
+         || node->file.size < vizParams.minimumFileSize)
       {
          return;
       }
 
-      m_highlightedNodes.emplace_back(&node);
+      //m_highlightedNodes.emplace_back(&node);
    });
 
    HighlightSelectedNodes();
@@ -696,19 +703,21 @@ void GLCanvas::HighlightSimilarExtensions(const TreeNode<VizNode>& selectedNode)
 {
    ClearHighlightedNodes();
 
+   const auto& vizParams = m_model.GetVisualizationParameters();
+
    std::for_each(
-      Tree<VizNode>::LeafIterator{ m_theVisualization->GetTree().GetHead() },
+      Tree<VizNode>::LeafIterator{ m_model.GetTree().GetHead() },
       Tree<VizNode>::LeafIterator{ },
       [&] (Tree<VizNode>::const_reference node)
    {
-      if ((m_visualizationParameters.onlyShowDirectories && node->file.type == FileType::REGULAR)
-         || node->file.size < m_visualizationParameters.minimumFileSize
+      if ((vizParams.onlyShowDirectories && node->file.type == FileType::REGULAR)
+         || node->file.size < vizParams.minimumFileSize
          || node->file.extension != selectedNode->file.extension)
       {
          return;
       }
 
-      m_highlightedNodes.emplace_back(&node);
+      //m_highlightedNodes.emplace_back(&node);
    });
 
    HighlightSelectedNodes();
@@ -716,7 +725,8 @@ void GLCanvas::HighlightSimilarExtensions(const TreeNode<VizNode>& selectedNode)
 
 void GLCanvas::ShowContextMenu(const QPoint& point)
 {
-   if (!m_selectedNode)
+   const auto* const selectedNode = m_model.GetSelectedNode();
+   if (!selectedNode)
    {
       return;
    }
@@ -724,21 +734,21 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
    const QPoint globalPoint = mapToGlobal(point);
 
    CanvasContextMenu menu{ m_keyboardManager };
-   menu.addAction("Highlight Ancestors", [&] { HighlightAncestors(*m_selectedNode); });
-   menu.addAction("Highlight Descendants", [&] { HighlightDescendants(*m_selectedNode); });
+   menu.addAction("Highlight Ancestors", [&] { HighlightAncestors(*selectedNode); });
+   menu.addAction("Highlight Descendants", [&] { HighlightDescendants(*selectedNode); });
 
-   if (m_selectedNode->GetData().file.type == FileType::REGULAR)
+   if (selectedNode->GetData().file.type == FileType::REGULAR)
    {
       const auto entryText =
          QString::fromStdWString(L"Highlight All ")
-         + QString::fromStdWString(m_selectedNode->GetData().file.extension)
+         + QString::fromStdWString(selectedNode->GetData().file.extension)
          + QString::fromStdWString(L" Files");
 
-      menu.addAction(entryText, [&] { HighlightSimilarExtensions(*m_selectedNode); });
+      menu.addAction(entryText, [&] { HighlightSimilarExtensions(*selectedNode); });
    }
 
    menu.addSeparator();
-   menu.addAction("Show in Explorer", [&] { ShowInFileExplorer(*m_selectedNode); });
+   menu.addAction("Show in Explorer", [&] { ShowInFileExplorer(*selectedNode); });
 
    menu.exec(globalPoint);
 }

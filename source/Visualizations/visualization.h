@@ -92,6 +92,12 @@ class VisualizationModel
       Tree<VizNode>& GetTree();
 
       /**
+       * @brief GetTree
+       * @return
+       */
+      const Tree<VizNode>& GetTree() const;
+
+      /**
        * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each
        * node by their respective file sizes.
        *

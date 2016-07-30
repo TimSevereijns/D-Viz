@@ -38,7 +38,9 @@ SOURCES += \
    Visualizations/squarifiedTreemap.cpp \
    Visualizations/visualization.cpp \
    Windows/aboutDialog.cpp \
-   Windows/mainWindow.cpp
+   Windows/mainWindow.cpp \
+    Windows/breakdownDialog.cpp \
+    mainModel.cpp
 
 HEADERS  += \
    constants.h \
@@ -70,11 +72,14 @@ HEADERS  += \
    Visualizations/squarifiedTreemap.h \
    Visualizations/visualization.h \
    Windows/aboutDialog.h \
-   Windows/mainWindow.h
+   Windows/mainWindow.h \
+    Windows/breakdownDialog.h \
+    mainModel.h
 
 FORMS    += \
    Windows/mainWindow.ui \
-   Windows/aboutDialog.ui
+   Windows/aboutDialog.ui \
+    Windows/breakdownDialog.ui
 
 INCLUDEPATH += ../../boost_1_60_0
 

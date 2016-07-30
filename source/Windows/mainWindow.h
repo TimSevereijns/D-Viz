@@ -5,8 +5,10 @@
 #include <QMainWindow>
 
 #include "aboutDialog.h"
+#include "breakdownDialog.h"
 #include "constants.h"
 #include "HID/xboxController.h"
+#include "mainModel.h"
 
 namespace Ui
 {
@@ -22,7 +24,13 @@ class MainWindow : public QMainWindow
 
    public:
 
-      explicit MainWindow(QWidget* parent = nullptr);
+      /**
+       * @brief MainWindow
+       *
+       * @param[in] mainModel
+       * @param[in] parent
+       */
+      MainWindow(QWidget* parent = nullptr);
 
       ~MainWindow();
 
@@ -135,6 +143,8 @@ class MainWindow : public QMainWindow
       void SetupSidebar();
       void SetupXboxController();
 
+      MainModel m_model;
+
       bool m_showDirectoriesOnly{ false };
       bool m_useDirectoryGradient{ false };
       bool m_xboxControllerConnected{ false };
@@ -159,6 +169,8 @@ class MainWindow : public QMainWindow
       std::unique_ptr<GLCanvas> m_glCanvas{ nullptr };
 
       std::unique_ptr<AboutDialog> m_aboutDialog{ nullptr };
+
+      std::unique_ptr<BreakdownDialog> m_breakdownDialog{ nullptr };
 
       std::shared_ptr<OptionsManager> m_optionsManager{ nullptr };
 

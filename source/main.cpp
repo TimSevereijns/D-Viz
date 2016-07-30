@@ -1,4 +1,5 @@
 #include "Windows/mainWindow.h"
+
 #include <QApplication>
 
 template<typename T>
@@ -13,7 +14,7 @@ int main(int argc, char* argv[])
 
    QApplication application{ argc, argv };
 
-   MainWindow mainWindow{ /* parent = */ 0 };
+   MainWindow mainWindow{ /* parent = */ nullptr };
    mainWindow.show();
 
    return application.exec();

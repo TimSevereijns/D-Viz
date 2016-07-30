@@ -14,7 +14,7 @@
 #include <QMenuBar>
 #include <QMessageBox>
 
-MainWindow::MainWindow(QWidget* parent /* = 0 */) :
+MainWindow::MainWindow(QWidget* parent /* = nullptr */) :
    QMainWindow(parent),
    m_optionsManager(new OptionsManager),
    m_ui(new Ui::MainWindow)
@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget* parent /* = 0 */) :
 
    assert(m_optionsManager);
 
-   m_glCanvas.reset(new GLCanvas{ this });
+   m_glCanvas.reset(new GLCanvas{ m_model, this });
    m_ui->canvasLayout->addWidget(m_glCanvas.get());
 
    SetupSidebar();
@@ -111,10 +111,10 @@ void MainWindow::SetupSidebar()
       m_optionsManager.get(), &OptionsManager::OnAttachLightToCameraStateChanged);
 
    connect(m_ui->regexSearchBox, &QLineEdit::returnPressed,
-      m_glCanvas.get(), &GLCanvas::PerformRegexSearch);
+      m_glCanvas.get(), &GLCanvas::PerformNodeSearch);
 
    connect(m_ui->regexSearchButton, &QPushButton::clicked,
-      m_glCanvas.get(), &GLCanvas::PerformRegexSearch);
+      m_glCanvas.get(), &GLCanvas::PerformNodeSearch);
 
    connect(m_ui->regexSearchBox, &QLineEdit::textChanged, this,
       [&] (const auto& newText)
@@ -127,6 +127,17 @@ void MainWindow::SetupSidebar()
 
    connect(m_ui->searchFilesCheckBox, &QCheckBox::stateChanged,
       m_optionsManager.get(), &OptionsManager::OnShouldSearchFilesChanged);
+
+   connect(m_ui->showBreakdownButton, &QPushButton::clicked, this,
+      [&] ()
+   {
+      if (!m_breakdownDialog)
+      {
+         m_breakdownDialog = std::make_unique<BreakdownDialog>(this);
+      }
+
+      m_breakdownDialog->show();
+   });
 }
 
 void MainWindow::SetupXboxController()
@@ -147,6 +158,7 @@ std::wstring MainWindow::GetDirectoryToVisualize() const
 {
    return m_directoryToVisualize;
 }
+
 void MainWindow::CreateMenus()
 {
    CreateFileMenu();
@@ -215,7 +227,7 @@ void MainWindow::OnFileMenuNewScan()
    parameters.forceNewScan = true;
    parameters.minimumFileSize = m_sizePruningOptions[comboBoxIndex].first;
 
-   m_glCanvas->CreateNewVisualization(parameters);
+   //m_glCanvas->CreateNewVisualization(parameters);
 }
 
 void MainWindow::OnFPSReadoutToggled(bool isEnabled)
