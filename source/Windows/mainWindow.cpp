@@ -1,11 +1,13 @@
 #include "mainWindow.h"
 
 #include "optionsManager.h"
+#include "Utilities/scopeExit.hpp"
 #include "Viewport/glCanvas.h"
 
 #include <cassert>
 #include <iostream>
 #include <limits>
+#include <sstream>
 
 #include "ui_mainwindow.h"
 
@@ -14,8 +16,12 @@
 #include <QMenuBar>
 #include <QMessageBox>
 
-MainWindow::MainWindow(QWidget* parent /* = nullptr */) :
+MainWindow::MainWindow(
+   MainModel& model,
+   QWidget* parent /* = nullptr */)
+   :
    QMainWindow(parent),
+   m_model{ model },
    m_optionsManager(new OptionsManager),
    m_ui(new Ui::MainWindow)
 {
@@ -27,7 +33,7 @@ MainWindow::MainWindow(QWidget* parent /* = nullptr */) :
 
    assert(m_optionsManager);
 
-   m_glCanvas.reset(new GLCanvas{ m_model, this });
+   m_glCanvas.reset(new GLCanvas{ model, this });
    m_ui->canvasLayout->addWidget(m_glCanvas.get());
 
    SetupSidebar();
@@ -70,9 +76,11 @@ void MainWindow::SetupSidebar()
       parameters.forceNewScan = false;
       parameters.minimumFileSize = m_sizePruningOptions[pruneSizeIndex].first;
 
+      m_model.SetVisualizationParameters(parameters);
+
       if (!m_directoryToVisualize.empty())
       {
-         m_glCanvas->ReloadVisualization(parameters);
+         m_glCanvas->ReloadVisualization();
       }
    });
 
@@ -219,15 +227,14 @@ void MainWindow::OnFileMenuNewScan()
 
    m_directoryToVisualize = selectedDirectory.toStdWString();
 
-   const auto comboBoxIndex = m_ui->pruneSizeComboBox->currentIndex();
-
    VisualizationParameters parameters;
    parameters.rootDirectory = m_directoryToVisualize;
    parameters.onlyShowDirectories = m_showDirectoriesOnly;
    parameters.forceNewScan = true;
-   parameters.minimumFileSize = m_sizePruningOptions[comboBoxIndex].first;
+   parameters.minimumFileSize = m_sizePruningOptions[m_ui->pruneSizeComboBox->currentIndex()].first;
 
-   //m_glCanvas->CreateNewVisualization(parameters);
+   m_model.SetVisualizationParameters(parameters);
+   m_model.GenerateNewVisualization(parameters);
 }
 
 void MainWindow::OnFPSReadoutToggled(bool isEnabled)
@@ -246,6 +253,11 @@ bool MainWindow::ShouldShowFPS() const
 std::wstring MainWindow::GetSearchQuery() const
 {
    return m_searchQuery;
+}
+
+MainModel& MainWindow::GetModel()
+{
+   return m_model;
 }
 
 void MainWindow::LaunchAboutDialog()
@@ -276,6 +288,85 @@ bool MainWindow::IsXboxControllerConnected() const
 void MainWindow::XboxControllerStateChanged(XboxController::State state)
 {
    m_xboxControllerState = std::make_unique<XboxController::State>(std::move(state));
+}
+
+void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
+{
+   const auto progressHandler =
+      [&] (const std::uintmax_t numberOfFilesScanned)
+   {
+      std::wstringstream message;
+      message.imbue(std::locale{ "" });
+      message << std::fixed << L"Files Scanned: " << numberOfFilesScanned;
+      SetStatusBarMessage(message.str());
+   };
+
+   const auto completionHandler =
+      [&, vizParameters] (const std::uintmax_t numberOfFilesScanned,
+      std::shared_ptr<Tree<VizNode>> scanningResults) mutable
+   {
+      QCursor previousCursor = cursor();
+      setCursor(Qt::WaitCursor);
+      ON_SCOPE_EXIT{ setCursor(previousCursor); };
+      QApplication::processEvents();
+
+      std::wstringstream message;
+      message.imbue(std::locale{ "" });
+      message << std::fixed << L"Total Files Scanned: " << numberOfFilesScanned;
+      SetStatusBarMessage(message.str());
+
+      AskUserToLimitFileSize(numberOfFilesScanned, vizParameters);
+      // @todo May have to set the viz parameters on the model
+
+      m_model.ParseResults(scanningResults);
+      m_model.UpdateBoundingBoxes();
+
+      m_glCanvas->ReloadVisualization();
+   };
+
+   const DriveScanningParameters scanningParameters
+   {
+      vizParameters.rootDirectory,
+      progressHandler,
+      completionHandler
+   };
+
+   m_scanner.StartScanning(scanningParameters);
+}
+
+void MainWindow::AskUserToLimitFileSize(
+   const uintmax_t numberOfFilesScanned,
+   VisualizationParameters& parameters)
+{
+   assert(numberOfFilesScanned > 0);
+   if (numberOfFilesScanned < 250'000)
+   {
+      return;
+   }
+
+   if (parameters.minimumFileSize < Constants::FileSize::ONE_MEBIBYTE)
+   {
+      QMessageBox messageBox;
+      messageBox.setIcon(QMessageBox::Warning);
+      messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+      messageBox.setText(
+         "More than a quarter million files were scanned. "
+         "Would you like to limit the visualized files to those 1 MiB or larger in "
+         "order to reduce the load on the GPU and system memory?");
+
+      const int election = messageBox.exec();
+      switch (election)
+      {
+         case QMessageBox::Yes:
+            parameters.minimumFileSize = Constants::FileSize::ONE_MEBIBYTE;
+            SetFilePruningComboBoxValue(Constants::FileSize::ONE_MEBIBYTE);
+            return;
+         case QMessageBox::No:
+            return;
+         default:
+            assert(false);
+      }
+   }
 }
 
 void MainWindow::SetFieldOfViewSlider(int fieldOfView)

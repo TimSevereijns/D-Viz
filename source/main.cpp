@@ -2,7 +2,7 @@
 
 #include <QApplication>
 
-template<typename T>
+template<typename NodeDataType>
 class Tree;
 
 struct VizNode;
@@ -14,8 +14,10 @@ int main(int argc, char* argv[])
 
    QApplication application{ argc, argv };
 
-   MainWindow mainWindow{ /* parent = */ nullptr };
-   mainWindow.show();
+   MainModel model{ };
+   MainWindow view{ model, nullptr };
+   model.SetView(&view);
+   view.show();
 
    return application.exec();
 }

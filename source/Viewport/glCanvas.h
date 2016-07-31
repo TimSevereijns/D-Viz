@@ -2,15 +2,15 @@
 #define GLCANVAS_H
 
 #include "camera.h"
-#include "HID/keyboardManager.h"
-#include "optionsManager.h"
-#include "Windows/mainWindow.h"
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
+#include "HID/keyboardManager.h"
 #include "mainModel.h"
+#include "optionsManager.h"
 #include "Scene/sceneAsset.h"
 #include "Viewport/graphicsDevice.h"
 #include "Visualizations/visualization.h"
+#include "Windows/mainWindow.h"
 
 #include <chrono>
 #include <deque>
@@ -39,24 +39,15 @@ class GLCanvas : public QOpenGLWidget
        * @param[in] parent          Pointer to the parent UI element.
        */
       GLCanvas(
-         MainModel& mainModel,
+         MainModel& model,
          QWidget* parent = nullptr);
-
-      /**
-       * @brief Creates a new visualization.
-       *
-       * @param[in] parameters      @see VisualizationParameters
-       *
-       * @todo Move entire function to model.
-       */
-      //void CreateNewVisualization(VisualizationParameters& parameters);
 
       /**
        * @brief Reloads the current visualization.
        *
        * @param[in] parameters      @see VisualizationParameters
        */
-      void ReloadVisualization(const VisualizationParameters& parameters);
+      void ReloadVisualization();
 
       /**
        * @brief Sets the current field of view for the camera.
@@ -94,13 +85,6 @@ class GLCanvas : public QOpenGLWidget
       void HandleInput();
 
    private:
-
-      /**
-       * @brief Initiates a drive scan.
-       *
-       * @param[in] vizParameters   @see VisualizationParameters
-       */
-      //void ScanDrive(VisualizationParameters& vizParameters);
 
       /**
        * @brief Computes and updates the running average of the visualization's frame rate.
@@ -167,17 +151,6 @@ class GLCanvas : public QOpenGLWidget
        * @brief Initializes the vertex buffer for the origin marker.
        */
       void PrepareOriginMarkerVertexBuffers();
-
-      /**
-       * @brief Prompts the user if he or she would like to set a lower bound on which files are
-       * visualized.
-       *
-       * @param[in] numberOfFilesScanned     The number of scanned files that can be visualized.
-       * @param[in] parameters               @see VisualizationParameters
-       */
-//      void AskUserToLimitFileSize(
-//         std::uintmax_t numberOfFilesScanned,
-//         VisualizationParameters& parameters) const;
 
       /**
        * @brief Highlights the ancestors of the passed in node.
@@ -255,15 +228,9 @@ class GLCanvas : public QOpenGLWidget
          Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, -VisualizationModel::ROOT_BLOCK_DEPTH } }
       };
 
-      // @todo Move to a model class:
-      //VisualizationParameters m_visualizationParameters;
-
       std::shared_ptr<OptionsManager> m_optionsManager;
 
       Camera m_camera;
-
-      // @todo Move to a model class:
-      //DriveScanner m_scanner;
 
       KeyboardManager m_keyboardManager;
 

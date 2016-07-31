@@ -149,11 +149,11 @@ namespace
 }
 
 GLCanvas::GLCanvas(
-   MainModel& mainModel,
+   MainModel& model,
    QWidget* parent)
    :
    QOpenGLWidget{ parent },
-   m_model{ mainModel },
+   m_model{ model },
    m_mainWindow{ reinterpret_cast<MainWindow*>(parent) }
 {
    if (!m_mainWindow)
@@ -214,99 +214,7 @@ void GLCanvas::resizeGL(int width, int height)
    m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
 }
 
-//void GLCanvas::CreateNewVisualization(VisualizationParameters& parameters)
-//{
-//   if (parameters.rootDirectory.empty())
-//   {
-//      return;
-//   }
-
-//   if (!m_model.HasVisualizationBeenLoaded() || parameters.forceNewScan)
-//   {
-//      m_theVisualization.reset(new SquarifiedTreeMap{ parameters });
-//      ScanDrive(parameters);
-//   }
-//}
-
-//void GLCanvas::ScanDrive(VisualizationParameters& vizParameters)
-//{
-//   const auto progressHandler =
-//      [&] (const std::uintmax_t numberOfFilesScanned)
-//   {
-//      std::wstringstream message;
-//      message.imbue(std::locale{ "" });
-//      message << std::fixed << L"Files Scanned: " << numberOfFilesScanned;
-//      m_mainWindow->SetStatusBarMessage(message.str());
-//   };
-
-//   const auto completionHandler =
-//      [&, vizParameters] (const std::uintmax_t numberOfFilesScanned,
-//      std::shared_ptr<Tree<VizNode>> fileTree) mutable
-//   {
-//      QCursor previousCursor = cursor();
-//      setCursor(Qt::WaitCursor);
-//      ON_SCOPE_EXIT{ setCursor(previousCursor); };
-//      QApplication::processEvents();
-
-//      std::wstringstream message;
-//      message.imbue(std::locale{ "" });
-//      message << std::fixed << L"Total Files Scanned: " << numberOfFilesScanned;
-//      m_mainWindow->SetStatusBarMessage(message.str());
-
-//      AskUserToLimitFileSize(numberOfFilesScanned, vizParameters);
-
-//      m_theVisualization->Parse(fileTree);
-//      m_theVisualization->UpdateBoundingBoxes();
-
-//      ReloadVisualization(vizParameters);
-//   };
-
-//   const DriveScanningParameters scanningParameters
-//   {
-//      vizParameters.rootDirectory,
-//      progressHandler,
-//      completionHandler
-//   };
-
-//   m_scanner.StartScanning(scanningParameters);
-//}
-
-//void GLCanvas::AskUserToLimitFileSize(
-//   const std::uintmax_t numberOfFilesScanned,
-//   VisualizationParameters& parameters) const
-//{
-//   assert(numberOfFilesScanned > 0);
-//   if (numberOfFilesScanned < 250'000)
-//   {
-//      return;
-//   }
-
-//   if (parameters.minimumFileSize < Constants::FileSize::ONE_MEBIBYTE)
-//   {
-//      QMessageBox messageBox;
-//      messageBox.setIcon(QMessageBox::Warning);
-//      messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-//      messageBox.setText(
-//         "More than a quarter million files were scanned. "
-//         "Would you like to limit the visualized files to those 1 MiB or larger in "
-//         "order to reduce the load on the GPU and system memory?");
-
-//      const int election = messageBox.exec();
-//      switch (election)
-//      {
-//         case QMessageBox::Yes:
-//            parameters.minimumFileSize = Constants::FileSize::ONE_MEBIBYTE;
-//            m_mainWindow->SetFilePruningComboBoxValue(Constants::FileSize::ONE_MEBIBYTE);
-//            return;
-//         case QMessageBox::No:
-//            return;
-//         default:
-//            assert(false);
-//      }
-//   }
-//}
-
-void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
+void GLCanvas::ReloadVisualization()
 {
    const bool previousSuspensionState = m_isPaintingSuspended;
    m_isPaintingSuspended = true;
@@ -315,10 +223,8 @@ void GLCanvas::ReloadVisualization(const VisualizationParameters& parameters)
    auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
    assert(vizAsset);
 
-   //m_visualizationParameters = parameters;
-   const auto blockCount = vizAsset->LoadBufferData(m_model.GetTree(), parameters);
-
-   m_isVisualizationLoaded = blockCount > 0;
+   const auto parameters = m_mainWindow->GetModel().GetVisualizationParameters();
+   const auto blockCount = vizAsset->LoadBufferData(m_mainWindow->GetModel().GetTree(), parameters);
 
    for (const auto& asset : m_sceneAssets)
    {
@@ -606,7 +512,7 @@ void GLCanvas::PerformNodeSearch()
 
    const auto& searchQuery = m_mainWindow->GetSearchQuery();
    if (searchQuery.empty()
-      || !m_isVisualizationLoaded
+      || !m_model.HasVisualizationBeenLoaded()
       || (!shouldSearchFiles && !shouldSearchDirectories))
    {
       return;

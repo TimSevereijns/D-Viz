@@ -11,6 +11,7 @@
 
 #include <QVector3D>
 
+class MainWindow;
 class GLCanvas;
 
 class MainModel
@@ -57,20 +58,42 @@ class MainModel
       const VisualizationParameters& GetVisualizationParameters() const;
 
       /**
+       * @brief SetVisualizationParameters
+       */
+      void SetVisualizationParameters(const VisualizationParameters& parameters);
+
+      /**
        * @brief GetSelectedNodes
        * @return
        */
       const std::vector<const TreeNode<VizNode>*> GetHighlightedNodes() const;
 
+      /**
+       * @brief SetView
+       * @param window
+       */
+      void SetView(MainWindow* window);
+
+      /**
+       * @brief ParseResults
+       * @param results
+       */
+      void ParseResults(const std::shared_ptr<Tree<VizNode>>& results);
+
+      /**
+       * @brief UpdateBoundingBoxes
+       */
+      void UpdateBoundingBoxes();
+
    private:
 
-      void ScanDrive(VisualizationParameters& vizParameters);
+      MainWindow* m_mainWindow{ nullptr };
 
       TreeNode<VizNode>* m_selectedNode{ nullptr };
 
       std::vector<const TreeNode<VizNode>*> m_highlightedNodes;
 
-      std::unique_ptr<VisualizationModel> m_theVisualization{ nullptr };
+      std::unique_ptr<VisualizationModel> m_treeMap{ nullptr };
 
       std::vector<Light> m_lights
       {
@@ -83,8 +106,6 @@ class MainModel
       };
 
       VisualizationParameters m_visualizationParameters;
-
-      DriveScanner m_scanner;
 };
 
 #endif // MAINMODEL_H

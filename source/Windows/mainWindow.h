@@ -22,6 +22,8 @@ class MainWindow : public QMainWindow
 {
    Q_OBJECT
 
+   friend class MainModel;
+
    public:
 
       /**
@@ -30,7 +32,9 @@ class MainWindow : public QMainWindow
        * @param[in] mainModel
        * @param[in] parent
        */
-      MainWindow(QWidget* parent = nullptr);
+      MainWindow(
+         MainModel& model,
+         QWidget* parent = nullptr);
 
       ~MainWindow();
 
@@ -51,12 +55,6 @@ class MainWindow : public QMainWindow
        * @param speed
        */
       void SetCameraSpeedSpinner(double speed);
-
-      /**
-       * @brief SetFilePruningComboBox
-       * @param index
-       */
-      void SetFilePruningComboBoxValue(uintmax_t minimum);
 
       /**
        * @brief GetXboxController
@@ -96,6 +94,12 @@ class MainWindow : public QMainWindow
        */
       std::wstring GetSearchQuery() const;
 
+      /**
+       * @brief GetModel
+       * @return
+       */
+      MainModel& GetModel();
+
    public slots:
 
       /**
@@ -133,6 +137,21 @@ class MainWindow : public QMainWindow
 
    private:
 
+      void ScanDrive(VisualizationParameters& vizParameters);
+
+      /**
+       * @brief Prompts the user if he or she would like to set a lower bound on which files are
+       * visualized.
+       *
+       * @param[in] numberOfFilesScanned     The number of scanned files that can be visualized.
+       * @param[in] parameters               @see VisualizationParameters
+       */
+      void AskUserToLimitFileSize(
+         const std::uintmax_t numberOfFilesScanned,
+         VisualizationParameters& parameters);
+
+      void SetFilePruningComboBoxValue(uintmax_t minimum);
+
       void CreateMenus();
       void CreateFileMenu();
       void CreateViewMenu();
@@ -143,7 +162,9 @@ class MainWindow : public QMainWindow
       void SetupSidebar();
       void SetupXboxController();
 
-      MainModel m_model;
+      MainModel& m_model;
+
+      DriveScanner m_scanner;
 
       bool m_showDirectoriesOnly{ false };
       bool m_useDirectoryGradient{ false };
