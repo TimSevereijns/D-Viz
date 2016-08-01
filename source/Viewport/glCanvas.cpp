@@ -154,14 +154,9 @@ GLCanvas::GLCanvas(
    :
    QOpenGLWidget{ parent },
    m_model{ model },
-   m_mainWindow{ reinterpret_cast<MainWindow*>(parent) }
+   m_mainWindow{ *(reinterpret_cast<MainWindow*>(parent)) }
 {
-   if (!m_mainWindow)
-   {
-      throw std::invalid_argument{ "Parent couldn't be interpreted as a MainWindow instance." };
-   }
-
-   m_optionsManager = m_mainWindow->GetOptionsManager();
+   m_optionsManager = m_mainWindow.GetOptionsManager();
 
    m_camera.SetPosition(QVector3D{ 500, 100, 0 });
 
@@ -223,8 +218,8 @@ void GLCanvas::ReloadVisualization()
    auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
    assert(vizAsset);
 
-   const auto parameters = m_mainWindow->GetModel().GetVisualizationParameters();
-   const auto blockCount = vizAsset->LoadBufferData(m_mainWindow->GetModel().GetTree(), parameters);
+   const auto parameters = m_model.GetVisualizationParameters();
+   const auto blockCount = vizAsset->LoadBufferData(m_model.GetTree(), parameters);
 
    for (const auto& asset : m_sceneAssets)
    {
@@ -232,7 +227,7 @@ void GLCanvas::ReloadVisualization()
    }
 
    assert (blockCount == vizAsset->GetBlockCount());
-   PrintMetadataToStatusBar(blockCount, *m_mainWindow);
+   PrintMetadataToStatusBar(blockCount, m_mainWindow);
 }
 
 void GLCanvas::SetFieldOfView(const float fieldOfView)
@@ -299,9 +294,9 @@ void GLCanvas::HandleNodeSelection(TreeNode<VizNode>* selectedNode)
       << sizeAndUnits.second;
 
    assert(message.str().size() > 0);
-   m_mainWindow->SetStatusBarMessage(message.str());
+   m_mainWindow.SetStatusBarMessage(message.str());
 
-   ClearHighlightedNodes();
+   m_model.ClearHighlightedNodes();
 
    m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
       *selectedNode,
@@ -434,7 +429,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
          m_optionsManager->m_cameraMovementSpeed -= 0.01;
       }
 
-      m_mainWindow->SetCameraSpeedSpinner(static_cast<double>(m_optionsManager->m_cameraMovementSpeed));
+      m_mainWindow.SetCameraSpeedSpinner(static_cast<double>(m_optionsManager->m_cameraMovementSpeed));
    }
    else
    {
@@ -447,15 +442,15 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
          m_camera.DecreaseFieldOfView();
       }
 
-      m_mainWindow->SetFieldOfViewSlider(static_cast<float>(m_camera.GetFieldOfView()));
+      m_mainWindow.SetFieldOfViewSlider(static_cast<float>(m_camera.GetFieldOfView()));
    }
 }
 
-void GLCanvas::HighlightSelectedNodes()
+void GLCanvas::HighlightSelectedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
 {
    std::uintmax_t selectionSizeInBytes{ 0 };
 
-   for (const auto* node : m_model.GetHighlightedNodes())
+   for (const auto* const node : nodes)
    {
       selectionSizeInBytes += node->GetData().file.size;
 
@@ -481,10 +476,10 @@ void GLCanvas::HighlightSelectedNodes()
       << sizeAndUnits.second;
 
    assert(message.str().size() > 0);
-   m_mainWindow->SetStatusBarMessage(message.str());
+   m_mainWindow.SetStatusBarMessage(message.str());
 }
 
-void GLCanvas::ClearHighlightedNodes()
+void GLCanvas::RestoreHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
 {
    if (m_model.GetSelectedNode())
    {
@@ -494,139 +489,33 @@ void GLCanvas::ClearHighlightedNodes()
          m_model.GetVisualizationParameters());
    }
 
-   for (auto* node : m_model.GetHighlightedNodes())
+   for (const auto* const node : nodes)
    {
       m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
          *node,
          SceneAsset::UpdateAction::DESELECT,
          m_model.GetVisualizationParameters());
    }
-
-   //m_highlightedNodes.clear();
 }
 
+// @todo Move this function back onto the MainWindow
 void GLCanvas::PerformNodeSearch()
 {
-   const bool shouldSearchFiles{ m_optionsManager->m_shouldSearchFiles };
-   const bool shouldSearchDirectories{ m_optionsManager->m_shouldSearchDirectories };
+//   const bool shouldSearchFiles{ m_optionsManager->m_shouldSearchFiles };
+//   const bool shouldSearchDirectories{ m_optionsManager->m_shouldSearchDirectories };
 
-   const auto& searchQuery = m_mainWindow->GetSearchQuery();
-   if (searchQuery.empty()
-      || !m_model.HasVisualizationBeenLoaded()
-      || (!shouldSearchFiles && !shouldSearchDirectories))
-   {
-      return;
-   }
+//   RestoreHighlightedNodes();
 
-   ClearHighlightedNodes();
+//   const auto searchResults = m_model.SearchTreeMap(shouldSearchFiles, shouldSearchDirectories);
 
-   const auto& vizParams = m_model.GetVisualizationParameters();
-
-   std::for_each(
-      Tree<VizNode>::PostOrderIterator{ m_model.GetTree().GetHead() },
-      Tree<VizNode>::PostOrderIterator{ },
-      [&] (Tree<VizNode>::const_reference node)
-   {
-      if (node->file.size < vizParams.minimumFileSize)
-      {
-         return;
-      }
-
-      if (!shouldSearchDirectories && node->file.type == FileType::DIRECTORY)
-      {
-         return;
-      }
-
-      if (!shouldSearchFiles && node->file.type == FileType::REGULAR)
-      {
-         return;
-      }
-
-      const auto fullFileName{ node->file.name + node->file.extension };
-      if (!boost::icontains(fullFileName, searchQuery))
-      {
-         return;
-      }
-
-      //m_highlightedNodes.emplace_back(&node);
-   });
-
-//   if (m_highlightedNodes.empty())
+//   if (searchResults.empty())
 //   {
-//      m_mainWindow->SetStatusBarMessage(L"No Matches Found", 3'000);
+//      m_mainWindow->SetStatusBarMessage(L"No Matches Found", 3000);
 //   }
 //   else
 //   {
 //      HighlightSelectedNodes();
 //   }
-}
-
-void GLCanvas::HighlightAncestors(const TreeNode<VizNode>& selectedNode)
-{
-   ClearHighlightedNodes();
-
-   auto* currentNode = &selectedNode;
-   do
-   {
-      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
-         *currentNode,
-         SceneAsset::UpdateAction::SELECT,
-         m_model.GetVisualizationParameters());
-
-      currentNode = currentNode->GetParent();
-      if (currentNode)
-      {
-         //m_highlightedNodes.emplace_back(currentNode);
-      }
-   }
-   while (currentNode);
-}
-
-void GLCanvas::HighlightDescendants(const TreeNode<VizNode>& selectedNode)
-{
-   ClearHighlightedNodes();
-
-   const auto& vizParams = m_model.GetVisualizationParameters();
-
-   std::for_each(
-      Tree<VizNode>::LeafIterator{ &selectedNode },
-      Tree<VizNode>::LeafIterator{ },
-      [&] (Tree<VizNode>::const_reference node)
-   {
-      if ((vizParams.onlyShowDirectories && node->file.type == FileType::REGULAR)
-         || node->file.size < vizParams.minimumFileSize)
-      {
-         return;
-      }
-
-      //m_highlightedNodes.emplace_back(&node);
-   });
-
-   HighlightSelectedNodes();
-}
-
-void GLCanvas::HighlightSimilarExtensions(const TreeNode<VizNode>& selectedNode)
-{
-   ClearHighlightedNodes();
-
-   const auto& vizParams = m_model.GetVisualizationParameters();
-
-   std::for_each(
-      Tree<VizNode>::LeafIterator{ m_model.GetTree().GetHead() },
-      Tree<VizNode>::LeafIterator{ },
-      [&] (Tree<VizNode>::const_reference node)
-   {
-      if ((vizParams.onlyShowDirectories && node->file.type == FileType::REGULAR)
-         || node->file.size < vizParams.minimumFileSize
-         || node->file.extension != selectedNode->file.extension)
-      {
-         return;
-      }
-
-      //m_highlightedNodes.emplace_back(&node);
-   });
-
-   HighlightSelectedNodes();
 }
 
 void GLCanvas::ShowContextMenu(const QPoint& point)
@@ -640,8 +529,17 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
    const QPoint globalPoint = mapToGlobal(point);
 
    CanvasContextMenu menu{ m_keyboardManager };
-   menu.addAction("Highlight Ancestors", [&] { HighlightAncestors(*selectedNode); });
-   menu.addAction("Highlight Descendants", [&] { HighlightDescendants(*selectedNode); });
+   menu.addAction("Highlight Ancestors",
+      [&] ()
+   {
+      m_model.HighlightAncestors(*selectedNode);
+   });
+
+   menu.addAction("Highlight Descendants",
+      [&] ()
+   {
+      m_model.HighlightDescendants(*selectedNode);
+   });
 
    if (selectedNode->GetData().file.type == FileType::REGULAR)
    {
@@ -650,7 +548,11 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
          + QString::fromStdWString(selectedNode->GetData().file.extension)
          + QString::fromStdWString(L" Files");
 
-      menu.addAction(entryText, [&] { HighlightSimilarExtensions(*selectedNode); });
+      menu.addAction(entryText,
+         [&] ()
+      {
+         m_model.HighlightAllMatchingExtension(*selectedNode);
+      });
    }
 
    menu.addSeparator();
@@ -661,12 +563,12 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
 void GLCanvas::HandleInput()
 {
-   assert(m_optionsManager && m_mainWindow);
+   assert(m_optionsManager);
 
    const auto now = std::chrono::system_clock::now();
    ON_SCOPE_EXIT noexcept { m_lastCameraPositionUpdatelTime = now; };
 
-   if (m_optionsManager->m_useXBoxController && m_mainWindow->IsXboxControllerConnected())
+   if (m_optionsManager->m_useXBoxController && m_mainWindow.IsXboxControllerConnected())
    {
       HandleXBoxControllerInput();
 
@@ -714,8 +616,8 @@ void GLCanvas::HandleXBoxControllerInput()
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastCameraPositionUpdatelTime);
 
-   const XboxController::State& controllerState = m_mainWindow->GetXboxControllerState();
-   const XboxController& controller = m_mainWindow->GetXboxControllerManager();
+   const XboxController::State& controllerState = m_mainWindow.GetXboxControllerState();
+   const XboxController& controller = m_mainWindow.GetXboxControllerManager();
 
    const auto cameraSpeed =
        m_optionsManager->m_cameraMovementSpeed / Constants::Xbox::MOVEMENT_AMPLIFICATION;
@@ -862,13 +764,10 @@ void GLCanvas::UpdateFPS()
    assert(m_frameRateDeque.size() > 0);
    const auto averageFps = fpsSum / m_frameRateDeque.size();
 
-   if (m_mainWindow)
-   {
-      m_mainWindow->setWindowTitle(
-         QString::fromStdString("D-Viz @ ")
-         + QString::number(averageFps)
-         + QString::fromStdString(" fps [*]"));
-   }
+   m_mainWindow.setWindowTitle(
+      QString::fromStdString("D-Viz @ ")
+      + QString::number(averageFps)
+      + QString::fromStdString(" fps [*]"));
 }
 
 void GLCanvas::paintGL()
@@ -880,7 +779,7 @@ void GLCanvas::paintGL()
 
    m_graphicsDevice->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-   if (m_mainWindow->ShouldShowFPS())
+   if (m_mainWindow.ShouldShowFPS())
    {
       UpdateFPS();
    }

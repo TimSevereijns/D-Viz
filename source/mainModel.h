@@ -85,15 +85,58 @@ class MainModel
        */
       void UpdateBoundingBoxes();
 
+      /**
+       * @brief SearchTreeMap
+       *
+       * @param searchFiles
+       * @param searchDirectories
+       *
+       * @return
+       */
+      std::vector<const TreeNode<VizNode>*> SearchTreeMap(
+         bool shouldSearchFiles,
+         bool shouldSearchDirectories);
+
+      /**
+       * @brief HighlightMatchingExtension
+       *
+       * @param selectedNode
+       */
+      void HighlightAllMatchingExtension(const TreeNode<VizNode>& selectedNode);
+
+      /**
+       * @brief HighlightDescendants
+       *
+       * @param selectedNode
+       */
+      void HighlightDescendants(const TreeNode<VizNode>& selectedNode);
+
+      /**
+       * @brief HighlightAncestors
+       *
+       * @param selectedNode
+       */
+      void HighlightAncestors(const TreeNode<VizNode>& selectedNode);
+
+      /**
+       * @brief ClearHighlightedNodes
+       */
+      void ClearHighlightedNodes();
+
+      /**
+       * @brief HighlightNodes
+       */
+      void PaintHighlightNodes();
+
    private:
 
       MainWindow* m_mainWindow{ nullptr };
 
       TreeNode<VizNode>* m_selectedNode{ nullptr };
 
-      std::vector<const TreeNode<VizNode>*> m_highlightedNodes;
-
       std::unique_ptr<VisualizationModel> m_treeMap{ nullptr };
+
+      std::vector<const TreeNode<VizNode>*> m_highlightedNodes;
 
       std::vector<Light> m_lights
       {

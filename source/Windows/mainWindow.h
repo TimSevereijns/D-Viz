@@ -100,6 +100,12 @@ class MainWindow : public QMainWindow
        */
       MainModel& GetModel();
 
+      /**
+       * @brief GetCanvas
+       * @return
+       */
+      GLCanvas& GetCanvas();
+
    public slots:
 
       /**

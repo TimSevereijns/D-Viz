@@ -56,6 +56,16 @@ class GLCanvas : public QOpenGLWidget
        */
       void SetFieldOfView(const float fieldOfView);
 
+      /**
+       * @brief HighlightSelectedNodes
+       */
+      void HighlightSelectedNodes(std::vector<const TreeNode<VizNode>*>& nodes);
+
+      /**
+       * @brief Returns any highlighted nodes back to their unhighlighted colors.
+       */
+      void RestoreHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes);
+
     protected:
 
       void initializeGL() override;
@@ -152,59 +162,17 @@ class GLCanvas : public QOpenGLWidget
        */
       void PrepareOriginMarkerVertexBuffers();
 
-      /**
-       * @brief Highlights the ancestors of the passed in node.
-       *
-       * @param[in] selectedNode    The node whose ancestors are to be highlighted.
-       */
-      void HighlightAncestors(const TreeNode<VizNode>& selectedNode);
-
-      /**
-       * @brief Highlight the descendants of the passed in node.
-       *
-       * @param[in] selectedNode    The node whose descendants are to be highlighted.
-       */
-      void HighlightDescendants(const TreeNode<VizNode>& selectedNode);
-
-      /**
-       * @brief Highlights all nodes in the tree that have the same file extension as the passed in
-       * node.
-       *
-       * @param[in] selectedNode    The file whose extension should be highlighted in the tree.
-       */
-      void HighlightSimilarExtensions(const TreeNode<VizNode>& selectedNode);
-
-      /**
-       * @brief HighlightSelectedNodes
-       */
-      void HighlightSelectedNodes();
-
-      /**
-       * @brief Returns any highlighted nodes back to their unhighlighted colors.
-       */
-      void ClearHighlightedNodes();
-
-      MainModel& m_model;
-
       bool m_isPaintingSuspended{ false };
       bool m_isVisualizationLoaded{ false };
 
       bool m_isLeftTriggerDown{ false };
       bool m_isRightTriggerDown{ false };
 
-      // @todo Turn this into a reference:
-      MainWindow* m_mainWindow{ nullptr };
+      MainModel& m_model;
 
-      // @todo Move to a model class:
-      //TreeNode<VizNode>* m_selectedNode{ nullptr };
-
-      // @todo Move to a model class:
-      //std::vector<const TreeNode<VizNode>*> m_highlightedNodes;
+      MainWindow& m_mainWindow;
 
       std::unique_ptr<GraphicsDevice> m_graphicsDevice{ nullptr };
-
-      // @todo Move to a model class:
-      //std::unique_ptr<VisualizationModel> m_theVisualization{ nullptr };
 
       std::unique_ptr<QTimer> m_frameRedrawTimer{ nullptr };
       std::unique_ptr<QTimer> m_inputCaptureTimer{ nullptr };

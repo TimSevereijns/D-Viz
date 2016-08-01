@@ -260,6 +260,11 @@ MainModel& MainWindow::GetModel()
    return m_model;
 }
 
+GLCanvas& MainWindow::GetCanvas()
+{
+   return *m_glCanvas;
+}
+
 void MainWindow::LaunchAboutDialog()
 {
    if (!m_aboutDialog)
