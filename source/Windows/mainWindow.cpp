@@ -17,11 +17,11 @@
 #include <QMessageBox>
 
 MainWindow::MainWindow(
-   MainModel& model,
+   Controller& controller,
    QWidget* parent /* = nullptr */)
    :
    QMainWindow(parent),
-   m_model{ model },
+   m_controller{ controller },
    m_optionsManager(new OptionsManager),
    m_ui(new Ui::MainWindow)
 {
@@ -33,7 +33,7 @@ MainWindow::MainWindow(
 
    assert(m_optionsManager);
 
-   m_glCanvas.reset(new GLCanvas{ model, this });
+   m_glCanvas.reset(new GLCanvas{ controller, this });
    m_ui->canvasLayout->addWidget(m_glCanvas.get());
 
    SetupSidebar();
@@ -76,7 +76,7 @@ void MainWindow::SetupSidebar()
       parameters.forceNewScan = false;
       parameters.minimumFileSize = m_sizePruningOptions[pruneSizeIndex].first;
 
-      m_model.SetVisualizationParameters(parameters);
+      m_controller.SetVisualizationParameters(parameters);
 
       if (!m_directoryToVisualize.empty())
       {
@@ -119,10 +119,22 @@ void MainWindow::SetupSidebar()
       m_optionsManager.get(), &OptionsManager::OnAttachLightToCameraStateChanged);
 
    connect(m_ui->regexSearchBox, &QLineEdit::returnPressed,
-      m_glCanvas.get(), &GLCanvas::PerformNodeSearch);
+      [&] ()
+   {
+      const bool shouldSearchFiles = m_ui->searchFilesCheckBox->isChecked();
+      const bool shouldSearchDirectories = m_ui->searchDirectoriesCheckBox->isChecked();
+
+      m_controller.SearchTreeMap(shouldSearchFiles, shouldSearchDirectories);
+   });
 
    connect(m_ui->regexSearchButton, &QPushButton::clicked,
-      m_glCanvas.get(), &GLCanvas::PerformNodeSearch);
+      [&] ()
+   {
+      const bool shouldSearchFiles = m_ui->searchFilesCheckBox->isChecked();
+      const bool shouldSearchDirectories = m_ui->searchDirectoriesCheckBox->isChecked();
+
+      m_controller.SearchTreeMap(shouldSearchFiles, shouldSearchDirectories);
+   });
 
    connect(m_ui->regexSearchBox, &QLineEdit::textChanged, this,
       [&] (const auto& newText)
@@ -233,8 +245,8 @@ void MainWindow::OnFileMenuNewScan()
    parameters.forceNewScan = true;
    parameters.minimumFileSize = m_sizePruningOptions[m_ui->pruneSizeComboBox->currentIndex()].first;
 
-   m_model.SetVisualizationParameters(parameters);
-   m_model.GenerateNewVisualization(parameters);
+   m_controller.SetVisualizationParameters(parameters);
+   m_controller.GenerateNewVisualization(parameters);
 }
 
 void MainWindow::OnFPSReadoutToggled(bool isEnabled)
@@ -255,9 +267,9 @@ std::wstring MainWindow::GetSearchQuery() const
    return m_searchQuery;
 }
 
-MainModel& MainWindow::GetModel()
+Controller& MainWindow::GetModel()
 {
-   return m_model;
+   return m_controller;
 }
 
 GLCanvas& MainWindow::GetCanvas()
@@ -323,8 +335,8 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
       AskUserToLimitFileSize(numberOfFilesScanned, vizParameters);
       // @todo May have to set the viz parameters on the model
 
-      m_model.ParseResults(scanningResults);
-      m_model.UpdateBoundingBoxes();
+      m_controller.ParseResults(scanningResults);
+      m_controller.UpdateBoundingBoxes();
 
       m_glCanvas->ReloadVisualization();
    };

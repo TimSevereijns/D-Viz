@@ -13,6 +13,7 @@ TEMPLATE = app
 CONFIG += c++11
 
 SOURCES += \
+   controller.cpp \
    DataStructs/block.cpp \
    DataStructs/fileInfo.cpp \
    DataStructs/light.cpp \
@@ -39,11 +40,11 @@ SOURCES += \
    Visualizations/visualization.cpp \
    Windows/aboutDialog.cpp \
    Windows/mainWindow.cpp \
-    Windows/breakdownDialog.cpp \
-    mainModel.cpp
+   Windows/breakdownDialog.cpp
 
 HEADERS  += \
    constants.h \
+   controller.h \
    DataStructs/block.h \
    DataStructs/fileInfo.h \
    DataStructs/light.h \
@@ -73,8 +74,7 @@ HEADERS  += \
    Visualizations/visualization.h \
    Windows/aboutDialog.h \
    Windows/mainWindow.h \
-    Windows/breakdownDialog.h \
-    mainModel.h
+   Windows/breakdownDialog.h
 
 FORMS    += \
    Windows/mainWindow.ui \

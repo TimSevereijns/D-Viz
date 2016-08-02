@@ -5,7 +5,7 @@
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
 #include "HID/keyboardManager.h"
-#include "mainModel.h"
+#include "controller.h"
 #include "optionsManager.h"
 #include "Scene/sceneAsset.h"
 #include "Viewport/graphicsDevice.h"
@@ -34,12 +34,13 @@ class GLCanvas : public QOpenGLWidget
    public:
 
       /**
-       * @brief Default constructor.
+       * @brief GLCanvas
        *
-       * @param[in] parent          Pointer to the parent UI element.
+       * @param controller
+       * @param parent
        */
       GLCanvas(
-         MainModel& model,
+         Controller& controller,
          QWidget* parent = nullptr);
 
       /**
@@ -55,6 +56,12 @@ class GLCanvas : public QOpenGLWidget
        * @param[in] fieldOfView     The new field of view.
        */
       void SetFieldOfView(const float fieldOfView);
+
+      /**
+       * @brief SelectNode
+       * @param node
+       */
+      void SelectNode(const TreeNode<VizNode>* const node);
 
       /**
        * @brief HighlightSelectedNodes
@@ -79,13 +86,6 @@ class GLCanvas : public QOpenGLWidget
       void mousePressEvent(QMouseEvent* event) override;
       void mouseMoveEvent(QMouseEvent* event) override;
       void wheelEvent(QWheelEvent* event) override;
-
-   public slots:
-
-      /**
-       * @brief Reads the input text from the input box and performs the search.
-       */
-      void PerformNodeSearch();
 
    private slots:
 
@@ -114,14 +114,6 @@ class GLCanvas : public QOpenGLWidget
        * @param[in] event           Details of the mouse click event.
        */
       void HandleRightClick(const QPoint& point);
-
-      /**
-       * @brief Handles TreeNode selection events.
-       *
-       * @param[in] selectedNode    Pointer to the TreeNode that the user clicked on, and nullptr if
-       *                            the user's click didn't hit a TreeNode.
-       */
-      void HandleNodeSelection(TreeNode<VizNode>* const selectedNode);
 
       /**
        * @brief Handles the input from the Xbox controller.
@@ -168,7 +160,7 @@ class GLCanvas : public QOpenGLWidget
       bool m_isLeftTriggerDown{ false };
       bool m_isRightTriggerDown{ false };
 
-      MainModel& m_model;
+      Controller& m_controller;
 
       MainWindow& m_mainWindow;
 

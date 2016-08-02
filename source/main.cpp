@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 
    QApplication application{ argc, argv };
 
-   MainModel model{ };
+   Controller model{ };
    MainWindow view{ model, nullptr };
    model.SetView(&view);
    view.show();

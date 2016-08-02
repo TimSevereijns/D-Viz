@@ -8,7 +8,7 @@
 #include "breakdownDialog.h"
 #include "constants.h"
 #include "HID/xboxController.h"
-#include "mainModel.h"
+#include "controller.h"
 
 namespace Ui
 {
@@ -22,18 +22,18 @@ class MainWindow : public QMainWindow
 {
    Q_OBJECT
 
-   friend class MainModel;
+   friend class Controller;
 
    public:
 
       /**
        * @brief MainWindow
        *
-       * @param[in] mainModel
+       * @param[in] controller
        * @param[in] parent
        */
       MainWindow(
-         MainModel& model,
+         Controller& controller,
          QWidget* parent = nullptr);
 
       ~MainWindow();
@@ -98,7 +98,7 @@ class MainWindow : public QMainWindow
        * @brief GetModel
        * @return
        */
-      MainModel& GetModel();
+      Controller& GetModel();
 
       /**
        * @brief GetCanvas
@@ -168,7 +168,7 @@ class MainWindow : public QMainWindow
       void SetupSidebar();
       void SetupXboxController();
 
-      MainModel& m_model;
+      Controller& m_controller;
 
       DriveScanner m_scanner;
 

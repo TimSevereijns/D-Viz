@@ -21,122 +21,8 @@
 #include <sstream>
 #include <utility>
 
-#include <ShlObj.h>
-#include <Objbase.h>
-
 namespace
 {
-   /**
-    * @brief Helper function to set the specifed vertex and block count in the bottom status bar.
-    *
-    * @param[in] vertexCount        The readout value.
-    * @param[in] mainWindow         The main window that contains the status bar.
-    */
-   void PrintMetadataToStatusBar(const std::uint32_t blockCount, MainWindow& mainWindow)
-   {
-      std::wstringstream message;
-      message.imbue(std::locale(""));
-      message
-         << std::fixed
-         << blockCount * Block::VERTICES_PER_BLOCK
-         << L" vertices, representing "
-         << blockCount
-         << L" files.";
-
-      mainWindow.SetStatusBarMessage(message.str());
-   }
-
-   const auto* const BYTES_READOUT_STRING = L" bytes";
-
-   /**
-    * @brief Converts the given size of the file from bytes to the most human readable units.
-    *
-    * @param[in] sizeInBytes        The size (in bytes) to be converted to a more appropriate unit.
-    *
-    * @returns A std::pair encapsulating the converted file size, and corresponding unit readout
-    * string.
-    */
-   auto ConvertFileSizeToMostAppropriateUnits(double sizeInBytes)
-   {
-      if (sizeInBytes < Constants::FileSize::ONE_KIBIBYTE)
-      {
-         return std::make_pair<double, std::wstring>(std::move(sizeInBytes), BYTES_READOUT_STRING);
-      }
-
-      if (sizeInBytes < Constants::FileSize::ONE_MEBIBYTE)
-      {
-         return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::ONE_KIBIBYTE, L" KiB");
-      }
-
-      if (sizeInBytes < Constants::FileSize::ONE_GIBIBYTE)
-      {
-         return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::ONE_MEBIBYTE, L" MiB");
-      }
-
-      if (sizeInBytes < Constants::FileSize::ONE_TEBIBYTE)
-      {
-         return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::ONE_GIBIBYTE, L" GiB");
-      }
-
-      return std::make_pair<double, std::wstring>(
-         sizeInBytes / Constants::FileSize::ONE_TEBIBYTE, L" TiB");
-   }
-
-   /**
-    * @brief Computes the absolute file path of the selected node by traveling up tree.
-    *
-    * @param[in] node               The selected node.
-    *
-    * @returns The absolute file path.
-    */
-   std::wstring GetFullNodePath(const TreeNode<VizNode>& node)
-   {
-      std::vector<std::wstring> reversePath;
-      reversePath.reserve(Tree<VizNode>::Depth(node));
-      reversePath.emplace_back(node->file.name);
-
-      const auto* currentNode = &node;
-
-      while (currentNode->GetParent())
-      {
-         currentNode = currentNode->GetParent();
-         reversePath.emplace_back(currentNode->GetData().file.name);
-      }
-
-      const auto completePath = std::accumulate(std::rbegin(reversePath), std::rend(reversePath),
-         std::wstring{ }, [] (const std::wstring& path, const std::wstring& file)
-      {
-         return path + (!path.empty() ? L"/" : L"") + file;
-      });
-
-      assert(completePath.size() > 0);
-      return completePath + node->file.extension;
-   }
-
-   /**
-    * @brief Opens the selected file in Windows File Explorer.
-    *
-    * @param[in] selectedNode       The node that represents the file to open.
-    */
-   void ShowInFileExplorer(const TreeNode<VizNode>& selectedNode)
-   {
-      CoInitializeEx(NULL, COINIT_MULTITHREADED);
-      ON_SCOPE_EXIT noexcept { CoUninitialize(); };
-
-      std::wstring filePath = GetFullNodePath(selectedNode);
-      std::replace(std::begin(filePath), std::end(filePath), L'/', L'\\');
-
-      ITEMIDLIST __unaligned * idList = ILCreateFromPath(filePath.c_str());
-      if (idList)
-      {
-         SHOpenFolderAndSelectItems(idList, 0, 0, 0);
-         ILFree(idList);
-      }
-   }
-
    /**
     * @brief Provides an easier way to index into the asset vector, than memorizing indices.
     */
@@ -149,11 +35,11 @@ namespace
 }
 
 GLCanvas::GLCanvas(
-   MainModel& model,
+   Controller& controller,
    QWidget* parent)
    :
    QOpenGLWidget{ parent },
-   m_model{ model },
+   m_controller{ controller },
    m_mainWindow{ *(reinterpret_cast<MainWindow*>(parent)) }
 {
    m_optionsManager = m_mainWindow.GetOptionsManager();
@@ -218,8 +104,8 @@ void GLCanvas::ReloadVisualization()
    auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
    assert(vizAsset);
 
-   const auto parameters = m_model.GetVisualizationParameters();
-   const auto blockCount = vizAsset->LoadBufferData(m_model.GetTree(), parameters);
+   const auto parameters = m_controller.GetVisualizationParameters();
+   const auto blockCount = vizAsset->LoadBufferData(m_controller.GetTree(), parameters);
 
    for (const auto& asset : m_sceneAssets)
    {
@@ -227,12 +113,20 @@ void GLCanvas::ReloadVisualization()
    }
 
    assert (blockCount == vizAsset->GetBlockCount());
-   PrintMetadataToStatusBar(blockCount, m_mainWindow);
+   m_controller.PrintMetadataToStatusBar(blockCount);
 }
 
 void GLCanvas::SetFieldOfView(const float fieldOfView)
 {
    m_camera.SetFieldOfView(fieldOfView);
+}
+
+void GLCanvas::SelectNode(const TreeNode<VizNode>* const node)
+{
+   m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
+      *node,
+      SceneAsset::UpdateAction::SELECT,
+      m_controller.GetVisualizationParameters());
 }
 
 void GLCanvas::keyPressEvent(QKeyEvent* const event)
@@ -275,40 +169,9 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
    event->accept();
 }
 
-void GLCanvas::HandleNodeSelection(TreeNode<VizNode>* selectedNode)
-{
-   const auto fileSize = selectedNode->GetData().file.size;
-   assert(fileSize > 0);
-
-   const auto sizeAndUnits = ConvertFileSizeToMostAppropriateUnits(fileSize);
-   const auto isInBytes = (sizeAndUnits.second == BYTES_READOUT_STRING);
-
-   std::wstringstream message;
-   message.imbue(std::locale{ "" });
-   message.precision(isInBytes ? 0 : 2);
-   message
-      << GetFullNodePath(*selectedNode)
-      << L"  |  "
-      << std::fixed
-      << sizeAndUnits.first
-      << sizeAndUnits.second;
-
-   assert(message.str().size() > 0);
-   m_mainWindow.SetStatusBarMessage(message.str());
-
-   m_model.ClearHighlightedNodes();
-
-   m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
-      *selectedNode,
-      SceneAsset::UpdateAction::SELECT,
-      m_model.GetVisualizationParameters());
-
-   //m_selectedNode = selectedNode;
-}
-
 void GLCanvas::HandleRightClick(const QPoint& point)
 {
-   if (!m_model.HasVisualizationBeenLoaded())
+   if (!m_controller.HasVisualizationBeenLoaded())
    {
       return;
    }
@@ -448,45 +311,23 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
 void GLCanvas::HighlightSelectedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
 {
-   std::uintmax_t selectionSizeInBytes{ 0 };
-
    for (const auto* const node : nodes)
    {
-      selectionSizeInBytes += node->GetData().file.size;
-
       m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
          *node,
          SceneAsset::UpdateAction::SELECT,
-         m_model.GetVisualizationParameters());
+         m_controller.GetVisualizationParameters());
    }
-
-   const auto sizeAndUnits = ConvertFileSizeToMostAppropriateUnits(selectionSizeInBytes);
-   const auto isInBytes = (sizeAndUnits.second == BYTES_READOUT_STRING);
-
-   std::wstringstream message;
-   message.imbue(std::locale{ "" });
-   message.precision(isInBytes ? 0 : 2);
-   message
-      << L"Found "
-      << m_model.GetHighlightedNodes().size()
-      << (m_model.GetHighlightedNodes().size() == 1 ? L" node" : L" nodes")
-      << L", representing "
-      << std::fixed
-      << sizeAndUnits.first
-      << sizeAndUnits.second;
-
-   assert(message.str().size() > 0);
-   m_mainWindow.SetStatusBarMessage(message.str());
 }
 
 void GLCanvas::RestoreHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
 {
-   if (m_model.GetSelectedNode())
+   if (m_controller.GetSelectedNode())
    {
       m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
-         *m_model.GetSelectedNode(),
+         *m_controller.GetSelectedNode(),
          SceneAsset::UpdateAction::DESELECT,
-         m_model.GetVisualizationParameters());
+         m_controller.GetVisualizationParameters());
    }
 
    for (const auto* const node : nodes)
@@ -494,33 +335,13 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const TreeNode<VizNode>*>& no
       m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
          *node,
          SceneAsset::UpdateAction::DESELECT,
-         m_model.GetVisualizationParameters());
+         m_controller.GetVisualizationParameters());
    }
-}
-
-// @todo Move this function back onto the MainWindow
-void GLCanvas::PerformNodeSearch()
-{
-//   const bool shouldSearchFiles{ m_optionsManager->m_shouldSearchFiles };
-//   const bool shouldSearchDirectories{ m_optionsManager->m_shouldSearchDirectories };
-
-//   RestoreHighlightedNodes();
-
-//   const auto searchResults = m_model.SearchTreeMap(shouldSearchFiles, shouldSearchDirectories);
-
-//   if (searchResults.empty())
-//   {
-//      m_mainWindow->SetStatusBarMessage(L"No Matches Found", 3000);
-//   }
-//   else
-//   {
-//      HighlightSelectedNodes();
-//   }
 }
 
 void GLCanvas::ShowContextMenu(const QPoint& point)
 {
-   const auto* const selectedNode = m_model.GetSelectedNode();
+   const auto* const selectedNode = m_controller.GetSelectedNode();
    if (!selectedNode)
    {
       return;
@@ -532,13 +353,13 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
    menu.addAction("Highlight Ancestors",
       [&] ()
    {
-      m_model.HighlightAncestors(*selectedNode);
+      m_controller.HighlightAncestors(*selectedNode);
    });
 
    menu.addAction("Highlight Descendants",
       [&] ()
    {
-      m_model.HighlightDescendants(*selectedNode);
+      m_controller.HighlightDescendants(*selectedNode);
    });
 
    if (selectedNode->GetData().file.type == FileType::REGULAR)
@@ -551,12 +372,12 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
       menu.addAction(entryText,
          [&] ()
       {
-         m_model.HighlightAllMatchingExtension(*selectedNode);
+         m_controller.HighlightAllMatchingExtension(*selectedNode);
       });
    }
 
    menu.addSeparator();
-   menu.addAction("Show in Explorer", [&] { ShowInFileExplorer(*selectedNode); });
+   menu.addAction("Show in Explorer", [&] { Controller::ShowInFileExplorer(*selectedNode); });
 
    menu.exec(globalPoint);
 }

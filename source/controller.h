@@ -14,12 +14,12 @@
 class MainWindow;
 class GLCanvas;
 
-class MainModel
+class Controller
 {
    friend class GLCanvas;
 
    public:
-      MainModel();
+      Controller();
 
       /**
        * @returns True if the visualization is not null;
@@ -102,21 +102,21 @@ class MainModel
        *
        * @param selectedNode
        */
-      void HighlightAllMatchingExtension(const TreeNode<VizNode>& selectedNode);
+      void HighlightAllMatchingExtension(const TreeNode<VizNode>& targetNode);
 
       /**
        * @brief HighlightDescendants
        *
        * @param selectedNode
        */
-      void HighlightDescendants(const TreeNode<VizNode>& selectedNode);
+      void HighlightDescendants(const TreeNode<VizNode>& node);
 
       /**
        * @brief HighlightAncestors
        *
        * @param selectedNode
        */
-      void HighlightAncestors(const TreeNode<VizNode>& selectedNode);
+      void HighlightAncestors(const TreeNode<VizNode>& node);
 
       /**
        * @brief ClearHighlightedNodes
@@ -127,6 +127,46 @@ class MainModel
        * @brief HighlightNodes
        */
       void PaintHighlightNodes();
+
+      /**
+       * @brief SelectNode
+       * @param selectedNode
+       */
+      void SelectNode(const TreeNode<VizNode>* const node);
+
+      /**
+       * @brief Helper function to set the specifed vertex and block count in the bottom status bar.
+       *
+       * @param[in] vertexCount        The readout value.
+       */
+      void PrintMetadataToStatusBar(const std::uint32_t blockCount);
+
+      /**
+       * @brief Converts the given size of the file from bytes to the most human readable units.
+       *
+       * @param[in] sizeInBytes        The size (in bytes) to be converted to a more appropriate unit.
+       *
+       * @returns A std::pair encapsulating the converted file size, and corresponding unit readout
+       * string.
+       */
+      static std::pair<double, std::wstring> ConvertFileSizeToMostAppropriateUnits(
+         double sizeInBytes);
+
+      /**
+       * @brief Computes the absolute file path of the selected node by traveling up tree.
+       *
+       * @param[in] node               The selected node.
+       *
+       * @returns The absolute file path.
+       */
+      static std::wstring ResolveCompleteFilePath(const TreeNode<VizNode>& node);
+
+      /**
+       * @brief Opens the selected file in Windows File Explorer.
+       *
+       * @param[in] selectedNode       The node that represents the file to open.
+       */
+      static void ShowInFileExplorer(const TreeNode<VizNode>& node);
 
    private:
 
