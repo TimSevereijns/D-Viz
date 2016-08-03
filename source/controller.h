@@ -16,127 +16,127 @@ class GLCanvas;
 
 class Controller
 {
-   friend class GLCanvas;
-
    public:
+      /**
+       * @brief Sets the MainWindow as the "view" for the controller.
+       *
+       * @param[in] window          The MainWindow to be used as the view.
+       */
+      void SetView(MainWindow* window);
+
       /**
        * @returns True if the visualization is not null;
        */
       bool HasVisualizationBeenLoaded() const;
 
       /**
-       * @brief GenerateNewVisualization
+       * @brief Generates a new visualization.
        *
-       * @param parameters
+       * @param[in] parameters
        */
       void GenerateNewVisualization(VisualizationParameters& parameters);
 
       /**
-       * @brief GetSelectedNode
-       * @return
+       * @returns A pointer to the selected node.
        */
       const TreeNode<VizNode>* const GetSelectedNode() const;
 
       /**
-       * @brief GetTree
-       * @return
+       * @returns A reference to the tree that represents the most recent drive scan.
        */
       Tree<VizNode>& GetTree();
 
       /**
-       * @brief GetTree
-       * @return
+       * @overload
        */
       const Tree<VizNode>& GetTree() const;
 
       /**
-       * @brief GetVisualizationParameters
-       * @return
+       * @returns A reference to the current visualization parameters.
        */
       const VisualizationParameters& GetVisualizationParameters() const;
 
       /**
-       * @brief SetVisualizationParameters
+       * @brief Updates the visualization parameters.
        */
       void SetVisualizationParameters(const VisualizationParameters& parameters);
 
       /**
-       * @brief GetSelectedNodes
-       * @return
+       * @returns A reference to the currently highlighted nodes. Highlighted nodes are distinct
+       * from the selected node (of which there can be only one).
        */
-      const std::vector<const TreeNode<VizNode>*> GetHighlightedNodes() const;
+      const std::vector<const TreeNode<VizNode>*>& GetHighlightedNodes() const;
 
       /**
-       * @brief SetView
-       * @param window
-       */
-      void SetView(MainWindow* window);
-
-      /**
-       * @brief ParseResults
-       * @param results
+       * @brief Parses the drive scan results.
+       *
+       * @param[in] results         The scan results to be parsed.
        */
       void ParseResults(const std::shared_ptr<Tree<VizNode>>& results);
 
       /**
-       * @brief UpdateBoundingBoxes
+       * @brief Updates the bounding boxes for the current treemap.
        */
       void UpdateBoundingBoxes();
 
       /**
-       * @brief SearchTreeMap
+       * @brief Searches the treemap for the search query contained within the search box.
        *
-       * @param searchFiles
-       * @param searchDirectories
+       * @todo Make this more generic, and pass in the search query.
        *
-       * @return
+       * @param[in] searchFiles        Pass in true to search files.
+       * @param[in] searchDirectories  Pass in true to search directories.
        */
       void SearchTreeMap(
          bool shouldSearchFiles,
          bool shouldSearchDirectories);
 
       /**
-       * @brief HighlightMatchingExtension
+       * @brief Highlights all nodes in the tree whose extension matches that of the passed in node.
        *
-       * @param selectedNode
+       * @param[in] targetNode      The node whose extension is to be highlighted.
        */
       void HighlightAllMatchingExtension(const TreeNode<VizNode>& targetNode);
 
       /**
-       * @brief HighlightDescendants
+       * @brief Highlights all nodes that descendant from the passed in node.
        *
-       * @param selectedNode
+       * @param[in] node            The node whose descendants to highlight.
        */
       void HighlightDescendants(const TreeNode<VizNode>& node);
 
       /**
-       * @brief HighlightAncestors
+       * @brief Highlights all nodes that are ancestors of the passed in node.
        *
-       * @param selectedNode
+       * @param[in] node            The node whose ancestors are to be highlighted.
        */
       void HighlightAncestors(const TreeNode<VizNode>& node);
 
       /**
-       * @brief ClearHighlightedNodes
+       * @brief Clears all highlighted nodes, as well as the selected node.
        */
-      void ClearHighlightedNodes();
+      void ClearSelectedAndHighlightedNodes();
 
       /**
-       * @brief HighlightNodes
+       * @brief Updates the visual representation of the highlighted nodes.
        */
       void PaintHighlightedNodes();
 
       /**
-       * @brief SelectNode
-       * @param selectedNode
+       * @brief Selects the passed in node.
+       *
+       * @param[in] node            A pointer to the node to be selected.
        */
       void SelectNode(const TreeNode<VizNode>* const node);
 
       /**
-       * @brief SelectNodeViaRay
+       * @brief Uses the passed in ray to select the nearest node from the perspective of the
+       * camera.
        *
-       * @param camera
-       * @param ray
+       * @todo Remove the camera object, and pass in the camera's position instead.
+       *
+       * @param[in] camera          The camera from which the ray was shot.
+       * @param[in] ray             The picking ray.
        */
       void SelectNodeViaRay(
          const Camera& camera,
@@ -145,25 +145,26 @@ class Controller
       /**
        * @brief Helper function to set the specifed vertex and block count in the bottom status bar.
        *
-       * @param[in] vertexCount        The readout value.
+       * @param[in] nodeCount       The number of nodes that are currently selected or highlighted.
        */
       void PrintMetadataToStatusBar(const std::uint32_t nodeCount);
 
       /**
        * @brief Converts the given size of the file from bytes to the most human readable units.
        *
-       * @param[in] sizeInBytes        The size (in bytes) to be converted to a more appropriate unit.
+       * @param[in] sizeInBytes     The size (in bytes) to be converted to a more appropriate
+       * unit.
        *
        * @returns A std::pair encapsulating the converted file size, and corresponding unit readout
        * string.
        */
-      static std::pair<double, std::wstring> ConvertFileSizeToMostAppropriateUnits(
+      static std::pair<double, std::wstring> ConvertFileSizeToAppropriateUnits(
          double sizeInBytes);
 
       /**
        * @brief Computes the absolute file path of the selected node by traveling up tree.
        *
-       * @param[in] node               The selected node.
+       * @param[in]                 The selected node.
        *
        * @returns The absolute file path.
        */
@@ -172,12 +173,12 @@ class Controller
       /**
        * @brief Opens the selected file in Windows File Explorer.
        *
-       * @param[in] selectedNode       The node that represents the file to open.
+       * @param[in] node            The node that represents the file to open.
        */
       static void ShowInFileExplorer(const TreeNode<VizNode>& node);
 
       /**
-       * @brief PrintSelectionDetailsToStatusBar
+       * @brief Prints selection details to the main window's status bar.
        */
       void PrintSelectionDetailsToStatusBar();
 
@@ -190,16 +191,6 @@ class Controller
       std::unique_ptr<VisualizationModel> m_treeMap{ nullptr };
 
       std::vector<const TreeNode<VizNode>*> m_highlightedNodes;
-
-      std::vector<Light> m_lights
-      {
-         Light{ },
-         Light{ QVector3D{ 0.0f, 80.0f, 0.0f } },
-         Light{ QVector3D{ 0.0f, 80.0f, -VisualizationModel::ROOT_BLOCK_DEPTH } },
-         Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
-         Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f,
-            -VisualizationModel::ROOT_BLOCK_DEPTH } }
-      };
 
       VisualizationParameters m_visualizationParameters;
 };

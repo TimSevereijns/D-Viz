@@ -34,10 +34,11 @@ class GLCanvas : public QOpenGLWidget
    public:
 
       /**
-       * @brief GLCanvas
+       * @brief Constructs a new GLCanvas object.
        *
-       * @param controller
-       * @param parent
+       * @param[in] controller      The Controller object that'll manage the visual representation
+       *                            of the underlying treemap.
+       * @param[in] parent          A pointer to the canvas's parent window.
        */
       GLCanvas(
          Controller& controller,
@@ -58,10 +59,11 @@ class GLCanvas : public QOpenGLWidget
       void SetFieldOfView(const float fieldOfView);
 
       /**
-       * @brief SelectNode
-       * @param node
+       * @brief Paints the selected node.
+       *
+       * @param[in] node            The node whose visual representation is to be repainted.
        */
-      void SelectNode(const TreeNode<VizNode>* const node);
+      inline void SelectNode(const TreeNode<VizNode>* const node);
 
       /**
        * @brief HighlightSelectedNodes
@@ -71,7 +73,7 @@ class GLCanvas : public QOpenGLWidget
       /**
        * @brief Returns any highlighted nodes back to their unhighlighted colors.
        */
-      void RestoreHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes);
+      void RestoresSelectedAndHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes);
 
     protected:
 

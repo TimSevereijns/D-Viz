@@ -117,14 +117,6 @@ void GLCanvas::SetFieldOfView(const float fieldOfView)
    m_camera.SetFieldOfView(fieldOfView);
 }
 
-void GLCanvas::SelectNode(const TreeNode<VizNode>* const node)
-{
-   m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
-      *node,
-      SceneAsset::UpdateAction::SELECT,
-      m_controller.GetVisualizationParameters());
-}
-
 void GLCanvas::keyPressEvent(QKeyEvent* const event)
 {
    assert(event);
@@ -280,18 +272,23 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    }
 }
 
+void GLCanvas::SelectNode(const TreeNode<VizNode>* const node)
+{
+   m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
+      *node,
+      SceneAsset::UpdateAction::SELECT,
+      m_controller.GetVisualizationParameters());
+}
+
 void GLCanvas::HighlightSelectedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
 {
    for (const auto* const node : nodes)
    {
-      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
-         *node,
-         SceneAsset::UpdateAction::SELECT,
-         m_controller.GetVisualizationParameters());
+      SelectNode(node);
    }
 }
 
-void GLCanvas::RestoreHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
+void GLCanvas::RestoresSelectedAndHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
 {
    if (m_controller.GetSelectedNode())
    {

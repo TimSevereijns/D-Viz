@@ -67,7 +67,7 @@ void Controller::SetVisualizationParameters(const VisualizationParameters& param
    m_visualizationParameters = parameters;
 }
 
-const std::vector<const TreeNode<VizNode>*> Controller::GetHighlightedNodes() const
+const std::vector<const TreeNode<VizNode>*>& Controller::GetHighlightedNodes() const
 {
    return m_highlightedNodes;
 }
@@ -97,14 +97,14 @@ void Controller::SelectNode(const TreeNode<VizNode>* const node)
       return;
    }
 
-   ClearHighlightedNodes();
+   ClearSelectedAndHighlightedNodes();
 
    m_selectedNode = node;
 
    const auto fileSize = node->GetData().file.size;
    assert(fileSize > 0);
 
-   const auto sizeAndUnits = Controller::ConvertFileSizeToMostAppropriateUnits(fileSize);
+   const auto sizeAndUnits = Controller::ConvertFileSizeToAppropriateUnits(fileSize);
    const auto isInBytes = (sizeAndUnits.second == BYTES_READOUT_STRING);
 
    std::wstringstream message;
@@ -142,7 +142,7 @@ void Controller::SelectNodeViaRay(
    }
    else
    {
-      ClearHighlightedNodes();
+      ClearSelectedAndHighlightedNodes();
 
       const auto nodeCount = GetTree().Size();
       PrintMetadataToStatusBar(static_cast<uint32_t>(nodeCount));
@@ -171,7 +171,7 @@ void Controller::PrintSelectionDetailsToStatusBar()
       selectionSizeInBytes += node->GetData().file.size;
    }
 
-   const auto sizeAndUnits = Controller::ConvertFileSizeToMostAppropriateUnits(selectionSizeInBytes);
+   const auto sizeAndUnits = Controller::ConvertFileSizeToAppropriateUnits(selectionSizeInBytes);
    const auto isInBytes = (sizeAndUnits.second == BYTES_READOUT_STRING);
 
    std::wstringstream message;
@@ -186,7 +186,6 @@ void Controller::PrintSelectionDetailsToStatusBar()
       << sizeAndUnits.first
       << sizeAndUnits.second;
 
-   assert(message.str().size() > 0);
    m_mainWindow->SetStatusBarMessage(message.str());
 }
 
@@ -202,16 +201,18 @@ void Controller::PaintHighlightedNodes()
    PrintSelectionDetailsToStatusBar();
 }
 
-void Controller::ClearHighlightedNodes()
+void Controller::ClearSelectedAndHighlightedNodes()
 {
-   m_mainWindow->GetCanvas().RestoreHighlightedNodes(m_highlightedNodes);
+   m_mainWindow->GetCanvas().RestoresSelectedAndHighlightedNodes(m_highlightedNodes);
+
+   m_selectedNode = nullptr;
 
    m_highlightedNodes.clear();
 }
 
 void Controller::HighlightAncestors(const TreeNode<VizNode>& node)
 {
-   ClearHighlightedNodes();
+   ClearSelectedAndHighlightedNodes();
 
    auto* currentNode = &node;
    do
@@ -226,7 +227,7 @@ void Controller::HighlightAncestors(const TreeNode<VizNode>& node)
 
 void Controller::HighlightDescendants(const TreeNode<VizNode>& node)
 {
-   ClearHighlightedNodes();
+   ClearSelectedAndHighlightedNodes();
 
    std::for_each(
       Tree<VizNode>::LeafIterator{ &node },
@@ -247,7 +248,7 @@ void Controller::HighlightDescendants(const TreeNode<VizNode>& node)
 
 void Controller::HighlightAllMatchingExtension(const TreeNode<VizNode>& targetNode)
 {
-   ClearHighlightedNodes();
+   ClearSelectedAndHighlightedNodes();
 
    std::for_each(
       Tree<VizNode>::LeafIterator{ GetTree().GetHead() },
@@ -279,7 +280,7 @@ void Controller::SearchTreeMap(
       return;
    }
 
-   ClearHighlightedNodes();
+   ClearSelectedAndHighlightedNodes();
 
    std::for_each(
       Tree<VizNode>::PostOrderIterator{ GetTree().GetHead() },
@@ -313,7 +314,7 @@ void Controller::SearchTreeMap(
    PaintHighlightedNodes();
 }
 
-std::pair<double, std::wstring> Controller::ConvertFileSizeToMostAppropriateUnits(
+std::pair<double, std::wstring> Controller::ConvertFileSizeToAppropriateUnits(
    double sizeInBytes)
 {
    if (sizeInBytes < Constants::FileSize::ONE_KIBIBYTE)
