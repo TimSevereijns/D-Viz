@@ -109,13 +109,6 @@ class GLCanvas : public QOpenGLWidget
       void ShowContextMenu(const QPoint& point);
 
       /**
-       * @brief Handles mouse right-click mouse events.
-       *
-       * @param[in] event           Details of the mouse click event.
-       */
-      void HandleRightClick(const QPoint& point);
-
-      /**
        * @brief Handles the input from the Xbox controller.
        */
       void HandleXBoxControllerInput();

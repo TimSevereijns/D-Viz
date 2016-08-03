@@ -107,7 +107,7 @@ namespace
       const auto blockDepth = block.GetDepth();
 
       { // Perform hit detection on the top face:
-         const auto randomPointOnTopFace = blockOrigin + DoublePoint3D{ 0, blockHeight, 0 };
+         const auto randomPointOnTopFace = blockOrigin + PrecisePoint{ 0, blockHeight, 0 };
          const QVector3D topFacePoint
          {
             static_cast<float>(randomPointOnTopFace.x()),
@@ -151,7 +151,7 @@ namespace
       }
 
       { // Perform hit detection on the back face:
-         const auto randomPointOnBackFace = blockOrigin + DoublePoint3D{ 0, 0, -blockDepth };
+         const auto randomPointOnBackFace = blockOrigin + PrecisePoint{ 0, 0, -blockDepth };
          const QVector3D backFacePoint
          {
             static_cast<float>(randomPointOnBackFace.x()),
@@ -195,7 +195,7 @@ namespace
       }
 
       { // Perform hit detection on the right face:
-         const auto randomPointOnRightFace = blockOrigin + DoublePoint3D{ blockWidth, 0, 0 };
+         const auto randomPointOnRightFace = blockOrigin + PrecisePoint{ blockWidth, 0, 0 };
          const QVector3D rightFacePoint
          {
             static_cast<float>(randomPointOnRightFace.x()),

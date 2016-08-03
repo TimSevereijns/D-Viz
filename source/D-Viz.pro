@@ -17,8 +17,8 @@ SOURCES += \
    DataStructs/block.cpp \
    DataStructs/fileInfo.cpp \
    DataStructs/light.cpp \
+   DataStructs/precisePoint.cpp \
    DataStructs/vizNode.cpp \
-   DataStructs/doublePoint3d.cpp \
    DataStructs/driveScanningParameters.cpp \
    DriveScanner/driveScanner.cpp \
    DriveScanner/scanningWorker.cpp \
@@ -49,8 +49,8 @@ HEADERS  += \
    DataStructs/fileInfo.h \
    DataStructs/light.h \
    DataStructs/vizNode.h \
-   DataStructs/doublePoint3d.h \
    DataStructs/driveScanningParameters.h \
+   DataStructs/precisePoint.h \
    DriveScanner/driveScanner.h \
    DriveScanner/scanningWorker.h \
    HID/keyboardManager.h \

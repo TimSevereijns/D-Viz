@@ -44,14 +44,14 @@ namespace
     */
    Block ComputeRemainingArea(const Block& block)
    {
-      const DoublePoint3D nearCorner
+      const PrecisePoint nearCorner
       {
          block.GetNextRowOrigin().x(),
          block.GetNextRowOrigin().y(),
          block.GetNextRowOrigin().z()
       };
 
-      const DoublePoint3D farCorner
+      const PrecisePoint farCorner
       {
          block.ComputeNextChildOrigin().x() + block.GetWidth(),
          block.ComputeNextChildOrigin().y(),
@@ -98,7 +98,7 @@ namespace
 
       const double rowToParentRatio = bytesInRow / remainingBytes;
 
-      const DoublePoint3D nearCorner
+      const PrecisePoint nearCorner
       {
          parentBlock.GetNextRowOrigin().x(),
          parentBlock.GetNextRowOrigin().y(),
@@ -118,7 +118,7 @@ namespace
 
          if (updateOffset)
          {
-            const DoublePoint3D nextRowOffset
+            const PrecisePoint nextRowOffset
             {
                rowRealEstate.GetWidth(),
                0.0,
@@ -132,7 +132,7 @@ namespace
       {
          rowRealEstate = Block
          {
-            DoublePoint3D(nearCorner),
+            PrecisePoint(nearCorner),
             remainingLand.GetWidth(),
             remainingLand.GetHeight(),
             -remainingLand.GetDepth() * rowToParentRatio
@@ -140,7 +140,7 @@ namespace
 
          if (updateOffset)
          {
-            const DoublePoint3D nextRowOffset
+            const PrecisePoint nextRowOffset
             {
                0.0,
                0.0,
@@ -192,7 +192,7 @@ namespace
          ? std::abs(land.GetDepth()) - (2.0 * VisualizationModel::MAX_PADDING)
          : ratioBasedBlockDepth;
 
-      const DoublePoint3D offset
+      const PrecisePoint offset
       {
          (land.GetWidth() * land.GetCoverage()) + widthPaddingPerSide,
          0.0,
@@ -249,7 +249,7 @@ namespace
          ? land.GetWidth() - (2.0 * VisualizationModel::MAX_PADDING)
          : ratioBasedWidth;
 
-      const DoublePoint3D offset
+      const PrecisePoint offset
       {
          widthPaddingPerSide,
          0.0,
@@ -543,7 +543,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
 
    const Block rootBlock
    {
-      DoublePoint3D{ },
+      PrecisePoint{ },
       VisualizationModel::ROOT_BLOCK_WIDTH,
       VisualizationModel::BLOCK_HEIGHT,
       VisualizationModel::ROOT_BLOCK_DEPTH

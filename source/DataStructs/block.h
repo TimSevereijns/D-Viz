@@ -1,7 +1,7 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
-#include "doublePoint3d.h"
+#include "precisePoint.h"
 
 #include <QVector>
 #include <QVector3D>
@@ -32,7 +32,7 @@ class Block
        * @param[in] depth              The desired block depth; depth grows along negative z-axis.
        */
       Block(
-         const DoublePoint3D& origin,
+         const PrecisePoint& origin,
          const double width,
          const double height,
          const double depth,
@@ -51,7 +51,7 @@ class Block
        *
        * @returns The coordinates of the block's origin offset by the height of the block.
        */
-      DoublePoint3D ComputeNextChildOrigin() const;
+      PrecisePoint ComputeNextChildOrigin() const;
 
       /**
        * @returns The width of the block. The width increases along the positive X axis.
@@ -73,12 +73,12 @@ class Block
        * closest to the origin assuming that no part of the block exists in the positive Z-space or
        * the negative X- and Y-space.
        */
-      DoublePoint3D GetOrigin() const;
+      PrecisePoint GetOrigin() const;
 
       /**
        * @returns The location at which to place the next child block.
        */
-      DoublePoint3D GetNextRowOrigin() const;
+      PrecisePoint GetNextRowOrigin() const;
 
       /**
        * @brief Stores the point at which the next child block should be placed.
@@ -88,7 +88,7 @@ class Block
        *
        * @param[in] origin          The origin at which to place the next child.
        */
-      void SetNextRowOrigin(const DoublePoint3D& origin);
+      void SetNextRowOrigin(const PrecisePoint& origin);
 
       /**
        * @returns The current percentage of the block's surface that is covered.
@@ -119,8 +119,8 @@ class Block
 
       QVector<QVector3D> m_vertices;
 
-      DoublePoint3D m_origin;
-      DoublePoint3D m_nextRowOrigin; ///< Specific to the Squarified Treemap.
+      PrecisePoint m_origin;
+      PrecisePoint m_nextRowOrigin; ///< Specific to the Squarified Treemap.
 
       double m_percentCovered{ 0.0 };
       double m_width{ 0.0 };

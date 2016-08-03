@@ -1,7 +1,7 @@
 #include "block.h"
 
 Block::Block(
-   const DoublePoint3D& origin,
+   const PrecisePoint& origin,
    const double width,
    const double height,
    const double depth,
@@ -71,9 +71,9 @@ bool Block::HasVolume() const
    return (m_width != 0.0 && m_height != 0.0 && m_depth != 0.0);
 }
 
-DoublePoint3D Block::ComputeNextChildOrigin() const
+PrecisePoint Block::ComputeNextChildOrigin() const
 {
-   return m_origin + DoublePoint3D{ 0, m_height, 0 };
+   return m_origin + PrecisePoint{ 0, m_height, 0 };
 }
 
 double Block::GetWidth() const
@@ -91,17 +91,17 @@ double Block::GetDepth() const
    return m_depth;
 }
 
-DoublePoint3D Block::GetOrigin() const
+PrecisePoint Block::GetOrigin() const
 {
    return m_origin;
 }
 
-DoublePoint3D Block::GetNextRowOrigin() const
+PrecisePoint Block::GetNextRowOrigin() const
 {
    return m_nextRowOrigin;
 }
 
-void Block::SetNextRowOrigin(const DoublePoint3D& origin)
+void Block::SetNextRowOrigin(const PrecisePoint& origin)
 {
    m_nextRowOrigin = origin;
 }

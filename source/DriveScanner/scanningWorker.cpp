@@ -85,7 +85,7 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
 
    const Block rootBlock
    {
-      DoublePoint3D{ },
+      PrecisePoint{ },
       VisualizationModel::ROOT_BLOCK_WIDTH,
       VisualizationModel::BLOCK_HEIGHT,
       VisualizationModel::ROOT_BLOCK_DEPTH

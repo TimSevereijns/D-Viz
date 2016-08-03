@@ -11,15 +11,11 @@
 #include "Visualizations/squarifiedTreemap.h"
 #include "Utilities/scopeExit.hpp"
 
-#include <boost/algorithm/string/predicate.hpp>
-
 #include <QApplication>
 #include <QMenu>
 #include <QMessageBox>
 
 #include <iostream>
-#include <sstream>
-#include <utility>
 
 namespace
 {
@@ -169,32 +165,6 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
    event->accept();
 }
 
-void GLCanvas::HandleRightClick(const QPoint& point)
-{
-   if (!m_controller.HasVisualizationBeenLoaded())
-   {
-      return;
-   }
-
-//   const auto ray = m_camera.ShootRayIntoScene(point);
-//   auto* selection = m_theVisualization->FindNearestIntersection(m_camera, ray,
-//     /m_model.GetVisualizationParameters());
-
-//   if (selection)
-//   {
-//      HandleNodeSelection(selection);
-//   }
-//   else
-//   {
-//      ClearHighlightedNodes();
-
-//       auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
-//       assert(vizAsset);
-
-//       PrintMetadataToStatusBar(vizAsset->GetBlockCount(), *m_mainWindow);
-//   }
-}
-
 void GLCanvas::mousePressEvent(QMouseEvent* const event)
 {
    assert(event);
@@ -213,7 +183,8 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
       }
       else
       {
-         HandleRightClick(event->pos());
+         const auto ray = m_camera.ShootRayIntoScene(event->pos());
+         m_controller.SelectNodeViaRay(m_camera, ray);
       }
    }
    else if (event->button() == Qt::LeftButton)
@@ -350,17 +321,8 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
    const QPoint globalPoint = mapToGlobal(point);
 
    CanvasContextMenu menu{ m_keyboardManager };
-   menu.addAction("Highlight Ancestors",
-      [&] ()
-   {
-      m_controller.HighlightAncestors(*selectedNode);
-   });
-
-   menu.addAction("Highlight Descendants",
-      [&] ()
-   {
-      m_controller.HighlightDescendants(*selectedNode);
-   });
+   menu.addAction("Highlight Ancestors", [&] { m_controller.HighlightAncestors(*selectedNode); });
+   menu.addAction("Highlight Descendants", [&] { m_controller.HighlightDescendants(*selectedNode); });
 
    if (selectedNode->GetData().file.type == FileType::REGULAR)
    {
@@ -369,11 +331,7 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
          + QString::fromStdWString(selectedNode->GetData().file.extension)
          + QString::fromStdWString(L" Files");
 
-      menu.addAction(entryText,
-         [&] ()
-      {
-         m_controller.HighlightAllMatchingExtension(*selectedNode);
-      });
+      menu.addAction(entryText, [&] { m_controller.HighlightAllMatchingExtension(*selectedNode); });
    }
 
    menu.addSeparator();
@@ -549,7 +507,8 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
    {
       m_isRightTriggerDown = true;
 
-      HandleRightClick(m_camera.GetViewport().center());
+      const auto ray = m_camera.ShootRayIntoScene(m_camera.GetViewport().center());
+      m_controller.SelectNodeViaRay(m_camera, ray);
    }
    else if (m_isRightTriggerDown
       && controllerState.rightTrigger <= Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD)

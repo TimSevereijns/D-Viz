@@ -19,8 +19,6 @@ class Controller
    friend class GLCanvas;
 
    public:
-      Controller();
-
       /**
        * @returns True if the visualization is not null;
        */
@@ -93,7 +91,7 @@ class Controller
        *
        * @return
        */
-      std::vector<const TreeNode<VizNode>*> SearchTreeMap(
+      void SearchTreeMap(
          bool shouldSearchFiles,
          bool shouldSearchDirectories);
 
@@ -126,7 +124,7 @@ class Controller
       /**
        * @brief HighlightNodes
        */
-      void PaintHighlightNodes();
+      void PaintHighlightedNodes();
 
       /**
        * @brief SelectNode
@@ -135,11 +133,21 @@ class Controller
       void SelectNode(const TreeNode<VizNode>* const node);
 
       /**
+       * @brief SelectNodeViaRay
+       *
+       * @param camera
+       * @param ray
+       */
+      void SelectNodeViaRay(
+         const Camera& camera,
+         const Qt3DCore::QRay3D& ray);
+
+      /**
        * @brief Helper function to set the specifed vertex and block count in the bottom status bar.
        *
        * @param[in] vertexCount        The readout value.
        */
-      void PrintMetadataToStatusBar(const std::uint32_t blockCount);
+      void PrintMetadataToStatusBar(const std::uint32_t nodeCount);
 
       /**
        * @brief Converts the given size of the file from bytes to the most human readable units.
@@ -168,11 +176,16 @@ class Controller
        */
       static void ShowInFileExplorer(const TreeNode<VizNode>& node);
 
+      /**
+       * @brief PrintSelectionDetailsToStatusBar
+       */
+      void PrintSelectionDetailsToStatusBar();
+
    private:
 
       MainWindow* m_mainWindow{ nullptr };
 
-      TreeNode<VizNode>* m_selectedNode{ nullptr };
+      const TreeNode<VizNode>* m_selectedNode{ nullptr };
 
       std::unique_ptr<VisualizationModel> m_treeMap{ nullptr };
 

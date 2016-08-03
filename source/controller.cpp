@@ -21,10 +21,6 @@ namespace
    const auto* const BYTES_READOUT_STRING = L" bytes";
 }
 
-Controller::Controller()
-{
-}
-
 bool Controller::HasVisualizationBeenLoaded() const
 {
    return m_treeMap != nullptr;
@@ -103,6 +99,8 @@ void Controller::SelectNode(const TreeNode<VizNode>* const node)
 
    ClearHighlightedNodes();
 
+   m_selectedNode = node;
+
    const auto fileSize = node->GetData().file.size;
    assert(fileSize > 0);
 
@@ -125,29 +123,48 @@ void Controller::SelectNode(const TreeNode<VizNode>* const node)
    m_mainWindow->GetCanvas().SelectNode(node);
 }
 
-void Controller::PrintMetadataToStatusBar(const uint32_t blockCount)
+void Controller::SelectNodeViaRay(
+   const Camera& camera,
+   const Qt3DCore::QRay3D& ray)
+{
+   if (!HasVisualizationBeenLoaded())
+   {
+      return;
+   }
+
+   assert(m_treeMap);
+
+   // @todo Remove the camera from the parameter requirements; just pass in a point.
+   const auto* node = m_treeMap->FindNearestIntersection(camera, ray, m_visualizationParameters);
+   if (node)
+   {
+      SelectNode(node);
+   }
+   else
+   {
+      ClearHighlightedNodes();
+
+      const auto nodeCount = GetTree().Size();
+      PrintMetadataToStatusBar(static_cast<uint32_t>(nodeCount));
+   }
+}
+
+void Controller::PrintMetadataToStatusBar(const uint32_t nodeCount)
 {
    std::wstringstream message;
    message.imbue(std::locale(""));
    message
       << std::fixed
-      << blockCount * Block::VERTICES_PER_BLOCK
+      << nodeCount * Block::VERTICES_PER_BLOCK
       << L" vertices, representing "
-      << blockCount
+      << nodeCount
       << L" files.";
 
    m_mainWindow->SetStatusBarMessage(message.str());
 }
 
-void Controller::PaintHighlightNodes()
+void Controller::PrintSelectionDetailsToStatusBar()
 {
-   if (m_highlightedNodes.empty())
-   {
-      return;
-   }
-
-   m_mainWindow->GetCanvas().HighlightSelectedNodes(m_highlightedNodes);
-
    std::uintmax_t selectionSizeInBytes{ 0 };
    for (const auto* const node : m_highlightedNodes)
    {
@@ -161,7 +178,7 @@ void Controller::PaintHighlightNodes()
    message.imbue(std::locale{ "" });
    message.precision(isInBytes ? 0 : 2);
    message
-      << L"Highlighting "
+      << L"Highlighted "
       << m_highlightedNodes.size()
       << (m_highlightedNodes.size() == 1 ? L" node" : L" nodes")
       << L", representing "
@@ -171,6 +188,18 @@ void Controller::PaintHighlightNodes()
 
    assert(message.str().size() > 0);
    m_mainWindow->SetStatusBarMessage(message.str());
+}
+
+void Controller::PaintHighlightedNodes()
+{
+   if (m_highlightedNodes.empty())
+   {
+      return;
+   }
+
+   m_mainWindow->GetCanvas().HighlightSelectedNodes(m_highlightedNodes);
+
+   PrintSelectionDetailsToStatusBar();
 }
 
 void Controller::ClearHighlightedNodes()
@@ -192,7 +221,7 @@ void Controller::HighlightAncestors(const TreeNode<VizNode>& node)
    }
    while (currentNode);
 
-   PaintHighlightNodes();
+   PaintHighlightedNodes();
 }
 
 void Controller::HighlightDescendants(const TreeNode<VizNode>& node)
@@ -213,7 +242,7 @@ void Controller::HighlightDescendants(const TreeNode<VizNode>& node)
       m_highlightedNodes.emplace_back(&node);
    });
 
-   PaintHighlightNodes();
+   PaintHighlightedNodes();
 }
 
 void Controller::HighlightAllMatchingExtension(const TreeNode<VizNode>& targetNode)
@@ -235,22 +264,22 @@ void Controller::HighlightAllMatchingExtension(const TreeNode<VizNode>& targetNo
       m_highlightedNodes.emplace_back(&node);
    });
 
-   PaintHighlightNodes();
+   PaintHighlightedNodes();
 }
 
-std::vector<const TreeNode<VizNode>*> Controller::SearchTreeMap(
+void Controller::SearchTreeMap(
    bool shouldSearchFiles,
    bool shouldSearchDirectories)
 {
-   std::vector<const TreeNode<VizNode>*> results;
-
    const auto& searchQuery = m_mainWindow->GetSearchQuery();
    if (searchQuery.empty()
       || !HasVisualizationBeenLoaded()
       || (!shouldSearchFiles && !shouldSearchDirectories))
    {
-      return { };
+      return;
    }
+
+   ClearHighlightedNodes();
 
    std::for_each(
       Tree<VizNode>::PostOrderIterator{ GetTree().GetHead() },
@@ -278,10 +307,10 @@ std::vector<const TreeNode<VizNode>*> Controller::SearchTreeMap(
          return;
       }
 
-      results.emplace_back(&node);
+      m_highlightedNodes.emplace_back(&node);
    });
 
-   return results;
+   PaintHighlightedNodes();
 }
 
 std::pair<double, std::wstring> Controller::ConvertFileSizeToMostAppropriateUnits(
@@ -311,7 +340,7 @@ std::pair<double, std::wstring> Controller::ConvertFileSizeToMostAppropriateUnit
    }
 
    return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::ONE_TEBIBYTE, L" TiB");
+      sizeInBytes / Constants::FileSize::ONE_TEBIBYTE, L" TiB");
 }
 
 std::wstring Controller::ResolveCompleteFilePath(const TreeNode<VizNode>& node)

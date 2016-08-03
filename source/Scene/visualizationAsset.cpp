@@ -116,7 +116,7 @@ bool VisualizationAsset::InitializeReferenceBlock()
 
    const auto referenceBlock = Block
    {
-      DoublePoint3D{ 0.0, 0.0, 0.0 },
+      PrecisePoint{ 0.0, 0.0, 0.0 },
       1.0,
       1.0,
       1.0,

@@ -5,13 +5,13 @@
  * @brief The DoublePoint3D class provides the bare necessities needed to perform all node layout
  * arithmetic with double (instead of single) floating point precision.
  */
-class DoublePoint3D
+class PrecisePoint
 {
    public:
 
-      DoublePoint3D() = default;
+      PrecisePoint() = default;
 
-      DoublePoint3D(
+      PrecisePoint(
          double x,
          double y,
          double z);
@@ -21,10 +21,10 @@ class DoublePoint3D
       double z() const;
 
       friend inline auto operator+(
-         const DoublePoint3D& lhs,
-         const DoublePoint3D& rhs)
+         const PrecisePoint& lhs,
+         const PrecisePoint& rhs)
       {
-         return DoublePoint3D
+         return PrecisePoint
          {
             lhs.m_x + rhs.m_x,
             lhs.m_y + rhs.m_y,
