@@ -73,7 +73,7 @@ class GLCanvas : public QOpenGLWidget
       /**
        * @brief Returns any highlighted nodes back to their unhighlighted colors.
        */
-      void RestoresSelectedAndHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes);
+      void RestoreSelectedAndHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes);
 
     protected:
 

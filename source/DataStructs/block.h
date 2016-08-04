@@ -16,6 +16,8 @@
  */
 class Block
 {
+   friend class SquarifiedTreeMap;
+
    public:
 
       Block() = default;
@@ -47,13 +49,6 @@ class Block
       bool HasVolume() const;
 
       /**
-       * @brief Retrieves the location at which to start the laying out immediate descendants.
-       *
-       * @returns The coordinates of the block's origin offset by the height of the block.
-       */
-      PrecisePoint ComputeNextChildOrigin() const;
-
-      /**
        * @returns The width of the block. The width increases along the positive X axis.
        */
       double GetWidth() const;
@@ -76,35 +71,9 @@ class Block
       PrecisePoint GetOrigin() const;
 
       /**
-       * @returns The location at which to place the next child block.
-       */
-      PrecisePoint GetNextRowOrigin() const;
-
-      /**
-       * @brief Stores the point at which the next child block should be placed.
-       *
-       * @todo Make SquarifiedTreemap a friend of this function so that is doesn't have to be
-       * public.
-       *
-       * @param[in] origin          The origin at which to place the next child.
-       */
-      void SetNextRowOrigin(const PrecisePoint& origin);
-
-      /**
        * @returns The current percentage of the block's surface that is covered.
        */
       double GetCoverage() const;
-
-      /**
-       * @brief Increases the percentage of the block that is covered.
-       *
-       * @todo Make SquarifiedTreemap a friend of this function so that is doesn't have to be
-       * public.
-       *
-       * @param[in] additionalCoverage    The percentage amount by which to increase the coverage,
-       *                                  expressed as a normalized val
-       */
-      void IncreaseCoverageBy(double additionalCoverage);
 
       /**
        * @returns All the vertices and corresponding normals that make up the block. See the
@@ -116,6 +85,33 @@ class Block
       constexpr static auto VERTICES_PER_BLOCK{ 30 };
 
    private:
+
+      /**
+       * @brief Retrieves the location at which to start the laying out immediate descendants.
+       *
+       * @returns The coordinates of the block's origin offset by the height of the block.
+       */
+      PrecisePoint ComputeNextChildOrigin() const;
+
+      /**
+       * @returns The location at which to place the next child block.
+       */
+      PrecisePoint GetNextRowOrigin() const;
+
+      /**
+       * @brief Stores the point at which the next child block should be placed.
+       *
+       * @param[in] origin          The origin at which to place the next child.
+       */
+      void SetNextRowOrigin(const PrecisePoint& origin);
+
+      /**
+       * @brief Increases the percentage of the block that is covered.
+       *
+       * @param[in] additionalCoverage    The percentage amount by which to increase the coverage,
+       *                                  expressed as a normalized val
+       */
+      void IncreaseCoverageBy(double additionalCoverage);
 
       QVector<QVector3D> m_vertices;
 

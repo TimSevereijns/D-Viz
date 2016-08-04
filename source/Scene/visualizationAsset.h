@@ -39,6 +39,9 @@ class VisualizationAsset : public SceneAsset
       /**
        * @brief Loads the TreeMap nodes into the necessary graphics buffers.
        *
+       * @todo Passing the tree in as a const reference is a bit of a lie, since the nodes can still
+       * be (and are) modifiable. Consider fixing this.
+       *
        * @param[in] tree            The tree to pull the visualized TreeMap information from.
        * @param[in] parameters      The current visualization parameters that will govern what nodes
        *                            will be visualized.
@@ -46,7 +49,7 @@ class VisualizationAsset : public SceneAsset
        * @returns The number of blocks that have been loaded into the buffer.
        */
       std::uint32_t LoadBufferData(
-         Tree<VizNode>& tree,
+         const Tree<VizNode>& tree,
          const VisualizationParameters& parameters);
 
       /**

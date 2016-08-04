@@ -34,7 +34,7 @@ class Controller
        *
        * @param[in] parameters
        */
-      void GenerateNewVisualization(VisualizationParameters& parameters);
+      void GenerateNewVisualization();
 
       /**
        * @returns A pointer to the selected node.
@@ -84,10 +84,12 @@ class Controller
        *
        * @todo Make this more generic, and pass in the search query.
        *
+       * @param[in] searchQuery        String to search against.
        * @param[in] searchFiles        Pass in true to search files.
        * @param[in] searchDirectories  Pass in true to search directories.
        */
       void SearchTreeMap(
+         const std::wstring& searchQuery,
          bool shouldSearchFiles,
          bool shouldSearchDirectories);
 
@@ -115,12 +117,12 @@ class Controller
       /**
        * @brief Clears all highlighted nodes, as well as the selected node.
        */
-      void ClearSelectedAndHighlightedNodes();
+      void ClearHighlightedNodes();
 
       /**
        * @brief Updates the visual representation of the highlighted nodes.
        */
-      void PaintHighlightedNodes();
+      void PaintSelectedAndHighlightedNodes();
 
       /**
        * @brief Selects the passed in node.
@@ -183,6 +185,9 @@ class Controller
       void PrintSelectionDetailsToStatusBar();
 
    private:
+
+      template<typename LambdaType>
+      void Highlight(LambdaType nodeSelector);
 
       MainWindow* m_mainWindow{ nullptr };
 

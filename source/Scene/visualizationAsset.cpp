@@ -261,7 +261,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
 }
 
 std::uint32_t VisualizationAsset::LoadBufferData(
-   Tree<VizNode>& tree,
+   const Tree<VizNode>& tree,
    const VisualizationParameters& parameters)
 {
    m_blockTransformations.clear();

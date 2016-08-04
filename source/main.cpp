@@ -14,10 +14,10 @@ int main(int argc, char* argv[])
 
    QApplication application{ argc, argv };
 
-   Controller model{ };
-   MainWindow view{ model, nullptr };
-   model.SetView(&view);
-   view.show();
+   Controller controller{ };
+   MainWindow window{ controller, nullptr };
+   controller.SetView(&window);
+   window.show();
 
    return application.exec();
 }

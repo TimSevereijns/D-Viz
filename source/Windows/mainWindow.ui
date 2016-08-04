@@ -301,7 +301,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="regexSearchBox">
+      <widget class="QLineEdit" name="searchBox">
        <property name="font">
         <font>
          <family>Consolas</family>
@@ -336,7 +336,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="regexSearchButton">
+      <widget class="QPushButton" name="searchButton">
        <property name="text">
         <string>Search and Highlight</string>
        </property>

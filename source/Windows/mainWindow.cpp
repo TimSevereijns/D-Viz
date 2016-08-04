@@ -118,29 +118,19 @@ void MainWindow::SetupSidebar()
       static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
       m_optionsManager.get(), &OptionsManager::OnAttachLightToCameraStateChanged);
 
-   connect(m_ui->regexSearchBox, &QLineEdit::returnPressed,
-      [&] ()
+   const auto onNewSearchQuery = [&]
    {
       const bool shouldSearchFiles = m_ui->searchFilesCheckBox->isChecked();
       const bool shouldSearchDirectories = m_ui->searchDirectoriesCheckBox->isChecked();
 
-      m_controller.SearchTreeMap(shouldSearchFiles, shouldSearchDirectories);
-   });
+      const auto searchQuery = m_ui->searchBox->text().toStdWString();
 
-   connect(m_ui->regexSearchButton, &QPushButton::clicked,
-      [&] ()
-   {
-      const bool shouldSearchFiles = m_ui->searchFilesCheckBox->isChecked();
-      const bool shouldSearchDirectories = m_ui->searchDirectoriesCheckBox->isChecked();
+      m_controller.SearchTreeMap(searchQuery, shouldSearchFiles, shouldSearchDirectories);
+   };
 
-      m_controller.SearchTreeMap(shouldSearchFiles, shouldSearchDirectories);
-   });
+   connect(m_ui->searchBox, &QLineEdit::returnPressed, onNewSearchQuery);
 
-   connect(m_ui->regexSearchBox, &QLineEdit::textChanged, this,
-      [&] (const auto& newText)
-   {
-      m_searchQuery = newText.toStdWString();
-   });
+   connect(m_ui->searchButton, &QPushButton::clicked, onNewSearchQuery);
 
    connect(m_ui->searchDirectoriesCheckBox, &QCheckBox::stateChanged,
       m_optionsManager.get(), &OptionsManager::OnShouldSearchDirectoriesChanged);
@@ -246,7 +236,7 @@ void MainWindow::OnFileMenuNewScan()
    parameters.minimumFileSize = m_sizePruningOptions[m_ui->pruneSizeComboBox->currentIndex()].first;
 
    m_controller.SetVisualizationParameters(parameters);
-   m_controller.GenerateNewVisualization(parameters);
+   m_controller.GenerateNewVisualization();
 }
 
 void MainWindow::OnFPSReadoutToggled(bool isEnabled)

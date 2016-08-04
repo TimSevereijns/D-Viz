@@ -288,7 +288,7 @@ void GLCanvas::HighlightSelectedNodes(std::vector<const TreeNode<VizNode>*>& nod
    }
 }
 
-void GLCanvas::RestoresSelectedAndHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
+void GLCanvas::RestoreSelectedAndHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
 {
    if (m_controller.GetSelectedNode())
    {
