@@ -1,5 +1,5 @@
-#ifndef MAINMODEL_H
-#define MAINMODEL_H
+#ifndef CONTROLLER_H
+#define CONTROLLER_H
 
 #include "DataStructs/light.h"
 #include "DataStructs/vizNode.h"
@@ -200,4 +200,4 @@ class Controller
       VisualizationParameters m_visualizationParameters;
 };
 
-#endif // MAINMODEL_H
+#endif // CONTROLLER_H

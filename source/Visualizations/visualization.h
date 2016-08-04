@@ -1,5 +1,5 @@
-#ifndef VISUALIZATION_H
-#define VISUALIZATION_H
+#ifndef VISUALIZATIONMODEL_H
+#define VISUALIZATIONMODEL_H
 
 #include <boost/optional.hpp>
 
@@ -114,4 +114,4 @@ class VisualizationModel
       VisualizationParameters m_vizParameters;
 };
 
-#endif // VISUALIZATION_H
+#endif // VISUALIZATIONMODEL_H

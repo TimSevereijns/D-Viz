@@ -14,7 +14,7 @@
 namespace
 {
    /**
-    * @brief RowSizeInBytes computes the total disk space represented by the nodes in the row.
+    * @brief Ccomputes the total disk space represented by the nodes in the row.
     *
     * @param[in] row                The nodes in the whose size is to contribute to total row size.
     * @param[in] candidateItem      An optional additional item to be included in the row.
@@ -37,7 +37,7 @@ namespace
    }
 
    /**
-    * @brief SlicePerpendicularToWidth
+    * @brief Slice perpendicular to block width.
     *
     * @param[in] land               The node, or "land," to lay the current node out upon.
     * @param[in] percentageOfParent The percentage of the parent node that the current node will
@@ -94,7 +94,7 @@ namespace
    }
 
    /**
-    * @brief SlicePerpendicularToDepth
+    * @brief Slice perpendicular to block depth.
     *
     * @param[in] land               The node, or "land," to lay the current node out upon.
     * @param[in] percentageOfParent The percentage of the parent node that the current node will

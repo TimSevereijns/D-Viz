@@ -1,9 +1,9 @@
-#ifndef DOUBLEPOINT3D_H
-#define DOUBLEPOINT3D_H
+#ifndef PRECISEPOINT_H
+#define PRECISEPOINT_H
 
 /**
- * @brief The DoublePoint3D class provides the bare necessities needed to perform all node layout
- * arithmetic with double (instead of single) floating point precision.
+ * @brief Provides the bare necessities needed to represent three-dimensional point with double
+ * precision.
  */
 class PrecisePoint
 {
@@ -39,4 +39,4 @@ class PrecisePoint
       double m_z{ 0.0 };
 };
 
-#endif // DOUBLEPOINT3D_H
+#endif // PRECISEPOINT_H
