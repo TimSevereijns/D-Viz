@@ -280,15 +280,7 @@ void GLCanvas::SelectNode(const TreeNode<VizNode>* const node)
       m_controller.GetVisualizationParameters());
 }
 
-void GLCanvas::HighlightSelectedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
-{
-   for (const auto* const node : nodes)
-   {
-      SelectNode(node);
-   }
-}
-
-void GLCanvas::RestoreSelectedAndHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
+void GLCanvas::RestoreSelectedNode()
 {
    if (m_controller.GetSelectedNode())
    {
@@ -297,7 +289,18 @@ void GLCanvas::RestoreSelectedAndHighlightedNodes(std::vector<const TreeNode<Viz
          SceneAsset::UpdateAction::DESELECT,
          m_controller.GetVisualizationParameters());
    }
+}
 
+void GLCanvas::HighlightSelectedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
+{
+   for (const auto* const node : nodes)
+   {
+      SelectNode(node);
+   }
+}
+
+void GLCanvas::RestoreHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
+{
    for (const auto* const node : nodes)
    {
       m_sceneAssets[Asset::TREEMAP]->UpdateVBO(

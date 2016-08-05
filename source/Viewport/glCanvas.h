@@ -66,6 +66,11 @@ class GLCanvas : public QOpenGLWidget
       inline void SelectNode(const TreeNode<VizNode>* const node);
 
       /**
+       * @brief Restores the color of the selected node back to its unselected state.
+       */
+      void RestoreSelectedNode();
+
+      /**
        * @brief HighlightSelectedNodes
        */
       void HighlightSelectedNodes(std::vector<const TreeNode<VizNode>*>& nodes);
@@ -73,9 +78,9 @@ class GLCanvas : public QOpenGLWidget
       /**
        * @brief Returns any highlighted nodes back to their unhighlighted colors.
        */
-      void RestoreSelectedAndHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes);
+      void RestoreHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes);
 
-    protected:
+   protected:
 
       void initializeGL() override;
       void resizeGL(int width, int height) override;

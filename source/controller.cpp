@@ -95,6 +95,7 @@ void Controller::SelectNode(const TreeNode<VizNode>* const node)
       return;
    }
 
+   ClearSelectedNode();
    ClearHighlightedNodes();
 
    m_selectedNode = node;
@@ -199,24 +200,43 @@ void Controller::PaintSelectedAndHighlightedNodes()
    PrintSelectionDetailsToStatusBar();
 }
 
+void Controller::ClearSelectedNode()
+{
+   m_mainWindow->GetCanvas().RestoreSelectedNode();
+
+   m_selectedNode = nullptr;
+}
+
 void Controller::ClearHighlightedNodes()
 {
-   m_mainWindow->GetCanvas().RestoreSelectedAndHighlightedNodes(m_highlightedNodes);
+   m_mainWindow->GetCanvas().RestoreHighlightedNodes(m_highlightedNodes);
 
    m_highlightedNodes.clear();
 }
 
 template<typename LambdaType>
-void Controller::Highlight(LambdaType nodeSelector)
+void Controller::Highlight(LambdaType nodeSelector,
+   bool clearSelectedNode,
+   bool clearPreviouslyHighlightedNodes)
 {
-   ClearHighlightedNodes();
+   if (clearPreviouslyHighlightedNodes)
+   {
+      ClearHighlightedNodes();
+   }
+
+   if (clearSelectedNode)
+   {
+      ClearSelectedNode();
+   }
+
    nodeSelector();
+
    PaintSelectedAndHighlightedNodes();
 }
 
 void Controller::HighlightAncestors(const TreeNode<VizNode>& node)
 {
-   Highlight([&]
+   const auto selector = [&]
    {
       auto* currentNode = &node;
       do
@@ -225,7 +245,12 @@ void Controller::HighlightAncestors(const TreeNode<VizNode>& node)
          currentNode = currentNode->GetParent();
       }
       while (currentNode);
-   });
+   };
+
+   Highlight(
+      selector,
+      /* clearSelectedNode = */ false,
+      /* clearPreviouslyHighlightedNodes = */ true);
 }
 
 void Controller::HighlightDescendants(const TreeNode<VizNode>& node)
@@ -247,7 +272,10 @@ void Controller::HighlightDescendants(const TreeNode<VizNode>& node)
       });
    };
 
-   Highlight(selector);
+   Highlight(
+      selector,
+      /* clearSelectedNode = */ false,
+      /* clearPreviouslyHighlightedNodes = */ true);
 }
 
 void Controller::HighlightAllMatchingExtension(const TreeNode<VizNode>& targetNode)
@@ -270,7 +298,10 @@ void Controller::HighlightAllMatchingExtension(const TreeNode<VizNode>& targetNo
       });
    };
 
-   Highlight(selector);
+   Highlight(
+      selector,
+      /* clearSelectedNode = */ false,
+      /* clearPreviouslyHighlightedNodes = */ true);
 }
 
 void Controller::SearchTreeMap(
@@ -284,8 +315,6 @@ void Controller::SearchTreeMap(
    {
       return;
    }
-
-   m_selectedNode = nullptr;
 
    const auto selector = [&]
    {
@@ -319,7 +348,10 @@ void Controller::SearchTreeMap(
       });
    };
 
-   Highlight(selector);
+   Highlight(
+      selector,
+      /* clearSelectedNode = */ true,
+      /* clearPreviouslyHighlightedNodes = */ true);
 }
 
 std::pair<double, std::wstring> Controller::ConvertFileSizeToAppropriateUnits(

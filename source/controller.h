@@ -115,7 +115,14 @@ class Controller
       void HighlightAncestors(const TreeNode<VizNode>& node);
 
       /**
-       * @brief Clears all highlighted nodes, as well as the selected node.
+       * @brief Clears the selected node, and restores the color of that selected node back to its
+       * unselected color.
+       */
+      void ClearSelectedNode();
+
+      /**
+       * @brief Clears all highlighted nodes, and restores the color of any highlighted nodes back
+       * to its unhighlighted color.
        */
       void ClearHighlightedNodes();
 
@@ -187,7 +194,10 @@ class Controller
    private:
 
       template<typename LambdaType>
-      void Highlight(LambdaType nodeSelector);
+      void Highlight(
+         LambdaType nodeSelector,
+         bool clearSelectedNode,
+         bool clearPreviouslyHighlightedNodes);
 
       MainWindow* m_mainWindow{ nullptr };
 

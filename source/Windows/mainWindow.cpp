@@ -323,7 +323,7 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
       SetStatusBarMessage(message.str());
 
       AskUserToLimitFileSize(numberOfFilesScanned, vizParameters);
-      // @todo May have to set the viz parameters on the model
+      m_controller.SetVisualizationParameters(vizParameters);
 
       m_controller.ParseResults(scanningResults);
       m_controller.UpdateBoundingBoxes();

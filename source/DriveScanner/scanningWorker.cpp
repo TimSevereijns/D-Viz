@@ -177,7 +177,7 @@ void ScanningWorker::ScanRecursively(
          // In some edge-cases, the Windows operating system doesn't allow anyone to access certain
          // directories, and attempts to do so will result in exceptional behaviour---pun intended.
          // In order to deal with these rare cases, we'll need to rely on a try-catch to keep going.
-         // One example of a problematic directory in Windows 7 is: C:\System Volume Information
+         // One example of a problematic directory in Windows 7 is: "C:\System Volume Information".
          if (boost::filesystem::is_empty(path))
          {
             return;
