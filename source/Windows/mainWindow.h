@@ -7,8 +7,8 @@
 #include "aboutDialog.h"
 #include "breakdownDialog.h"
 #include "constants.h"
-#include "HID/xboxController.h"
 #include "controller.h"
+#include "HID/xboxController.h"
 
 namespace Ui
 {

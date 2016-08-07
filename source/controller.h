@@ -129,7 +129,7 @@ class Controller
       /**
        * @brief Updates the visual representation of the highlighted nodes.
        */
-      void PaintSelectedAndHighlightedNodes();
+      void PaintHighlightedNodes();
 
       /**
        * @brief Selects the passed in node.
@@ -195,9 +195,9 @@ class Controller
 
       template<typename LambdaType>
       void Highlight(
-         LambdaType nodeSelector,
-         bool clearSelectedNode,
-         bool clearPreviouslyHighlightedNodes);
+         const LambdaType& nodeSelector,
+         bool shouldClearSelectedNode,
+         bool shouldClearPreviouslyHighlightedNodes);
 
       MainWindow* m_mainWindow{ nullptr };
 

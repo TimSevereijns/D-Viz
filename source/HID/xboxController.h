@@ -3,8 +3,8 @@
 
 #include <cstdint>
 #include <functional>
-#include <numeric>
 #include <memory>
+#include <numeric>
 #include <unordered_map>
 
 #include <QObject>

@@ -2,10 +2,10 @@
 #define GLCANVAS_H
 
 #include "camera.h"
+#include "controller.h"
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
 #include "HID/keyboardManager.h"
-#include "controller.h"
 #include "optionsManager.h"
 #include "Scene/sceneAsset.h"
 #include "Viewport/graphicsDevice.h"
@@ -160,6 +160,10 @@ class GLCanvas : public QOpenGLWidget
       bool m_isLeftTriggerDown{ false };
       bool m_isRightTriggerDown{ false };
 
+      bool m_isLeftMouseButtonDown{ false };
+
+      bool m_isCursorHidden{ false };
+
       Controller& m_controller;
 
       MainWindow& m_mainWindow;
@@ -175,6 +179,11 @@ class GLCanvas : public QOpenGLWidget
       };
 
       std::chrono::system_clock::time_point m_lastCameraPositionUpdatelTime
+      {
+         std::chrono::system_clock::now()
+      };
+
+      std::chrono::system_clock::time_point m_startOfMouseLookEvent
       {
          std::chrono::system_clock::now()
       };

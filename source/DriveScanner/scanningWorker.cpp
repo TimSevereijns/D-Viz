@@ -63,7 +63,7 @@ namespace
       }
    }
 
-   constexpr unsigned int UPDATE_FREQUENCY = 1000;
+   constexpr std::chrono::seconds UPDATE_FREQUENCY{ 1 };
 }
 
 const std::uintmax_t ScanningWorker::SIZE_UNDEFINED = 0;
@@ -133,15 +133,15 @@ void ScanningWorker::ScanRecursively(
    const boost::filesystem::path& path,
    TreeNode<VizNode>& treeNode)
 {
-   using namespace std::chrono;
+   const auto now = std::chrono::high_resolution_clock::now();
    const auto timeSinceLastProgressUpdate =
-      duration_cast<milliseconds>(high_resolution_clock::now() - m_lastProgressUpdate).count();
+      std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastProgressUpdate);
 
    if (timeSinceLastProgressUpdate > UPDATE_FREQUENCY)
    {
       emit ProgressUpdate(m_filesScanned);
 
-      m_lastProgressUpdate = high_resolution_clock::now();
+      m_lastProgressUpdate = std::chrono::high_resolution_clock::now();
    }
 
    bool isRegularFile = false;
@@ -190,8 +190,8 @@ void ScanningWorker::ScanRecursively(
 
       const FileInfo directoryInfo
       {
-         path.filename().stem().wstring(),
-         path.filename().extension().wstring(),
+         path.filename().wstring(),
+         /* extension = */ L"",
          ScanningWorker::SIZE_UNDEFINED,
          FileType::DIRECTORY
       };

@@ -1,9 +1,9 @@
 #include "controller.h"
 
 #include "constants.h"
+#include "Utilities/scopeExit.hpp"
 #include "Viewport/glCanvas.h"
 #include "Visualizations/squarifiedTreemap.h"
-#include "Utilities/scopeExit.hpp"
 #include "Windows/mainWindow.h"
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -188,7 +188,7 @@ void Controller::PrintSelectionDetailsToStatusBar()
    m_mainWindow->SetStatusBarMessage(message.str());
 }
 
-void Controller::PaintSelectedAndHighlightedNodes()
+void Controller::PaintHighlightedNodes()
 {
    if (m_highlightedNodes.empty())
    {
@@ -215,23 +215,24 @@ void Controller::ClearHighlightedNodes()
 }
 
 template<typename LambdaType>
-void Controller::Highlight(LambdaType nodeSelector,
-   bool clearSelectedNode,
-   bool clearPreviouslyHighlightedNodes)
+void Controller::Highlight(
+   const LambdaType& nodeSelector,
+   bool shouldClearSelectedNode,
+   bool shouldClearPreviouslyHighlightedNodes)
 {
-   if (clearPreviouslyHighlightedNodes)
+   if (shouldClearPreviouslyHighlightedNodes)
    {
       ClearHighlightedNodes();
    }
 
-   if (clearSelectedNode)
+   if (shouldClearSelectedNode)
    {
       ClearSelectedNode();
    }
 
    nodeSelector();
 
-   PaintSelectedAndHighlightedNodes();
+   PaintHighlightedNodes();
 }
 
 void Controller::HighlightAncestors(const TreeNode<VizNode>& node)
@@ -249,8 +250,8 @@ void Controller::HighlightAncestors(const TreeNode<VizNode>& node)
 
    Highlight(
       selector,
-      /* clearSelectedNode = */ false,
-      /* clearPreviouslyHighlightedNodes = */ true);
+      /* shouldClearSelectedNode = */ false,
+      /* shouldClearPreviouslyHighlightedNodes = */ true);
 }
 
 void Controller::HighlightDescendants(const TreeNode<VizNode>& node)
@@ -274,8 +275,8 @@ void Controller::HighlightDescendants(const TreeNode<VizNode>& node)
 
    Highlight(
       selector,
-      /* clearSelectedNode = */ false,
-      /* clearPreviouslyHighlightedNodes = */ true);
+      /* shouldClearSelectedNode = */ false,
+      /* shouldClearPreviouslyHighlightedNodes = */ true);
 }
 
 void Controller::HighlightAllMatchingExtension(const TreeNode<VizNode>& targetNode)
@@ -300,8 +301,8 @@ void Controller::HighlightAllMatchingExtension(const TreeNode<VizNode>& targetNo
 
    Highlight(
       selector,
-      /* clearSelectedNode = */ false,
-      /* clearPreviouslyHighlightedNodes = */ true);
+      /* shouldClearSelectedNode = */ false,
+      /* shouldClearPreviouslyHighlightedNodes = */ true);
 }
 
 void Controller::SearchTreeMap(
@@ -350,8 +351,8 @@ void Controller::SearchTreeMap(
 
    Highlight(
       selector,
-      /* clearSelectedNode = */ true,
-      /* clearPreviouslyHighlightedNodes = */ true);
+      /* shouldClearSelectedNode = */ true,
+      /* shouldClearPreviouslyHighlightedNodes = */ true);
 }
 
 std::pair<double, std::wstring> Controller::ConvertFileSizeToAppropriateUnits(

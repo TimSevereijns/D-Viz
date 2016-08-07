@@ -7,9 +7,9 @@
 #include <iostream>
 #include <string>
 
-#include <Qt3DCore/QRay3D>
 #include <QColor>
 #include <QRectF>
+#include <Qt3DCore/QRay3D>
 
 #include "../constants.h"
 #include "../ThirdParty/stopwatch.hpp"
@@ -374,7 +374,9 @@ TreeNode<VizNode>* VisualizationModel::FindNearestIntersection(
 
    Stopwatch<std::chrono::microseconds>([&]
    {
-      auto allIntersections = FindAllIntersections(ray, camera, parameters, m_theTree->GetHead());
+      const auto headNode = m_theTree->GetHead();
+      const auto allIntersections = FindAllIntersections(ray, camera, parameters, headNode);
+
       if (allIntersections.empty())
       {
          return;
