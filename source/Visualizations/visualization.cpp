@@ -108,7 +108,7 @@ namespace
 
       { // Perform hit detection on the top face:
          const auto randomPointOnTopFace = blockOrigin + PrecisePoint{ 0, blockHeight, 0 };
-         const QVector3D topFacePoint
+         const QVector3D pointOnPlane
          {
             static_cast<float>(randomPointOnTopFace.x()),
             static_cast<float>(randomPointOnTopFace.y()),
@@ -116,7 +116,7 @@ namespace
          };
 
          const boost::optional<QVector3D> intersectionPoint =
-            DoesRayIntersectPlane(ray, topFacePoint, POSITIVE_Y_NORMAL);
+            DoesRayIntersectPlane(ray, pointOnPlane, POSITIVE_Y_NORMAL);
 
          if (intersectionPoint &&
              blockOrigin.x()                 < intersectionPoint->x() &&
@@ -130,7 +130,7 @@ namespace
 
       { // Perform hit detection on the front face:
          const auto randomPointOnFrontFace = blockOrigin;
-         const QVector3D frontFacePoint
+         const QVector3D pointOnPlane
          {
             static_cast<float>(randomPointOnFrontFace.x()),
             static_cast<float>(randomPointOnFrontFace.y()),
@@ -138,7 +138,7 @@ namespace
          };
 
          const boost::optional<QVector3D> intersectionPoint =
-            DoesRayIntersectPlane(ray, frontFacePoint, POSITIVE_Z_NORMAL);
+            DoesRayIntersectPlane(ray, pointOnPlane, POSITIVE_Z_NORMAL);
 
          if (intersectionPoint &&
              blockOrigin.x()                 < intersectionPoint->x() &&
@@ -152,7 +152,7 @@ namespace
 
       { // Perform hit detection on the back face:
          const auto randomPointOnBackFace = blockOrigin + PrecisePoint{ 0, 0, -blockDepth };
-         const QVector3D backFacePoint
+         const QVector3D pointOnPlane
          {
             static_cast<float>(randomPointOnBackFace.x()),
             static_cast<float>(randomPointOnBackFace.y()),
@@ -160,7 +160,7 @@ namespace
          };
 
          const boost::optional<QVector3D> intersectionPoint =
-            DoesRayIntersectPlane(ray, backFacePoint, NEGATIVE_Z_NORMAL);
+            DoesRayIntersectPlane(ray, pointOnPlane, NEGATIVE_Z_NORMAL);
 
          if (intersectionPoint &&
              blockOrigin.x()                 < intersectionPoint->x() &&
@@ -174,7 +174,7 @@ namespace
 
       { // Perform hit detection on the left face:
          const auto randomPointOnLeftFace = blockOrigin;
-         const QVector3D leftFacePoint
+         const QVector3D pointOnPlane
          {
             static_cast<float>(randomPointOnLeftFace.x()),
             static_cast<float>(randomPointOnLeftFace.y()),
@@ -182,7 +182,7 @@ namespace
          };
 
          const boost::optional<QVector3D> intersectionPoint =
-            DoesRayIntersectPlane(ray, leftFacePoint, NEGATIVE_X_NORMAL);
+            DoesRayIntersectPlane(ray, pointOnPlane, NEGATIVE_X_NORMAL);
 
          if (intersectionPoint &&
              blockOrigin.z()                 > intersectionPoint->z() &&
@@ -196,7 +196,7 @@ namespace
 
       { // Perform hit detection on the right face:
          const auto randomPointOnRightFace = blockOrigin + PrecisePoint{ blockWidth, 0, 0 };
-         const QVector3D rightFacePoint
+         const QVector3D pointOnPlane
          {
             static_cast<float>(randomPointOnRightFace.x()),
             static_cast<float>(randomPointOnRightFace.y()),
@@ -204,7 +204,7 @@ namespace
          };
 
          const boost::optional<QVector3D> intersectionPoint =
-            DoesRayIntersectPlane(ray, rightFacePoint, POSITIVE_X_NORMAL);
+            DoesRayIntersectPlane(ray, pointOnPlane, POSITIVE_X_NORMAL);
 
          if (intersectionPoint &&
              blockOrigin.z()                 > intersectionPoint->z() &&

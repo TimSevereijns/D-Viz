@@ -141,6 +141,7 @@ void Controller::SelectNodeViaRay(
    }
    else
    {
+      ClearSelectedNode();
       ClearHighlightedNodes();
 
       const auto nodeCount = GetTree().Size();
