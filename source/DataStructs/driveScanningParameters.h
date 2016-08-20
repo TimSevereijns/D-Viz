@@ -20,7 +20,9 @@ struct VizNode;
  */
 struct DriveScanningParameters
 {
-   using ProgressCallback = std::function<void (const std::uintmax_t filesScanned)>;
+   using ProgressCallback = std::function<void (const std::uintmax_t filesScanned,
+      const std::uintmax_t numberOfBytesProcessed)>;
+
    using ScanCompleteCallback = std::function<void (const std::uintmax_t filesScanned,
       std::shared_ptr<Tree<VizNode>> fileTree)>;
 

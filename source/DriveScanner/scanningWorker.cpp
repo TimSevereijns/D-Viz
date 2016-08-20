@@ -139,7 +139,7 @@ void ScanningWorker::ScanRecursively(
 
    if (timeSinceLastProgressUpdate > UPDATE_FREQUENCY)
    {
-      emit ProgressUpdate(m_filesScanned);
+      emit ProgressUpdate(m_filesScanned, m_numberOfBytesProcessed);
 
       m_lastProgressUpdate = std::chrono::high_resolution_clock::now();
    }
@@ -158,11 +158,14 @@ void ScanningWorker::ScanRecursively(
 
    if (isRegularFile && boost::filesystem::file_size(path) > 0)
    {
+      const auto fileSize = boost::filesystem::file_size(path);
+      m_numberOfBytesProcessed += fileSize;
+
       const FileInfo fileInfo
       {
          path.filename().stem().wstring(),
          path.filename().extension().wstring(),
-         boost::filesystem::file_size(path),
+         fileSize,
          FileType::REGULAR
       };
 
@@ -220,7 +223,7 @@ void ScanningWorker::Start()
       return;
    }
 
-   emit ProgressUpdate(0);
+   emit ProgressUpdate(0, 0);
 
    m_lastProgressUpdate = std::chrono::high_resolution_clock::now();
 

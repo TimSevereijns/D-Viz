@@ -64,8 +64,11 @@ class ScanningWorker : public QObject
        * @brief Signals drive scanning progress updates.
        *
        * @param[in] filesScanned    The number of files scanned so far.
+       * @param[in] numberOfBytesProcessed   The cumulative size of all files scanned so far.
        */
-      void ProgressUpdate(const std::uintmax_t filesScanned);
+      void ProgressUpdate(
+         const std::uintmax_t filesScanned,
+         const std::uintmax_t nnumberOfBytesProcessed);
 
       /**
        * @brief Allows for cross-thread signaling to show the user a standard Qt message box.
@@ -99,6 +102,7 @@ class ScanningWorker : public QObject
       std::shared_ptr<Tree<VizNode>> CreateTreeAndRootNode();
 
       std::uintmax_t m_filesScanned{ 0 };
+      std::uintmax_t m_numberOfBytesProcessed{ 0 };
 
       std::chrono::high_resolution_clock::time_point m_lastProgressUpdate;
 

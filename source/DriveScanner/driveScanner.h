@@ -49,9 +49,12 @@ class DriveScanner : public QObject
        *
        * @see ScanningWorker::ProgressUpdate
        *
-       * @param[in] filesScanned    The number of files scanned.
+       * @param[in] filesScanned             The number of files scanned.
+       * @param[in] numberOfBytesProcessed   The cumulative size of all files scanned so far.
        */
-      void HandleProgressUpdates(const std::uintmax_t filesScanned);
+      void HandleProgressUpdates(
+         const std::uintmax_t filesScanned,
+         const std::uintmax_t numberOfBytesProcessed);
 
       /**
        * @brief Handle the ScanningWorker::ShowMessageBox signal.

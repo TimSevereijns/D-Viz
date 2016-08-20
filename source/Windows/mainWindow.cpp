@@ -299,17 +299,44 @@ void MainWindow::XboxControllerStateChanged(XboxController::State state)
 
 void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
 {
-   const auto progressHandler =
-      [&] (const std::uintmax_t numberOfFilesScanned)
+   std::wstring filePath = vizParameters.rootDirectory;
+   std::replace(std::begin(filePath), std::end(filePath), L'/', L'\\');
+   filePath += '\\';
+
+   std::uint64_t totalNumberOfFreeBytes{ 0 };
+   std::uint64_t totalNumberOfBytes{ 0 };
+   const bool diskInfo = GetDiskFreeSpaceExW(
+      filePath.c_str(),
+      NULL,
+      (PULARGE_INTEGER)&totalNumberOfBytes,
+      (PULARGE_INTEGER)&totalNumberOfFreeBytes);
+
+   const auto occupiedSpace = totalNumberOfBytes - totalNumberOfFreeBytes;
+
+   const auto progressHandler = [&, occupiedSpace]
+      (const std::uintmax_t numberOfFilesScanned,
+      const std::uintmax_t bytesProcessed)
    {
+      const auto percentComplete = 100 *
+         (static_cast<long double>(bytesProcessed) / static_cast<long double>(occupiedSpace));
+
       std::wstringstream message;
       message.imbue(std::locale{ "" });
-      message << std::fixed << L"Files Scanned: " << numberOfFilesScanned;
+      message.precision(2);
+      message
+         << std::fixed
+         << L"Files Scanned: "
+         << numberOfFilesScanned
+         << L"  |  "
+         << percentComplete
+         << L"% Complete"
+         << std::endl;
+
       SetStatusBarMessage(message.str());
    };
 
-   const auto completionHandler =
-      [&, vizParameters] (const std::uintmax_t numberOfFilesScanned,
+   const auto completionHandler = [&, vizParameters]
+      (const std::uintmax_t numberOfFilesScanned,
       std::shared_ptr<Tree<VizNode>> scanningResults) mutable
    {
       QCursor previousCursor = cursor();

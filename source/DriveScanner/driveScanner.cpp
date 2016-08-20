@@ -6,9 +6,11 @@
 
 #include <QMessageBox>
 
-void DriveScanner::HandleProgressUpdates(const std::uintmax_t filesScanned)
+void DriveScanner::HandleProgressUpdates(
+   const std::uintmax_t filesScanned,
+   const std::uintmax_t numberOfBytesProcessed)
 {
-   m_parameters.onProgressUpdateCallback(filesScanned);
+   m_parameters.onProgressUpdateCallback(filesScanned, numberOfBytesProcessed);
 }
 
 void DriveScanner::HandleCompletion(
@@ -38,8 +40,8 @@ void DriveScanner::StartScanning(const DriveScanningParameters& parameters)
    connect(worker, SIGNAL(Finished(const std::uintmax_t, std::shared_ptr<Tree<VizNode>>)),
       this, SLOT(HandleCompletion(const std::uintmax_t, std::shared_ptr<Tree<VizNode>>)));
 
-   connect(worker, SIGNAL(ProgressUpdate(const std::uintmax_t)),
-      this, SLOT(HandleProgressUpdates(const std::uintmax_t)));
+   connect(worker, SIGNAL(ProgressUpdate(const std::uintmax_t, const std::uintmax_t)),
+      this, SLOT(HandleProgressUpdates(const std::uintmax_t, const std::uintmax_t)));
 
    connect(worker, SIGNAL(ShowMessageBox(const QString&)),
       this, SLOT(HandleMessageBox(const QString&)), Qt::BlockingQueuedConnection);
