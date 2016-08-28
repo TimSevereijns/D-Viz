@@ -120,12 +120,7 @@ void ScanningWorker::IterateOverDirectory(
    {
       ScanRecursively(itr->path(), treeNode);
 
-      boost::system::error_code errorCode;
-      itr.increment(errorCode);
-      if (errorCode)
-      {
-         emit ShowMessageBox("Could not advance iterator!");
-      }
+      itr++;
    }
 }
 
@@ -156,9 +151,14 @@ void ScanningWorker::ScanRecursively(
       return;
    }
 
-   if (isRegularFile && boost::filesystem::file_size(path) > 0)
+   if (isRegularFile)
    {
       const auto fileSize = boost::filesystem::file_size(path);
+      if (fileSize == 0)
+      {
+         return;
+      }
+
       m_numberOfBytesProcessed += fileSize;
 
       const FileInfo fileInfo
@@ -203,14 +203,7 @@ void ScanningWorker::ScanRecursively(
 
       ++m_filesScanned;
 
-      boost::system::error_code errorCode;
-      auto itr = boost::filesystem::directory_iterator{ path, errorCode };
-      if (errorCode)
-      {
-         emit ShowMessageBox("Could not create iterator!");
-         return;
-      }
-
+      auto itr = boost::filesystem::directory_iterator{ path };
       IterateOverDirectory(itr, *treeNode.GetLastChild());
    }
 }
@@ -229,14 +222,7 @@ void ScanningWorker::Start()
 
    Stopwatch<std::chrono::seconds>([&]
    {
-      boost::system::error_code errorCode;
-      auto itr = boost::filesystem::directory_iterator{ m_parameters.path, errorCode };
-      if (errorCode)
-      {
-         emit ShowMessageBox("Could not create iterator!");
-         return;
-      }
-
+      auto itr = boost::filesystem::directory_iterator{ m_parameters.path };
       IterateOverDirectory(itr, *theTree->GetHead());
    }, "Scanned Drive in ");
 

@@ -85,7 +85,7 @@ class ScanningWorker : public QObject
        * @param[in] itr             Reference to the iterator to iterate over.
        * @param[in] treeNode        The TreeNode to append the contents of the directory to.
        */
-      void IterateOverDirectory(
+      inline void IterateOverDirectory(
          boost::filesystem::directory_iterator& itr,
          TreeNode<VizNode>& treeNode) noexcept;
 

@@ -418,7 +418,7 @@ void Controller::ShowInFileExplorer(const TreeNode<VizNode>& node)
    std::wstring filePath = Controller::ResolveCompleteFilePath(node);
    std::replace(std::begin(filePath), std::end(filePath), L'/', L'\\');
 
-   ITEMIDLIST __unaligned * idList = ILCreateFromPath(filePath.c_str());
+   auto* idList = ILCreateFromPath(filePath.c_str());
    if (idList)
    {
       SHOpenFolderAndSelectItems(idList, 0, 0, 0);
