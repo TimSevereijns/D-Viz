@@ -126,7 +126,7 @@ void Controller::SelectNodeViaRay(
    const Camera& camera,
    const Qt3DCore::QRay3D& ray)
 {
-   if (!HasVisualizationBeenLoaded())
+   if (!HasVisualizationBeenLoaded() || !ShouldAllowUserInteractionWithModel())
    {
       return;
    }
@@ -189,6 +189,16 @@ void Controller::PrintSelectionDetailsToStatusBar()
    m_mainWindow->SetStatusBarMessage(message.str());
 }
 
+void Controller::AllowUserInteractionWithModel(bool allowInteraction)
+{
+   m_allowInteractionWithModel = allowInteraction;
+}
+
+bool Controller::ShouldAllowUserInteractionWithModel() const
+{
+   return m_allowInteractionWithModel;
+}
+
 void Controller::PaintHighlightedNodes()
 {
    if (m_highlightedNodes.empty())
@@ -215,9 +225,9 @@ void Controller::ClearHighlightedNodes()
    m_highlightedNodes.clear();
 }
 
-template<typename LambdaType>
+template<typename CallableType>
 void Controller::Highlight(
-   const LambdaType& nodeSelector,
+   const CallableType& nodeSelector,
    bool shouldClearSelectedNode,
    bool shouldClearPreviouslyHighlightedNodes)
 {

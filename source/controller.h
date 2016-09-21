@@ -191,13 +191,27 @@ class Controller
        */
       void PrintSelectionDetailsToStatusBar();
 
+      /**
+       * @brief AllowUserInteractionWithModel
+       * @param allowInteraction
+       */
+      void AllowUserInteractionWithModel(bool allowInteraction);
+
+      /**
+       * @brief ShouldAllowUserInteractionWithModel
+       * @return
+       */
+      bool ShouldAllowUserInteractionWithModel() const;
+
    private:
 
-      template<typename LambdaType>
+      template<typename CallableType>
       void Highlight(
-         const LambdaType& nodeSelector,
+         const CallableType& nodeSelector,
          bool shouldClearSelectedNode,
          bool shouldClearPreviouslyHighlightedNodes);
+
+      bool m_allowInteractionWithModel{ false };
 
       MainWindow* m_mainWindow{ nullptr };
 

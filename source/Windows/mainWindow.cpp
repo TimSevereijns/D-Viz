@@ -356,6 +356,8 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
       m_controller.UpdateBoundingBoxes();
 
       m_glCanvas->ReloadVisualization();
+
+      m_controller.AllowUserInteractionWithModel(true);
    };
 
    const DriveScanningParameters scanningParameters
@@ -364,6 +366,8 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
       progressHandler,
       completionHandler
    };
+
+   m_controller.AllowUserInteractionWithModel(false);
 
    m_scanner.StartScanning(scanningParameters);
 }
