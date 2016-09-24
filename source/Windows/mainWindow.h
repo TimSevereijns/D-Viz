@@ -98,7 +98,7 @@ class MainWindow : public QMainWindow
        * @brief GetModel
        * @return
        */
-      Controller& GetModel();
+      Controller& GetController();
 
       /**
        * @brief GetCanvas

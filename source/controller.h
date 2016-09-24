@@ -90,6 +90,7 @@ class Controller
        */
       void SearchTreeMap(
          const std::wstring& searchQuery,
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback,
          bool shouldSearchFiles,
          bool shouldSearchDirectories);
 
@@ -98,21 +99,27 @@ class Controller
        *
        * @param[in] targetNode      The node whose extension is to be highlighted.
        */
-      void HighlightAllMatchingExtension(const TreeNode<VizNode>& targetNode);
+      void HighlightAllMatchingExtensions(
+         const TreeNode<VizNode>& targetNode,
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback);
 
       /**
        * @brief Highlights all nodes that descendant from the passed in node.
        *
        * @param[in] node            The node whose descendants to highlight.
        */
-      void HighlightDescendants(const TreeNode<VizNode>& node);
+      void HighlightDescendants(
+         const TreeNode<VizNode>& node,
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback);
 
       /**
        * @brief Highlights all nodes that are ancestors of the passed in node.
        *
        * @param[in] node            The node whose ancestors are to be highlighted.
        */
-      void HighlightAncestors(const TreeNode<VizNode>& node);
+      void HighlightAncestors(
+         const TreeNode<VizNode>& node,
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback);
 
       /**
        * @brief Clears the selected node, and restores the color of that selected node back to its
@@ -125,11 +132,6 @@ class Controller
        * to its unhighlighted color.
        */
       void ClearHighlightedNodes();
-
-      /**
-       * @brief Updates the visual representation of the highlighted nodes.
-       */
-      void PaintHighlightedNodes();
 
       /**
        * @brief Selects the passed in node.
@@ -205,9 +207,10 @@ class Controller
 
    private:
 
-      template<typename CallableType>
-      void Highlight(
-         const CallableType& nodeSelector,
+      template<typename NodeSelectorType, typename CallbackType>
+      void ProcessSelection(
+         const NodeSelectorType& nodeSelector,
+         const CallbackType& highlightSelectionCallback,
          bool shouldClearSelectedNode,
          bool shouldClearPreviouslyHighlightedNodes);
 

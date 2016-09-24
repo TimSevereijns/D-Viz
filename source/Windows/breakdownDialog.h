@@ -3,6 +3,10 @@
 
 #include <QDialog>
 
+#include "scanBreakdownModel.h"
+
+#include <functional>
+
 namespace Ui
 {
    class breakdownDialog;
@@ -10,8 +14,6 @@ namespace Ui
 
 /**
  * @brief The BreakdownDialog class
- *
- * http://doc.qt.io/qt-5/qtwidgets-itemviews-simpletreemodel-example.html
  */
 class BreakdownDialog : public QDialog
 {
@@ -19,10 +21,13 @@ class BreakdownDialog : public QDialog
 
    public:
       explicit BreakdownDialog(QWidget* parent = nullptr);
+
       ~BreakdownDialog();
 
    private:
-      Ui::breakdownDialog* ui;
+      Ui::breakdownDialog* m_ui;
+
+      ScanBreakdownModel m_model;
 };
 
 #endif // BREAKDOWNDIALOG_H

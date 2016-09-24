@@ -40,7 +40,8 @@ SOURCES += \
    Visualizations/visualization.cpp \
    Windows/aboutDialog.cpp \
    Windows/mainWindow.cpp \
-   Windows/breakdownDialog.cpp
+   Windows/breakdownDialog.cpp \
+   Windows/scanBreakdownModel.cpp
 
 HEADERS  += \
    constants.h \
@@ -74,7 +75,8 @@ HEADERS  += \
    Visualizations/visualization.h \
    Windows/aboutDialog.h \
    Windows/mainWindow.h \
-   Windows/breakdownDialog.h
+   Windows/breakdownDialog.h \
+   Windows/scanBreakdownModel.h
 
 FORMS    += \
    Windows/mainWindow.ui \

@@ -125,7 +125,12 @@ void MainWindow::SetupSidebar()
 
       const auto searchQuery = m_ui->searchBox->text().toStdWString();
 
-      m_controller.SearchTreeMap(searchQuery, shouldSearchFiles, shouldSearchDirectories);
+      const auto callback = [&] (std::vector<const TreeNode<VizNode>*>& nodes)
+      {
+         m_glCanvas->HighlightSelectedNodes(nodes);
+      };
+
+      m_controller.SearchTreeMap(searchQuery, callback, shouldSearchFiles, shouldSearchDirectories);
    };
 
    connect(m_ui->searchBox, &QLineEdit::returnPressed, onNewSearchQuery);
@@ -257,7 +262,7 @@ std::wstring MainWindow::GetSearchQuery() const
    return m_searchQuery;
 }
 
-Controller& MainWindow::GetModel()
+Controller& MainWindow::GetController()
 {
    return m_controller;
 }

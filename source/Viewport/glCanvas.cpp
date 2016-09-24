@@ -352,11 +352,22 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
       return;
    }
 
-   const QPoint globalPoint = mapToGlobal(point);
+   const auto highlightSelectionCallback = [&] (std::vector<const TreeNode<VizNode>*>& nodes)
+   {
+      HighlightSelectedNodes(nodes);
+   };
 
    CanvasContextMenu menu{ m_keyboardManager };
-   menu.addAction("Highlight Ancestors", [&] { m_controller.HighlightAncestors(*selectedNode); });
-   menu.addAction("Highlight Descendants", [&] { m_controller.HighlightDescendants(*selectedNode); });
+
+   menu.addAction("Highlight Ancestors", [&]
+   {
+      m_controller.HighlightAncestors(*selectedNode, highlightSelectionCallback);
+   });
+
+   menu.addAction("Highlight Descendants", [&]
+   {
+      m_controller.HighlightDescendants(*selectedNode, highlightSelectionCallback);
+   });
 
    if (selectedNode->GetData().file.type == FileType::REGULAR)
    {
@@ -365,12 +376,19 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
          + QString::fromStdWString(selectedNode->GetData().file.extension)
          + QString::fromStdWString(L" Files");
 
-      menu.addAction(entryText, [&] { m_controller.HighlightAllMatchingExtension(*selectedNode); });
+      menu.addAction(entryText, [&]
+      {
+         m_controller.HighlightAllMatchingExtensions(*selectedNode, highlightSelectionCallback);
+      });
    }
 
    menu.addSeparator();
-   menu.addAction("Show in Explorer", [&] { Controller::ShowInFileExplorer(*selectedNode); });
+   menu.addAction("Show in Explorer", [&]
+   {
+      Controller::ShowInFileExplorer(*selectedNode);
+   });
 
+   const QPoint globalPoint = mapToGlobal(point);
    menu.exec(globalPoint);
 }
 

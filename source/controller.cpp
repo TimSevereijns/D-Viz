@@ -199,18 +199,6 @@ bool Controller::ShouldAllowUserInteractionWithModel() const
    return m_allowInteractionWithModel;
 }
 
-void Controller::PaintHighlightedNodes()
-{
-   if (m_highlightedNodes.empty())
-   {
-      return;
-   }
-
-   m_mainWindow->GetCanvas().HighlightSelectedNodes(m_highlightedNodes);
-
-   PrintSelectionDetailsToStatusBar();
-}
-
 void Controller::ClearSelectedNode()
 {
    m_mainWindow->GetCanvas().RestoreSelectedNode();
@@ -225,9 +213,10 @@ void Controller::ClearHighlightedNodes()
    m_highlightedNodes.clear();
 }
 
-template<typename CallableType>
-void Controller::Highlight(
-   const CallableType& nodeSelector,
+template<typename NodeSelectorType, typename CallbackType>
+void Controller::ProcessSelection(
+   const NodeSelectorType& nodeSelector,
+   const CallbackType& highlightSelectionCallback,
    bool shouldClearSelectedNode,
    bool shouldClearPreviouslyHighlightedNodes)
 {
@@ -243,10 +232,20 @@ void Controller::Highlight(
 
    nodeSelector();
 
-   PaintHighlightedNodes();
+   if (m_highlightedNodes.empty())
+   {
+      return;
+   }
+
+   highlightSelectionCallback(m_highlightedNodes);
+
+   // @todo Consider making this part of the callback as well:
+   PrintSelectionDetailsToStatusBar();
 }
 
-void Controller::HighlightAncestors(const TreeNode<VizNode>& node)
+void Controller::HighlightAncestors(
+   const TreeNode<VizNode>& node,
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback)
 {
    const auto selector = [&]
    {
@@ -259,13 +258,16 @@ void Controller::HighlightAncestors(const TreeNode<VizNode>& node)
       while (currentNode);
    };
 
-   Highlight(
+   ProcessSelection(
       selector,
+      highlightSelectionCallback,
       /* shouldClearSelectedNode = */ false,
       /* shouldClearPreviouslyHighlightedNodes = */ true);
 }
 
-void Controller::HighlightDescendants(const TreeNode<VizNode>& node)
+void Controller::HighlightDescendants(
+   const TreeNode<VizNode>& node,
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback)
 {
    const auto selector = [&]
    {
@@ -284,13 +286,16 @@ void Controller::HighlightDescendants(const TreeNode<VizNode>& node)
       });
    };
 
-   Highlight(
+   ProcessSelection(
       selector,
+      highlightSelectionCallback,
       /* shouldClearSelectedNode = */ false,
       /* shouldClearPreviouslyHighlightedNodes = */ true);
 }
 
-void Controller::HighlightAllMatchingExtension(const TreeNode<VizNode>& targetNode)
+void Controller::HighlightAllMatchingExtensions(
+   const TreeNode<VizNode>& targetNode,
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback)
 {
    const auto selector = [&]
    {
@@ -310,14 +315,16 @@ void Controller::HighlightAllMatchingExtension(const TreeNode<VizNode>& targetNo
       });
    };
 
-   Highlight(
+   ProcessSelection(
       selector,
+      highlightSelectionCallback,
       /* shouldClearSelectedNode = */ false,
       /* shouldClearPreviouslyHighlightedNodes = */ true);
 }
 
 void Controller::SearchTreeMap(
    const std::wstring& searchQuery,
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback,
    bool shouldSearchFiles,
    bool shouldSearchDirectories)
 {
@@ -360,8 +367,9 @@ void Controller::SearchTreeMap(
       });
    };
 
-   Highlight(
+   ProcessSelection(
       selector,
+      highlightSelectionCallback,
       /* shouldClearSelectedNode = */ true,
       /* shouldClearPreviouslyHighlightedNodes = */ true);
 }
