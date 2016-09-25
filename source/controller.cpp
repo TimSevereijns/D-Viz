@@ -88,7 +88,7 @@ void Controller::UpdateBoundingBoxes()
    m_treeMap->UpdateBoundingBoxes();
 }
 
-void Controller::SelectNode(const TreeNode<VizNode>* const node)
+void Controller::SelectNodeAndUpdateStatusBar(const TreeNode<VizNode>* const node)
 {
    if (!node)
    {
@@ -126,7 +126,7 @@ void Controller::SelectNodeViaRay(
    const Camera& camera,
    const Qt3DCore::QRay3D& ray)
 {
-   if (!HasVisualizationBeenLoaded() || !ShouldAllowUserInteractionWithModel())
+   if (!HasVisualizationBeenLoaded() || !IsUserAllowedToInteractWithModel())
    {
       return;
    }
@@ -137,7 +137,7 @@ void Controller::SelectNodeViaRay(
    const auto* node = m_treeMap->FindNearestIntersection(camera, ray, m_visualizationParameters);
    if (node)
    {
-      SelectNode(node);
+      SelectNodeAndUpdateStatusBar(node);
    }
    else
    {
@@ -194,7 +194,7 @@ void Controller::AllowUserInteractionWithModel(bool allowInteraction)
    m_allowInteractionWithModel = allowInteraction;
 }
 
-bool Controller::ShouldAllowUserInteractionWithModel() const
+bool Controller::IsUserAllowedToInteractWithModel() const
 {
    return m_allowInteractionWithModel;
 }
@@ -216,7 +216,7 @@ void Controller::ClearHighlightedNodes()
 template<typename NodeSelectorType, typename CallbackType>
 void Controller::ProcessSelection(
    const NodeSelectorType& nodeSelector,
-   const CallbackType& highlightSelectionCallback,
+   const CallbackType& viewUpdateCallback,
    bool shouldClearSelectedNode,
    bool shouldClearPreviouslyHighlightedNodes)
 {
@@ -237,7 +237,7 @@ void Controller::ProcessSelection(
       return;
    }
 
-   highlightSelectionCallback(m_highlightedNodes);
+   viewUpdateCallback(m_highlightedNodes);
 
    // @todo Consider making this part of the callback as well:
    PrintSelectionDetailsToStatusBar();
@@ -245,7 +245,7 @@ void Controller::ProcessSelection(
 
 void Controller::HighlightAncestors(
    const TreeNode<VizNode>& node,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback)
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback)
 {
    const auto selector = [&]
    {
@@ -260,14 +260,14 @@ void Controller::HighlightAncestors(
 
    ProcessSelection(
       selector,
-      highlightSelectionCallback,
+      viewUpdateCallback,
       /* shouldClearSelectedNode = */ false,
       /* shouldClearPreviouslyHighlightedNodes = */ true);
 }
 
 void Controller::HighlightDescendants(
    const TreeNode<VizNode>& node,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback)
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback)
 {
    const auto selector = [&]
    {
@@ -288,14 +288,14 @@ void Controller::HighlightDescendants(
 
    ProcessSelection(
       selector,
-      highlightSelectionCallback,
+      viewUpdateCallback,
       /* shouldClearSelectedNode = */ false,
       /* shouldClearPreviouslyHighlightedNodes = */ true);
 }
 
 void Controller::HighlightAllMatchingExtensions(
    const TreeNode<VizNode>& targetNode,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback)
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback)
 {
    const auto selector = [&]
    {
@@ -317,14 +317,14 @@ void Controller::HighlightAllMatchingExtensions(
 
    ProcessSelection(
       selector,
-      highlightSelectionCallback,
+      viewUpdateCallback,
       /* shouldClearSelectedNode = */ false,
       /* shouldClearPreviouslyHighlightedNodes = */ true);
 }
 
 void Controller::SearchTreeMap(
    const std::wstring& searchQuery,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback,
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback,
    bool shouldSearchFiles,
    bool shouldSearchDirectories)
 {
@@ -342,17 +342,9 @@ void Controller::SearchTreeMap(
          Tree<VizNode>::PostOrderIterator{ },
          [&] (Tree<VizNode>::const_reference node)
       {
-         if (node->file.size < m_visualizationParameters.minimumFileSize)
-         {
-            return;
-         }
-
-         if (!shouldSearchDirectories && node->file.type == FileType::DIRECTORY)
-         {
-            return;
-         }
-
-         if (!shouldSearchFiles && node->file.type == FileType::REGULAR)
+         if (node->file.size < m_visualizationParameters.minimumFileSize
+            || (!shouldSearchDirectories && node->file.type == FileType::DIRECTORY)
+            || (!shouldSearchFiles && node->file.type == FileType::REGULAR))
          {
             return;
          }
@@ -369,7 +361,7 @@ void Controller::SearchTreeMap(
 
    ProcessSelection(
       selector,
-      highlightSelectionCallback,
+      viewUpdateCallback,
       /* shouldClearSelectedNode = */ true,
       /* shouldClearPreviouslyHighlightedNodes = */ true);
 }

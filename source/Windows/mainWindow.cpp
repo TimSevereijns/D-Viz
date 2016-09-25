@@ -16,6 +16,28 @@
 #include <QMenuBar>
 #include <QMessageBox>
 
+namespace
+{
+   auto GetUsedDiskSpace(std::wstring path)
+   {
+      std::replace(std::begin(path), std::end(path), L'/', L'\\');
+      path += '\\';
+
+      std::uint64_t totalNumberOfFreeBytes{ 0 };
+      std::uint64_t totalNumberOfBytes{ 0 };
+      const bool wasOperationSuccessful = GetDiskFreeSpaceExW(
+         path.c_str(),
+         NULL,
+         (PULARGE_INTEGER)&totalNumberOfBytes,
+         (PULARGE_INTEGER)&totalNumberOfFreeBytes);
+
+      assert(wasOperationSuccessful);
+
+      const auto occupiedSpace = totalNumberOfBytes - totalNumberOfFreeBytes;
+      return occupiedSpace;
+   }
+}
+
 MainWindow::MainWindow(
    Controller& controller,
    QWidget* parent /* = nullptr */)
@@ -52,20 +74,17 @@ void MainWindow::SetupSidebar()
       m_ui->pruneSizeComboBox->addItem(pair.second, pair.first);
    });
 
-   connect(m_ui->directoriesOnlyCheckBox, &QCheckBox::stateChanged, this,
-      [&] (int state)
+   connect(m_ui->directoriesOnlyCheckBox, &QCheckBox::stateChanged, this, [&] (int state)
    {
       m_showDirectoriesOnly = (state == Qt::Checked);
    });
 
-   connect(m_ui->directoryGradientCheckBox, &QCheckBox::stateChanged, this,
-      [&] (int state)
+   connect(m_ui->directoryGradientCheckBox, &QCheckBox::stateChanged, this, [&] (int state)
    {
       m_useDirectoryGradient = (state == Qt::Checked);
    });
 
-   connect(m_ui->pruneTreeButton, &QPushButton::clicked, this,
-      [&] ()
+   connect(m_ui->pruneTreeButton, &QPushButton::clicked, this, [&]
    {
       const auto pruneSizeIndex = m_ui->pruneSizeComboBox->currentIndex();
 
@@ -84,8 +103,7 @@ void MainWindow::SetupSidebar()
       }
    });
 
-   connect(m_ui->fieldOfViewSlider, &QSlider::valueChanged, this,
-      [&] (int fieldOfView)
+   connect(m_ui->fieldOfViewSlider, &QSlider::valueChanged, this, [&] (int fieldOfView)
    {
       m_glCanvas->SetFieldOfView(static_cast<float>(fieldOfView));
    });
@@ -143,8 +161,7 @@ void MainWindow::SetupSidebar()
    connect(m_ui->searchFilesCheckBox, &QCheckBox::stateChanged,
       m_optionsManager.get(), &OptionsManager::OnShouldSearchFilesChanged);
 
-   connect(m_ui->showBreakdownButton, &QPushButton::clicked, this,
-      [&] ()
+   connect(m_ui->showBreakdownButton, &QPushButton::clicked, this, [&]
    {
       if (!m_breakdownDialog)
       {
@@ -304,19 +321,7 @@ void MainWindow::XboxControllerStateChanged(XboxController::State state)
 
 void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
 {
-   std::wstring filePath = vizParameters.rootDirectory;
-   std::replace(std::begin(filePath), std::end(filePath), L'/', L'\\');
-   filePath += '\\';
-
-   std::uint64_t totalNumberOfFreeBytes{ 0 };
-   std::uint64_t totalNumberOfBytes{ 0 };
-   const bool diskInfo = GetDiskFreeSpaceExW(
-      filePath.c_str(),
-      NULL,
-      (PULARGE_INTEGER)&totalNumberOfBytes,
-      (PULARGE_INTEGER)&totalNumberOfFreeBytes);
-
-   const auto occupiedSpace = totalNumberOfBytes - totalNumberOfFreeBytes;
+   const auto occupiedSpace = GetUsedDiskSpace(vizParameters.rootDirectory);
 
    const auto progressHandler = [&, occupiedSpace]
       (const std::uintmax_t numberOfFilesScanned,

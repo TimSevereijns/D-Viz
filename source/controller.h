@@ -85,41 +85,49 @@ class Controller
        * @todo Make this more generic, and pass in the search query.
        *
        * @param[in] searchQuery        String to search against.
+       * @param[in] viewUpdateCallback The function to be executed to update the view after the
+       *                               selection has taken place.
        * @param[in] searchFiles        Pass in true to search files.
        * @param[in] searchDirectories  Pass in true to search directories.
        */
       void SearchTreeMap(
          const std::wstring& searchQuery,
-         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback,
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback,
          bool shouldSearchFiles,
          bool shouldSearchDirectories);
 
       /**
        * @brief Highlights all nodes in the tree whose extension matches that of the passed in node.
        *
-       * @param[in] targetNode      The node whose extension is to be highlighted.
+       * @param[in] targetNode         The node whose extension is to be highlighted.
+       * @param[in] viewUpdateCallback The function to be executed to update the view after the
+       *                               selection has taken place.
        */
       void HighlightAllMatchingExtensions(
          const TreeNode<VizNode>& targetNode,
-         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback);
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback);
 
       /**
        * @brief Highlights all nodes that descendant from the passed in node.
        *
-       * @param[in] node            The node whose descendants to highlight.
+       * @param[in] node               The node whose descendants to highlight.
+       * @param[in] viewUpdateCallback The function to be executed to update the view after the
+       *                               selection has taken place.
        */
       void HighlightDescendants(
          const TreeNode<VizNode>& node,
-         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback);
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback);
 
       /**
        * @brief Highlights all nodes that are ancestors of the passed in node.
        *
-       * @param[in] node            The node whose ancestors are to be highlighted.
+       * @param[in] node               The node whose ancestors are to be highlighted.
+       * @param[in] viewUpdateCallback The function to be executed to update the view after the
+       *                               selection has taken place.
        */
       void HighlightAncestors(
          const TreeNode<VizNode>& node,
-         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& highlightSelectionCallback);
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback);
 
       /**
        * @brief Clears the selected node, and restores the color of that selected node back to its
@@ -138,7 +146,7 @@ class Controller
        *
        * @param[in] node            A pointer to the node to be selected.
        */
-      void SelectNode(const TreeNode<VizNode>* const node);
+      void SelectNodeAndUpdateStatusBar(const TreeNode<VizNode>* const node);
 
       /**
        * @brief Uses the passed in ray to select the nearest node from the perspective of the
@@ -195,15 +203,15 @@ class Controller
 
       /**
        * @brief AllowUserInteractionWithModel
-       * @param allowInteraction
+       *
+       * @param allowInteraction    The new state.
        */
       void AllowUserInteractionWithModel(bool allowInteraction);
 
       /**
-       * @brief ShouldAllowUserInteractionWithModel
-       * @return
+       * @returns True if the user is allow to select or highlight nodes in the visualization model.
        */
-      bool ShouldAllowUserInteractionWithModel() const;
+      bool IsUserAllowedToInteractWithModel() const;
 
    private:
 
