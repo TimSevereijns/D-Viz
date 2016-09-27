@@ -2,6 +2,7 @@
 #define CONTROLLER_H
 
 #include "DataStructs/light.h"
+#include "DataStructs/viewCallbacks.h"
 #include "DataStructs/vizNode.h"
 #include "DriveScanner/driveScanner.h"
 #include "ThirdParty/Tree.hpp"
@@ -85,61 +86,61 @@ class Controller
        * @todo Make this more generic, and pass in the search query.
        *
        * @param[in] searchQuery        String to search against.
-       * @param[in] viewUpdateCallback The function to be executed to update the view after the
-       *                               selection has taken place.
+       * @param[in] callbacks          @see ViewCallbacks
        * @param[in] searchFiles        Pass in true to search files.
        * @param[in] searchDirectories  Pass in true to search directories.
        */
       void SearchTreeMap(
          const std::wstring& searchQuery,
-         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback,
+         const ViewCallbacks& callbacks,
          bool shouldSearchFiles,
          bool shouldSearchDirectories);
 
       /**
        * @brief Highlights all nodes in the tree whose extension matches that of the passed in node.
        *
-       * @param[in] targetNode         The node whose extension is to be highlighted.
-       * @param[in] viewUpdateCallback The function to be executed to update the view after the
-       *                               selection has taken place.
+       * @param[in] targetNode      The node whose extension is to be highlighted.
+       * @param[in] callbacks       @see ViewCallbacks
        */
       void HighlightAllMatchingExtensions(
          const TreeNode<VizNode>& targetNode,
-         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback);
+         const ViewCallbacks& callbacks);
 
       /**
        * @brief Highlights all nodes that descendant from the passed in node.
        *
-       * @param[in] node               The node whose descendants to highlight.
-       * @param[in] viewUpdateCallback The function to be executed to update the view after the
-       *                               selection has taken place.
+       * @param[in] node            The node whose descendants to highlight.
+       * @param[in] callbacks       @see ViewCallbacks
        */
       void HighlightDescendants(
          const TreeNode<VizNode>& node,
-         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback);
+         const ViewCallbacks& callbacks);
 
       /**
        * @brief Highlights all nodes that are ancestors of the passed in node.
        *
-       * @param[in] node               The node whose ancestors are to be highlighted.
-       * @param[in] viewUpdateCallback The function to be executed to update the view after the
-       *                               selection has taken place.
+       * @param[in] node            The node whose ancestors are to be highlighted.
+       * @param[in] callbacks       @see ViewCallbacks
        */
-      void HighlightAncestors(
+      void Controller::HighlightAncestors(
          const TreeNode<VizNode>& node,
-         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback);
+         const ViewCallbacks& callbacks);
 
       /**
        * @brief Clears the selected node, and restores the color of that selected node back to its
        * unselected color.
+       *
+       * @param[in] callbacks       @see ViewCallbacks
        */
-      void ClearSelectedNode();
+      inline void ClearSelectedNode(const ViewCallbacks& callbacks);
 
       /**
        * @brief Clears all highlighted nodes, and restores the color of any highlighted nodes back
        * to its unhighlighted color.
+       *
+       * @param[in] callbacks       @see ViewCallbacks
        */
-      void ClearHighlightedNodes();
+      inline void ClearHighlightedNodes(const ViewCallbacks& callbacks);
 
       /**
        * @brief Selects the passed in node.
@@ -156,10 +157,12 @@ class Controller
        *
        * @param[in] camera          The camera from which the ray was shot.
        * @param[in] ray             The picking ray.
+       * @param[in] callbacks       @see ViewCallbacks
        */
       void SelectNodeViaRay(
          const Camera& camera,
-         const Qt3DCore::QRay3D& ray);
+         const Qt3DCore::QRay3D& ray,
+         const ViewCallbacks& callbacks);
 
       /**
        * @brief Helper function to set the specifed vertex and block count in the bottom status bar.
@@ -215,10 +218,10 @@ class Controller
 
    private:
 
-      template<typename NodeSelectorType, typename CallbackType>
+      template<typename NodeSelectorType>
       void ProcessSelection(
          const NodeSelectorType& nodeSelector,
-         const CallbackType& highlightSelectionCallback,
+         const ViewCallbacks& callbacks,
          bool shouldClearSelectedNode,
          bool shouldClearPreviouslyHighlightedNodes);
 

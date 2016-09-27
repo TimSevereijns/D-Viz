@@ -76,7 +76,8 @@ HEADERS  += \
    Windows/aboutDialog.h \
    Windows/mainWindow.h \
    Windows/breakdownDialog.h \
-   Windows/scanBreakdownModel.h
+   Windows/scanBreakdownModel.h \
+   DataStructs/viewCallbacks.h
 
 FORMS    += \
    Windows/mainWindow.ui \

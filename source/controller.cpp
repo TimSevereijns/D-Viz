@@ -95,9 +95,6 @@ void Controller::SelectNodeAndUpdateStatusBar(const TreeNode<VizNode>* const nod
       return;
    }
 
-   ClearSelectedNode();
-   ClearHighlightedNodes();
-
    m_selectedNode = node;
 
    const auto fileSize = node->GetData().file.size;
@@ -124,7 +121,8 @@ void Controller::SelectNodeAndUpdateStatusBar(const TreeNode<VizNode>* const nod
 
 void Controller::SelectNodeViaRay(
    const Camera& camera,
-   const Qt3DCore::QRay3D& ray)
+   const Qt3DCore::QRay3D& ray,
+   const ViewCallbacks& callbacks)
 {
    if (!HasVisualizationBeenLoaded() || !IsUserAllowedToInteractWithModel())
    {
@@ -132,6 +130,9 @@ void Controller::SelectNodeViaRay(
    }
 
    assert(m_treeMap);
+
+   ClearSelectedNode(callbacks);
+   ClearHighlightedNodes(callbacks);
 
    // @todo Remove the camera from the parameter list; just pass in a point...
    const auto* node = m_treeMap->FindNearestIntersection(camera, ray, m_visualizationParameters);
@@ -141,9 +142,6 @@ void Controller::SelectNodeViaRay(
    }
    else
    {
-      ClearSelectedNode();
-      ClearHighlightedNodes();
-
       const auto nodeCount = GetTree().Size();
       PrintMetadataToStatusBar(static_cast<uint32_t>(nodeCount));
    }
@@ -199,35 +197,35 @@ bool Controller::IsUserAllowedToInteractWithModel() const
    return m_allowInteractionWithModel;
 }
 
-void Controller::ClearSelectedNode()
+void Controller::ClearSelectedNode(const ViewCallbacks& callbacks)
 {
-   m_mainWindow->GetCanvas().RestoreSelectedNode();
+   callbacks.ClearSelectedNode();
 
    m_selectedNode = nullptr;
 }
 
-void Controller::ClearHighlightedNodes()
+void Controller::ClearHighlightedNodes(const ViewCallbacks& callbacks)
 {
-   m_mainWindow->GetCanvas().RestoreHighlightedNodes(m_highlightedNodes);
+   callbacks.ClearHighlightedNodes(m_highlightedNodes);
 
    m_highlightedNodes.clear();
 }
 
-template<typename NodeSelectorType, typename CallbackType>
+template<typename NodeSelectorType>
 void Controller::ProcessSelection(
    const NodeSelectorType& nodeSelector,
-   const CallbackType& viewUpdateCallback,
+   const ViewCallbacks& callbacks,
    bool shouldClearSelectedNode,
    bool shouldClearPreviouslyHighlightedNodes)
 {
    if (shouldClearPreviouslyHighlightedNodes)
    {
-      ClearHighlightedNodes();
+      ClearHighlightedNodes(callbacks);
    }
 
    if (shouldClearSelectedNode)
    {
-      ClearSelectedNode();
+      ClearSelectedNode(callbacks);
    }
 
    nodeSelector();
@@ -237,7 +235,7 @@ void Controller::ProcessSelection(
       return;
    }
 
-   viewUpdateCallback(m_highlightedNodes);
+   callbacks.RenderNodes(m_highlightedNodes);
 
    // @todo Consider making this part of the callback as well:
    PrintSelectionDetailsToStatusBar();
@@ -245,7 +243,7 @@ void Controller::ProcessSelection(
 
 void Controller::HighlightAncestors(
    const TreeNode<VizNode>& node,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback)
+   const ViewCallbacks& callbacks)
 {
    const auto selector = [&]
    {
@@ -260,14 +258,14 @@ void Controller::HighlightAncestors(
 
    ProcessSelection(
       selector,
-      viewUpdateCallback,
+      callbacks,
       /* shouldClearSelectedNode = */ false,
       /* shouldClearPreviouslyHighlightedNodes = */ true);
 }
 
 void Controller::HighlightDescendants(
    const TreeNode<VizNode>& node,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback)
+   const ViewCallbacks& callbacks)
 {
    const auto selector = [&]
    {
@@ -288,14 +286,14 @@ void Controller::HighlightDescendants(
 
    ProcessSelection(
       selector,
-      viewUpdateCallback,
+      callbacks,
       /* shouldClearSelectedNode = */ false,
       /* shouldClearPreviouslyHighlightedNodes = */ true);
 }
 
 void Controller::HighlightAllMatchingExtensions(
    const TreeNode<VizNode>& targetNode,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback)
+   const ViewCallbacks& callbacks)
 {
    const auto selector = [&]
    {
@@ -317,14 +315,14 @@ void Controller::HighlightAllMatchingExtensions(
 
    ProcessSelection(
       selector,
-      viewUpdateCallback,
+      callbacks,
       /* shouldClearSelectedNode = */ false,
       /* shouldClearPreviouslyHighlightedNodes = */ true);
 }
 
 void Controller::SearchTreeMap(
    const std::wstring& searchQuery,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& viewUpdateCallback,
+   const ViewCallbacks& callbacks,
    bool shouldSearchFiles,
    bool shouldSearchDirectories)
 {
@@ -361,7 +359,7 @@ void Controller::SearchTreeMap(
 
    ProcessSelection(
       selector,
-      viewUpdateCallback,
+      callbacks,
       /* shouldClearSelectedNode = */ true,
       /* shouldClearPreviouslyHighlightedNodes = */ true);
 }

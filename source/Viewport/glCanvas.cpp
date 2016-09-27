@@ -2,6 +2,8 @@
 
 #include "../constants.h"
 
+#include "DataStructs/viewCallbacks.h"
+
 #include "Scene/crosshairAsset.h"
 #include "Scene/debuggingRayAsset.h"
 #include "Scene/gridAsset.h"
@@ -175,8 +177,10 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
       }
       else
       {
+         const auto callbacks = SetupCallbacks();
          const auto ray = m_camera.ShootRayIntoScene(event->pos());
-         m_controller.SelectNodeViaRay(m_camera, ray);
+
+         m_controller.SelectNodeViaRay(m_camera, ray, callbacks);
       }
    }
    else if (event->button() == Qt::LeftButton)
@@ -344,6 +348,23 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const TreeNode<VizNode>*>& no
    }
 }
 
+ViewCallbacks GLCanvas::SetupCallbacks()
+{
+   const auto renderer = [&] (std::vector<const TreeNode<VizNode>*>& nodes)
+   {
+      HighlightSelectedNodes(nodes);
+   };
+
+   const auto highlightClearer = [&] (std::vector<const TreeNode<VizNode>*>& nodes)
+   {
+      RestoreHighlightedNodes(nodes);
+   };
+
+   const auto selectionClearer = [&] { RestoreSelectedNode(); };
+
+   return { renderer, highlightClearer, selectionClearer };
+}
+
 void GLCanvas::ShowContextMenu(const QPoint& point)
 {
    const auto* const selectedNode = m_controller.GetSelectedNode();
@@ -352,21 +373,18 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
       return;
    }
 
-   const auto highlightSelectionCallback = [&] (std::vector<const TreeNode<VizNode>*>& nodes)
-   {
-      HighlightSelectedNodes(nodes);
-   };
+   const auto callbacks = SetupCallbacks();
 
    CanvasContextMenu menu{ m_keyboardManager };
 
    menu.addAction("Highlight Ancestors", [&]
    {
-      m_controller.HighlightAncestors(*selectedNode, highlightSelectionCallback);
+      m_controller.HighlightAncestors(*selectedNode, callbacks);
    });
 
    menu.addAction("Highlight Descendants", [&]
    {
-      m_controller.HighlightDescendants(*selectedNode, highlightSelectionCallback);
+      m_controller.HighlightDescendants(*selectedNode, callbacks);
    });
 
    if (selectedNode->GetData().file.type == FileType::REGULAR)
@@ -378,7 +396,7 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
       menu.addAction(entryText, [&]
       {
-         m_controller.HighlightAllMatchingExtensions(*selectedNode, highlightSelectionCallback);
+         m_controller.HighlightAllMatchingExtensions(*selectedNode, callbacks);
       });
    }
 
@@ -559,8 +577,10 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
    {
       m_isRightTriggerDown = true;
 
+      const auto callbacks = SetupCallbacks();
       const auto ray = m_camera.ShootRayIntoScene(m_camera.GetViewport().center());
-      m_controller.SelectNodeViaRay(m_camera, ray);
+
+      m_controller.SelectNodeViaRay(m_camera, ray, callbacks);
    }
    else if (m_isRightTriggerDown
       && controllerState.rightTrigger <= Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD)

@@ -4,6 +4,7 @@
 #include "camera.h"
 #include "controller.h"
 #include "DataStructs/light.h"
+#include "DataStructs/viewCallbacks.h"
 #include "DriveScanner/driveScanner.h"
 #include "HID/keyboardManager.h"
 #include "optionsManager.h"
@@ -107,6 +108,11 @@ class GLCanvas : public QOpenGLWidget
        * @brief Computes and updates the running average of the visualization's frame rate.
        */
       void UpdateFPS();
+
+      /**
+       *
+       */
+      ViewCallbacks SetupCallbacks();
 
       /**
        * @brief Generates and displays the context menu.
