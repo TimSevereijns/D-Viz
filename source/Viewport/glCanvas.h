@@ -110,11 +110,6 @@ class GLCanvas : public QOpenGLWidget
       void UpdateFPS();
 
       /**
-       *
-       */
-      ViewCallbacks SetupCallbacks();
-
-      /**
        * @brief Generates and displays the context menu.
        *
        * @param[in] point           The location at which to place the top left corner of the menu.

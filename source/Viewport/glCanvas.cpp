@@ -177,10 +177,19 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
       }
       else
       {
-         const auto callbacks = SetupCallbacks();
          const auto ray = m_camera.ShootRayIntoScene(event->pos());
 
-         m_controller.SelectNodeViaRay(m_camera, ray, callbacks);
+         m_controller.SelectNodeViaRay(m_camera, ray,
+            [&] (VectorOfConstNodes& nodes)
+            {
+               RestoreHighlightedNodes(nodes);
+               RestoreSelectedNode();
+            },
+            [&] (auto* node)
+            {
+               SelectNode(node);
+            }
+         );
       }
    }
    else if (event->button() == Qt::LeftButton)
@@ -348,23 +357,6 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const TreeNode<VizNode>*>& no
    }
 }
 
-ViewCallbacks GLCanvas::SetupCallbacks()
-{
-   const auto renderer = [&] (std::vector<const TreeNode<VizNode>*>& nodes)
-   {
-      HighlightSelectedNodes(nodes);
-   };
-
-   const auto highlightClearer = [&] (std::vector<const TreeNode<VizNode>*>& nodes)
-   {
-      RestoreHighlightedNodes(nodes);
-   };
-
-   const auto selectionClearer = [&] { RestoreSelectedNode(); };
-
-   return { renderer, highlightClearer, selectionClearer };
-}
-
 void GLCanvas::ShowContextMenu(const QPoint& point)
 {
    const auto* const selectedNode = m_controller.GetSelectedNode();
@@ -373,18 +365,32 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
       return;
    }
 
-   const auto callbacks = SetupCallbacks();
-
    CanvasContextMenu menu{ m_keyboardManager };
 
    menu.addAction("Highlight Ancestors", [&]
    {
-      m_controller.HighlightAncestors(*selectedNode, callbacks);
+      m_controller.ClearHighlightedNodes([&] (VectorOfConstNodes& nodes)
+      {
+         RestoreHighlightedNodes(nodes);
+      });
+
+      m_controller.HighlightAncestors(*selectedNode, [&] (VectorOfConstNodes& nodes)
+      {
+         HighlightSelectedNodes(nodes);
+      });
    });
 
    menu.addAction("Highlight Descendants", [&]
    {
-      m_controller.HighlightDescendants(*selectedNode, callbacks);
+      m_controller.ClearHighlightedNodes([&] (VectorOfConstNodes& nodes)
+      {
+         RestoreHighlightedNodes(nodes);
+      });
+
+      m_controller.HighlightDescendants(*selectedNode, [&] (VectorOfConstNodes& nodes)
+      {
+         HighlightSelectedNodes(nodes);
+      });
    });
 
    if (selectedNode->GetData().file.type == FileType::REGULAR)
@@ -396,7 +402,15 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
       menu.addAction(entryText, [&]
       {
-         m_controller.HighlightAllMatchingExtensions(*selectedNode, callbacks);
+         m_controller.ClearHighlightedNodes([&] (VectorOfConstNodes& nodes)
+         {
+            RestoreHighlightedNodes(nodes);
+         });
+
+         m_controller.HighlightAllMatchingExtensions(*selectedNode, [&] (VectorOfConstNodes& nodes)
+         {
+            HighlightSelectedNodes(nodes);
+         });
       });
    }
 
@@ -577,10 +591,19 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
    {
       m_isRightTriggerDown = true;
 
-      const auto callbacks = SetupCallbacks();
       const auto ray = m_camera.ShootRayIntoScene(m_camera.GetViewport().center());
 
-      m_controller.SelectNodeViaRay(m_camera, ray, callbacks);
+      m_controller.SelectNodeViaRay(m_camera, ray,
+         [&] (VectorOfConstNodes& nodes)
+         {
+            RestoreHighlightedNodes(nodes);
+            RestoreSelectedNode();
+         },
+         [&] (auto* node)
+         {
+            SelectNode(node);
+         }
+      );
    }
    else if (m_isRightTriggerDown
       && controllerState.rightTrigger <= Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD)

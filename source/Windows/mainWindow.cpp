@@ -145,6 +145,10 @@ void MainWindow::SetupSidebar()
 
 //      const auto callback = [&] (std::vector<const TreeNode<VizNode>*>& nodes)
 //      {
+//         const auto highlightedNodes = m_controller.GetHighlightedNodes();
+
+           // @todo Add another callback to make this work.
+//         m_glCanvas->RestoreHighlightedNodes(highlightedNodes);
 //         m_glCanvas->HighlightSelectedNodes(nodes);
 //      };
 

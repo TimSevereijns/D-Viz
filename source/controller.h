@@ -92,7 +92,7 @@ class Controller
        */
       void SearchTreeMap(
          const std::wstring& searchQuery,
-         const ViewCallbacks& callbacks,
+         const std::function<void (VectorOfConstNodes&)>& callback,
          bool shouldSearchFiles,
          bool shouldSearchDirectories);
 
@@ -104,7 +104,7 @@ class Controller
        */
       void HighlightAllMatchingExtensions(
          const TreeNode<VizNode>& targetNode,
-         const ViewCallbacks& callbacks);
+         const std::function<void (VectorOfConstNodes&)>& callback);
 
       /**
        * @brief Highlights all nodes that descendant from the passed in node.
@@ -114,7 +114,7 @@ class Controller
        */
       void HighlightDescendants(
          const TreeNode<VizNode>& node,
-         const ViewCallbacks& callbacks);
+         const std::function<void (VectorOfConstNodes&)>& callback);
 
       /**
        * @brief Highlights all nodes that are ancestors of the passed in node.
@@ -124,15 +124,13 @@ class Controller
        */
       void Controller::HighlightAncestors(
          const TreeNode<VizNode>& node,
-         const ViewCallbacks& callbacks);
+         const std::function<void (VectorOfConstNodes&)>& callback);
 
       /**
        * @brief Clears the selected node, and restores the color of that selected node back to its
        * unselected color.
-       *
-       * @param[in] callbacks       @see ViewCallbacks
        */
-      inline void ClearSelectedNode(const ViewCallbacks& callbacks);
+      inline void ClearSelectedNode();
 
       /**
        * @brief Clears all highlighted nodes, and restores the color of any highlighted nodes back
@@ -140,14 +138,16 @@ class Controller
        *
        * @param[in] callbacks       @see ViewCallbacks
        */
-      inline void ClearHighlightedNodes(const ViewCallbacks& callbacks);
+      inline void ClearHighlightedNodes(const std::function<void (VectorOfConstNodes&)>& callback);
 
       /**
        * @brief Selects the passed in node.
        *
        * @param[in] node            A pointer to the node to be selected.
        */
-      void SelectNodeAndUpdateStatusBar(const TreeNode<VizNode>* const node);
+      void SelectNodeAndUpdateStatusBar(
+         const TreeNode<VizNode>* const node,
+         const std::function<void (const TreeNode<VizNode>* const)>& selectorCallback);
 
       /**
        * @brief Uses the passed in ray to select the nearest node from the perspective of the
@@ -162,7 +162,8 @@ class Controller
       void SelectNodeViaRay(
          const Camera& camera,
          const Qt3DCore::QRay3D& ray,
-         const ViewCallbacks& callbacks);
+         const std::function<void (VectorOfConstNodes&)>& clearingCallback,
+         const std::function<void (const TreeNode<VizNode>* const)>& selectorCallback);
 
       /**
        * @brief Helper function to set the specifed vertex and block count in the bottom status bar.
@@ -219,11 +220,9 @@ class Controller
    private:
 
       template<typename NodeSelectorType>
-      void ProcessSelection(
+      void Controller::ProcessSelection(
          const NodeSelectorType& nodeSelector,
-         const ViewCallbacks& callbacks,
-         bool shouldClearSelectedNode,
-         bool shouldClearPreviouslyHighlightedNodes);
+         const std::function<void (VectorOfConstNodes&)>& callback);
 
       bool m_allowInteractionWithModel{ false };
 
