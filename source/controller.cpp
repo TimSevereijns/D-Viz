@@ -7,6 +7,7 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
+#include <algorithm>
 #include <sstream>
 #include <utility>
 
@@ -144,7 +145,15 @@ void Controller::SelectNodeViaRay(
    }
    else
    {
-      const auto nodeCount = GetTree().Size();
+      // @todo Walking the entire tree isn't exactly efficient; find a better way...
+      const auto nodeCount = std::count_if(
+         Tree<VizNode>::LeafIterator{ m_treeMap->GetTree().GetHead() },
+         Tree<VizNode>::LeafIterator{ },
+         [] (Tree<VizNode>::const_reference /*node*/)
+      {
+         return true;
+      });
+
       PrintMetadataToStatusBar(static_cast<uint32_t>(nodeCount));
    }
 }
@@ -253,7 +262,7 @@ void Controller::HighlightDescendants(
          Tree<VizNode>::LeafIterator{ },
          [&] (Tree<VizNode>::const_reference node)
       {
-         if ((m_visualizationParameters.onlyShowDirectories && node->file.type == FileType::REGULAR)
+         if ((m_visualizationParameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
             || node->file.size < m_visualizationParameters.minimumFileSize)
          {
             return;
@@ -277,7 +286,7 @@ void Controller::HighlightAllMatchingExtensions(
          Tree<VizNode>::LeafIterator{ },
          [&] (Tree<VizNode>::const_reference node)
       {
-         if ((m_visualizationParameters.onlyShowDirectories && node->file.type == FileType::REGULAR)
+         if ((m_visualizationParameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
             || node->file.size < m_visualizationParameters.minimumFileSize
             || node->file.extension != targetNode->file.extension)
          {
