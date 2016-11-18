@@ -124,7 +124,7 @@ void Controller::SelectNodeAndUpdateStatusBar(
 void Controller::SelectNodeViaRay(
    const Camera& camera,
    const Qt3DCore::QRay3D& ray,
-   const std::function<void (VectorOfConstNodes&)>& clearingCallback,
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& clearingCallback,
    const std::function<void (const TreeNode<VizNode>* const)>& selectorCallback)
 {
    if (!HasVisualizationBeenLoaded() || !IsUserAllowedToInteractWithModel())
@@ -213,7 +213,8 @@ void Controller::ClearSelectedNode()
    m_selectedNode = nullptr;
 }
 
-void Controller::ClearHighlightedNodes(const std::function<void (VectorOfConstNodes&)>& callback)
+void Controller::ClearHighlightedNodes(
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback)
 {
    callback(m_highlightedNodes);
 
@@ -223,7 +224,7 @@ void Controller::ClearHighlightedNodes(const std::function<void (VectorOfConstNo
 template<typename NodeSelectorType>
 void Controller::ProcessSelection(
    const NodeSelectorType& nodeSelector,
-   const std::function<void (VectorOfConstNodes&)>& callback)
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback)
 {
    nodeSelector();
 
@@ -235,7 +236,7 @@ void Controller::ProcessSelection(
 
 void Controller::HighlightAncestors(
    const TreeNode<VizNode>& node,
-   const std::function<void (VectorOfConstNodes&)>& callback)
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback)
 {
    const auto selector = [&]
    {
@@ -253,7 +254,7 @@ void Controller::HighlightAncestors(
 
 void Controller::HighlightDescendants(
    const TreeNode<VizNode>& node,
-   const std::function<void (VectorOfConstNodes&)>& callback)
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback)
 {
    const auto selector = [&]
    {
@@ -277,7 +278,7 @@ void Controller::HighlightDescendants(
 
 void Controller::HighlightAllMatchingExtensions(
    const TreeNode<VizNode>& targetNode,
-   const std::function<void (VectorOfConstNodes&)>& callback)
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback)
 {
    const auto selector = [&]
    {
@@ -302,7 +303,7 @@ void Controller::HighlightAllMatchingExtensions(
 
 void Controller::SearchTreeMap(
    const std::wstring& searchQuery,
-   const std::function<void (VectorOfConstNodes&)>& callback,
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback,
    bool shouldSearchFiles,
    bool shouldSearchDirectories)
 {

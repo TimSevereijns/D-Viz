@@ -2,7 +2,6 @@
 #define CONTROLLER_H
 
 #include "DataStructs/light.h"
-#include "DataStructs/viewCallbacks.h"
 #include "DataStructs/vizNode.h"
 #include "DriveScanner/driveScanner.h"
 #include "ThirdParty/Tree.hpp"
@@ -92,7 +91,7 @@ class Controller
        */
       void SearchTreeMap(
          const std::wstring& searchQuery,
-         const std::function<void (VectorOfConstNodes&)>& callback,
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback,
          bool shouldSearchFiles,
          bool shouldSearchDirectories);
 
@@ -104,7 +103,7 @@ class Controller
        */
       void HighlightAllMatchingExtensions(
          const TreeNode<VizNode>& targetNode,
-         const std::function<void (VectorOfConstNodes&)>& callback);
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback);
 
       /**
        * @brief Highlights all nodes that descendant from the passed in node.
@@ -114,7 +113,7 @@ class Controller
        */
       void HighlightDescendants(
          const TreeNode<VizNode>& node,
-         const std::function<void (VectorOfConstNodes&)>& callback);
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback);
 
       /**
        * @brief Highlights all nodes that are ancestors of the passed in node.
@@ -124,7 +123,7 @@ class Controller
        */
       void Controller::HighlightAncestors(
          const TreeNode<VizNode>& node,
-         const std::function<void (VectorOfConstNodes&)>& callback);
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback);
 
       /**
        * @brief Clears the selected node, and restores the color of that selected node back to its
@@ -138,7 +137,8 @@ class Controller
        *
        * @param[in] callbacks       @see ViewCallbacks
        */
-      inline void ClearHighlightedNodes(const std::function<void (VectorOfConstNodes&)>& callback);
+      inline void ClearHighlightedNodes(
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback);
 
       /**
        * @brief Selects the passed in node.
@@ -162,7 +162,7 @@ class Controller
       void SelectNodeViaRay(
          const Camera& camera,
          const Qt3DCore::QRay3D& ray,
-         const std::function<void (VectorOfConstNodes&)>& clearingCallback,
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& clearingCallback,
          const std::function<void (const TreeNode<VizNode>* const)>& selectorCallback);
 
       /**
@@ -222,7 +222,7 @@ class Controller
       template<typename NodeSelectorType>
       void Controller::ProcessSelection(
          const NodeSelectorType& nodeSelector,
-         const std::function<void (VectorOfConstNodes&)>& callback);
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback);
 
       bool m_allowInteractionWithModel{ false };
 

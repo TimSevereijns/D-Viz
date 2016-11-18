@@ -4,7 +4,6 @@
 #include "camera.h"
 #include "controller.h"
 #include "DataStructs/light.h"
-#include "DataStructs/viewCallbacks.h"
 #include "DriveScanner/driveScanner.h"
 #include "HID/keyboardManager.h"
 #include "optionsManager.h"

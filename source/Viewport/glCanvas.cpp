@@ -2,8 +2,6 @@
 
 #include "../constants.h"
 
-#include "DataStructs/viewCallbacks.h"
-
 #include "Scene/crosshairAsset.h"
 #include "Scene/debuggingRayAsset.h"
 #include "Scene/gridAsset.h"
@@ -180,7 +178,7 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
          const auto ray = m_camera.ShootRayIntoScene(event->pos());
 
          m_controller.SelectNodeViaRay(m_camera, ray,
-            [&] (VectorOfConstNodes& nodes)
+            [&] (std::vector<const TreeNode<VizNode>*>& nodes)
             {
                RestoreHighlightedNodes(nodes);
                RestoreSelectedNode();
@@ -369,12 +367,12 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
    menu.addAction("Highlight Ancestors", [&]
    {
-      m_controller.ClearHighlightedNodes([&] (VectorOfConstNodes& nodes)
+      m_controller.ClearHighlightedNodes([&] (std::vector<const TreeNode<VizNode>*>& nodes)
       {
          RestoreHighlightedNodes(nodes);
       });
 
-      m_controller.HighlightAncestors(*selectedNode, [&] (VectorOfConstNodes& nodes)
+      m_controller.HighlightAncestors(*selectedNode, [&] (std::vector<const TreeNode<VizNode>*>& nodes)
       {
          HighlightSelectedNodes(nodes);
       });
@@ -382,12 +380,13 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
    menu.addAction("Highlight Descendants", [&]
    {
-      m_controller.ClearHighlightedNodes([&] (VectorOfConstNodes& nodes)
+      m_controller.ClearHighlightedNodes([&] (std::vector<const TreeNode<VizNode>*>& nodes)
       {
          RestoreHighlightedNodes(nodes);
       });
 
-      m_controller.HighlightDescendants(*selectedNode, [&] (VectorOfConstNodes& nodes)
+      m_controller.HighlightDescendants(*selectedNode,
+         [&] (std::vector<const TreeNode<VizNode>*>& nodes)
       {
          HighlightSelectedNodes(nodes);
       });
@@ -402,12 +401,13 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
       menu.addAction(entryText, [&]
       {
-         m_controller.ClearHighlightedNodes([&] (VectorOfConstNodes& nodes)
+         m_controller.ClearHighlightedNodes([&] (std::vector<const TreeNode<VizNode>*>& nodes)
          {
             RestoreHighlightedNodes(nodes);
          });
 
-         m_controller.HighlightAllMatchingExtensions(*selectedNode, [&] (VectorOfConstNodes& nodes)
+         m_controller.HighlightAllMatchingExtensions(*selectedNode,
+            [&] (std::vector<const TreeNode<VizNode>*>& nodes)
          {
             HighlightSelectedNodes(nodes);
          });
@@ -594,7 +594,7 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
       const auto ray = m_camera.ShootRayIntoScene(m_camera.GetViewport().center());
 
       m_controller.SelectNodeViaRay(m_camera, ray,
-         [&] (VectorOfConstNodes& nodes)
+         [&] (std::vector<const TreeNode<VizNode>*>& nodes)
          {
             RestoreHighlightedNodes(nodes);
             RestoreSelectedNode();
