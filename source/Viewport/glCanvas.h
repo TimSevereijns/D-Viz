@@ -73,7 +73,7 @@ class GLCanvas : public QOpenGLWidget
       /**
        * @brief HighlightSelectedNodes
        */
-      void HighlightSelectedNodes(std::vector<const TreeNode<VizNode>*>& nodes);
+      void HighlightNodes(std::vector<const TreeNode<VizNode>*>& nodes);
 
       /**
        * @brief Returns any highlighted nodes back to their unhighlighted colors.
@@ -153,6 +153,11 @@ class GLCanvas : public QOpenGLWidget
        * @brief Initializes the vertex buffer for the origin marker.
        */
       void PrepareOriginMarkerVertexBuffers();
+
+      /**
+       * @brief SelectNodeViaRay
+       */
+      void SelectNodeViaRay(const QPoint& rayOrigin);
 
       bool m_isPaintingSuspended{ false };
       bool m_isVisualizationLoaded{ false };

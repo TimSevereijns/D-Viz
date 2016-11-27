@@ -175,19 +175,7 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
       }
       else
       {
-         const auto ray = m_camera.ShootRayIntoScene(event->pos());
-
-         m_controller.SelectNodeViaRay(m_camera, ray,
-            [&] (std::vector<const TreeNode<VizNode>*>& nodes)
-            {
-               RestoreHighlightedNodes(nodes);
-               RestoreSelectedNode();
-            },
-            [&] (auto* node)
-            {
-               SelectNode(node);
-            }
-         );
+         SelectNodeViaRay(event->pos());
       }
    }
    else if (event->button() == Qt::LeftButton)
@@ -336,7 +324,7 @@ void GLCanvas::RestoreSelectedNode()
    }
 }
 
-void GLCanvas::HighlightSelectedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
+void GLCanvas::HighlightNodes(std::vector<const TreeNode<VizNode>*>& nodes)
 {
    for (const auto* const node : nodes)
    {
@@ -363,33 +351,21 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
       return;
    }
 
+   const auto deselectionCallback = [&] (auto& nodes) { RestoreHighlightedNodes(nodes); };
+   const auto selectionCallback = [&] (auto& nodes) { HighlightNodes(nodes); };
+
    CanvasContextMenu menu{ m_keyboardManager };
 
    menu.addAction("Highlight Ancestors", [&]
    {
-      m_controller.ClearHighlightedNodes([&] (std::vector<const TreeNode<VizNode>*>& nodes)
-      {
-         RestoreHighlightedNodes(nodes);
-      });
-
-      m_controller.HighlightAncestors(*selectedNode, [&] (std::vector<const TreeNode<VizNode>*>& nodes)
-      {
-         HighlightSelectedNodes(nodes);
-      });
+      m_controller.ClearHighlightedNodes(deselectionCallback);
+      m_controller.HighlightAncestors(*selectedNode, selectionCallback);
    });
 
    menu.addAction("Highlight Descendants", [&]
    {
-      m_controller.ClearHighlightedNodes([&] (std::vector<const TreeNode<VizNode>*>& nodes)
-      {
-         RestoreHighlightedNodes(nodes);
-      });
-
-      m_controller.HighlightDescendants(*selectedNode,
-         [&] (std::vector<const TreeNode<VizNode>*>& nodes)
-      {
-         HighlightSelectedNodes(nodes);
-      });
+      m_controller.ClearHighlightedNodes(deselectionCallback);
+      m_controller.HighlightDescendants(*selectedNode, selectionCallback);
    });
 
    if (selectedNode->GetData().file.type == FileType::REGULAR)
@@ -401,16 +377,8 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
       menu.addAction(entryText, [&]
       {
-         m_controller.ClearHighlightedNodes([&] (std::vector<const TreeNode<VizNode>*>& nodes)
-         {
-            RestoreHighlightedNodes(nodes);
-         });
-
-         m_controller.HighlightAllMatchingExtensions(*selectedNode,
-            [&] (std::vector<const TreeNode<VizNode>*>& nodes)
-         {
-            HighlightSelectedNodes(nodes);
-         });
+         m_controller.ClearHighlightedNodes(deselectionCallback);
+         m_controller.HighlightDescendants(*selectedNode, selectionCallback);
       });
    }
 
@@ -591,25 +559,28 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
    {
       m_isRightTriggerDown = true;
 
-      const auto ray = m_camera.ShootRayIntoScene(m_camera.GetViewport().center());
-
-      m_controller.SelectNodeViaRay(m_camera, ray,
-         [&] (std::vector<const TreeNode<VizNode>*>& nodes)
-         {
-            RestoreHighlightedNodes(nodes);
-            RestoreSelectedNode();
-         },
-         [&] (auto* node)
-         {
-            SelectNode(node);
-         }
-      );
+      SelectNodeViaRay(m_camera.GetViewport().center());
    }
    else if (m_isRightTriggerDown
       && controllerState.rightTrigger <= Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD)
    {
       m_isRightTriggerDown = false;
    }
+}
+
+void GLCanvas::SelectNodeViaRay(const QPoint& rayOrigin)
+{
+   const auto deselectionCallback = [&] (std::vector<const TreeNode<VizNode>*>& nodes)
+   {
+      RestoreHighlightedNodes(nodes);
+      RestoreSelectedNode();
+   };
+
+   const auto selectionCallback = [&] (auto* node) { SelectNode(node); };
+
+   const auto ray = m_camera.ShootRayIntoScene(rayOrigin);
+
+   m_controller.SelectNodeViaRay(m_camera, ray, deselectionCallback, selectionCallback );
 }
 
 void GLCanvas::UpdateFPS()
