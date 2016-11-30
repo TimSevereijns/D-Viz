@@ -64,6 +64,7 @@ HEADERS  += \
    Scene/sceneAsset.h \
    Scene/visualizationAsset.h \
    ThirdParty/stopwatch.hpp \
+   ThirdParty/ThreadSafeQueue.hpp \
    ThirdParty/Tree.hpp \
    Utilities/colorGradient.hpp \
    Utilities/scopeExit.hpp \

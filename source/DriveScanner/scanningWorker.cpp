@@ -2,8 +2,13 @@
 #include "scanningWorker.h"
 
 #include "../ThirdParty/stopwatch.hpp"
+#include "../ThirdParty/threadsafequeue.hpp"
 
 #include <iostream>
+#include <memory>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 namespace
 {
@@ -64,6 +69,144 @@ namespace
    }
 
    constexpr std::chrono::seconds UPDATE_FREQUENCY{ 1 };
+
+   /**
+    * @brief The NodeAndPath struct
+    */
+   struct NodeAndPath
+   {
+      std::unique_ptr<TreeNode<VizNode>> node;
+      boost::filesystem::path path;
+
+      NodeAndPath(
+         decltype(node) node,
+         decltype(path) path)
+         :
+         node{ std::move(node) },
+         path{ std::move(path) }
+      {
+      }
+
+      NodeAndPath() = default;
+   };
+
+   /**
+    * @brief PreprocessTargetFiles
+    * @param filesToProcess
+    */
+   auto PreprocessTargetFiles(std::vector<NodeAndPath>& filesToProcess)
+   {
+      const auto firstNonDirectory =
+         std::partition(std::begin(filesToProcess), std::end(filesToProcess),
+         [] (const auto& nodeAndPath) noexcept
+      {
+         try
+         {
+            if (boost::filesystem::is_directory(nodeAndPath.path)
+               && !boost::filesystem::is_symlink(nodeAndPath.path)
+               && !boost::filesystem::is_empty(nodeAndPath.path))
+            {
+               return true;
+            }
+         }
+         catch (...)
+         {
+            return false;
+         }
+
+         return false;
+      });
+
+      const auto firstInvalidFile =
+         std::partition(firstNonDirectory, std::end(filesToProcess),
+         [] (const auto& nodeAndPath) noexcept
+      {
+         try
+         {
+            if (boost::filesystem::is_regular_file(nodeAndPath.path))
+            {
+               return true;
+            }
+         }
+         catch (...)
+         {
+            return false;
+         }
+
+         return false;
+      });
+
+      filesToProcess.erase(firstInvalidFile, std::end(filesToProcess));
+
+      return firstNonDirectory;
+   }
+
+   /**
+    * @brief CreateTaskItems
+    * @param path
+    * @return
+    */
+   std::vector<NodeAndPath> CreateTaskItems(const boost::filesystem::path& path)
+   {
+      boost::system::error_code errorCode;
+      auto itr = boost::filesystem::directory_iterator{ path, errorCode };
+      if (errorCode)
+      {
+         std::cout << "Could not create directory iterator." << std::endl;
+         return {};
+      }
+
+      std::vector<NodeAndPath> filesToProcess;
+
+      const auto end = boost::filesystem::directory_iterator{};
+      while (itr != end)
+      {
+         auto nodeAndPath = NodeAndPath{ std::make_unique<TreeNode<VizNode>>(), itr->path() };
+         filesToProcess.emplace_back(std::move(nodeAndPath));
+         itr++;
+      }
+
+      const auto firstRegularFile = PreprocessTargetFiles(filesToProcess);
+
+      for (auto& nodeAndPath : filesToProcess)
+      {
+         nodeAndPath.node->GetData().file.name = nodeAndPath.path.filename().wstring();
+         nodeAndPath.node->GetData().file.size = std::uint64_t{ 0 };
+         nodeAndPath.node->GetData().file.type = boost::filesystem::is_directory(nodeAndPath.path)
+            ? FileType::DIRECTORY
+            : FileType::REGULAR;
+      }
+
+      std::vector<NodeAndPath> regularFiles;
+      std::move(firstRegularFile, std::end(filesToProcess), std::back_inserter(regularFiles));
+      filesToProcess.erase(firstRegularFile, std::end(filesToProcess));
+
+      return filesToProcess;
+   }
+
+   /**
+    * @brief BuildFinalTree
+    * @param queue
+    * @param fileTree
+    */
+   void BuildFinalTree(
+      ThreadSafeQueue<NodeAndPath>& queue,
+      Tree<VizNode>& fileTree)
+   {
+      while (!queue.IsEmpty())
+      {
+         auto nodeAndPath = NodeAndPath{};
+         const auto successfullyPopped = queue.TryPop(nodeAndPath);
+         if (!successfullyPopped)
+         {
+            assert(false);
+            continue;
+         }
+
+         fileTree.GetHead()->AppendChild(*nodeAndPath.node);
+         nodeAndPath.node.release();
+      }
+   }
 }
 
 const std::uintmax_t ScanningWorker::SIZE_UNDEFINED = 0;
@@ -111,7 +254,7 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
    return std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
 }
 
-void ScanningWorker::IterateOverDirectory(
+void ScanningWorker::IterateOverDirectoryAndScan(
    boost::filesystem::directory_iterator& itr,
    TreeNode<VizNode>& treeNode) noexcept
 {
@@ -159,7 +302,7 @@ void ScanningWorker::ScanRecursively(
          return;
       }
 
-      m_numberOfBytesProcessed += fileSize;
+      m_numberOfBytesProcessed.fetch_add(fileSize);
 
       const FileInfo fileInfo
       {
@@ -171,7 +314,7 @@ void ScanningWorker::ScanRecursively(
 
       treeNode.AppendChild(VizNode{ fileInfo });
 
-      ++m_filesScanned;
+      m_filesScanned.fetch_add(1);
    }
    else if (boost::filesystem::is_directory(path) && !boost::filesystem::is_symlink(path))
    {
@@ -204,7 +347,7 @@ void ScanningWorker::ScanRecursively(
       ++m_filesScanned;
 
       auto itr = boost::filesystem::directory_iterator{ path };
-      IterateOverDirectory(itr, *treeNode.GetLastChild());
+      IterateOverDirectoryAndScan(itr, *treeNode.GetLastChild());
    }
 }
 
@@ -218,12 +361,71 @@ void ScanningWorker::Start()
 
    emit ProgressUpdate(0, 0);
 
+   // @todo Make variable thread safe.
    m_lastProgressUpdate = std::chrono::high_resolution_clock::now();
 
    Stopwatch<std::chrono::seconds>([&]
    {
-      auto itr = boost::filesystem::directory_iterator{ m_parameters.path };
-      IterateOverDirectory(itr, *theTree->GetHead());
+      std::vector<NodeAndPath> filesToProcess = CreateTaskItems(m_parameters.path);
+
+      ThreadSafeQueue<NodeAndPath> taskQueue;
+      for (auto& nodeAndPair : filesToProcess)
+      {
+         taskQueue.Emplace(std::move(nodeAndPair));
+      }
+
+      ThreadSafeQueue<NodeAndPath> resultsQueue;
+      std::vector<std::thread> scanningThreads;
+      std::mutex streamMutex;
+      const auto numberOfThreads = std::thread::hardware_concurrency();
+
+      for (unsigned int i = 0; i < numberOfThreads; i++)
+      {
+         scanningThreads.emplace_back(std::thread
+         {
+            [mutex = std::ref(streamMutex),
+            queue = std::ref(taskQueue),
+            results = std::ref(resultsQueue), this] () noexcept
+            {
+               while (!queue.get().IsEmpty())
+               {
+                  auto nodeAndPath = NodeAndPath{};
+                  const auto successfullyPopped = queue.get().TryPop(nodeAndPath);
+                  if (!successfullyPopped)
+                  {
+                     continue;
+                  }
+
+                  IterateOverDirectoryAndScan(
+                     boost::filesystem::directory_iterator{ nodeAndPath.path },
+                     *nodeAndPath.node);
+
+                  {
+                     std::lock_guard<std::mutex> lock{ mutex };
+                     std::cout
+                        << "Finished scanning: "
+                        << nodeAndPath.path.string()
+                        << '\n';
+                  }
+
+                  results.get().Emplace(std::move(nodeAndPath));
+               }
+
+               std::lock_guard<std::mutex> lock{ mutex };
+               std::cout
+                  << "Thread "
+                  << std::this_thread::get_id()
+                  << " has finished...\n";
+            }
+         });
+      }
+
+      for (auto& thread : scanningThreads)
+      {
+         thread.join();
+      }
+
+      BuildFinalTree(resultsQueue, *theTree);
    }, "Scanned Drive in ");
 
    ComputeDirectorySizes(*theTree);

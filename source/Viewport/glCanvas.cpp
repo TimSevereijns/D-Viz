@@ -407,7 +407,7 @@ void GLCanvas::HandleInput()
    }
 
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-      now - m_lastCameraPositionUpdatelTime);
+      now - m_lastCameraPositionUpdatelTime).count();
 
    const bool isWKeyDown = m_keyboardManager.IsKeyDown(Qt::Key_W);
    const bool isAKeyDown = m_keyboardManager.IsKeyDown(Qt::Key_A);
@@ -423,29 +423,29 @@ void GLCanvas::HandleInput()
 
    if (isWKeyDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Forward());
+      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Forward());
    }
 
    if (isAKeyDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Left());
+      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Left());
    }
 
    if (isSKeyDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Backward());
+      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Backward());
    }
 
    if (isDKeyDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Right());
+      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Right());
    }
 }
 
 void GLCanvas::HandleXBoxControllerInput()
 {
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::system_clock::now() - m_lastCameraPositionUpdatelTime);
+      std::chrono::system_clock::now() - m_lastCameraPositionUpdatelTime).count();
 
    const XboxController::State& controllerState = m_mainWindow.GetXboxControllerState();
    const XboxController& controller = m_mainWindow.GetXboxControllerManager();
@@ -455,32 +455,32 @@ void GLCanvas::HandleXBoxControllerInput()
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_UP))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Forward());
+      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Forward());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_LEFT))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Left());
+      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Left());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_DOWN))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Backward());
+      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Backward());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_RIGHT))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Right());
+      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Right());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_LEFT_SHOULDER))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Down());
+      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Down());
    }
 
    if (controller.IsButtonDown(XINPUT_GAMEPAD_RIGHT_SHOULDER))
    {
-      m_camera.OffsetPosition(millisecondsElapsed.count() * cameraSpeed * m_camera.Up());
+      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Up());
    }
 
    HandleXboxThumbstickInput(controllerState);

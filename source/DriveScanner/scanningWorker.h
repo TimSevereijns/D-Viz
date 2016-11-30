@@ -7,6 +7,7 @@
 #include <QVector>
 #include <QVector3D>
 
+#include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <memory>
@@ -85,7 +86,7 @@ class ScanningWorker : public QObject
        * @param[in] itr             Reference to the iterator to iterate over.
        * @param[in] treeNode        The TreeNode to append the contents of the directory to.
        */
-      inline void IterateOverDirectory(
+      inline void IterateOverDirectoryAndScan(
          boost::filesystem::directory_iterator& itr,
          TreeNode<VizNode>& treeNode) noexcept;
 
@@ -101,8 +102,8 @@ class ScanningWorker : public QObject
 
       std::shared_ptr<Tree<VizNode>> CreateTreeAndRootNode();
 
-      std::uintmax_t m_filesScanned{ 0 };
-      std::uintmax_t m_numberOfBytesProcessed{ 0 };
+      std::atomic<std::uintmax_t> m_filesScanned{ 0 };
+      std::atomic<std::uintmax_t> m_numberOfBytesProcessed{ 0 };
 
       std::chrono::high_resolution_clock::time_point m_lastProgressUpdate;
 

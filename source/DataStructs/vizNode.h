@@ -22,6 +22,11 @@ struct VizNode
    std::uint32_t offsetIntoVBO{ VizNode::INVALID_OFFSET };
 
    /**
+    *
+    */
+   VizNode() = default;
+
+   /**
     * @brief Constructs a new VizNode to represent the specified file.
     *
     * The block, and its bounding box will be default constructed.
