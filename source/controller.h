@@ -84,14 +84,16 @@ class Controller
        *
        * @todo Make this more generic, and pass in the search query.
        *
-       * @param[in] searchQuery        String to search against.
-       * @param[in] callbacks          @see ViewCallbacks
-       * @param[in] searchFiles        Pass in true to search files.
-       * @param[in] searchDirectories  Pass in true to search directories.
+       * @param[in] searchQuery           String to search against.
+       * @param[in] deselectionCallback   Callback to clear the canvas of selection highlights.
+       * @param[in] selectionCallback     Callback to highlight matching nodes on the canvas.
+       * @param[in] searchFiles           Pass in true to search files.
+       * @param[in] searchDirectories     Pass in true to search directories.
        */
       void SearchTreeMap(
          const std::wstring& searchQuery,
-         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback,
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& deselectionCallback,
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& selectionCallback,
          bool shouldSearchFiles,
          bool shouldSearchDirectories);
 
@@ -99,7 +101,7 @@ class Controller
        * @brief Highlights all nodes in the tree whose extension matches that of the passed in node.
        *
        * @param[in] targetNode      The node whose extension is to be highlighted.
-       * @param[in] callbacks       @see ViewCallbacks
+       * @param[in] callbacks       @todo
        */
       void HighlightAllMatchingExtensions(
          const TreeNode<VizNode>& targetNode,
@@ -109,7 +111,7 @@ class Controller
        * @brief Highlights all nodes that descendant from the passed in node.
        *
        * @param[in] node            The node whose descendants to highlight.
-       * @param[in] callbacks       @see ViewCallbacks
+       * @param[in] callbacks       @todo
        */
       void HighlightDescendants(
          const TreeNode<VizNode>& node,
@@ -119,7 +121,7 @@ class Controller
        * @brief Highlights all nodes that are ancestors of the passed in node.
        *
        * @param[in] node            The node whose ancestors are to be highlighted.
-       * @param[in] callbacks       @see ViewCallbacks
+       * @param[in] callbacks       @todo
        */
       void Controller::HighlightAncestors(
          const TreeNode<VizNode>& node,
@@ -135,10 +137,12 @@ class Controller
        * @brief Clears all highlighted nodes, and restores the color of any highlighted nodes back
        * to its unhighlighted color.
        *
-       * @param[in] callbacks       @see ViewCallbacks
+       * @param[in] callbacks       @todo
+       * @param[in] clearSelected   Pass in true if the primary selection target is to be cleared.
        */
       inline void ClearHighlightedNodes(
-         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback);
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback,
+         bool clearSelected);
 
       /**
        * @brief Selects the passed in node.
@@ -157,13 +161,13 @@ class Controller
        *
        * @param[in] camera          The camera from which the ray was shot.
        * @param[in] ray             The picking ray.
-       * @param[in] callbacks       @see ViewCallbacks
+       * @param[in] callbacks       @todo
        */
       void SelectNodeViaRay(
          const Camera& camera,
          const Qt3DCore::QRay3D& ray,
-         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& clearingCallback,
-         const std::function<void (const TreeNode<VizNode>* const)>& selectorCallback);
+         const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& deselectionCallback,
+         const std::function<void (const TreeNode<VizNode>* const)>& selectionCallback);
 
       /**
        * @brief Helper function to set the specifed vertex and block count in the bottom status bar.

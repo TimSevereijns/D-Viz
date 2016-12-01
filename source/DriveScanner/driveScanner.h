@@ -3,12 +3,14 @@
 
 #include <QObject>
 #include <QThread>
+#include <QTimer>
 
 #include <cstdint>
 #include <memory>
 #include <string>
 
 #include "../DataStructs/driveScanningParameters.h"
+#include "../DataStructs/scanningprogress.hpp"
 
 #include "scanningWorker.h"
 
@@ -52,9 +54,7 @@ class DriveScanner : public QObject
        * @param[in] filesScanned             The number of files scanned.
        * @param[in] numberOfBytesProcessed   The cumulative size of all files scanned so far.
        */
-      void HandleProgressUpdates(
-         const std::uintmax_t filesScanned,
-         const std::uintmax_t numberOfBytesProcessed);
+      void HandleProgressUpdates();
 
       /**
        * @brief Handle the ScanningWorker::ShowMessageBox signal.
@@ -68,6 +68,10 @@ class DriveScanner : public QObject
    private:
 
       DriveScanningParameters m_parameters;
+
+      ScanningProgress m_progress;
+
+      std::unique_ptr<QTimer> m_progressUpdateTimer{ nullptr };
 };
 
 #endif // DRIVESCANNER_H

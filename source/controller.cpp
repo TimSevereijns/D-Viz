@@ -124,8 +124,8 @@ void Controller::SelectNodeAndUpdateStatusBar(
 void Controller::SelectNodeViaRay(
    const Camera& camera,
    const Qt3DCore::QRay3D& ray,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& clearingCallback,
-   const std::function<void (const TreeNode<VizNode>* const)>& selectorCallback)
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& deselectionCallback,
+   const std::function<void (const TreeNode<VizNode>* const)>& selectionCallback)
 {
    if (!HasVisualizationBeenLoaded() || !IsUserAllowedToInteractWithModel())
    {
@@ -134,14 +134,14 @@ void Controller::SelectNodeViaRay(
 
    assert(m_treeMap);
 
-   ClearHighlightedNodes(clearingCallback);
-   ClearSelectedNode();
+   constexpr auto clearSelected{ true };
+   ClearHighlightedNodes(deselectionCallback, clearSelected);
 
    // @todo Remove the camera from the parameter list; just pass in a point...
    const auto* node = m_treeMap->FindNearestIntersection(camera, ray, m_visualizationParameters);
    if (node)
    {
-      SelectNodeAndUpdateStatusBar(node, selectorCallback);
+      SelectNodeAndUpdateStatusBar(node, selectionCallback);
    }
    else
    {
@@ -214,11 +214,21 @@ void Controller::ClearSelectedNode()
 }
 
 void Controller::ClearHighlightedNodes(
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback)
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback,
+   bool clearSelected)
 {
-   callback(m_highlightedNodes);
+   if (clearSelected && m_selectedNode)
+   {
+      m_highlightedNodes.emplace_back(m_selectedNode);
+   }
 
+   callback(m_highlightedNodes);
    m_highlightedNodes.clear();
+
+   if (clearSelected && m_selectedNode)
+   {
+      m_selectedNode = nullptr;
+   }
 }
 
 template<typename NodeSelectorType>
@@ -303,7 +313,8 @@ void Controller::HighlightAllMatchingExtensions(
 
 void Controller::SearchTreeMap(
    const std::wstring& searchQuery,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback,
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& deselectionCallback,
+   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& selectionCallback,
    bool shouldSearchFiles,
    bool shouldSearchDirectories)
 {
@@ -313,6 +324,9 @@ void Controller::SearchTreeMap(
    {
       return;
    }
+
+   constexpr auto clearSelected{ true };
+   ClearHighlightedNodes(deselectionCallback, clearSelected);
 
    const auto selector = [&]
    {
@@ -338,8 +352,7 @@ void Controller::SearchTreeMap(
       });
    };
 
-   // @todo Clear selected and highlighted:
-   ProcessSelection(selector, callback);
+   ProcessSelection(selector, selectionCallback);
 }
 
 std::pair<double, std::wstring> Controller::ConvertFileSizeToAppropriateUnits(

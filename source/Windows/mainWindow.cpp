@@ -138,21 +138,20 @@ void MainWindow::SetupSidebar()
 
    const auto onNewSearchQuery = [&]
    {
-//      const bool shouldSearchFiles = m_ui->searchFilesCheckBox->isChecked();
-//      const bool shouldSearchDirectories = m_ui->searchDirectoriesCheckBox->isChecked();
+      const bool shouldSearchFiles = m_ui->searchFilesCheckBox->isChecked();
+      const bool shouldSearchDirectories = m_ui->searchDirectoriesCheckBox->isChecked();
 
-//      const auto searchQuery = m_ui->searchBox->text().toStdWString();
+      const auto searchQuery = m_ui->searchBox->text().toStdWString();
 
-//      const auto callback = [&] (std::vector<const TreeNode<VizNode>*>& nodes)
-//      {
-//         const auto highlightedNodes = m_controller.GetHighlightedNodes();
+      const auto deselectionCallback = [&] (auto& nodes) { m_glCanvas->RestoreHighlightedNodes(nodes); };
+      const auto selectionCallback = [&] (auto& nodes) { m_glCanvas->HighlightNodes(nodes); };
 
-           // @todo Add another callback to make this work.
-//         m_glCanvas->RestoreHighlightedNodes(highlightedNodes);
-//         m_glCanvas->HighlightSelectedNodes(nodes);
-//      };
-
-//      m_controller.SearchTreeMap(searchQuery, callback, shouldSearchFiles, shouldSearchDirectories);
+      m_controller.SearchTreeMap(
+         searchQuery,
+         deselectionCallback,
+         selectionCallback,
+         shouldSearchFiles,
+         shouldSearchDirectories);
    };
 
    connect(m_ui->searchBox, &QLineEdit::returnPressed, onNewSearchQuery);

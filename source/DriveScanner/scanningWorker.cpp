@@ -2,7 +2,7 @@
 #include "scanningWorker.h"
 
 #include "../ThirdParty/stopwatch.hpp"
-#include "../ThirdParty/threadsafequeue.hpp"
+#include "../ThirdParty/ThreadSafeQueue.hpp"
 
 #include <iostream>
 #include <memory>
@@ -158,7 +158,7 @@ namespace
 
       std::vector<NodeAndPath> filesToProcess;
 
-      const auto end = boost::filesystem::directory_iterator{};
+      const auto end = boost::filesystem::directory_iterator{ };
       while (itr != end)
       {
          auto nodeAndPath = NodeAndPath{ std::make_unique<TreeNode<VizNode>>(), itr->path() };
@@ -195,7 +195,7 @@ namespace
    {
       while (!queue.IsEmpty())
       {
-         auto nodeAndPath = NodeAndPath{};
+         auto nodeAndPath = NodeAndPath{ };
          const auto successfullyPopped = queue.TryPop(nodeAndPath);
          if (!successfullyPopped)
          {
@@ -211,9 +211,13 @@ namespace
 
 const std::uintmax_t ScanningWorker::SIZE_UNDEFINED = 0;
 
-ScanningWorker::ScanningWorker(const DriveScanningParameters& parameters) :
+ScanningWorker::ScanningWorker(
+   const DriveScanningParameters& parameters,
+   ScanningProgress& progress)
+   :
    QObject{ },
-   m_parameters{ parameters }
+   m_parameters{ parameters },
+   m_progress{ progress }
 {
 }
 
@@ -271,17 +275,6 @@ void ScanningWorker::ScanRecursively(
    const boost::filesystem::path& path,
    TreeNode<VizNode>& treeNode)
 {
-   const auto now = std::chrono::high_resolution_clock::now();
-   const auto timeSinceLastProgressUpdate =
-      std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastProgressUpdate);
-
-   if (timeSinceLastProgressUpdate > UPDATE_FREQUENCY)
-   {
-      emit ProgressUpdate(m_filesScanned, m_numberOfBytesProcessed);
-
-      m_lastProgressUpdate = std::chrono::high_resolution_clock::now();
-   }
-
    bool isRegularFile = false;
    try
    {
@@ -302,7 +295,7 @@ void ScanningWorker::ScanRecursively(
          return;
       }
 
-      m_numberOfBytesProcessed.fetch_add(fileSize);
+      m_progress.numberOfBytesProcessed.fetch_add(fileSize);
 
       const FileInfo fileInfo
       {
@@ -314,7 +307,7 @@ void ScanningWorker::ScanRecursively(
 
       treeNode.AppendChild(VizNode{ fileInfo });
 
-      m_filesScanned.fetch_add(1);
+      m_progress.filesScanned.fetch_add(1);
    }
    else if (boost::filesystem::is_directory(path) && !boost::filesystem::is_symlink(path))
    {
@@ -344,7 +337,7 @@ void ScanningWorker::ScanRecursively(
 
       treeNode.AppendChild(VizNode{ directoryInfo });
 
-      ++m_filesScanned;
+      m_progress.filesScanned.fetch_add(1);
 
       auto itr = boost::filesystem::directory_iterator{ path };
       IterateOverDirectoryAndScan(itr, *treeNode.GetLastChild());
@@ -361,9 +354,6 @@ void ScanningWorker::Start()
 
    emit ProgressUpdate(0, 0);
 
-   // @todo Make variable thread safe.
-   m_lastProgressUpdate = std::chrono::high_resolution_clock::now();
-
    Stopwatch<std::chrono::seconds>([&]
    {
       std::vector<NodeAndPath> filesToProcess = CreateTaskItems(m_parameters.path);
@@ -375,22 +365,22 @@ void ScanningWorker::Start()
       }
 
       ThreadSafeQueue<NodeAndPath> resultsQueue;
+
       std::vector<std::thread> scanningThreads;
       std::mutex streamMutex;
+
       const auto numberOfThreads = std::thread::hardware_concurrency();
 
       for (unsigned int i = 0; i < numberOfThreads; i++)
       {
          scanningThreads.emplace_back(std::thread
          {
-            [mutex = std::ref(streamMutex),
-            queue = std::ref(taskQueue),
-            results = std::ref(resultsQueue), this] () noexcept
+            [&] () noexcept
             {
-               while (!queue.get().IsEmpty())
+               while (!taskQueue.IsEmpty())
                {
-                  auto nodeAndPath = NodeAndPath{};
-                  const auto successfullyPopped = queue.get().TryPop(nodeAndPath);
+                  auto nodeAndPath = NodeAndPath{ };
+                  const auto successfullyPopped = taskQueue.TryPop(nodeAndPath);
                   if (!successfullyPopped)
                   {
                      continue;
@@ -401,17 +391,17 @@ void ScanningWorker::Start()
                      *nodeAndPath.node);
 
                   {
-                     std::lock_guard<std::mutex> lock{ mutex };
+                     std::lock_guard<std::mutex> lock{ streamMutex };
                      std::cout
                         << "Finished scanning: "
                         << nodeAndPath.path.string()
                         << '\n';
                   }
 
-                  results.get().Emplace(std::move(nodeAndPath));
+                  resultsQueue.Emplace(std::move(nodeAndPath));
                }
 
-               std::lock_guard<std::mutex> lock{ mutex };
+               std::lock_guard<std::mutex> lock{ streamMutex };
                std::cout
                   << "Thread "
                   << std::this_thread::get_id()

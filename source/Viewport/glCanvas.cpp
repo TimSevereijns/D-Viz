@@ -50,11 +50,11 @@ GLCanvas::GLCanvas(
    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
    setFormat(format);
 
-   m_frameRedrawTimer.reset(new QTimer{ this });
+   m_frameRedrawTimer = std::make_unique<QTimer>(this);
    connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
    m_frameRedrawTimer->start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
 
-   m_inputCaptureTimer.reset(new QTimer{ this });
+   m_inputCaptureTimer = std::make_unique<QTimer>(this);
    connect(m_inputCaptureTimer.get(), SIGNAL(timeout()), this, SLOT(HandleInput()));
    m_inputCaptureTimer->start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
 }
@@ -358,13 +358,15 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
    menu.addAction("Highlight Ancestors", [&]
    {
-      m_controller.ClearHighlightedNodes(deselectionCallback);
+      constexpr auto clearSelected{ true };
+      m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
       m_controller.HighlightAncestors(*selectedNode, selectionCallback);
    });
 
    menu.addAction("Highlight Descendants", [&]
    {
-      m_controller.ClearHighlightedNodes(deselectionCallback);
+      constexpr auto clearSelected{ true };
+      m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
       m_controller.HighlightDescendants(*selectedNode, selectionCallback);
    });
 
@@ -377,8 +379,9 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
       menu.addAction(entryText, [&]
       {
-         m_controller.ClearHighlightedNodes(deselectionCallback);
-         m_controller.HighlightDescendants(*selectedNode, selectionCallback);
+         constexpr auto clearSelected{ true };
+         m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
+         m_controller.HighlightAllMatchingExtensions(*selectedNode, selectionCallback);
       });
    }
 

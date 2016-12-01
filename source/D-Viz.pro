@@ -52,6 +52,7 @@ HEADERS  += \
    DataStructs/vizNode.h \
    DataStructs/driveScanningParameters.h \
    DataStructs/precisePoint.h \
+   DataStructs/scanningprogress.hpp \
    DriveScanner/driveScanner.h \
    DriveScanner/scanningWorker.h \
    HID/keyboardManager.h \

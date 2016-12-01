@@ -16,6 +16,7 @@
 #include "../DataStructs/block.h"
 #include "../DataStructs/driveScanningParameters.h"
 #include "../DataStructs/fileInfo.h"
+#include "../DataStructs/scanningprogress.hpp"
 #include "../DataStructs/vizNode.h"
 
 #include "../Visualizations/visualization.h"
@@ -33,7 +34,9 @@ class ScanningWorker : public QObject
 
       static const std::uintmax_t SIZE_UNDEFINED;
 
-      explicit ScanningWorker(const DriveScanningParameters& parameters);
+      explicit ScanningWorker(
+         const DriveScanningParameters& parameters,
+         ScanningProgress& progress);
 
    public slots:
 
@@ -105,9 +108,9 @@ class ScanningWorker : public QObject
       std::atomic<std::uintmax_t> m_filesScanned{ 0 };
       std::atomic<std::uintmax_t> m_numberOfBytesProcessed{ 0 };
 
-      std::chrono::high_resolution_clock::time_point m_lastProgressUpdate;
-
       DriveScanningParameters m_parameters;
+
+      ScanningProgress& m_progress;
 };
 
 #endif // SCANNINGWORKER_H

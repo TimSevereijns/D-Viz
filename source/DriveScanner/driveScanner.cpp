@@ -6,10 +6,10 @@
 
 #include <QMessageBox>
 
-void DriveScanner::HandleProgressUpdates(
-   const std::uintmax_t filesScanned,
-   const std::uintmax_t numberOfBytesProcessed)
+void DriveScanner::HandleProgressUpdates()
 {
+   const auto filesScanned = m_progress.filesScanned.load();
+   const auto numberOfBytesProcessed = m_progress.numberOfBytesProcessed.load();
    m_parameters.onProgressUpdateCallback(filesScanned, numberOfBytesProcessed);
 }
 
@@ -18,6 +18,7 @@ void DriveScanner::HandleCompletion(
    std::shared_ptr<Tree<VizNode>> fileTree)
 {
    m_parameters.onScanCompletedCallback(filesScanned, fileTree);
+   m_progressUpdateTimer->stop();
 }
 
 void DriveScanner::HandleMessageBox(const QString& message)
@@ -31,17 +32,23 @@ void DriveScanner::HandleMessageBox(const QString& message)
 
 void DriveScanner::StartScanning(const DriveScanningParameters& parameters)
 {
+   m_progress.Reset();
+   m_progressUpdateTimer = std::make_unique<QTimer>(this);
+   connect(m_progressUpdateTimer.get(), SIGNAL(timeout()), this, SLOT(HandleProgressUpdates()));
+
    m_parameters = parameters;
 
    QThread* thread = new QThread;
-   ScanningWorker* worker = new ScanningWorker{ m_parameters };
+   ScanningWorker* worker = new ScanningWorker{ m_parameters, m_progress };
    worker->moveToThread(thread);
+
+   m_progressUpdateTimer->start(250);
 
    connect(worker, SIGNAL(Finished(const std::uintmax_t, std::shared_ptr<Tree<VizNode>>)),
       this, SLOT(HandleCompletion(const std::uintmax_t, std::shared_ptr<Tree<VizNode>>)));
 
    connect(worker, SIGNAL(ProgressUpdate(const std::uintmax_t, const std::uintmax_t)),
-      this, SLOT(HandleProgressUpdates(const std::uintmax_t, const std::uintmax_t)));
+      this, SLOT(HandleProgressUpdates()));
 
    connect(worker, SIGNAL(ShowMessageBox(const QString&)),
       this, SLOT(HandleMessageBox(const QString&)), Qt::BlockingQueuedConnection);
