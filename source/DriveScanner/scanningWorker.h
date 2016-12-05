@@ -32,7 +32,7 @@ class ScanningWorker : public QObject
 
    public:
 
-      static const std::uintmax_t SIZE_UNDEFINED;
+      static constexpr std::uintmax_t SIZE_UNDEFINED{ 0 };
 
       explicit ScanningWorker(
          const DriveScanningParameters& parameters,
@@ -104,9 +104,6 @@ class ScanningWorker : public QObject
          TreeNode<VizNode>& fileNode);
 
       std::shared_ptr<Tree<VizNode>> CreateTreeAndRootNode();
-
-      std::atomic<std::uintmax_t> m_filesScanned{ 0 };
-      std::atomic<std::uintmax_t> m_numberOfBytesProcessed{ 0 };
 
       DriveScanningParameters m_parameters;
 

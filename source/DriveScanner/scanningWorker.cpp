@@ -68,8 +68,6 @@ namespace
       }
    }
 
-   constexpr std::chrono::seconds UPDATE_FREQUENCY{ 1 };
-
    /**
     * @brief The NodeAndPath struct
     */
@@ -91,8 +89,13 @@ namespace
    };
 
    /**
-    * @brief PreprocessTargetFiles
-    * @param filesToProcess
+    * @brief PreprocessTargetFiles will partition the files to be scanned such that directories
+    * come first, followed by the regular files. Any path that could not be accessed, or that points
+    * to either an empty directory or a symbolic link, will be removed from the vector.
+    *
+    * @param[in] filesToProcess     All potential files to be scanned.
+    *
+    * @returns An iterator to the first file that is not a directory.
     */
    auto PreprocessTargetFiles(std::vector<NodeAndPath>& filesToProcess)
    {
@@ -143,8 +146,10 @@ namespace
 
    /**
     * @brief CreateTaskItems
-    * @param path
-    * @return
+    *
+    * @param[in] path               The initial enty path at which to start the scan.
+    *
+    * @returns A vector of partitioned, scannable files. Directories first, regular files second.
     */
    std::vector<NodeAndPath> CreateTaskItems(const boost::filesystem::path& path)
    {
@@ -161,6 +166,10 @@ namespace
       const auto end = boost::filesystem::directory_iterator{ };
       while (itr != end)
       {
+         // The nodes are default constructed so that we don't have to actually access any of the
+         // filesystem paths yet. The nodes are fleshed out once we've had a chance to preprocess
+         // the top-level files and to prune anything that might be problematic.
+
          auto nodeAndPath = NodeAndPath{ std::make_unique<TreeNode<VizNode>>(), itr->path() };
          filesToProcess.emplace_back(std::move(nodeAndPath));
          itr++;
@@ -185,9 +194,10 @@ namespace
    }
 
    /**
-    * @brief BuildFinalTree
-    * @param queue
-    * @param fileTree
+    * @brief BuildFinalTree puts all the pieces back together again...
+    *
+    * @param[in] queue              A queue containing the results of the scanning tasks.
+    * @param[out] fileTree          The tree into which the scan results should be inserted.
     */
    void BuildFinalTree(
       ThreadSafeQueue<NodeAndPath>& queue,
@@ -208,8 +218,6 @@ namespace
       }
    }
 }
-
-const std::uintmax_t ScanningWorker::SIZE_UNDEFINED = 0;
 
 ScanningWorker::ScanningWorker(
    const DriveScanningParameters& parameters,
@@ -421,5 +429,5 @@ void ScanningWorker::Start()
    ComputeDirectorySizes(*theTree);
    PruneEmptyFilesAndDirectories(*theTree);
 
-   emit Finished(m_filesScanned, theTree);
+   emit Finished(m_progress.filesScanned.load(), theTree);
 }
