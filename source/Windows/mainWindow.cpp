@@ -330,8 +330,13 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
       (const std::uintmax_t numberOfFilesScanned,
       const std::uintmax_t bytesProcessed)
    {
-      const auto percentComplete = 100 *
-         (static_cast<long double>(bytesProcessed) / static_cast<long double>(occupiedSpace));
+      auto percentComplete = 100 *
+         (static_cast<double>(bytesProcessed) / static_cast<double>(occupiedSpace));
+
+      if (percentComplete > 99.99)
+      {
+         percentComplete = 99.99;
+      }
 
       std::wstringstream message;
       message.imbue(std::locale{ "" });
@@ -342,8 +347,7 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
          << numberOfFilesScanned
          << L"  |  "
          << percentComplete
-         << L"% Complete"
-         << std::endl;
+         << L"% Complete";
 
       SetStatusBarMessage(message.str());
    };

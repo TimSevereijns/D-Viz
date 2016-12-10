@@ -19,12 +19,19 @@ BreakdownDialog::BreakdownDialog(QWidget* parent) :
    const auto& controller = mainWindow->GetController();
    const auto tree = controller.GetTree();
 
-   for (auto&& node : tree)
+   for (const auto& node : tree)
    {
-      m_model.insert(&node);
+      m_model.insert(node);
    }
 
-   m_ui->treeView->setModel(&m_model);
+   //m_model.setHeaderData(0, Qt::Orientation::Horizontal, QString("File Type"));
+   //m_model.setHeaderData(1, Qt::Orientation::Horizontal, QString("Cumulative Size (Bytes)"));
+
+   m_ui->tableView->setModel(&m_model);
+
+   m_ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+   m_ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+   m_ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 BreakdownDialog::~BreakdownDialog()

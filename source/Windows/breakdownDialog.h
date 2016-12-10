@@ -20,11 +20,13 @@ class BreakdownDialog : public QDialog
       Q_OBJECT
 
    public:
+
       explicit BreakdownDialog(QWidget* parent = nullptr);
 
       ~BreakdownDialog();
 
    private:
+
       Ui::breakdownDialog* m_ui;
 
       ScanBreakdownModel m_model;
