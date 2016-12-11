@@ -3,6 +3,9 @@
 
 #include "mainWindow.h"
 
+#include <QResizeEvent>
+#include <QScrollbar>
+
 #include <functional>
 #include <iostream>
 #include <vector>
@@ -24,14 +27,34 @@ BreakdownDialog::BreakdownDialog(QWidget* parent) :
       m_model.insert(node);
    }
 
-   //m_model.setHeaderData(0, Qt::Orientation::Horizontal, QString("File Type"));
-   //m_model.setHeaderData(1, Qt::Orientation::Horizontal, QString("Cumulative Size (Bytes)"));
-
    m_ui->tableView->setModel(&m_model);
+   m_ui->tableView->resizeColumnsToContents();
 
    m_ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
    m_ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
    m_ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+   m_ui->tableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+   AdjustColumnWidthsToFitViewport();
+}
+
+void BreakdownDialog::AdjustColumnWidthsToFitViewport()
+{
+   const auto headerWidth = m_ui->tableView->verticalHeader()->width();
+
+   const auto scrollbarWidth = m_ui->tableView->verticalScrollBar()->isVisible()
+      ? m_ui->tableView->verticalScrollBar()->width()
+      : 0;
+
+   const auto tableWidth = m_ui->tableView->width() - headerWidth - scrollbarWidth;
+
+   m_ui->tableView->setColumnWidth(0, tableWidth / 2);
+   m_ui->tableView->setColumnWidth(1, tableWidth / 2);
+}
+
+void BreakdownDialog::resizeEvent(QResizeEvent* /*event*/)
+{
+   AdjustColumnWidthsToFitViewport();
 }
 
 BreakdownDialog::~BreakdownDialog()

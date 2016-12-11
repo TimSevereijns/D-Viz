@@ -25,7 +25,13 @@ class BreakdownDialog : public QDialog
 
       ~BreakdownDialog();
 
+   protected:
+
+      void resizeEvent(QResizeEvent* event) final override;
+
    private:
+
+      void AdjustColumnWidthsToFitViewport();
 
       Ui::breakdownDialog* m_ui;
 

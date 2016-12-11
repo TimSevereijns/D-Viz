@@ -1,6 +1,30 @@
 #include "scanBreakdownModel.h"
 
 #include <iterator>
+#include <mutex>
+#include <sstream>
+
+namespace
+{
+   std::once_flag stringStreamSetupFlag;
+
+   static auto ConvertToFormattedString(const std::uintmax_t number)
+   {
+      static std::wstringstream stringStream;
+
+      std::call_once(stringStreamSetupFlag,
+         [&] () noexcept
+      {
+         stringStream.imbue(std::locale{ "" });
+      });
+
+      stringStream.str(std::wstring{ });
+      stringStream.clear();
+
+      stringStream << number;
+      return stringStream.str();
+   }
+}
 
 int ScanBreakdownModel::rowCount(const QModelIndex& /*parent*/) const
 {
@@ -15,8 +39,13 @@ int ScanBreakdownModel::columnCount(const QModelIndex& /*parent*/) const
 QVariant ScanBreakdownModel::headerData(
    int section,
    Qt::Orientation orientation,
-   int /*role*/) const
+   int role) const
 {
+   if (role != Qt::DisplayRole)
+   {
+      return { };
+   }
+
    if (orientation == Qt::Orientation::Horizontal)
    {
       switch(section)
@@ -43,7 +72,7 @@ QVariant ScanBreakdownModel::data(
 
    return index.column() == 0
       ? QString::fromStdWString(start->first)
-      : QString::number(start->second);
+      : QString::fromStdWString(ConvertToFormattedString(start->second));
 }
 
 void ScanBreakdownModel::insert(const TreeNode<VizNode>& node)

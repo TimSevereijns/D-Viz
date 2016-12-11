@@ -528,8 +528,10 @@ void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controller
 
 void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerState)
 {
-   if (!m_isLeftTriggerDown
-       && controllerState.leftTrigger > Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD)
+   const bool isLeftTriggerThresholdExceeded =
+      controllerState.leftTrigger > Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD;
+
+   if (!m_isLeftTriggerDown && isLeftTriggerThresholdExceeded)
    {
       m_isLeftTriggerDown = true;
 
@@ -542,8 +544,7 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
          crosshairAsset->Show(m_camera);
       }
    }
-   else if (m_isLeftTriggerDown
-      && controllerState.leftTrigger <= Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD)
+   else if (m_isLeftTriggerDown && !isLeftTriggerThresholdExceeded)
    {
       m_isLeftTriggerDown = false;
 
@@ -557,15 +558,16 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
       }
    }
 
-   if (!m_isRightTriggerDown
-      && controllerState.rightTrigger > Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD)
+   const bool isRightTriggerThresholdExceeded =
+      controllerState.rightTrigger > Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD;
+
+   if (!m_isRightTriggerDown && isRightTriggerThresholdExceeded)
    {
       m_isRightTriggerDown = true;
 
       SelectNodeViaRay(m_camera.GetViewport().center());
    }
-   else if (m_isRightTriggerDown
-      && controllerState.rightTrigger <= Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD)
+   else if (m_isRightTriggerDown && !isRightTriggerThresholdExceeded)
    {
       m_isRightTriggerDown = false;
    }
