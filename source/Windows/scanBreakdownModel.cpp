@@ -1,14 +1,21 @@
 #include "scanBreakdownModel.h"
 
+#include "../controller.h"
+
 #include <iterator>
 #include <mutex>
 #include <sstream>
+#include <type_traits>
 
 namespace
 {
    std::once_flag stringStreamSetupFlag;
 
-   static auto ConvertToFormattedString(const std::uintmax_t number)
+   template<
+      typename Type,
+      typename = std::enable_if<std::is_arithmetic_v<Type>>
+   >
+   static auto ConvertToFormattedString(const Type& number)
    {
       static std::wstringstream stringStream;
 
@@ -48,10 +55,10 @@ QVariant ScanBreakdownModel::headerData(
 
    if (orientation == Qt::Orientation::Horizontal)
    {
-      switch(section)
+      switch (section)
       {
          case 0: return QString("File Type");
-         case 1: return QString("Cumulative Size (Bytes)");
+         case 1: return QString("Cumulative Size");
       }
    }
 
@@ -70,23 +77,28 @@ QVariant ScanBreakdownModel::data(
    auto start = std::begin(m_fileTypeMap);
    std::advance(start, index.row());
 
+   const auto fileSize = Controller::ConvertFileSizeToAppropriateUnits(start->second);
+   const auto fileSizeString = ConvertToFormattedString(fileSize.first) + L" " + fileSize.second;
+
    return index.column() == 0
       ? QString::fromStdWString(start->first)
-      : QString::fromStdWString(ConvertToFormattedString(start->second));
+      : QString::fromStdWString(fileSizeString);
 }
 
 void ScanBreakdownModel::insert(const TreeNode<VizNode>& node)
 {
    const auto& file = node->file;
-   if (file.type == FileType::REGULAR)
+   if (file.type != FileType::REGULAR)
    {
-      if (file.extension.empty())
-      {
-         m_fileTypeMap[L"Unknown"] += file.size;
-      }
-      else
-      {
-         m_fileTypeMap[file.extension] += file.size;
-      }
+      return;
+   }
+
+   if (file.extension.empty())
+   {
+      m_fileTypeMap[L"No Extension"] += file.size;
+   }
+   else
+   {
+      m_fileTypeMap[file.extension] += file.size;
    }
 }

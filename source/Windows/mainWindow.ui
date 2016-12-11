@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>20</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>
@@ -62,7 +62,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>204</width>
+     <width>228</width>
      <height>781</height>
     </size>
    </property>
@@ -351,6 +351,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="showBreakdownButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>View Scan Breakdown</string>
        </property>

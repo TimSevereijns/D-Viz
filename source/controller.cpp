@@ -1,6 +1,7 @@
 #include "controller.h"
 
 #include "constants.h"
+#include "ThirdParty/stopwatch.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Visualizations/squarifiedTreemap.h"
 #include "Windows/mainWindow.h"
@@ -330,26 +331,34 @@ void Controller::SearchTreeMap(
 
    const auto selector = [&]
    {
-      std::for_each(
-         Tree<VizNode>::PostOrderIterator{ GetTree().GetHead() },
-         Tree<VizNode>::PostOrderIterator{ },
-         [&] (Tree<VizNode>::const_reference node)
+      std::wstring fullName;
+      fullName.reserve(32);
+
+      Stopwatch<std::chrono::milliseconds>([&] ()
       {
-         if (node->file.size < m_visualizationParameters.minimumFileSize
-            || (!shouldSearchDirectories && node->file.type == FileType::DIRECTORY)
-            || (!shouldSearchFiles && node->file.type == FileType::REGULAR))
+         std::for_each(
+            Tree<VizNode>::PostOrderIterator{ GetTree().GetHead() },
+            Tree<VizNode>::PostOrderIterator{ },
+            [&] (Tree<VizNode>::const_reference node)
          {
-            return;
-         }
+            const auto& file = node->file;
 
-         const auto fullFileName{ node->file.name + node->file.extension };
-         if (!boost::icontains(fullFileName, searchQuery))
-         {
-            return;
-         }
+            if (file.size < m_visualizationParameters.minimumFileSize
+               || (!shouldSearchDirectories && file.type == FileType::DIRECTORY)
+               || (!shouldSearchFiles && file.type == FileType::REGULAR))
+            {
+               return;
+            }
 
-         m_highlightedNodes.emplace_back(&node);
-      });
+            fullName = file.name + file.extension;
+            if (!boost::icontains(fullName, searchQuery))
+            {
+               return;
+            }
+
+            m_highlightedNodes.emplace_back(&node);
+         });
+      }, "Complete search in ");
    };
 
    ProcessSelection(selector, selectionCallback);

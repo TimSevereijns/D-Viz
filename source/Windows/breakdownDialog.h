@@ -2,6 +2,7 @@
 #define BREAKDOWNDIALOG_H
 
 #include <QDialog>
+#include <QSortFilterProxyModel>
 
 #include "scanBreakdownModel.h"
 
@@ -36,6 +37,7 @@ class BreakdownDialog : public QDialog
       Ui::breakdownDialog* m_ui;
 
       ScanBreakdownModel m_model;
+      QSortFilterProxyModel m_proxyModel;
 };
 
 #endif // BREAKDOWNDIALOG_H

@@ -14,6 +14,7 @@ BreakdownDialog::BreakdownDialog(QWidget* parent) :
    QDialog{ parent },
    m_ui{ new Ui::breakdownDialog }
 {
+   assert(m_ui);
    m_ui->setupUi(this);
 
    auto* mainWindow = reinterpret_cast<MainWindow*>(parent);
@@ -22,18 +23,24 @@ BreakdownDialog::BreakdownDialog(QWidget* parent) :
    const auto& controller = mainWindow->GetController();
    const auto tree = controller.GetTree();
 
+   if (tree.GetHead()->GetChildCount() == 0)
+   {
+      return;
+   }
+
    for (const auto& node : tree)
    {
       m_model.insert(node);
    }
 
-   m_ui->tableView->setModel(&m_model);
-   m_ui->tableView->resizeColumnsToContents();
+   m_proxyModel.setSourceModel(&m_model);
+   m_ui->tableView->setModel(&m_proxyModel);
 
    m_ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
    m_ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
    m_ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
    m_ui->tableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+   m_ui->tableView->setSortingEnabled(true);
 
    AdjustColumnWidthsToFitViewport();
 }

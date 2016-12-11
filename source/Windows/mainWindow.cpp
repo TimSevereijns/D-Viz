@@ -49,6 +49,7 @@ MainWindow::MainWindow(
 {
    SetupXboxController();
 
+   assert(m_ui);
    m_ui->setupUi(this);
 
    CreateMenus();
@@ -56,6 +57,8 @@ MainWindow::MainWindow(
    assert(m_optionsManager);
 
    m_glCanvas.reset(new GLCanvas{ controller, this });
+   assert(m_glCanvas);
+
    m_ui->canvasLayout->addWidget(m_glCanvas.get());
 
    SetupSidebar();
@@ -375,6 +378,7 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
       m_glCanvas->ReloadVisualization();
 
       m_controller.AllowUserInteractionWithModel(true);
+      m_ui->showBreakdownButton->setEnabled(true);
    };
 
    const DriveScanningParameters scanningParameters
@@ -385,6 +389,8 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
    };
 
    m_controller.AllowUserInteractionWithModel(false);
+   m_ui->showBreakdownButton->setEnabled(false);
+
 
    m_scanner.StartScanning(scanningParameters);
 }
