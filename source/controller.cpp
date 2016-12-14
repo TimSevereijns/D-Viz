@@ -1,7 +1,8 @@
 #include "controller.h"
 
 #include "constants.h"
-#include "ThirdParty/stopwatch.hpp"
+#include "ThirdParty/ArenaAllocator.hpp"
+#include "ThirdParty/Stopwatch.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Visualizations/squarifiedTreemap.h"
 #include "Windows/mainWindow.h"
@@ -20,6 +21,17 @@
 namespace
 {
    const auto* const BYTES_READOUT_STRING = L" bytes";
+
+   template<std::size_t ArenaSize = 512>
+   using WideStackString = std::basic_string<
+      wchar_t,
+      std::char_traits<wchar_t>,
+      ArenaAllocator<
+         wchar_t,
+         ArenaSize,
+         alignof(wchar_t)
+      >
+   >;
 }
 
 bool Controller::HasVisualizationBeenLoaded() const
@@ -331,8 +343,11 @@ void Controller::SearchTreeMap(
 
    const auto selector = [&]
    {
-      std::wstring fullName;
-      fullName.reserve(32);
+      // Using a stack allocated string (along with case sensitive comparison) appears to be about
+      // 25-30% percent faster compared to a regular heap allocated string.
+      // 222ms vs 316ms for ~750,000 files scanned on an old Intel Q9450.
+      WideStackString<2048>::allocator_type::arena_type stringArena{ };
+      WideStackString<2048> fullName{ std::move(stringArena) };
 
       Stopwatch<std::chrono::milliseconds>([&] ()
       {
@@ -350,8 +365,10 @@ void Controller::SearchTreeMap(
                return;
             }
 
-            fullName = file.name + file.extension;
-            if (!boost::icontains(fullName, searchQuery))
+            fullName = file.name.data();
+            fullName.append(file.extension.data());
+
+            if (!boost::contains(fullName, searchQuery))
             {
                return;
             }

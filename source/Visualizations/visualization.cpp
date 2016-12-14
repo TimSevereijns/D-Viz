@@ -12,7 +12,7 @@
 #include <Qt3DCore/QRay3D>
 
 #include "../constants.h"
-#include "../ThirdParty/stopwatch.hpp"
+#include "../ThirdParty/Stopwatch.hpp"
 
 namespace
 {

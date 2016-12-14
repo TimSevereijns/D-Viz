@@ -1,7 +1,7 @@
 #include "driveScanner.h"
 #include "scanningWorker.h"
 
-#include "../ThirdParty/stopwatch.hpp"
+#include "../ThirdParty/Stopwatch.hpp"
 #include "../ThirdParty/ThreadSafeQueue.hpp"
 
 #include <iostream>

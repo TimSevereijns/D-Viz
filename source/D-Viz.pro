@@ -64,7 +64,8 @@ HEADERS  += \
    Scene/lineAsset.h \
    Scene/sceneAsset.h \
    Scene/visualizationAsset.h \
-   ThirdParty/stopwatch.hpp \
+   ThirdParty/ArenaAllocator.hpp \
+   ThirdParty/Stopwatch.hpp \
    ThirdParty/ThreadSafeQueue.hpp \
    ThirdParty/Tree.hpp \
    Utilities/colorGradient.hpp \
@@ -81,9 +82,9 @@ HEADERS  += \
    Windows/scanBreakdownModel.h
 
 FORMS    += \
-   Windows/mainWindow.ui \
    Windows/aboutDialog.ui \
-    Windows/breakdownDialog.ui
+   Windows/breakdownDialog.ui \
+   Windows/mainWindow.ui
 
 INCLUDEPATH += ../../boost_1_60_0
 
