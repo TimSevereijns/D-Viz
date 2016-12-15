@@ -344,10 +344,11 @@ void Controller::SearchTreeMap(
    const auto selector = [&]
    {
       // Using a stack allocated string (along with case sensitive comparison) appears to be about
-      // 25-30% percent faster compared to a regular heap allocated string.
-      // 222ms vs 316ms for ~750,000 files scanned on an old Intel Q9450.
-      WideStackString<2048>::allocator_type::arena_type stringArena{ };
-      WideStackString<2048> fullName{ std::move(stringArena) };
+      // 25-30% percent faster compared to a regular heap allocated string:
+      // 212ms vs 316ms for ~750,000 files scanned on an old Intel Q9450.
+      WideStackString<540>::allocator_type::arena_type stringArena{ };
+      WideStackString<540> fullName{ std::move(stringArena) };
+      fullName.resize(260); ///< Resize to prevent reallocation with later append operations.
 
       Stopwatch<std::chrono::milliseconds>([&] ()
       {
@@ -375,7 +376,7 @@ void Controller::SearchTreeMap(
 
             m_highlightedNodes.emplace_back(&node);
          });
-      }, "Complete search in ");
+      }, "Completed search in ");
    };
 
    ProcessSelection(selector, selectionCallback);
