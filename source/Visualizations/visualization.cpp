@@ -9,7 +9,9 @@
 
 #include <QColor>
 #include <QRectF>
-#include <Qt3DCore/QRay3D>
+
+// @todo Replace the use of this class with something more stable.
+#include <Qt3DRender/private/qray3d_p.h>
 
 #include "../constants.h"
 #include "../ThirdParty/Stopwatch.hpp"
@@ -37,7 +39,7 @@ namespace
     * error, or boost::none if no such intersection exists.
     */
    boost::optional<QVector3D> DoesRayIntersectPlane(
-      const Qt3DCore::QRay3D& ray,
+      const Qt3DRender::QRay3D& ray,
       const QVector3D& pointOnPlane,
       const QVector3D& planeNormal)
    {
@@ -69,7 +71,7 @@ namespace
     * @return The closest intersection point, or boost::none should anything weird occur.
     */
    boost::optional<QVector3D> FindClosestIntersectionPoint(
-      const Qt3DCore::QRay3D& ray,
+      const Qt3DRender::QRay3D& ray,
       const std::vector<QVector3D>& allIntersections)
    {
       const auto& closest = std::min_element(std::begin(allIntersections), std::end(allIntersections),
@@ -95,7 +97,7 @@ namespace
     * @returns The point of intersection should it exist; boost::none otherwise.
     */
    boost::optional<QVector3D> DoesRayIntersectBlock(
-      const Qt3DCore::QRay3D& ray,
+      const Qt3DRender::QRay3D& ray,
       const Block& block)
    {
       // @todo Replace with a stack allocated container.
@@ -260,7 +262,7 @@ namespace
     * @param[in] node               The current node being hit-tested.
     */
    std::vector<IntersectionPointAndNode> FindAllIntersections(
-      const Qt3DCore::QRay3D& ray,
+      const Qt3DRender::QRay3D& ray,
       const Camera& camera,
       const VisualizationParameters& parameters,
       TreeNode<VizNode>* node)
@@ -362,7 +364,7 @@ void VisualizationModel::UpdateBoundingBoxes()
 
 TreeNode<VizNode>* VisualizationModel::FindNearestIntersection(
    const Camera& camera,
-   const Qt3DCore::QRay3D& ray,
+   const Qt3DRender::QRay3D& ray,
    const VisualizationParameters& parameters) const
 {
    if (!m_hasDataBeenParsed)

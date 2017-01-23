@@ -82,7 +82,7 @@ class VisualizationModel
        */
       TreeNode<VizNode>* FindNearestIntersection(
          const Camera& camera,
-         const Qt3DCore::QRay3D& ray,
+         const Qt3DRender::QRay3D& ray,
          const VisualizationParameters& parameters) const;
 
       /**

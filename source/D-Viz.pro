@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl
+QT       += 3drender-private gui opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets 3dcore
 
@@ -86,7 +86,7 @@ FORMS    += \
    Windows/breakdownDialog.ui \
    Windows/mainWindow.ui
 
-INCLUDEPATH += ../../boost_1_60_0
+INCLUDEPATH += ../../boost_1_63_0
 
 DISTFILES += \
    Shaders/visualizationFragmentShader.frag \
@@ -97,16 +97,16 @@ DISTFILES += \
 RESOURCES += \
    resources.qrc
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../boost_1_60_0/stage/lib/ -lboost_filesystem-vc140-mt-1_60
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../boost_1_60_0/stage/lib/ -lboost_filesystem-vc140-mt-gd-1_60
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../boost_1_63_0/stage/lib/ -lboost_filesystem-vc140-mt-1_63
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../boost_1_63_0/stage/lib/ -lboost_filesystem-vc140-mt-gd-1_63
 
-INCLUDEPATH += $$PWD/../../boost_1_60_0/stage
-DEPENDPATH += $$PWD/../../boost_1_60_0/stage
+INCLUDEPATH += $$PWD/../../boost_1_63_0/stage
+DEPENDPATH += $$PWD/../../boost_1_63_0/stage
 
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../boost_1_60_0/stage/lib/libboost_filesystem-vc140-mt-1_60.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../boost_1_60_0/stage/lib/libboost_filesystem-vc140-mt-gd-1_60.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../boost_1_60_0/stage/lib/boost_filesystem-vc140-mt-1_60.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../boost_1_60_0/stage/lib/boost_filesystem-vc140-mt-gd-1_60.lib
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../boost_1_63_0/stage/lib/libboost_filesystem-vc140-mt-1_63.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../boost_1_63_0/stage/lib/libboost_filesystem-vc140-mt-gd-1_63.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../boost_1_63_0/stage/lib/boost_filesystem-vc140-mt-1_63.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../boost_1_63_0/stage/lib/boost_filesystem-vc140-mt-gd-1_63.lib
 
 win32:
    LIBS += -lXInput9_1_0
@@ -115,8 +115,8 @@ win32:
 
 CONFIG(release, debug|release) {
    library_files.path += $$OUT_PWD/release
-   library_files.files += $$PWD/../../boost_1_60_0/stage/lib/boost_filesystem-vc140-mt-1_60*
-   library_files.files += $$PWD/../../boost_1_60_0/stage/lib/boost_system-vc140-mt-1_60*
+   library_files.files += $$PWD/../../boost_1_60_0/stage/lib/boost_filesystem-vc140-mt-1_63*
+   library_files.files += $$PWD/../../boost_1_60_0/stage/lib/boost_system-vc140-mt-1_63*
    library_files.files += $$(QTDIR)/bin/Qt53DCore.dll
    library_files.files += $$(QTDIR)/bin/Qt5Widgets.dll
    library_files.files += $$(QTDIR)/bin/Qt5Gui.dll
@@ -127,8 +127,8 @@ CONFIG(release, debug|release) {
 }
 CONFIG(debug, debug|release) {
    library_files.path += $$OUT_PWD/debug
-   library_files.files += $$PWD/../../boost_1_60_0/stage/lib/boost_filesystem-vc140-mt-gd-1_60*
-   library_files.files += $$PWD/../../boost_1_60_0/stage/lib/boost_system-vc140-mt-gd-1_60*
+   library_files.files += $$PWD/../../boost_1_63_0/stage/lib/boost_filesystem-vc140-mt-gd-1_63*
+   library_files.files += $$PWD/../../boost_1_63_0/stage/lib/boost_system-vc140-mt-gd-1_63*
    library_files.files += $$(QTDIR)/bin/Qt53DCore.dll
    library_files.files += $$(QTDIR)/bin/Qt5Widgets.dll
    library_files.files += $$(QTDIR)/bin/Qt5Gui.dll
