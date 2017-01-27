@@ -3,35 +3,6 @@
 #include "../controller.h"
 
 #include <iterator>
-#include <mutex>
-#include <sstream>
-#include <type_traits>
-
-namespace
-{
-   std::once_flag stringStreamSetupFlag;
-
-   template<
-      typename Type,
-      typename = std::enable_if<std::is_arithmetic_v<Type>>
-   >
-   static auto ConvertToFormattedString(const Type& number)
-   {
-      static std::wstringstream stringStream;
-
-      std::call_once(stringStreamSetupFlag,
-         [&] () noexcept
-      {
-         stringStream.imbue(std::locale{ "" });
-      });
-
-      stringStream.str(std::wstring{ });
-      stringStream.clear();
-
-      stringStream << number;
-      return stringStream.str();
-   }
-}
 
 int ScanBreakdownModel::rowCount(const QModelIndex& /*parent*/) const
 {
@@ -69,20 +40,35 @@ QVariant ScanBreakdownModel::data(
    const QModelIndex& index,
    int role) const
 {
-   if (!index.isValid() || role != Qt::DisplayRole)
+   if (!index.isValid() &&
+      role != Qt::UserRole &&
+      role != Qt::DisplayRole)
    {
       return { };
    }
 
-   auto start = std::begin(m_fileTypeMap);
-   std::advance(start, index.row());
+   const auto& data = m_fileTypeVector[index.row()];
 
-   const auto fileSize = Controller::ConvertFileSizeToAppropriateUnits(start->second);
-   const auto fileSizeString = ConvertToFormattedString(fileSize.first) + L" " + fileSize.second;
+   if (role == Qt::DisplayRole)
+   {
+      return index.column() == 0
+        ? QString::fromStdWString(data.fileExtension)
+        : QString::fromStdWString(data.formattedSize);
+   }
 
-   return index.column() == 0
-      ? QString::fromStdWString(start->first)
-      : QString::fromStdWString(fileSizeString);
+   if (role == Qt::UserRole)
+   {
+      if (index.column() == 0)
+      {
+         return QString::fromStdWString(data.fileExtension);
+      }
+      else if (index.column() == 1)
+      {
+         return data.totalSize;
+      }
+   }
+
+   return { };
 }
 
 void ScanBreakdownModel::insert(const TreeNode<VizNode>& node)
@@ -101,4 +87,12 @@ void ScanBreakdownModel::insert(const TreeNode<VizNode>& node)
    {
       m_fileTypeMap[file.extension] += file.size;
    }
+}
+
+void ScanBreakdownModel::FinalizeInsertion()
+{
+   assert(!m_fileTypeMap.empty() && m_fileTypeVector.empty());
+
+   std::copy(std::begin(m_fileTypeMap), std::end(m_fileTypeMap),
+      std::back_inserter(m_fileTypeVector));
 }

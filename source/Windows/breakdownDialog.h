@@ -13,6 +13,35 @@ namespace Ui
    class breakdownDialog;
 }
 
+class ScanBreakdownFilterProxyModel : public QSortFilterProxyModel
+{
+   bool lessThan(
+      const QModelIndex& lhs,
+      const QModelIndex& rhs) const final override
+   {
+      const auto lhsData = sourceModel()->data(lhs, Qt::UserRole);
+      const auto rhsData = sourceModel()->data(rhs, Qt::UserRole);
+
+      if (lhs.column() == 0)
+      {
+         const auto lhsExtension = lhsData.value<QString>();
+         const auto rhsExtension = rhsData.value<QString>();
+
+         return lhsExtension < rhsExtension;
+      }
+      else if (lhs.column() == 1)
+      {
+         const auto lhsSize = lhsData.value<std::uintmax_t>();
+         const auto rhsSize = rhsData.value<std::uintmax_t>();
+
+         return lhsSize < rhsSize;
+      }
+
+      assert(false);
+      return false;
+   }
+};
+
 /**
  * @brief The BreakdownDialog class
  */
@@ -37,7 +66,7 @@ class BreakdownDialog : public QDialog
       Ui::breakdownDialog* m_ui;
 
       ScanBreakdownModel m_model;
-      QSortFilterProxyModel m_proxyModel;
+      ScanBreakdownFilterProxyModel m_proxyModel;
 };
 
 #endif // BREAKDOWNDIALOG_H

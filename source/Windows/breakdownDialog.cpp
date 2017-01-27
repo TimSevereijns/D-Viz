@@ -30,8 +30,13 @@ BreakdownDialog::BreakdownDialog(QWidget* parent) :
 
    for (const auto& node : tree)
    {
-      m_model.insert(node);
+      if (node->file.type != FileType::DIRECTORY)
+      {
+         m_model.insert(node);
+      }
    }
+
+   m_model.FinalizeInsertion();
 
    m_proxyModel.setSourceModel(&m_model);
    m_ui->tableView->setModel(&m_proxyModel);
@@ -41,6 +46,7 @@ BreakdownDialog::BreakdownDialog(QWidget* parent) :
    m_ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
    m_ui->tableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    m_ui->tableView->setSortingEnabled(true);
+   m_ui->tableView->sortByColumn(1, Qt::SortOrder::DescendingOrder);
 
    AdjustColumnWidthsToFitViewport();
 }
