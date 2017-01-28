@@ -12,10 +12,12 @@ TARGET = D-Viz
 TEMPLATE = app
 CONFIG += c++11
 
+# Generate PDBs for Release builds:
 QMAKE_LFLAGS_RELEASE+=/MAP
 QMAKE_CFLAGS_RELEASE += /Zi
 QMAKE_LFLAGS_RELEASE +=/debug /opt:ref
 
+# Bump up the warning level to W4:
 QMAKE_CFLAGS_WARN_ON -= -W3
 QMAKE_CFLAGS_WARN_ON += -W4
 
