@@ -25,13 +25,18 @@ namespace Constants
 
    namespace Graphics
    {
-      constexpr static int DESIRED_TIME_BETWEEN_FRAMES = 20;
+      constexpr static auto DESIRED_TIME_BETWEEN_FRAMES{ 20 };
    }
 
    namespace Xbox
    {
-      constexpr static double MOVEMENT_AMPLIFICATION = 10.0;
-      constexpr static float TRIGGER_ACTUATION_THRESHOLD = 0.2f;
+      constexpr static auto MOVEMENT_AMPLIFICATION{ 10.0 };
+      constexpr static auto TRIGGER_ACTUATION_THRESHOLD{ 0.2f };
+   }
+
+   namespace Concurrency
+   {
+      constexpr static auto THREAD_LIMIT{ 4 };
    }
 }
 

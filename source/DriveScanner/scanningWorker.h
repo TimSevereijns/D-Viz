@@ -1,7 +1,7 @@
 #ifndef SCANNINGWORKER_H
 #define SCANNINGWORKER_H
 
-#include <boost/filesystem.hpp>
+#include <experimental/filesystem>
 
 #include <QObject>
 #include <QVector>
@@ -22,6 +22,29 @@
 #include "../Visualizations/visualization.h"
 
 #include "../ThirdParty/Tree.hpp"
+
+/**
+ * @brief The NodeAndPath struct
+ */
+struct NodeAndPath
+{
+   std::unique_ptr<TreeNode<VizNode>> node;
+   std::experimental::filesystem::path path;
+
+   NodeAndPath(
+      decltype(node) node,
+      decltype(path) path)
+      :
+      node{ std::move(node) },
+      path{ std::move(path) }
+   {
+   }
+
+   NodeAndPath() = default;
+};
+
+template<typename Type>
+class ThreadSafeQueue;
 
 /**
  * @brief The ScanningWorker class
@@ -75,6 +98,22 @@ class ScanningWorker : public QObject
 
    private:
 
+      void ProcessQueue(
+         ThreadSafeQueue<NodeAndPath>& taskQueue,
+         ThreadSafeQueue<NodeAndPath>& resultsQueue) noexcept;
+
+      /**
+       * @brief Helper function to process a single file.
+       *
+       * @note This function assumes the path is valid and accessible.
+       *
+       * @param[in] path            The location on disk to scan.
+       * @param[in] fileNode        The TreeNode in Tree to append newly discoved files to.
+       */
+      void ProcessRegularFile(
+         const std::experimental::filesystem::path& path,
+         TreeNode<VizNode>& treeNode) noexcept;
+
       /**
        * @brief Helper function to facilitate exception-free iteration over a directory.
        *
@@ -82,7 +121,7 @@ class ScanningWorker : public QObject
        * @param[in] treeNode        The TreeNode to append the contents of the directory to.
        */
       inline void IterateOverDirectoryAndScan(
-         boost::filesystem::directory_iterator& itr,
+         std::experimental::filesystem::directory_iterator& itr,
          TreeNode<VizNode>& treeNode) noexcept;
 
       /**
@@ -92,7 +131,7 @@ class ScanningWorker : public QObject
        * @param[in] fileNode        The TreeNode in Tree to append newly discoved files to.
        */
       void ScanRecursively(
-         const boost::filesystem::path& path,
+         const std::experimental::filesystem::path& path,
          TreeNode<VizNode>& fileNode);
 
       std::shared_ptr<Tree<VizNode>> CreateTreeAndRootNode();

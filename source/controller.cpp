@@ -23,15 +23,16 @@ namespace
    const auto* const BYTES_READOUT_STRING = L" bytes";
 
    template<std::size_t ArenaSize = 512>
-   using WideStackString = std::basic_string<
-      wchar_t,
-      std::char_traits<wchar_t>,
-      ArenaAllocator<
+   using WideStackString =
+      std::basic_string<
          wchar_t,
-         ArenaSize,
-         alignof(wchar_t)
-      >
-   >;
+         std::char_traits<wchar_t>,
+         ArenaAllocator<
+            wchar_t,
+            ArenaSize,
+            alignof(wchar_t)
+         >
+      >;
 }
 
 bool Controller::HasVisualizationBeenLoaded() const
@@ -429,7 +430,8 @@ std::wstring Controller::ResolveCompleteFilePath(const TreeNode<VizNode>& node)
    const auto completePath = std::accumulate(std::rbegin(reversePath), std::rend(reversePath),
       std::wstring{ }, [] (const std::wstring& path, const std::wstring& file)
    {
-      return path + (!path.empty() ? L"/" : L"") + file;
+      const auto shouldAddSlash = !path.empty() && path.back() != L'\\';
+      return path + (shouldAddSlash ? L"\\" : L"") + file;
    });
 
    assert(completePath.size() > 0);
@@ -441,8 +443,13 @@ void Controller::ShowInFileExplorer(const TreeNode<VizNode>& node)
    CoInitializeEx(NULL, COINIT_MULTITHREADED);
    ON_SCOPE_EXIT noexcept { CoUninitialize(); };
 
+   assert(std::none_of(std::begin(filePath), std::end(filePath),
+      [] (const auto character)
+   {
+      return character == L'/';
+   }));
+
    std::wstring filePath = Controller::ResolveCompleteFilePath(node);
-   std::replace(std::begin(filePath), std::end(filePath), L'/', L'\\');
 
    auto* idList = ILCreateFromPath(filePath.c_str());
    if (idList)

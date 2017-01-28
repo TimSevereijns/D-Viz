@@ -1,23 +1,29 @@
 #include "driveScanner.h"
 #include "scanningWorker.h"
 
+#include "../constants.h"
+
 #include "../ThirdParty/Stopwatch.hpp"
 #include "../ThirdParty/ThreadSafeQueue.hpp"
 
-#include "../Utilities/notAnotherWordCompiler.hpp"
+#include "../Utilities/ignoreUnused.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <system_error>
 #include <thread>
 #include <vector>
 
 namespace
 {
+   std::mutex streamMutex;
+
    /**
     * @brief PruneNodes removes nodes whose corresponding file or directory size is zero. This is
     * often necessary because a directory may contain a single other directory within it that is
-    * empty. In such a case, the outer directory has a size of zero, but boost::filesystem::is_empty
+    * empty. In such a case, the outer directory has a size of zero, but filesystem::is_empty
     * will still have reported this directory as being non-empty.
     *
     * @param[in, out] tree           The tree to be pruned.
@@ -71,26 +77,6 @@ namespace
    }
 
    /**
-    * @brief The NodeAndPath struct
-    */
-   struct NodeAndPath
-   {
-      std::unique_ptr<TreeNode<VizNode>> node;
-      boost::filesystem::path path;
-
-      NodeAndPath(
-         decltype(node) node,
-         decltype(path) path)
-         :
-         node{ std::move(node) },
-         path{ std::move(path) }
-      {
-      }
-
-      NodeAndPath() = default;
-   };
-
-   /**
     * @brief PreprocessTargetFiles will partition the files to be scanned such that directories
     * come first, followed by the regular files. Any path that could not be accessed, or that points
     * to either an empty directory or a symbolic link, will be removed from the vector.
@@ -107,9 +93,9 @@ namespace
       {
          try
          {
-            if (boost::filesystem::is_directory(nodeAndPath.path)
-               && !boost::filesystem::is_symlink(nodeAndPath.path)
-               && !boost::filesystem::is_empty(nodeAndPath.path))
+            if (std::experimental::filesystem::is_directory(nodeAndPath.path)
+               && !std::experimental::filesystem::is_symlink(nodeAndPath.path)
+               && !std::experimental::filesystem::is_empty(nodeAndPath.path))
             {
                return true;
             }
@@ -128,7 +114,7 @@ namespace
       {
          try
          {
-            if (boost::filesystem::is_regular_file(nodeAndPath.path))
+            if (std::experimental::filesystem::is_regular_file(nodeAndPath.path))
             {
                return true;
             }
@@ -136,6 +122,16 @@ namespace
          catch (...)
          {
             return false;
+         }
+
+         try
+         {
+            std::cout << "Whoops: " << nodeAndPath.path.string() << "\n";
+            std::cout << std::experimental::filesystem::file_size(nodeAndPath.path) << std::endl;
+         }
+         catch (...)
+         {
+            std::cout << "Fuck\n";
          }
 
          return false;
@@ -151,21 +147,23 @@ namespace
     *
     * @param[in] path               The initial enty path at which to start the scan.
     *
-    * @returns A vector of partitioned, scannable files. Directories first, regular files second.
+    * @returns A pair of vectors containing partitioned, scannable files. The first element in the
+    * pair contains the directories, and the second element contains the regular files.
     */
-   std::vector<NodeAndPath> CreateTaskItems(const boost::filesystem::path& path)
+   std::pair<std::vector<NodeAndPath>, std::vector<NodeAndPath>>
+      CreateTaskItems(const std::experimental::filesystem::path& path)
    {
-      boost::system::error_code errorCode;
-      auto itr = boost::filesystem::directory_iterator{ path, errorCode };
+      std::error_code errorCode;
+      auto itr = std::experimental::filesystem::directory_iterator{ path, errorCode };
       if (errorCode)
       {
-         std::cout << "Could not create directory iterator." << std::endl;
+         std::cout << "Could not create directory iterator.\n";
          return { };
       }
 
       std::vector<NodeAndPath> filesToProcess;
 
-      const auto end = boost::filesystem::directory_iterator{ };
+      const auto end = std::experimental::filesystem::directory_iterator{ };
       while (itr != end)
       {
          // The nodes are default constructed so that we don't have to actually access any of the
@@ -183,7 +181,7 @@ namespace
       {
          nodeAndPath.node->GetData().file.name = nodeAndPath.path.filename().wstring();
          nodeAndPath.node->GetData().file.size = std::uint64_t{ 0 };
-         nodeAndPath.node->GetData().file.type = boost::filesystem::is_directory(nodeAndPath.path)
+         nodeAndPath.node->GetData().file.type = std::experimental::filesystem::is_directory(nodeAndPath.path)
             ? FileType::DIRECTORY
             : FileType::REGULAR;
       }
@@ -192,7 +190,7 @@ namespace
       std::move(firstRegularFile, std::end(filesToProcess), std::back_inserter(regularFiles));
       filesToProcess.erase(firstRegularFile, std::end(filesToProcess));
 
-      return filesToProcess;
+      return std::make_pair(std::move(filesToProcess), std::move(regularFiles));
    }
 
    /**
@@ -233,8 +231,8 @@ ScanningWorker::ScanningWorker(
 
 std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
 {
-   assert(boost::filesystem::is_directory(m_parameters.path));
-   if (!boost::filesystem::is_directory(m_parameters.path))
+   assert(std::experimental::filesystem::is_directory(m_parameters.path));
+   if (!std::experimental::filesystem::is_directory(m_parameters.path))
    {
       emit ShowMessageBox("Please select a directory.");
       return nullptr;
@@ -248,12 +246,11 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
       VisualizationModel::ROOT_BLOCK_DEPTH
    };
 
-   boost::filesystem::path rawPath{ m_parameters.path };
-   auto sanitizedPath = rawPath.remove_trailing_separator();
+   std::experimental::filesystem::path path{ m_parameters.path };
 
    const FileInfo fileInfo
    {
-      sanitizedPath.wstring(),
+      path.wstring(),
       /* extension = */ L"",
       ScanningWorker::SIZE_UNDEFINED,
       FileType::DIRECTORY
@@ -269,10 +266,10 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
 }
 
 void ScanningWorker::IterateOverDirectoryAndScan(
-   boost::filesystem::directory_iterator& itr,
+   std::experimental::filesystem::directory_iterator& itr,
    TreeNode<VizNode>& treeNode) noexcept
 {
-   const auto end = boost::filesystem::directory_iterator{ };
+   const auto end = std::experimental::filesystem::directory_iterator{ };
    while (itr != end)
    {
       ScanRecursively(itr->path(), treeNode);
@@ -281,8 +278,33 @@ void ScanningWorker::IterateOverDirectoryAndScan(
    }
 }
 
+void ScanningWorker::ProcessRegularFile(
+   const std::experimental::filesystem::path& path,
+   TreeNode<VizNode>& treeNode) noexcept
+{
+    const auto fileSize = std::experimental::filesystem::file_size(path);
+    if (fileSize == 0)
+    {
+       return;
+    }
+
+    m_progress.numberOfBytesProcessed.fetch_add(fileSize);
+
+    const FileInfo fileInfo
+    {
+       path.filename().stem().wstring(),
+       path.filename().extension().wstring(),
+       fileSize,
+       FileType::REGULAR
+    };
+
+    treeNode.AppendChild(VizNode{ fileInfo });
+
+    m_progress.filesScanned.fetch_add(1);
+}
+
 void ScanningWorker::ScanRecursively(
-   const boost::filesystem::path& path,
+   const std::experimental::filesystem::path& path,
    TreeNode<VizNode>& treeNode)
 {
    bool isRegularFile = false;
@@ -290,7 +312,7 @@ void ScanningWorker::ScanRecursively(
    {
       // In certain cases, this function can, apparently, raise exceptions, although it
       // isn't entirely clear to me what circumstances need to exist for this to occur:
-      isRegularFile = boost::filesystem::is_regular_file(path);
+      isRegularFile = std::experimental::filesystem::is_regular_file(path);
    }
    catch (...)
    {
@@ -299,27 +321,9 @@ void ScanningWorker::ScanRecursively(
 
    if (isRegularFile)
    {
-      const auto fileSize = boost::filesystem::file_size(path);
-      if (fileSize == 0)
-      {
-         return;
-      }
-
-      m_progress.numberOfBytesProcessed.fetch_add(fileSize);
-
-      const FileInfo fileInfo
-      {
-         path.filename().stem().wstring(),
-         path.filename().extension().wstring(),
-         fileSize,
-         FileType::REGULAR
-      };
-
-      treeNode.AppendChild(VizNode{ fileInfo });
-
-      m_progress.filesScanned.fetch_add(1);
+      ProcessRegularFile(path, treeNode);
    }
-   else if (boost::filesystem::is_directory(path) && !boost::filesystem::is_symlink(path))
+   else if (std::experimental::filesystem::is_directory(path) && !std::experimental::filesystem::is_symlink(path))
    {
       try
       {
@@ -327,7 +331,7 @@ void ScanningWorker::ScanRecursively(
          // directories, and attempts to do so will result in exceptional behaviour---pun intended.
          // In order to deal with these rare cases, we'll need to rely on a try-catch to keep going.
          // One example of a problematic directory in Windows 7 is: "C:\System Volume Information".
-         if (boost::filesystem::is_empty(path))
+         if (std::experimental::filesystem::is_empty(path))
          {
             return;
          }
@@ -349,9 +353,48 @@ void ScanningWorker::ScanRecursively(
 
       m_progress.filesScanned.fetch_add(1);
 
-      auto itr = boost::filesystem::directory_iterator{ path };
+      auto itr = std::experimental::filesystem::directory_iterator{ path };
       IterateOverDirectoryAndScan(itr, *treeNode.GetLastChild());
    }
+}
+
+void ScanningWorker::ProcessQueue(
+   ThreadSafeQueue<NodeAndPath>& taskQueue,
+   ThreadSafeQueue<NodeAndPath>& resultsQueue) noexcept
+{
+   while (!taskQueue.IsEmpty())
+   {
+      auto nodeAndPath = NodeAndPath{ };
+      const auto successfullyPopped = taskQueue.TryPop(nodeAndPath);
+      if (!successfullyPopped)
+      {
+         continue;
+      }
+
+      IterateOverDirectoryAndScan(
+         std::experimental::filesystem::directory_iterator{ nodeAndPath.path },
+         *nodeAndPath.node);
+
+      {
+         std::lock_guard<std::mutex> lock{ streamMutex };
+         IgnoreUnused(lock);
+
+         std::cout
+            << "Finished scanning: "
+            << nodeAndPath.path.string()
+            << '\n';
+      }
+
+      resultsQueue.Emplace(std::move(nodeAndPath));
+   }
+
+   std::lock_guard<std::mutex> lock{ streamMutex };
+   IgnoreUnused(lock);
+
+   std::cout
+      << "Thread "
+      << std::this_thread::get_id()
+      << " has finished...\n";
 }
 
 void ScanningWorker::Start()
@@ -366,62 +409,37 @@ void ScanningWorker::Start()
 
    Stopwatch<std::chrono::seconds>([&]
    {
-      std::vector<NodeAndPath> filesToProcess = CreateTaskItems(m_parameters.path);
+      std::pair<std::vector<NodeAndPath>, std::vector<NodeAndPath>> directoriesAndFiles =
+         CreateTaskItems(m_parameters.path);
 
+      ThreadSafeQueue<NodeAndPath> resultQueue;
       ThreadSafeQueue<NodeAndPath> taskQueue;
-      for (auto& nodeAndPair : filesToProcess)
+
+      for (auto& nodeAndPath : directoriesAndFiles.first)
       {
-         taskQueue.Emplace(std::move(nodeAndPair));
+         taskQueue.Emplace(std::move(nodeAndPath));
       }
 
-      ThreadSafeQueue<NodeAndPath> resultsQueue;
-
       std::vector<std::thread> scanningThreads;
-      std::mutex streamMutex;
 
-      const auto numberOfThreads = std::thread::hardware_concurrency();
+      const auto numberOfThreads = std::min(std::thread::hardware_concurrency(),
+         static_cast<unsigned int>(Constants::Concurrency::THREAD_LIMIT));
 
-      for (unsigned int i = 0; i < numberOfThreads; i++)
+      for (unsigned int i{ 0 }; i < numberOfThreads; ++i)
       {
          scanningThreads.emplace_back(std::thread
          {
-            [&] () noexcept
+            [&taskQueue, &resultQueue, this] () noexcept
             {
-               while (!taskQueue.IsEmpty())
-               {
-                  auto nodeAndPath = NodeAndPath{ };
-                  const auto successfullyPopped = taskQueue.TryPop(nodeAndPath);
-                  if (!successfullyPopped)
-                  {
-                     continue;
-                  }
-
-                  IterateOverDirectoryAndScan(
-                     boost::filesystem::directory_iterator{ nodeAndPath.path },
-                     *nodeAndPath.node);
-
-                  {
-                     std::lock_guard<std::mutex> lock{ streamMutex };
-                     IgnoreUnused(lock);
-
-                     std::cout
-                        << "Finished scanning: "
-                        << nodeAndPath.path.string()
-                        << '\n';
-                  }
-
-                  resultsQueue.Emplace(std::move(nodeAndPath));
-               }
-
-               std::lock_guard<std::mutex> lock{ streamMutex };
-               IgnoreUnused(lock);
-
-               std::cout
-                  << "Thread "
-                  << std::this_thread::get_id()
-                  << " has finished...\n";
+               ProcessQueue(taskQueue, resultQueue);
             }
          });
+      }
+
+      for (auto& nodeAndPath : directoriesAndFiles.second)
+      {
+          std::cout << "Processing File: " << nodeAndPath.path.string() << "\n";
+          ProcessRegularFile(nodeAndPath.path, *nodeAndPath.node);
       }
 
       for (auto& thread : scanningThreads)
@@ -429,7 +447,7 @@ void ScanningWorker::Start()
          thread.join();
       }
 
-      BuildFinalTree(resultsQueue, *theTree);
+      BuildFinalTree(resultQueue, *theTree);
    }, "Scanned Drive in ");
 
    ComputeDirectorySizes(*theTree);
