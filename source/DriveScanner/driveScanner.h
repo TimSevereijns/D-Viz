@@ -38,21 +38,15 @@ class DriveScanner : public QObject
        *
        * @see ScanningWorker::Finished
        *
-       * @param[in] filesScanned    Number of files scanned.
        * @param[in] fileTree        The final tree representing the scanned drive (or a part
        *                            thereof).
        */
-      void HandleCompletion(
-         const std::uintmax_t filesScanned,
-         std::shared_ptr<Tree<VizNode>> fileTree);
+      void HandleCompletion(std::shared_ptr<Tree<VizNode>> fileTree);
 
       /**
        * @brief Handle the ScanningWorker::ProgressUpdate signal.
        *
        * @see ScanningWorker::ProgressUpdate
-       *
-       * @param[in] filesScanned             The number of files scanned.
-       * @param[in] numberOfBytesProcessed   The cumulative size of all files scanned so far.
        */
       void HandleProgressUpdates();
 

@@ -158,6 +158,10 @@ class MainWindow : public QMainWindow
 
       void SetFilePruningComboBoxValue(uintmax_t minimum);
 
+      void ComputeProgress(
+         const std::uintmax_t numberOfFilesScanned,
+         const std::uintmax_t bytesProcessed);
+
       void CreateMenus();
       void CreateFileMenu();
       void CreateViewMenu();
@@ -177,6 +181,8 @@ class MainWindow : public QMainWindow
       bool m_xboxControllerConnected{ false };
 
       int m_sizePruningComboBoxIndex{ 0 };
+
+      std::uint64_t m_occupiedDiskSpace{ 0 };
 
       std::wstring m_searchQuery{ };
 

@@ -10,15 +10,18 @@ void DriveScanner::HandleProgressUpdates()
 {
    const auto filesScanned = m_progress.filesScanned.load();
    const auto numberOfBytesProcessed = m_progress.numberOfBytesProcessed.load();
+
    m_parameters.onProgressUpdateCallback(filesScanned, numberOfBytesProcessed);
 }
 
-void DriveScanner::HandleCompletion(
-   const std::uintmax_t filesScanned,
-   std::shared_ptr<Tree<VizNode>> fileTree)
+void DriveScanner::HandleCompletion(std::shared_ptr<Tree<VizNode>> fileTree)
 {
-   m_parameters.onScanCompletedCallback(filesScanned, fileTree);
+   const auto filesScanned = m_progress.filesScanned.load();
+   const auto numberOfBytesProcessed = m_progress.numberOfBytesProcessed.load();
+
    m_progressUpdateTimer->stop();
+
+   m_parameters.onScanCompletedCallback(filesScanned, numberOfBytesProcessed, fileTree);
 }
 
 void DriveScanner::HandleMessageBox(const QString& message)
@@ -44,17 +47,17 @@ void DriveScanner::StartScanning(const DriveScanningParameters& parameters)
 
    m_progressUpdateTimer->start(250);
 
-   connect(worker, SIGNAL(Finished(const std::uintmax_t, std::shared_ptr<Tree<VizNode>>)),
-      this, SLOT(HandleCompletion(const std::uintmax_t, std::shared_ptr<Tree<VizNode>>)));
+   connect(worker, SIGNAL(Finished(std::shared_ptr<Tree<VizNode>>)),
+      this, SLOT(HandleCompletion(std::shared_ptr<Tree<VizNode>>)));
 
-   connect(worker, SIGNAL(ProgressUpdate(const std::uintmax_t, const std::uintmax_t)),
+   connect(worker, SIGNAL(Finished(std::shared_ptr<Tree<VizNode>>)),
+      worker, SLOT(deleteLater()));
+
+   connect(worker, SIGNAL(ProgressUpdate()),
       this, SLOT(HandleProgressUpdates()));
 
    connect(worker, SIGNAL(ShowMessageBox(const QString&)),
       this, SLOT(HandleMessageBox(const QString&)), Qt::BlockingQueuedConnection);
-
-   connect(worker, SIGNAL(Finished(const std::uintmax_t, std::shared_ptr<Tree<VizNode>>)),
-      worker, SLOT(deleteLater()));
 
    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
    connect(thread, SIGNAL(started()), worker, SLOT(Start()));

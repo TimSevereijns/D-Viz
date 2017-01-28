@@ -12,6 +12,13 @@ TARGET = D-Viz
 TEMPLATE = app
 CONFIG += c++11
 
+QMAKE_LFLAGS_RELEASE+=/MAP
+QMAKE_CFLAGS_RELEASE += /Zi
+QMAKE_LFLAGS_RELEASE +=/debug /opt:ref
+
+QMAKE_CFLAGS_WARN_ON -= -W3
+QMAKE_CFLAGS_WARN_ON += -W4
+
 SOURCES += \
    controller.cpp \
    DataStructs/block.cpp \
@@ -70,6 +77,7 @@ HEADERS  += \
    ThirdParty/Tree.hpp \
    Utilities/colorGradient.hpp \
    Utilities/scopeExit.hpp \
+   Utilities/notAnotherWordCompiler.hpp \
    Viewport/camera.h \
    Viewport/canvasContextMenu.h \
    Viewport/glCanvas.h \

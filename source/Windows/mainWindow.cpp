@@ -18,7 +18,7 @@
 
 namespace
 {
-   auto GetUsedDiskSpace(std::wstring path)
+   std::uint64_t GetUsedDiskSpace(std::wstring path)
    {
       std::replace(std::begin(path), std::end(path), L'/', L'\\');
       path += '\\';
@@ -32,6 +32,9 @@ namespace
          (PULARGE_INTEGER)&totalNumberOfFreeBytes);
 
       assert(wasOperationSuccessful);
+
+      std::cout << "Disk Size:  " << totalNumberOfBytes << std::endl;
+      std::cout << "Free Space: " << totalNumberOfFreeBytes << std::endl;
 
       const auto occupiedSpace = totalNumberOfBytes - totalNumberOfFreeBytes;
       return occupiedSpace;
@@ -325,49 +328,50 @@ void MainWindow::XboxControllerStateChanged(XboxController::State state)
    m_xboxControllerState = std::make_unique<XboxController::State>(std::move(state));
 }
 
+void MainWindow::ComputeProgress(
+   const std::uintmax_t numberOfFilesScanned,
+   const std::uintmax_t bytesProcessed)
+{
+   assert(m_occupiedDiskSpace > 0);
+
+   const auto percentComplete = std::min(99.99,
+      100 * (static_cast<double>(bytesProcessed) / static_cast<double>(m_occupiedDiskSpace)));
+
+   std::wstringstream message;
+   message.imbue(std::locale{ "" });
+   message.precision(2);
+   message
+      << std::fixed
+      << L"Files Scanned: "
+      << numberOfFilesScanned
+      << L"  |  "
+      << percentComplete
+      << L"% Complete";
+
+   SetStatusBarMessage(message.str());
+}
+
 void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
 {
-   const auto occupiedSpace = GetUsedDiskSpace(vizParameters.rootDirectory);
+   m_occupiedDiskSpace = GetUsedDiskSpace(vizParameters.rootDirectory);
 
-   const auto progressHandler = [&, occupiedSpace]
-      (const std::uintmax_t numberOfFilesScanned,
-      const std::uintmax_t bytesProcessed)
+   const auto progressHandler =
+      [this] (const std::uintmax_t numberOfFilesScanned, const std::uintmax_t bytesProcessed)
    {
-      auto percentComplete = 100 *
-         (static_cast<double>(bytesProcessed) / static_cast<double>(occupiedSpace));
-
-      if (percentComplete > 99.99)
-      {
-         percentComplete = 99.99;
-      }
-
-      std::wstringstream message;
-      message.imbue(std::locale{ "" });
-      message.precision(2);
-      message
-         << std::fixed
-         << L"Files Scanned: "
-         << numberOfFilesScanned
-         << L"  |  "
-         << percentComplete
-         << L"% Complete";
-
-      SetStatusBarMessage(message.str());
+      ComputeProgress(numberOfFilesScanned, bytesProcessed);
    };
 
    const auto completionHandler = [&, vizParameters]
       (const std::uintmax_t numberOfFilesScanned,
+      const std::uintmax_t bytesProcessed,
       std::shared_ptr<Tree<VizNode>> scanningResults) mutable
    {
+      ComputeProgress(numberOfFilesScanned, bytesProcessed);
+
       QCursor previousCursor = cursor();
       setCursor(Qt::WaitCursor);
       ON_SCOPE_EXIT{ setCursor(previousCursor); };
       QApplication::processEvents();
-
-      std::wstringstream message;
-      message.imbue(std::locale{ "" });
-      message << std::fixed << L"Total Files Scanned: " << numberOfFilesScanned;
-      SetStatusBarMessage(message.str());
 
       AskUserToLimitFileSize(numberOfFilesScanned, vizParameters);
       m_controller.SetVisualizationParameters(vizParameters);
@@ -390,7 +394,6 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
 
    m_controller.AllowUserInteractionWithModel(false);
    m_ui->showBreakdownButton->setEnabled(false);
-
 
    m_scanner.StartScanning(scanningParameters);
 }

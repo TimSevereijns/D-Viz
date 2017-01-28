@@ -4,6 +4,8 @@
 #include "../ThirdParty/Stopwatch.hpp"
 #include "../ThirdParty/ThreadSafeQueue.hpp"
 
+#include "../Utilities/notAnotherWordCompiler.hpp"
+
 #include <iostream>
 #include <memory>
 #include <mutex>
@@ -158,7 +160,7 @@ namespace
       if (errorCode)
       {
          std::cout << "Could not create directory iterator." << std::endl;
-         return {};
+         return { };
       }
 
       std::vector<NodeAndPath> filesToProcess;
@@ -360,7 +362,7 @@ void ScanningWorker::Start()
       return;
    }
 
-   emit ProgressUpdate(0, 0);
+   emit ProgressUpdate();
 
    Stopwatch<std::chrono::seconds>([&]
    {
@@ -400,6 +402,8 @@ void ScanningWorker::Start()
 
                   {
                      std::lock_guard<std::mutex> lock{ streamMutex };
+                     IgnoreUnused(lock);
+
                      std::cout
                         << "Finished scanning: "
                         << nodeAndPath.path.string()
@@ -410,6 +414,8 @@ void ScanningWorker::Start()
                }
 
                std::lock_guard<std::mutex> lock{ streamMutex };
+               IgnoreUnused(lock);
+
                std::cout
                   << "Thread "
                   << std::this_thread::get_id()
@@ -429,5 +435,5 @@ void ScanningWorker::Start()
    ComputeDirectorySizes(*theTree);
    PruneEmptyFilesAndDirectories(*theTree);
 
-   emit Finished(m_progress.filesScanned.load(), theTree);
+   emit Finished(theTree);
 }

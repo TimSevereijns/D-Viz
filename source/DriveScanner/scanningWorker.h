@@ -57,22 +57,14 @@ class ScanningWorker : public QObject
       /**
        * @brief Signals that the drive scanning has finished.
        *
-       * @param[in] filesScanned    The total number of files that were scanned.
        * @param[in] fileTree        A pointer to the final tree representing the scanned drive.
        */
-      void Finished(
-         const std::uintmax_t filesScanned,
-         std::shared_ptr<Tree<VizNode>> fileTree);
+      void Finished(std::shared_ptr<Tree<VizNode>> fileTree);
 
       /**
        * @brief Signals drive scanning progress updates.
-       *
-       * @param[in] filesScanned    The number of files scanned so far.
-       * @param[in] numberOfBytesProcessed   The cumulative size of all files scanned so far.
        */
-      void ProgressUpdate(
-         const std::uintmax_t filesScanned,
-         const std::uintmax_t nnumberOfBytesProcessed);
+      void ProgressUpdate();
 
       /**
        * @brief Allows for cross-thread signaling to show the user a standard Qt message box.
