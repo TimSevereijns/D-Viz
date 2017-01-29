@@ -100,7 +100,6 @@ namespace
       const Qt3DRender::QRay3D& ray,
       const Block& block)
    {
-      // @todo Replace with a stack allocated container.
       std::vector<QVector3D> allIntersections;
 
       const auto blockOrigin = block.GetOrigin();

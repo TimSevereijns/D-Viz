@@ -21,10 +21,11 @@ namespace
    std::mutex streamMutex;
 
    /**
-    * @brief PruneNodes removes nodes whose corresponding file or directory size is zero. This is
-    * often necessary because a directory may contain a single other directory within it that is
-    * empty. In such a case, the outer directory has a size of zero, but filesystem::is_empty
-    * will still have reported this directory as being non-empty.
+    * @brief Rremoves nodes whose corresponding file or directory size is zero. This is often
+    * necessary because a directory may contain a single other directory within it that is
+    * empty. In such a case, the outer directory has a size of zero, but
+    * std::experimental::filesystem::is_empty will still have reported this directory as being
+    * non-empty.
     *
     * @param[in, out] tree           The tree to be pruned.
     */
@@ -51,8 +52,8 @@ namespace
    }
 
    /**
-    * @brief ComputeDirectorySizes is a post-processing step that iterates through the tree and
-    * computes the size of all directories.
+    * @brief Performs a post-processing step that iterates through the tree and computes the size
+    * of all directories.
     *
     * @param[in, out] tree          The tree whose nodes need their directory sizes computed.
     */
@@ -77,9 +78,9 @@ namespace
    }
 
    /**
-    * @brief PreprocessTargetFiles will partition the files to be scanned such that directories
-    * come first, followed by the regular files. Any path that could not be accessed, or that points
-    * to either an empty directory or a symbolic link, will be removed from the vector.
+    * @brief Partitions the files to be scanned such that directories come first, followed by the
+    * regular files. Any path that could not be accessed, or that points to either an empty
+    * directory or a symbolic link, will be removed from the vector.
     *
     * @param[in] filesToProcess     All potential files to be scanned.
     *
@@ -131,7 +132,7 @@ namespace
          }
          catch (...)
          {
-            std::cout << "Fuck\n";
+            std::cout << "Exception Thrown.\n";
          }
 
          return false;
@@ -143,7 +144,7 @@ namespace
    }
 
    /**
-    * @brief CreateTaskItems
+    * @brief Creates two vectors full of tasks in need of processing.
     *
     * @param[in] path               The initial enty path at which to start the scan.
     *
@@ -181,7 +182,8 @@ namespace
       {
          nodeAndPath.node->GetData().file.name = nodeAndPath.path.filename().wstring();
          nodeAndPath.node->GetData().file.size = std::uint64_t{ 0 };
-         nodeAndPath.node->GetData().file.type = std::experimental::filesystem::is_directory(nodeAndPath.path)
+         nodeAndPath.node->GetData().file.type =
+            std::experimental::filesystem::is_directory(nodeAndPath.path)
             ? FileType::DIRECTORY
             : FileType::REGULAR;
       }
@@ -194,7 +196,7 @@ namespace
    }
 
    /**
-    * @brief BuildFinalTree puts all the pieces back together again...
+    * @brief Puts all the scanning result pieces back together again...
     *
     * @param[in] queue              A queue containing the results of the scanning tasks.
     * @param[out] fileTree          The tree into which the scan results should be inserted.
@@ -323,7 +325,8 @@ void ScanningWorker::ScanRecursively(
    {
       ProcessRegularFile(path, treeNode);
    }
-   else if (std::experimental::filesystem::is_directory(path) && !std::experimental::filesystem::is_symlink(path))
+   else if (std::experimental::filesystem::is_directory(path)
+      && !std::experimental::filesystem::is_symlink(path))
    {
       try
       {

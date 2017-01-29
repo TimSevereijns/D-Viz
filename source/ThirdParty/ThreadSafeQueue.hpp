@@ -36,7 +36,7 @@ public:
    void WaitAndPop(Type& data)
    {
       std::unique_lock<decltype(m_mutex)> lock{ m_mutex };
-      m_conditionVariable.wait(lock, [&] { return !m_queue.empty(); });
+      m_conditionVariable.wait(lock, [this] { return !m_queue.empty(); });
 
       data = std::move(m_queue.front());
 

@@ -1,26 +1,26 @@
 /**
- * The MIT License (MIT)
- *
- * Copyright (c) 2016 Tim Severeijns
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+* The MIT License (MIT)
+*
+* Copyright (c) 2016 Tim Severeijns
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
 
 #pragma once
 
@@ -31,13 +31,13 @@
 #include <string>
 #include <typeinfo>
 
-namespace
+namespace StopwatchInternals
 {
    template<typename Type>
    struct TypeName
    {
       // Evaluated at runtime:
-      static const decltype(typeid(Type).name()) value;
+      static decltype(typeid(Type).name()) value;
    };
 
    template<typename Type>
@@ -97,7 +97,7 @@ template<typename ChronoType>
 class Stopwatch
 {
 public:
-   using CallbackType = std::function<void (ChronoType, std::string)>;
+   using CallbackType = std::function<void(ChronoType, std::string)>;
 
    /**
    * @brief This Stopwatch constructor executes and times the code encapsulated within the
@@ -119,7 +119,7 @@ public:
 
       if (callback)
       {
-         callback(m_elapsedTime, std::move(TypeName<ChronoType>::value));
+         callback(m_elapsedTime, std::move(StopwatchInternals::TypeName<ChronoType>::value));
       }
    }
 
@@ -148,7 +148,7 @@ public:
          << message
          << m_elapsedTime.count()
          << " "
-         << TypeName<ChronoType>::value
+         << StopwatchInternals::TypeName<ChronoType>::value
          << "."
          << std::endl;
    }
@@ -169,9 +169,17 @@ public:
    /**
    * @returns The elapsed time in ChronoType units.
    */
-   ChronoType GetElapsedTime()
+   ChronoType GetElapsedTime() const
    {
       return m_elapsedTime;
+   }
+
+   /**
+   * @returns A character array containing the chrono resolution name.
+   */
+   constexpr auto GetUnitsAsCharacterArray() const
+   {
+      return StopwatchInternals::TypeName<ChronoType>::value;
    }
 
 private:

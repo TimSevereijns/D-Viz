@@ -82,13 +82,11 @@ class Controller
       /**
        * @brief Searches the treemap for the search query contained within the search box.
        *
-       * @todo Make this more generic, and pass in the search query.
-       *
-       * @param[in] searchQuery           String to search against.
-       * @param[in] deselectionCallback   Callback to clear the canvas of selection highlights.
-       * @param[in] selectionCallback     Callback to highlight matching nodes on the canvas.
-       * @param[in] searchFiles           Pass in true to search files.
-       * @param[in] searchDirectories     Pass in true to search directories.
+       * @param[in] searchQuery              String to search against.
+       * @param[in] deselectionCallback      Callback to clear the canvas of selection highlights.
+       * @param[in] selectionCallback        Callback to highlight matching nodes on the canvas.
+       * @param[in] shouldSearchFiles        Pass in true to search files.
+       * @param[in] shouldSearchDirectories  Pass in true to search directories.
        */
       void SearchTreeMap(
          const std::wstring& searchQuery,
@@ -101,7 +99,7 @@ class Controller
        * @brief Highlights all nodes in the tree whose extension matches that of the passed in node.
        *
        * @param[in] targetNode      The node whose extension is to be highlighted.
-       * @param[in] callbacks       @todo
+       * @param[in] callback        Callback to highlight matching nodes on the canvas.
        */
       void HighlightAllMatchingExtensions(
          const TreeNode<VizNode>& targetNode,
@@ -111,7 +109,7 @@ class Controller
        * @brief Highlights all nodes that descendant from the passed in node.
        *
        * @param[in] node            The node whose descendants to highlight.
-       * @param[in] callbacks       @todo
+       * @param[in] callback        Callback to highlight matching nodes on the canvas.
        */
       void HighlightDescendants(
          const TreeNode<VizNode>& node,
@@ -121,7 +119,7 @@ class Controller
        * @brief Highlights all nodes that are ancestors of the passed in node.
        *
        * @param[in] node            The node whose ancestors are to be highlighted.
-       * @param[in] callbacks       @todo
+       * @param[in] callback        Callback to highlight matching nodes on the canvas.
        */
       void Controller::HighlightAncestors(
          const TreeNode<VizNode>& node,
@@ -137,7 +135,7 @@ class Controller
        * @brief Clears all highlighted nodes, and restores the color of any highlighted nodes back
        * to its unhighlighted color.
        *
-       * @param[in] callbacks       @todo
+       * @param[in] callback        Callback to highlight matching nodes on the canvas.
        * @param[in] clearSelected   Pass in true if the primary selection target is to be cleared.
        */
       inline void ClearHighlightedNodes(
@@ -147,7 +145,8 @@ class Controller
       /**
        * @brief Selects the passed in node.
        *
-       * @param[in] node            A pointer to the node to be selected.
+       * @param[in] node               A pointer to the node to be selected.
+       * @param[in] selectorCallback   Callback to identify matching nodes.
        */
       void SelectNodeAndUpdateStatusBar(
          const TreeNode<VizNode>* const node,
@@ -159,9 +158,10 @@ class Controller
        *
        * @todo Remove the camera object, and pass in the camera's position instead.
        *
-       * @param[in] camera          The camera from which the ray was shot.
-       * @param[in] ray             The picking ray.
-       * @param[in] callbacks       @todo
+       * @param[in] camera              The camera from which the ray was shot.
+       * @param[in] ray                 The picking ray.
+       * @param[in] deselectionCallback Callback to clear the canvas of selection highlights.
+       * @param[in] selectionCallback   Callback to highlight matching nodes on the canvas.
        */
       void SelectNodeViaRay(
          const Camera& camera,
