@@ -274,13 +274,13 @@ void ScanningWorker::IterateOverDirectoryAndScan(
    const auto end = std::experimental::filesystem::directory_iterator{ };
    while (itr != end)
    {
-      ScanRecursively(itr->path(), treeNode);
+      ProcessDirectory(itr->path(), treeNode);
 
       itr++;
    }
 }
 
-void ScanningWorker::ProcessRegularFile(
+void ScanningWorker::ProcessFile(
    const std::experimental::filesystem::path& path,
    TreeNode<VizNode>& treeNode) noexcept
 {
@@ -305,7 +305,7 @@ void ScanningWorker::ProcessRegularFile(
     m_progress.filesScanned.fetch_add(1);
 }
 
-void ScanningWorker::ScanRecursively(
+void ScanningWorker::ProcessDirectory(
    const std::experimental::filesystem::path& path,
    TreeNode<VizNode>& treeNode)
 {
@@ -323,7 +323,7 @@ void ScanningWorker::ScanRecursively(
 
    if (isRegularFile)
    {
-      ProcessRegularFile(path, treeNode);
+      ProcessFile(path, treeNode);
    }
    else if (std::experimental::filesystem::is_directory(path)
       && !std::experimental::filesystem::is_symlink(path))
@@ -385,7 +385,7 @@ void ScanningWorker::ProcessQueue(
          std::cout
             << "Finished scanning: "
             << nodeAndPath.path.string()
-            << '\n';
+            << std::endl;
       }
 
       resultsQueue.Emplace(std::move(nodeAndPath));
@@ -397,7 +397,8 @@ void ScanningWorker::ProcessQueue(
    std::cout
       << "Thread "
       << std::this_thread::get_id()
-      << " has finished...\n";
+      << " has finished..."
+      << std::endl;
 }
 
 void ScanningWorker::Start()
@@ -442,8 +443,10 @@ void ScanningWorker::Start()
       for (auto& nodeAndPath : directoriesAndFiles.second)
       {
           std::cout << "Processing File: " << nodeAndPath.path.string() << "\n";
-          ProcessRegularFile(nodeAndPath.path, *nodeAndPath.node);
+          ProcessFile(nodeAndPath.path, *nodeAndPath.node);
       }
+
+      std::cout << std::flush;
 
       for (auto& thread : scanningThreads)
       {

@@ -103,18 +103,6 @@ class ScanningWorker : public QObject
          ThreadSafeQueue<NodeAndPath>& resultsQueue) noexcept;
 
       /**
-       * @brief Helper function to process a single file.
-       *
-       * @note This function assumes the path is valid and accessible.
-       *
-       * @param[in] path            The location on disk to scan.
-       * @param[in] fileNode        The TreeNode in Tree to append newly discoved files to.
-       */
-      void ProcessRegularFile(
-         const std::experimental::filesystem::path& path,
-         TreeNode<VizNode>& treeNode) noexcept;
-
-      /**
        * @brief Helper function to facilitate exception-free iteration over a directory.
        *
        * @param[in] itr             Reference to the iterator to iterate over.
@@ -125,12 +113,24 @@ class ScanningWorker : public QObject
          TreeNode<VizNode>& treeNode) noexcept;
 
       /**
-       * @brief Performs a recursive depth-first exploration of the file system.
+       * @brief Helper function to process a single file.
        *
-       * @param[in] path            The location on disk to scan.
-       * @param[in] fileNode        The TreeNode in Tree to append newly discoved files to.
+       * @note This function assumes the path is valid and accessible.
+       *
+       * @param[in] path            The path to the file.
+       * @param[in] fileNode        The TreeNode in Tree to append newly discovered files to.
        */
-      void ScanRecursively(
+      void ProcessFile(
+         const std::experimental::filesystem::path& path,
+         TreeNode<VizNode>& treeNode) noexcept;
+
+      /**
+       * @brief Helper function to process a single file
+       *
+       * @param[in] path            The path to the directory.
+       * @param[in] fileNode        The TreeNode in Tree to append newly discovered files to.
+       */
+      void ProcessDirectory(
          const std::experimental::filesystem::path& path,
          TreeNode<VizNode>& fileNode);
 
