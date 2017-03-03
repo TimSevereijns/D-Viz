@@ -26,8 +26,8 @@ namespace
    std::mutex streamMutex;
 
    /**
-    * @brief Rremoves nodes whose corresponding file or directory size is zero. This is often
-    * necessary because a directory may contain a single other directory within it that is
+    * @brief Removes nodes whose corresponding file or directory size is zero. This is often
+    * necessary because a directory may contain only a single other directory within it that is
     * empty. In such a case, the outer directory has a size of zero, but
     * std::experimental::filesystem::is_empty will still have reported this directory as being
     * non-empty.
@@ -136,12 +136,12 @@ namespace
          }
          catch (...)
          {
+#ifdef Q_OS_WIN
             std::cout
                << "Falling back on the Win API for: \""
                << nodeAndPath.path.string()
                << "\"\n";
 
-#ifdef Q_OS_WIN
             WIN32_FIND_DATA fileData;
             const HANDLE fileHandle = FindFirstFileW(nodeAndPath.path.wstring().data(), &fileData);
             if (fileHandle == INVALID_HANDLE_VALUE)
@@ -307,9 +307,12 @@ void ScanningWorker::ProcessFile(
       }
 
       // First we force the high-word to actually be a 64-bit value, then we shift it over by
-      // 32 bits, and then finally we OR in low-word. Yes, the Microsoft documentation seen here
-      // is wrong: https://msdn.microsoft.com/en-us/library/windows/desktop/aa365740(v=vs.85).aspx
-      // Credit for this solution to Mats Petersson: http://stackoverflow.com/a/15209394/694056.
+      // 32 bits, and then finally we OR in the low-word. Yes, the Microsoft documentation seen
+      // here is wrong: 
+      //	   https://msdn.microsoft.com/en-us/library/windows/desktop/aa365740(v=vs.85).aspx
+      //
+      // Credit for this solution goes to Mats Petersson:
+      //   http://stackoverflow.com/a/15209394/694056.
       constexpr auto highWordShift = sizeof(fileData.nFileSizeLow) * 8;
       fileSize = (static_cast<std::uintmax_t>(fileData.nFileSizeHigh) << highWordShift)
          | fileData.nFileSizeLow;
@@ -448,7 +451,7 @@ void ScanningWorker::Start()
 
    emit ProgressUpdate();
 
-   Stopwatch<std::chrono::seconds>([&]
+   Stopwatch<std::chrono::seconds>([&] () noexcept
    {
       std::pair<std::vector<NodeAndPath>, std::vector<NodeAndPath>> directoriesAndFiles =
          CreateTaskItems(m_parameters.path);
