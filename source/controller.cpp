@@ -443,13 +443,13 @@ void Controller::ShowInFileExplorer(const TreeNode<VizNode>& node)
    CoInitializeEx(NULL, COINIT_MULTITHREADED);
    ON_SCOPE_EXIT noexcept { CoUninitialize(); };
 
+   std::wstring filePath = Controller::ResolveCompleteFilePath(node);
+
    assert(std::none_of(std::begin(filePath), std::end(filePath),
       [] (const auto character)
    {
       return character == L'/';
    }));
-
-   std::wstring filePath = Controller::ResolveCompleteFilePath(node);
 
    auto* idList = ILCreateFromPath(filePath.c_str());
    if (idList)

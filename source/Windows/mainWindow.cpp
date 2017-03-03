@@ -33,8 +33,9 @@ namespace
 
       assert(wasOperationSuccessful);
 
-      std::cout << "Disk Size:  " << totalNumberOfBytes << std::endl;
-      std::cout << "Free Space: " << totalNumberOfFreeBytes << std::endl;
+      std::cout << "Disk Size:  " << totalNumberOfBytes << "\n";
+      std::cout << "Free Space: " << totalNumberOfFreeBytes << "\n";
+      std::cout << std::flush;
 
       const auto occupiedSpace = totalNumberOfBytes - totalNumberOfFreeBytes;
       return occupiedSpace;

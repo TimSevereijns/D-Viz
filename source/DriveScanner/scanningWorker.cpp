@@ -16,6 +16,11 @@
 #include <thread>
 #include <vector>
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+#include <fileapi.h>
+#endif
+
 namespace
 {
    std::mutex streamMutex;
@@ -127,12 +132,26 @@ namespace
 
          try
          {
-            std::cout << "Whoops: " << nodeAndPath.path.string() << "\n";
-            std::cout << std::experimental::filesystem::file_size(nodeAndPath.path) << std::endl;
+            std::cout << std::experimental::filesystem::file_size(nodeAndPath.path) << "\n";
          }
          catch (...)
          {
-            std::cout << "Exception Thrown.\n";
+            std::cout
+               << "Falling back on the WIN API for: \""
+               << nodeAndPath.path.string()
+               << "\"\n";
+
+#ifdef Q_OS_WIN
+            WIN32_FIND_DATA fileData;
+            const HANDLE fileHandle = FindFirstFileW(nodeAndPath.path.wstring().data(), &fileData);
+            if (fileHandle == INVALID_HANDLE_VALUE)
+            {
+               std::cout << "Invalid File Handle!\n";
+               return false;
+            }
+
+            return true;
+#endif
          }
 
          return false;
@@ -212,7 +231,7 @@ namespace
          if (!successfullyPopped)
          {
             assert(false);
-            continue;
+            break;
          }
 
          fileTree.GetHead()->AppendChild(*nodeAndPath.node);
@@ -267,42 +286,54 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
    return std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
 }
 
-void ScanningWorker::IterateOverDirectoryAndScan(
-   std::experimental::filesystem::directory_iterator& itr,
-   TreeNode<VizNode>& treeNode) noexcept
-{
-   const auto end = std::experimental::filesystem::directory_iterator{ };
-   while (itr != end)
-   {
-      ScanRecursively(itr->path(), treeNode);
-
-      itr++;
-   }
-}
-
 void ScanningWorker::ProcessRegularFile(
    const std::experimental::filesystem::path& path,
    TreeNode<VizNode>& treeNode) noexcept
 {
-    const auto fileSize = std::experimental::filesystem::file_size(path);
-    if (fileSize == 0)
-    {
-       return;
-    }
+   std::uintmax_t fileSize{ 0 };
 
-    m_progress.numberOfBytesProcessed.fetch_add(fileSize);
+   try
+   {
+      fileSize = std::experimental::filesystem::file_size(path);
+   }
+   catch (...)
+   {
+#ifdef Q_OS_WIN
+      WIN32_FIND_DATA fileData;
+      const HANDLE fileHandle = FindFirstFileW(path.wstring().data(), &fileData);
+      if (fileHandle == INVALID_HANDLE_VALUE)
+      {
+         return;
+      }
 
-    const FileInfo fileInfo
-    {
-       path.filename().stem().wstring(),
-       path.filename().extension().wstring(),
-       fileSize,
-       FileType::REGULAR
-    };
+      // First we force the high-word to actually be a 64-bit value, then we shift it over by
+      // 32 bits, and then finally we OR in low-word. Yes, the Microsoft documentation seen here
+      // is wrong: https://msdn.microsoft.com/en-us/library/windows/desktop/aa365740(v=vs.85).aspx
+      // Credit for this solution to Mats Petersson: http://stackoverflow.com/a/15209394/694056.
+      constexpr auto highWordShift = sizeof(fileData.nFileSizeLow) * 8;
+      fileSize = (static_cast<std::uintmax_t>(fileData.nFileSizeHigh) << highWordShift)
+         | fileData.nFileSizeLow;
+#endif
+   }
 
-    treeNode.AppendChild(VizNode{ fileInfo });
+   if (fileSize == 0)
+   {
+      return;
+   }
 
-    m_progress.filesScanned.fetch_add(1);
+   m_progress.numberOfBytesProcessed.fetch_add(fileSize);
+
+   const FileInfo fileInfo
+   {
+      path.filename().stem().wstring(),
+      path.filename().extension().wstring(),
+      fileSize,
+      FileType::REGULAR
+   };
+
+   treeNode.AppendChild(VizNode{ fileInfo });
+
+   m_progress.filesScanned.fetch_add(1);
 }
 
 void ScanningWorker::ScanRecursively(
@@ -361,6 +392,19 @@ void ScanningWorker::ScanRecursively(
    }
 }
 
+void ScanningWorker::IterateOverDirectoryAndScan(
+   std::experimental::filesystem::directory_iterator& itr,
+   TreeNode<VizNode>& treeNode) noexcept
+{
+   const auto end = std::experimental::filesystem::directory_iterator{ };
+   while (itr != end)
+   {
+      ScanRecursively(itr->path(), treeNode);
+
+      itr++;
+   }
+}
+
 void ScanningWorker::ProcessQueue(
    ThreadSafeQueue<NodeAndPath>& taskQueue,
    ThreadSafeQueue<NodeAndPath>& resultsQueue) noexcept
@@ -371,7 +415,7 @@ void ScanningWorker::ProcessQueue(
       const auto successfullyPopped = taskQueue.TryPop(nodeAndPath);
       if (!successfullyPopped)
       {
-         continue;
+         break;
       }
 
       IterateOverDirectoryAndScan(
@@ -382,10 +426,7 @@ void ScanningWorker::ProcessQueue(
          std::lock_guard<std::mutex> lock{ streamMutex };
          IgnoreUnused(lock);
 
-         std::cout
-            << "Finished scanning: "
-            << nodeAndPath.path.string()
-            << '\n';
+         std::cout << "Finished scanning: \"" << nodeAndPath.path.string() << "\"\n";
       }
 
       resultsQueue.Emplace(std::move(nodeAndPath));
@@ -394,10 +435,7 @@ void ScanningWorker::ProcessQueue(
    std::lock_guard<std::mutex> lock{ streamMutex };
    IgnoreUnused(lock);
 
-   std::cout
-      << "Thread "
-      << std::this_thread::get_id()
-      << " has finished...\n";
+   std::cout << "Thread " << std::this_thread::get_id() << " has finished...\n";
 }
 
 void ScanningWorker::Start()
@@ -425,7 +463,7 @@ void ScanningWorker::Start()
 
       std::vector<std::thread> scanningThreads;
 
-      const auto numberOfThreads = std::min(std::thread::hardware_concurrency(),
+      const auto numberOfThreads = (std::min)(std::thread::hardware_concurrency(),
          static_cast<unsigned int>(Constants::Concurrency::THREAD_LIMIT));
 
       for (unsigned int i{ 0 }; i < numberOfThreads; ++i)
@@ -441,8 +479,7 @@ void ScanningWorker::Start()
 
       for (auto& nodeAndPath : directoriesAndFiles.second)
       {
-          std::cout << "Processing File: " << nodeAndPath.path.string() << "\n";
-          ProcessRegularFile(nodeAndPath.path, *nodeAndPath.node);
+          ProcessRegularFile(nodeAndPath.path, *theTree->GetHead());
       }
 
       for (auto& thread : scanningThreads)
