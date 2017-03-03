@@ -110,9 +110,19 @@ class ScanningWorker : public QObject
        * @param[in] path            The location on disk to scan.
        * @param[in] fileNode        The TreeNode in Tree to append newly discoved files to.
        */
-      void ProcessRegularFile(
+      void ProcessFile(
          const std::experimental::filesystem::path& path,
          TreeNode<VizNode>& treeNode) noexcept;
+
+      /**
+       * @brief Performs a recursive depth-first exploration of the file system.
+       *
+       * @param[in] path            The location on disk to scan.
+       * @param[in] fileNode        The TreeNode in Tree to append newly discoved files to.
+       */
+      void ProcessDirectory(
+         const std::experimental::filesystem::path& path,
+         TreeNode<VizNode>& fileNode);
 
       /**
        * @brief Helper function to facilitate exception-free iteration over a directory.
@@ -123,16 +133,6 @@ class ScanningWorker : public QObject
       inline void IterateOverDirectoryAndScan(
          std::experimental::filesystem::directory_iterator& itr,
          TreeNode<VizNode>& treeNode) noexcept;
-
-      /**
-       * @brief Performs a recursive depth-first exploration of the file system.
-       *
-       * @param[in] path            The location on disk to scan.
-       * @param[in] fileNode        The TreeNode in Tree to append newly discoved files to.
-       */
-      void ScanRecursively(
-         const std::experimental::filesystem::path& path,
-         TreeNode<VizNode>& fileNode);
 
       std::shared_ptr<Tree<VizNode>> CreateTreeAndRootNode();
 

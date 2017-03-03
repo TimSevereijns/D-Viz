@@ -137,7 +137,7 @@ namespace
          catch (...)
          {
             std::cout
-               << "Falling back on the WIN API for: \""
+               << "Falling back on the Win API for: \""
                << nodeAndPath.path.string()
                << "\"\n";
 
@@ -286,7 +286,7 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
    return std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
 }
 
-void ScanningWorker::ProcessRegularFile(
+void ScanningWorker::ProcessFile(
    const std::experimental::filesystem::path& path,
    TreeNode<VizNode>& treeNode) noexcept
 {
@@ -336,7 +336,7 @@ void ScanningWorker::ProcessRegularFile(
    m_progress.filesScanned.fetch_add(1);
 }
 
-void ScanningWorker::ScanRecursively(
+void ScanningWorker::ProcessDirectory(
    const std::experimental::filesystem::path& path,
    TreeNode<VizNode>& treeNode)
 {
@@ -354,7 +354,7 @@ void ScanningWorker::ScanRecursively(
 
    if (isRegularFile)
    {
-      ProcessRegularFile(path, treeNode);
+      ProcessFile(path, treeNode);
    }
    else if (std::experimental::filesystem::is_directory(path)
       && !std::experimental::filesystem::is_symlink(path))
@@ -399,7 +399,7 @@ void ScanningWorker::IterateOverDirectoryAndScan(
    const auto end = std::experimental::filesystem::directory_iterator{ };
    while (itr != end)
    {
-      ScanRecursively(itr->path(), treeNode);
+      ProcessDirectory(itr->path(), treeNode);
 
       itr++;
    }
@@ -426,7 +426,7 @@ void ScanningWorker::ProcessQueue(
          std::lock_guard<std::mutex> lock{ streamMutex };
          IgnoreUnused(lock);
 
-         std::cout << "Finished scanning: \"" << nodeAndPath.path.string() << "\"\n";
+         std::cout << "Finished scanning: \"" << nodeAndPath.path.string() << "\"" << std::endl;
       }
 
       resultsQueue.Emplace(std::move(nodeAndPath));
@@ -435,7 +435,7 @@ void ScanningWorker::ProcessQueue(
    std::lock_guard<std::mutex> lock{ streamMutex };
    IgnoreUnused(lock);
 
-   std::cout << "Thread " << std::this_thread::get_id() << " has finished...\n";
+   std::cout << "Thread " << std::this_thread::get_id() << " has finished..." << std::endl;
 }
 
 void ScanningWorker::Start()
@@ -479,7 +479,7 @@ void ScanningWorker::Start()
 
       for (auto& nodeAndPath : directoriesAndFiles.second)
       {
-          ProcessRegularFile(nodeAndPath.path, *theTree->GetHead());
+          ProcessFile(nodeAndPath.path, *theTree->GetHead());
       }
 
       for (auto& thread : scanningThreads)
