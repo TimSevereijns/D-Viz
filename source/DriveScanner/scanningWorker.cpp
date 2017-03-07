@@ -26,55 +26,56 @@ namespace
    std::mutex streamMutex;
 
    /**
-    * @brief Use the `FindFirstFileW(...)` function to see if the given file path is accessible.
+    * @brief Use the `FindFirstFileW(...)` function to retrieve the file size.
+    *
+    * The `std::experimental::filesystem::file_size(...)` function uses a different native function
+    * to get at the file size for a given file, and this function (while probably faster than
+    * `FindFirstFileW(...)`) has a tendency to throw. If such exceptional behaviour were to occur,
+    * then this function can be used to hopefully still get at the file size.
     *
     * @param path[in]               The path to the troublesome file.
     *
-    * @returns True if the file is accessible and false otherwise.
+    * @returns The size of the file if it's accessible, and zero otherwise.
     */
-   bool ProbeFileWithWinAPI(const std::wstring& path)
-   {
-#ifdef Q_OS_WIN
-      std::wcout << "Falling back on the Win API for: \"" << path << std::endl;
-
-      WIN32_FIND_DATA fileData;
-      const HANDLE fileHandle = FindFirstFileW(path.data(), &fileData);
-      if (fileHandle == INVALID_HANDLE_VALUE)
-      {
-         std::cout << "Invalid File Handle!" << std::endl;
-         return false;
-      }
-
-      return true;
-#elif
-      return false;
-#endif
-   }
-
-   /**
-    * @brief Use the `FindFirstFileW(...)` function to see if the given file path is accessible.
-    *
-    * @param path[in]               The path to the troublesome file.
-    *
-    * @returns
-    */
-   std::uintmax_t GetFileSizeUsingWinAPI(const std::wstring& path)
+   std::uintmax_t GetFileSizeUsingWinAPI(const std::experimental::filesystem::path& path)
    {
       std::uintmax_t fileSize{ 0 };
 
 #ifdef Q_OS_WIN
       WIN32_FIND_DATA fileData;
-      const HANDLE fileHandle = FindFirstFileW(path.data(), &fileData);
+      const HANDLE fileHandle = FindFirstFileW(path.wstring().data(), &fileData);
       if (fileHandle == INVALID_HANDLE_VALUE)
       {
          return 0;
       }
 
-      constexpr auto highWordShift = sizeof(fileData.nFileSizeLow) * 8;
-      fileSize = (static_cast<std::uintmax_t>(fileData.nFileSizeHigh) << highWordShift)
-         | fileData.nFileSizeLow;
+      const auto highWord = static_cast<std::uintmax_t>(fileData.nFileSizeHigh);
+      fileSize = (highWord << sizeof(fileData.nFileSizeLow) * 8) | fileData.nFileSizeLow;
 #endif
+
       return fileSize;
+   }
+
+   /**
+    * @brief Helper function to safely wrap the retrieval of a file's size.
+    *
+    * @param path[in]               The path to the file.
+    *
+    * @return The size of the file if it's accessible, and zero otherwise.
+    */
+   std::uintmax_t ComputeFileSize(const std::experimental::filesystem::path& path) noexcept
+   {
+      try
+      {
+         assert(!std::experimental::filesystem::is_directory(path));
+
+         return std::experimental::filesystem::file_size(path);
+      }
+      catch (...)
+      {
+         std::wcout << "Falling back on the Win API for: \"" << path.wstring() << std::endl;
+         return GetFileSizeUsingWinAPI(path);
+      }
    }
 
    /**
@@ -135,71 +136,6 @@ namespace
    }
 
    /**
-    * @brief Partitions the files to be scanned such that directories come first, followed by the
-    * regular files. Any path that could not be accessed, or that points to either an empty
-    * directory or a symbolic link, will be removed from the vector.
-    *
-    * @param[in] filesToProcess     All potential files to be scanned.
-    *
-    * @returns An iterator to the first file that is not a directory.
-    */
-   auto PreprocessTargetFiles(std::vector<NodeAndPath>& filesToProcess)
-   {
-      const auto firstNonDirectory =
-         std::partition(std::begin(filesToProcess), std::end(filesToProcess),
-         [] (const auto& nodeAndPath) noexcept
-      {
-         try
-         {
-            if (std::experimental::filesystem::is_directory(nodeAndPath.path)
-               && !std::experimental::filesystem::is_symlink(nodeAndPath.path)
-               && !std::experimental::filesystem::is_empty(nodeAndPath.path))
-            {
-               return true;
-            }
-         }
-         catch (...)
-         {
-            return false;
-         }
-
-         return false;
-      });
-
-      const auto firstInvalidFile =
-         std::partition(firstNonDirectory, std::end(filesToProcess),
-         [] (const auto& nodeAndPath) noexcept
-      {
-         try
-         {
-            if (std::experimental::filesystem::is_regular_file(nodeAndPath.path))
-            {
-               return true;
-            }
-         }
-         catch (...)
-         {
-            return false;
-         }
-
-         try
-         {
-            std::cout << std::experimental::filesystem::file_size(nodeAndPath.path) << "\n";
-         }
-         catch (...)
-         {
-            return ProbeFileWithWinAPI(nodeAndPath.path.wstring());
-         }
-
-         return false;
-      });
-
-      filesToProcess.erase(firstInvalidFile, std::end(filesToProcess));
-
-      return firstNonDirectory;
-   }
-
-   /**
     * @brief Creates two vectors full of tasks in need of processing.
     *
     * @param[in] path               The initial enty path at which to start the scan.
@@ -218,37 +154,48 @@ namespace
          return { };
       }
 
+      std::vector<NodeAndPath> directoriesToProcess;
       std::vector<NodeAndPath> filesToProcess;
 
       const auto end = std::experimental::filesystem::directory_iterator{ };
       while (itr != end)
       {
-         // The nodes are default constructed so that we don't have to actually access any of the
-         // filesystem paths yet. The nodes are fleshed out once we've had a chance to preprocess
-         // the top-level files and to prune anything that might be problematic.
+         const auto path = itr->path();
 
-         auto nodeAndPath = NodeAndPath{ std::make_unique<TreeNode<VizNode>>(), itr->path() };
-         filesToProcess.emplace_back(std::move(nodeAndPath));
-         itr++;
-      }
-
-      const auto firstRegularFile = PreprocessTargetFiles(filesToProcess);
-
-      for (auto& nodeAndPath : filesToProcess)
-      {
-         nodeAndPath.node->GetData().file.name = nodeAndPath.path.filename().wstring();
-         nodeAndPath.node->GetData().file.size = std::uint64_t{ 0 };
-         nodeAndPath.node->GetData().file.type =
-            std::experimental::filesystem::is_directory(nodeAndPath.path)
+         const auto fileType = std::experimental::filesystem::is_directory(path)
             ? FileType::DIRECTORY
             : FileType::REGULAR;
+
+         const VizNode node
+         {
+            FileInfo
+            {
+               /* name = */ path.filename().wstring(),
+               /* extension = */ path.extension().wstring(),
+               /* size = */ 0,
+               /* type = */ fileType
+            }
+         };
+
+         NodeAndPath nodeAndPath
+         {
+            std::make_unique<TreeNode<VizNode>>(std::move(node)),
+            std::move(path)
+         };
+
+         if (fileType == FileType::DIRECTORY)
+         {
+            directoriesToProcess.emplace_back(std::move(nodeAndPath));
+         }
+         else if (fileType == FileType::REGULAR)
+         {
+            filesToProcess.emplace_back(std::move(nodeAndPath));
+         }
+
+         ++itr;
       }
 
-      std::vector<NodeAndPath> regularFiles;
-      std::move(firstRegularFile, std::end(filesToProcess), std::back_inserter(regularFiles));
-      filesToProcess.erase(firstRegularFile, std::end(filesToProcess));
-
-      return std::make_pair(std::move(filesToProcess), std::move(regularFiles));
+      return std::make_pair(std::move(directoriesToProcess), std::move(filesToProcess));
    }
 
    /**
@@ -263,7 +210,7 @@ namespace
    {
       while (!queue.IsEmpty())
       {
-         auto nodeAndPath = NodeAndPath{ };
+         NodeAndPath nodeAndPath{ };
          const auto successfullyPopped = queue.TryPop(nodeAndPath);
          if (!successfullyPopped)
          {
@@ -327,16 +274,7 @@ void ScanningWorker::ProcessFile(
    const std::experimental::filesystem::path& path,
    TreeNode<VizNode>& treeNode) noexcept
 {
-   std::uintmax_t fileSize{ 0 };
-
-   try
-   {
-      fileSize = std::experimental::filesystem::file_size(path);
-   }
-   catch (...)
-   {
-      fileSize = GetFileSizeUsingWinAPI(path.wstring());
-   }
+   std::uintmax_t fileSize = ComputeFileSize(path);
 
    if (fileSize == 0)
    {
@@ -423,7 +361,7 @@ void ScanningWorker::IterateOverDirectoryAndScan(
    {
       ProcessDirectory(itr->path(), treeNode);
 
-      itr++;
+      ++itr;
    }
 }
 
@@ -433,7 +371,7 @@ void ScanningWorker::ProcessQueue(
 {
    while (!taskQueue.IsEmpty())
    {
-      auto nodeAndPath = NodeAndPath{ };
+      NodeAndPath nodeAndPath{ };
       const auto successfullyPopped = taskQueue.TryPop(nodeAndPath);
       if (!successfullyPopped)
       {
@@ -448,7 +386,7 @@ void ScanningWorker::ProcessQueue(
          std::lock_guard<std::mutex> lock{ streamMutex };
          IgnoreUnused(lock);
 
-         std::cout << "Finished scanning: \"" << nodeAndPath.path.string() << "\"" << std::endl;
+         std::wcout << "Finished scanning: \"" << nodeAndPath.path.wstring() << "\"" << std::endl;
       }
 
       resultsQueue.Emplace(std::move(nodeAndPath));
@@ -478,15 +416,15 @@ void ScanningWorker::Start()
       ThreadSafeQueue<NodeAndPath> resultQueue;
       ThreadSafeQueue<NodeAndPath> taskQueue;
 
-      for (auto& nodeAndPath : directoriesAndFiles.first)
+      for (auto& directory : directoriesAndFiles.first)
       {
-         taskQueue.Emplace(std::move(nodeAndPath));
+         taskQueue.Emplace(std::move(directory));
       }
 
       std::vector<std::thread> scanningThreads;
 
       const auto numberOfThreads = (std::min)(std::thread::hardware_concurrency(),
-         static_cast<unsigned int>(Constants::Concurrency::THREAD_LIMIT));
+         Constants::Concurrency::THREAD_LIMIT);
 
       for (unsigned int i{ 0 }; i < numberOfThreads; ++i)
       {
@@ -499,9 +437,9 @@ void ScanningWorker::Start()
          });
       }
 
-      for (auto& nodeAndPath : directoriesAndFiles.second)
+      for (auto& file : directoriesAndFiles.second)
       {
-          ProcessFile(nodeAndPath.path, *theTree->GetHead());
+         ProcessFile(file.path, *theTree->GetHead());
       }
 
       for (auto& thread : scanningThreads)

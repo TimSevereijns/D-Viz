@@ -36,7 +36,7 @@ namespace Constants
 
    namespace Concurrency
    {
-      constexpr static auto THREAD_LIMIT{ 4 };
+      constexpr static unsigned int THREAD_LIMIT{ 4 };
    }
 }
 

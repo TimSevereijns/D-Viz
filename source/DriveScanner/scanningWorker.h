@@ -55,6 +55,8 @@ class ScanningWorker : public QObject
 
    public:
 
+      using NodePtr = std::unique_ptr<TreeNode<VizNode>>;
+
       static constexpr std::uintmax_t SIZE_UNDEFINED{ 0 };
 
       explicit ScanningWorker(
