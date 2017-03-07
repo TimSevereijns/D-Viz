@@ -26,6 +26,58 @@ namespace
    std::mutex streamMutex;
 
    /**
+    * @brief Use the `FindFirstFileW(...)` function to see if the given file path is accessible.
+    *
+    * @param path[in]               The path to the troublesome file.
+    *
+    * @returns True if the file is accessible and false otherwise.
+    */
+   bool ProbeFileWithWinAPI(const std::wstring& path)
+   {
+#ifdef Q_OS_WIN
+      std::wcout << "Falling back on the Win API for: \"" << path << std::endl;
+
+      WIN32_FIND_DATA fileData;
+      const HANDLE fileHandle = FindFirstFileW(path.data(), &fileData);
+      if (fileHandle == INVALID_HANDLE_VALUE)
+      {
+         std::cout << "Invalid File Handle!" << std::endl;
+         return false;
+      }
+
+      return true;
+#elif
+      return false;
+#endif
+   }
+
+   /**
+    * @brief Use the `FindFirstFileW(...)` function to see if the given file path is accessible.
+    *
+    * @param path[in]               The path to the troublesome file.
+    *
+    * @returns
+    */
+   std::uintmax_t GetFileSizeUsingWinAPI(const std::wstring& path)
+   {
+      std::uintmax_t fileSize{ 0 };
+
+#ifdef Q_OS_WIN
+      WIN32_FIND_DATA fileData;
+      const HANDLE fileHandle = FindFirstFileW(path.data(), &fileData);
+      if (fileHandle == INVALID_HANDLE_VALUE)
+      {
+         return 0;
+      }
+
+      constexpr auto highWordShift = sizeof(fileData.nFileSizeLow) * 8;
+      fileSize = (static_cast<std::uintmax_t>(fileData.nFileSizeHigh) << highWordShift)
+         | fileData.nFileSizeLow;
+#endif
+      return fileSize;
+   }
+
+   /**
     * @brief Removes nodes whose corresponding file or directory size is zero. This is often
     * necessary because a directory may contain only a single other directory within it that is
     * empty. In such a case, the outer directory has a size of zero, but
@@ -136,22 +188,7 @@ namespace
          }
          catch (...)
          {
-#ifdef Q_OS_WIN
-            std::cout
-               << "Falling back on the Win API for: \""
-               << nodeAndPath.path.string()
-               << "\"\n";
-
-            WIN32_FIND_DATA fileData;
-            const HANDLE fileHandle = FindFirstFileW(nodeAndPath.path.wstring().data(), &fileData);
-            if (fileHandle == INVALID_HANDLE_VALUE)
-            {
-               std::cout << "Invalid File Handle!\n";
-               return false;
-            }
-
-            return true;
-#endif
+            return ProbeFileWithWinAPI(nodeAndPath.path.wstring());
          }
 
          return false;
@@ -298,25 +335,7 @@ void ScanningWorker::ProcessFile(
    }
    catch (...)
    {
-#ifdef Q_OS_WIN
-      WIN32_FIND_DATA fileData;
-      const HANDLE fileHandle = FindFirstFileW(path.wstring().data(), &fileData);
-      if (fileHandle == INVALID_HANDLE_VALUE)
-      {
-         return;
-      }
-
-      // First we force the high-word to actually be a 64-bit value, then we shift it over by
-      // 32 bits, and then finally we OR in the low-word. Yes, the Microsoft documentation seen
-      // here is wrong: 
-      //	   https://msdn.microsoft.com/en-us/library/windows/desktop/aa365740(v=vs.85).aspx
-      //
-      // Credit for this solution goes to Mats Petersson:
-      //   http://stackoverflow.com/a/15209394/694056.
-      constexpr auto highWordShift = sizeof(fileData.nFileSizeLow) * 8;
-      fileSize = (static_cast<std::uintmax_t>(fileData.nFileSizeHigh) << highWordShift)
-         | fileData.nFileSizeLow;
-#endif
+      fileSize = GetFileSizeUsingWinAPI(path.wstring());
    }
 
    if (fileSize == 0)
