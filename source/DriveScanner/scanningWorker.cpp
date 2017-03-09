@@ -73,7 +73,10 @@ namespace
       }
       catch (...)
       {
-         std::wcout << "Falling back on the Win API for: \"" << path.wstring() << std::endl;
+         std::lock_guard<std::mutex> lock{ streamMutex };
+         IgnoreUnused(lock);
+
+         std::wcout << "Falling back on the Win API for: \"" << path.wstring() << "\"" << std::endl;
          return GetFileSizeUsingWinAPI(path);
       }
    }
@@ -91,7 +94,7 @@ namespace
    {
       std::vector<TreeNode<VizNode>*> toBeDeleted;
 
-      for (auto& node : tree)
+      for (auto&& node : tree)
       {
          if (node->file.size == 0)
          {
@@ -166,14 +169,16 @@ namespace
             ? FileType::DIRECTORY
             : FileType::REGULAR;
 
+         constexpr std::uintmax_t fileSizeToBeComputedLater{ 0 };
+
          const VizNode node
          {
             FileInfo
             {
-               /* name = */ path.filename().wstring(),
-               /* extension = */ path.extension().wstring(),
-               /* size = */ 0,
-               /* type = */ fileType
+               path.filename().wstring(),
+               path.extension().wstring(),
+               fileSizeToBeComputedLater,
+               fileType
             }
          };
 
@@ -375,6 +380,7 @@ void ScanningWorker::ProcessQueue(
       const auto successfullyPopped = taskQueue.TryPop(nodeAndPath);
       if (!successfullyPopped)
       {
+      	assert(false);
          break;
       }
 
@@ -416,7 +422,7 @@ void ScanningWorker::Start()
       ThreadSafeQueue<NodeAndPath> resultQueue;
       ThreadSafeQueue<NodeAndPath> taskQueue;
 
-      for (auto& directory : directoriesAndFiles.first)
+      for (auto&& directory : directoriesAndFiles.first)
       {
          taskQueue.Emplace(std::move(directory));
       }
@@ -437,12 +443,12 @@ void ScanningWorker::Start()
          });
       }
 
-      for (auto& file : directoriesAndFiles.second)
+      for (auto&& file : directoriesAndFiles.second)
       {
          ProcessFile(file.path, *theTree->GetHead());
       }
 
-      for (auto& thread : scanningThreads)
+      for (auto&& thread : scanningThreads)
       {
          thread.join();
       }

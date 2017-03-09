@@ -104,9 +104,12 @@ class GLCanvas : public QOpenGLWidget
    private:
 
       /**
-       * @brief Computes and updates the running average of the visualization's frame rate.
+       * @brief Records the elapsed frame time.
+       *
+       * @todo Double-check that this is actually a sane way of doing it, or if I'm missing
+       * something.
        */
-      void UpdateFPS();
+      void UpdateFrameTime(const std::chrono::microseconds& elapsedTime);
 
       /**
        * @brief Generates and displays the context menu.
@@ -214,7 +217,7 @@ class GLCanvas : public QOpenGLWidget
 
       std::vector<std::unique_ptr<SceneAsset>> m_sceneAssets;
 
-      std::deque<int> m_frameRateDeque;
+      std::deque<int> m_frameTimeDeque;
 };
 
 #endif // GLCANVAS_H

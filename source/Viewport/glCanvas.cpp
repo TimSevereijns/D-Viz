@@ -1,6 +1,7 @@
 #include "glCanvas.h"
 
 #include "../constants.h"
+#include "../ThirdParty/stopwatch.hpp"
 
 #include "Scene/crosshairAsset.h"
 #include "Scene/debuggingRayAsset.h"
@@ -588,63 +589,60 @@ void GLCanvas::SelectNodeViaRay(const QPoint& rayOrigin)
    m_controller.SelectNodeViaRay(m_camera, ray, deselectionCallback, selectionCallback );
 }
 
-void GLCanvas::UpdateFPS()
+void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
 {
-   const auto now = std::chrono::system_clock::now();
-   const auto millisecondsElapsed = std::max<unsigned int>(
-      std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastFrameDrawTime).count(),
-      1); ///< This will avoid division by zero.
-
-   m_lastFrameDrawTime = now;
-
-   constexpr auto movingAverageWindowSize{ 32 };
-   if (m_frameRateDeque.size() > movingAverageWindowSize)
+   constexpr auto movingAverageWindowSize{ 64 };
+   if (m_frameTimeDeque.size() > movingAverageWindowSize)
    {
-      m_frameRateDeque.pop_front();
+      m_frameTimeDeque.pop_front();
    }
-   assert(m_frameRateDeque.size() <= movingAverageWindowSize);
+   assert(m_frameTimeDeque.size() <= movingAverageWindowSize);
 
-   m_frameRateDeque.emplace_back(1000 / millisecondsElapsed);
+   m_frameTimeDeque.emplace_back(static_cast<int>(elapsedTime.count()));
 
-   const int fpsSum = std::accumulate(std::begin(m_frameRateDeque), std::end(m_frameRateDeque), 0,
-      [] (const int runningTotal, const int fps)
+   const int total = std::accumulate(std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0,
+      [] (const int runningTotal, const int frameTime) noexcept
    {
-      return runningTotal + fps;
+      return runningTotal + frameTime;
    });
 
-   assert(m_frameRateDeque.size() > 0);
-   const auto averageFps = fpsSum / m_frameRateDeque.size();
+   assert(m_frameTimeDeque.size() > 0);
+   const auto averageFrameTime = total / m_frameTimeDeque.size();
 
    m_mainWindow.setWindowTitle(
-      QString::fromStdString("D-Viz @ ")
-      + QString::number(averageFps)
-      + QString::fromStdString(" fps [*]"));
+      QString::fromStdWString(L"D-Viz @ ")
+      + QString::number(averageFrameTime)
+      + QString::fromStdWString(L" \xB5s / frame"));
 }
 
 void GLCanvas::paintGL()
 {
-   if (m_isPaintingSuspended)
+   const auto elapsedTime = Stopwatch<std::chrono::microseconds>(
+      [&] () noexcept
    {
-      return;
-   }
+      if (m_isPaintingSuspended)
+      {
+         return;
+      }
 
-   m_graphicsDevice->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      m_graphicsDevice->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-   if (m_mainWindow.ShouldShowFPS())
+      assert(m_optionsManager);
+      if (m_optionsManager->m_isLightAttachedToCamera)
+      {
+         assert(m_lights.size() > 0);
+         m_lights.front().position = m_camera.GetPosition();
+      }
+
+      for (const auto& asset : m_sceneAssets)
+      {
+         assert(asset);
+         asset->Render(m_camera, m_lights, *m_optionsManager);
+      }
+   }).GetElapsedTime();
+
+   if (m_mainWindow.ShouldShowFrameTime())
    {
-      UpdateFPS();
-   }
-
-   assert(m_optionsManager);
-   if (m_optionsManager->m_isLightAttachedToCamera)
-   {
-      assert(m_lights.size() > 0);
-      m_lights.front().position = m_camera.GetPosition();
-   }
-
-   for (const auto& asset : m_sceneAssets)
-   {
-      assert(asset);
-      asset->Render(m_camera, m_lights, *m_optionsManager);
+      UpdateFrameTime(elapsedTime);
    }
 }

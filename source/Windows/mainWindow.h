@@ -87,7 +87,7 @@ class MainWindow : public QMainWindow
       /**
        * @returns True if the frames per second (FPS) readout should be shown in the titlebar.
        */
-      bool ShouldShowFPS() const;
+      bool ShouldShowFrameTime() const;
 
       /**
        * @returns The current search query.
@@ -196,7 +196,7 @@ class MainWindow : public QMainWindow
       std::unique_ptr<QAction> m_fileMenuNewScan{ nullptr };
       std::unique_ptr<QAction> m_fileMenuPreferences{ nullptr };
       std::unique_ptr<QAction> m_fileMenuExit{ nullptr };
-      std::unique_ptr<QAction> m_viewMenuToggleFPS{ nullptr };
+      std::unique_ptr<QAction> m_viewMenuToggleFrameTime{ nullptr };
       std::unique_ptr<QAction> m_helpMenuAboutDialog{ nullptr };
 
       std::unique_ptr<GLCanvas> m_glCanvas{ nullptr };

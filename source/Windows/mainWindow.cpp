@@ -227,13 +227,13 @@ void MainWindow::CreateFileMenu()
 
 void MainWindow::CreateViewMenu()
 {
-   m_viewMenuToggleFPS.reset(new QAction("Show FPS", this));
-   m_viewMenuToggleFPS->setCheckable(true);
-   m_viewMenuToggleFPS->setStatusTip("Toggle FPS Readout");
-   connect(m_viewMenuToggleFPS.get(), &QAction::toggled, this, &MainWindow::OnFPSReadoutToggled);
+   m_viewMenuToggleFrameTime.reset(new QAction("Show Frame Time", this));
+   m_viewMenuToggleFrameTime->setCheckable(true);
+   m_viewMenuToggleFrameTime->setStatusTip("Toggle Frame Time Readout");
+   connect(m_viewMenuToggleFrameTime.get(), &QAction::toggled, this, &MainWindow::OnFPSReadoutToggled);
 
    m_viewMenu.reset(menuBar()->addMenu("View"));
-   m_viewMenu->addAction(m_viewMenuToggleFPS.get());
+   m_viewMenu->addAction(m_viewMenuToggleFrameTime.get());
 }
 
 void MainWindow::CreateHelpMenu()
@@ -279,9 +279,9 @@ void MainWindow::OnFPSReadoutToggled(bool isEnabled)
    }
 }
 
-bool MainWindow::ShouldShowFPS() const
+bool MainWindow::ShouldShowFrameTime() const
 {
-   return m_viewMenuToggleFPS->isChecked();
+   return m_viewMenuToggleFrameTime->isChecked();
 }
 
 std::wstring MainWindow::GetSearchQuery() const
