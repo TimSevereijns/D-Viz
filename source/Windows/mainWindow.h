@@ -85,7 +85,7 @@ class MainWindow : public QMainWindow
          int timeout = 0);
 
       /**
-       * @returns True if the frames per second (FPS) readout should be shown in the titlebar.
+       * @returns True if the frame time readout should be shown in the titlebar.
        */
       bool ShouldShowFrameTime() const;
 

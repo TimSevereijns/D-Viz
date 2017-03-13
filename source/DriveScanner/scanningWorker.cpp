@@ -120,7 +120,7 @@ namespace
     */
    void ComputeDirectorySizes(Tree<VizNode>& tree)
    {
-      for (auto& node : tree)
+      for (auto&& node : tree)
       {
          const FileInfo fileInfo = node->file;
 

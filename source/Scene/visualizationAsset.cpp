@@ -59,7 +59,7 @@ namespace
    {
       if (node.GetData().file.type != FileType::DIRECTORY)
       {
-         return Constants::Colors::GREEN;
+         return Constants::Colors::FILE_GREEN;
       }
 
       if (!params.useDirectoryGradient)
@@ -302,7 +302,7 @@ std::uint32_t VisualizationAsset::LoadBufferData(
       }
       else if (node->file.type == FileType::REGULAR)
       {
-         m_blockColors << Constants::Colors::GREEN;
+         m_blockColors << Constants::Colors::FILE_GREEN;
       }
    }
 

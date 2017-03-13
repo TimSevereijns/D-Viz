@@ -6,6 +6,7 @@
 #include "Scene/crosshairAsset.h"
 #include "Scene/debuggingRayAsset.h"
 #include "Scene/gridAsset.h"
+#include "Scene/lightMarkerAsset.h"
 #include "Scene/visualizationAsset.h"
 
 #include "canvasContextMenu.h"
@@ -27,8 +28,43 @@ namespace
    {
       GRID = 0,      ///< GridAsset
       TREEMAP,       ///< VisualizationAsset
-      CROSSHAIR      ///< NodeSelectionCrosshair
+      CROSSHAIR,     ///< CrosshairAsset
+      LIGHT_MARKERS  ///< LightMarkerAsset
    };
+
+   /**
+    * @brief Computes and sets the vertex and color data for the light markers.
+    *
+    * @param[in] lights                   The lights in the scene to be marked.
+    * @param[in, out] lightMarkerAsset    The scene asset to be updated
+    */
+   void InitializeLightMarkers(
+      const std::vector<Light>& lights,
+      LightMarkerAsset& lightMarkerAsset)
+   {
+      constexpr auto verticesPerMarker{ 6 };
+
+      QVector<QVector3D> vertices;
+      for (const auto& light : lights)
+      {
+         vertices
+            << light.position + QVector3D{ 5.0f, 0.0f, 0.0f }
+            << light.position - QVector3D{ 5.0f, 0.0f, 0.0f }
+            << light.position + QVector3D{ 0.0f, 5.0f, 0.0f }
+            << light.position - QVector3D{ 0.0f, 5.0f, 0.0f }
+            << light.position + QVector3D{ 0.0f, 0.0f, 5.0f }
+            << light.position - QVector3D{ 0.0f, 0.0f, 5.0f };
+      }
+
+      QVector<QVector3D> colors;
+      for (std::size_t index{ 0 }; index < lights.size() * verticesPerMarker; ++index)
+      {
+         colors << Constants::Colors::WHITE;
+      }
+
+      lightMarkerAsset.SetVertexData(std::move(vertices));
+      lightMarkerAsset.SetColorData(std::move(colors));
+   }
 }
 
 GLCanvas::GLCanvas(
@@ -72,6 +108,12 @@ void GLCanvas::initializeGL()
    m_sceneAssets.emplace_back(std::make_unique<GridAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<CrosshairAsset>(*m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<LightMarkerAsset>(*m_graphicsDevice));
+
+   auto* const lightMarkers = dynamic_cast<LightMarkerAsset*>(m_sceneAssets[LIGHT_MARKERS].get());
+   assert(lightMarkers);
+
+   InitializeLightMarkers(m_lights, *lightMarkers);
 
    for (const auto& asset : m_sceneAssets)
    {

@@ -16,10 +16,13 @@ namespace Constants
    }
 
    namespace Colors
-   {                                         // Red,             Green,           Blue
+   {                                         // Red,                     Green,              Blue
+      const static QVector3D RED             { 1.0f,                      0.0f,              0.0f};
+      const static QVector3D GREEN           { 0.0f,                      1.0f,              0.0f};
+      const static QVector3D BLUE            { 0.0f,                      0.0f,              1.0f};
       const static QVector3D CANARY_YELLOW   { 1.0f,           239.0f / 255.0f,             0.0f };
       const static QVector3D HOT_PINK        { 1.0f,           105.0f / 255.0f,  180.0f / 255.0f };
-      const static QVector3D GREEN           { 0.5f,                      1.0f,             0.5f };
+      const static QVector3D FILE_GREEN      { 0.5f,                      1.0f,             0.5f };
       const static QVector3D WHITE           { 1.0f,                      1.0f,             1.0f };
    }
 
