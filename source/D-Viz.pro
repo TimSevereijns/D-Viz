@@ -104,7 +104,9 @@ DISTFILES += \
    Shaders/visualizationFragmentShader.frag \
    Shaders/visualizationVertexShader.vert \
    Shaders/simpleLineFragmentShader.frag \
-   Shaders/simpleLineVertexShader.vert
+   Shaders/simpleLineVertexShader.vert \
+   Shaders/shadowMapping.frag \
+   Shaders/shadowMapping.vert
 
 RESOURCES += \
    resources.qrc

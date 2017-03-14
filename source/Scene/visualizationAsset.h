@@ -5,6 +5,8 @@
 
 #include "../Utilities/colorGradient.hpp"
 
+#include <QOpenGLTexture>
+
 struct VizNode;
 template<typename DataType> class TreeNode;
 
@@ -59,6 +61,8 @@ class VisualizationAsset : public SceneAsset
 
    private:
 
+      bool RenderShadowPass(const Camera& camera);
+
       QVector3D ComputeGradientColor(const TreeNode<VizNode>& node);
 
       void FindLargestDirectory(const Tree<VizNode>& tree);
@@ -71,6 +75,7 @@ class VisualizationAsset : public SceneAsset
       bool InitializeReferenceBlock();
       bool InitializeColors();
       bool InitializeBlockTransformations();
+      bool InitializeShadowMachinery();
 
       QOpenGLBuffer m_referenceBlockBuffer;
       QOpenGLBuffer m_blockTransformationBuffer;
@@ -79,6 +84,13 @@ class VisualizationAsset : public SceneAsset
       QVector<QVector3D> m_referenceBlockVertices;
       QVector<QMatrix4x4> m_blockTransformations;
       QVector<QVector3D> m_blockColors;
+
+      static constexpr auto SHADOW_MAP_WIDTH{ 1920 };
+      static constexpr auto SHADOW_MAP_HEIGHT{ 1080 };
+
+      QOpenGLShaderProgram m_shadowShader;
+      QOpenGLBuffer m_shadowFrameBuffer;
+      QOpenGLTexture m_shadowDepthMap{ QOpenGLTexture::Target2D };
 };
 
 #endif // VISUALIZATIONASSET_H

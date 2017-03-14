@@ -15,9 +15,9 @@ out vec3 vertexNormal;
 
 void main(void)
 {
-   vertexPosition = vec3(instanceMatrix * vec4(vertex, 1));
+   vertexPosition = vec3(instanceMatrix * vec4(vertex, 1.0f));
    vertexColor = color;
    vertexNormal = normal;
 
-   gl_Position = projectionMatrix * viewMatrix * instanceMatrix * vec4(vertex, 1);
+   gl_Position = projectionMatrix * viewMatrix * instanceMatrix * vec4(vertex, 1.0f);
 }

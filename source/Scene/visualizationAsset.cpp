@@ -4,7 +4,10 @@
 #include "../DataStructs/vizNode.h"
 #include "../ThirdParty/Tree.hpp"
 #include "../Utilities/colorGradient.hpp"
+#include "../Utilities/scopeExit.hpp"
 #include "../Visualizations/visualization.h"
+
+#include <iostream>
 
 namespace
 {
@@ -89,7 +92,23 @@ VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
 
 bool VisualizationAsset::LoadShaders()
 {
-   return SceneAsset::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
+   m_shadowShader.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/Shaders/shadowMapping.vert");
+   m_shadowShader.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/Shaders/shadowMapping.frag");
+   bool success = m_shadowShader.link();
+
+   success |= SceneAsset::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
+
+   return success;
+}
+
+bool VisualizationAsset::InitializeShadowMachinery()
+{
+   m_shadowShader.bindAttributeLocation("vertex", /* location = */ 0);
+   m_shadowShader.bind();
+
+   // @todo Missing an attribute location, perhaps?
+
+   return true;
 }
 
 bool VisualizationAsset::Initialize()
@@ -97,11 +116,13 @@ bool VisualizationAsset::Initialize()
    const bool unitBlockInitialized = InitializeReferenceBlock();
    const bool colorsInitialized = InitializeColors();
    const bool transformationsInitialized = InitializeBlockTransformations();
+   const bool shadowMachineryInitialized = InitializeShadowMachinery();
 
    const bool overallSuccess =
       unitBlockInitialized
       && colorsInitialized
-      && transformationsInitialized;
+      && transformationsInitialized
+      && shadowMachineryInitialized;
 
    assert(overallSuccess);
    return overallSuccess;
@@ -355,6 +376,45 @@ bool VisualizationAsset::IsAssetLoaded() const
    return !(m_blockTransformations.empty() && m_blockColors.empty());
 }
 
+bool VisualizationAsset::RenderShadowPass(const Camera& camera)
+{
+   ON_SCOPE_EXIT
+   {
+      const auto& viewport = camera.GetViewport();
+      m_graphicsDevice.glViewport(0, 0, viewport.width(),viewport.height());
+   };
+
+   m_graphicsDevice.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
+
+   m_shadowShader.bind();
+   m_shadowFrameBuffer.bind();
+
+   static constexpr GLenum buffers[] =
+   {
+      GL_COLOR_ATTACHMENT0,
+      GL_COLOR_ATTACHMENT1,
+      GL_COLOR_ATTACHMENT2,
+      GL_COLOR_ATTACHMENT3
+   };
+
+   m_graphicsDevice.glDrawBuffers(4, buffers);
+
+   m_shadowShader.setUniformValue("viewMatrix", camera.GetViewMatrix());
+   m_shadowShader.setUniformValue("projectionMatrix", camera.GetProjectionMatrix());
+
+   m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+   constexpr float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+   m_graphicsDevice.glClearBufferfv(GL_COLOR, 0, white);
+
+   // @todo Call to VAO::draw(*m_shadowShader);
+
+   m_shadowFrameBuffer.release();
+   m_shadowShader.release();
+
+   return true;
+}
+
 bool VisualizationAsset::Render(
    const Camera& camera,
    const std::vector<Light>& lights,
@@ -364,6 +424,10 @@ bool VisualizationAsset::Render(
    {
       return true;
    }
+
+   //RenderShadowPass(camera);
+
+   m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    m_shader.bind();
    m_shader.setUniformValue("viewMatrix", camera.GetViewMatrix());

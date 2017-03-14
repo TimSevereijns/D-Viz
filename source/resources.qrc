@@ -4,5 +4,7 @@
         <file>Shaders/simpleLineVertexShader.vert</file>
         <file>Shaders/visualizationFragmentShader.frag</file>
         <file>Shaders/visualizationVertexShader.vert</file>
+        <file>Shaders/shadowMapping.frag</file>
+        <file>Shaders/shadowMapping.vert</file>
     </qresource>
 </RCC>
