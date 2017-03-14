@@ -3,8 +3,8 @@
 layout (location = 0) in vec3 color;
 layout (location = 1) in mat4 instanceMatrix;
 
-uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
 
 in vec3 vertex;
 in vec3 normal;
