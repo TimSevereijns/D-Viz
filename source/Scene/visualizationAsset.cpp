@@ -101,16 +101,6 @@ bool VisualizationAsset::LoadShaders()
    return success;
 }
 
-bool VisualizationAsset::InitializeShadowMachinery()
-{
-   m_shadowShader.bindAttributeLocation("vertex", /* location = */ 0);
-   m_shadowShader.bind();
-
-   // @todo Missing an attribute location, perhaps?
-
-   return true;
-}
-
 bool VisualizationAsset::Initialize()
 {
    const bool unitBlockInitialized = InitializeReferenceBlock();
@@ -206,8 +196,6 @@ bool VisualizationAsset::InitializeColors()
       /* stride = */ sizeof(QVector3D),
       /* ptr = */ (GLvoid*)0);
 
-   m_graphicsDevice.glBindVertexArray(0);
-
    m_blockColorBuffer.release();
    m_VAO.release();
 
@@ -233,6 +221,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* data = */ m_blockTransformations.constData(),
       /* count = */ m_blockTransformations.size() * sizeOfMatrix);
 
+   // Row 1 of the matrix:
    m_graphicsDevice.glEnableVertexAttribArray(1);
    m_graphicsDevice.glVertexAttribDivisor(1, 1);
    m_graphicsDevice.glVertexAttribPointer(
@@ -243,6 +232,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* stride = */ sizeOfMatrix,
       /* ptr = */ (GLvoid*)(0 * sizeOfVector));
 
+   // Row 2 of the matrix:
    m_graphicsDevice.glEnableVertexAttribArray(2);
    m_graphicsDevice.glVertexAttribDivisor(2, 1);
    m_graphicsDevice.glVertexAttribPointer(
@@ -253,6 +243,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* stride = */ sizeOfMatrix,
       /* ptr = */ (GLvoid*)(1 * sizeOfVector));
 
+   // Row 3 of the matrix:
    m_graphicsDevice.glEnableVertexAttribArray(3);
    m_graphicsDevice.glVertexAttribDivisor(3, 1);
    m_graphicsDevice.glVertexAttribPointer(
@@ -263,6 +254,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* stride = */ sizeOfMatrix,
       /* ptr = */ (GLvoid*)(2 * sizeOfVector));
 
+   // Row 4 of the matrix:
    m_graphicsDevice.glEnableVertexAttribArray(4);
    m_graphicsDevice.glVertexAttribDivisor(4, 1);
    m_graphicsDevice.glVertexAttribPointer(
@@ -273,9 +265,40 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* stride = */ sizeOfMatrix,
       /* ptr = */ (GLvoid*)(3 * sizeOfVector));
 
-   m_graphicsDevice.glBindVertexArray(0);
-
    m_blockTransformationBuffer.release();
+   m_VAO.release();
+
+   return true;
+}
+
+bool VisualizationAsset::InitializeShadowMachinery()
+{
+   m_shadowFrameBuffer.addColorAttachment(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
+   m_shadowFrameBuffer.addColorAttachment(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
+   m_shadowFrameBuffer.addColorAttachment(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
+
+   m_VAO.bind();
+   m_referenceBlockBuffer.bind();
+   m_shadowShader.bind();
+
+   m_shadowShader.enableAttributeArray("vertex");
+   m_shadowShader.setAttributeBuffer(
+      /* location = */ "vertex",
+      /* type = */ GL_FLOAT,
+      /* offset = */ 0,
+      /* tupleSize = */ 3,
+      /* stride = */ 2 * sizeof(QVector3D));
+
+   m_shadowShader.enableAttributeArray("normal");
+   m_shadowShader.setAttributeBuffer(
+      /* location = */ "normal",
+      /* type = */ GL_FLOAT,
+      /* offset = */ sizeof(QVector3D),
+      /* tupleSize = */ 3,
+      /* stride = */ 2 * sizeof(QVector3D));
+
+   m_shadowShader.release();
+   m_referenceBlockBuffer.release();
    m_VAO.release();
 
    return true;
@@ -381,35 +404,37 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
    ON_SCOPE_EXIT
    {
       const auto& viewport = camera.GetViewport();
-      m_graphicsDevice.glViewport(0, 0, viewport.width(),viewport.height());
+      m_graphicsDevice.glViewport(0, 0, viewport.width(), viewport.height());
    };
 
    m_graphicsDevice.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
+   m_graphicsDevice.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-   m_shadowShader.bind();
    m_shadowFrameBuffer.bind();
 
-   static constexpr GLenum buffers[] =
-   {
-      GL_COLOR_ATTACHMENT0,
-      GL_COLOR_ATTACHMENT1,
-      GL_COLOR_ATTACHMENT2,
-      GL_COLOR_ATTACHMENT3
-   };
-
-   m_graphicsDevice.glDrawBuffers(4, buffers);
-
-   m_shadowShader.setUniformValue("viewMatrix", camera.GetViewMatrix());
-   m_shadowShader.setUniformValue("projectionMatrix", camera.GetProjectionMatrix());
-
-   m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   m_graphicsDevice.glClear(GL_DEPTH_BUFFER_BIT);
 
    constexpr float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
    m_graphicsDevice.glClearBufferfv(GL_COLOR, 0, white);
 
-   // @todo Call to VAO::draw(*m_shadowShader);
+   m_shadowShader.bind();
+   m_shadowShader.setUniformValue("projectionMatrix", camera.GetProjectionMatrix());
+   m_shadowShader.setUniformValue("viewMatrix", camera.GetViewMatrix());
 
+   m_VAO.bind();
+
+   m_graphicsDevice.glDrawArraysInstanced(
+      /* mode = */ GL_TRIANGLES,
+      /* first = */ 0,
+      /* count = */ m_referenceBlockVertices.size(),
+      /* instanceCount = */ m_blockColors.size()
+   );
+
+   m_VAO.release();
+
+   //m_shadowFrameBuffer.toImage(true, 0).save("C:\\Users\\Tim\\Desktop\\depth.png");
    m_shadowFrameBuffer.release();
+
    m_shadowShader.release();
 
    return true;
@@ -425,13 +450,11 @@ bool VisualizationAsset::Render(
       return true;
    }
 
-   //RenderShadowPass(camera);
-
-   m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   RenderShadowPass(camera);
 
    m_shader.bind();
-   m_shader.setUniformValue("viewMatrix", camera.GetViewMatrix());
    m_shader.setUniformValue("projectionMatrix", camera.GetProjectionMatrix());
+   m_shader.setUniformValue("viewMatrix", camera.GetViewMatrix());
 
    m_shader.setUniformValue("cameraPosition", camera.GetPosition());
    m_shader.setUniformValue("materialShininess", settings.m_materialShininess);

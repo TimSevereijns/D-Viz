@@ -82,7 +82,7 @@ GLCanvas::GLCanvas(
    setFocusPolicy(Qt::StrongFocus);
 
    QSurfaceFormat format;
-   format.setDepthBufferSize(24);
+   format.setDepthBufferSize(32);
    format.setSamples(8);
    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
    setFormat(format);

@@ -6,6 +6,7 @@
 #include "../Utilities/colorGradient.hpp"
 
 #include <QOpenGLTexture>
+#include <QOpenGLFrameBufferObject>
 
 struct VizNode;
 template<typename DataType> class TreeNode;
@@ -85,12 +86,20 @@ class VisualizationAsset : public SceneAsset
       QVector<QMatrix4x4> m_blockTransformations;
       QVector<QVector3D> m_blockColors;
 
-      static constexpr auto SHADOW_MAP_WIDTH{ 1920 };
-      static constexpr auto SHADOW_MAP_HEIGHT{ 1080 };
-
       QOpenGLShaderProgram m_shadowShader;
-      QOpenGLBuffer m_shadowFrameBuffer;
-      QOpenGLTexture m_shadowDepthMap{ QOpenGLTexture::Target2D };
+
+      static constexpr auto SHADOW_MAP_WIDTH{ 2048 };
+      static constexpr auto SHADOW_MAP_HEIGHT{ 1024 };
+
+      QOpenGLFramebufferObject m_shadowFrameBuffer
+      {
+         SHADOW_MAP_WIDTH,
+         SHADOW_MAP_HEIGHT,
+         QOpenGLFramebufferObject::Depth,
+         GL_TEXTURE_2D
+      };
+
+      //QOpenGLTexture m_shadowDepthMap{ QOpenGLTexture::Target2D };
 };
 
 #endif // VISUALIZATIONASSET_H
