@@ -47,6 +47,14 @@ void Camera::OffsetPosition(const QVector3D& offset) noexcept
    m_position += offset;
 }
 
+void Camera::SetOrientation(float pitch, float yaw)
+{
+   m_horizontalAngle = yaw;
+   m_verticalAngle = pitch;
+
+   NormalizeAngles(m_horizontalAngle, m_verticalAngle);
+}
+
 QMatrix4x4 Camera::GetOrientation() const
 {
    QMatrix4x4 orientation;

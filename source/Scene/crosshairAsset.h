@@ -5,7 +5,7 @@
 
 #include <QPoint>
 
-class CrosshairAsset: public LineAsset
+class CrosshairAsset final : public LineAsset
 {
    public:
 

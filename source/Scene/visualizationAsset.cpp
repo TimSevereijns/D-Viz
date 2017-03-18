@@ -83,6 +83,49 @@ namespace
       const auto nodeColor = gradient.GetColorAtValue(ratio);
       return nodeColor;
    }
+
+   /**
+    * @brief ComputeLightTransformationMatrix
+    *
+    * @param camera
+    *
+    * @returns
+    */
+   QMatrix4x4 ComputeLightTransformationMatrix(const Camera& camera)
+   {
+      // @todo Figure out a good light position:
+//      const auto lightPosition = QVector3D{ 0.0f, 80.0f, 0.0f };
+//      const auto centerOfAttention = QVector3D{ 500.0f, 0.0f, -500.0f };
+//      const auto up = QVector3D{ 0.0f, 1.0f, 0.0f };
+
+//      QMatrix4x4 lightView{ };
+//      lightView.lookAt(lightPosition, centerOfAttention, up);
+
+//      QMatrix4x4 lightProjection{ };
+//      lightProjection.ortho(
+//         camera.GetViewport().left(),
+//         camera.GetViewport().right(),
+//         camera.GetViewport().bottom(),
+//         camera.GetViewport().top(),
+//         camera.GetNearPlane(),
+//         camera.GetFarPlane());
+
+//      const auto lightTransformationMatrix = lightProjection * lightView;
+//      return lightTransformationMatrix;
+
+      Camera shadowCam = camera;
+      shadowCam.SetPosition(QVector3D{ 0.0f, 80.0f, 0.0f });
+      shadowCam.SetOrientation(15.0f, 45.0f);
+      return shadowCam.GetProjectionViewMatrix();
+   }
+
+    static const QMatrix4x4 biasMatrix
+    {
+        0.5f, 0.0f, 0.0f, 0.5f,
+        0.0f, 0.5f, 0.0f, 0.5f,
+        0.0f, 0.0f, 0.5f, 0.5f,
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
 }
 
 VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
@@ -96,7 +139,7 @@ bool VisualizationAsset::LoadShaders()
    m_shadowShader.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/Shaders/shadowMapping.frag");
    bool success = m_shadowShader.link();
 
-   success |= SceneAsset::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
+   success &= SceneAsset::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
 
    return success;
 }
@@ -418,8 +461,8 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
    m_graphicsDevice.glClearBufferfv(GL_COLOR, 0, white);
 
    m_shadowShader.bind();
-   m_shadowShader.setUniformValue("projectionMatrix", camera.GetProjectionMatrix());
-   m_shadowShader.setUniformValue("viewMatrix", camera.GetViewMatrix());
+   m_shadowShader.setUniformValue("lightTransformMatrix", ComputeLightTransformationMatrix(camera));
+   //m_shadowShader.setUniformValue("lightTransformMatrix", camera.GetProjectionViewMatrix());
 
    m_VAO.bind();
 
@@ -450,14 +493,22 @@ bool VisualizationAsset::Render(
       return true;
    }
 
-   RenderShadowPass(camera);
+   //RenderShadowPass(camera);
 
    m_shader.bind();
-   m_shader.setUniformValue("projectionMatrix", camera.GetProjectionMatrix());
-   m_shader.setUniformValue("viewMatrix", camera.GetViewMatrix());
 
+  const QMatrix4x4 depthBiasedModelViewProjection =
+      biasMatrix * ComputeLightTransformationMatrix(camera);
+
+   m_shader.setUniformValue("projectionViewMatrix", camera.GetProjectionViewMatrix());
    m_shader.setUniformValue("cameraPosition", camera.GetPosition());
    m_shader.setUniformValue("materialShininess", settings.m_materialShininess);
+   m_shader.setUniformValue("depthBiasedModelViewProjectionMatrix", depthBiasedModelViewProjection);
+
+   // Bind to texture unit 0, which will be created by default:
+   GLuint depthMapTextureID = m_shadowFrameBuffer.texture();
+   m_graphicsDevice.glActiveTexture(GL_TEXTURE0);
+   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, depthMapTextureID);
 
    SetUniformLights(lights, settings, m_shader);
 

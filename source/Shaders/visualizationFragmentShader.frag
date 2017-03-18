@@ -5,6 +5,8 @@ uniform vec3 materialSpecularColor;
 
 uniform float materialShininess;
 
+uniform sampler2D shadowMap;
+
 uniform struct Light
 {
    vec3 position;
@@ -16,6 +18,8 @@ uniform struct Light
 in vec3 vertexPosition;
 in vec3 vertexColor;
 in vec3 vertexNormal;
+
+in vec4 shadowCoordinate;
 
 out vec4 pixelColor;
 
@@ -54,13 +58,32 @@ vec3 ComputeLightContribution(
    return linearColor;
 }
 
+float ComputeShadowAttenuation()
+{
+   float shadowAcneBias = 0.005;
+   vec3 samplingCoordinates = (shadowCoordinate.xyz / shadowCoordinate.w) * 0.5 + 0.5;
+   float distanceToNearestOccluder = texture2D(shadowMap, samplingCoordinates.xy).r;
+   float distanceToFragment = shadowCoordinate.z  - shadowAcneBias;
+
+   return (distanceToNearestOccluder < distanceToFragment) ? 0.5 : 1.0;
+}
+
+float near_plane = 1;
+float far_plane = 2000;
+
+float LinearizeDepth(float depth)
+{
+    float z = depth * 2.0 - 1.0; // Back to NDC
+    return (2.0 * near_plane) / (far_plane + near_plane - z * (far_plane - near_plane));
+}
+
 void main(void)
 {
    vec3 fragmentToCamera = normalize(cameraPosition - vec3(vertexPosition));
 
    // Calculate the contribution of each light:
    vec3 linearColor = vec3(0, 0, 0);
-   for (int i = 0; i < 5; i++)
+   for (int i = 0; i < 5; ++i)
    {
       linearColor += ComputeLightContribution(
          allLights[i],
@@ -74,5 +97,9 @@ void main(void)
    vec3 gamma = vec3(1.0 / 2.2);
 
    // Final pixel color:
-   pixelColor = vec4(pow(linearColor, gamma), 1);
+   pixelColor = vec4(pow(linearColor, gamma), 1);// * ComputeShadowAttenuation();
+
+   // DEBUG: This will allow for the visualization of the camera's depth buffer:
+   //float depth = LinearizeDepth(gl_FragCoord.z);
+   //pixelColor = vec4(depth, depth, depth, 1.0);
 }

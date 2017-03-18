@@ -38,6 +38,16 @@ class Camera
       void OffsetPosition(const QVector3D& offset) noexcept;
 
       /**
+       * @brief Sets the current camera orientation in terms of pitch and yaw.
+       *
+       * There is currently no roll support.
+       *
+       * @param[in] pitch           In degrees.
+       * @param[in] yaw             In degrees.
+       */
+      void SetOrientation(float pitch, float yaw);
+
+      /**
        * @brief Retrieves the camera's current orientation matrix.
        *
        * @returns The current orientation of the camera; that is, pitch, roll, and yaw.
@@ -45,7 +55,7 @@ class Camera
       QMatrix4x4 GetOrientation() const;
 
       /**
-       * @brief Sets the current camera orientation in terms of pitch and yaw.
+       * @brief Offset the current camera orientation in terms of pitch and yaw.
        *
        * There is currently no roll support.
        *
@@ -235,7 +245,7 @@ class Camera
        */
       float GetFarPlane() const noexcept;
 
-   private:
+private:
 
       QVector3D m_position;
 

@@ -6,7 +6,7 @@
 /**
  * @brief Represents the squarified treemap visualization.
  */
-class SquarifiedTreeMap : public VisualizationModel
+class SquarifiedTreeMap final : public VisualizationModel
 {
    public:
 
@@ -24,8 +24,8 @@ class SquarifiedTreeMap : public VisualizationModel
       Block ComputeRemainingArea(const Block& block);
 
       /**
-       * @brief ComputeShortestEdgeOfRemainingArea calculates the shortest dimension (width or depth)
-       * of the remaining bounds available to build within.
+       * @brief Calculates the shortest dimension (width or depth) of the remaining bounds available
+       * to build within.
        *
        * @param[in] node               The node being built upon.
        *

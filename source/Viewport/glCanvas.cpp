@@ -105,6 +105,8 @@ void GLCanvas::initializeGL()
    m_graphicsDevice->glEnable(GL_MULTISAMPLE);
    m_graphicsDevice->glEnable(GL_LINE_SMOOTH);
 
+   m_graphicsDevice->glCullFace(GL_BACK);
+
    m_sceneAssets.emplace_back(std::make_unique<GridAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<CrosshairAsset>(*m_graphicsDevice));
@@ -486,6 +488,16 @@ void GLCanvas::HandleInput()
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Right());
    }
+
+//   const auto row1 = m_camera.GetProjectionViewMatrix().row(0);
+//   const auto row2 = m_camera.GetProjectionViewMatrix().row(1);
+//   const auto row3 = m_camera.GetProjectionViewMatrix().row(4);
+//   const auto row4 = m_camera.GetProjectionViewMatrix().row(3);
+
+//   std::cout << row1.x() << ", " << row1.y() << ", " << row1.z() << ", " << row1.w() << "\n";
+//   std::cout << row2.x() << ", " << row2.y() << ", " << row2.z() << ", " << row2.w() << "\n";
+//   std::cout << row3.x() << ", " << row3.y() << ", " << row3.z() << ", " << row3.w() << "\n";
+//   std::cout << row4.x() << ", " << row4.y() << ", " << row4.z() << ", " << row4.w() << std::endl;
 }
 
 void GLCanvas::HandleXBoxControllerInput()

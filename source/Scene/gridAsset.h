@@ -7,7 +7,7 @@
  * @brief The GridAsset class implements the setup and rendering logic for the yellow grid that
  * appears under the visualization.
  */
-class GridAsset : public LineAsset
+class GridAsset final : public LineAsset
 {
    public:
 

@@ -3,8 +3,8 @@
 layout (location = 0) in vec3 color;
 layout (location = 1) in mat4 instanceMatrix;
 
-uniform mat4 projectionMatrix;
-uniform mat4 viewMatrix;
+uniform mat4 projectionViewMatrix;
+uniform mat4 depthBiasedModelViewProjectionMatrix;
 
 in vec3 vertex;
 in vec3 normal;
@@ -13,11 +13,15 @@ out vec3 vertexPosition;
 out vec3 vertexColor;
 out vec3 vertexNormal;
 
+out vec4 shadowCoordinate;
+
 void main(void)
 {
    vertexPosition = vec3(instanceMatrix * vec4(vertex, 1.0f));
    vertexColor = color;
    vertexNormal = normal;
 
-   gl_Position = projectionMatrix * viewMatrix * instanceMatrix * vec4(vertex, 1.0f);
+   shadowCoordinate = depthBiasedModelViewProjectionMatrix * vec4(vertex, 1.0f);
+
+   gl_Position = projectionViewMatrix * instanceMatrix * vec4(vertex, 1.0f);
 }
