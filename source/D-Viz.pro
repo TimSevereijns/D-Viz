@@ -41,6 +41,7 @@ SOURCES += \
    Scene/lightMarkerAsset.cpp \
    Scene/lineAsset.cpp \
    Scene/sceneAsset.cpp \
+   Scene/texturePreviewAsset.cpp \
    Scene/visualizationAsset.cpp \
    Viewport/camera.cpp \
    Viewport/canvasContextMenu.cpp \
@@ -74,6 +75,7 @@ HEADERS  += \
    Scene/lightMarkerAsset.h \
    Scene/lineAsset.h \
    Scene/sceneAsset.h \
+   Scene/texturePreviewAsset.h \
    Scene/visualizationAsset.h \
    ThirdParty/ArenaAllocator.hpp \
    ThirdParty/Stopwatch.hpp \
@@ -106,7 +108,7 @@ DISTFILES += \
    Shaders/simpleLineFragmentShader.frag \
    Shaders/simpleLineVertexShader.vert \
    Shaders/shadowMapping.frag \
-   Shaders/shadowMapping.vert
+   Shaders/shadowMapping.vert \
 
 RESOURCES += \
    resources.qrc

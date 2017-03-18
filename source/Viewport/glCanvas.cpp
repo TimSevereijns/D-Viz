@@ -7,6 +7,7 @@
 #include "Scene/debuggingRayAsset.h"
 #include "Scene/gridAsset.h"
 #include "Scene/lightMarkerAsset.h"
+#include "Scene/texturePreviewAsset.h"
 #include "Scene/visualizationAsset.h"
 
 #include "canvasContextMenu.h"
@@ -111,6 +112,7 @@ void GLCanvas::initializeGL()
    m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<CrosshairAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<LightMarkerAsset>(*m_graphicsDevice));
+   //m_sceneAssets.emplace_back(std::make_unique<TexturePreviewAsset>(*m_graphicsDevice));
 
    auto* const lightMarkers = dynamic_cast<LightMarkerAsset*>(m_sceneAssets[LIGHT_MARKERS].get());
    assert(lightMarkers);

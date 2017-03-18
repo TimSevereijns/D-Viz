@@ -79,13 +79,8 @@ bool CrosshairAsset::Render(
       camera.GetNearPlane(),
       camera.GetFarPlane());
 
-   QMatrix4x4 identityMatrix;
-   identityMatrix.setToIdentity();
-
-   const auto mvpMatrix = orthoMatrix * identityMatrix;
-
    m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", mvpMatrix);
+   m_shader.setUniformValue("mvpMatrix", orthoMatrix);
 
    m_VAO.bind();
 

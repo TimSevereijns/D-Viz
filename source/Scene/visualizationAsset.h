@@ -83,8 +83,8 @@ class VisualizationAsset final : public SceneAsset
       QOpenGLBuffer m_blockColorBuffer;
 
       QVector<QVector3D> m_referenceBlockVertices;
-      QVector<QMatrix4x4> m_blockTransformations;
       QVector<QVector3D> m_blockColors;
+      QVector<QMatrix4x4> m_blockTransformations;
 
       QOpenGLShaderProgram m_shadowShader;
 

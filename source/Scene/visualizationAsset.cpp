@@ -493,7 +493,7 @@ bool VisualizationAsset::Render(
       return true;
    }
 
-   //RenderShadowPass(camera);
+   RenderShadowPass(camera);
 
    m_shader.bind();
 
