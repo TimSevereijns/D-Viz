@@ -24,7 +24,7 @@ bool TexturePreviewAsset::Initialize()
    m_shader.bindAttributeLocation("vertex", PROGRAM_VERTEX_ATTRIBUTE);
    m_shader.bindAttributeLocation("texCoord", PROGRAM_TEXCOORD_ATTRIBUTE);
 
-   const auto testImageFilePath = QString{"C:/Users/Tim/Desktop/depth.png"};
+   const auto testImageFilePath = QString{ "C:/Users/Tim/Desktop/depth.png" };
    const auto image = QImage{ testImageFilePath };
    m_texture.reset(new QOpenGLTexture(image.mirrored()));
 

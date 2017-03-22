@@ -58,18 +58,8 @@ vec3 ComputeLightContribution(
    return linearColor;
 }
 
-float ComputeShadowAttenuation()
-{
-   float shadowAcneBias = 0.005;
-   vec3 samplingCoordinates = (shadowCoordinate.xyz / shadowCoordinate.w) * 0.5 + 0.5;
-   float distanceToNearestOccluder = texture2D(shadowMap, samplingCoordinates.xy).r;
-   float distanceToFragment = shadowCoordinate.z  - shadowAcneBias;
-
-   return (distanceToNearestOccluder < distanceToFragment) ? 0.5 : 1.0;
-}
-
-float near_plane = 1;
-float far_plane = 2000;
+float near_plane = 1.0f;
+float far_plane = 2000.0f;
 
 float LinearizeDepth(float depth)
 {
@@ -77,29 +67,39 @@ float LinearizeDepth(float depth)
     return (2.0 * near_plane) / (far_plane + near_plane - z * (far_plane - near_plane));
 }
 
+float ComputeShadowAttenuation()
+{
+   float shadowAcneBias = 0.005f;
+   float distanceToNearestOccluder = LinearizeDepth(texture2D(shadowMap, shadowCoordinate.xy).r);
+   float distanceToFragment = shadowCoordinate.z - shadowAcneBias;
+
+   return (distanceToNearestOccluder < distanceToFragment) ? 0.5f : 1.0f;
+}
+
 void main(void)
 {
    vec3 fragmentToCamera = normalize(cameraPosition - vec3(vertexPosition));
 
    // Calculate the contribution of each light:
-   vec3 linearColor = vec3(0, 0, 0);
-   for (int i = 0; i < 5; ++i)
-   {
+   vec3 linearColor = vec3(0.0f, 0.0f, 0.0f);
+//   for (int i = 0; i < 5; ++i)
+//   {
       linearColor += ComputeLightContribution(
-         allLights[i],
+         allLights[1],
          vertexColor,
          vertexNormal,
          vertexPosition.xyz,
          fragmentToCamera);
-   }
+   //}
 
    // Gamma correction:
-   vec3 gamma = vec3(1.0 / 2.2);
+   vec3 gamma = vec3(1.0f / 2.2f);
 
    // Final pixel color:
-   pixelColor = vec4(pow(linearColor, gamma), 1);// * ComputeShadowAttenuation();
+   pixelColor = vec4(pow(linearColor, gamma), 1) * ComputeShadowAttenuation();
 
    // DEBUG: This will allow for the visualization of the camera's depth buffer:
-   //float depth = LinearizeDepth(gl_FragCoord.z);
-   //pixelColor = vec4(depth, depth, depth, 1.0);
+   float depth = texture2D(shadowMap, shadowCoordinate.xy).r;//LinearizeDepth(gl_FragCoord.z);
+   depth = (depth == 0.0) ? 0.0 : 0.75;
+   pixelColor = vec4(depth, depth, depth, 1.0);
 }

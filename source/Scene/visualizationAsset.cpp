@@ -93,29 +93,9 @@ namespace
     */
    QMatrix4x4 ComputeLightTransformationMatrix(const Camera& camera)
    {
-      // @todo Figure out a good light position:
-//      const auto lightPosition = QVector3D{ 0.0f, 80.0f, 0.0f };
-//      const auto centerOfAttention = QVector3D{ 500.0f, 0.0f, -500.0f };
-//      const auto up = QVector3D{ 0.0f, 1.0f, 0.0f };
-
-//      QMatrix4x4 lightView{ };
-//      lightView.lookAt(lightPosition, centerOfAttention, up);
-
-//      QMatrix4x4 lightProjection{ };
-//      lightProjection.ortho(
-//         camera.GetViewport().left(),
-//         camera.GetViewport().right(),
-//         camera.GetViewport().bottom(),
-//         camera.GetViewport().top(),
-//         camera.GetNearPlane(),
-//         camera.GetFarPlane());
-
-//      const auto lightTransformationMatrix = lightProjection * lightView;
-//      return lightTransformationMatrix;
-
       Camera shadowCam = camera;
       shadowCam.SetPosition(QVector3D{ 0.0f, 80.0f, 0.0f });
-      shadowCam.SetOrientation(15.0f, 45.0f);
+      shadowCam.SetOrientation(10.0f, 45.0f);
       return shadowCam.GetProjectionViewMatrix();
    }
 
@@ -131,6 +111,13 @@ namespace
 VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
    SceneAsset{ device }
 {
+   m_shadowFrameBuffer = std::make_unique<QOpenGLFramebufferObject>(
+      /* width = */ 2048,
+      /* height = */ 1024,
+      QOpenGLFramebufferObject::Depth,
+      GL_TEXTURE_2D,
+      GL_RGB32F
+   );
 }
 
 bool VisualizationAsset::LoadShaders()
@@ -316,10 +303,6 @@ bool VisualizationAsset::InitializeBlockTransformations()
 
 bool VisualizationAsset::InitializeShadowMachinery()
 {
-   m_shadowFrameBuffer.addColorAttachment(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
-   m_shadowFrameBuffer.addColorAttachment(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
-   m_shadowFrameBuffer.addColorAttachment(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
-
    m_VAO.bind();
    m_referenceBlockBuffer.bind();
    m_shadowShader.bind();
@@ -437,6 +420,19 @@ std::uint32_t VisualizationAsset::GetBlockCount() const
    return m_blockCount;
 }
 
+void VisualizationAsset::SetViewport(
+   int width,
+   int height)
+{
+   m_shadowFrameBuffer = std::make_unique<QOpenGLFramebufferObject>(
+      4 * width,
+      4 * height,
+      QOpenGLFramebufferObject::Depth,
+      GL_TEXTURE_2D,
+      GL_RGB32F
+   );
+}
+
 bool VisualizationAsset::IsAssetLoaded() const
 {
    return !(m_blockTransformations.empty() && m_blockColors.empty());
@@ -450,19 +446,18 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
       m_graphicsDevice.glViewport(0, 0, viewport.width(), viewport.height());
    };
 
-   m_graphicsDevice.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
-   m_graphicsDevice.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+   m_graphicsDevice.glViewport(0, 0, 4 * m_viewportWidth, 4 * m_viewportHeight);
 
-   m_shadowFrameBuffer.bind();
-
-   m_graphicsDevice.glClear(GL_DEPTH_BUFFER_BIT);
-
-   constexpr float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-   m_graphicsDevice.glClearBufferfv(GL_COLOR, 0, white);
-
+   m_shadowFrameBuffer->bind();
    m_shadowShader.bind();
-   m_shadowShader.setUniformValue("lightTransformMatrix", ComputeLightTransformationMatrix(camera));
-   //m_shadowShader.setUniformValue("lightTransformMatrix", camera.GetProjectionViewMatrix());
+
+   m_shadowShader.setUniformValue("cameraProjectionViewMatrix",
+      ComputeLightTransformationMatrix(camera));
+
+   m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+   static constexpr float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+   m_graphicsDevice.glClearBufferfv(GL_COLOR, 0, white);
 
    m_VAO.bind();
 
@@ -474,11 +469,10 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
    );
 
    m_VAO.release();
-
-   //m_shadowFrameBuffer.toImage(true, 0).save("C:\\Users\\Tim\\Desktop\\depth.png");
-   m_shadowFrameBuffer.release();
-
    m_shadowShader.release();
+   m_shadowFrameBuffer->release();
+
+   //m_shadowFrameBuffer->toImage(true, 0).save("C:\\Users\\Tim\\Desktop\\depth.png");
 
    return true;
 }
@@ -497,24 +491,23 @@ bool VisualizationAsset::Render(
 
    m_shader.bind();
 
-  const QMatrix4x4 depthBiasedModelViewProjection =
+   // Bind to texture unit 0, which will be created by default:
+   m_graphicsDevice.glActiveTexture(GL_TEXTURE0);
+   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowFrameBuffer->texture());
+
+   const QMatrix4x4 depthBiasedModelViewProjection =
       biasMatrix * ComputeLightTransformationMatrix(camera);
 
-   m_shader.setUniformValue("projectionViewMatrix", camera.GetProjectionViewMatrix());
+   //m_shader.setUniformValue("shadowMap", m_shadowFrameBuffer->texture());
+   m_shader.setUniformValue("cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());
    m_shader.setUniformValue("cameraPosition", camera.GetPosition());
    m_shader.setUniformValue("materialShininess", settings.m_materialShininess);
-   m_shader.setUniformValue("depthBiasedModelViewProjectionMatrix", depthBiasedModelViewProjection);
-
-   // Bind to texture unit 0, which will be created by default:
-   GLuint depthMapTextureID = m_shadowFrameBuffer.texture();
-   m_graphicsDevice.glActiveTexture(GL_TEXTURE0);
-   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, depthMapTextureID);
+   m_shader.setUniformValue("shadowProjectionViewMatrix", depthBiasedModelViewProjection);
 
    SetUniformLights(lights, settings, m_shader);
 
    // @todo No need to set this repeatedly now that the color isn't controlled by the UI.
-   const QVector3D specularColor{ 0.0f, 0.0f, 0.0f };
-   m_shader.setUniformValue("materialSpecularColor", specularColor);
+   m_shader.setUniformValue("materialSpecularColor", QVector3D{ 0.0f, 0.0f, 0.0f });
 
    m_VAO.bind();
 
@@ -525,8 +518,8 @@ bool VisualizationAsset::Render(
       /* instanceCount = */ m_blockColors.size()
    );
 
-   m_shader.release();
    m_VAO.release();
+   m_shader.release();
 
    return true;
 }
@@ -534,8 +527,8 @@ bool VisualizationAsset::Render(
 bool VisualizationAsset::Reload()
 {
    InitializeReferenceBlock();
-   InitializeColors();
    InitializeBlockTransformations();
+   InitializeColors();
 
    return true;
 }

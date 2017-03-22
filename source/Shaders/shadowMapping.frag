@@ -3,7 +3,7 @@
 out vec4 pixelColor;
 
 float near = 1.0;
-float far  = 1000.0;
+float far  = 2000.0;
 
 float LinearizeDepth(float depth)
 {

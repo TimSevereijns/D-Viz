@@ -1,11 +1,12 @@
 #ifndef VISUALIZATIONASSET_H
 #define VISUALIZATIONASSET_H
 
+#include <memory>
+
 #include "sceneAsset.h"
 
 #include "../Utilities/colorGradient.hpp"
 
-#include <QOpenGLTexture>
 #include <QOpenGLFrameBufferObject>
 
 struct VizNode;
@@ -60,6 +61,16 @@ class VisualizationAsset final : public SceneAsset
        */
       std::uint32_t GetBlockCount() const;
 
+      /**
+       * @brief SetViewport
+       *
+       * @param width
+       * @param height
+       */
+      void SetViewport(
+         int width,
+         int height);
+
    private:
 
       bool RenderShadowPass(const Camera& camera);
@@ -88,17 +99,10 @@ class VisualizationAsset final : public SceneAsset
 
       QOpenGLShaderProgram m_shadowShader;
 
-      static constexpr auto SHADOW_MAP_WIDTH{ 2048 };
-      static constexpr auto SHADOW_MAP_HEIGHT{ 1024 };
+      int m_viewportWidth{ 2048 };
+      int m_viewportHeight{ 1024 };
 
-      QOpenGLFramebufferObject m_shadowFrameBuffer
-      {
-         SHADOW_MAP_WIDTH,
-         SHADOW_MAP_HEIGHT,
-         QOpenGLFramebufferObject::Depth,
-         GL_TEXTURE_2D,
-         GL_RGB32F
-      };
+      std::unique_ptr<QOpenGLFramebufferObject> m_shadowFrameBuffer{ nullptr };
 
       QMatrix4x4 m_lightSpaceTransformationMatrix;
 };
