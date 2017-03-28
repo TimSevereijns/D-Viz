@@ -123,11 +123,6 @@ void GLCanvas::initializeGL()
       asset->LoadShaders();
       asset->Initialize();
    }
-
-//   auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[TREEMAP].get());
-//   assert(vizAsset);
-
-//   vizAsset->SetTexturePreviewer(dynamic_cast<TexturePreviewAsset*>(m_sceneAssets[TEXTURE_PREVIEW].get()));
 }
 
 void GLCanvas::resizeGL(int width, int height)
@@ -140,11 +135,6 @@ void GLCanvas::resizeGL(int width, int height)
    m_graphicsDevice->glViewport(0, 0, width, height);
 
    m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
-
-   auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
-   assert(vizAsset);
-
-   vizAsset->SetViewport(width, height);
 }
 
 void GLCanvas::ReloadVisualization()

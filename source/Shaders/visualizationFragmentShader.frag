@@ -69,23 +69,16 @@ float LinearizeDepth(float depth)
 
 float ComputeShadowAttenuation()
 {
-//   float shadowAcneBias = 0.005f;
-//   vec4 coordinate = shadowCoordinate / shadowCoordinate.w;
-//   float distanceToNearestOccluder = texture2D(shadowMap, coordinate.xy).z;
-//   float distanceToFragment = shadowCoordinate.w - shadowAcneBias;
-
-//   return (distanceToNearestOccluder < distanceToFragment) ? 0.5f : 1.0f;
-
-   vec4 shadowCoordinateWdivide = shadowCoordinate / shadowCoordinate.w;
-   shadowCoordinateWdivide.z += 0.005;
-
-   float distanceFromLight = texture2D(shadowMap, shadowCoordinateWdivide.st).z;
-
-   float shadow = 1.0;
-   if (shadowCoordinate.w > 0.0)
-   {
-      shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0;
-   }
+   // perform perspective divide
+   vec3 projCoords = shadowCoordinate.xyz / shadowCoordinate.w;
+   // Transform to [0,1] range
+   projCoords = projCoords * 0.5 + 0.5;
+   // Get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+   float closestDepth = texture(shadowMap, projCoords.xy).r;
+   // Get depth of current fragment from light's perspective
+   float currentDepth = projCoords.z;
+   // Check whether current frag pos is in shadow
+   float shadow = (currentDepth - 0.005f) > closestDepth  ? 1.0 : 0.5;
 
    return shadow;
 }
@@ -112,9 +105,8 @@ void main(void)
    // Final pixel color:
    pixelColor = vec4(pow(linearColor, gamma), 1) * ComputeShadowAttenuation();
 
-   // DEBUG: This will allow for the visualization of the camera's depth buffer:
-   //float depth = LinearizeDepth(gl_FragCoord.z);
-   //depth = (depth > 0.4 && depth < 0.5) ? 0.0 : 0.75;
+   //float depth = texture(shadowMap, gl_FragCoord.xy).r;
+   //pixelColor = vec4(vec3(depth), 1.0);
 
-   //pixelColor = vec4(depth, depth, depth, 1.0);
+   //pixelColor = vec4(vec3(ComputeShadowAttenuation()), 1.0);
 }

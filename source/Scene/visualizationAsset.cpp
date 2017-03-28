@@ -113,15 +113,6 @@ namespace
 VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
    SceneAsset{ device }
 {
-   m_shadowFrameBuffer = std::make_unique<QOpenGLFramebufferObject>(
-      /* width = */ 4096,
-      /* height = */ 4096,
-      QOpenGLFramebufferObject::Depth,
-      GL_TEXTURE_2D,
-      GL_RGB32F
-   );
-
-   m_shadowMapTexture = std::make_unique<QOpenGLTexture>(QOpenGLTexture::Target::Target2D);
 }
 
 bool VisualizationAsset::LoadShaders()
@@ -307,31 +298,29 @@ bool VisualizationAsset::InitializeBlockTransformations()
 
 bool VisualizationAsset::InitializeShadowMachinery()
 {
-//   m_VAO.bind();
-//   m_referenceBlockBuffer.bind();
-//   m_shadowShader.bind();
+   m_VAO.bind();
+   m_referenceBlockBuffer.bind();
+   m_shadowShader.bind();
 
-//   m_shadowShader.enableAttributeArray("vertex");
-//   m_shadowShader.setAttributeBuffer(
-//      /* location = */ "vertex",
-//      /* type = */ GL_FLOAT,
-//      /* offset = */ 0,
-//      /* tupleSize = */ 3,
-//      /* stride = */ 2 * sizeof(QVector3D));
+   m_shadowShader.enableAttributeArray("vertex");
+   m_shadowShader.setAttributeBuffer(
+      /* location = */ "vertex",
+      /* type = */ GL_FLOAT,
+      /* offset = */ 0,
+      /* tupleSize = */ 3,
+      /* stride = */ 2 * sizeof(QVector3D));
 
-//   m_shadowShader.enableAttributeArray("normal");
-//   m_shadowShader.setAttributeBuffer(
-//      /* location = */ "normal",
-//      /* type = */ GL_FLOAT,
-//      /* offset = */ sizeof(QVector3D),
-//      /* tupleSize = */ 3,
-//      /* stride = */ 2 * sizeof(QVector3D));
+   m_shadowShader.enableAttributeArray("normal");
+   m_shadowShader.setAttributeBuffer(
+      /* location = */ "normal",
+      /* type = */ GL_FLOAT,
+      /* offset = */ sizeof(QVector3D),
+      /* tupleSize = */ 3,
+      /* stride = */ 2 * sizeof(QVector3D));
 
-//   m_shadowShader.release();
-//   m_referenceBlockBuffer.release();
-//   m_VAO.release();
-
-   /////////////
+   m_shadowShader.release();
+   m_referenceBlockBuffer.release();
+   m_VAO.release();
 
    m_graphicsDevice.glGenFramebuffers(1, &m_shadowMapFrameBufferID);
 
@@ -453,19 +442,6 @@ std::uint32_t VisualizationAsset::GetBlockCount() const
    return m_blockCount;
 }
 
-void VisualizationAsset::SetViewport(
-   int /*width*/,
-   int /*height*/)
-{
-   m_shadowFrameBuffer = std::make_unique<QOpenGLFramebufferObject>(
-      /* width = */ 4096,
-      /* height = */ 4096,
-      QOpenGLFramebufferObject::Depth,
-      GL_TEXTURE_2D,
-      GL_RGB32F
-   );
-}
-
 bool VisualizationAsset::IsAssetLoaded() const
 {
    return !(m_blockTransformations.empty() && m_blockColors.empty());
@@ -479,20 +455,20 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
       m_graphicsDevice.glViewport(0, 0, viewport.width(), viewport.height());
    };
 
-   m_graphicsDevice.glViewport(0, 0, 4 * m_viewportWidth, 4 * m_viewportHeight);
+   // Since Qt uses at least one framebuffer for its own rendering needs, we'll need to
+   // save and then restore the current framebuffer:
+   GLint qtBuffer;
+   m_graphicsDevice.glGetIntegerv(GL_FRAMEBUFFER_BINDING, &qtBuffer);
 
-   m_shadowFrameBuffer->bind();
+   m_graphicsDevice.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
+
+   m_graphicsDevice.glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMapFrameBufferID);
+   m_graphicsDevice.glClear(GL_DEPTH_BUFFER_BIT);
+
    m_shadowShader.bind();
 
    m_shadowShader.setUniformValue("cameraProjectionViewMatrix",
       ComputeLightTransformationMatrix(camera));
-
-   m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-   m_graphicsDevice.glDrawBuffer(GL_NONE);
-   m_graphicsDevice.glReadBuffer(GL_NONE);
-
-   static constexpr float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-   m_graphicsDevice.glClearBufferfv(GL_COLOR, 0, white);
 
    m_VAO.bind();
 
@@ -505,48 +481,21 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
 
    m_VAO.release();
 
-   if (shouldUpdateDepthTexture)
-   {
-      const QImage shadowMap = m_shadowFrameBuffer->toImage().mirrored();
-
-      m_shadowMapTexture->destroy();
-      m_shadowMapTexture->create();
-      m_shadowMapTexture->setData(shadowMap, QOpenGLTexture::MipMapGeneration::GenerateMipMaps);
-      m_shadowMapTexture->setMinificationFilter(QOpenGLTexture::Filter::Nearest);
-      m_shadowMapTexture->setMagnificationFilter(QOpenGLTexture::Filter::Nearest);
-      m_shadowMapTexture->setWrapMode(QOpenGLTexture::CoordinateDirection::DirectionS,
-         QOpenGLTexture::WrapMode::ClampToEdge);
-      m_shadowMapTexture->setWrapMode(QOpenGLTexture::CoordinateDirection::DirectionT,
-         QOpenGLTexture::WrapMode::ClampToEdge);
-
-      //m_previewer->SetTexture(shadowMap);
-      m_shadowFrameBuffer->toImage(true, 0).save("C:\\Users\\Tim\\Desktop\\depth.png");
-
-      shouldUpdateDepthTexture = false;
-   }
-
    m_shadowShader.release();
-   m_shadowFrameBuffer->release();
+
+   m_graphicsDevice.glBindFramebuffer(GL_FRAMEBUFFER, qtBuffer);
 
    return true;
 }
 
-bool VisualizationAsset::Render(
+bool VisualizationAsset::RenderMainPass(
    const Camera& camera,
    const std::vector<Light>& lights,
    const OptionsManager& settings)
 {
-   if (!IsAssetLoaded())
-   {
-      return true;
-   }
-
-   RenderShadowPass(camera);
+   m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    m_shader.bind();
-
-   m_shadowMapTexture->bind();
-   //m_shader.setUniformValue("shadowMap", 0);
 
    m_shader.setUniformValue("cameraPosition", camera.GetPosition());
    m_shader.setUniformValue("materialShininess", settings.m_materialShininess);
@@ -562,6 +511,9 @@ bool VisualizationAsset::Render(
    // @todo No need to set this repeatedly now that the color isn't controlled by the UI.
    m_shader.setUniformValue("materialSpecularColor", QVector3D{ 0.0f, 0.0f, 0.0f });
 
+   m_graphicsDevice.glActiveTexture(GL_TEXTURE0);
+   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowMapTextureID);
+
    m_VAO.bind();
 
    m_graphicsDevice.glDrawArraysInstanced(
@@ -572,8 +524,24 @@ bool VisualizationAsset::Render(
    );
 
    m_VAO.release();
-   m_shadowMapTexture->release();
+
    m_shader.release();
+
+   return true;
+}
+
+bool VisualizationAsset::Render(
+   const Camera& camera,
+   const std::vector<Light>& lights,
+   const OptionsManager& settings)
+{
+   if (!IsAssetLoaded())
+   {
+      return true;
+   }
+
+   RenderShadowPass(camera);
+   RenderMainPass(camera, lights, settings);
 
    return true;
 }
@@ -614,9 +582,4 @@ void VisualizationAsset::UpdateVBO(
 
    m_blockColorBuffer.release();
    m_VAO.release();
-}
-
-void VisualizationAsset::SetTexturePreviewer(TexturePreviewAsset* previewer)
-{
-   m_previewer = previewer;
 }

@@ -63,18 +63,6 @@ class VisualizationAsset final : public SceneAsset
        */
       std::uint32_t GetBlockCount() const;
 
-      /**
-       * @brief SetViewport
-       *
-       * @param width
-       * @param height
-       */
-      void SetViewport(
-         int width,
-         int height);
-
-      void SetTexturePreviewer(TexturePreviewAsset* previewer);
-
    private:
 
       GLuint m_shadowMapTextureID{ 0 };
@@ -83,6 +71,11 @@ class VisualizationAsset final : public SceneAsset
       TexturePreviewAsset* m_previewer;
 
       bool RenderShadowPass(const Camera& camera);
+
+      bool RenderMainPass(
+         const Camera& camera,
+         const std::vector<Light>& lights,
+         const OptionsManager& settings);
 
       QVector3D ComputeGradientColor(const TreeNode<VizNode>& node);
 
@@ -110,9 +103,6 @@ class VisualizationAsset final : public SceneAsset
 
       static constexpr int SHADOW_MAP_WIDTH{ 4096 };
       static constexpr int SHADOW_MAP_HEIGHT{ 4096 };
-
-      std::unique_ptr<QOpenGLFramebufferObject> m_shadowFrameBuffer{ nullptr };
-      std::unique_ptr<QOpenGLTexture> m_shadowMapTexture{ nullptr };
 
       QMatrix4x4 m_lightSpaceTransformationMatrix;
 };
