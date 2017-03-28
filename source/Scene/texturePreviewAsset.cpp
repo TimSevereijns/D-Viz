@@ -50,6 +50,12 @@ bool TexturePreviewAsset::Initialize()
    return true;
 }
 
+void TexturePreviewAsset::SetTexture(const QImage& texture)
+{
+   // Make a copy of the texture and store it.
+   m_texture = std::make_unique<QOpenGLTexture>(texture);
+}
+
 bool TexturePreviewAsset::LoadShaders()
 {
    return SceneAsset::LoadShaders("texturePreview", "texturePreview");

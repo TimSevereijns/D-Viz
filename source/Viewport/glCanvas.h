@@ -199,7 +199,7 @@ class GLCanvas : public QOpenGLWidget
       std::vector<Light> m_lights
       {
          Light{ },
-         Light{ QVector3D{ 0.0f, 80.0f, 0.0f } },
+         Light{ QVector3D{ -200.0f, 250.0f, 200.0f } },
          Light{ QVector3D{ 0.0f, 80.0f, -VisualizationModel::ROOT_BLOCK_DEPTH } },
          Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
          Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, -VisualizationModel::ROOT_BLOCK_DEPTH } }

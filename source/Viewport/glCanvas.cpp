@@ -27,10 +27,11 @@ namespace
     */
    enum Asset
    {
-      GRID = 0,      ///< GridAsset
-      TREEMAP,       ///< VisualizationAsset
-      CROSSHAIR,     ///< CrosshairAsset
-      LIGHT_MARKERS  ///< LightMarkerAsset
+      GRID = 0,         ///< GridAsset
+      TREEMAP,          ///< VisualizationAsset
+      CROSSHAIR,        ///< CrosshairAsset
+      LIGHT_MARKERS,    ///< LightMarkerAsset
+      TEXTURE_PREVIEW   ///< TexturePreviewAsset
    };
 
    /**
@@ -106,8 +107,6 @@ void GLCanvas::initializeGL()
    m_graphicsDevice->glEnable(GL_MULTISAMPLE);
    m_graphicsDevice->glEnable(GL_LINE_SMOOTH);
 
-   //m_graphicsDevice->glCullFace(GL_BACK);
-
    m_sceneAssets.emplace_back(std::make_unique<GridAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<CrosshairAsset>(*m_graphicsDevice));
@@ -124,6 +123,11 @@ void GLCanvas::initializeGL()
       asset->LoadShaders();
       asset->Initialize();
    }
+
+//   auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[TREEMAP].get());
+//   assert(vizAsset);
+
+//   vizAsset->SetTexturePreviewer(dynamic_cast<TexturePreviewAsset*>(m_sceneAssets[TEXTURE_PREVIEW].get()));
 }
 
 void GLCanvas::resizeGL(int width, int height)

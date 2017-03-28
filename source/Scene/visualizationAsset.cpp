@@ -94,7 +94,7 @@ namespace
    QMatrix4x4 ComputeLightTransformationMatrix(const Camera& camera)
    {
       Camera shadowCam = camera;
-      shadowCam.SetPosition(QVector3D{ 0.0f, 80.0f, 0.0f });
+      shadowCam.SetPosition(QVector3D{ -200.0f, 250.0f, 200.0f });
       shadowCam.SetOrientation(10.0f, 45.0f);
       return shadowCam.GetProjectionViewMatrix();
    }
@@ -106,18 +106,22 @@ namespace
         0.0f, 0.0f, 0.5f, 0.5f,
         0.0f, 0.0f, 0.0f, 1.0f
     };
+
+    bool shouldUpdateDepthTexture = true;
 }
 
 VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
    SceneAsset{ device }
 {
    m_shadowFrameBuffer = std::make_unique<QOpenGLFramebufferObject>(
-      /* width = */ 2048,
-      /* height = */ 1024,
+      /* width = */ 4096,
+      /* height = */ 4096,
       QOpenGLFramebufferObject::Depth,
       GL_TEXTURE_2D,
       GL_RGB32F
    );
+
+   m_shadowMapTexture = std::make_unique<QOpenGLTexture>(QOpenGLTexture::Target::Target2D);
 }
 
 bool VisualizationAsset::LoadShaders()
@@ -134,14 +138,14 @@ bool VisualizationAsset::LoadShaders()
 bool VisualizationAsset::Initialize()
 {
    const bool unitBlockInitialized = InitializeReferenceBlock();
-   const bool colorsInitialized = InitializeColors();
    const bool transformationsInitialized = InitializeBlockTransformations();
+   const bool colorsInitialized = InitializeColors();
    const bool shadowMachineryInitialized = InitializeShadowMachinery();
 
    const bool overallSuccess =
       unitBlockInitialized
-      && colorsInitialized
       && transformationsInitialized
+      && colorsInitialized
       && shadowMachineryInitialized;
 
    assert(overallSuccess);
@@ -303,29 +307,58 @@ bool VisualizationAsset::InitializeBlockTransformations()
 
 bool VisualizationAsset::InitializeShadowMachinery()
 {
-   m_VAO.bind();
-   m_referenceBlockBuffer.bind();
-   m_shadowShader.bind();
+//   m_VAO.bind();
+//   m_referenceBlockBuffer.bind();
+//   m_shadowShader.bind();
 
-   m_shadowShader.enableAttributeArray("vertex");
-   m_shadowShader.setAttributeBuffer(
-      /* location = */ "vertex",
-      /* type = */ GL_FLOAT,
-      /* offset = */ 0,
-      /* tupleSize = */ 3,
-      /* stride = */ 2 * sizeof(QVector3D));
+//   m_shadowShader.enableAttributeArray("vertex");
+//   m_shadowShader.setAttributeBuffer(
+//      /* location = */ "vertex",
+//      /* type = */ GL_FLOAT,
+//      /* offset = */ 0,
+//      /* tupleSize = */ 3,
+//      /* stride = */ 2 * sizeof(QVector3D));
 
-   m_shadowShader.enableAttributeArray("normal");
-   m_shadowShader.setAttributeBuffer(
-      /* location = */ "normal",
-      /* type = */ GL_FLOAT,
-      /* offset = */ sizeof(QVector3D),
-      /* tupleSize = */ 3,
-      /* stride = */ 2 * sizeof(QVector3D));
+//   m_shadowShader.enableAttributeArray("normal");
+//   m_shadowShader.setAttributeBuffer(
+//      /* location = */ "normal",
+//      /* type = */ GL_FLOAT,
+//      /* offset = */ sizeof(QVector3D),
+//      /* tupleSize = */ 3,
+//      /* stride = */ 2 * sizeof(QVector3D));
 
-   m_shadowShader.release();
-   m_referenceBlockBuffer.release();
-   m_VAO.release();
+//   m_shadowShader.release();
+//   m_referenceBlockBuffer.release();
+//   m_VAO.release();
+
+   /////////////
+
+   m_graphicsDevice.glGenFramebuffers(1, &m_shadowMapFrameBufferID);
+
+   m_graphicsDevice.glGenTextures(1, &m_shadowMapTextureID);
+   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowMapTextureID);
+
+   m_graphicsDevice.glTexImage2D(
+      GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_MAP_WIDTH,
+      SHADOW_MAP_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
+   m_graphicsDevice.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+   m_graphicsDevice.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+   m_graphicsDevice.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+   m_graphicsDevice.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+   constexpr GLfloat borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+   m_graphicsDevice.glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+   m_graphicsDevice.glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMapFrameBufferID);
+
+   m_graphicsDevice.glFramebufferTexture2D(
+      GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowMapTextureID, 0);
+
+   m_graphicsDevice.glDrawBuffer(GL_NONE);
+   m_graphicsDevice.glReadBuffer(GL_NONE);
+
+   m_graphicsDevice.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
    return true;
 }
@@ -339,7 +372,7 @@ std::uint32_t VisualizationAsset::LoadBufferData(
 
    m_blockCount = 0;
 
-   for (TreeNode<VizNode>& node : tree)
+   for (auto&& node : tree)
    {
       const bool fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
       const bool notTheRightFileType =
@@ -388,7 +421,7 @@ void VisualizationAsset::FindLargestDirectory(const Tree<VizNode>& tree)
 {
    std::uintmax_t largestDirectory = std::numeric_limits<std::uintmax_t>::min();
 
-   for (auto& node : tree)
+   for (auto&& node : tree)
    {
       if (node.GetData().file.type != FileType::DIRECTORY)
       {
@@ -421,12 +454,12 @@ std::uint32_t VisualizationAsset::GetBlockCount() const
 }
 
 void VisualizationAsset::SetViewport(
-   int width,
-   int height)
+   int /*width*/,
+   int /*height*/)
 {
    m_shadowFrameBuffer = std::make_unique<QOpenGLFramebufferObject>(
-      4 * width,
-      4 * height,
+      /* width = */ 4096,
+      /* height = */ 4096,
       QOpenGLFramebufferObject::Depth,
       GL_TEXTURE_2D,
       GL_RGB32F
@@ -455,6 +488,8 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
       ComputeLightTransformationMatrix(camera));
 
    m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   m_graphicsDevice.glDrawBuffer(GL_NONE);
+   m_graphicsDevice.glReadBuffer(GL_NONE);
 
    static constexpr float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
    m_graphicsDevice.glClearBufferfv(GL_COLOR, 0, white);
@@ -469,10 +504,29 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
    );
 
    m_VAO.release();
+
+   if (shouldUpdateDepthTexture)
+   {
+      const QImage shadowMap = m_shadowFrameBuffer->toImage().mirrored();
+
+      m_shadowMapTexture->destroy();
+      m_shadowMapTexture->create();
+      m_shadowMapTexture->setData(shadowMap, QOpenGLTexture::MipMapGeneration::GenerateMipMaps);
+      m_shadowMapTexture->setMinificationFilter(QOpenGLTexture::Filter::Nearest);
+      m_shadowMapTexture->setMagnificationFilter(QOpenGLTexture::Filter::Nearest);
+      m_shadowMapTexture->setWrapMode(QOpenGLTexture::CoordinateDirection::DirectionS,
+         QOpenGLTexture::WrapMode::ClampToEdge);
+      m_shadowMapTexture->setWrapMode(QOpenGLTexture::CoordinateDirection::DirectionT,
+         QOpenGLTexture::WrapMode::ClampToEdge);
+
+      //m_previewer->SetTexture(shadowMap);
+      m_shadowFrameBuffer->toImage(true, 0).save("C:\\Users\\Tim\\Desktop\\depth.png");
+
+      shouldUpdateDepthTexture = false;
+   }
+
    m_shadowShader.release();
    m_shadowFrameBuffer->release();
-
-   //m_shadowFrameBuffer->toImage(true, 0).save("C:\\Users\\Tim\\Desktop\\depth.png");
 
    return true;
 }
@@ -491,18 +545,17 @@ bool VisualizationAsset::Render(
 
    m_shader.bind();
 
-   // Bind to texture unit 0, which will be created by default:
-   m_graphicsDevice.glActiveTexture(GL_TEXTURE0);
-   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowFrameBuffer->texture());
+   m_shadowMapTexture->bind();
+   //m_shader.setUniformValue("shadowMap", 0);
 
-   const QMatrix4x4 depthBiasedModelViewProjection =
-      biasMatrix * ComputeLightTransformationMatrix(camera);
-
-   //m_shader.setUniformValue("shadowMap", m_shadowFrameBuffer->texture());
-   m_shader.setUniformValue("cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());
    m_shader.setUniformValue("cameraPosition", camera.GetPosition());
    m_shader.setUniformValue("materialShininess", settings.m_materialShininess);
-   m_shader.setUniformValue("shadowProjectionViewMatrix", depthBiasedModelViewProjection);
+
+   const QMatrix4x4 shadowProjectionViewMatrix =
+      biasMatrix * ComputeLightTransformationMatrix(camera);
+
+   m_shader.setUniformValue("shadowProjectionViewMatrix", shadowProjectionViewMatrix );
+   m_shader.setUniformValue("cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());
 
    SetUniformLights(lights, settings, m_shader);
 
@@ -519,6 +572,7 @@ bool VisualizationAsset::Render(
    );
 
    m_VAO.release();
+   m_shadowMapTexture->release();
    m_shader.release();
 
    return true;
@@ -560,4 +614,9 @@ void VisualizationAsset::UpdateVBO(
 
    m_blockColorBuffer.release();
    m_VAO.release();
+}
+
+void VisualizationAsset::SetTexturePreviewer(TexturePreviewAsset* previewer)
+{
+   m_previewer = previewer;
 }

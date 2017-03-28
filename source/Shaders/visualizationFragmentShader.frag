@@ -1,4 +1,4 @@
-#version 410 core
+#version 450 core
 
 uniform vec3 cameraPosition;
 uniform vec3 materialSpecularColor;
@@ -69,11 +69,25 @@ float LinearizeDepth(float depth)
 
 float ComputeShadowAttenuation()
 {
-   float shadowAcneBias = 0.005f;
-   float distanceToNearestOccluder = LinearizeDepth(texture2D(shadowMap, shadowCoordinate.xy).r);
-   float distanceToFragment = shadowCoordinate.z - shadowAcneBias;
+//   float shadowAcneBias = 0.005f;
+//   vec4 coordinate = shadowCoordinate / shadowCoordinate.w;
+//   float distanceToNearestOccluder = texture2D(shadowMap, coordinate.xy).z;
+//   float distanceToFragment = shadowCoordinate.w - shadowAcneBias;
 
-   return (distanceToNearestOccluder < distanceToFragment) ? 0.5f : 1.0f;
+//   return (distanceToNearestOccluder < distanceToFragment) ? 0.5f : 1.0f;
+
+   vec4 shadowCoordinateWdivide = shadowCoordinate / shadowCoordinate.w;
+   shadowCoordinateWdivide.z += 0.005;
+
+   float distanceFromLight = texture2D(shadowMap, shadowCoordinateWdivide.st).z;
+
+   float shadow = 1.0;
+   if (shadowCoordinate.w > 0.0)
+   {
+      shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0;
+   }
+
+   return shadow;
 }
 
 void main(void)
@@ -99,7 +113,8 @@ void main(void)
    pixelColor = vec4(pow(linearColor, gamma), 1) * ComputeShadowAttenuation();
 
    // DEBUG: This will allow for the visualization of the camera's depth buffer:
-   float depth = texture2D(shadowMap, shadowCoordinate.xy).r;//LinearizeDepth(gl_FragCoord.z);
-   depth = (depth == 0.0) ? 0.0 : 0.75;
-   pixelColor = vec4(depth, depth, depth, 1.0);
+   //float depth = LinearizeDepth(gl_FragCoord.z);
+   //depth = (depth > 0.4 && depth < 0.5) ? 0.0 : 0.75;
+
+   //pixelColor = vec4(depth, depth, depth, 1.0);
 }

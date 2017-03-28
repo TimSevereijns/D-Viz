@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include <QImage>
 #include <QOpenGLTexture>
 
 #include "sceneAsset.h"
@@ -23,6 +24,8 @@ public:
       const OptionsManager& settings) override;
 
    bool Reload() override;
+
+   void SetTexture(const QImage &texture);
 
 private:
 

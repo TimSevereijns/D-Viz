@@ -4,10 +4,12 @@
 #include <memory>
 
 #include "sceneAsset.h"
+#include "texturePreviewAsset.h"
 
 #include "../Utilities/colorGradient.hpp"
 
 #include <QOpenGLFrameBufferObject>
+#include <QOpenGLTexture>
 
 struct VizNode;
 template<typename DataType> class TreeNode;
@@ -71,7 +73,14 @@ class VisualizationAsset final : public SceneAsset
          int width,
          int height);
 
+      void SetTexturePreviewer(TexturePreviewAsset* previewer);
+
    private:
+
+      GLuint m_shadowMapTextureID{ 0 };
+      GLuint m_shadowMapFrameBufferID{ 0 };
+
+      TexturePreviewAsset* m_previewer;
 
       bool RenderShadowPass(const Camera& camera);
 
@@ -99,10 +108,11 @@ class VisualizationAsset final : public SceneAsset
 
       QOpenGLShaderProgram m_shadowShader;
 
-      int m_viewportWidth{ 2048 };
-      int m_viewportHeight{ 1024 };
+      static constexpr int SHADOW_MAP_WIDTH{ 4096 };
+      static constexpr int SHADOW_MAP_HEIGHT{ 4096 };
 
       std::unique_ptr<QOpenGLFramebufferObject> m_shadowFrameBuffer{ nullptr };
+      std::unique_ptr<QOpenGLTexture> m_shadowMapTexture{ nullptr };
 
       QMatrix4x4 m_lightSpaceTransformationMatrix;
 };
