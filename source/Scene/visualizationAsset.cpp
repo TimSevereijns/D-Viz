@@ -113,6 +113,11 @@ namespace
 VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
    SceneAsset{ device }
 {
+   m_shadowFrameBuffer = std::make_unique<QOpenGLFramebufferObject>(
+      /* width = */ SHADOW_MAP_WIDTH,
+      /* height = */ SHADOW_MAP_HEIGHT,
+      QOpenGLFramebufferObject::Depth,
+      GL_TEXTURE_2D);
 }
 
 bool VisualizationAsset::LoadShaders()
@@ -122,6 +127,7 @@ bool VisualizationAsset::LoadShaders()
    bool success = m_shadowShader.link();
 
    success &= SceneAsset::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
+   success &= LoadTexturePreviewShaders();
 
    return success;
 }
@@ -132,12 +138,14 @@ bool VisualizationAsset::Initialize()
    const bool transformationsInitialized = InitializeBlockTransformations();
    const bool colorsInitialized = InitializeColors();
    const bool shadowMachineryInitialized = InitializeShadowMachinery();
+   const bool texturePreviewerInitialized = InitializeTexturePreviewer();
 
    const bool overallSuccess =
       unitBlockInitialized
       && transformationsInitialized
       && colorsInitialized
-      && shadowMachineryInitialized;
+      && shadowMachineryInitialized
+      && texturePreviewerInitialized;
 
    assert(overallSuccess);
    return overallSuccess;
@@ -322,33 +330,6 @@ bool VisualizationAsset::InitializeShadowMachinery()
    m_referenceBlockBuffer.release();
    m_VAO.release();
 
-   m_graphicsDevice.glGenFramebuffers(1, &m_shadowMapFrameBufferID);
-
-   m_graphicsDevice.glGenTextures(1, &m_shadowMapTextureID);
-   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowMapTextureID);
-
-   m_graphicsDevice.glTexImage2D(
-      GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_MAP_WIDTH,
-      SHADOW_MAP_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-
-   m_graphicsDevice.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-   m_graphicsDevice.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-   m_graphicsDevice.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-   m_graphicsDevice.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
-   constexpr GLfloat borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-   m_graphicsDevice.glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-
-   m_graphicsDevice.glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMapFrameBufferID);
-
-   m_graphicsDevice.glFramebufferTexture2D(
-      GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowMapTextureID, 0);
-
-   m_graphicsDevice.glDrawBuffer(GL_NONE);
-   m_graphicsDevice.glReadBuffer(GL_NONE);
-
-   m_graphicsDevice.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
    return true;
 }
 
@@ -455,20 +436,18 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
       m_graphicsDevice.glViewport(0, 0, viewport.width(), viewport.height());
    };
 
-   // Since Qt uses at least one framebuffer for its own rendering needs, we'll need to
-   // save and then restore the current framebuffer:
-   GLint qtBuffer;
-   m_graphicsDevice.glGetIntegerv(GL_FRAMEBUFFER_BINDING, &qtBuffer);
-
    m_graphicsDevice.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
 
-   m_graphicsDevice.glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMapFrameBufferID);
-   m_graphicsDevice.glClear(GL_DEPTH_BUFFER_BIT);
-
+   m_shadowFrameBuffer->bind();
    m_shadowShader.bind();
 
    m_shadowShader.setUniformValue("lightProjectionViewMatrix",
       ComputeLightTransformationMatrix(camera));
+
+   m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+   static constexpr float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+   m_graphicsDevice.glClearBufferfv(GL_COLOR, 0, white);
 
    m_VAO.bind();
 
@@ -482,8 +461,9 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
    m_VAO.release();
 
    m_shadowShader.release();
+   m_shadowFrameBuffer->release();
 
-   m_graphicsDevice.glBindFramebuffer(GL_FRAMEBUFFER, qtBuffer);
+   //m_shadowFrameBuffer->toImage(true, 0).save("C:\\Users\\Tim\\Desktop\\depth.png");
 
    return true;
 }
@@ -508,8 +488,8 @@ bool VisualizationAsset::RenderMainPass(
 
    SetUniformLights(lights, settings, m_shader);
 
-   m_graphicsDevice.glActiveTexture(GL_TEXTURE1);
-   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowMapTextureID);
+   m_graphicsDevice.glActiveTexture(GL_TEXTURE0);
+   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowFrameBuffer->texture());
 
    m_VAO.bind();
 
@@ -538,7 +518,7 @@ bool VisualizationAsset::Render(
    }
 
    RenderShadowPass(camera);
-   //RenderMainPass(camera, lights, settings);
+   RenderMainPass(camera, lights, settings);
    RenderDepthMapPreview();
 
    return true;
@@ -582,7 +562,7 @@ void VisualizationAsset::UpdateVBO(
    m_VAO.release();
 }
 
-void VisualizationAsset::LoadTexturePreviewShaders()
+bool VisualizationAsset::LoadTexturePreviewShaders()
 {
    if (!m_texturePreviewShader.addShaderFromSourceFile(QOpenGLShader::Vertex,
       ":/Shaders/texturePreview.vert"))
@@ -596,57 +576,86 @@ void VisualizationAsset::LoadTexturePreviewShaders()
       std::cout << "Error loading fragment shader!" << std::endl;
    }
 
-   m_texturePreviewShader.link();
+   return m_texturePreviewShader.link();
 }
 
-namespace
+bool VisualizationAsset::InitializeTexturePreviewer()
 {
-   GLuint quadVAO = 0;
-   GLuint quadVBO;
-}
-
-// RenderQuad() Renders a 1x1 quad in NDC, best used for framebuffer color targets
-// and post-processing effects.
-void VisualizationAsset::RenderDepthMapPreview()
-{
-   if (quadVAO == 0)
+   static constexpr int coordinates[4][3] =
    {
-      LoadTexturePreviewShaders();
+      { +1, -1, -1 },
+      { -1, -1, -1 },
+      { -1, +1, -1 },
+      { +1, +1, -1 }
+   };
 
-      constexpr GLfloat quadVertices[] =
-      {
-         // Positions         // Texture Coords
-         -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-         -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
-          1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
-          1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-      };
+   static constexpr auto PROGRAM_VERTEX_ATTRIBUTE{ 0 };
+   static constexpr auto PROGRAM_TEXCOORD_ATTRIBUTE{ 1 };
 
-      // Setup plane VAO
-      m_graphicsDevice.glGenVertexArrays(1, &quadVAO);
-      m_graphicsDevice.glGenBuffers(1, &quadVBO);
-      m_graphicsDevice.glBindVertexArray(quadVAO);
-      m_graphicsDevice.glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-      m_graphicsDevice.glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices,
-         GL_STATIC_DRAW);
+   m_texturePreviewShader.bindAttributeLocation("vertex", PROGRAM_VERTEX_ATTRIBUTE);
+   m_texturePreviewShader.bindAttributeLocation("texCoord", PROGRAM_TEXCOORD_ATTRIBUTE);
 
-      m_graphicsDevice.glEnableVertexAttribArray(0);
-      m_graphicsDevice.glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-         5 * sizeof(GLfloat), (GLvoid*)0);
+   QVector<GLfloat> vertexData;
+   for (int i = 0; i < 4; ++i)
+   {
+      // Vertex position:
+      vertexData.append(coordinates[i][0]);
+      vertexData.append(coordinates[i][1]);
+      vertexData.append(coordinates[i][2]);
 
-      m_graphicsDevice.glEnableVertexAttribArray(1);
-      m_graphicsDevice.glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
-         5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+      // Texture coordinate:
+      vertexData.append(i == 0 || i == 3);
+      vertexData.append(i == 0 || i == 1);
    }
 
+   m_texturePreviewVertexBuffer.create();
+   m_texturePreviewVertexBuffer.bind();
+
+   m_texturePreviewVertexBuffer.allocate(
+      vertexData.constData(),
+      vertexData.count() * sizeof(GLfloat));
+
+   m_texturePreviewVertexBuffer.release();
+
+   return true;
+}
+
+void VisualizationAsset::RenderDepthMapPreview()
+{
+   // Simply using Normalized Device Coordinates (NDC), and an arbitrary choice of view planes.
+   QMatrix4x4 orthoMatrix;
+   orthoMatrix.ortho(-1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1000.0f);
+   orthoMatrix.translate(0.0f, 0.0f, -1.0f);
+
+   m_texturePreviewVertexBuffer.bind();
+
+   static constexpr auto PROGRAM_VERTEX_ATTRIBUTE{ 0 };
+   static constexpr auto PROGRAM_TEXCOORD_ATTRIBUTE{ 1 };
+
    m_texturePreviewShader.bind();
+   m_texturePreviewShader.setUniformValue("matrix", orthoMatrix);
+   m_texturePreviewShader.enableAttributeArray(PROGRAM_VERTEX_ATTRIBUTE);
+   m_texturePreviewShader.enableAttributeArray(PROGRAM_TEXCOORD_ATTRIBUTE);
+
+   m_texturePreviewShader.setAttributeBuffer(PROGRAM_VERTEX_ATTRIBUTE, GL_FLOAT,
+      /* offset = */    0,
+      /* tupleSize = */ 3,
+      /* stride = */    5 * sizeof(GLfloat));
+
+   m_texturePreviewShader.setAttributeBuffer(PROGRAM_TEXCOORD_ATTRIBUTE, GL_FLOAT,
+      /* offset = */    3 * sizeof(GLfloat),
+      /* tupleSize = */ 2,
+      /* stride = */    5 * sizeof(GLfloat));
 
    m_graphicsDevice.glActiveTexture(GL_TEXTURE0);
-   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowMapFrameBufferID);
+   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowFrameBuffer->texture());
 
-   m_graphicsDevice.glBindVertexArray(quadVAO);
-   m_graphicsDevice.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-   m_graphicsDevice.glBindVertexArray(0);
+   m_graphicsDevice.glDrawArrays(
+      /* mode = */ GL_TRIANGLE_FAN,
+      /* first = */ 0,
+      /* count = */ 4);
 
    m_texturePreviewShader.release();
+
+   m_texturePreviewVertexBuffer.release();
 }

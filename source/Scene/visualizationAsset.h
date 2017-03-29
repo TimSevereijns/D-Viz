@@ -83,7 +83,8 @@ class VisualizationAsset final : public SceneAsset
       bool InitializeBlockTransformations();
       bool InitializeShadowMachinery();
 
-      void LoadTexturePreviewShaders();
+      bool LoadTexturePreviewShaders();
+      bool InitializeTexturePreviewer();
 
       GLuint m_shadowMapTextureID{ 0 };
       GLuint m_shadowMapFrameBufferID{ 0 };
@@ -98,6 +99,7 @@ class VisualizationAsset final : public SceneAsset
       QOpenGLBuffer m_referenceBlockBuffer;
       QOpenGLBuffer m_blockTransformationBuffer;
       QOpenGLBuffer m_blockColorBuffer;
+      QOpenGLBuffer m_texturePreviewVertexBuffer;
 
       QVector<QVector3D> m_referenceBlockVertices;
       QVector<QVector3D> m_blockColors;
@@ -105,6 +107,8 @@ class VisualizationAsset final : public SceneAsset
 
       QOpenGLShaderProgram m_shadowShader;
       QOpenGLShaderProgram m_texturePreviewShader;
+
+      std::unique_ptr<QOpenGLFramebufferObject> m_shadowFrameBuffer{ nullptr };
 
       static constexpr int SHADOW_MAP_WIDTH{ 4096 };
       static constexpr int SHADOW_MAP_HEIGHT{ 4096 };
