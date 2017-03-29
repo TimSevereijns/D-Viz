@@ -105,10 +105,10 @@ class VisualizationAsset final : public SceneAsset
       QVector<QVector3D> m_blockColors;
       QVector<QMatrix4x4> m_blockTransformations;
 
-      QOpenGLShaderProgram m_shadowShader;
+      QOpenGLShaderProgram m_shadowMapShader;
       QOpenGLShaderProgram m_texturePreviewShader;
 
-      std::unique_ptr<QOpenGLFramebufferObject> m_shadowFrameBuffer{ nullptr };
+      std::unique_ptr<QOpenGLFramebufferObject> m_shadowMapFrameBuffer{ nullptr };
 
       static constexpr int SHADOW_MAP_WIDTH{ 4096 };
       static constexpr int SHADOW_MAP_HEIGHT{ 4096 };

@@ -151,7 +151,7 @@ class SceneAsset
       QOpenGLBuffer m_vertexBuffer;
       QOpenGLBuffer m_colorBuffer;
 
-      QOpenGLShaderProgram m_shader;
+      QOpenGLShaderProgram m_mainShader;
 
       QOpenGLVertexArrayObject m_VAO;
 

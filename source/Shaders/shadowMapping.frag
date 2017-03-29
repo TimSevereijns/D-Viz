@@ -2,6 +2,7 @@
 
 out vec4 pixelColor;
 
+// @todo Pass these values in as uniforms:
 float near = 1.0;
 float far  = 2000.0;
 
@@ -13,7 +14,7 @@ float LinearizeDepth(float depth)
 
 void main()
 {
-   float depth = LinearizeDepth(gl_FragCoord.z);
-   //float depth = gl_FragCoord.z;
+   //float depth = LinearizeDepth(gl_FragCoord.z);
+   float depth = gl_FragCoord.z;
    pixelColor = vec4(depth, depth, depth, 1.0);
 }

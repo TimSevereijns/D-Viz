@@ -108,12 +108,15 @@ namespace
     };
 
     bool shouldUpdateDepthTexture = true;
+
+    static constexpr auto TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE{ 0 };
+    static constexpr auto TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE{ 1 };
 }
 
 VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
    SceneAsset{ device }
 {
-   m_shadowFrameBuffer = std::make_unique<QOpenGLFramebufferObject>(
+   m_shadowMapFrameBuffer = std::make_unique<QOpenGLFramebufferObject>(
       /* width = */ SHADOW_MAP_WIDTH,
       /* height = */ SHADOW_MAP_HEIGHT,
       QOpenGLFramebufferObject::Depth,
@@ -122,9 +125,9 @@ VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
 
 bool VisualizationAsset::LoadShaders()
 {
-   m_shadowShader.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/Shaders/shadowMapping.vert");
-   m_shadowShader.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/Shaders/shadowMapping.frag");
-   bool success = m_shadowShader.link();
+   m_shadowMapShader.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/Shaders/shadowMapping.vert");
+   m_shadowMapShader.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/Shaders/shadowMapping.frag");
+   bool success = m_shadowMapShader.link();
 
    success &= SceneAsset::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
    success &= LoadTexturePreviewShaders();
@@ -181,16 +184,16 @@ bool VisualizationAsset::InitializeReferenceBlock()
 
    m_referenceBlockBuffer.bind();
 
-   m_shader.enableAttributeArray("vertex");
-   m_shader.setAttributeBuffer(
+   m_mainShader.enableAttributeArray("vertex");
+   m_mainShader.setAttributeBuffer(
       /* location = */ "vertex",
       /* type = */ GL_FLOAT,
       /* offset = */ 0,
       /* tupleSize = */ 3,
       /* stride = */ 2 * sizeof(QVector3D));
 
-   m_shader.enableAttributeArray("normal");
-   m_shader.setAttributeBuffer(
+   m_mainShader.enableAttributeArray("normal");
+   m_mainShader.setAttributeBuffer(
       /* location = */ "normal",
       /* type = */ GL_FLOAT,
       /* offset = */ sizeof(QVector3D),
@@ -308,25 +311,25 @@ bool VisualizationAsset::InitializeShadowMachinery()
 {
    m_VAO.bind();
    m_referenceBlockBuffer.bind();
-   m_shadowShader.bind();
+   m_shadowMapShader.bind();
 
-   m_shadowShader.enableAttributeArray("vertex");
-   m_shadowShader.setAttributeBuffer(
+   m_shadowMapShader.enableAttributeArray("vertex");
+   m_shadowMapShader.setAttributeBuffer(
       /* location = */ "vertex",
       /* type = */ GL_FLOAT,
       /* offset = */ 0,
       /* tupleSize = */ 3,
       /* stride = */ 2 * sizeof(QVector3D));
 
-   m_shadowShader.enableAttributeArray("normal");
-   m_shadowShader.setAttributeBuffer(
+   m_shadowMapShader.enableAttributeArray("normal");
+   m_shadowMapShader.setAttributeBuffer(
       /* location = */ "normal",
       /* type = */ GL_FLOAT,
       /* offset = */ sizeof(QVector3D),
       /* tupleSize = */ 3,
       /* stride = */ 2 * sizeof(QVector3D));
 
-   m_shadowShader.release();
+   m_shadowMapShader.release();
    m_referenceBlockBuffer.release();
    m_VAO.release();
 
@@ -438,10 +441,10 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
 
    m_graphicsDevice.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
 
-   m_shadowFrameBuffer->bind();
-   m_shadowShader.bind();
+   m_shadowMapFrameBuffer->bind();
+   m_shadowMapShader.bind();
 
-   m_shadowShader.setUniformValue("lightProjectionViewMatrix",
+   m_shadowMapShader.setUniformValue("lightProjectionViewMatrix",
       ComputeLightTransformationMatrix(camera));
 
    m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -460,10 +463,8 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
 
    m_VAO.release();
 
-   m_shadowShader.release();
-   m_shadowFrameBuffer->release();
-
-   //m_shadowFrameBuffer->toImage(true, 0).save("C:\\Users\\Tim\\Desktop\\depth.png");
+   m_shadowMapShader.release();
+   m_shadowMapFrameBuffer->release();
 
    return true;
 }
@@ -475,21 +476,21 @@ bool VisualizationAsset::RenderMainPass(
 {
    m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-   m_shader.bind();
+   m_mainShader.bind();
 
-   m_shader.setUniformValue("cameraPosition", camera.GetPosition());
-   m_shader.setUniformValue("materialShininess", settings.m_materialShininess);
+   m_mainShader.setUniformValue("cameraPosition", camera.GetPosition());
+   m_mainShader.setUniformValue("materialShininess", settings.m_materialShininess);
 
    const QMatrix4x4 lightProjectionViewMatrix =
       /*biasMatrix **/ ComputeLightTransformationMatrix(camera);
 
-   m_shader.setUniformValue("lightProjectionViewMatrix", lightProjectionViewMatrix );
-   m_shader.setUniformValue("cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());
+   m_mainShader.setUniformValue("lightProjectionViewMatrix", lightProjectionViewMatrix );
+   m_mainShader.setUniformValue("cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());
 
-   SetUniformLights(lights, settings, m_shader);
+   SetUniformLights(lights, settings, m_mainShader);
 
    m_graphicsDevice.glActiveTexture(GL_TEXTURE0);
-   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowFrameBuffer->texture());
+   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowMapFrameBuffer->texture());
 
    m_VAO.bind();
 
@@ -502,7 +503,7 @@ bool VisualizationAsset::RenderMainPass(
 
    m_VAO.release();
 
-   m_shader.release();
+   m_mainShader.release();
 
    return true;
 }
@@ -519,7 +520,7 @@ bool VisualizationAsset::Render(
 
    RenderShadowPass(camera);
    RenderMainPass(camera, lights, settings);
-   RenderDepthMapPreview();
+   //RenderDepthMapPreview(); ///< Be sure to linearize the depth output in `shadowMapping.frag`
 
    return true;
 }
@@ -589,11 +590,8 @@ bool VisualizationAsset::InitializeTexturePreviewer()
       { +1, +1, -1 }
    };
 
-   static constexpr auto PROGRAM_VERTEX_ATTRIBUTE{ 0 };
-   static constexpr auto PROGRAM_TEXCOORD_ATTRIBUTE{ 1 };
-
-   m_texturePreviewShader.bindAttributeLocation("vertex", PROGRAM_VERTEX_ATTRIBUTE);
-   m_texturePreviewShader.bindAttributeLocation("texCoord", PROGRAM_TEXCOORD_ATTRIBUTE);
+   m_texturePreviewShader.bindAttributeLocation("vertex", TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE);
+   m_texturePreviewShader.bindAttributeLocation("texCoord", TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE);
 
    QVector<GLfloat> vertexData;
    for (int i = 0; i < 4; ++i)
@@ -629,26 +627,23 @@ void VisualizationAsset::RenderDepthMapPreview()
 
    m_texturePreviewVertexBuffer.bind();
 
-   static constexpr auto PROGRAM_VERTEX_ATTRIBUTE{ 0 };
-   static constexpr auto PROGRAM_TEXCOORD_ATTRIBUTE{ 1 };
-
    m_texturePreviewShader.bind();
    m_texturePreviewShader.setUniformValue("matrix", orthoMatrix);
-   m_texturePreviewShader.enableAttributeArray(PROGRAM_VERTEX_ATTRIBUTE);
-   m_texturePreviewShader.enableAttributeArray(PROGRAM_TEXCOORD_ATTRIBUTE);
+   m_texturePreviewShader.enableAttributeArray(TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE);
+   m_texturePreviewShader.enableAttributeArray(TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE);
 
-   m_texturePreviewShader.setAttributeBuffer(PROGRAM_VERTEX_ATTRIBUTE, GL_FLOAT,
+   m_texturePreviewShader.setAttributeBuffer(TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE, GL_FLOAT,
       /* offset = */    0,
       /* tupleSize = */ 3,
       /* stride = */    5 * sizeof(GLfloat));
 
-   m_texturePreviewShader.setAttributeBuffer(PROGRAM_TEXCOORD_ATTRIBUTE, GL_FLOAT,
+   m_texturePreviewShader.setAttributeBuffer(TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE, GL_FLOAT,
       /* offset = */    3 * sizeof(GLfloat),
       /* tupleSize = */ 2,
       /* stride = */    5 * sizeof(GLfloat));
 
    m_graphicsDevice.glActiveTexture(GL_TEXTURE0);
-   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowFrameBuffer->texture());
+   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowMapFrameBuffer->texture());
 
    m_graphicsDevice.glDrawArrays(
       /* mode = */ GL_TRIANGLE_FAN,

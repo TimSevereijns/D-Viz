@@ -21,8 +21,8 @@ bool TexturePreviewAsset::Initialize()
       { +1, +1, -1 }
    };
 
-   m_shader.bindAttributeLocation("vertex", PROGRAM_VERTEX_ATTRIBUTE);
-   m_shader.bindAttributeLocation("texCoord", PROGRAM_TEXCOORD_ATTRIBUTE);
+   m_mainShader.bindAttributeLocation("vertex", PROGRAM_VERTEX_ATTRIBUTE);
+   m_mainShader.bindAttributeLocation("texCoord", PROGRAM_TEXCOORD_ATTRIBUTE);
 
    const auto testImageFilePath = QString{ "C:/Users/Tim/Desktop/depth.png" };
    const auto image = QImage{ testImageFilePath };
@@ -74,17 +74,17 @@ bool TexturePreviewAsset::Render(
 
    m_VBO.bind();
 
-   m_shader.bind();
-   m_shader.setUniformValue("matrix", orthoMatrix);
-   m_shader.enableAttributeArray(PROGRAM_VERTEX_ATTRIBUTE);
-   m_shader.enableAttributeArray(PROGRAM_TEXCOORD_ATTRIBUTE);
+   m_mainShader.bind();
+   m_mainShader.setUniformValue("matrix", orthoMatrix);
+   m_mainShader.enableAttributeArray(PROGRAM_VERTEX_ATTRIBUTE);
+   m_mainShader.enableAttributeArray(PROGRAM_TEXCOORD_ATTRIBUTE);
 
-   m_shader.setAttributeBuffer(PROGRAM_VERTEX_ATTRIBUTE, GL_FLOAT,
+   m_mainShader.setAttributeBuffer(PROGRAM_VERTEX_ATTRIBUTE, GL_FLOAT,
       /* offset = */    0,
       /* tupleSize = */ 3,
       /* stride = */    5 * sizeof(GLfloat));
 
-   m_shader.setAttributeBuffer(PROGRAM_TEXCOORD_ATTRIBUTE, GL_FLOAT,
+   m_mainShader.setAttributeBuffer(PROGRAM_TEXCOORD_ATTRIBUTE, GL_FLOAT,
       /* offset = */    3 * sizeof(GLfloat),
       /* tupleSize = */ 2,
       /* stride = */    5 * sizeof(GLfloat));
@@ -97,7 +97,7 @@ bool TexturePreviewAsset::Render(
       /* count = */ 4);
 
    m_texture->release();
-   m_shader.release();
+   m_mainShader.release();
 
    m_VBO.release();
 

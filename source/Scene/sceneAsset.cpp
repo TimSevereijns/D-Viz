@@ -25,19 +25,19 @@ bool SceneAsset::LoadShaders(
    const QString& vertexShaderName,
    const QString& fragmentShaderName)
 {
-   if (!m_shader.addShaderFromSourceFile(QOpenGLShader::Vertex,
+   if (!m_mainShader.addShaderFromSourceFile(QOpenGLShader::Vertex,
       ":/Shaders/" + vertexShaderName + ".vert"))
    {
       std::cout << "Error loading vertex shader!" << std::endl;
    }
 
-   if (!m_shader.addShaderFromSourceFile(QOpenGLShader::Fragment,
+   if (!m_mainShader.addShaderFromSourceFile(QOpenGLShader::Fragment,
       ":/Shaders/" + fragmentShaderName + ".frag"))
    {
       std::cout << "Error loading fragment shader!" << std::endl;
    }
 
-   return m_shader.link();
+   return m_mainShader.link();
 }
 
 bool SceneAsset::IsAssetLoaded() const

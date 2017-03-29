@@ -79,8 +79,8 @@ bool CrosshairAsset::Render(
       camera.GetNearPlane(),
       camera.GetFarPlane());
 
-   m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", orthoMatrix);
+   m_mainShader.bind();
+   m_mainShader.setUniformValue("mvpMatrix", orthoMatrix);
 
    m_VAO.bind();
 
@@ -91,7 +91,7 @@ bool CrosshairAsset::Render(
       /* count = */ m_rawVertices.size());
 
    m_VAO.release();
-   m_shader.release();
+   m_mainShader.release();
 
    return true;
 }

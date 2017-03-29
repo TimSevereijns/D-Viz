@@ -63,7 +63,7 @@ float far_plane = 2000.0f;
 
 float LinearizeDepth(float depth)
 {
-    float z = depth * 2.0 - 1.0; // Back to Normalized Device Coordinates
+    float z = depth * 2.0 - 1.0; // Back to Normalized Device Coordinates (NDC)
     return (2.0 * near_plane) / (far_plane + near_plane - z * (far_plane - near_plane));
 }
 
@@ -78,7 +78,7 @@ float ComputeShadowAttenuation()
    // Get depth of current fragment from light's perspective
    float currentDepth = projCoords.z;
    // Check whether current frag pos is in shadow
-   float shadow = (currentDepth - 0.005f) > closestDepth  ? 1.0 : 0.5;
+   float shadow = (currentDepth) > closestDepth  ? 1.0 : 0.5;
 
    return shadow;
 }
@@ -89,24 +89,19 @@ void main(void)
 
    // Calculate the contribution of each light:
    vec3 linearColor = vec3(0.0f, 0.0f, 0.0f);
-//   for (int i = 0; i < 5; ++i)
-//   {
+   for (int i = 0; i < 5; ++i)
+   {
       linearColor += ComputeLightContribution(
-         allLights[1],
+         allLights[i],
          vertexColor,
          vertexNormal,
          vertexPosition.xyz,
          fragmentToCamera);
-   //}
+   }
 
    // Gamma correction:
    vec3 gamma = vec3(1.0f / 2.2f);
 
    // Final pixel color:
-   pixelColor = vec4(pow(linearColor, gamma), 1) * ComputeShadowAttenuation();
-
-   //float depth = texture(shadowMap, gl_FragCoord.xy).r;
-   //pixelColor = vec4(vec3(depth), 1.0);
-
-   //pixelColor = vec4(vec3(ComputeShadowAttenuation()), 1.0);
+   pixelColor = vec4(pow(linearColor, gamma), 1);// * ComputeShadowAttenuation();
 }

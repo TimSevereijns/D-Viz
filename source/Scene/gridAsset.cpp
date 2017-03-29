@@ -105,8 +105,8 @@ bool GridAsset::Render(
    const std::vector<Light>&,
    const OptionsManager&)
 {
-   m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
+   m_mainShader.bind();
+   m_mainShader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 
    m_VAO.bind();
 
@@ -122,7 +122,7 @@ bool GridAsset::Render(
       /* first = */ 6,
       /* count = */ m_rawVertices.size());
 
-   m_shader.release();
+   m_mainShader.release();
    m_VAO.release();
 
    return true;

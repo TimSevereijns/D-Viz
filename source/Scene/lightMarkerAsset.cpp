@@ -10,8 +10,8 @@ bool LightMarkerAsset::Render(
    const std::vector<Light>&,
    const OptionsManager&)
 {
-   m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
+   m_mainShader.bind();
+   m_mainShader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 
    m_VAO.bind();
 
@@ -24,7 +24,7 @@ bool LightMarkerAsset::Render(
 
    m_graphicsDevice.glLineWidth(1);
 
-   m_shader.release();
+   m_mainShader.release();
    m_VAO.release();
 
    return true;
