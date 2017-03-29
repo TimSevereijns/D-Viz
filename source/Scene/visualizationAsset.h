@@ -65,10 +65,7 @@ class VisualizationAsset final : public SceneAsset
 
    private:
 
-      GLuint m_shadowMapTextureID{ 0 };
-      GLuint m_shadowMapFrameBufferID{ 0 };
-
-      TexturePreviewAsset* m_previewer;
+      void RenderDepthMapPreview();
 
       bool RenderShadowPass(const Camera& camera);
 
@@ -81,15 +78,22 @@ class VisualizationAsset final : public SceneAsset
 
       void FindLargestDirectory(const Tree<VizNode>& tree);
 
-      ColorGradient m_directoryColorGradient;
-
-      std::uint32_t m_blockCount{ 0 };
-      std::uintmax_t m_largestDirectorySize{ 0 };
-
       bool InitializeReferenceBlock();
       bool InitializeColors();
       bool InitializeBlockTransformations();
       bool InitializeShadowMachinery();
+
+      void LoadTexturePreviewShaders();
+
+      GLuint m_shadowMapTextureID{ 0 };
+      GLuint m_shadowMapFrameBufferID{ 0 };
+
+      TexturePreviewAsset* m_previewer;
+
+      ColorGradient m_directoryColorGradient;
+
+      std::uint32_t m_blockCount{ 0 };
+      std::uintmax_t m_largestDirectorySize{ 0 };
 
       QOpenGLBuffer m_referenceBlockBuffer;
       QOpenGLBuffer m_blockTransformationBuffer;
@@ -100,6 +104,7 @@ class VisualizationAsset final : public SceneAsset
       QVector<QMatrix4x4> m_blockTransformations;
 
       QOpenGLShaderProgram m_shadowShader;
+      QOpenGLShaderProgram m_texturePreviewShader;
 
       static constexpr int SHADOW_MAP_WIDTH{ 4096 };
       static constexpr int SHADOW_MAP_HEIGHT{ 4096 };

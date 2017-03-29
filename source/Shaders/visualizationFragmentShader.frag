@@ -1,7 +1,6 @@
 #version 450 core
 
 uniform vec3 cameraPosition;
-uniform vec3 materialSpecularColor;
 
 uniform float materialShininess;
 
@@ -47,6 +46,7 @@ vec3 ComputeLightContribution(
          max(0.0, dot(surfaceToCamera, reflect(-surfaceToLight, normal))),
          materialShininess);
    }
+   vec3 materialSpecularColor = vec3(0.0f, 0.0f, 0.0f);
    vec3 specular = specularCoefficient * materialSpecularColor * light.intensity;
 
    // Attenuation:
@@ -63,7 +63,7 @@ float far_plane = 2000.0f;
 
 float LinearizeDepth(float depth)
 {
-    float z = depth * 2.0 - 1.0; // Back to NDC
+    float z = depth * 2.0 - 1.0; // Back to Normalized Device Coordinates
     return (2.0 * near_plane) / (far_plane + near_plane - z * (far_plane - near_plane));
 }
 
@@ -73,7 +73,7 @@ float ComputeShadowAttenuation()
    vec3 projCoords = shadowCoordinate.xyz / shadowCoordinate.w;
    // Transform to [0,1] range
    projCoords = projCoords * 0.5 + 0.5;
-   // Get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+   // Get closest depth value from light's perspective (using [0,1] range)
    float closestDepth = texture(shadowMap, projCoords.xy).r;
    // Get depth of current fragment from light's perspective
    float currentDepth = projCoords.z;

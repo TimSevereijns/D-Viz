@@ -467,7 +467,7 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
 
    m_shadowShader.bind();
 
-   m_shadowShader.setUniformValue("cameraProjectionViewMatrix",
+   m_shadowShader.setUniformValue("lightProjectionViewMatrix",
       ComputeLightTransformationMatrix(camera));
 
    m_VAO.bind();
@@ -500,18 +500,15 @@ bool VisualizationAsset::RenderMainPass(
    m_shader.setUniformValue("cameraPosition", camera.GetPosition());
    m_shader.setUniformValue("materialShininess", settings.m_materialShininess);
 
-   const QMatrix4x4 shadowProjectionViewMatrix =
-      biasMatrix * ComputeLightTransformationMatrix(camera);
+   const QMatrix4x4 lightProjectionViewMatrix =
+      /*biasMatrix **/ ComputeLightTransformationMatrix(camera);
 
-   m_shader.setUniformValue("shadowProjectionViewMatrix", shadowProjectionViewMatrix );
+   m_shader.setUniformValue("lightProjectionViewMatrix", lightProjectionViewMatrix );
    m_shader.setUniformValue("cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());
 
    SetUniformLights(lights, settings, m_shader);
 
-   // @todo No need to set this repeatedly now that the color isn't controlled by the UI.
-   m_shader.setUniformValue("materialSpecularColor", QVector3D{ 0.0f, 0.0f, 0.0f });
-
-   m_graphicsDevice.glActiveTexture(GL_TEXTURE0);
+   m_graphicsDevice.glActiveTexture(GL_TEXTURE1);
    m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowMapTextureID);
 
    m_VAO.bind();
@@ -541,7 +538,8 @@ bool VisualizationAsset::Render(
    }
 
    RenderShadowPass(camera);
-   RenderMainPass(camera, lights, settings);
+   //RenderMainPass(camera, lights, settings);
+   RenderDepthMapPreview();
 
    return true;
 }
@@ -582,4 +580,73 @@ void VisualizationAsset::UpdateVBO(
 
    m_blockColorBuffer.release();
    m_VAO.release();
+}
+
+void VisualizationAsset::LoadTexturePreviewShaders()
+{
+   if (!m_texturePreviewShader.addShaderFromSourceFile(QOpenGLShader::Vertex,
+      ":/Shaders/texturePreview.vert"))
+   {
+      std::cout << "Error loading vertex shader!" << std::endl;
+   }
+
+   if (!m_texturePreviewShader.addShaderFromSourceFile(QOpenGLShader::Fragment,
+      ":/Shaders/texturePreview.frag"))
+   {
+      std::cout << "Error loading fragment shader!" << std::endl;
+   }
+
+   m_texturePreviewShader.link();
+}
+
+namespace
+{
+   GLuint quadVAO = 0;
+   GLuint quadVBO;
+}
+
+// RenderQuad() Renders a 1x1 quad in NDC, best used for framebuffer color targets
+// and post-processing effects.
+void VisualizationAsset::RenderDepthMapPreview()
+{
+   if (quadVAO == 0)
+   {
+      LoadTexturePreviewShaders();
+
+      constexpr GLfloat quadVertices[] =
+      {
+         // Positions         // Texture Coords
+         -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
+         -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+          1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
+          1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
+      };
+
+      // Setup plane VAO
+      m_graphicsDevice.glGenVertexArrays(1, &quadVAO);
+      m_graphicsDevice.glGenBuffers(1, &quadVBO);
+      m_graphicsDevice.glBindVertexArray(quadVAO);
+      m_graphicsDevice.glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+      m_graphicsDevice.glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices,
+         GL_STATIC_DRAW);
+
+      m_graphicsDevice.glEnableVertexAttribArray(0);
+      m_graphicsDevice.glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+         5 * sizeof(GLfloat), (GLvoid*)0);
+
+      m_graphicsDevice.glEnableVertexAttribArray(1);
+      m_graphicsDevice.glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
+         5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+   }
+
+   m_texturePreviewShader.bind();
+
+   m_graphicsDevice.glActiveTexture(GL_TEXTURE0);
+   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowMapFrameBufferID);
+
+   m_graphicsDevice.glBindVertexArray(quadVAO);
+   m_graphicsDevice.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+   m_graphicsDevice.glBindVertexArray(0);
+
+   m_texturePreviewShader.release();
 }

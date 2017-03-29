@@ -3,7 +3,7 @@
 layout (location = 0) in vec3 color;
 layout (location = 1) in mat4 instanceMatrix;
 
-uniform mat4 cameraProjectionViewMatrix;
+uniform mat4 lightProjectionViewMatrix;
 
 in vec3 vertex;
 in vec3 normal;
@@ -18,5 +18,5 @@ void main(void)
    vertexColor = color;
    vertexNormal = normal;
 
-   gl_Position = cameraProjectionViewMatrix * instanceMatrix * vec4(vertex, 1.0f);
+   gl_Position = lightProjectionViewMatrix * instanceMatrix * vec4(vertex, 1.0f);
 }
