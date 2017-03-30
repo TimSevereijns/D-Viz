@@ -69,17 +69,41 @@ float LinearizeDepth(float depth)
 
 float ComputeShadowAttenuation()
 {
-   // perform perspective divide
-   vec3 projCoords = shadowCoordinate.xyz / shadowCoordinate.w;
-   // Transform to [0,1] range
-   projCoords = projCoords * 0.5 + 0.5;
-   // Get closest depth value from light's perspective (using [0,1] range)
-   float closestDepth = texture(shadowMap, projCoords.xy).r;
-   // Get depth of current fragment from light's perspective
-   float currentDepth = projCoords.z;
-   // Check whether current frag pos is in shadow
-   float bias = 0.0;
-   float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.5;
+   // Perform perspective divide, and transform result to [0, 1] range:
+   vec3 projectionCoordinates = shadowCoordinate.xyz / shadowCoordinate.w;
+   projectionCoordinates = projectionCoordinates * 0.5 + 0.5;
+
+   float distanceToOccluder = texture(shadowMap, projectionCoordinates.xy).r;
+   float distanceToFragment = projectionCoordinates.z;
+
+   vec3 fragmentToLight = normalize(allLights[1].position - vertexPosition.xyz);
+   float cosTheta = dot(vertexNormal, fragmentToLight);
+
+   float bias = 0.000001 * tan(acos(cosTheta)); // cosTheta is dot( n,l ), clamped between 0 and 1
+   bias = clamp(bias, 0.0, 0.000001);
+
+   //float bias = 0.00000001;
+   float shadow = distanceToFragment - bias < distanceToOccluder  ? 1.0 : 0.2;
+
+   // Percent Closer Filtering:
+//   float shadow = 0.0;
+//   vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+//   for(int x = -3; x <= 3; ++x)
+//   {
+//       for(int y = -3; y <= 3; ++y)
+//       {
+//           float depth = texture(shadowMap, projectionCoordinates.xy + vec2(x, y) * texelSize).r;
+//           shadow += distanceToFragment - bias < depth  ? 1.0 : 0.2;
+//       }
+//   }
+
+//   shadow /= 49.0;
+
+   // Keep the shadow at 0.2 when outside the far_plane region of the light's frustum.
+   if (projectionCoordinates.z > 1.0)
+   {
+      return 0.2;
+   }
 
    return shadow;
 }

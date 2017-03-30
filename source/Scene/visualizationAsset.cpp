@@ -94,18 +94,11 @@ namespace
    QMatrix4x4 ComputeLightTransformationMatrix(const Camera& camera)
    {
       Camera shadowCam = camera;
-      shadowCam.SetPosition(QVector3D{ -200.0f, 250.0f, 200.0f });
+      shadowCam.SetPosition(QVector3D{ -200.0f, 500.0f, 200.0f });
       shadowCam.SetOrientation(25.0f, 45.0f);
+      shadowCam.SetNearPlane(250.0f);
       return shadowCam.GetProjectionViewMatrix();
    }
-
-    static const QMatrix4x4 biasMatrix
-    {
-        0.5f, 0.0f, 0.0f, 0.5f,
-        0.0f, 0.5f, 0.0f, 0.5f,
-        0.0f, 0.0f, 0.5f, 0.5f,
-        0.0f, 0.0f, 0.0f, 1.0f
-    };
 
     static constexpr auto TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE{ 0 };
     static constexpr auto TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE{ 1 };
@@ -115,8 +108,8 @@ VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
    SceneAsset{ device }
 {
    m_shadowMapFrameBuffer = std::make_unique<QOpenGLFramebufferObject>(
-      /* width = */ SHADOW_MAP_WIDTH,
-      /* height = */ SHADOW_MAP_HEIGHT,
+      SHADOW_MAP_WIDTH,
+      SHADOW_MAP_HEIGHT,
       QOpenGLFramebufferObject::Depth,
       GL_TEXTURE_2D,
       GL_RGBA32F);
@@ -432,11 +425,8 @@ bool VisualizationAsset::IsAssetLoaded() const
 
 bool VisualizationAsset::RenderShadowPass(const Camera& camera)
 {
-   ON_SCOPE_EXIT
-   {
-      const auto& viewport = camera.GetViewport();
-      m_graphicsDevice.glViewport(0, 0, viewport.width(), viewport.height());
-   };
+   // In order to fix Peter-panning artifacts, we'll temporarily cull front faces:
+   m_graphicsDevice.glCullFace(GL_FRONT);
 
    m_graphicsDevice.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
 
@@ -465,6 +455,11 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
    m_shadowMapShader.release();
    m_shadowMapFrameBuffer->release();
 
+   const auto& viewport = camera.GetViewport();
+   m_graphicsDevice.glViewport(0, 0, viewport.width(), viewport.height());
+
+   m_graphicsDevice.glCullFace(GL_BACK);
+
    return true;
 }
 
@@ -480,8 +475,7 @@ bool VisualizationAsset::RenderMainPass(
    m_mainShader.setUniformValue("cameraPosition", camera.GetPosition());
    m_mainShader.setUniformValue("materialShininess", settings.m_materialShininess);
 
-   const QMatrix4x4 lightProjectionViewMatrix =
-      /*biasMatrix **/ ComputeLightTransformationMatrix(camera);
+   const QMatrix4x4 lightProjectionViewMatrix = ComputeLightTransformationMatrix(camera);
 
    m_mainShader.setUniformValue("lightProjectionViewMatrix", lightProjectionViewMatrix );
    m_mainShader.setUniformValue("cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());

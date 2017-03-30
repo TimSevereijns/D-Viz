@@ -202,9 +202,19 @@ void Camera::SetViewport(const QRect& size) noexcept
    m_aspectRatio = static_cast<float>(size.width()) / static_cast<float>(size.height());
 }
 
+void Camera::SetNearPlane(float nearPlane)
+{
+   m_nearPlane = nearPlane;
+}
+
 float Camera::GetNearPlane() const noexcept
 {
    return m_nearPlane;
+}
+
+void Camera::SetFarPlane(float farPlane)
+{
+   m_farPlane = farPlane;
 }
 
 float Camera::GetFarPlane() const noexcept

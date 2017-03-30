@@ -105,8 +105,8 @@ class VisualizationAsset final : public SceneAsset
 
       std::unique_ptr<QOpenGLFramebufferObject> m_shadowMapFrameBuffer{ nullptr };
 
-      static constexpr int SHADOW_MAP_WIDTH{ 4096 };
-      static constexpr int SHADOW_MAP_HEIGHT{ 4096 };
+      static constexpr int SHADOW_MAP_WIDTH{ 8192 };
+      static constexpr int SHADOW_MAP_HEIGHT{ 8192 };
 
       QMatrix4x4 m_lightSpaceTransformationMatrix;
 };

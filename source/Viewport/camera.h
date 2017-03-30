@@ -232,11 +232,28 @@ class Camera
       bool IsPointInFrontOfCamera(const QVector3D& point) const;
 
       /**
+       * @brief Sets the near plane distance.
+       *
+       * @note Avoiding setting this too close, because that will kill your precision at distance,
+       * which, in turn, will likely cause very obvious Z-fighting.
+       *
+       * @param[in] nearPlane         The new plane distance.
+       */
+      void SetNearPlane(float nearPlane);
+
+      /**
        * @brief Retrieves the distance from the camera's focal plane to the near viewing plane.
        *
        * @returns Distance to near plane.
        */
       float GetNearPlane() const noexcept;
+
+      /**
+       * @brief Sets the far plane distance.
+       *
+       * @param[in] farPlane        The new plane distance.
+       */
+      void SetFarPlane(float farPlane);
 
       /**
        * @brief Retrieves the distance from the camera's focal plane to the far viewing plane.
