@@ -95,7 +95,7 @@ namespace
    {
       Camera shadowCam = camera;
       shadowCam.SetPosition(QVector3D{ -200.0f, 250.0f, 200.0f });
-      shadowCam.SetOrientation(10.0f, 45.0f);
+      shadowCam.SetOrientation(25.0f, 45.0f);
       return shadowCam.GetProjectionViewMatrix();
    }
 
@@ -106,8 +106,6 @@ namespace
         0.0f, 0.0f, 0.5f, 0.5f,
         0.0f, 0.0f, 0.0f, 1.0f
     };
-
-    bool shouldUpdateDepthTexture = true;
 
     static constexpr auto TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE{ 0 };
     static constexpr auto TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE{ 1 };
@@ -120,7 +118,8 @@ VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
       /* width = */ SHADOW_MAP_WIDTH,
       /* height = */ SHADOW_MAP_HEIGHT,
       QOpenGLFramebufferObject::Depth,
-      GL_TEXTURE_2D);
+      GL_TEXTURE_2D,
+      GL_RGBA32F);
 }
 
 bool VisualizationAsset::LoadShaders()

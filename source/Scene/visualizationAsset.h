@@ -86,11 +86,6 @@ class VisualizationAsset final : public SceneAsset
       bool LoadTexturePreviewShaders();
       bool InitializeTexturePreviewer();
 
-      GLuint m_shadowMapTextureID{ 0 };
-      GLuint m_shadowMapFrameBufferID{ 0 };
-
-      TexturePreviewAsset* m_previewer;
-
       ColorGradient m_directoryColorGradient;
 
       std::uint32_t m_blockCount{ 0 };

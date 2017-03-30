@@ -78,7 +78,8 @@ float ComputeShadowAttenuation()
    // Get depth of current fragment from light's perspective
    float currentDepth = projCoords.z;
    // Check whether current frag pos is in shadow
-   float shadow = (currentDepth) > closestDepth  ? 1.0 : 0.5;
+   float bias = 0.0;
+   float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.5;
 
    return shadow;
 }
@@ -89,10 +90,10 @@ void main(void)
 
    // Calculate the contribution of each light:
    vec3 linearColor = vec3(0.0f, 0.0f, 0.0f);
-   for (int i = 0; i < 5; ++i)
+   //for (int i = 0; i < 5; ++i)
    {
       linearColor += ComputeLightContribution(
-         allLights[i],
+         allLights[1],
          vertexColor,
          vertexNormal,
          vertexPosition.xyz,
@@ -103,5 +104,5 @@ void main(void)
    vec3 gamma = vec3(1.0f / 2.2f);
 
    // Final pixel color:
-   pixelColor = vec4(pow(linearColor, gamma), 1);// * ComputeShadowAttenuation();
+   pixelColor = vec4(pow(linearColor, gamma), 1) * ComputeShadowAttenuation();
 }
