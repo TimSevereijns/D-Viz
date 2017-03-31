@@ -1,4 +1,4 @@
-#version 450 core
+#version 330 core
 
 uniform vec3 cameraPosition;
 
@@ -27,7 +27,8 @@ vec3 ComputeLightContribution(
    vec3 surfaceColor,
    vec3 normal,
    vec3 surfacePosition,
-   vec3 surfaceToCamera)
+   vec3 surfaceToCamera,
+   bool includeAmbient)
 {
    vec3 surfaceToLight = normalize(light.position - surfacePosition);
 
@@ -54,17 +55,19 @@ vec3 ComputeLightContribution(
    float attenuation = 1.0 / (1.0 + light.attenuation * distanceToLight);
 
    // Linear color (before gamma correction):
-   vec3 linearColor = ambient + attenuation * (diffuse + specular);
+   vec3 linearColor = (includeAmbient ? ambient : vec3(0.0f));
+   linearColor += attenuation * (diffuse + specular);
+
    return linearColor;
 }
 
-float near_plane = 1.0f;
-float far_plane = 2000.0f;
+float nearPlane = 1.0f;
+float farPlane = 2000.0f;
 
 float LinearizeDepth(float depth)
 {
     float z = depth * 2.0 - 1.0; // Back to Normalized Device Coordinates (NDC)
-    return (2.0 * near_plane) / (far_plane + near_plane - z * (far_plane - near_plane));
+    return (2.0 * nearPlane) / (farPlane + nearPlane - z * (farPlane - nearPlane));
 }
 
 float ComputeShadowAttenuation()
@@ -79,30 +82,26 @@ float ComputeShadowAttenuation()
    vec3 fragmentToLight = normalize(allLights[1].position - vertexPosition.xyz);
    float cosTheta = dot(vertexNormal, fragmentToLight);
 
-   float bias = 0.000001 * tan(acos(cosTheta)); // cosTheta is dot( n,l ), clamped between 0 and 1
-   bias = clamp(bias, 0.0, 0.000001);
-
-   //float bias = 0.00000001;
-   float shadow = distanceToFragment - bias < distanceToOccluder  ? 1.0 : 0.2;
+   float bias = 0.00000001;
+   float shadow = distanceToFragment - bias < distanceToOccluder  ? 1.0 : 0.0;
 
    // Percent Closer Filtering:
 //   float shadow = 0.0;
 //   vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-//   for(int x = -3; x <= 3; ++x)
+//   for (int x = -1; x <= 1; ++x)
 //   {
-//       for(int y = -3; y <= 3; ++y)
+//       for (int y = -1; y <= 1; ++y)
 //       {
 //           float depth = texture(shadowMap, projectionCoordinates.xy + vec2(x, y) * texelSize).r;
-//           shadow += distanceToFragment - bias < depth  ? 1.0 : 0.2;
+//           shadow += distanceToFragment - bias < depth  ? 1.0 : 0.0;
 //       }
 //   }
+//   shadow /= 9.0;
 
-//   shadow /= 49.0;
-
-   // Keep the shadow at 0.2 when outside the far_plane region of the light's frustum.
+   // Keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
    if (projectionCoordinates.z > 1.0)
    {
-      return 0.2;
+      return 0.0;
    }
 
    return shadow;
@@ -112,21 +111,42 @@ void main(void)
 {
    vec3 fragmentToCamera = normalize(cameraPosition - vec3(vertexPosition));
 
-   // Calculate the contribution of each light:
-   vec3 linearColor = vec3(0.0f, 0.0f, 0.0f);
-   //for (int i = 0; i < 5; ++i)
-   {
-      linearColor += ComputeLightContribution(
+   vec3 linearColor = vec3(0.0f);
+
+   // Calculate the contribution of the light attached to the camera:
+//   vec3 linearColor = ComputeLightContribution(
+//      allLights[0],
+//      vertexColor,
+//      vertexNormal,
+//      vertexPosition.xyz,
+//      fragmentToCamera,
+//      /* includeAmbient = */ true);
+
+   // Calculate the contribution of the shadow casting light:
+   linearColor += ComputeShadowAttenuation() *
+      ComputeLightContribution(
          allLights[1],
          vertexColor,
          vertexNormal,
          vertexPosition.xyz,
-         fragmentToCamera);
-   }
+         fragmentToCamera,
+         /* includeAmbient = */ false);
+
+   // Calculate the contribution of the non-shadow casting lights:
+//   for (int i = 2; i < 5; ++i)
+//   {
+//      linearColor += ComputeLightContribution(
+//         allLights[i],
+//         vertexColor,
+//         vertexNormal,
+//         vertexPosition.xyz,
+//         fragmentToCamera,
+//         /* includeAmbient = */ true);
+//   }
 
    // Gamma correction:
    vec3 gamma = vec3(1.0f / 2.2f);
 
    // Final pixel color:
-   pixelColor = vec4(pow(linearColor, gamma), 1) * ComputeShadowAttenuation();
+   pixelColor = vec4(pow(linearColor, gamma), 1);
 }

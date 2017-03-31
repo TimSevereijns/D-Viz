@@ -1,7 +1,7 @@
 #include "graphicsDevice.h"
 
 GraphicsDevice::GraphicsDevice() :
-   QOpenGLFunctions_4_5_Core{ }
+   QOpenGLFunctions_3_3_Core{ }
 {
    initializeOpenGLFunctions();
 }

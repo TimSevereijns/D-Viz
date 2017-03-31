@@ -107,12 +107,6 @@ namespace
 VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
    SceneAsset{ device }
 {
-   m_shadowMapFrameBuffer = std::make_unique<QOpenGLFramebufferObject>(
-      SHADOW_MAP_WIDTH,
-      SHADOW_MAP_HEIGHT,
-      QOpenGLFramebufferObject::Depth,
-      GL_TEXTURE_2D,
-      GL_RGBA32F);
 }
 
 bool VisualizationAsset::LoadShaders()
@@ -430,7 +424,7 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
 
    m_graphicsDevice.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
 
-   m_shadowMapFrameBuffer->bind();
+   m_shadowMapFrameBuffer.bind();
    m_shadowMapShader.bind();
 
    m_shadowMapShader.setUniformValue("lightProjectionViewMatrix",
@@ -453,7 +447,7 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
    m_VAO.release();
 
    m_shadowMapShader.release();
-   m_shadowMapFrameBuffer->release();
+   m_shadowMapFrameBuffer.release();
 
    const auto& viewport = camera.GetViewport();
    m_graphicsDevice.glViewport(0, 0, viewport.width(), viewport.height());
@@ -483,7 +477,7 @@ bool VisualizationAsset::RenderMainPass(
    SetUniformLights(lights, settings, m_mainShader);
 
    m_graphicsDevice.glActiveTexture(GL_TEXTURE0);
-   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowMapFrameBuffer->texture());
+   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowMapFrameBuffer.texture());
 
    m_VAO.bind();
 
@@ -636,7 +630,7 @@ void VisualizationAsset::RenderDepthMapPreview()
       /* stride = */    5 * sizeof(GLfloat));
 
    m_graphicsDevice.glActiveTexture(GL_TEXTURE0);
-   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowMapFrameBuffer->texture());
+   m_graphicsDevice.glBindTexture(GL_TEXTURE_2D, m_shadowMapFrameBuffer.texture());
 
    m_graphicsDevice.glDrawArrays(
       /* mode = */ GL_TRIANGLE_FAN,

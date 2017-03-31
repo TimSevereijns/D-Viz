@@ -103,7 +103,14 @@ class VisualizationAsset final : public SceneAsset
       QOpenGLShaderProgram m_shadowMapShader;
       QOpenGLShaderProgram m_texturePreviewShader;
 
-      std::unique_ptr<QOpenGLFramebufferObject> m_shadowMapFrameBuffer{ nullptr };
+      QOpenGLFramebufferObject m_shadowMapFrameBuffer
+      {
+         SHADOW_MAP_WIDTH,
+         SHADOW_MAP_HEIGHT,
+         QOpenGLFramebufferObject::Depth,
+         GL_TEXTURE_2D,
+         GL_R32F
+      };
 
       static constexpr int SHADOW_MAP_WIDTH{ 8192 };
       static constexpr int SHADOW_MAP_HEIGHT{ 8192 };

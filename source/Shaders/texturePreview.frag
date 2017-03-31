@@ -1,4 +1,4 @@
-#version 410 core
+#version 330 core
 
 uniform sampler2D texture;
 varying vec4 textureCoordinate;
