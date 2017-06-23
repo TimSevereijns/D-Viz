@@ -380,7 +380,7 @@ void ScanningWorker::ProcessQueue(
       const auto successfullyPopped = taskQueue.TryPop(nodeAndPath);
       if (!successfullyPopped)
       {
-      	assert(false);
+         assert(false);
          break;
       }
 
@@ -429,18 +429,13 @@ void ScanningWorker::Start()
 
       std::vector<std::thread> scanningThreads;
 
-      const auto numberOfThreads = (std::min)(std::thread::hardware_concurrency(),
+      const auto numberOfThreads = (std::min)(
+         std::thread::hardware_concurrency(),
          Constants::Concurrency::THREAD_LIMIT);
 
       for (unsigned int i{ 0 }; i < numberOfThreads; ++i)
       {
-         scanningThreads.emplace_back(std::thread
-         {
-            [&taskQueue, &resultQueue, this] () noexcept
-            {
-               ProcessQueue(taskQueue, resultQueue);
-            }
-         });
+         scanningThreads.emplace_back([&] () noexcept { ProcessQueue(taskQueue, resultQueue); });
       }
 
       for (auto&& file : directoriesAndFiles.second)

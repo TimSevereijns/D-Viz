@@ -110,9 +110,7 @@ void GLCanvas::initializeGL()
    m_sceneAssets.emplace_back(std::make_unique<CrosshairAsset>(*m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<LightMarkerAsset>(*m_graphicsDevice));
 
-   auto* const lightMarkers = dynamic_cast<LightMarkerAsset*>(m_sceneAssets[LIGHT_MARKERS].get());
-   assert(lightMarkers);
-
+   auto* const lightMarkers = static_cast<LightMarkerAsset*>(m_sceneAssets[LIGHT_MARKERS].get());
    InitializeLightMarkers(m_lights, *lightMarkers);
 
    for (const auto& asset : m_sceneAssets)
@@ -140,10 +138,8 @@ void GLCanvas::ReloadVisualization()
    m_isPaintingSuspended = true;
    ON_SCOPE_EXIT noexcept { m_isPaintingSuspended = previousSuspensionState; };
 
-   auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
-   assert(vizAsset);
-
    const auto parameters = m_controller.GetVisualizationParameters();
+   auto* const vizAsset = static_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
    const auto blockCount = vizAsset->LoadBufferData(m_controller.GetTree(), parameters);
 
    for (const auto& asset : m_sceneAssets)
@@ -579,26 +575,18 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
       m_isLeftTriggerDown = true;
 
       auto* const crosshairAsset =
-         dynamic_cast<CrosshairAsset*>(m_sceneAssets[Asset::CROSSHAIR].get());
+            static_cast<CrosshairAsset*>(m_sceneAssets[Asset::CROSSHAIR].get());
 
-      assert(crosshairAsset);
-      if (crosshairAsset)
-      {
-         crosshairAsset->Show(m_camera);
-      }
+      crosshairAsset->Show(m_camera);
    }
    else if (m_isLeftTriggerDown && !isLeftTriggerThresholdExceeded)
    {
       m_isLeftTriggerDown = false;
 
       auto* const crosshairAsset =
-         dynamic_cast<CrosshairAsset*>(m_sceneAssets[Asset::CROSSHAIR].get());
+         static_cast<CrosshairAsset*>(m_sceneAssets[Asset::CROSSHAIR].get());
 
-      assert(crosshairAsset);
-      if (crosshairAsset)
-      {
-         crosshairAsset->Hide();
-      }
+      crosshairAsset->Hide();
    }
 
    const bool isRightTriggerThresholdExceeded =
@@ -625,9 +613,7 @@ void GLCanvas::SelectNodeViaRay(const QPoint& rayOrigin)
    };
 
    const auto selectionCallback = [&] (auto* node) { SelectNode(node); };
-
    const auto ray = m_camera.ShootRayIntoScene(rayOrigin);
-
    m_controller.SelectNodeViaRay(m_camera, ray, deselectionCallback, selectionCallback );
 }
 
