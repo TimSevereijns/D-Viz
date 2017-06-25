@@ -344,7 +344,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    }
 }
 
-void GLCanvas::SelectNode(const TreeNode<VizNode>* const node)
+void GLCanvas::SelectNode(const Tree<VizFile>::Node* const node)
 {
    m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
       *node,
@@ -363,7 +363,7 @@ void GLCanvas::RestoreSelectedNode()
    }
 }
 
-void GLCanvas::HighlightNodes(std::vector<const TreeNode<VizNode>*>& nodes)
+void GLCanvas::HighlightNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
 {
    for (const auto* const node : nodes)
    {
@@ -371,7 +371,7 @@ void GLCanvas::HighlightNodes(std::vector<const TreeNode<VizNode>*>& nodes)
    }
 }
 
-void GLCanvas::RestoreHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
+void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
 {
    for (const auto* const node : nodes)
    {
@@ -606,7 +606,7 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
 
 void GLCanvas::SelectNodeViaRay(const QPoint& rayOrigin)
 {
-   const auto deselectionCallback = [&] (std::vector<const TreeNode<VizNode>*>& nodes)
+   const auto deselectionCallback = [&] (std::vector<const Tree<VizFile>::Node*>& nodes)
    {
       RestoreHighlightedNodes(nodes);
       RestoreSelectedNode();

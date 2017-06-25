@@ -1,7 +1,7 @@
 #include "visualizationAsset.h"
 
 #include "../constants.h"
-#include "../DataStructs/vizNode.h"
+#include "../DataStructs/vizFile.h"
 #include "../ThirdParty/Tree.hpp"
 #include "../Utilities/colorGradient.hpp"
 #include "../Utilities/scopeExit.hpp"
@@ -57,7 +57,7 @@ namespace
     * @returns The color to restore the node to.
     */
    QVector3D RestoreColor(
-      const TreeNode<VizNode>& node,
+      const Tree<VizFile>::Node& node,
       const VisualizationParameters& params)
    {
       if (node.GetData().file.type != FileType::DIRECTORY)
@@ -305,7 +305,7 @@ bool VisualizationAsset::InitializeShadowMachinery()
 }
 
 std::uint32_t VisualizationAsset::LoadBufferData(
-   const Tree<VizNode>& tree,
+   const Tree<VizFile>& tree,
    const VisualizationParameters& parameters)
 {
    m_blockTransformations.clear();
@@ -313,7 +313,7 @@ std::uint32_t VisualizationAsset::LoadBufferData(
 
    m_blockCount = 0;
 
-   for (TreeNode<VizNode>& node : tree)
+   for (Tree<VizFile>::Node& node : tree)
    {
       const bool fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
       const bool notTheRightFileType =
@@ -358,7 +358,7 @@ std::uint32_t VisualizationAsset::LoadBufferData(
    return m_blockCount;
 }
 
-void VisualizationAsset::FindLargestDirectory(const Tree<VizNode>& tree)
+void VisualizationAsset::FindLargestDirectory(const Tree<VizFile>& tree)
 {
    std::uintmax_t largestDirectory = std::numeric_limits<std::uintmax_t>::min();
 
@@ -380,7 +380,7 @@ void VisualizationAsset::FindLargestDirectory(const Tree<VizNode>& tree)
    m_largestDirectorySize = largestDirectory;
 }
 
-QVector3D VisualizationAsset::ComputeGradientColor(const TreeNode<VizNode>& node)
+QVector3D VisualizationAsset::ComputeGradientColor(const Tree<VizFile>::Node& node)
 {
    const auto blockSize = node.GetData().file.size;
    const auto ratio = static_cast<double>(blockSize) / static_cast<double>(m_largestDirectorySize);
@@ -490,7 +490,7 @@ bool VisualizationAsset::Reload()
 }
 
 void VisualizationAsset::UpdateVBO(
-   const TreeNode<VizNode>& node,
+   const Tree<VizFile>::Node& node,
    SceneAsset::UpdateAction action,
    const VisualizationParameters& options)
 {

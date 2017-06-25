@@ -12,7 +12,7 @@ class SquarifiedTreeMap : public VisualizationModel
 
       SquarifiedTreeMap(const VisualizationParameters& parameters);
 
-      void Parse(const std::shared_ptr<Tree<VizNode>>& theTree) override;
+      void Parse(const std::shared_ptr<Tree<VizFile>>& theTree) override;
 
    private:
 
@@ -31,7 +31,7 @@ class SquarifiedTreeMap : public VisualizationModel
        *
        * @returns A double respresent the length of the shortest edge.
        */
-      double ComputeShortestEdgeOfRemainingBounds(const VizNode& node);
+      double ComputeShortestEdgeOfRemainingBounds(const VizFile& node);
 
       /**
        * @brief Calculates the worst aspect ratio of all items accepted into the row along with one
@@ -46,9 +46,9 @@ class SquarifiedTreeMap : public VisualizationModel
        * @returns A double representing the least square aspect ratio.
        */
       double ComputeWorstAspectRatio(
-         const std::vector<TreeNode<VizNode>*>& row,
+         const std::vector<Tree<VizFile>::Node*>& row,
          const std::uintmax_t candidateSize,
-         VizNode& parentNode,
+         VizFile& parentNode,
          const double shortestEdgeOfBounds);
 
       /**
@@ -58,7 +58,7 @@ class SquarifiedTreeMap : public VisualizationModel
        * @param[in, out] nodes         The sibling nodes to be laid out within the available bounds
        *                               of the parent node.
        */
-      void SquarifyAndLayoutRows(const std::vector<TreeNode<VizNode>*>& nodes);
+      void SquarifyAndLayoutRows(const std::vector<Tree<VizFile>::Node*>& nodes);
 
       /**
        * @brief The main entry point into the squarification algorithm, and performs a recursive
@@ -67,7 +67,7 @@ class SquarifiedTreeMap : public VisualizationModel
        *
        * @param[in, out] root          The node whose children to lay out.
        */
-      void SquarifyRecursively(const TreeNode<VizNode>& root);
+      void SquarifyRecursively(const Tree<VizFile>::Node& root);
 
       /**
        * @brief Computes the outer bounds (including the necessary boundary padding) needed to
@@ -83,7 +83,7 @@ class SquarifiedTreeMap : public VisualizationModel
        */
       Block CalculateRowBounds(
          std::uintmax_t bytesInRow,
-         VizNode& parentNode,
+         VizFile& parentNode,
          const bool updateOffset);
 
       /**
@@ -93,7 +93,7 @@ class SquarifiedTreeMap : public VisualizationModel
        *
        * @param[in, out] row           The nodes to include in a single row.
        */
-      void LayoutRow(std::vector<TreeNode<VizNode>*>& row);
+      void LayoutRow(std::vector<Tree<VizFile>::Node*>& row);
 };
 
 #endif // SQUARIFIEDTREEMAP_H

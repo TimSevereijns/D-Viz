@@ -17,7 +17,7 @@
 #include "../DataStructs/driveScanningParameters.h"
 #include "../DataStructs/fileInfo.h"
 #include "../DataStructs/scanningprogress.hpp"
-#include "../DataStructs/vizNode.h"
+#include "../DataStructs/vizFile.h"
 
 #include "../Visualizations/visualization.h"
 
@@ -28,7 +28,7 @@
  */
 struct NodeAndPath
 {
-   std::unique_ptr<TreeNode<VizNode>> node;
+   std::unique_ptr<Tree<VizFile>::Node> node;
    std::experimental::filesystem::path path;
 
    NodeAndPath(
@@ -55,7 +55,7 @@ class ScanningWorker : public QObject
 
    public:
 
-      using NodePtr = std::unique_ptr<TreeNode<VizNode>>;
+      using NodePtr = std::unique_ptr<Tree<VizFile>::Node>;
 
       static constexpr std::uintmax_t SIZE_UNDEFINED{ 0 };
 
@@ -84,7 +84,7 @@ class ScanningWorker : public QObject
        *
        * @param[in] fileTree        A pointer to the final tree representing the scanned drive.
        */
-      void Finished(std::shared_ptr<Tree<VizNode>> fileTree);
+      void Finished(std::shared_ptr<Tree<VizFile>> fileTree);
 
       /**
        * @brief Signals drive scanning progress updates.
@@ -114,7 +114,7 @@ class ScanningWorker : public QObject
        */
       void ProcessFile(
          const std::experimental::filesystem::path& path,
-         TreeNode<VizNode>& treeNode) noexcept;
+         Tree<VizFile>::Node& treeNode) noexcept;
 
       /**
        * @brief Performs a recursive depth-first exploration of the file system.
@@ -124,7 +124,7 @@ class ScanningWorker : public QObject
        */
       void ProcessDirectory(
          const std::experimental::filesystem::path& path,
-         TreeNode<VizNode>& fileNode);
+         Tree<VizFile>::Node& fileNode);
 
       /**
        * @brief Helper function to facilitate exception-free iteration over a directory.
@@ -134,9 +134,9 @@ class ScanningWorker : public QObject
        */
       inline void IterateOverDirectoryAndScan(
          std::experimental::filesystem::directory_iterator& itr,
-         TreeNode<VizNode>& treeNode) noexcept;
+         Tree<VizFile>::Node& treeNode) noexcept;
 
-      std::shared_ptr<Tree<VizNode>> CreateTreeAndRootNode();
+      std::shared_ptr<Tree<VizFile>> CreateTreeAndRootNode();
 
       DriveScanningParameters m_parameters;
 

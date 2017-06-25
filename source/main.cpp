@@ -5,12 +5,12 @@
 template<typename NodeDataType>
 class Tree;
 
-struct VizNode;
+struct VizFile;
 
 int main(int argc, char* argv[])
 {
    qRegisterMetaType<std::uintmax_t>("std::uintmax_t");
-   qRegisterMetaType<std::shared_ptr<Tree<VizNode>>>("std::shared_ptr<Tree<VizNode>>");
+   qRegisterMetaType<std::shared_ptr<Tree<VizFile>>>("std::shared_ptr<Tree<VizNode>>");
 
    QApplication application{ argc, argv };
 

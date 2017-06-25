@@ -5,7 +5,7 @@
 
 #include "../controller.h"
 
-#include "../DataStructs/vizNode.h"
+#include "../DataStructs/vizFile.h"
 #include "../ThirdParty/Tree.hpp"
 
 #include <mutex>
@@ -78,7 +78,7 @@ class ScanBreakdownModel : public QAbstractTableModel
          const QModelIndex& index,
          int role) const final override;
 
-      void insert(const TreeNode<VizNode>& node);
+      void insert(const Tree<VizFile>::Node& node);
 
    private:
 

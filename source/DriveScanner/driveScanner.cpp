@@ -14,7 +14,7 @@ void DriveScanner::HandleProgressUpdates()
    m_parameters.onProgressUpdateCallback(filesScanned, numberOfBytesProcessed);
 }
 
-void DriveScanner::HandleCompletion(std::shared_ptr<Tree<VizNode>> fileTree)
+void DriveScanner::HandleCompletion(std::shared_ptr<Tree<VizFile>> fileTree)
 {
    const auto filesScanned = m_progress.filesScanned.load();
    const auto numberOfBytesProcessed = m_progress.numberOfBytesProcessed.load();
@@ -47,10 +47,10 @@ void DriveScanner::StartScanning(const DriveScanningParameters& parameters)
 
    m_progressUpdateTimer->start(250);
 
-   connect(worker, SIGNAL(Finished(std::shared_ptr<Tree<VizNode>>)),
-      this, SLOT(HandleCompletion(std::shared_ptr<Tree<VizNode>>)));
+   connect(worker, SIGNAL(Finished(std::shared_ptr<Tree<VizFile>>)),
+      this, SLOT(HandleCompletion(std::shared_ptr<Tree<VizFile>>)));
 
-   connect(worker, SIGNAL(Finished(std::shared_ptr<Tree<VizNode>>)),
+   connect(worker, SIGNAL(Finished(std::shared_ptr<Tree<VizFile>>)),
       worker, SLOT(deleteLater()));
 
    connect(worker, SIGNAL(ProgressUpdate()),

@@ -13,7 +13,7 @@ namespace std
 template<typename T>
 class Tree;
 
-struct VizNode;
+struct VizFile;
 
 /**
  * @brief The DriveScannerParameters struct
@@ -24,7 +24,7 @@ struct DriveScanningParameters
       const std::uintmax_t numberOfBytesProcessed)>;
 
    using ScanCompleteCallback = std::function<void (const std::uintmax_t filesScanned,
-      const std::uintmax_t numberOfBytesProcessed, std::shared_ptr<Tree<VizNode>> fileTree)>;
+      const std::uintmax_t numberOfBytesProcessed, std::shared_ptr<Tree<VizFile>> fileTree)>;
 
    ProgressCallback onProgressUpdateCallback{ };
    ScanCompleteCallback onScanCompletedCallback{ };

@@ -11,7 +11,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 
-struct VizNode;
+struct VizFile;
 template<typename DataType> class TreeNode;
 
 /**
@@ -130,7 +130,7 @@ class SceneAsset
        * @param[in] action          The type of update to perform on the target VBO segment.
        */
       virtual void UpdateVBO(
-         const TreeNode<VizNode>& node,
+         const Tree<VizFile>::Node& node,
          UpdateAction action,
          const VisualizationParameters& options);
 

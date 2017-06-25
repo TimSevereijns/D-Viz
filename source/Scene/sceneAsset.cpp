@@ -68,7 +68,7 @@ unsigned int SceneAsset::GetColorCount() const
 }
 
 void SceneAsset::UpdateVBO(
-   const TreeNode<VizNode>&,
+   const Tree<VizFile>::Node&,
    UpdateAction,
    const VisualizationParameters&)
 {

@@ -54,17 +54,17 @@ void Controller::GenerateNewVisualization()
    }
 }
 
-const TreeNode<VizNode>* const Controller::GetSelectedNode() const
+const Tree<VizFile>::Node* const Controller::GetSelectedNode() const
 {
    return m_selectedNode;
 }
 
-Tree<VizNode>& Controller::GetTree()
+Tree<VizFile>& Controller::GetTree()
 {
    return m_treeMap->GetTree();
 }
 
-const Tree<VizNode>& Controller::GetTree() const
+const Tree<VizFile>& Controller::GetTree() const
 {
    return m_treeMap->GetTree();
 }
@@ -79,7 +79,7 @@ void Controller::SetVisualizationParameters(const VisualizationParameters& param
    m_visualizationParameters = parameters;
 }
 
-const std::vector<const TreeNode<VizNode>*>& Controller::GetHighlightedNodes() const
+const std::vector<const Tree<VizFile>::Node*>& Controller::GetHighlightedNodes() const
 {
    return m_highlightedNodes;
 }
@@ -92,7 +92,7 @@ void Controller::SetView(MainWindow* window)
    m_mainWindow = window;
 }
 
-void Controller::ParseResults(const std::shared_ptr<Tree<VizNode>>& results)
+void Controller::ParseResults(const std::shared_ptr<Tree<VizFile>>& results)
 {
    m_treeMap->Parse(results);
 }
@@ -103,8 +103,8 @@ void Controller::UpdateBoundingBoxes()
 }
 
 void Controller::SelectNodeAndUpdateStatusBar(
-   const TreeNode<VizNode>* const node,
-   const std::function<void (const TreeNode<VizNode>* const)>& selectorCallback)
+   const Tree<VizFile>::Node* const node,
+   const std::function<void (const Tree<VizFile>::Node* const)>& selectorCallback)
 {
    if (!node)
    {
@@ -138,8 +138,8 @@ void Controller::SelectNodeAndUpdateStatusBar(
 void Controller::SelectNodeViaRay(
    const Camera& camera,
    const Qt3DRender::QRay3D& ray,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& deselectionCallback,
-   const std::function<void (const TreeNode<VizNode>* const)>& selectionCallback)
+   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& deselectionCallback,
+   const std::function<void (const Tree<VizFile>::Node* const)>& selectionCallback)
 {
    if (!HasVisualizationBeenLoaded() || !IsUserAllowedToInteractWithModel())
    {
@@ -161,9 +161,9 @@ void Controller::SelectNodeViaRay(
    {
       // @todo Walking the entire tree isn't exactly efficient; find a better way...
       const auto nodeCount = std::count_if(
-         Tree<VizNode>::LeafIterator{ m_treeMap->GetTree().GetHead() },
-         Tree<VizNode>::LeafIterator{ },
-         [] (Tree<VizNode>::const_reference /*node*/)
+         Tree<VizFile>::LeafIterator{ m_treeMap->GetTree().GetRoot() },
+         Tree<VizFile>::LeafIterator{ },
+         [] (Tree<VizFile>::const_reference /*node*/)
       {
          return true;
       });
@@ -228,7 +228,7 @@ void Controller::ClearSelectedNode()
 }
 
 void Controller::ClearHighlightedNodes(
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback,
+   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback,
    bool clearSelected)
 {
    if (clearSelected && m_selectedNode)
@@ -248,7 +248,7 @@ void Controller::ClearHighlightedNodes(
 template<typename NodeSelectorType>
 void Controller::ProcessSelection(
    const NodeSelectorType& nodeSelector,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback)
+   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback)
 {
    nodeSelector();
 
@@ -259,8 +259,8 @@ void Controller::ProcessSelection(
 }
 
 void Controller::HighlightAncestors(
-   const TreeNode<VizNode>& node,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback)
+   const Tree<VizFile>::Node& node,
+   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback)
 {
    const auto selector = [&]
    {
@@ -277,15 +277,15 @@ void Controller::HighlightAncestors(
 }
 
 void Controller::HighlightDescendants(
-   const TreeNode<VizNode>& node,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback)
+   const Tree<VizFile>::Node& node,
+   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback)
 {
    const auto selector = [&]
    {
       std::for_each(
-         Tree<VizNode>::LeafIterator{ &node },
-         Tree<VizNode>::LeafIterator{ },
-         [&] (Tree<VizNode>::const_reference node)
+         Tree<VizFile>::LeafIterator{ &node },
+         Tree<VizFile>::LeafIterator{ },
+         [&] (Tree<VizFile>::const_reference node)
       {
          if ((m_visualizationParameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
             || node->file.size < m_visualizationParameters.minimumFileSize)
@@ -301,15 +301,15 @@ void Controller::HighlightDescendants(
 }
 
 void Controller::HighlightAllMatchingExtensions(
-   const TreeNode<VizNode>& targetNode,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& callback)
+   const Tree<VizFile>::Node& targetNode,
+   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback)
 {
    const auto selector = [&]
    {
       std::for_each(
-         Tree<VizNode>::LeafIterator{ GetTree().GetHead() },
-         Tree<VizNode>::LeafIterator{ },
-         [&] (Tree<VizNode>::const_reference node)
+         Tree<VizFile>::LeafIterator{ GetTree().GetRoot() },
+         Tree<VizFile>::LeafIterator{ },
+         [&] (Tree<VizFile>::const_reference node)
       {
          if ((m_visualizationParameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
             || node->file.size < m_visualizationParameters.minimumFileSize
@@ -327,8 +327,8 @@ void Controller::HighlightAllMatchingExtensions(
 
 void Controller::SearchTreeMap(
    const std::wstring& searchQuery,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& deselectionCallback,
-   const std::function<void (std::vector<const TreeNode<VizNode>*>&)>& selectionCallback,
+   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& deselectionCallback,
+   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& selectionCallback,
    bool shouldSearchFiles,
    bool shouldSearchDirectories)
 {
@@ -354,9 +354,9 @@ void Controller::SearchTreeMap(
       Stopwatch<std::chrono::milliseconds>([&] ()
       {
          std::for_each(
-            Tree<VizNode>::PostOrderIterator{ GetTree().GetHead() },
-            Tree<VizNode>::PostOrderIterator{ },
-            [&] (Tree<VizNode>::const_reference node)
+            Tree<VizFile>::PostOrderIterator{ GetTree().GetRoot() },
+            Tree<VizFile>::PostOrderIterator{ },
+            [&] (Tree<VizFile>::const_reference node)
          {
             const auto& file = node->file;
 
@@ -413,10 +413,10 @@ std::pair<double, std::wstring> Controller::ConvertFileSizeToAppropriateUnits(
       sizeInBytes / Constants::FileSize::ONE_TEBIBYTE, L" TiB");
 }
 
-std::wstring Controller::ResolveCompleteFilePath(const TreeNode<VizNode>& node)
+std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node)
 {
    std::vector<std::wstring> reversePath;
-   reversePath.reserve(Tree<VizNode>::Depth(node));
+   reversePath.reserve(Tree<VizFile>::Depth(node));
    reversePath.emplace_back(node->file.name);
 
    const auto* currentNode = &node;
@@ -438,7 +438,7 @@ std::wstring Controller::ResolveCompleteFilePath(const TreeNode<VizNode>& node)
    return completePath + node->file.extension;
 }
 
-void Controller::ShowInFileExplorer(const TreeNode<VizNode>& node)
+void Controller::ShowInFileExplorer(const Tree<VizFile>::Node& node)
 {
    CoInitializeEx(NULL, COINIT_MULTITHREADED);
    ON_SCOPE_EXIT noexcept { CoUninitialize(); };

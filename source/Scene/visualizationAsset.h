@@ -8,7 +8,7 @@
 #include <QOpenGLTexture>
 #include <QOpenGLFrameBufferObject>
 
-struct VizNode;
+struct VizFile;
 template<typename DataType> class TreeNode;
 
 /**
@@ -33,7 +33,7 @@ class VisualizationAsset : public SceneAsset
       bool Reload() override;
 
       void UpdateVBO(
-         const TreeNode<VizNode>& node,
+         const Tree<VizFile>::Node& node,
          UpdateAction action,
          const VisualizationParameters& options) override;
 
@@ -52,7 +52,7 @@ class VisualizationAsset : public SceneAsset
        * @returns The number of blocks that have been loaded into the buffer.
        */
       std::uint32_t LoadBufferData(
-         const Tree<VizNode>& tree,
+         const Tree<VizFile>& tree,
          const VisualizationParameters& parameters);
 
       /**
@@ -64,9 +64,9 @@ class VisualizationAsset : public SceneAsset
 
       bool RenderShadowPass(const Camera& camera);
 
-      QVector3D ComputeGradientColor(const TreeNode<VizNode>& node);
+      QVector3D ComputeGradientColor(const Tree<VizFile>::Node& node);
 
-      void FindLargestDirectory(const Tree<VizNode>& tree);
+      void FindLargestDirectory(const Tree<VizFile>& tree);
 
       ColorGradient m_directoryColorGradient;
 

@@ -226,7 +226,7 @@ namespace
     *
     * @param[out] node              The node to advance.
     */
-   void AdvanceToNextNonDescendant(TreeNode<VizNode>*& node)
+   void AdvanceToNextNonDescendant(Tree<VizFile>::Node*& node)
    {
       if (node->GetNextSibling())
       {
@@ -250,7 +250,7 @@ namespace
       }
    }
 
-   using IntersectionPointAndNode = std::pair<QVector3D, TreeNode<VizNode>*>;
+   using IntersectionPointAndNode = std::pair<QVector3D, Tree<VizFile>::Node*>;
 
    /**
     * @brief Iterates over all nodes in the scene, placing all intersections in a vector.
@@ -264,7 +264,7 @@ namespace
       const Qt3DRender::QRay3D& ray,
       const Camera& camera,
       const VisualizationParameters& parameters,
-      TreeNode<VizNode>* node)
+      Tree<VizFile>::Node* node)
    {
       std::vector<IntersectionPointAndNode> allIntersections;
 
@@ -361,7 +361,7 @@ void VisualizationModel::UpdateBoundingBoxes()
    });
 }
 
-TreeNode<VizNode>* VisualizationModel::FindNearestIntersection(
+Tree<VizFile>::Node* VisualizationModel::FindNearestIntersection(
    const Camera& camera,
    const Qt3DRender::QRay3D& ray,
    const VisualizationParameters& parameters) const
@@ -371,11 +371,11 @@ TreeNode<VizNode>* VisualizationModel::FindNearestIntersection(
       return nullptr;
    }
 
-   TreeNode<VizNode>* nearestIntersection = nullptr;
+   Tree<VizFile>::Node* nearestIntersection = nullptr;
 
    Stopwatch<std::chrono::microseconds>([&]
    {
-      const auto headNode = m_theTree->GetHead();
+      const auto headNode = m_theTree->GetRoot();
       const auto allIntersections = FindAllIntersections(ray, camera, parameters, headNode);
 
       if (allIntersections.empty())
@@ -395,19 +395,19 @@ TreeNode<VizNode>* VisualizationModel::FindNearestIntersection(
    return nearestIntersection;
 }
 
-Tree<VizNode>& VisualizationModel::GetTree()
+Tree<VizFile>& VisualizationModel::GetTree()
 {
    assert(m_theTree);
    return *m_theTree;
 }
 
-const Tree<VizNode>& VisualizationModel::GetTree() const
+const Tree<VizFile>& VisualizationModel::GetTree() const
 {
    assert(m_theTree);
    return *m_theTree;
 }
 
-void VisualizationModel::SortNodes(Tree<VizNode>& tree)
+void VisualizationModel::SortNodes(Tree<VizFile>& tree)
 {
    for (auto& node : tree)
    {

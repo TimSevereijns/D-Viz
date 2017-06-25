@@ -90,9 +90,9 @@ namespace
     *
     * @param[in, out] tree           The tree to be pruned.
     */
-   void PruneEmptyFilesAndDirectories(Tree<VizNode>& tree)
+   void PruneEmptyFilesAndDirectories(Tree<VizFile>& tree)
    {
-      std::vector<TreeNode<VizNode>*> toBeDeleted;
+      std::vector<Tree<VizFile>::Node*> toBeDeleted;
 
       for (auto&& node : tree)
       {
@@ -118,13 +118,13 @@ namespace
     *
     * @param[in, out] tree          The tree whose nodes need their directory sizes computed.
     */
-   void ComputeDirectorySizes(Tree<VizNode>& tree)
+   void ComputeDirectorySizes(Tree<VizFile>& tree)
    {
       for (auto&& node : tree)
       {
          const FileInfo fileInfo = node->file;
 
-         TreeNode<VizNode>* parent = node.GetParent();
+         Tree<VizFile>::Node* parent = node.GetParent();
          if (!parent)
          {
             return;
@@ -171,7 +171,7 @@ namespace
 
          constexpr std::uintmax_t fileSizeToBeComputedLater{ 0 };
 
-         const VizNode node
+         const VizFile node
          {
             FileInfo
             {
@@ -184,7 +184,7 @@ namespace
 
          NodeAndPath nodeAndPath
          {
-            std::make_unique<TreeNode<VizNode>>(std::move(node)),
+            std::make_unique<Tree<VizFile>::Node>(std::move(node)),
             std::move(path)
          };
 
@@ -211,7 +211,7 @@ namespace
     */
    void BuildFinalTree(
       ThreadSafeQueue<NodeAndPath>& queue,
-      Tree<VizNode>& fileTree)
+      Tree<VizFile>& fileTree)
    {
       while (!queue.IsEmpty())
       {
@@ -223,7 +223,7 @@ namespace
             break;
          }
 
-         fileTree.GetHead()->AppendChild(*nodeAndPath.node);
+         fileTree.GetRoot()->AppendChild(*nodeAndPath.node);
          nodeAndPath.node.release();
       }
    }
@@ -239,7 +239,7 @@ ScanningWorker::ScanningWorker(
 {
 }
 
-std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
+std::shared_ptr<Tree<VizFile>> ScanningWorker::CreateTreeAndRootNode()
 {
    assert(std::experimental::filesystem::is_directory(m_parameters.path));
    if (!std::experimental::filesystem::is_directory(m_parameters.path))
@@ -266,18 +266,18 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
       FileType::DIRECTORY
    };
 
-   const VizNode rootNode
+   const VizFile rootNode
    {
       fileInfo,
       rootBlock
    };
 
-   return std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
+   return std::make_shared<Tree<VizFile>>(Tree<VizFile>(rootNode));
 }
 
 void ScanningWorker::ProcessFile(
    const std::experimental::filesystem::path& path,
-   TreeNode<VizNode>& treeNode) noexcept
+   Tree<VizFile>::Node& treeNode) noexcept
 {
    std::uintmax_t fileSize = ComputeFileSize(path);
 
@@ -296,14 +296,14 @@ void ScanningWorker::ProcessFile(
       FileType::REGULAR
    };
 
-   treeNode.AppendChild(VizNode{ fileInfo });
+   treeNode.AppendChild(VizFile{ fileInfo });
 
    m_progress.filesScanned.fetch_add(1);
 }
 
 void ScanningWorker::ProcessDirectory(
    const std::experimental::filesystem::path& path,
-   TreeNode<VizNode>& treeNode)
+   Tree<VizFile>::Node& treeNode)
 {
    bool isRegularFile = false;
    try
@@ -348,7 +348,7 @@ void ScanningWorker::ProcessDirectory(
          FileType::DIRECTORY
       };
 
-      treeNode.AppendChild(VizNode{ directoryInfo });
+      treeNode.AppendChild(VizFile{ directoryInfo });
 
       m_progress.filesScanned.fetch_add(1);
 
@@ -359,7 +359,7 @@ void ScanningWorker::ProcessDirectory(
 
 void ScanningWorker::IterateOverDirectoryAndScan(
    std::experimental::filesystem::directory_iterator& itr,
-   TreeNode<VizNode>& treeNode) noexcept
+   Tree<VizFile>::Node& treeNode) noexcept
 {
    const auto end = std::experimental::filesystem::directory_iterator{ };
    while (itr != end)
@@ -440,7 +440,7 @@ void ScanningWorker::Start()
 
       for (auto&& file : directoriesAndFiles.second)
       {
-         ProcessFile(file.path, *theTree->GetHead());
+         ProcessFile(file.path, *theTree->GetRoot());
       }
 
       for (auto&& thread : scanningThreads)

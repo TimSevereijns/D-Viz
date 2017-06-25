@@ -23,7 +23,7 @@ BreakdownDialog::BreakdownDialog(QWidget* parent) :
    const auto& controller = mainWindow->GetController();
    const auto tree = controller.GetTree();
 
-   if (tree.GetHead()->GetChildCount() == 0)
+   if (tree.GetRoot()->GetChildCount() == 0)
    {
       return;
    }

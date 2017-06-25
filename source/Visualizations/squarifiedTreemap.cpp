@@ -22,7 +22,7 @@ namespace
     * @returns A total row size in bytes of disk space occupied.
     */
    auto ComputeBytesInRow(
-      const std::vector<TreeNode<VizNode>*>& row,
+      const std::vector<Tree<VizFile>::Node*>& row,
       const std::uintmax_t candidateSize)
    {
       auto sumOfFileSizes = std::accumulate(std::begin(row), std::end(row),
@@ -50,7 +50,7 @@ namespace
    double SlicePerpendicularToWidth(
       const Block& land,
       const double percentageOfParent,
-      VizNode& node,
+      VizFile& node,
       const size_t nodeCount)
    {
       const auto blockWidthPlusPadding = land.GetWidth() * percentageOfParent;
@@ -107,7 +107,7 @@ namespace
    double SlicePerpendicularToDepth(
       const Block& land,
       const double percentageOfParent,
-      VizNode& node,
+      VizFile& node,
       const size_t nodeCount)
    {
       const auto blockDepthPlusPadding = std::abs(land.GetDepth() * percentageOfParent);
@@ -184,7 +184,7 @@ Block SquarifiedTreeMap::ComputeRemainingArea(const Block& block)
    return remainingArea;
 }
 
-double SquarifiedTreeMap::ComputeShortestEdgeOfRemainingBounds(const VizNode& node)
+double SquarifiedTreeMap::ComputeShortestEdgeOfRemainingBounds(const VizFile& node)
 {
    const Block remainingRealEstate = ComputeRemainingArea(node.block);
    const auto shortestEdge = std::min(std::abs(remainingRealEstate.GetDepth()),
@@ -195,9 +195,9 @@ double SquarifiedTreeMap::ComputeShortestEdgeOfRemainingBounds(const VizNode& no
 }
 
 double SquarifiedTreeMap::ComputeWorstAspectRatio(
-   const std::vector<TreeNode<VizNode>*>& row,
+   const std::vector<Tree<VizFile>::Node*>& row,
    const uintmax_t candidateSize,
-   VizNode& parentNode,
+   VizFile& parentNode,
    const double shortestEdgeOfBounds)
 {
    if (row.empty() && candidateSize == 0)
@@ -268,26 +268,26 @@ double SquarifiedTreeMap::ComputeWorstAspectRatio(
    return worstRatio;
 }
 
-void SquarifiedTreeMap::SquarifyAndLayoutRows(const std::vector<TreeNode<VizNode>*>& nodes)
+void SquarifiedTreeMap::SquarifyAndLayoutRows(const std::vector<Tree<VizFile>::Node*>& nodes)
 {
    if (nodes.empty())
    {
       return;
    }
 
-   TreeNode<VizNode>* parentNode = nodes.front()->GetParent();
+   Tree<VizFile>::Node* parentNode = nodes.front()->GetParent();
    assert(parentNode);
 
-   VizNode& parentVizNode = parentNode->GetData();
+   VizFile& parentVizNode = parentNode->GetData();
    assert(parentVizNode.block.HasVolume());
 
-   std::vector<TreeNode<VizNode>*> row;
+   std::vector<Tree<VizFile>::Node*> row;
    row.reserve(nodes.size());
 
    double shortestEdgeOfBounds = ComputeShortestEdgeOfRemainingBounds(parentVizNode);
    assert(shortestEdgeOfBounds > 0.0);
 
-   for (TreeNode<VizNode>* const node : nodes)
+   for (Tree<VizFile>::Node* const node : nodes)
    {
       const double worstRatioWithNodeAddedToCurrentRow =
          ComputeWorstAspectRatio(row, node->GetData().file.size, parentVizNode,
@@ -321,15 +321,15 @@ void SquarifiedTreeMap::SquarifyAndLayoutRows(const std::vector<TreeNode<VizNode
    }
 }
 
-void SquarifiedTreeMap::SquarifyRecursively(const TreeNode<VizNode>& root)
+void SquarifiedTreeMap::SquarifyRecursively(const Tree<VizFile>::Node& root)
 {
-   TreeNode<VizNode>* firstChild = root.GetFirstChild();
+   Tree<VizFile>::Node* firstChild = root.GetFirstChild();
    if (!firstChild)
    {
       return;
    }
 
-   std::vector<TreeNode<VizNode>*> children;
+   std::vector<Tree<VizFile>::Node*> children;
    children.reserve(root.GetChildCount());
    children.emplace_back(firstChild);
 
@@ -353,7 +353,7 @@ void SquarifiedTreeMap::SquarifyRecursively(const TreeNode<VizNode>& root)
 
 Block SquarifiedTreeMap::CalculateRowBounds(
    std::uintmax_t bytesInRow,
-   VizNode& parentNode,
+   VizFile& parentNode,
    const bool updateOffset)
 {
    const Block& parentBlock = parentNode.block;
@@ -425,7 +425,7 @@ Block SquarifiedTreeMap::CalculateRowBounds(
    return rowRealEstate;
 }
 
-void SquarifiedTreeMap::LayoutRow(std::vector<TreeNode<VizNode>*>& row)
+void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizFile>::Node*>& row)
 {
    if (row.empty())
    {
@@ -446,7 +446,7 @@ void SquarifiedTreeMap::LayoutRow(std::vector<TreeNode<VizNode>*>& row)
 
    for (auto* const node : row)
    {
-      VizNode& data = node->GetData();
+      VizFile& data = node->GetData();
 
       const std::uintmax_t nodeFileSize = data.file.size;
       if (nodeFileSize == 0)
@@ -469,7 +469,7 @@ void SquarifiedTreeMap::LayoutRow(std::vector<TreeNode<VizNode>*>& row)
    }
 }
 
-void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
+void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizFile>>& theTree)
 {
    if (!theTree)
    {
@@ -491,10 +491,10 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizNode>>& theTree)
       VisualizationModel::ROOT_BLOCK_DEPTH
    };
 
-   theTree->GetHead()->GetData().block = rootBlock;
+   theTree->GetRoot()->GetData().block = rootBlock;
 
    TIME_IN_MILLISECONDS(
-      SquarifyRecursively(*theTree->GetHead()),
+      SquarifyRecursively(*theTree->GetRoot()),
       "Visualization generated in ");
 
    m_hasDataBeenParsed = true;

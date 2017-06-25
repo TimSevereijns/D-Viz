@@ -365,7 +365,7 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
    const auto completionHandler = [&, vizParameters]
       (const std::uintmax_t numberOfFilesScanned,
       const std::uintmax_t bytesProcessed,
-      std::shared_ptr<Tree<VizNode>> scanningResults) mutable
+      std::shared_ptr<Tree<VizFile>> scanningResults) mutable
    {
       ComputeProgress(numberOfFilesScanned, bytesProcessed);
 

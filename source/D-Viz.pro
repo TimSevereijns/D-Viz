@@ -27,7 +27,6 @@ SOURCES += \
    DataStructs/fileInfo.cpp \
    DataStructs/light.cpp \
    DataStructs/precisePoint.cpp \
-   DataStructs/vizNode.cpp \
    DataStructs/driveScanningParameters.cpp \
    DriveScanner/driveScanner.cpp \
    DriveScanner/scanningWorker.cpp \
@@ -51,7 +50,8 @@ SOURCES += \
    Windows/aboutDialog.cpp \
    Windows/mainWindow.cpp \
    Windows/breakdownDialog.cpp \
-   Windows/scanBreakdownModel.cpp
+   Windows/scanBreakdownModel.cpp \
+    DataStructs/vizFile.cpp
 
 HEADERS  += \
    constants.h \
@@ -59,7 +59,6 @@ HEADERS  += \
    DataStructs/block.h \
    DataStructs/fileInfo.h \
    DataStructs/light.h \
-   DataStructs/vizNode.h \
    DataStructs/driveScanningParameters.h \
    DataStructs/precisePoint.h \
    DataStructs/scanningprogress.hpp \
@@ -91,7 +90,8 @@ HEADERS  += \
    Windows/aboutDialog.h \
    Windows/mainWindow.h \
    Windows/breakdownDialog.h \
-   Windows/scanBreakdownModel.h
+   Windows/scanBreakdownModel.h \
+    DataStructs/vizFile.h
 
 FORMS    += \
    Windows/aboutDialog.ui \
