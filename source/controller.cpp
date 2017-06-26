@@ -1,8 +1,8 @@
 #include "controller.h"
 
 #include "constants.h"
-#include "ThirdParty/ArenaAllocator.hpp"
-#include "ThirdParty/Stopwatch.hpp"
+#include "ArenaAllocator/ArenaAllocator.hpp"
+#include "Stopwatch/Stopwatch.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Visualizations/squarifiedTreemap.h"
 #include "Windows/mainWindow.h"

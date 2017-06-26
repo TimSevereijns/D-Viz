@@ -3,8 +3,8 @@
 
 #include "../constants.h"
 
-#include "../ThirdParty/Stopwatch.hpp"
-#include "../ThirdParty/ThreadSafeQueue.hpp"
+#include "Stopwatch/Stopwatch.hpp"
+#include "../Utilities/ThreadSafeQueue.hpp"
 
 #include "../Utilities/ignoreUnused.hpp"
 

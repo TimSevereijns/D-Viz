@@ -1,15 +1,14 @@
 #include "glCanvas.h"
 
 #include "../constants.h"
-#include "../ThirdParty/stopwatch.hpp"
 
+#include "canvasContextMenu.h"
 #include "Scene/crosshairAsset.h"
 #include "Scene/debuggingRayAsset.h"
 #include "Scene/gridAsset.h"
 #include "Scene/lightMarkerAsset.h"
 #include "Scene/visualizationAsset.h"
-
-#include "canvasContextMenu.h"
+#include "Stopwatch/Stopwatch.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Visualizations/squarifiedTreemap.h"
 

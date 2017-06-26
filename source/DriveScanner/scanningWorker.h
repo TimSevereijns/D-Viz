@@ -21,7 +21,7 @@
 
 #include "../Visualizations/visualization.h"
 
-#include "../ThirdParty/Tree.hpp"
+#include "Tree/Tree.hpp"
 
 /**
  * @brief The NodeAndPath struct

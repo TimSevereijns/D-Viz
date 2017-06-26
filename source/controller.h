@@ -4,7 +4,7 @@
 #include "DataStructs/light.h"
 #include "DataStructs/vizFile.h"
 #include "DriveScanner/driveScanner.h"
-#include "ThirdParty/Tree.hpp"
+#include "Tree/Tree.hpp"
 
 #include <memory>
 #include <vector>

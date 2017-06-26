@@ -14,7 +14,8 @@
 #include <Qt3DRender/private/qray3d_p.h>
 
 #include "../constants.h"
-#include "../ThirdParty/Stopwatch.hpp"
+
+#include "Stopwatch/Stopwatch.hpp"
 
 namespace
 {

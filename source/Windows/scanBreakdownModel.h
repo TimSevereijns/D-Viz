@@ -4,9 +4,9 @@
 #include <QAbstractTableModel>
 
 #include "../controller.h"
-
 #include "../DataStructs/vizFile.h"
-#include "../ThirdParty/Tree.hpp"
+
+#include "Tree/Tree.hpp"
 
 #include <mutex>
 #include <sstream>

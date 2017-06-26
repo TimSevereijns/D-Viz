@@ -28,6 +28,7 @@ SOURCES += \
    DataStructs/light.cpp \
    DataStructs/precisePoint.cpp \
    DataStructs/driveScanningParameters.cpp \
+   DataStructs/vizFile.cpp \
    DriveScanner/driveScanner.cpp \
    DriveScanner/scanningWorker.cpp \
    HID/keyboardManager.cpp \
@@ -50,8 +51,7 @@ SOURCES += \
    Windows/aboutDialog.cpp \
    Windows/mainWindow.cpp \
    Windows/breakdownDialog.cpp \
-   Windows/scanBreakdownModel.cpp \
-    DataStructs/vizFile.cpp
+   Windows/scanBreakdownModel.cpp
 
 HEADERS  += \
    constants.h \
@@ -62,6 +62,7 @@ HEADERS  += \
    DataStructs/driveScanningParameters.h \
    DataStructs/precisePoint.h \
    DataStructs/scanningprogress.hpp \
+   DataStructs/vizFile.cpp \
    DriveScanner/driveScanner.h \
    DriveScanner/scanningWorker.h \
    HID/keyboardManager.h \
@@ -74,13 +75,10 @@ HEADERS  += \
    Scene/lineAsset.h \
    Scene/sceneAsset.h \
    Scene/visualizationAsset.h \
-   ThirdParty/ArenaAllocator.hpp \
-   ThirdParty/Stopwatch.hpp \
-   ThirdParty/ThreadSafeQueue.hpp \
-   ThirdParty/Tree.hpp \
    Utilities/colorGradient.hpp \
-   Utilities/scopeExit.hpp \
    Utilities/ignoreUnused.hpp \
+   Utilities/scopeExit.hpp \
+   Utilities/threadSafeQueue.hpp \
    Viewport/camera.h \
    Viewport/canvasContextMenu.h \
    Viewport/glCanvas.h \
@@ -90,15 +88,20 @@ HEADERS  += \
    Windows/aboutDialog.h \
    Windows/mainWindow.h \
    Windows/breakdownDialog.h \
-   Windows/scanBreakdownModel.h \
-    DataStructs/vizFile.h
+   Windows/scanBreakdownModel.h
 
 FORMS    += \
    Windows/aboutDialog.ui \
    Windows/breakdownDialog.ui \
    Windows/mainWindow.ui
 
-INCLUDEPATH += ../../boost_1_63_0
+INCLUDEPATH += \
+   ../../boost_1_63_0 \
+   ../Foreign/Blackhole/include \
+   ../Foreign/Stopwatch/source \
+   ../Foreign/Tree/source \
+   ../Foreign/ArenaAllocator/source
+
 
 DISTFILES += \
    Shaders/visualizationFragmentShader.frag \

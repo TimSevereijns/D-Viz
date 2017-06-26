@@ -91,6 +91,7 @@ public:
    }
 
 private:
+
    mutable std::mutex m_mutex;
 
    std::queue<Type> m_queue;

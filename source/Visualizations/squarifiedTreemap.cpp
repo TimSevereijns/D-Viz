@@ -9,7 +9,7 @@
 #define ENABLE_STOPWATCH
 #endif
 
-#include "../ThirdParty/Stopwatch.hpp"
+#include "Stopwatch/Stopwatch.hpp"
 
 namespace
 {

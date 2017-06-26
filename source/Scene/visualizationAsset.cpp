@@ -2,10 +2,11 @@
 
 #include "../constants.h"
 #include "../DataStructs/vizFile.h"
-#include "../ThirdParty/Tree.hpp"
 #include "../Utilities/colorGradient.hpp"
 #include "../Utilities/scopeExit.hpp"
 #include "../Visualizations/visualization.h"
+
+#include "Tree/Tree.hpp"
 
 #include <iostream>
 
