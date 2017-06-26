@@ -7,6 +7,6 @@
 [submodule "Foreign/Tree"]
 	path = Foreign/Tree
 	url = git@github.com:TimSevereijns/Tree.git
-[submodule "Foreign/Blackhole"]
-	path = Foreign/Blackhole
-	url = https://github.com/3Hren/blackhole.git
+[submodule "Foreign/Spdlog"]
+	path = Foreign/Spdlog
+	url = https://github.com/gabime/spdlog.git
