@@ -1,10 +1,8 @@
+#include "constants.h"
 #include "Windows/mainWindow.h"
 
-#include "spdlog/spdlog.h"
-
 #include <QApplication>
-
-const auto& LOG_NAME{ "D-Viz" };
+#include <spdlog/spdlog.h>
 
 template<typename NodeDataType>
 class Tree;
@@ -13,8 +11,8 @@ struct VizFile;
 
 int main(int argc, char* argv[])
 {
-   spdlog::basic_logger_mt("D-Viz", ".\\log.txt");
-   spdlog::get("D-Viz")->info("Starting D-Viz...");
+   spdlog::basic_logger_mt(Constants::Logging::LOG_NAME, ".\\log.txt");
+   spdlog::get(Constants::Logging::LOG_NAME)->info("Starting D-Viz...");
 
    qRegisterMetaType<std::uintmax_t>("std::uintmax_t");
    qRegisterMetaType<std::shared_ptr<Tree<VizFile>>>("std::shared_ptr<Tree<VizFile>>");

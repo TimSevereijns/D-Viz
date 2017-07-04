@@ -20,7 +20,7 @@
 #include "../DataStructs/vizFile.h"
 #include "../Visualizations/visualization.h"
 
-#include "Tree/Tree.hpp"
+#include <Tree/Tree.hpp>
 
 /**
  * @brief The NodeAndPath struct

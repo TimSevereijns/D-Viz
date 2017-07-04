@@ -1,7 +1,10 @@
 #include "visualization.h"
 
+#include "../constants.h"
+
 #include <boost/optional.hpp>
 #include <spdlog/spdlog.h>
+#include <Stopwatch/Stopwatch.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -13,10 +16,6 @@
 
 // @todo Replace the use of this class with something more stable.
 #include <Qt3DRender/private/qray3d_p.h>
-
-#include "../constants.h"
-
-#include "Stopwatch/Stopwatch.hpp"
 
 namespace
 {
@@ -394,12 +393,8 @@ Tree<VizFile>::Node* VisualizationModel::FindNearestIntersection(
       nearestIntersection = closest->second;
    }, [] (const auto& elapsed, const auto& units)
    {
-      const std::string message
-      {
-         "Selected node in: " + std::to_string(elapsed.count()) + std::string{ " " } + units
-      };
-
-      spdlog::get(Constants::Logging::APP_NAME)->info(message);
+      spdlog::get(Constants::Logging::LOG_NAME)->info(
+         "Selected node in: " + std::to_string(elapsed.count()) + std::string{ " " } + units);
    });
 
    return nearestIntersection;

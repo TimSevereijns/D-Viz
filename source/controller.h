@@ -4,7 +4,7 @@
 #include "DataStructs/light.h"
 #include "DataStructs/vizFile.h"
 #include "DriveScanner/driveScanner.h"
-#include "Tree/Tree.hpp"
+#include <Tree/Tree.hpp>
 
 #include <memory>
 #include <vector>
@@ -98,11 +98,11 @@ class Controller
       /**
        * @brief Highlights all nodes in the tree whose extension matches that of the passed in node.
        *
-       * @param[in] targetNode      The node whose extension is to be highlighted.
+       * @param[in] sampleNode      The node whose extension is to be highlighted.
        * @param[in] callback        Callback to highlight matching nodes on the canvas.
        */
       void HighlightAllMatchingExtensions(
-         const Tree<VizFile>::Node& targetNode,
+         const Tree<VizFile>::Node& sampleNode,
          const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback);
 
       /**

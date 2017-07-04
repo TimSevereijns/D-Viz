@@ -6,7 +6,7 @@
 #include "../controller.h"
 #include "../DataStructs/vizFile.h"
 
-#include "Tree/Tree.hpp"
+#include <Tree/Tree.hpp>
 
 #include <mutex>
 #include <sstream>
@@ -48,7 +48,9 @@ struct FileExtensionAndTotalSize
 
     FileExtensionAndTotalSize() = default;
 
-    FileExtensionAndTotalSize(const std::pair<const std::wstring, std::uintmax_t>& extensionAndSize) :
+    FileExtensionAndTotalSize(
+       const std::pair<const std::wstring, std::uintmax_t>& extensionAndSize)
+       :
        fileExtension{ extensionAndSize.first },
        totalSize{ extensionAndSize.second }
     {
@@ -59,24 +61,24 @@ struct FileExtensionAndTotalSize
 
 Q_DECLARE_METATYPE( FileExtensionAndTotalSize );
 
-class ScanBreakdownModel : public QAbstractTableModel
+class ScanBreakdownModel final : public QAbstractTableModel
 {
    friend class BreakdownDialog;
 
    public:
 
-      int rowCount(const QModelIndex& parent) const final override;
+      int rowCount(const QModelIndex& parent) const override;
 
-      int columnCount(const QModelIndex& parent) const final override;
+      int columnCount(const QModelIndex& parent) const override;
 
       QVariant headerData(
          int section,
          Qt::Orientation orientation,
-         int role) const final override;
+         int role) const override;
 
       QVariant data(
          const QModelIndex& index,
-         int role) const final override;
+         int role) const override;
 
       void insert(const Tree<VizFile>::Node& node);
 

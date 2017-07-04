@@ -28,8 +28,8 @@ QVariant ScanBreakdownModel::headerData(
    {
       switch (section)
       {
-         case 0: return QString("File Type");
-         case 1: return QString("Cumulative Size");
+         case 0: return QString{ "File Type" };
+         case 1: return QString{ "Cumulative Size" };
       }
    }
 

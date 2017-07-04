@@ -2,8 +2,8 @@
 
 #include "scanningWorker.h"
 
-#include "spdlog/spdlog.h"
-#include "Stopwatch/Stopwatch.hpp"
+#include <spdlog/spdlog.h>
+#include <Stopwatch/Stopwatch.hpp>
 
 #include "../constants.h"
 #include "../Utilities/ignoreUnused.hpp"
@@ -110,7 +110,7 @@ namespace
          node->DeleteFromTree();
       }
 
-      spdlog::get(Constants::Logging::APP_NAME)->info(
+      spdlog::get(Constants::Logging::LOG_NAME)->info(
          "Number of Sizeless Files Removed: " + std::to_string(nodesRemoved)
       );
    }
@@ -156,8 +156,9 @@ namespace
       auto itr = std::experimental::filesystem::directory_iterator{ path, errorCode };
       if (errorCode)
       {
-         spdlog::get(Constants::Logging::APP_NAME)->error("Could not create directory iterator!");
-         spdlog::get(Constants::Logging::APP_NAME)->flush();
+         const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
+         log->error("Could not create directory iterator!");
+         log->flush();
 
          return { };
       }
@@ -277,7 +278,7 @@ std::shared_ptr<Tree<VizFile>> ScanningWorker::CreateTreeAndRootNode()
       rootBlock
    };
 
-   return std::make_shared<Tree<VizFile>>(Tree<VizFile>(rootNode));
+   return std::make_shared<Tree<VizFile>>(rootNode);
 }
 
 void ScanningWorker::ProcessFile(
@@ -322,12 +323,18 @@ void ScanningWorker::ProcessDirectory(
       return;
    }
 
+   if (std::experimental::filesystem::is_other(path))
+   {
+      std::cout << path.string() << " is other" << std::endl;
+   }
+
    if (isRegularFile)
    {
       ProcessFile(path, treeNode);
    }
    else if (std::experimental::filesystem::is_directory(path)
-      && !std::experimental::filesystem::is_symlink(path))
+      && !std::experimental::filesystem::is_symlink(path)
+      && !std::experimental::filesystem::is_other(path))
    {
       try
       {
@@ -456,12 +463,8 @@ void ScanningWorker::Start()
       BuildFinalTree(resultQueue, *theTree);
    }, [] (const auto& elapsed, const auto& units)
    {
-      const std::string message
-      {
-         "Scanned Drive in: " + std::to_string(elapsed.count()) + std::string{ " " } + units
-      };
-
-      spdlog::get(Constants::Logging::APP_NAME)->info(message);
+      spdlog::get(Constants::Logging::LOG_NAME)->info(
+         "Scanned Drive in: " + std::to_string(elapsed.count()) + std::string{ " " } + units);
    });
 
    ComputeDirectorySizes(*theTree);

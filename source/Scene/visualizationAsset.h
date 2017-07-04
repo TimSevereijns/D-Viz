@@ -15,7 +15,7 @@ template<typename DataType> class TreeNode;
  * @brief The VisualizationAsset class implements the functionality needed to represent the
  * main visualization scene asset.
  */
-class VisualizationAsset : public SceneAsset
+class VisualizationAsset final : public SceneAsset
 {
    public:
 
@@ -85,21 +85,6 @@ class VisualizationAsset : public SceneAsset
       QVector<QVector3D> m_referenceBlockVertices;
       QVector<QMatrix4x4> m_blockTransformations;
       QVector<QVector3D> m_blockColors;
-
-      QOpenGLShaderProgram m_shadowShader;
-
-      static constexpr auto SHADOW_MAP_WIDTH{ 2048 };
-      static constexpr auto SHADOW_MAP_HEIGHT{ 1024 };
-
-      QOpenGLFramebufferObject m_shadowFrameBuffer
-      {
-         SHADOW_MAP_WIDTH,
-         SHADOW_MAP_HEIGHT,
-         QOpenGLFramebufferObject::Depth,
-         GL_TEXTURE_2D
-      };
-
-      //QOpenGLTexture m_shadowDepthMap{ QOpenGLTexture::Target2D };
 };
 
 #endif // VISUALIZATIONASSET_H

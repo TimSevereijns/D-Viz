@@ -1,14 +1,14 @@
 #include "controller.h"
 
 #include "constants.h"
-#include "ArenaAllocator/ArenaAllocator.hpp"
-#include "Stopwatch/Stopwatch.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Visualizations/squarifiedTreemap.h"
 #include "Windows/mainWindow.h"
 
+#include <ArenaAllocator/ArenaAllocator.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <spdlog/spdlog.h>
+#include <Stopwatch/Stopwatch.hpp>
 
 #include <algorithm>
 #include <sstream>
@@ -302,7 +302,7 @@ void Controller::HighlightDescendants(
 }
 
 void Controller::HighlightAllMatchingExtensions(
-   const Tree<VizFile>::Node& targetNode,
+   const Tree<VizFile>::Node& sampleNode,
    const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback)
 {
    const auto selector = [&]
@@ -314,7 +314,7 @@ void Controller::HighlightAllMatchingExtensions(
       {
          if ((m_visualizationParameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
             || node->file.size < m_visualizationParameters.minimumFileSize
-            || node->file.extension != targetNode->file.extension)
+            || node->file.extension != sampleNode->file.extension)
          {
             return;
          }
@@ -380,12 +380,8 @@ void Controller::SearchTreeMap(
          });
       }, [] (const auto& elapsed, const auto& units)
       {
-         const std::string message
-         {
-            "Search Completed in: " + std::to_string(elapsed.count()) + std::string{ " " } + units
-         };
-
-         spdlog::get(Constants::Logging::APP_NAME)->info(message);
+         spdlog::get(Constants::Logging::LOG_NAME)->info(
+            "Search Completed in: " + std::to_string(elapsed.count()) + std::string{ " " } + units);
       });
    };
 

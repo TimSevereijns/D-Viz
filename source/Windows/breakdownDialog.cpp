@@ -3,6 +3,9 @@
 
 #include "mainWindow.h"
 
+#include <spdlog/spdlog.h>
+#include <Stopwatch/Stopwatch.hpp>
+
 #include <QResizeEvent>
 #include <QScrollbar>
 
@@ -28,13 +31,20 @@ BreakdownDialog::BreakdownDialog(QWidget* parent) :
       return;
    }
 
-   for (const auto& node : tree)
+   Stopwatch<std::chrono::milliseconds>([&] ()
    {
-      if (node->file.type != FileType::DIRECTORY)
+      for (const auto& node : tree)
       {
-         m_model.insert(node);
+         if (node->file.type != FileType::DIRECTORY)
+         {
+            m_model.insert(node);
+         }
       }
-   }
+   }, [] (const auto& elapsed, const auto& units)
+   {
+      spdlog::get(Constants::Logging::LOG_NAME)->info(
+         "Built break-down model in: " + std::to_string(elapsed.count()) + std::string{ " " } + units);
+   });
 
    m_model.FinalizeInsertion();
 

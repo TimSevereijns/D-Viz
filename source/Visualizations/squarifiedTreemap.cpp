@@ -1,15 +1,14 @@
 #include "squarifiedTreemap.h"
 
+#include "constants.h"
+
 #include <algorithm>
 #include <assert.h>
 #include <limits>
 #include <numeric>
 
-#ifndef ENABLE_STOPWATCH
-#define ENABLE_STOPWATCH
-#endif
-
-#include "Stopwatch/Stopwatch.hpp"
+#include <spdlog/spdlog.h>
+#include <Stopwatch/Stopwatch.hpp>
 
 namespace
 {
@@ -158,18 +157,22 @@ SquarifiedTreeMap::SquarifiedTreeMap(const VisualizationParameters& parameters) 
 
 Block SquarifiedTreeMap::ComputeRemainingArea(const Block& block)
 {
+   const auto& originOfNextRow = block.GetNextRowOrigin();
+
    const PrecisePoint nearCorner
    {
-      block.GetNextRowOrigin().x(),
-      block.GetNextRowOrigin().y(),
-      block.GetNextRowOrigin().z()
+      originOfNextRow.x(),
+      originOfNextRow.y(),
+      originOfNextRow.z()
    };
+
+   const auto& originOfNextChild = block.ComputeNextChildOrigin();
 
    const PrecisePoint farCorner
    {
-      block.ComputeNextChildOrigin().x() + block.GetWidth(),
-      block.ComputeNextChildOrigin().y(),
-      block.ComputeNextChildOrigin().z() - block.GetDepth()
+      originOfNextChild.x() + block.GetWidth(),
+      originOfNextChild.y(),
+      originOfNextChild.z() - block.GetDepth()
    };
 
    const Block remainingArea
@@ -367,11 +370,13 @@ Block SquarifiedTreeMap::CalculateRowBounds(
 
    const double rowToParentRatio = bytesInRow / remainingBytes;
 
+   const auto& originOfNextRow = parentBlock.GetNextRowOrigin();
+
    const PrecisePoint nearCorner
    {
-      parentBlock.GetNextRowOrigin().x(),
-      parentBlock.GetNextRowOrigin().y(),
-      parentBlock.GetNextRowOrigin().z()
+      originOfNextRow.x(),
+      originOfNextRow.y(),
+      originOfNextRow.z()
    };
 
    Block rowRealEstate;
@@ -479,9 +484,14 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizFile>>& theTree)
 
    m_theTree = theTree;
 
-   TIME_IN_MILLISECONDS(
-      VisualizationModel::SortNodes(*m_theTree),
-      "Sorted tree in ");
+   Stopwatch<std::chrono::milliseconds>([&]
+   {
+      VisualizationModel::SortNodes(*m_theTree);
+   }, [] (const auto& elapsed, const auto& units)
+   {
+      spdlog::get(Constants::Logging::LOG_NAME)->info(
+         "Sorted tree in: " + std::to_string(elapsed.count()) + std::string{ " " } + units);
+   });
 
    const Block rootBlock
    {
@@ -493,9 +503,14 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizFile>>& theTree)
 
    theTree->GetRoot()->GetData().block = rootBlock;
 
-   TIME_IN_MILLISECONDS(
-      SquarifyRecursively(*theTree->GetRoot()),
-      "Visualization generated in ");
+   Stopwatch<std::chrono::milliseconds>([&]
+   {
+      SquarifyRecursively(*theTree->GetRoot());
+   }, [] (const auto& elapsed, const auto& units)
+   {
+      spdlog::get(Constants::Logging::LOG_NAME)->info(
+         "Visualization generated in: " + std::to_string(elapsed.count()) + std::string{ " " } + units);
+   });
 
    m_hasDataBeenParsed = true;
 }

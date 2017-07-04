@@ -1,15 +1,17 @@
 #include "mainWindow.h"
 
+#include "ui_mainwindow.h"
+
 #include "optionsManager.h"
 #include "Utilities/scopeExit.hpp"
 #include "Viewport/glCanvas.h"
+
+#include <spdlog/spdlog.h>
 
 #include <cassert>
 #include <iostream>
 #include <limits>
 #include <sstream>
-
-#include "ui_mainwindow.h"
 
 #include <QAction>
 #include <QFileDialog>
@@ -33,9 +35,9 @@ namespace
 
       assert(wasOperationSuccessful);
 
-      std::cout << "Disk Size:  " << totalNumberOfBytes << "\n";
-      std::cout << "Free Space: " << totalNumberOfFreeBytes << "\n";
-      std::cout << std::flush;
+      const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
+      log->info("Disk Size: " + std::to_string(totalNumberOfBytes) + " bytes.");
+      log->info("Free Space: " + std::to_string(totalNumberOfFreeBytes) + " bytes.");
 
       const auto occupiedSpace = totalNumberOfBytes - totalNumberOfFreeBytes;
       return occupiedSpace;
@@ -335,8 +337,15 @@ void MainWindow::ComputeProgress(
 {
    assert(m_occupiedDiskSpace > 0);
 
-   const auto percentComplete = std::min(99.99,
-      100 * (static_cast<double>(bytesProcessed) / static_cast<double>(m_occupiedDiskSpace)));
+   // This clamps to percentage to just below 100%. Progress can report as being more than 100%
+   // due to an issue in the std::experimental::filesystem code, which causes it to report junctions
+   // as regular old directories (without ever triggering the is_symlink(...) check.
+
+   //const auto percentComplete = std::min(99.99,
+   //   100 * (static_cast<double>(bytesProcessed) / static_cast<double>(m_occupiedDiskSpace)));
+
+   const auto percentComplete =
+      100 * (static_cast<double>(bytesProcessed) / static_cast<double>(m_occupiedDiskSpace));
 
    std::wstringstream message;
    message.imbue(std::locale{ "" });
@@ -367,11 +376,18 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
       const std::uintmax_t bytesProcessed,
       std::shared_ptr<Tree<VizFile>> scanningResults) mutable
    {
+      const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
+      log->info("Scanned " + std::to_string(numberOfFilesScanned) + " files, representing "
+         + std::to_string(bytesProcessed) + " bytes");
+
+      log->flush();
+
       ComputeProgress(numberOfFilesScanned, bytesProcessed);
 
       QCursor previousCursor = cursor();
       setCursor(Qt::WaitCursor);
       ON_SCOPE_EXIT{ setCursor(previousCursor); };
+
       QApplication::processEvents();
 
       AskUserToLimitFileSize(numberOfFilesScanned, vizParameters);

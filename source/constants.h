@@ -44,7 +44,7 @@ namespace Constants
 
    namespace Logging
    {
-      const static auto& APP_NAME{ "D-Viz" };
+      const static auto& LOG_NAME{ "D-Viz" };
    }
 }
 

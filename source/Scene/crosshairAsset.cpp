@@ -11,7 +11,7 @@ namespace
     *
     * @returns All the vertices needed to draw the crosshair.
     */
-   auto CreateCrosshairVertices(const QPoint center)
+   auto CreateCrosshairVertices(const QPoint& center)
    {
       QVector<QVector3D> vertices;
       vertices.reserve(4);

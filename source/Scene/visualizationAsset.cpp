@@ -6,7 +6,7 @@
 #include "../Utilities/scopeExit.hpp"
 #include "../Visualizations/visualization.h"
 
-#include "Tree/Tree.hpp"
+#include <Tree/Tree.hpp>
 
 #include <iostream>
 
@@ -93,13 +93,7 @@ VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
 
 bool VisualizationAsset::LoadShaders()
 {
-   m_shadowShader.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/Shaders/shadowMapping.vert");
-   m_shadowShader.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/Shaders/shadowMapping.frag");
-   bool success = m_shadowShader.link();
-
-   success |= SceneAsset::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
-
-   return success;
+   return SceneAsset::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
 }
 
 bool VisualizationAsset::Initialize()
@@ -107,13 +101,11 @@ bool VisualizationAsset::Initialize()
    const bool unitBlockInitialized = InitializeReferenceBlock();
    const bool colorsInitialized = InitializeColors();
    const bool transformationsInitialized = InitializeBlockTransformations();
-   const bool shadowMachineryInitialized = InitializeShadowMachinery();
 
    const bool overallSuccess =
       unitBlockInitialized
       && colorsInitialized
-      && transformationsInitialized
-      && shadowMachineryInitialized;
+      && transformationsInitialized;
 
    assert(overallSuccess);
    return overallSuccess;
@@ -195,7 +187,7 @@ bool VisualizationAsset::InitializeColors()
       /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeof(QVector3D),
-      /* ptr = */ (GLvoid*)0);
+      /* ptr = */ static_cast<GLvoid*>(0));
 
    m_blockColorBuffer.release();
    m_VAO.release();
@@ -231,7 +223,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeOfMatrix,
-      /* ptr = */ (GLvoid*)(0 * sizeOfVector));
+      /* ptr = */ static_cast<GLvoid*>(0 * sizeOfVector));
 
    // Row 2 of the matrix:
    m_graphicsDevice.glEnableVertexAttribArray(2);
@@ -242,7 +234,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeOfMatrix,
-      /* ptr = */ (GLvoid*)(1 * sizeOfVector));
+      /* ptr = */ reinterpret_cast<GLvoid*>(1 * sizeOfVector));
 
    // Row 3 of the matrix:
    m_graphicsDevice.glEnableVertexAttribArray(3);
@@ -253,7 +245,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeOfMatrix,
-      /* ptr = */ (GLvoid*)(2 * sizeOfVector));
+      /* ptr = */ reinterpret_cast<GLvoid*>(2 * sizeOfVector));
 
    // Row 4 of the matrix:
    m_graphicsDevice.glEnableVertexAttribArray(4);
@@ -264,42 +256,9 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeOfMatrix,
-      /* ptr = */ (GLvoid*)(3 * sizeOfVector));
+      /* ptr = */ reinterpret_cast<GLvoid*>(3 * sizeOfVector));
 
    m_blockTransformationBuffer.release();
-   m_VAO.release();
-
-   return true;
-}
-
-bool VisualizationAsset::InitializeShadowMachinery()
-{
-   m_shadowFrameBuffer.addColorAttachment(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
-   m_shadowFrameBuffer.addColorAttachment(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
-   m_shadowFrameBuffer.addColorAttachment(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
-
-   m_VAO.bind();
-   m_referenceBlockBuffer.bind();
-   m_shadowShader.bind();
-
-   m_shadowShader.enableAttributeArray("vertex");
-   m_shadowShader.setAttributeBuffer(
-      /* location = */ "vertex",
-      /* type = */ GL_FLOAT,
-      /* offset = */ 0,
-      /* tupleSize = */ 3,
-      /* stride = */ 2 * sizeof(QVector3D));
-
-   m_shadowShader.enableAttributeArray("normal");
-   m_shadowShader.setAttributeBuffer(
-      /* location = */ "normal",
-      /* type = */ GL_FLOAT,
-      /* offset = */ sizeof(QVector3D),
-      /* tupleSize = */ 3,
-      /* stride = */ 2 * sizeof(QVector3D));
-
-   m_shadowShader.release();
-   m_referenceBlockBuffer.release();
    m_VAO.release();
 
    return true;
@@ -328,9 +287,10 @@ std::uint32_t VisualizationAsset::LoadBufferData(
       node->offsetIntoVBO = m_blockCount++;
 
       const auto& block = node->block;
+      const auto& blockOrigin = block.GetOrigin();
 
       QMatrix4x4 instanceMatrix{ };
-      instanceMatrix.translate(block.GetOrigin().x(), block.GetOrigin().y(), block.GetOrigin().z());
+      instanceMatrix.translate(blockOrigin.x(), blockOrigin.y(), blockOrigin.z());
       instanceMatrix.scale(block.GetWidth(), block.GetHeight(), block.GetDepth());
       m_blockTransformations << instanceMatrix;
 
@@ -400,47 +360,6 @@ bool VisualizationAsset::IsAssetLoaded() const
    return !(m_blockTransformations.empty() && m_blockColors.empty());
 }
 
-bool VisualizationAsset::RenderShadowPass(const Camera& camera)
-{
-   ON_SCOPE_EXIT
-   {
-      const auto& viewport = camera.GetViewport();
-      m_graphicsDevice.glViewport(0, 0, viewport.width(), viewport.height());
-   };
-
-   m_graphicsDevice.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
-   m_graphicsDevice.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-   m_shadowFrameBuffer.bind();
-
-   m_graphicsDevice.glClear(GL_DEPTH_BUFFER_BIT);
-
-   constexpr float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-   m_graphicsDevice.glClearBufferfv(GL_COLOR, 0, white);
-
-   m_shadowShader.bind();
-   m_shadowShader.setUniformValue("projectionMatrix", camera.GetProjectionMatrix());
-   m_shadowShader.setUniformValue("viewMatrix", camera.GetViewMatrix());
-
-   m_VAO.bind();
-
-   m_graphicsDevice.glDrawArraysInstanced(
-      /* mode = */ GL_TRIANGLES,
-      /* first = */ 0,
-      /* count = */ m_referenceBlockVertices.size(),
-      /* instanceCount = */ m_blockColors.size()
-   );
-
-   m_VAO.release();
-
-   //m_shadowFrameBuffer.toImage(true, 0).save("C:\\Users\\Tim\\Desktop\\depth.png");
-   m_shadowFrameBuffer.release();
-
-   m_shadowShader.release();
-
-   return true;
-}
-
 bool VisualizationAsset::Render(
    const Camera& camera,
    const std::vector<Light>& lights,
@@ -450,8 +369,6 @@ bool VisualizationAsset::Render(
    {
       return true;
    }
-
-   RenderShadowPass(camera);
 
    m_shader.bind();
    m_shader.setUniformValue("projectionMatrix", camera.GetProjectionMatrix());

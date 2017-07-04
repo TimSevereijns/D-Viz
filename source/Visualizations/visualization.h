@@ -10,7 +10,7 @@
 #include <memory>
 #include <numeric>
 
-#include "Tree/Tree.hpp"
+#include <Tree/Tree.hpp>
 
 #include "../DataStructs/vizFile.h"
 #include "../Viewport/camera.h"
