@@ -8,6 +8,7 @@
 #include "Windows/mainWindow.h"
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <spdlog/spdlog.h>
 
 #include <algorithm>
 #include <sstream>
@@ -370,14 +371,22 @@ void Controller::SearchTreeMap(
             fullName = file.name.data();
             fullName.append(file.extension.data());
 
-            if (!boost::contains(fullName, searchQuery))
+            if (!boost::icontains(fullName, searchQuery))
             {
                return;
             }
 
             m_highlightedNodes.emplace_back(&node);
          });
-      }, "Completed search in ");
+      }, [] (const auto& elapsed, const auto& units)
+      {
+         const std::string message
+         {
+            "Search Completed in: " + std::to_string(elapsed.count()) + std::string{ " " } + units
+         };
+
+         spdlog::get(Constants::Logging::APP_NAME)->info(message);
+      });
    };
 
    ProcessSelection(selector, selectionCallback);

@@ -4,11 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <functional>
-
-namespace std
-{
-   template<typename T> class shared_ptr;
-}
+#include <memory>
 
 template<typename T>
 class Tree;

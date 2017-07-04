@@ -1,12 +1,13 @@
 #include "driveScanner.h"
+
 #include "scanningWorker.h"
 
-#include "../constants.h"
-
+#include "spdlog/spdlog.h"
 #include "Stopwatch/Stopwatch.hpp"
-#include "../Utilities/ThreadSafeQueue.hpp"
 
+#include "../constants.h"
 #include "../Utilities/ignoreUnused.hpp"
+#include "../Utilities/ThreadSafeQueue.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -109,7 +110,9 @@ namespace
          node->DeleteFromTree();
       }
 
-      std::cout << "Number of Sizeless Files Removed: " << nodesRemoved << std::endl;
+      spdlog::get(Constants::Logging::APP_NAME)->info(
+         "Number of Sizeless Files Removed: " + std::to_string(nodesRemoved)
+      );
    }
 
    /**
@@ -153,7 +156,9 @@ namespace
       auto itr = std::experimental::filesystem::directory_iterator{ path, errorCode };
       if (errorCode)
       {
-         std::cout << "Could not create directory iterator.\n";
+         spdlog::get(Constants::Logging::APP_NAME)->error("Could not create directory iterator!");
+         spdlog::get(Constants::Logging::APP_NAME)->flush();
+
          return { };
       }
 
@@ -449,7 +454,15 @@ void ScanningWorker::Start()
       }
 
       BuildFinalTree(resultQueue, *theTree);
-   }, "Scanned Drive in ");
+   }, [] (const auto& elapsed, const auto& units)
+   {
+      const std::string message
+      {
+         "Scanned Drive in: " + std::to_string(elapsed.count()) + std::string{ " " } + units
+      };
+
+      spdlog::get(Constants::Logging::APP_NAME)->info(message);
+   });
 
    ComputeDirectorySizes(*theTree);
    PruneEmptyFilesAndDirectories(*theTree);

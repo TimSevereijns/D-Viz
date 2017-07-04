@@ -49,8 +49,8 @@ SOURCES += \
    Visualizations/squarifiedTreemap.cpp \
    Visualizations/visualization.cpp \
    Windows/aboutDialog.cpp \
-   Windows/mainWindow.cpp \
    Windows/breakdownDialog.cpp \
+   Windows/mainWindow.cpp \
    Windows/scanBreakdownModel.cpp
 
 HEADERS  += \
@@ -86,8 +86,8 @@ HEADERS  += \
    Visualizations/squarifiedTreemap.h \
    Visualizations/visualization.h \
    Windows/aboutDialog.h \
-   Windows/mainWindow.h \
    Windows/breakdownDialog.h \
+   Windows/mainWindow.h \
    Windows/scanBreakdownModel.h
 
 FORMS    += \
@@ -97,7 +97,7 @@ FORMS    += \
 
 INCLUDEPATH += \
    ../../boost_1_63_0 \
-   ../Foreign/Blackhole/include \
+   ../Foreign/Spdlog/include \
    ../Foreign/Stopwatch/source \
    ../Foreign/Tree/source \
    ../Foreign/ArenaAllocator/source

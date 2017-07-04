@@ -574,7 +574,7 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
       m_isLeftTriggerDown = true;
 
       auto* const crosshairAsset =
-            static_cast<CrosshairAsset*>(m_sceneAssets[Asset::CROSSHAIR].get());
+         static_cast<CrosshairAsset*>(m_sceneAssets[Asset::CROSSHAIR].get());
 
       crosshairAsset->Show(m_camera);
    }

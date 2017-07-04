@@ -1,6 +1,7 @@
 #include "visualization.h"
 
 #include <boost/optional.hpp>
+#include <spdlog/spdlog.h>
 
 #include <algorithm>
 #include <chrono>
@@ -391,7 +392,15 @@ Tree<VizFile>::Node* VisualizationModel::FindNearestIntersection(
       });
 
       nearestIntersection = closest->second;
-   }, "Node selected in ");
+   }, [] (const auto& elapsed, const auto& units)
+   {
+      const std::string message
+      {
+         "Selected node in: " + std::to_string(elapsed.count()) + std::string{ " " } + units
+      };
+
+      spdlog::get(Constants::Logging::APP_NAME)->info(message);
+   });
 
    return nearestIntersection;
 }

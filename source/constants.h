@@ -41,6 +41,11 @@ namespace Constants
    {
       constexpr static unsigned int THREAD_LIMIT{ 4 };
    }
+
+   namespace Logging
+   {
+      const static auto& APP_NAME{ "D-Viz" };
+   }
 }
 
 #endif // CONSTANTS

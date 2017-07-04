@@ -1,8 +1,6 @@
 #ifndef SCANNINGWORKER_H
 #define SCANNINGWORKER_H
 
-#include <experimental/filesystem>
-
 #include <QObject>
 #include <QVector>
 #include <QVector3D>
@@ -13,12 +11,13 @@
 #include <memory>
 #include <string>
 
+#include <experimental/filesystem>
+
 #include "../DataStructs/block.h"
 #include "../DataStructs/driveScanningParameters.h"
 #include "../DataStructs/fileInfo.h"
 #include "../DataStructs/scanningprogress.hpp"
 #include "../DataStructs/vizFile.h"
-
 #include "../Visualizations/visualization.h"
 
 #include "Tree/Tree.hpp"
