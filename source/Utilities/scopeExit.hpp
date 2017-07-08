@@ -25,8 +25,9 @@ struct ScopeExit
    ScopeExit(ScopeExit&&) = default;
    ScopeExit& operator=(ScopeExit&&) = default;
 
-   private:
-      LambdaType m_lambda;
+private:
+
+   LambdaType m_lambda;
 };
 
 namespace

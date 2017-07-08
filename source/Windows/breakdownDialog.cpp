@@ -40,10 +40,10 @@ BreakdownDialog::BreakdownDialog(QWidget* parent) :
             m_model.insert(node);
          }
       }
-   }, [] (const auto& elapsed, const auto& units)
+   }, [] (const auto& elapsed, const auto& units) noexcept
    {
       spdlog::get(Constants::Logging::LOG_NAME)->info(
-         "Built break-down model in: " + std::to_string(elapsed.count()) + std::string{ " " } + units);
+         fmt::format("Built break-down model in: {} {}", elapsed.count(), units));
    });
 
    m_model.FinalizeInsertion();

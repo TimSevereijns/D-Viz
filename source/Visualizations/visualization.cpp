@@ -391,10 +391,10 @@ Tree<VizFile>::Node* VisualizationModel::FindNearestIntersection(
       });
 
       nearestIntersection = closest->second;
-   }, [] (const auto& elapsed, const auto& units)
+   }, [] (const auto& elapsed, const auto& units) noexcept
    {
       spdlog::get(Constants::Logging::LOG_NAME)->info(
-         "Selected node in: " + std::to_string(elapsed.count()) + std::string{ " " } + units);
+         fmt::format("Selected node in: {} {}", elapsed.count(), units));
    });
 
    return nearestIntersection;

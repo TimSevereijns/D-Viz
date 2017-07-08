@@ -487,10 +487,10 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizFile>>& theTree)
    Stopwatch<std::chrono::milliseconds>([&]
    {
       VisualizationModel::SortNodes(*m_theTree);
-   }, [] (const auto& elapsed, const auto& units)
+   }, [] (const auto& elapsed, const auto& units) noexcept
    {
       spdlog::get(Constants::Logging::LOG_NAME)->info(
-         "Sorted tree in: " + std::to_string(elapsed.count()) + std::string{ " " } + units);
+         fmt::format("Sorted tree in: {} {}", elapsed.count(), units));
    });
 
    const Block rootBlock
@@ -506,10 +506,10 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizFile>>& theTree)
    Stopwatch<std::chrono::milliseconds>([&]
    {
       SquarifyRecursively(*theTree->GetRoot());
-   }, [] (const auto& elapsed, const auto& units)
+   }, [] (const auto& elapsed, const auto& units) noexcept
    {
       spdlog::get(Constants::Logging::LOG_NAME)->info(
-         "Visualization generated in: " + std::to_string(elapsed.count()) + std::string{ " " } + units);
+         fmt::format("Visualization Generated in: {} {}", elapsed.count(), units));
    });
 
    m_hasDataBeenParsed = true;

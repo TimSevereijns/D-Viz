@@ -13,11 +13,11 @@ namespace Ui
    class breakdownDialog;
 }
 
-class ScanBreakdownFilterProxyModel : public QSortFilterProxyModel
+class ScanBreakdownFilterProxyModel final : public QSortFilterProxyModel
 {
    bool lessThan(
       const QModelIndex& lhs,
-      const QModelIndex& rhs) const final override
+      const QModelIndex& rhs) const override
    {
       const auto lhsData = sourceModel()->data(lhs, Qt::UserRole);
       const auto rhsData = sourceModel()->data(rhs, Qt::UserRole);
@@ -45,7 +45,7 @@ class ScanBreakdownFilterProxyModel : public QSortFilterProxyModel
 /**
  * @brief The BreakdownDialog class
  */
-class BreakdownDialog : public QDialog
+class BreakdownDialog final : public QDialog
 {
       Q_OBJECT
 
@@ -57,7 +57,7 @@ class BreakdownDialog : public QDialog
 
    protected:
 
-      void resizeEvent(QResizeEvent* event) final override;
+      void resizeEvent(QResizeEvent* event) override;
 
    private:
 

@@ -36,8 +36,8 @@ namespace
       assert(wasOperationSuccessful);
 
       const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
-      log->info("Disk Size: " + std::to_string(totalNumberOfBytes) + " bytes.");
-      log->info("Free Space: " + std::to_string(totalNumberOfFreeBytes) + " bytes.");
+      log->info(fmt::format("Disk Size:  {} bytes", totalNumberOfBytes));
+      log->info(fmt::format("Free Space: {} bytes", totalNumberOfFreeBytes));
 
       const auto occupiedSpace = totalNumberOfBytes - totalNumberOfFreeBytes;
       return occupiedSpace;
@@ -377,9 +377,8 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
       std::shared_ptr<Tree<VizFile>> scanningResults) mutable
    {
       const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
-      log->info("Scanned " + std::to_string(numberOfFilesScanned) + " files, representing "
-         + std::to_string(bytesProcessed) + " bytes");
-
+      log->info(fmt::format("Scanned: {} files, representing {} bytes",
+         numberOfFilesScanned, bytesProcessed));
       log->flush();
 
       ComputeProgress(numberOfFilesScanned, bytesProcessed);

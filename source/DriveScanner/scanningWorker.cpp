@@ -111,7 +111,7 @@ namespace
       }
 
       spdlog::get(Constants::Logging::LOG_NAME)->info(
-         "Number of Sizeless Files Removed: " + std::to_string(nodesRemoved)
+         fmt::format("Number of Sizeless Files Removed: {}", nodesRemoved)
       );
    }
 
@@ -323,18 +323,12 @@ void ScanningWorker::ProcessDirectory(
       return;
    }
 
-   if (std::experimental::filesystem::is_other(path))
-   {
-      std::cout << path.string() << " is other" << std::endl;
-   }
-
    if (isRegularFile)
    {
       ProcessFile(path, treeNode);
    }
    else if (std::experimental::filesystem::is_directory(path)
-      && !std::experimental::filesystem::is_symlink(path)
-      && !std::experimental::filesystem::is_other(path))
+      && !std::experimental::filesystem::is_symlink(path))
    {
       try
       {
@@ -461,10 +455,10 @@ void ScanningWorker::Start()
       }
 
       BuildFinalTree(resultQueue, *theTree);
-   }, [] (const auto& elapsed, const auto& units)
+   }, [] (const auto& elapsed, const auto& units) noexcept
    {
       spdlog::get(Constants::Logging::LOG_NAME)->info(
-         "Scanned Drive in: " + std::to_string(elapsed.count()) + std::string{ " " } + units);
+         fmt::format("Scanned Drive in: {} {}", elapsed.count(), units));
    });
 
    ComputeDirectorySizes(*theTree);
