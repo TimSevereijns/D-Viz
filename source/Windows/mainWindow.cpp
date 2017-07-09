@@ -1,6 +1,6 @@
 #include "mainWindow.h"
 
-#include "ui_mainwindow.h"
+#include "ui_mainWindow.h"
 
 #include "optionsManager.h"
 #include "Utilities/scopeExit.hpp"
@@ -18,8 +18,14 @@
 #include <QMenuBar>
 #include <QMessageBox>
 
+#ifdef Q_OS_LINUX
+#include <sys/statvfs.h>
+#endif
+
 namespace
 {
+#ifdef Q_OS_WIN
+
    std::uint64_t GetUsedDiskSpace(std::wstring path)
    {
       std::replace(std::begin(path), std::end(path), L'/', L'\\');
@@ -42,6 +48,20 @@ namespace
       const auto occupiedSpace = totalNumberOfBytes - totalNumberOfFreeBytes;
       return occupiedSpace;
    }
+
+#elif defined(Q_OS_LINUX)
+
+   std::uint64_t GetUsedDiskSpace(const std::wstring& rawPath)
+   {
+      const std::experimental::filesystem::path path{ rawPath };
+
+      struct statvfs diskInfo;
+      statvfs(path.string().data(), &diskInfo);
+
+      return (diskInfo.f_blocks - diskInfo.f_bfree) * diskInfo.f_bsize;
+   }
+
+#endif
 }
 
 MainWindow::MainWindow(
@@ -80,7 +100,7 @@ void MainWindow::SetupSidebar()
    std::for_each(std::begin(m_sizePruningOptions), std::end(m_sizePruningOptions),
       [&] (const auto& pair)
    {
-      m_ui->pruneSizeComboBox->addItem(pair.second, pair.first);
+      m_ui->pruneSizeComboBox->addItem(pair.second, static_cast<qulonglong>(pair.first));
    });
 
    connect(m_ui->directoriesOnlyCheckBox, &QCheckBox::stateChanged, this, [&] (int state)
@@ -472,7 +492,9 @@ void MainWindow::SetFilePruningComboBoxValue(std::uintmax_t minimum)
       return;
    }
 
-   const int targetIndex = m_ui->pruneSizeComboBox->findData(match->first);
+   const int targetIndex = m_ui->pruneSizeComboBox->findData(
+      static_cast<qulonglong>(match->first));
+
    if (targetIndex != -1)
    {
       m_ui->pruneSizeComboBox->setCurrentIndex(targetIndex);

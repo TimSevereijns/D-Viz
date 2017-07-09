@@ -11,7 +11,12 @@ struct VizFile;
 
 int main(int argc, char* argv[])
 {
+#ifdef Q_OS_WIN
    spdlog::basic_logger_mt(Constants::Logging::LOG_NAME, ".\\log.txt");
+#else
+   spdlog::basic_logger_mt(Constants::Logging::LOG_NAME, "./log.txt");
+#endif
+
    spdlog::get(Constants::Logging::LOG_NAME)->info("Starting D-Viz...");
 
    qRegisterMetaType<std::uintmax_t>("std::uintmax_t");

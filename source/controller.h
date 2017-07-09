@@ -39,7 +39,7 @@ class Controller
       /**
        * @returns A pointer to the selected node.
        */
-      const Tree<VizFile>::Node* const GetSelectedNode() const;
+      const Tree<VizFile>::Node* GetSelectedNode() const;
 
       /**
        * @returns A reference to the tree that represents the most recent drive scan.
@@ -121,7 +121,7 @@ class Controller
        * @param[in] node            The node whose ancestors are to be highlighted.
        * @param[in] callback        Callback to highlight matching nodes on the canvas.
        */
-      void Controller::HighlightAncestors(
+      void HighlightAncestors(
          const Tree<VizFile>::Node& node,
          const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback);
 
@@ -129,7 +129,7 @@ class Controller
        * @brief Clears the selected node, and restores the color of that selected node back to its
        * unselected color.
        */
-      inline void ClearSelectedNode();
+      void ClearSelectedNode();
 
       /**
        * @brief Clears all highlighted nodes, and restores the color of any highlighted nodes back
@@ -138,7 +138,7 @@ class Controller
        * @param[in] callback        Callback to highlight matching nodes on the canvas.
        * @param[in] clearSelected   Pass in true if the primary selection target is to be cleared.
        */
-      inline void ClearHighlightedNodes(
+      void ClearHighlightedNodes(
          const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback,
          bool clearSelected);
 
@@ -165,7 +165,7 @@ class Controller
        */
       void SelectNodeViaRay(
          const Camera& camera,
-         const Qt3DRender::QRay3D& ray,
+         const Qt3DRender::RayCasting::QRay3D& ray,
          const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& deselectionCallback,
          const std::function<void (const Tree<VizFile>::Node* const)>& selectionCallback);
 
@@ -224,7 +224,7 @@ class Controller
    private:
 
       template<typename NodeSelectorType>
-      void Controller::ProcessSelection(
+      void ProcessSelection(
          const NodeSelectorType& nodeSelector,
          const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback);
 

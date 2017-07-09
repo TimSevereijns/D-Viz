@@ -16,8 +16,10 @@
 
 #include <QCursor>
 
+#ifdef Q_OS_WIN
 #include <ShlObj.h>
 #include <Objbase.h>
+#endif
 
 namespace
 {
@@ -55,7 +57,7 @@ void Controller::GenerateNewVisualization()
    }
 }
 
-const Tree<VizFile>::Node* const Controller::GetSelectedNode() const
+const Tree<VizFile>::Node* Controller::GetSelectedNode() const
 {
    return m_selectedNode;
 }
@@ -138,7 +140,7 @@ void Controller::SelectNodeAndUpdateStatusBar(
 
 void Controller::SelectNodeViaRay(
    const Camera& camera,
-   const Qt3DRender::QRay3D& ray,
+   const Qt3DRender::RayCasting::QRay3D& ray,
    const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& deselectionCallback,
    const std::function<void (const Tree<VizFile>::Node* const)>& selectionCallback)
 {
@@ -348,9 +350,12 @@ void Controller::SearchTreeMap(
       // Using a stack allocated string (along with case sensitive comparison) appears to be about
       // 25-30% percent faster compared to a regular heap allocated string:
       // 212ms vs 316ms for ~750,000 files scanned on an old Intel Q9450.
-      WideStackString<540>::allocator_type::arena_type stringArena{ };
-      WideStackString<540> fullName{ std::move(stringArena) };
-      fullName.resize(260); ///< Resize to prevent reallocation with later append operations.
+      //WideStackString<540>::allocator_type::arena_type stringArena{ };
+      //WideStackString<540> fullName{ std::move(stringArena) };
+      //fullName.resize(260); ///< Resize to prevent reallocation with later append operations.
+
+      std::wstring fullName;
+      fullName.resize(260);
 
       Stopwatch<std::chrono::milliseconds>([&] ()
       {
@@ -432,11 +437,17 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node
       reversePath.emplace_back(currentNode->GetData().file.name);
    }
 
+#ifdef Q_OS_WIN
+   constexpr auto slash{ L"\\" };
+#else
+   constexpr auto slash{ L"/" };
+#endif
+
    const auto completePath = std::accumulate(std::rbegin(reversePath), std::rend(reversePath),
       std::wstring{ }, [] (const std::wstring& path, const std::wstring& file)
    {
-      const auto shouldAddSlash = !path.empty() && path.back() != L'\\';
-      return path + (shouldAddSlash ? L"\\" : L"") + file;
+      const auto shouldAddSlash = !path.empty() && (path.back() != L'\\' || path.back() != L'/');
+      return path + (shouldAddSlash ? slash : L"") + file;
    });
 
    assert(completePath.size() > 0);
@@ -445,6 +456,7 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node
 
 void Controller::ShowInFileExplorer(const Tree<VizFile>::Node& node)
 {
+#ifdef Q_OS_WIN
    CoInitializeEx(NULL, COINIT_MULTITHREADED);
    ON_SCOPE_EXIT noexcept { CoUninitialize(); };
 
@@ -462,4 +474,15 @@ void Controller::ShowInFileExplorer(const Tree<VizFile>::Node& node)
       SHOpenFolderAndSelectItems(idList, 0, 0, 0);
       ILFree(idList);
    }
+#elif defined(Q_OS_LINUX)
+    const std::wstring rawPath = Controller::ResolveCompleteFilePath(node);
+    const std::experimental::filesystem::path path{ rawPath };
+
+    // @todo Look into adding support for other popular file browsers, like Nautilus.
+
+    fmt::MemoryWriter writer;
+    writer << "nemo \"" << path.c_str() << "\"";
+
+    std::system(writer.c_str());
+#endif
 }

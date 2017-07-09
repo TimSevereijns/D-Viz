@@ -3,6 +3,7 @@
 
 #include <QVector3D>
 
+#include <cmath>
 #include <limits>
 
 namespace Constants

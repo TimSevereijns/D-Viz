@@ -50,7 +50,7 @@ class ColorGradient
        */
       void AddColorPoint(float red, float green, float blue, float value)
       {
-         for(int i = 0; i < m_colorPoints.size(); i++)
+         for(auto i = 0u; i < m_colorPoints.size(); i++)
          {
             if (value < m_colorPoints[i].normalizedValue)
             {

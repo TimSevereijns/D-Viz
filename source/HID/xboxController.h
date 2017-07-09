@@ -10,11 +10,33 @@
 #include <QObject>
 #include <QTimer>
 
+#ifdef Q_OS_WIN
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 
 #include <Windows.h>
 #include <Xinput.h>
+#endif
+
+#ifndef XINPUT_GAMEPAD_DPAD_UP
+    #define XINPUT_GAMEPAD_DPAD_UP          0x00000001
+    #define XINPUT_GAMEPAD_DPAD_DOWN        0x00000002
+    #define XINPUT_GAMEPAD_DPAD_LEFT        0x00000004
+    #define XINPUT_GAMEPAD_DPAD_RIGHT       0x00000008
+    #define XINPUT_GAMEPAD_START            0x00000010
+    #define XINPUT_GAMEPAD_BACK             0x00000020
+    #define XINPUT_GAMEPAD_LEFT_THUMB       0x00000040
+    #define XINPUT_GAMEPAD_RIGHT_THUMB      0x00000080
+    #define XINPUT_GAMEPAD_LEFT_SHOULDER    0x0100
+    #define XINPUT_GAMEPAD_RIGHT_SHOULDER   0x0200
+    #define XINPUT_GAMEPAD_A                0x1000
+    #define XINPUT_GAMEPAD_B                0x2000
+    #define XINPUT_GAMEPAD_X                0x4000
+    #define XINPUT_GAMEPAD_Y                0x8000
+    #define XINPUT_GAMEPAD_TRIGGER_THRESHOLD	30
+    #define XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE	7849
+    #define XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE 8689
+#endif
 
 /**
  * @brief The XboxController class tracks and manages the state of the attached Xbox controller(s).
@@ -145,6 +167,7 @@ class XboxController : public QObject
 
       std::unordered_map<unsigned int, StateAndHandlers> m_buttonMap
       {
+#ifdef Q_OS_WIN
          { XINPUT_GAMEPAD_A, StateAndHandlers(XboxController::KEY_STATE::UP) },
          { XINPUT_GAMEPAD_B, StateAndHandlers(XboxController::KEY_STATE::UP) },
          { XINPUT_GAMEPAD_X, StateAndHandlers(XboxController::KEY_STATE::UP) },
@@ -159,6 +182,7 @@ class XboxController : public QObject
          { XINPUT_GAMEPAD_DPAD_LEFT, StateAndHandlers(XboxController::KEY_STATE::UP) },
          { XINPUT_GAMEPAD_DPAD_RIGHT, StateAndHandlers(XboxController::KEY_STATE::UP) },
          { XINPUT_GAMEPAD_DPAD_DOWN, StateAndHandlers(XboxController::KEY_STATE::UP) }
+#endif
       };
 };
 

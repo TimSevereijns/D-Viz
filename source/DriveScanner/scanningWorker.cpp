@@ -7,7 +7,7 @@
 
 #include "../constants.h"
 #include "../Utilities/ignoreUnused.hpp"
-#include "../Utilities/ThreadSafeQueue.hpp"
+#include "../Utilities/threadSafeQueue.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -390,8 +390,11 @@ void ScanningWorker::ProcessQueue(
          break;
       }
 
+      auto startingDirectory =
+         std::experimental::filesystem::directory_iterator{ nodeAndPath.path };
+
       IterateOverDirectoryAndScan(
-         std::experimental::filesystem::directory_iterator{ nodeAndPath.path },
+         startingDirectory,
          *nodeAndPath.node);
 
       {

@@ -7,7 +7,7 @@
 #include <Stopwatch/Stopwatch.hpp>
 
 #include <QResizeEvent>
-#include <QScrollbar>
+#include <QScrollBar>
 
 #include <functional>
 #include <iostream>

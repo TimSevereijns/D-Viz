@@ -6,16 +6,16 @@
 
 QT       += 3drender-private gui opengl
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets 3dcore
+greaterThan(QT_MAJOR_VERSION, 5): QT += widgets 3dcore
 
 TARGET = D-Viz
 TEMPLATE = app
-CONFIG += c++11
+CONFIG += c++1z
 
 # Generate PDBs for Release builds:
-QMAKE_LFLAGS_RELEASE+=/MAP
-QMAKE_CFLAGS_RELEASE += /Zi
-QMAKE_LFLAGS_RELEASE +=/debug /opt:ref
+win32:QMAKE_LFLAGS_RELEASE+=/MAP
+win32:QMAKE_CFLAGS_RELEASE += /Zi
+win32:QMAKE_LFLAGS_RELEASE +=/debug /opt:ref
 
 # Bump up the warning level to W4:
 QMAKE_CFLAGS_WARN_ON -= -W3
@@ -96,7 +96,7 @@ FORMS    += \
    Windows/mainWindow.ui
 
 INCLUDEPATH += \
-   ../../boost_1_63_0 \
+   ../../boost \
    ../Foreign/Spdlog/include \
    ../Foreign/Stopwatch/source \
    ../Foreign/Tree/source \
@@ -114,13 +114,11 @@ DISTFILES += \
 RESOURCES += \
    resources.qrc
 
-INCLUDEPATH += $$PWD/../../boost_1_63_0/stage
-DEPENDPATH += $$PWD/../../boost_1_63_0/stage
+INCLUDEPATH += $$PWD/../../boost/stage
+DEPENDPATH += $$PWD/../../boost/stage
 
-win32:
-   LIBS += -lXInput9_1_0
-   LIBS += -lShell32
-   LIBS += -lOle32
+win32:LIBS += -lXInput9_1_0 -lShell32 -lOle32
+unix:LIBS += -lstdc++fs
 
 CONFIG(release, debug|release) {
    library_files.path += $$OUT_PWD/release

@@ -64,7 +64,7 @@ QVariant ScanBreakdownModel::data(
       }
       else if (index.column() == 1)
       {
-         return data.totalSize;
+         return static_cast<qulonglong>(data.totalSize);
       }
    }
 

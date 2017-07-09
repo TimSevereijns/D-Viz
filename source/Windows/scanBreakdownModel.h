@@ -20,7 +20,7 @@ namespace
 
    template<
       typename Type,
-      typename = std::enable_if<std::is_arithmetic_v<Type>>
+      typename = std::enable_if<std::is_arithmetic<Type>::value>
    >
    static auto ConvertToFormattedSizeString(const Type& number)
    {

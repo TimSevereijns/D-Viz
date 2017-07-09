@@ -3,19 +3,21 @@
 
 #include <QLabel>
 #include <QMainWindow>
+#include <QMenu>
 
 #include "aboutDialog.h"
 #include "breakdownDialog.h"
 #include "constants.h"
 #include "controller.h"
 #include "HID/xboxController.h"
+#include "Viewport/glCanvas.h"
 
 namespace Ui
 {
    class MainWindow;
 }
 
-class GLCanvas;
+//class GLCanvas;
 class OptionsManager;
 
 class MainWindow : public QMainWindow

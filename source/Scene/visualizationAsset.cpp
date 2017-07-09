@@ -223,7 +223,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeOfMatrix,
-      /* ptr = */ static_cast<GLvoid*>(0 * sizeOfVector));
+      /* ptr = */ reinterpret_cast<GLvoid*>(0 * sizeOfVector));
 
    // Row 2 of the matrix:
    m_graphicsDevice.glEnableVertexAttribArray(2);
@@ -314,7 +314,7 @@ std::uint32_t VisualizationAsset::LoadBufferData(
    FindLargestDirectory(tree);
 
    assert(m_blockColors.size() == m_blockTransformations.size());
-   assert(m_blockColors.size() == m_blockCount);
+   assert(m_blockColors.size() == static_cast<int>(m_blockCount));
 
    return m_blockCount;
 }

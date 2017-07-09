@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include "../Utilities/ignoreUnused.hpp"
 
 const uint8_t XboxController::MAX_TRIGGER_VALUE = std::numeric_limits<int8_t>::max();
 const uint8_t XboxController::MIN_TRIGGER_VALUE = std::numeric_limits<int8_t>::min();
@@ -173,8 +174,10 @@ XboxController::XboxController(
    m_triggerThreshold{ std::min(triggerThreshold, XboxController::MAX_TRIGGER_VALUE) },
    m_pollingTimer{ new QTimer }
 {
+#ifdef Q_OS_WIN
    m_controllerNumber = std::min(controllerNumber, XUSER_MAX_COUNT - 1);
    connect(m_pollingTimer.get(), SIGNAL(timeout()), this, SLOT(Update()));
+#endif
 }
 
 void XboxController::StartAutoPolling(unsigned int interval)
@@ -214,6 +217,7 @@ bool XboxController::IsButtonDown(const unsigned int button) const
 
 void XboxController::Update()
 {
+#ifdef Q_OS_WIN
    XINPUT_STATE inputState;
    ZeroMemory(&inputState, sizeof(XINPUT_STATE));
 
@@ -274,6 +278,7 @@ void XboxController::Update()
    }
 
    m_previousState = m_currentState;
+#endif
 }
 
 void XboxController::SetLeftStickDeadZone(int16_t newDeadZone)
@@ -293,10 +298,14 @@ void XboxController::SetTriggerThreshold(uint8_t newThreshold)
 
 void XboxController::SetVibration(const float leftVibration, const float rightVibration)
 {
+#ifdef Q_OS_WIN
    XINPUT_VIBRATION xInputVibration;
    xInputVibration.wLeftMotorSpeed = MAX_VIBRATION_VALUE * qBound(0.0f, 1.0f, leftVibration);
    xInputVibration.wRightMotorSpeed = MAX_VIBRATION_VALUE * qBound(0.0f, 1.0f, rightVibration);
    XInputSetState(m_controllerNumber, &xInputVibration);
+#else
+   IgnoreUnused(leftVibration, rightVibration);
+#endif
 }
 
 bool XboxController::HasStateChanged() const

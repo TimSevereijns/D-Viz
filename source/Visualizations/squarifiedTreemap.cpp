@@ -440,7 +440,7 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizFile>::Node*>& row)
 
    const std::uintmax_t bytesInRow = ComputeBytesInRow(row, /*candidateSize =*/ 0);
 
-   Block& land = CalculateRowBounds(bytesInRow, row.front()->GetParent()->GetData(),
+   Block land = CalculateRowBounds(bytesInRow, row.front()->GetParent()->GetData(),
       /*updateOffset =*/ true);
 
    assert(land.HasVolume());

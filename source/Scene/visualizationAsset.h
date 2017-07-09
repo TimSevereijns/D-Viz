@@ -6,7 +6,6 @@
 #include "../Utilities/colorGradient.hpp"
 
 #include <QOpenGLTexture>
-#include <QOpenGLFrameBufferObject>
 
 struct VizFile;
 template<typename DataType> class TreeNode;

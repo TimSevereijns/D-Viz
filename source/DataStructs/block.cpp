@@ -7,12 +7,12 @@ Block::Block(
    const double depth,
    const bool generateVertices /* = false */)
    :
+   m_origin{ origin },
+   m_nextRowOrigin{ origin.x(), origin.y() + height, origin.z() },
+   m_percentCovered{ 0.0 },
    m_width{ width },
    m_height{ height },
-   m_depth{ depth },
-   m_percentCovered{ 0.0 },
-   m_origin{ origin },
-   m_nextRowOrigin{ origin.x(), origin.y() + height, origin.z() }
+   m_depth{ depth }
 {
    if (!generateVertices)
    {
