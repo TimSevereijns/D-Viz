@@ -444,7 +444,7 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node
 #endif
 
    const auto completePath = std::accumulate(std::rbegin(reversePath), std::rend(reversePath),
-      std::wstring{ }, [] (const std::wstring& path, const std::wstring& file)
+      std::wstring{ }, [&] (const std::wstring& path, const std::wstring& file)
    {
       const auto shouldAddSlash = !path.empty() && (path.back() != L'\\' || path.back() != L'/');
       return path + (shouldAddSlash ? slash : L"") + file;
