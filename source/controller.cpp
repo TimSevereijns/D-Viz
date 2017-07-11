@@ -36,6 +36,70 @@ namespace
             alignof(wchar_t)
          >
       >;
+
+   template<typename OperatingSystemType>
+   struct PreferredSeparator
+   {
+   };
+
+   template<>
+   struct PreferredSeparator<Constants::OS::Windows>
+   {
+      static constexpr auto value = L"\\";
+   };
+
+   template<>
+   struct PreferredSeparator<Constants::OS::Linux>
+   {
+      static constexpr auto value = L"/";
+   };
+
+   template<typename OperatingSystemType>
+   struct FileExplorer
+   {
+   };
+
+   template<>
+   struct FileExplorer<Constants::OS::Windows>
+   {
+      static void Open(const Tree<VizFile>::Node& node)
+      {
+         CoInitializeEx(NULL, COINIT_MULTITHREADED);
+         ON_SCOPE_EXIT noexcept { CoUninitialize(); };
+
+         std::wstring filePath = Controller::ResolveCompleteFilePath(node);
+
+         assert(std::none_of(std::begin(filePath), std::end(filePath),
+            [] (const auto character)
+         {
+            return character == L'/';
+         }));
+
+         auto* idList = ILCreateFromPath(filePath.c_str());
+         if (idList)
+         {
+            SHOpenFolderAndSelectItems(idList, 0, 0, 0);
+            ILFree(idList);
+         }
+      }
+   };
+
+   template<>
+   struct FileExplorer<Constants::OS::Linux>
+   {
+      static void Open(const Tree<VizFile>::Node& node)
+      {
+         const std::wstring rawPath = Controller::ResolveCompleteFilePath(node);
+         const std::experimental::filesystem::path path{ rawPath };
+
+         // @todo Look into adding support for other popular file browsers, like Nautilus.
+
+         fmt::MemoryWriter writer;
+         writer << "nemo \"" << path.string().c_str() << "\"";
+
+         std::system(writer.c_str());
+      }
+   };
 }
 
 bool Controller::HasVisualizationBeenLoaded() const
@@ -437,15 +501,11 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node
       reversePath.emplace_back(currentNode->GetData().file.name);
    }
 
-#ifdef Q_OS_WIN
-   constexpr auto slash{ L"\\" };
-#else
-   constexpr auto slash{ L"/" };
-#endif
-
    const auto completePath = std::accumulate(std::rbegin(reversePath), std::rend(reversePath),
-      std::wstring{ }, [&] (const std::wstring& path, const std::wstring& file)
+      std::wstring{ }, [] (const std::wstring& path, const std::wstring& file)
    {
+      constexpr auto slash = PreferredSeparator<Constants::OperatingSystem>::value;
+
       const auto shouldAddSlash = !path.empty() && (path.back() != L'\\' || path.back() != L'/');
       return path + (shouldAddSlash ? slash : L"") + file;
    });
@@ -456,33 +516,5 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node
 
 void Controller::ShowInFileExplorer(const Tree<VizFile>::Node& node)
 {
-#ifdef Q_OS_WIN
-   CoInitializeEx(NULL, COINIT_MULTITHREADED);
-   ON_SCOPE_EXIT noexcept { CoUninitialize(); };
-
-   std::wstring filePath = Controller::ResolveCompleteFilePath(node);
-
-   assert(std::none_of(std::begin(filePath), std::end(filePath),
-      [] (const auto character)
-   {
-      return character == L'/';
-   }));
-
-   auto* idList = ILCreateFromPath(filePath.c_str());
-   if (idList)
-   {
-      SHOpenFolderAndSelectItems(idList, 0, 0, 0);
-      ILFree(idList);
-   }
-#elif defined(Q_OS_LINUX)
-    const std::wstring rawPath = Controller::ResolveCompleteFilePath(node);
-    const std::experimental::filesystem::path path{ rawPath };
-
-    // @todo Look into adding support for other popular file browsers, like Nautilus.
-
-    fmt::MemoryWriter writer;
-    writer << "nemo \"" << path.c_str() << "\"";
-
-    std::system(writer.c_str());
-#endif
+   FileExplorer<Constants::OperatingSystem>::Open(node);
 }

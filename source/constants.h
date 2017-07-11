@@ -8,6 +8,18 @@
 
 namespace Constants
 {
+   namespace OS
+   {
+      struct Windows{ };
+      struct Linux{ };
+   }
+
+#ifdef Q_OS_WIN
+   using OperatingSystem = OS::Windows;
+#else
+   using OperatingSystem = OS::Linux;
+#endif
+
    namespace FileSize
    {
       const static auto ONE_KIBIBYTE = static_cast<std::uintmax_t>(std::pow(2, 10));
