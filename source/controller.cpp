@@ -54,20 +54,17 @@ namespace
       static constexpr auto value = L"/";
    };
 
-   template<typename OperatingSystemType>
    struct FileExplorer
    {
-   };
-
-   template<>
-   struct FileExplorer<Constants::OS::Windows>
-   {
-      static void Open(const Tree<VizFile>::Node& node)
+      template<typename OperatingSystemType = Constants::OperatingSystem>
+      static
+      std::enable_if_t<std::is_same_v<OperatingSystemType, Constants::OS::Windows>>
+      Open(const Tree<VizFile>::Node& node)
       {
          CoInitializeEx(NULL, COINIT_MULTITHREADED);
          ON_SCOPE_EXIT noexcept { CoUninitialize(); };
 
-         std::wstring filePath = Controller::ResolveCompleteFilePath(node);
+         const std::wstring filePath = Controller::ResolveCompleteFilePath(node);
 
          assert(std::none_of(std::begin(filePath), std::end(filePath),
             [] (const auto character)
@@ -75,19 +72,18 @@ namespace
             return character == L'/';
          }));
 
-         auto* idList = ILCreateFromPath(filePath.c_str());
+         auto* const idList = ILCreateFromPath(filePath.c_str());
          if (idList)
          {
             SHOpenFolderAndSelectItems(idList, 0, 0, 0);
             ILFree(idList);
          }
       }
-   };
 
-   template<>
-   struct FileExplorer<Constants::OS::Linux>
-   {
-      static void Open(const Tree<VizFile>::Node& node)
+      template<typename OperatingSystemType = Constants::OperatingSystem>
+      static
+      std::enable_if_t<std::is_same_v<OperatingSystemType, Constants::OS::Linux>>
+      Open(const Tree<VizFile>::Node& node)
       {
          const std::wstring rawPath = Controller::ResolveCompleteFilePath(node);
          const std::experimental::filesystem::path path{ rawPath };
@@ -95,7 +91,7 @@ namespace
          // @todo Look into adding support for other popular file browsers, like Nautilus.
 
          fmt::MemoryWriter writer;
-         writer << "nemo \"" << path.string().c_str() << "\"";
+         writer << "nemo \"" << path.c_str() << "\"";
 
          std::system(writer.c_str());
       }
@@ -516,5 +512,5 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node
 
 void Controller::ShowInFileExplorer(const Tree<VizFile>::Node& node)
 {
-   FileExplorer<Constants::OperatingSystem>::Open(node);
+   FileExplorer::Open(node);
 }

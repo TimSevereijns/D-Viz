@@ -16,7 +16,7 @@ namespace Constants
 
 #ifdef Q_OS_WIN
    using OperatingSystem = OS::Windows;
-#else
+#elif defined(Q_OS_LINUX)
    using OperatingSystem = OS::Linux;
 #endif
 
