@@ -8,18 +8,6 @@
 
 namespace Constants
 {
-   namespace OS
-   {
-      struct Windows{ };
-      struct Linux{ };
-   }
-
-#ifdef Q_OS_WIN
-   using OperatingSystem = OS::Windows;
-#elif defined(Q_OS_LINUX)
-   using OperatingSystem = OS::Linux;
-#endif
-
    namespace FileSize
    {
       const static auto ONE_KIBIBYTE = static_cast<std::uintmax_t>(std::pow(2, 10));
@@ -44,10 +32,10 @@ namespace Constants
       constexpr static auto DESIRED_TIME_BETWEEN_FRAMES{ 20 };
    }
 
-   namespace Xbox
+   namespace Input
    {
       constexpr static auto MOVEMENT_AMPLIFICATION{ 10.0 };
-      constexpr static auto TRIGGER_ACTUATION_THRESHOLD{ 0.2f };
+      constexpr static auto TRIGGER_ACTUATION_THRESHOLD{ 0.2 };
    }
 
    namespace Concurrency

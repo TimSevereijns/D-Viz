@@ -121,21 +121,21 @@ class GLCanvas : public QOpenGLWidget
       /**
        * @brief Handles the input from the Xbox controller.
        */
-      void HandleXBoxControllerInput();
+      void HandleGamepadInput();
 
       /**
        * @brief Handles Xbox left and right trigger input.
        *
-       * @param[in] controllerState    The current state of the controller.
+       * @param[in] gamepad
        */
-      void HandleXboxTriggerInput(const XboxController::State& controllerState);
+      void HandleXboxTriggerInput(const CustomGamepad& gamepad);
 
       /**
        * @brief Handles Xbox thumb stick input.
        *
-       * @param[in] controllerState    The current state of the controller.
+       * @param[in] gamepad.
        */
-      void HandleXboxThumbstickInput(const XboxController::State& controllerState);
+      void HandleXboxThumbstickInput(const CustomGamepad& gamepad);
 
       /**
        * @brief Compiles and loads the OpenGL shader program for the visualization.

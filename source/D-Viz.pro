@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += 3drender-private gui opengl
+QT       += 3drender-private gui opengl gamepad
 
 greaterThan(QT_MAJOR_VERSION, 5): QT += widgets 3dcore
 
@@ -31,8 +31,8 @@ SOURCES += \
    DataStructs/vizFile.cpp \
    DriveScanner/driveScanner.cpp \
    DriveScanner/scanningWorker.cpp \
+   HID/gamepad.cpp \
    HID/keyboardManager.cpp \
-   HID/xboxController.cpp \
    main.cpp \
    optionsManager.cpp \
    Scene/crosshairAsset.cpp \
@@ -65,8 +65,8 @@ HEADERS  += \
    DataStructs/vizFile.cpp \
    DriveScanner/driveScanner.h \
    DriveScanner/scanningWorker.h \
+   HID/gamepad.h \
    HID/keyboardManager.h \
-   HID/xboxController.h \
    optionsManager.h \
    Scene/crosshairAsset.h \
    Scene/debuggingRayAsset.h \
@@ -77,6 +77,7 @@ HEADERS  += \
    Scene/visualizationAsset.h \
    Utilities/colorGradient.hpp \
    Utilities/ignoreUnused.hpp \
+   Utilities/operatingSystemSpecific.hpp \
    Utilities/scopeExit.hpp \
    Utilities/threadSafeQueue.hpp \
    Viewport/camera.h \

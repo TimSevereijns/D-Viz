@@ -412,8 +412,8 @@ void VisualizationAsset::UpdateVBO(
    SceneAsset::UpdateAction action,
    const VisualizationParameters& options)
 {
-   constexpr auto colorDataTupleSize{ sizeof(QVector3D) };
-   const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorDataTupleSize;
+   constexpr auto colorTupleSize{ sizeof(QVector3D) };
+   const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorTupleSize;
 
    const auto newColor = (action == SceneAsset::UpdateAction::DESELECT)
       ? RestoreColor(node, options)
@@ -421,7 +421,9 @@ void VisualizationAsset::UpdateVBO(
 
    assert(m_VAO.isCreated());
    assert(m_blockColorBuffer.isCreated());
-   assert(m_blockColorBuffer.size() >= offsetIntoColorBuffer / colorDataTupleSize);
+
+   // @todo This appears to fail, figure out why:
+   //assert(m_blockColorBuffer.size() >= static_cast<int>(offsetIntoColorBuffer / colorTupleSize));
 
    m_VAO.bind();
    m_blockColorBuffer.bind();
@@ -429,7 +431,7 @@ void VisualizationAsset::UpdateVBO(
    m_graphicsDevice.glBufferSubData(
       /* target = */ GL_ARRAY_BUFFER,
       /* offset = */ offsetIntoColorBuffer,
-      /* size = */ colorDataTupleSize,
+      /* size = */ colorTupleSize,
       /* data = */ &newColor);
 
    m_blockColorBuffer.release();

@@ -2,9 +2,9 @@
 #define DRIVESCANNINGPARAMETERS_H
 
 #include <cstdint>
-#include <string>
 #include <functional>
 #include <memory>
+#include <string>
 
 template<typename T>
 class Tree;
@@ -22,10 +22,10 @@ struct DriveScanningParameters
    using ScanCompleteCallback = std::function<void (const std::uintmax_t filesScanned,
       const std::uintmax_t numberOfBytesProcessed, std::shared_ptr<Tree<VizFile>> fileTree)>;
 
+   std::wstring path{ };
+
    ProgressCallback onProgressUpdateCallback{ };
    ScanCompleteCallback onScanCompletedCallback{ };
-
-   std::wstring path{ };
 
    DriveScanningParameters() = default;
 

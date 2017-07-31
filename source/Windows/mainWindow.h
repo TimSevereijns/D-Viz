@@ -9,7 +9,7 @@
 #include "breakdownDialog.h"
 #include "constants.h"
 #include "controller.h"
-#include "HID/xboxController.h"
+#include "HID/gamepad.h"
 #include "Viewport/glCanvas.h"
 
 namespace Ui
@@ -17,7 +17,6 @@ namespace Ui
    class MainWindow;
 }
 
-//class GLCanvas;
 class OptionsManager;
 
 class MainWindow : public QMainWindow
@@ -62,7 +61,7 @@ class MainWindow : public QMainWindow
        * @brief GetXboxController
        * @return
        */
-      XboxController::State& GetXboxControllerState() const;
+      //XboxController::State& GetXboxControllerState() const;
 
       /**
        * @brief GetOptionsManager
@@ -74,7 +73,7 @@ class MainWindow : public QMainWindow
        * @brief GetXboxControllerManager
        * @return
        */
-      XboxController& GetXboxControllerManager();
+      //XboxController& GetXboxControllerManager();
 
       /**
        * @brief Sets a temporary message in the status bar.
@@ -108,6 +107,12 @@ class MainWindow : public QMainWindow
        */
       GLCanvas& GetCanvas();
 
+      /**
+       * @brief GetGamepad
+       * @return
+       */
+      CustomGamepad& GetGamepad();
+
    public slots:
 
       /**
@@ -119,29 +124,6 @@ class MainWindow : public QMainWindow
        * @brief OnFPSReadoutToggled
        */
       void OnFPSReadoutToggled(bool isEnabled);
-
-
-      /**
-       * @brief XboxControllerConnected
-       */
-      void XboxControllerConnected();
-
-      /**
-       * @brief XboxControllerDisconnect
-       */
-      void XboxControllerDisconnected();
-
-      /**
-       * @brief IsXboxControllerConnected
-       * @return
-       */
-      bool IsXboxControllerConnected() const;
-
-      /**
-       * @brief XboxControllerStateChanged
-       * @param state
-       */
-      void XboxControllerStateChanged(XboxController::State state);
 
    private:
 
@@ -172,7 +154,7 @@ class MainWindow : public QMainWindow
       void LaunchAboutDialog();
 
       void SetupSidebar();
-      void SetupXboxController();
+      void SetupGamepad();
 
       Controller& m_controller;
 
@@ -188,8 +170,7 @@ class MainWindow : public QMainWindow
 
       std::wstring m_searchQuery{ };
 
-      std::unique_ptr<XboxController> m_xboxController{ new XboxController };
-      std::unique_ptr<XboxController::State> m_xboxControllerState{ new XboxController::State };
+      std::unique_ptr<CustomGamepad> m_gamepad{ std::make_unique<CustomGamepad>(0, this) };
 
       std::unique_ptr<QMenu> m_fileMenu{ nullptr };
       std::unique_ptr<QMenu> m_viewMenu{ nullptr };

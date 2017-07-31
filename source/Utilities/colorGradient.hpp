@@ -9,29 +9,26 @@
 
 // Inspired by: http://www.andrewnoske.com/wiki/Code_-_heatmaps_and_color_gradients
 
-namespace
+/**
+* @brief The ColorPoint struct is an internal class used to store colors at different points
+* in the gradient
+*/
+struct ColorPoint
 {
-   /**
-    * @brief The ColorPoint struct is an internal class used to store colors at different points
-    * in the gradient
-    */
-   struct ColorPoint
+   ColorPoint(float _red, float _green, float _blue, float value) :
+      red(_red),
+      green(_green),
+      blue(_blue),
+      normalizedValue(value)
    {
-      ColorPoint(float _red, float _green, float _blue, float value) :
-         red(_red),
-         green(_green),
-         blue(_blue),
-         normalizedValue(value)
-      {
-      }
+   }
 
-      float red;
-      float green;
-      float blue;
+   float red;
+   float green;
+   float blue;
 
-      float normalizedValue;
-   };
-}
+   float normalizedValue;
+};
 
 /**
  * @brief The ColorGradient class

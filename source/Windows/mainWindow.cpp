@@ -3,6 +3,7 @@
 #include "ui_mainWindow.h"
 
 #include "optionsManager.h"
+#include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Viewport/glCanvas.h"
 
@@ -18,52 +19,6 @@
 #include <QMenuBar>
 #include <QMessageBox>
 
-#ifdef Q_OS_LINUX
-#include <sys/statvfs.h>
-#endif
-
-namespace
-{
-#ifdef Q_OS_WIN
-
-   std::uint64_t GetUsedDiskSpace(std::wstring path)
-   {
-      std::replace(std::begin(path), std::end(path), L'/', L'\\');
-      path += '\\';
-
-      std::uint64_t totalNumberOfFreeBytes{ 0 };
-      std::uint64_t totalNumberOfBytes{ 0 };
-      const bool wasOperationSuccessful = GetDiskFreeSpaceExW(
-         path.c_str(),
-         NULL,
-         (PULARGE_INTEGER)&totalNumberOfBytes,
-         (PULARGE_INTEGER)&totalNumberOfFreeBytes);
-
-      assert(wasOperationSuccessful);
-
-      const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
-      log->info(fmt::format("Disk Size:  {} bytes", totalNumberOfBytes));
-      log->info(fmt::format("Free Space: {} bytes", totalNumberOfFreeBytes));
-
-      const auto occupiedSpace = totalNumberOfBytes - totalNumberOfFreeBytes;
-      return occupiedSpace;
-   }
-
-#elif defined(Q_OS_LINUX)
-
-   std::uint64_t GetUsedDiskSpace(const std::wstring& rawPath)
-   {
-      const std::experimental::filesystem::path path{ rawPath };
-
-      struct statvfs diskInfo;
-      statvfs(path.string().data(), &diskInfo);
-
-      return (diskInfo.f_blocks - diskInfo.f_bfree) * diskInfo.f_bsize;
-   }
-
-#endif
-}
-
 MainWindow::MainWindow(
    Controller& controller,
    QWidget* parent /* = nullptr */)
@@ -73,7 +28,7 @@ MainWindow::MainWindow(
    m_optionsManager(new OptionsManager),
    m_ui(new Ui::MainWindow)
 {
-   SetupXboxController();
+   SetupGamepad();
 
    assert(m_ui);
    m_ui->setupUi(this);
@@ -204,18 +159,17 @@ void MainWindow::SetupSidebar()
    });
 }
 
-void MainWindow::SetupXboxController()
+void MainWindow::SetupGamepad()
 {
-   m_xboxController->StartAutoPolling(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
+   const auto gamepads = QGamepadManager::instance()->connectedGamepads();
+   if (gamepads.isEmpty())
+   {
+       return;
+   }
 
-   connect(m_xboxController.get(), SIGNAL(ControllerConnected(uint)),
-      this, SLOT(XboxControllerConnected()));
+   m_gamepad.reset(new CustomGamepad{ *gamepads.begin(), this });
 
-   connect(m_xboxController.get(), SIGNAL(ControllerDisconnected(uint)),
-      this, SLOT(XboxControllerDisconnected()));
-
-   connect(m_xboxController.get(), SIGNAL(NewControllerState(XboxController::State)),
-      this, SLOT(XboxControllerStateChanged(XboxController::State)));
+   QGamepadManager::instance()->resetConfiguration(m_gamepad->deviceId());
 }
 
 std::wstring MainWindow::GetDirectoryToVisualize() const
@@ -321,6 +275,11 @@ GLCanvas& MainWindow::GetCanvas()
    return *m_glCanvas;
 }
 
+CustomGamepad& MainWindow::GetGamepad()
+{
+   return *m_gamepad;
+}
+
 void MainWindow::LaunchAboutDialog()
 {
    if (!m_aboutDialog)
@@ -329,26 +288,6 @@ void MainWindow::LaunchAboutDialog()
    }
 
    m_aboutDialog->show();
-}
-
-void MainWindow::XboxControllerConnected()
-{
-   m_xboxControllerConnected = true;
-}
-
-void MainWindow::XboxControllerDisconnected()
-{
-   m_xboxControllerConnected = false;
-}
-
-bool MainWindow::IsXboxControllerConnected() const
-{
-   return m_xboxControllerConnected;
-}
-
-void MainWindow::XboxControllerStateChanged(XboxController::State state)
-{
-   m_xboxControllerState = std::make_unique<XboxController::State>(std::move(state));
 }
 
 void MainWindow::ComputeProgress(
@@ -383,7 +322,7 @@ void MainWindow::ComputeProgress(
 
 void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
 {
-   m_occupiedDiskSpace = GetUsedDiskSpace(vizParameters.rootDirectory);
+   m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(vizParameters.rootDirectory);
 
    const auto progressHandler =
       [this] (const std::uintmax_t numberOfFilesScanned, const std::uintmax_t bytesProcessed)
@@ -499,16 +438,6 @@ void MainWindow::SetFilePruningComboBoxValue(std::uintmax_t minimum)
    {
       m_ui->pruneSizeComboBox->setCurrentIndex(targetIndex);
    }
-}
-
-XboxController::State& MainWindow::GetXboxControllerState() const
-{
-   return *m_xboxControllerState;
-}
-
-XboxController& MainWindow::GetXboxControllerManager()
-{
-   return *m_xboxController.get();
 }
 
 void MainWindow::SetStatusBarMessage(

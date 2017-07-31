@@ -42,6 +42,8 @@ namespace
    {
       std::uintmax_t fileSize{ 0 };
 
+      IgnoreUnused(path, fileSize);
+
 #ifdef Q_OS_WIN
       WIN32_FIND_DATA fileData;
       const HANDLE fileHandle = FindFirstFileW(path.wstring().data(), &fileData);

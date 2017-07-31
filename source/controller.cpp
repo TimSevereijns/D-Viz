@@ -1,6 +1,8 @@
 #include "controller.h"
 
 #include "constants.h"
+#include "Utilities/ignoreUnused.hpp"
+#include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Visualizations/squarifiedTreemap.h"
 #include "Windows/mainWindow.h"
@@ -15,11 +17,6 @@
 #include <utility>
 
 #include <QCursor>
-
-#ifdef Q_OS_WIN
-#include <ShlObj.h>
-#include <Objbase.h>
-#endif
 
 namespace
 {
@@ -36,66 +33,6 @@ namespace
             alignof(wchar_t)
          >
       >;
-
-   template<typename OperatingSystemType>
-   struct PreferredSeparator
-   {
-   };
-
-   template<>
-   struct PreferredSeparator<Constants::OS::Windows>
-   {
-      static constexpr auto value = L"\\";
-   };
-
-   template<>
-   struct PreferredSeparator<Constants::OS::Linux>
-   {
-      static constexpr auto value = L"/";
-   };
-
-   struct FileExplorer
-   {
-      template<typename OperatingSystemType = Constants::OperatingSystem>
-      static
-      std::enable_if_t<std::is_same_v<OperatingSystemType, Constants::OS::Windows>>
-      Open(const Tree<VizFile>::Node& node)
-      {
-         CoInitializeEx(NULL, COINIT_MULTITHREADED);
-         ON_SCOPE_EXIT noexcept { CoUninitialize(); };
-
-         const std::wstring filePath = Controller::ResolveCompleteFilePath(node);
-
-         assert(std::none_of(std::begin(filePath), std::end(filePath),
-            [] (const auto character)
-         {
-            return character == L'/';
-         }));
-
-         auto* const idList = ILCreateFromPath(filePath.c_str());
-         if (idList)
-         {
-            SHOpenFolderAndSelectItems(idList, 0, 0, 0);
-            ILFree(idList);
-         }
-      }
-
-      template<typename OperatingSystemType = Constants::OperatingSystem>
-      static
-      std::enable_if_t<std::is_same_v<OperatingSystemType, Constants::OS::Linux>>
-      Open(const Tree<VizFile>::Node& node)
-      {
-         const std::wstring rawPath = Controller::ResolveCompleteFilePath(node);
-         const std::experimental::filesystem::path path{ rawPath };
-
-         // @todo Look into adding support for other popular file browsers, like Nautilus.
-
-         fmt::MemoryWriter writer;
-         writer << "nemo \"" << path.c_str() << "\"";
-
-         std::system(writer.c_str());
-      }
-   };
 }
 
 bool Controller::HasVisualizationBeenLoaded() const
@@ -500,10 +437,8 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node
    const auto completePath = std::accumulate(std::rbegin(reversePath), std::rend(reversePath),
       std::wstring{ }, [] (const std::wstring& path, const std::wstring& file)
    {
-      constexpr auto slash = PreferredSeparator<Constants::OperatingSystem>::value;
-
       const auto shouldAddSlash = !path.empty() && (path.back() != L'\\' || path.back() != L'/');
-      return path + (shouldAddSlash ? slash : L"") + file;
+      return path + (shouldAddSlash ? OperatingSystemSpecific::PREFERRED_SEPARATOR : L"") + file;
    });
 
    assert(completePath.size() > 0);
@@ -512,5 +447,5 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node
 
 void Controller::ShowInFileExplorer(const Tree<VizFile>::Node& node)
 {
-   FileExplorer::Open(node);
+   OperatingSystemSpecific::LaunchFileExplorer(node);
 }

@@ -326,7 +326,8 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
          m_optionsManager->m_cameraMovementSpeed -= 0.01;
       }
 
-      m_mainWindow.SetCameraSpeedSpinner(static_cast<double>(m_optionsManager->m_cameraMovementSpeed));
+      const auto newSpeed = static_cast<double>(m_optionsManager->m_cameraMovementSpeed);
+      m_mainWindow.SetCameraSpeedSpinner(newSpeed);
    }
    else
    {
@@ -440,11 +441,11 @@ void GLCanvas::HandleInput()
    const auto now = std::chrono::system_clock::now();
    ON_SCOPE_EXIT noexcept { m_lastCameraPositionUpdatelTime = now; };
 
-   if (m_optionsManager->m_useXBoxController && m_mainWindow.IsXboxControllerConnected())
+   if (m_optionsManager->m_useXBoxController && m_mainWindow.GetGamepad().isConnected())
    {
-      HandleXBoxControllerInput();
+      HandleGamepadInput();
 
-       return;
+      return;
    }
 
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -483,93 +484,89 @@ void GLCanvas::HandleInput()
    }
 }
 
-void GLCanvas::HandleXBoxControllerInput()
+void GLCanvas::HandleGamepadInput()
 {
    const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now() - m_lastCameraPositionUpdatelTime).count();
 
-   const XboxController::State& controllerState = m_mainWindow.GetXboxControllerState();
-   const XboxController& controller = m_mainWindow.GetXboxControllerManager();
-
    const auto cameraSpeed =
-       m_optionsManager->m_cameraMovementSpeed / Constants::Xbox::MOVEMENT_AMPLIFICATION;
+       m_optionsManager->m_cameraMovementSpeed / Constants::Input::MOVEMENT_AMPLIFICATION;
 
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_UP))
+   const auto& gamepad = m_mainWindow.GetGamepad();
+
+   if (gamepad.buttonUp())
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Forward());
    }
 
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_LEFT))
+   if (gamepad.buttonLeft())
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Left());
    }
 
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_DOWN))
+   if (gamepad.buttonDown())
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Backward());
    }
 
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_RIGHT))
+   if (gamepad.buttonRight())
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Right());
    }
 
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_LEFT_SHOULDER))
+   if (gamepad.buttonL1())
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Down());
    }
 
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_RIGHT_SHOULDER))
+   if (gamepad.buttonR1())
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Up());
    }
 
-   HandleXboxThumbstickInput(controllerState);
-   HandleXboxTriggerInput(controllerState);
+   HandleXboxThumbstickInput(gamepad);
+   HandleXboxTriggerInput(gamepad);
 }
 
-void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controllerState)
+void GLCanvas::HandleXboxThumbstickInput(const CustomGamepad& gamepad)
 {
-   if (controllerState.rightThumbX || controllerState.rightThumbY)
+   if (gamepad.axisRightX() || gamepad.axisRightY())
    {
       const auto pitch =
-         Constants::Xbox::MOVEMENT_AMPLIFICATION
+         Constants::Input::MOVEMENT_AMPLIFICATION
          * m_optionsManager->m_mouseSensitivity
-         * -controllerState.rightThumbY;
+         * gamepad.axisRightY();
 
       const auto yaw =
-         Constants::Xbox::MOVEMENT_AMPLIFICATION
+         Constants::Input::MOVEMENT_AMPLIFICATION
          * m_optionsManager->m_mouseSensitivity
-         * controllerState.rightThumbX;
+         * gamepad.axisRightX();
 
       m_camera.OffsetOrientation(pitch, yaw);
    }
 
-   if (controllerState.leftThumbY)
+   if (gamepad.axisLeftY())
    {
       m_camera.OffsetPosition(
-         Constants::Xbox::MOVEMENT_AMPLIFICATION
+         Constants::Input::MOVEMENT_AMPLIFICATION
          * m_optionsManager->m_cameraMovementSpeed
-         * controllerState.leftThumbY
+         * -gamepad.axisLeftY()
          * m_camera.Forward());
    }
 
-   if (controllerState.leftThumbX)
+   if (gamepad.axisLeftX())
    {
       m_camera.OffsetPosition(
-         Constants::Xbox::MOVEMENT_AMPLIFICATION
+         Constants::Input::MOVEMENT_AMPLIFICATION
          * m_optionsManager->m_cameraMovementSpeed
-         * controllerState.leftThumbX
+         * gamepad.axisLeftX()
          * m_camera.Right());
    }
 }
 
-void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerState)
+void GLCanvas::HandleXboxTriggerInput(const CustomGamepad& gamepad)
 {
-   const bool isLeftTriggerThresholdExceeded =
-      controllerState.leftTrigger > Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD;
-
-   if (!m_isLeftTriggerDown && isLeftTriggerThresholdExceeded)
+   if (!m_isLeftTriggerDown && gamepad.IsLeftTriggerDown())
    {
       m_isLeftTriggerDown = true;
 
@@ -578,9 +575,9 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
 
       crosshairAsset->Show(m_camera);
    }
-   else if (m_isLeftTriggerDown && !isLeftTriggerThresholdExceeded)
+   else if (m_isLeftTriggerDown && !gamepad.IsLeftTriggerDown())
    {
-      m_isLeftTriggerDown = false;
+       m_isLeftTriggerDown = false;
 
       auto* const crosshairAsset =
          static_cast<CrosshairAsset*>(m_sceneAssets[Asset::CROSSHAIR].get());
@@ -588,16 +585,13 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
       crosshairAsset->Hide();
    }
 
-   const bool isRightTriggerThresholdExceeded =
-      controllerState.rightTrigger > Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD;
-
-   if (!m_isRightTriggerDown && isRightTriggerThresholdExceeded)
+   if (!m_isRightTriggerDown && gamepad.IsRightTriggerDown())
    {
       m_isRightTriggerDown = true;
 
       SelectNodeViaRay(m_camera.GetViewport().center());
    }
-   else if (m_isRightTriggerDown && !isRightTriggerThresholdExceeded)
+   else if (m_isRightTriggerDown && !gamepad.IsRightTriggerDown())
    {
       m_isRightTriggerDown = false;
    }
