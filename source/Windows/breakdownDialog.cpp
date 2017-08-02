@@ -15,12 +15,12 @@
 
 BreakdownDialog::BreakdownDialog(QWidget* parent) :
    QDialog{ parent },
-   m_ui{ new Ui::breakdownDialog }
+   m_ui{ std::make_unique<Ui::breakdownDialog>() }
 {
    assert(m_ui);
    m_ui->setupUi(this);
 
-   auto* mainWindow = reinterpret_cast<MainWindow*>(parent);
+   auto* const mainWindow = reinterpret_cast<MainWindow*>(parent);
    assert(mainWindow);
 
    const auto& controller = mainWindow->GetController();
@@ -78,9 +78,4 @@ void BreakdownDialog::AdjustColumnWidthsToFitViewport()
 void BreakdownDialog::resizeEvent(QResizeEvent* /*event*/)
 {
    AdjustColumnWidthsToFitViewport();
-}
-
-BreakdownDialog::~BreakdownDialog()
-{
-   delete m_ui;
 }

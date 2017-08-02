@@ -2,6 +2,7 @@
 #define OPERATINGSYSTEMSPECIFIC_HPP
 
 #include "Utilities/ignoreUnused.hpp"
+#include "Utilities/scopeExit.hpp"
 
 #include <string>
 #include <experimental/filesystem>
@@ -97,7 +98,14 @@ namespace OperatingSystemSpecific
        struct statvfs diskInfo;
        statvfs(path.string().data(), &diskInfo);
 
-       return (diskInfo.f_blocks - diskInfo.f_bfree) * diskInfo.f_bsize;
+       const auto totalNumberOfBytes = diskInfo.f_blocks * diskInfo.f_bsize;
+       const auto totalNumberOfFreeBytes = diskInfo.f_bfree * diskInfo.f_bsize;
+
+       const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
+       log->info(fmt::format("Disk Size:  {} bytes", totalNumberOfBytes));
+       log->info(fmt::format("Free Space: {} bytes", totalNumberOfFreeBytes));
+
+       return totalNumberOfBytes - totalNumberOfFreeBytes;
     }
 
 #endif

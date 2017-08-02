@@ -7,11 +7,9 @@
 #include "scanBreakdownModel.h"
 
 #include <functional>
+#include <memory>
 
-namespace Ui
-{
-   class breakdownDialog;
-}
+#include "ui_breakdownDialog.h"
 
 class ScanBreakdownFilterProxyModel final : public QSortFilterProxyModel
 {
@@ -53,8 +51,6 @@ class BreakdownDialog final : public QDialog
 
       explicit BreakdownDialog(QWidget* parent = nullptr);
 
-      ~BreakdownDialog();
-
    protected:
 
       void resizeEvent(QResizeEvent* event) override;
@@ -63,7 +59,7 @@ class BreakdownDialog final : public QDialog
 
       void AdjustColumnWidthsToFitViewport();
 
-      Ui::breakdownDialog* m_ui;
+      std::unique_ptr<Ui::breakdownDialog> m_ui;
 
       ScanBreakdownModel m_model;
       ScanBreakdownFilterProxyModel m_proxyModel;

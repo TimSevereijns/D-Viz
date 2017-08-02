@@ -16,6 +16,8 @@
 #include <QMenu>
 #include <QMessageBox>
 
+#include <spdlog/spdlog.h>
+
 #include <iostream>
 
 namespace
@@ -134,8 +136,9 @@ void GLCanvas::resizeGL(int width, int height)
 void GLCanvas::ReloadVisualization()
 {
    const bool previousSuspensionState = m_isPaintingSuspended;
-   m_isPaintingSuspended = true;
    ON_SCOPE_EXIT noexcept { m_isPaintingSuspended = previousSuspensionState; };
+
+   m_isPaintingSuspended = true;
 
    const auto parameters = m_controller.GetVisualizationParameters();
    auto* const vizAsset = static_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
@@ -146,18 +149,17 @@ void GLCanvas::ReloadVisualization()
       asset->Reload();
    }
 
-   assert (blockCount == vizAsset->GetBlockCount());
+   assert(blockCount == vizAsset->GetBlockCount());
    m_controller.PrintMetadataToStatusBar(blockCount);
 }
 
-void GLCanvas::SetFieldOfView(const float fieldOfView)
+void GLCanvas::SetFieldOfView(float fieldOfView)
 {
    m_camera.SetFieldOfView(fieldOfView);
 }
 
 void GLCanvas::keyPressEvent(QKeyEvent* const event)
 {
-   assert(event);
    if (!event)
    {
       return;
@@ -169,7 +171,7 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
       return;
    }
 
-   const auto state = KeyboardManager::KEY_STATE::DOWN;
+   constexpr auto state = KeyboardManager::KEY_STATE::DOWN;
    m_keyboardManager.UpdateKeyState(static_cast<Qt::Key>(event->key()), state);
 
    event->accept();
@@ -177,7 +179,6 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
 
 void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
 {
-   assert(event);
    if (!event)
    {
       return;
@@ -189,7 +190,7 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
       return;
    }
 
-   const auto state = KeyboardManager::KEY_STATE::UP;
+   constexpr auto state = KeyboardManager::KEY_STATE::UP;
    m_keyboardManager.UpdateKeyState(static_cast<Qt::Key>(event->key()), state);
 
    event->accept();
@@ -197,7 +198,6 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
 
 void GLCanvas::mousePressEvent(QMouseEvent* const event)
 {
-   assert(event);
    if (!event)
    {
       return;
@@ -230,7 +230,6 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
 
 void GLCanvas::mouseReleaseEvent(QMouseEvent* const event)
 {
-   assert(event);
    if (!event)
    {
       return;
@@ -253,7 +252,6 @@ void GLCanvas::mouseReleaseEvent(QMouseEvent* const event)
 
 void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 {
-   assert(event);
    if (!event)
    {
       return;
@@ -300,7 +298,6 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 
 void GLCanvas::wheelEvent(QWheelEvent* const event)
 {
-   assert(event);
    if (!event)
    {
       return;
@@ -411,12 +408,10 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
    if (selectedNode->GetData().file.type == FileType::REGULAR)
    {
-      const auto entryText =
-         QString::fromStdWString(L"Highlight All ")
-         + QString::fromStdWString(selectedNode->GetData().file.extension)
-         + QString::fromStdWString(L" Files");
+      fmt::WMemoryWriter writer;
+      writer << L"Highlight All " << selectedNode->GetData().file.extension << L" Files";
 
-      menu.addAction(entryText, [&]
+      menu.addAction(QString::fromStdWString(writer.c_str()), [&]
       {
          constexpr auto clearSelected{ true };
          m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
@@ -441,16 +436,15 @@ void GLCanvas::HandleInput()
    const auto now = std::chrono::system_clock::now();
    ON_SCOPE_EXIT noexcept { m_lastCameraPositionUpdatelTime = now; };
 
-   if (m_optionsManager->m_useXBoxController && m_mainWindow.GetGamepad().isConnected())
-   {
-      HandleGamepadInput();
+   const auto millisecondsElapsedSinceLastUpdate =
+      std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastCameraPositionUpdatelTime);
 
-      return;
-   }
+   HandleGamepadInput(millisecondsElapsedSinceLastUpdate);
+   HandleKeyboardInput(millisecondsElapsedSinceLastUpdate);
+}
 
-   const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-      now - m_lastCameraPositionUpdatelTime).count();
-
+void GLCanvas::HandleKeyboardInput(const std::chrono::milliseconds& elapsedTime)
+{
    const bool isWKeyDown = m_keyboardManager.IsKeyDown(Qt::Key_W);
    const bool isAKeyDown = m_keyboardManager.IsKeyDown(Qt::Key_A);
    const bool isSKeyDown = m_keyboardManager.IsKeyDown(Qt::Key_S);
@@ -461,6 +455,7 @@ void GLCanvas::HandleInput()
       return;
    }
 
+   const auto millisecondsElapsed = elapsedTime.count();
    const auto cameraSpeed = m_optionsManager->m_cameraMovementSpeed;
 
    if (isWKeyDown)
@@ -484,13 +479,16 @@ void GLCanvas::HandleInput()
    }
 }
 
-void GLCanvas::HandleGamepadInput()
+void GLCanvas::HandleGamepadInput(const std::chrono::milliseconds& elapsedTime)
 {
-   const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::system_clock::now() - m_lastCameraPositionUpdatelTime).count();
+   if (!m_mainWindow.GetGamepad().isConnected())
+   {
+      return;
+   }
 
+   const auto millisecondsElapsed = elapsedTime.count();
    const auto cameraSpeed =
-       m_optionsManager->m_cameraMovementSpeed / Constants::Input::MOVEMENT_AMPLIFICATION;
+      m_optionsManager->m_cameraMovementSpeed / Constants::Input::MOVEMENT_AMPLIFICATION;
 
    const auto& gamepad = m_mainWindow.GetGamepad();
 
@@ -524,11 +522,11 @@ void GLCanvas::HandleGamepadInput()
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Up());
    }
 
-   HandleXboxThumbstickInput(gamepad);
-   HandleXboxTriggerInput(gamepad);
+   HandleGamepadThumbstickInput(gamepad);
+   HandleGamepadTriggerInput(gamepad);
 }
 
-void GLCanvas::HandleXboxThumbstickInput(const CustomGamepad& gamepad)
+void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
 {
    if (gamepad.axisRightX() || gamepad.axisRightY())
    {
@@ -564,7 +562,7 @@ void GLCanvas::HandleXboxThumbstickInput(const CustomGamepad& gamepad)
    }
 }
 
-void GLCanvas::HandleXboxTriggerInput(const CustomGamepad& gamepad)
+void GLCanvas::HandleGamepadTriggerInput(const Gamepad& gamepad)
 {
    if (!m_isLeftTriggerDown && gamepad.IsLeftTriggerDown())
    {
@@ -638,14 +636,14 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
 
 void GLCanvas::paintGL()
 {
+   if (m_isPaintingSuspended)
+   {
+      return;
+   }
+
    const auto elapsedTime = Stopwatch<std::chrono::microseconds>(
       [&] () noexcept
    {
-      if (m_isPaintingSuspended)
-      {
-         return;
-      }
-
       m_graphicsDevice->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       assert(m_optionsManager);

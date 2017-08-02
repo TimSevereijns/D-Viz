@@ -1,6 +1,6 @@
 #include "gamepad.h"
 
-CustomGamepad::CustomGamepad(
+Gamepad::Gamepad(
    int deviceId,
    QObject*parent)
    :
@@ -8,12 +8,12 @@ CustomGamepad::CustomGamepad(
 {
 }
 
-bool CustomGamepad::IsLeftTriggerDown() const
+bool Gamepad::IsLeftTriggerDown() const
 {
    return buttonL2() >= Constants::Input::TRIGGER_ACTUATION_THRESHOLD;
 }
 
-bool CustomGamepad::IsRightTriggerDown() const
+bool Gamepad::IsRightTriggerDown() const
 {
    return buttonR2() >= Constants::Input::TRIGGER_ACTUATION_THRESHOLD;
 }

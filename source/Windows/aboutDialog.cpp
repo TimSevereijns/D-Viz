@@ -2,13 +2,8 @@
 #include "ui_aboutDialog.h"
 
 AboutDialog::AboutDialog(QWidget *parent) :
-   QDialog(parent),
-   ui(new Ui::AboutDialog)
+   QDialog{ parent },
+   m_ui{ std::make_unique<Ui::AboutDialog>() }
 {
-   ui->setupUi(this);
-}
-
-AboutDialog::~AboutDialog()
-{
-   delete ui;
+   m_ui->setupUi(this);
 }

@@ -12,12 +12,7 @@
 #include "HID/gamepad.h"
 #include "Viewport/glCanvas.h"
 
-namespace Ui
-{
-   class MainWindow;
-}
-
-class OptionsManager;
+#include "ui_mainWindow.h"
 
 class MainWindow : public QMainWindow
 {
@@ -36,8 +31,6 @@ class MainWindow : public QMainWindow
       MainWindow(
          Controller& controller,
          QWidget* parent = nullptr);
-
-      ~MainWindow();
 
       /**
        * @brief GetDirectoryToVisualize
@@ -58,22 +51,10 @@ class MainWindow : public QMainWindow
       void SetCameraSpeedSpinner(double speed);
 
       /**
-       * @brief GetXboxController
-       * @return
-       */
-      //XboxController::State& GetXboxControllerState() const;
-
-      /**
        * @brief GetOptionsManager
        * @return
        */
       std::shared_ptr<OptionsManager> GetOptionsManager();
-
-      /**
-       * @brief GetXboxControllerManager
-       * @return
-       */
-      //XboxController& GetXboxControllerManager();
 
       /**
        * @brief Sets a temporary message in the status bar.
@@ -111,7 +92,7 @@ class MainWindow : public QMainWindow
        * @brief GetGamepad
        * @return
        */
-      CustomGamepad& GetGamepad();
+      Gamepad& GetGamepad();
 
    public slots:
 
@@ -146,13 +127,12 @@ class MainWindow : public QMainWindow
          const std::uintmax_t numberOfFilesScanned,
          const std::uintmax_t bytesProcessed);
 
-      void CreateMenus();
-      void CreateFileMenu();
-      void CreateViewMenu();
-      void CreateHelpMenu();
-
       void LaunchAboutDialog();
 
+      void SetupMenus();
+      void SetupFileMenu();
+      void SetupViewMenu();
+      void SetupHelpMenu();
       void SetupSidebar();
       void SetupGamepad();
 
@@ -168,9 +148,7 @@ class MainWindow : public QMainWindow
 
       std::uint64_t m_occupiedDiskSpace{ 0 };
 
-      std::wstring m_searchQuery{ };
-
-      std::unique_ptr<CustomGamepad> m_gamepad{ std::make_unique<CustomGamepad>(0, this) };
+      std::unique_ptr<Gamepad> m_gamepad{ std::make_unique<Gamepad>(0, this) };
 
       std::unique_ptr<QMenu> m_fileMenu{ nullptr };
       std::unique_ptr<QMenu> m_viewMenu{ nullptr };
@@ -188,15 +166,16 @@ class MainWindow : public QMainWindow
 
       std::unique_ptr<BreakdownDialog> m_breakdownDialog{ nullptr };
 
+      std::unique_ptr<Ui::MainWindow> m_ui{ nullptr };
+
       std::shared_ptr<OptionsManager> m_optionsManager{ nullptr };
 
-      Ui::MainWindow* m_ui{ nullptr };
-
-      std::wstring m_directoryToVisualize{ L"" };
+      std::wstring m_searchQuery{ };
+      std::wstring m_directoryToVisualize{ };
 
       std::vector<std::pair<std::uintmax_t, QString>> m_sizePruningOptions
       {
-         std::pair<std::uintmax_t, QString>(0,                                      "Show All"),
+         std::pair<std::uintmax_t, QString>(0,                                       "Show All"),
          std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_KIBIBYTE,       "< 1 Kib"),
          std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_MEBIBYTE,       "< 1 MiB"),
          std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_MEBIBYTE * 10,  "< 10 MiB"),

@@ -119,23 +119,32 @@ class GLCanvas : public QOpenGLWidget
       void ShowContextMenu(const QPoint& point);
 
       /**
-       * @brief Handles the input from the Xbox controller.
+       * @brief HandleKeyboardInput
+       *
+       * @param[in] elapsedTime
        */
-      void HandleGamepadInput();
+      void HandleKeyboardInput(const std::chrono::milliseconds& elapsedTime);
 
       /**
-       * @brief Handles Xbox left and right trigger input.
+       * @brief Handles the input from the gamepad controller.
+       *
+       * @param[in] elapsedTime
+       */
+      void HandleGamepadInput(const std::chrono::milliseconds& elapsedTime);
+
+      /**
+       * @brief Handles left and right trigger input.
        *
        * @param[in] gamepad
        */
-      void HandleXboxTriggerInput(const CustomGamepad& gamepad);
+      void HandleGamepadTriggerInput(const Gamepad& gamepad);
 
       /**
-       * @brief Handles Xbox thumb stick input.
+       * @brief Handles thumb stick inputs.
        *
        * @param[in] gamepad.
        */
-      void HandleXboxThumbstickInput(const CustomGamepad& gamepad);
+      void HandleGamepadThumbstickInput(const Gamepad& gamepad);
 
       /**
        * @brief Compiles and loads the OpenGL shader program for the visualization.

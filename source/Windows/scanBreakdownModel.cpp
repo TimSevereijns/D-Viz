@@ -93,6 +93,8 @@ void ScanBreakdownModel::FinalizeInsertion()
 {
    assert(!m_fileTypeMap.empty() && m_fileTypeVector.empty());
 
-   std::copy(std::begin(m_fileTypeMap), std::end(m_fileTypeMap),
+   std::copy(
+      std::begin(m_fileTypeMap),
+      std::end(m_fileTypeMap),
       std::back_inserter(m_fileTypeVector));
 }

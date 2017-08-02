@@ -49,7 +49,8 @@ void Controller::GenerateNewVisualization()
 
    if (!HasVisualizationBeenLoaded() || m_visualizationParameters.forceNewScan)
    {
-      m_treeMap.reset(new SquarifiedTreeMap{ m_visualizationParameters });
+      //m_treeMap.reset(new SquarifiedTreeMap{ m_visualizationParameters });
+      m_treeMap = std::make_unique<SquarifiedTreeMap>(m_visualizationParameters);
       m_mainWindow->ScanDrive(m_visualizationParameters);
    }
 }
@@ -172,7 +173,7 @@ void Controller::SelectNodeViaRay(
    }
 }
 
-void Controller::PrintMetadataToStatusBar(const uint32_t nodeCount)
+void Controller::PrintMetadataToStatusBar(uint32_t nodeCount)
 {
    std::wstringstream message;
    message.imbue(std::locale(""));
@@ -422,7 +423,7 @@ std::pair<double, std::wstring> Controller::ConvertFileSizeToAppropriateUnits(
 
 std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node)
 {
-   std::vector<std::wstring> reversePath;
+   std::vector<std::reference_wrapper<const std::wstring>> reversePath;
    reversePath.reserve(Tree<VizFile>::Depth(node));
    reversePath.emplace_back(node->file.name);
 

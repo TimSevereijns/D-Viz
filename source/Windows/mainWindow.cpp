@@ -1,7 +1,5 @@
 #include "mainWindow.h"
 
-#include "ui_mainWindow.h"
-
 #include "optionsManager.h"
 #include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
@@ -12,6 +10,7 @@
 #include <cassert>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <sstream>
 
 #include <QAction>
@@ -23,31 +22,21 @@ MainWindow::MainWindow(
    Controller& controller,
    QWidget* parent /* = nullptr */)
    :
-   QMainWindow(parent),
+   QMainWindow{ parent },
    m_controller{ controller },
-   m_optionsManager(new OptionsManager),
-   m_ui(new Ui::MainWindow)
+   m_optionsManager{ std::make_shared<OptionsManager>() },
+   m_ui{ std::make_unique<Ui::MainWindow>() }
 {
-   SetupGamepad();
-
    assert(m_ui);
    m_ui->setupUi(this);
 
-   CreateMenus();
-
-   assert(m_optionsManager);
-
-   m_glCanvas.reset(new GLCanvas{ controller, this });
-   assert(m_glCanvas);
+   m_glCanvas = std::make_unique<GLCanvas>(controller, this);
 
    m_ui->canvasLayout->addWidget(m_glCanvas.get());
 
+   SetupMenus();
+   SetupGamepad();
    SetupSidebar();
-}
-
-MainWindow::~MainWindow()
-{
-   delete m_ui;
 }
 
 void MainWindow::SetupSidebar()
@@ -122,13 +111,20 @@ void MainWindow::SetupSidebar()
 
    const auto onNewSearchQuery = [&]
    {
-      const bool shouldSearchFiles = m_ui->searchFilesCheckBox->isChecked();
-      const bool shouldSearchDirectories = m_ui->searchDirectoriesCheckBox->isChecked();
-
       const auto searchQuery = m_ui->searchBox->text().toStdWString();
 
-      const auto deselectionCallback = [&] (auto& nodes) { m_glCanvas->RestoreHighlightedNodes(nodes); };
-      const auto selectionCallback = [&] (auto& nodes) { m_glCanvas->HighlightNodes(nodes); };
+      const auto deselectionCallback = [&] (auto& nodes)
+      {
+         m_glCanvas->RestoreHighlightedNodes(nodes);
+      };
+
+      const auto selectionCallback = [&] (auto& nodes)
+      {
+         m_glCanvas->HighlightNodes(nodes);
+      };
+
+      const bool shouldSearchFiles = m_ui->searchFilesCheckBox->isChecked();
+      const bool shouldSearchDirectories = m_ui->searchDirectoriesCheckBox->isChecked();
 
       m_controller.SearchTreeMap(
          searchQuery,
@@ -164,11 +160,10 @@ void MainWindow::SetupGamepad()
    const auto gamepads = QGamepadManager::instance()->connectedGamepads();
    if (gamepads.isEmpty())
    {
-       return;
+      return;
    }
 
-   m_gamepad.reset(new CustomGamepad{ *gamepads.begin(), this });
-
+   m_gamepad = std::make_unique<Gamepad>(*gamepads.begin(), this);
    QGamepadManager::instance()->resetConfiguration(m_gamepad->deviceId());
 }
 
@@ -177,21 +172,21 @@ std::wstring MainWindow::GetDirectoryToVisualize() const
    return m_directoryToVisualize;
 }
 
-void MainWindow::CreateMenus()
+void MainWindow::SetupMenus()
 {
-   CreateFileMenu();
-   CreateViewMenu();
-   CreateHelpMenu();
+   SetupFileMenu();
+   SetupViewMenu();
+   SetupHelpMenu();
 }
 
-void MainWindow::CreateFileMenu()
+void MainWindow::SetupFileMenu()
 {
-   m_fileMenuNewScan.reset(new QAction("New Scan...", this));
+   m_fileMenuNewScan = std::make_unique<QAction>("New Scan...", this);
    m_fileMenuNewScan->setShortcuts(QKeySequence::New);
    m_fileMenuNewScan->setStatusTip("Start a new visualization");
    connect(m_fileMenuNewScan.get(), &QAction::triggered, this, &MainWindow::OnFileMenuNewScan);
 
-   m_fileMenuExit.reset(new QAction("Exit", this));
+   m_fileMenuExit = std::make_unique<QAction>("Exit", this);
    m_fileMenuExit->setShortcuts(QKeySequence::Quit);
    m_fileMenuExit->setStatusTip("Exit the program");
    connect(m_fileMenuExit.get(), &QAction::triggered, this, &MainWindow::close);
@@ -201,9 +196,9 @@ void MainWindow::CreateFileMenu()
    m_fileMenu->addAction(m_fileMenuExit.get());
 }
 
-void MainWindow::CreateViewMenu()
+void MainWindow::SetupViewMenu()
 {
-   m_viewMenuToggleFrameTime.reset(new QAction("Show Frame Time", this));
+   m_viewMenuToggleFrameTime = std::make_unique<QAction>("Show Frame Time", this);
    m_viewMenuToggleFrameTime->setCheckable(true);
    m_viewMenuToggleFrameTime->setStatusTip("Toggle Frame Time Readout");
    connect(m_viewMenuToggleFrameTime.get(), &QAction::toggled, this, &MainWindow::OnFPSReadoutToggled);
@@ -212,9 +207,9 @@ void MainWindow::CreateViewMenu()
    m_viewMenu->addAction(m_viewMenuToggleFrameTime.get());
 }
 
-void MainWindow::CreateHelpMenu()
+void MainWindow::SetupHelpMenu()
 {
-   m_helpMenuAboutDialog.reset(new QAction("About", this));
+   m_helpMenuAboutDialog = std::make_unique<QAction>("About", this);
    m_helpMenuAboutDialog->setStatusTip("About D-Viz");
    connect(m_helpMenuAboutDialog.get(), &QAction::triggered, this, &MainWindow::LaunchAboutDialog);
 
@@ -224,7 +219,7 @@ void MainWindow::CreateHelpMenu()
 
 void MainWindow::OnFileMenuNewScan()
 {
-   QString selectedDirectory = QFileDialog::getExistingDirectory(
+   const auto selectedDirectory = QFileDialog::getExistingDirectory(
       this,
       "Select a Directory to Visualize",
       "/home",
@@ -275,7 +270,7 @@ GLCanvas& MainWindow::GetCanvas()
    return *m_glCanvas;
 }
 
-CustomGamepad& MainWindow::GetGamepad()
+Gamepad& MainWindow::GetGamepad()
 {
    return *m_gamepad;
 }
@@ -378,33 +373,32 @@ void MainWindow::AskUserToLimitFileSize(
    VisualizationParameters& parameters)
 {
    assert(numberOfFilesScanned > 0);
-   if (numberOfFilesScanned < 250'000)
+
+   if (numberOfFilesScanned < 250'000
+      || parameters.minimumFileSize >= Constants::FileSize::ONE_MEBIBYTE)
    {
       return;
    }
 
-   if (parameters.minimumFileSize < Constants::FileSize::ONE_MEBIBYTE)
-   {
-      QMessageBox messageBox;
-      messageBox.setIcon(QMessageBox::Warning);
-      messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-      messageBox.setText(
-         "More than a quarter million files were scanned. "
-         "Would you like to limit the visualized files to those 1 MiB or larger in "
-         "order to reduce the load on the GPU and system memory?");
+   QMessageBox messageBox;
+   messageBox.setIcon(QMessageBox::Warning);
+   messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+   messageBox.setText(
+      "More than a quarter million files were scanned. "
+      "Would you like to limit the visualized files to those 1 MiB or larger in "
+      "order to reduce the load on the GPU and system memory?");
 
-      const int election = messageBox.exec();
-      switch (election)
-      {
-         case QMessageBox::Yes:
-            parameters.minimumFileSize = Constants::FileSize::ONE_MEBIBYTE;
-            SetFilePruningComboBoxValue(Constants::FileSize::ONE_MEBIBYTE);
-            return;
-         case QMessageBox::No:
-            return;
-         default:
-            assert(false);
-      }
+   const auto election = messageBox.exec();
+   switch (election)
+   {
+      case QMessageBox::Yes:
+         parameters.minimumFileSize = Constants::FileSize::ONE_MEBIBYTE;
+         SetFilePruningComboBoxValue(Constants::FileSize::ONE_MEBIBYTE);
+         return;
+      case QMessageBox::No:
+         return;
+      default:
+         assert(false);
    }
 }
 
@@ -420,8 +414,10 @@ void MainWindow::SetCameraSpeedSpinner(double speed)
 
 void MainWindow::SetFilePruningComboBoxValue(std::uintmax_t minimum)
 {
-   const auto match = std::find_if(std::begin(m_sizePruningOptions), std::end(m_sizePruningOptions),
-      [minimum] (const auto& pair)
+   const auto match = std::find_if(
+      std::begin(m_sizePruningOptions),
+      std::end(m_sizePruningOptions),
+      [minimum] (const auto& pair) noexcept
    {
       return pair.first >= minimum;
    });

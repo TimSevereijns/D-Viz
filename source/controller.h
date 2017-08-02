@@ -31,8 +31,6 @@ class Controller
 
       /**
        * @brief Generates a new visualization.
-       *
-       * @param[in] parameters
        */
       void GenerateNewVisualization();
 
@@ -83,8 +81,8 @@ class Controller
        * @brief Searches the treemap for the search query contained within the search box.
        *
        * @param[in] searchQuery              String to search against.
-       * @param[in] deselectionCallback      Callback to clear the canvas of selection highlights.
-       * @param[in] selectionCallback        Callback to highlight matching nodes on the canvas.
+       * @param[in] deselectionCallback      UI callback to clear selection highlights.
+       * @param[in] selectionCallback        UI callback to highlight matching nodes on the canvas.
        * @param[in] shouldSearchFiles        Pass in true to search files.
        * @param[in] shouldSearchDirectories  Pass in true to search directories.
        */
@@ -99,7 +97,7 @@ class Controller
        * @brief Highlights all nodes in the tree whose extension matches that of the passed in node.
        *
        * @param[in] sampleNode      The node whose extension is to be highlighted.
-       * @param[in] callback        Callback to highlight matching nodes on the canvas.
+       * @param[in] callback        UI callback to highlight matching nodes on the canvas.
        */
       void HighlightAllMatchingExtensions(
          const Tree<VizFile>::Node& sampleNode,
@@ -109,7 +107,7 @@ class Controller
        * @brief Highlights all nodes that descendant from the passed in node.
        *
        * @param[in] node            The node whose descendants to highlight.
-       * @param[in] callback        Callback to highlight matching nodes on the canvas.
+       * @param[in] callback        UI callback to highlight matching nodes on the canvas.
        */
       void HighlightDescendants(
          const Tree<VizFile>::Node& node,
@@ -119,7 +117,7 @@ class Controller
        * @brief Highlights all nodes that are ancestors of the passed in node.
        *
        * @param[in] node            The node whose ancestors are to be highlighted.
-       * @param[in] callback        Callback to highlight matching nodes on the canvas.
+       * @param[in] callback        UI callback to highlight matching nodes on the canvas.
        */
       void HighlightAncestors(
          const Tree<VizFile>::Node& node,
@@ -135,7 +133,7 @@ class Controller
        * @brief Clears all highlighted nodes, and restores the color of any highlighted nodes back
        * to its unhighlighted color.
        *
-       * @param[in] callback        Callback to highlight matching nodes on the canvas.
+       * @param[in] callback        UI callback to highlight matching nodes on the canvas.
        * @param[in] clearSelected   Pass in true if the primary selection target is to be cleared.
        */
       void ClearHighlightedNodes(
@@ -146,7 +144,7 @@ class Controller
        * @brief Selects the passed in node.
        *
        * @param[in] node               A pointer to the node to be selected.
-       * @param[in] selectorCallback   Callback to identify matching nodes.
+       * @param[in] selectorCallback   UI callback to highlight matching node on the canvas.
        */
       void SelectNodeAndUpdateStatusBar(
          const Tree<VizFile>::Node* const node,
@@ -160,8 +158,8 @@ class Controller
        *
        * @param[in] camera              The camera from which the ray was shot.
        * @param[in] ray                 The picking ray.
-       * @param[in] deselectionCallback Callback to clear the canvas of selection highlights.
-       * @param[in] selectionCallback   Callback to highlight matching nodes on the canvas.
+       * @param[in] deselectionCallback UI callback to clear the canvas of selection highlights.
+       * @param[in] selectionCallback   UI callback to highlight matching nodes on the canvas.
        */
       void SelectNodeViaRay(
          const Camera& camera,
@@ -174,7 +172,7 @@ class Controller
        *
        * @param[in] nodeCount       The number of nodes that are currently selected or highlighted.
        */
-      void PrintMetadataToStatusBar(const std::uint32_t nodeCount);
+      void PrintMetadataToStatusBar(std::uint32_t nodeCount);
 
       /**
        * @brief Converts the given size of the file from bytes to the most human readable units.
@@ -185,13 +183,12 @@ class Controller
        * @returns A std::pair encapsulating the converted file size, and corresponding unit readout
        * string.
        */
-      static std::pair<double, std::wstring> ConvertFileSizeToAppropriateUnits(
-         double sizeInBytes);
+      static std::pair<double, std::wstring> ConvertFileSizeToAppropriateUnits(double sizeInBytes);
 
       /**
        * @brief Computes the absolute file path of the selected node by traveling up tree.
        *
-       * @param[in]                 The selected node.
+       * @param[in] node            The selected node.
        *
        * @returns The absolute file path.
        */
@@ -210,7 +207,7 @@ class Controller
       void PrintSelectionDetailsToStatusBar();
 
       /**
-       * @brief AllowUserInteractionWithModel
+       * @brief Whether to allow the user to interact with the UI.
        *
        * @param allowInteraction    The new state.
        */
