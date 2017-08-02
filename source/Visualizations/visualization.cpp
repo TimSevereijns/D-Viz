@@ -316,7 +316,7 @@ const float VisualizationModel::ROOT_BLOCK_WIDTH = 1000.0f;
 const float VisualizationModel::ROOT_BLOCK_DEPTH = 1000.0f;
 
 VisualizationModel::VisualizationModel(const VisualizationParameters& parameters) :
-   m_vizParameters(parameters)
+   m_vizParameters{ parameters }
 {
 }
 

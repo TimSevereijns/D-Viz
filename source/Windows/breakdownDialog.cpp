@@ -1,6 +1,4 @@
 #include "breakdownDialog.h"
-#include "ui_breakdownDialog.h"
-
 #include "mainWindow.h"
 
 #include <spdlog/spdlog.h>

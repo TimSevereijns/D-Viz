@@ -25,7 +25,7 @@ namespace OperatingSystemSpecific
 {
 #ifdef Q_OS_WIN
 
-    static constexpr auto PREFERRED_SEPARATOR = L"\\";
+    static constexpr auto PREFERRED_SLASH = L'\\';
 
     inline void LaunchFileExplorer(const Tree<VizFile>::Node& node)
     {
@@ -75,7 +75,7 @@ namespace OperatingSystemSpecific
 
 #ifdef Q_OS_LINUX
 
-    static constexpr auto PREFERRED_SEPARATOR = L"/";
+    static constexpr auto PREFERRED_SLASH = L'/';
 
     inline void LaunchFileExplorer(const Tree<VizFile>::Node& node)
     {

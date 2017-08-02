@@ -428,7 +428,6 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node
    reversePath.emplace_back(node->file.name);
 
    const auto* currentNode = &node;
-
    while (currentNode->GetParent())
    {
       currentNode = currentNode->GetParent();
@@ -438,8 +437,12 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node
    const auto completePath = std::accumulate(std::rbegin(reversePath), std::rend(reversePath),
       std::wstring{ }, [] (const std::wstring& path, const std::wstring& file)
    {
-      const auto shouldAddSlash = !path.empty() && (path.back() != L'\\' || path.back() != L'/');
-      return path + (shouldAddSlash ? OperatingSystemSpecific::PREFERRED_SEPARATOR : L"") + file;
+      if (!path.empty() && path.back() != OperatingSystemSpecific::PREFERRED_SLASH)
+      {
+         return path + OperatingSystemSpecific::PREFERRED_SLASH + file;
+      }
+
+      return path + file;
    });
 
    assert(completePath.size() > 0);
