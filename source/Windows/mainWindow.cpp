@@ -175,46 +175,91 @@ std::wstring MainWindow::GetDirectoryToVisualize() const
 void MainWindow::SetupMenus()
 {
    SetupFileMenu();
-   SetupViewMenu();
+   SetupOptionsMenu();
    SetupHelpMenu();
 }
 
 void MainWindow::SetupFileMenu()
 {
-   m_fileMenuNewScan = std::make_unique<QAction>("New Scan...", this);
-   m_fileMenuNewScan->setShortcuts(QKeySequence::New);
-   m_fileMenuNewScan->setStatusTip("Start a new visualization");
-   connect(m_fileMenuNewScan.get(), &QAction::triggered, this, &MainWindow::OnFileMenuNewScan);
+   m_fileMenuWrapper.newScan.setParent(this);
+   m_fileMenuWrapper.newScan.setText("New Scan...");
+   m_fileMenuWrapper.newScan.setShortcuts(QKeySequence::New);
+   m_fileMenuWrapper.newScan.setStatusTip("Start a new visualization");
 
-   m_fileMenuExit = std::make_unique<QAction>("Exit", this);
-   m_fileMenuExit->setShortcuts(QKeySequence::Quit);
-   m_fileMenuExit->setStatusTip("Exit the program");
-   connect(m_fileMenuExit.get(), &QAction::triggered, this, &MainWindow::close);
+   connect(&m_fileMenuWrapper.newScan, &QAction::triggered, this, &MainWindow::OnFileMenuNewScan);
 
-   m_fileMenu.reset(menuBar()->addMenu("File"));
-   m_fileMenu->addAction(m_fileMenuNewScan.get());
-   m_fileMenu->addAction(m_fileMenuExit.get());
+   m_fileMenuWrapper.exit.setParent(this);
+   m_fileMenuWrapper.exit.setText("Exit");
+   m_fileMenuWrapper.exit.setShortcuts(QKeySequence::Quit);
+   m_fileMenuWrapper.exit.setStatusTip("Exit the program");
+
+   connect(&m_fileMenuWrapper.exit, &QAction::triggered, this, &MainWindow::close);
+
+   m_fileMenu.setTitle("File");
+   m_fileMenu.addAction(&m_fileMenuWrapper.newScan);
+   m_fileMenu.addAction(&m_fileMenuWrapper.exit);
+
+   menuBar()->addMenu(&m_fileMenu);
 }
 
-void MainWindow::SetupViewMenu()
+void MainWindow::SetupOptionsMenu()
 {
-   m_viewMenuToggleFrameTime = std::make_unique<QAction>("Show Frame Time", this);
-   m_viewMenuToggleFrameTime->setCheckable(true);
-   m_viewMenuToggleFrameTime->setStatusTip("Toggle Frame Time Readout");
-   connect(m_viewMenuToggleFrameTime.get(), &QAction::toggled, this, &MainWindow::OnFPSReadoutToggled);
+   m_optionsMenuWrapper.toggleFrameTime.setParent(this);
+   m_optionsMenuWrapper.toggleFrameTime.setText("Show Frame Time");
+   m_optionsMenuWrapper.toggleFrameTime.setCheckable(true);
+   m_optionsMenuWrapper.toggleFrameTime.setToolTip("Toggle Frame Time Readout");
 
-   m_viewMenu.reset(menuBar()->addMenu("View"));
-   m_viewMenu->addAction(m_viewMenuToggleFrameTime.get());
+   connect(&m_optionsMenuWrapper.toggleFrameTime, &QAction::toggled, this,
+      &MainWindow::OnFPSReadoutToggled);
+
+   m_optionsMenu.setTitle("Options");
+   m_optionsMenu.addAction(&m_optionsMenuWrapper.toggleFrameTime);
+
+   SetupFileSizeSubMenu();
+
+   menuBar()->addMenu(&m_optionsMenu);
+}
+
+void MainWindow::SetupFileSizeSubMenu()
+{
+   auto& subMenuWrapper = m_optionsMenuWrapper.fileSizeMenuWrapper;
+
+   subMenuWrapper.binaryPrefix.setParent(&m_optionsMenu);
+   subMenuWrapper.binaryPrefix.setText("Binary Prefix");
+   subMenuWrapper.binaryPrefix.setToolTip("Use Base-Two Units");
+   subMenuWrapper.binaryPrefix.setCheckable(true);
+   subMenuWrapper.binaryPrefix.setChecked(true);
+
+   // @todo Connect the `binaryPrefix` action to a handler.
+
+   subMenuWrapper.decimalPrefix.setParent(&m_optionsMenu);
+   subMenuWrapper.decimalPrefix.setText("Decimal Prefix");
+   subMenuWrapper.decimalPrefix.setToolTip("Use Base-Ten Units");
+   subMenuWrapper.decimalPrefix.setCheckable(true);
+   subMenuWrapper.decimalPrefix.setChecked(false);
+
+   // @todo Connect the `decimalPrefix` action to a handler.
+
+   m_optionsMenuWrapper.fileSizeMenu.setTitle("File Size Units");
+   m_optionsMenuWrapper.fileSizeMenu.addAction(&subMenuWrapper.binaryPrefix);
+   m_optionsMenuWrapper.fileSizeMenu.addAction(&subMenuWrapper.decimalPrefix);
+
+   m_optionsMenu.addMenu(&m_optionsMenuWrapper.fileSizeMenu);
 }
 
 void MainWindow::SetupHelpMenu()
 {
-   m_helpMenuAboutDialog = std::make_unique<QAction>("About", this);
-   m_helpMenuAboutDialog->setStatusTip("About D-Viz");
-   connect(m_helpMenuAboutDialog.get(), &QAction::triggered, this, &MainWindow::LaunchAboutDialog);
+   m_helpMenuWrapper.aboutDialog.setParent(this);
+   m_helpMenuWrapper.aboutDialog.setText("About");
+   m_helpMenuWrapper.aboutDialog.setToolTip("About D-Viz");
 
-   m_helpMenu.reset(menuBar()->addMenu("Help"));
-   m_helpMenu->addAction(m_helpMenuAboutDialog.get());
+   connect(&m_helpMenuWrapper.aboutDialog, &QAction::triggered, this,
+      &MainWindow::LaunchAboutDialog);
+
+   m_helpMenu.setTitle("Help");
+   m_helpMenu.addAction(&m_helpMenuWrapper.aboutDialog);
+
+   menuBar()->addMenu(&m_helpMenu);
 }
 
 void MainWindow::OnFileMenuNewScan()
@@ -252,7 +297,7 @@ void MainWindow::OnFPSReadoutToggled(bool isEnabled)
 
 bool MainWindow::ShouldShowFrameTime() const
 {
-   return m_viewMenuToggleFrameTime->isChecked();
+   return m_optionsMenuWrapper.toggleFrameTime.isChecked();
 }
 
 std::wstring MainWindow::GetSearchQuery() const

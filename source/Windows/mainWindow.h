@@ -131,7 +131,8 @@ class MainWindow : public QMainWindow
 
       void SetupMenus();
       void SetupFileMenu();
-      void SetupViewMenu();
+      void SetupFileSizeSubMenu();
+      void SetupOptionsMenu();
       void SetupHelpMenu();
       void SetupSidebar();
       void SetupGamepad();
@@ -150,15 +151,47 @@ class MainWindow : public QMainWindow
 
       std::unique_ptr<Gamepad> m_gamepad{ std::make_unique<Gamepad>(0, this) };
 
-      std::unique_ptr<QMenu> m_fileMenu{ nullptr };
-      std::unique_ptr<QMenu> m_viewMenu{ nullptr };
-      std::unique_ptr<QMenu> m_helpMenu{ nullptr };
+      QMenu m_fileMenu{ nullptr };
 
-      std::unique_ptr<QAction> m_fileMenuNewScan{ nullptr };
-      std::unique_ptr<QAction> m_fileMenuPreferences{ nullptr };
-      std::unique_ptr<QAction> m_fileMenuExit{ nullptr };
-      std::unique_ptr<QAction> m_viewMenuToggleFrameTime{ nullptr };
-      std::unique_ptr<QAction> m_helpMenuAboutDialog{ nullptr };
+      /**
+       * @brief Wraps everything that constitutes the "File" menu.
+       */
+      struct FileMenu
+      {
+         QAction newScan{ nullptr };
+         QAction exit{ nullptr };
+      } m_fileMenuWrapper;
+
+      // @note Since any sub-menus of this menu will reference this menu as a parent, it's
+      // imperative that this menu outlive any of its sub-menus. In other words, make sure that
+      // this menu is declared before any of its sub-menus in this class.
+      QMenu m_optionsMenu{ nullptr };
+
+      /**
+       * @brief Wraps everything that constitutes the "Options" menu.
+       */
+      struct OptionsMenu
+      {
+         QMenu fileSizeMenu{ nullptr };
+
+         struct FileSizeMenu
+         {
+            QAction binaryPrefix{ nullptr };
+            QAction decimalPrefix{ nullptr };
+         } fileSizeMenuWrapper;
+
+         QAction toggleFrameTime{ nullptr };
+      } m_optionsMenuWrapper;
+
+      QMenu m_helpMenu{ nullptr };
+
+      /**
+       * @brief Wraps everything that constitutes the "Help" menu.
+       */
+      struct HelpMenu
+      {
+         QAction aboutDialog{ nullptr };
+      } m_helpMenuWrapper;
 
       std::unique_ptr<GLCanvas> m_glCanvas{ nullptr };
 
