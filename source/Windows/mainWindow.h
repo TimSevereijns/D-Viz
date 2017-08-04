@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QAction>
 #include <QLabel>
 #include <QMainWindow>
 #include <QMenu>
@@ -14,7 +15,7 @@
 
 #include "ui_mainWindow.h"
 
-class MainWindow : public QMainWindow
+class MainWindow final : public QMainWindow
 {
    Q_OBJECT
 
@@ -33,26 +34,26 @@ class MainWindow : public QMainWindow
          QWidget* parent = nullptr);
 
       /**
-       * @brief GetDirectoryToVisualize
-       * @return
+       * @returns The base directory of the visualization.
        */
       std::wstring GetDirectoryToVisualize() const;
 
       /**
-       * @brief UpdateFieldOfViewSlider
+       * @brief Sets the field of view.
+       *
        * @param fieldOfView
        */
       void SetFieldOfViewSlider(int fieldOfView);
 
       /**
-       * @brief UpdateCameraSpeedComboBox
+       * @brief Sets the camera movement speed.
+       *
        * @param speed
        */
       void SetCameraSpeedSpinner(double speed);
 
       /**
-       * @brief GetOptionsManager
-       * @return
+       * @returns The options manager.
        */
       std::shared_ptr<OptionsManager> GetOptionsManager();
 
@@ -77,19 +78,22 @@ class MainWindow : public QMainWindow
       std::wstring GetSearchQuery() const;
 
       /**
-       * @brief GetModel
+       * @brief GetController
+       *
        * @return
        */
       Controller& GetController();
 
       /**
        * @brief GetCanvas
+       *
        * @return
        */
       GLCanvas& GetCanvas();
 
       /**
        * @brief GetGamepad
+       *
        * @return
        */
       Gamepad& GetGamepad();
@@ -103,8 +107,21 @@ class MainWindow : public QMainWindow
 
       /**
        * @brief OnFPSReadoutToggled
+       * @param isEnabled
        */
       void OnFPSReadoutToggled(bool isEnabled);
+
+      /**
+       * @brief SwitchToBinaryPrefix
+       * @param useBinary
+       */
+      void SwitchToBinaryPrefix(bool useBinary);
+
+      /**
+       * @brief SwitchToDecimalPrefix
+       * @param useDecimal
+       */
+      void SwitchToDecimalPrefix(bool useDecimal);
 
    private:
 
@@ -121,7 +138,7 @@ class MainWindow : public QMainWindow
          const std::uintmax_t numberOfFilesScanned,
          VisualizationParameters& parameters);
 
-      void SetFilePruningComboBoxValue(uintmax_t minimum);
+      void SetFilePruningComboBoxValue(std::uintmax_t minimum);
 
       void ComputeProgress(
          const std::uintmax_t numberOfFilesScanned,
@@ -130,6 +147,7 @@ class MainWindow : public QMainWindow
       void LaunchAboutDialog();
 
       void SetupMenus();
+      void SetupFileSizePruningDropdown();
       void SetupFileMenu();
       void SetupFileSizeSubMenu();
       void SetupOptionsMenu();
@@ -143,11 +161,10 @@ class MainWindow : public QMainWindow
 
       bool m_showDirectoriesOnly{ false };
       bool m_useDirectoryGradient{ false };
-      bool m_xboxControllerConnected{ false };
 
       int m_sizePruningComboBoxIndex{ 0 };
 
-      std::uint64_t m_occupiedDiskSpace{ 0 };
+      std::uint64_t m_occupiedDiskSpace{ 0u };
 
       std::unique_ptr<Gamepad> m_gamepad{ std::make_unique<Gamepad>(0, this) };
 
@@ -206,19 +223,35 @@ class MainWindow : public QMainWindow
       std::wstring m_searchQuery{ };
       std::wstring m_directoryToVisualize{ };
 
-      std::vector<std::pair<std::uintmax_t, QString>> m_sizePruningOptions
+      std::vector<std::pair<std::uintmax_t, QString>> m_binaryFileSizeOptions
       {
-         std::pair<std::uintmax_t, QString>(0,                                       "Show All"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_KIBIBYTE,       "< 1 Kib"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_MEBIBYTE,       "< 1 MiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_MEBIBYTE * 10,  "< 10 MiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_MEBIBYTE * 100, "< 100 MiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_MEBIBYTE * 250, "< 250 MiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_MEBIBYTE * 500, "< 500 MiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_GIBIBYTE,       "< 1 GiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_GIBIBYTE * 5,   "< 5 GiB"),
-         std::pair<std::uintmax_t, QString>(Constants::FileSize::ONE_GIBIBYTE * 10,  "< 10 GiB")
+         { 0u,                                              "Show All"  },
+         { Constants::FileSize::Binary::ONE_KIBIBYTE,       "< 1 KiB"   },
+         { Constants::FileSize::Binary::ONE_MEBIBYTE,       "< 1 MiB"   },
+         { Constants::FileSize::Binary::ONE_MEBIBYTE * 10,  "< 10 MiB"  },
+         { Constants::FileSize::Binary::ONE_MEBIBYTE * 100, "< 100 MiB" },
+         { Constants::FileSize::Binary::ONE_MEBIBYTE * 250, "< 250 MiB" },
+         { Constants::FileSize::Binary::ONE_MEBIBYTE * 500, "< 500 MiB" },
+         { Constants::FileSize::Binary::ONE_GIBIBYTE,       "< 1 GiB"   },
+         { Constants::FileSize::Binary::ONE_GIBIBYTE * 5,   "< 5 GiB"   },
+         { Constants::FileSize::Binary::ONE_GIBIBYTE * 10,  "< 10 GiB"  }
       };
+
+      std::vector<std::pair<std::uintmax_t, QString>> m_decimalFileSizeOptions
+      {
+         { 0u,                                               "Show All" },
+         { Constants::FileSize::Decimal::ONE_KILOBYTE,       "< 1 KB"   },
+         { Constants::FileSize::Decimal::ONE_MEGABYTE,       "< 1 MB"   },
+         { Constants::FileSize::Decimal::ONE_MEGABYTE * 10,  "< 10 MB"  },
+         { Constants::FileSize::Decimal::ONE_MEGABYTE * 100, "< 100 MB" },
+         { Constants::FileSize::Decimal::ONE_MEGABYTE * 250, "< 250 MB" },
+         { Constants::FileSize::Decimal::ONE_MEGABYTE * 500, "< 500 MB" },
+         { Constants::FileSize::Decimal::ONE_GIGABYTE,       "< 1 GB"   },
+         { Constants::FileSize::Decimal::ONE_GIGABYTE * 5,   "< 5 GB"   },
+         { Constants::FileSize::Decimal::ONE_GIGABYTE * 10,  "< 10 GB"  }
+      };
+
+      decltype(m_binaryFileSizeOptions)& m_fileSizeOptions{ m_binaryFileSizeOptions };
 };
 
 #endif // MAINWINDOW_H

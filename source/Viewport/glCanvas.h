@@ -27,7 +27,7 @@
  * individual scene assets that make up the entire visualization. Camera movement and scene
  * interaction are also handled by this class.
  */
-class GLCanvas : public QOpenGLWidget
+class GLCanvas final : public QOpenGLWidget
 {
    Q_OBJECT
 
@@ -97,7 +97,7 @@ class GLCanvas : public QOpenGLWidget
    private slots:
 
       /**
-       * @brief Handles keyboard, mouse, and Xbox controller input.
+       * @brief Handles keyboard, mouse, and gamepad input.
        */
       void HandleInput();
 

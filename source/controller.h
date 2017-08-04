@@ -183,7 +183,8 @@ class Controller
        * @returns A std::pair encapsulating the converted file size, and corresponding unit readout
        * string.
        */
-      static std::pair<double, std::wstring> ConvertFileSizeToAppropriateUnits(double sizeInBytes);
+      static std::pair<double, std::wstring> ConvertFileSizeToAppropriateUnits(
+         std::uintmax_t sizeInBytes);
 
       /**
        * @brief Computes the absolute file path of the selected node by traveling up tree.

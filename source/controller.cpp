@@ -33,6 +33,72 @@ namespace
             alignof(wchar_t)
          >
       >;
+
+   /**
+    * @note The input is implicitly converted to a `double` so that we don't end up performing
+    * integer division.
+    */
+   std::pair<double, std::wstring> ConvertToBinaryPrefix(double sizeInBytes)
+   {
+      if (sizeInBytes < Constants::FileSize::Binary::ONE_KIBIBYTE)
+      {
+         return std::make_pair<double, std::wstring>(std::move(sizeInBytes), BYTES_READOUT_STRING);
+      }
+
+      if (sizeInBytes < Constants::FileSize::Binary::ONE_MEBIBYTE)
+      {
+         return std::make_pair<double, std::wstring>(
+            sizeInBytes / Constants::FileSize::Binary::ONE_KIBIBYTE, L" KiB");
+      }
+
+      if (sizeInBytes < Constants::FileSize::Binary::ONE_GIBIBYTE)
+      {
+         return std::make_pair<double, std::wstring>(
+            sizeInBytes / Constants::FileSize::Binary::ONE_MEBIBYTE, L" MiB");
+      }
+
+      if (sizeInBytes < Constants::FileSize::Binary::ONE_TEBIBYTE)
+      {
+         return std::make_pair<double, std::wstring>(
+            sizeInBytes / Constants::FileSize::Binary::ONE_GIBIBYTE, L" GiB");
+      }
+
+      return std::make_pair<double, std::wstring>(
+         sizeInBytes / Constants::FileSize::Binary::ONE_TEBIBYTE, L" TiB");
+   }
+
+   /**
+    * @note The input is implicitly converted to a `double` so that we don't end up performing
+    * integer division.
+    */
+   std::pair<double, std::wstring> ConvertToDecimalPrefix(double sizeInBytes)
+   {
+      if (sizeInBytes < Constants::FileSize::Decimal::ONE_KILOBYTE)
+      {
+         return std::make_pair<double, std::wstring>(std::move(sizeInBytes), BYTES_READOUT_STRING);
+      }
+
+      if (sizeInBytes < Constants::FileSize::Decimal::ONE_MEGABYTE)
+      {
+         return std::make_pair<double, std::wstring>(
+            sizeInBytes / Constants::FileSize::Decimal::ONE_KILOBYTE, L" KB");
+      }
+
+      if (sizeInBytes < Constants::FileSize::Decimal::ONE_GIGABYTE)
+      {
+         return std::make_pair<double, std::wstring>(
+            sizeInBytes / Constants::FileSize::Decimal::ONE_MEGABYTE, L" MB");
+      }
+
+      if (sizeInBytes < Constants::FileSize::Decimal::ONE_TERABYTE)
+      {
+         return std::make_pair<double, std::wstring>(
+            sizeInBytes / Constants::FileSize::Decimal::ONE_GIGABYTE, L" GB");
+      }
+
+      return std::make_pair<double, std::wstring>(
+         sizeInBytes / Constants::FileSize::Decimal::ONE_TERABYTE, L" TB");
+   }
 }
 
 bool Controller::HasVisualizationBeenLoaded() const
@@ -392,33 +458,19 @@ void Controller::SearchTreeMap(
 }
 
 std::pair<double, std::wstring> Controller::ConvertFileSizeToAppropriateUnits(
-   double sizeInBytes)
+   std::uintmax_t sizeInBytes)
 {
-   if (sizeInBytes < Constants::FileSize::ONE_KIBIBYTE)
+   switch (ActivePrefix)
    {
-      return std::make_pair<double, std::wstring>(std::move(sizeInBytes), BYTES_READOUT_STRING);
+      case Constants::FileSize::Prefix::BINARY:
+         return ConvertToBinaryPrefix(sizeInBytes);
+      case Constants::FileSize::Prefix::DECIMAL:
+         return ConvertToDecimalPrefix(sizeInBytes);
+      default:
+         assert(false);
    }
 
-   if (sizeInBytes < Constants::FileSize::ONE_MEBIBYTE)
-   {
-      return std::make_pair<double, std::wstring>(
-         sizeInBytes / Constants::FileSize::ONE_KIBIBYTE, L" KiB");
-   }
-
-   if (sizeInBytes < Constants::FileSize::ONE_GIBIBYTE)
-   {
-      return std::make_pair<double, std::wstring>(
-         sizeInBytes / Constants::FileSize::ONE_MEBIBYTE, L" MiB");
-   }
-
-   if (sizeInBytes < Constants::FileSize::ONE_TEBIBYTE)
-   {
-      return std::make_pair<double, std::wstring>(
-         sizeInBytes / Constants::FileSize::ONE_GIBIBYTE, L" GiB");
-   }
-
-   return std::make_pair<double, std::wstring>(
-      sizeInBytes / Constants::FileSize::ONE_TEBIBYTE, L" TiB");
+   return std::make_pair<double, std::wstring>( 0, L"Whoops" );
 }
 
 std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node)
