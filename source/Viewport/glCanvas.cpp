@@ -88,28 +88,29 @@ GLCanvas::GLCanvas(
    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
    setFormat(format);
 
-   m_frameRedrawTimer = std::make_unique<QTimer>(this);
-   connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
-   m_frameRedrawTimer->start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
+   connect(&m_frameRedrawTimer, SIGNAL(timeout()), this, SLOT(RunMainLoop()));
+   m_frameRedrawTimer.start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
+}
 
-   m_inputCaptureTimer = std::make_unique<QTimer>(this);
-   connect(m_inputCaptureTimer.get(), SIGNAL(timeout()), this, SLOT(HandleInput()));
-   m_inputCaptureTimer->start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
+void GLCanvas::RunMainLoop()
+{
+  HandleUserInput();
+  update();
 }
 
 void GLCanvas::initializeGL()
 {
-   m_graphicsDevice = std::make_unique<GraphicsDevice>();
+   m_graphicsDevice.initializeOpenGLFunctions();
 
-   m_graphicsDevice->glEnable(GL_DEPTH_TEST);
-   m_graphicsDevice->glEnable(GL_CULL_FACE);
-   m_graphicsDevice->glEnable(GL_MULTISAMPLE);
-   m_graphicsDevice->glEnable(GL_LINE_SMOOTH);
+   m_graphicsDevice.glEnable(GL_DEPTH_TEST);
+   m_graphicsDevice.glEnable(GL_CULL_FACE);
+   m_graphicsDevice.glEnable(GL_MULTISAMPLE);
+   m_graphicsDevice.glEnable(GL_LINE_SMOOTH);
 
-   m_sceneAssets.emplace_back(std::make_unique<GridAsset>(*m_graphicsDevice));
-   m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(*m_graphicsDevice));
-   m_sceneAssets.emplace_back(std::make_unique<CrosshairAsset>(*m_graphicsDevice));
-   m_sceneAssets.emplace_back(std::make_unique<LightMarkerAsset>(*m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<GridAsset>(m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<CrosshairAsset>(m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<LightMarkerAsset>(m_graphicsDevice));
 
    auto* const lightMarkers = static_cast<LightMarkerAsset*>(m_sceneAssets[LIGHT_MARKERS].get());
    InitializeLightMarkers(m_lights, *lightMarkers);
@@ -128,7 +129,7 @@ void GLCanvas::resizeGL(int width, int height)
       height = 1;
    }
 
-   m_graphicsDevice->glViewport(0, 0, width, height);
+   m_graphicsDevice.glViewport(0, 0, width, height);
 
    m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
 }
@@ -429,7 +430,7 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
    menu.exec(globalPoint);
 }
 
-void GLCanvas::HandleInput()
+void GLCanvas::HandleUserInput()
 {
    assert(m_optionsManager);
 
@@ -486,11 +487,20 @@ void GLCanvas::HandleGamepadInput(const std::chrono::milliseconds& elapsedTime)
       return;
    }
 
+   const auto& gamepad = m_mainWindow.GetGamepad();
+
+   HandleGamepadKeyInput(gamepad, elapsedTime);
+   HandleGamepadThumbstickInput(gamepad);
+   HandleGamepadTriggerInput(gamepad);
+}
+
+void GLCanvas::HandleGamepadKeyInput(
+   const Gamepad& gamepad,
+   const std::chrono::milliseconds& elapsedTime)
+{
    const auto millisecondsElapsed = elapsedTime.count();
    const auto cameraSpeed =
       m_optionsManager->m_cameraMovementSpeed / Constants::Input::MOVEMENT_AMPLIFICATION;
-
-   const auto& gamepad = m_mainWindow.GetGamepad();
 
    if (gamepad.buttonUp())
    {
@@ -521,9 +531,6 @@ void GLCanvas::HandleGamepadInput(const std::chrono::milliseconds& elapsedTime)
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Up());
    }
-
-   HandleGamepadThumbstickInput(gamepad);
-   HandleGamepadTriggerInput(gamepad);
 }
 
 void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
@@ -644,7 +651,7 @@ void GLCanvas::paintGL()
    const auto elapsedTime = Stopwatch<std::chrono::microseconds>(
       [&] () noexcept
    {
-      m_graphicsDevice->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       assert(m_optionsManager);
       if (m_optionsManager->m_isLightAttachedToCamera)

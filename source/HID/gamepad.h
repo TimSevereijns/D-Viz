@@ -7,10 +7,8 @@
 
 /**
  * @brief The CustomGamepad class
- *
- * @todo Add taring and deadzone support; this functionality seems to be missing from the Qt lib.
  */
-class Gamepad : public QGamepad
+class Gamepad final : public QGamepad
 {
    public:
 

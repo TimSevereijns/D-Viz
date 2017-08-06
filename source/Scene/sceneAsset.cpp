@@ -3,7 +3,7 @@
 #include <iostream>
 #include <utility>
 
-SceneAsset::SceneAsset(GraphicsDevice& device) :
+SceneAsset::SceneAsset(QOpenGLExtraFunctions& device) :
    m_graphicsDevice{ device }
 {
 }

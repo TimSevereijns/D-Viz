@@ -3,13 +3,11 @@
 
 #include "lineAsset.h"
 
-#include <QPoint>
-
-class CrosshairAsset: public LineAsset
+class CrosshairAsset final : public LineAsset
 {
    public:
 
-      CrosshairAsset(GraphicsDevice& device);
+      CrosshairAsset(QOpenGLExtraFunctions& device);
 
       bool Render(
          const Camera& camera,

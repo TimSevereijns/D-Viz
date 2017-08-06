@@ -44,7 +44,7 @@ namespace
    }
 }
 
-CrosshairAsset::CrosshairAsset(GraphicsDevice& device) :
+CrosshairAsset::CrosshairAsset(QOpenGLExtraFunctions& device) :
    LineAsset{ device }
 {
    m_rawColors = CreateCrosshairColors();

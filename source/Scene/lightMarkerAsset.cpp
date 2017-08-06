@@ -1,6 +1,6 @@
 #include "lightMarkerAsset.h"
 
-LightMarkerAsset::LightMarkerAsset(GraphicsDevice& device) :
+LightMarkerAsset::LightMarkerAsset(QOpenGLExtraFunctions& device) :
    LineAsset{ device }
 {
 }

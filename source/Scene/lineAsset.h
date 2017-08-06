@@ -10,7 +10,7 @@ class LineAsset : public SceneAsset
 {
    public:
 
-      explicit LineAsset(GraphicsDevice& device);
+      explicit LineAsset(QOpenGLExtraFunctions& device);
 
       bool LoadShaders() override;
 

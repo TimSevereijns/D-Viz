@@ -6,11 +6,11 @@
 /**
  * @brief Simple marker to highlight the position of the lights.
  */
-class LightMarkerAsset : public LineAsset
+class LightMarkerAsset final : public LineAsset
 {
    public:
 
-      explicit LightMarkerAsset(GraphicsDevice& device);
+      explicit LightMarkerAsset(QOpenGLExtraFunctions& device);
 
       bool Render(
          const Camera& camera,

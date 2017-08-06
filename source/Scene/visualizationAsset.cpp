@@ -86,7 +86,7 @@ namespace
    }
 }
 
-VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
+VisualizationAsset::VisualizationAsset(QOpenGLExtraFunctions& device) :
    SceneAsset{ device }
 {
 }

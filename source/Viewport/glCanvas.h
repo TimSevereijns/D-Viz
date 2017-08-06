@@ -8,7 +8,6 @@
 #include "HID/keyboardManager.h"
 #include "optionsManager.h"
 #include "Scene/sceneAsset.h"
-#include "Viewport/graphicsDevice.h"
 #include "Visualizations/visualization.h"
 #include "Windows/mainWindow.h"
 
@@ -97,11 +96,16 @@ class GLCanvas final : public QOpenGLWidget
    private slots:
 
       /**
-       * @brief Handles keyboard, mouse, and gamepad input.
+       * @brief Handles keyboard, mouse, and gamepad input, and also updates the OpenGL canvas.
        */
-      void HandleInput();
+      void RunMainLoop();
 
    private:
+
+      /**
+       * @brief Handle Input
+       */
+      void HandleUserInput();
 
       /**
        * @brief Records the elapsed frame time.
@@ -131,6 +135,16 @@ class GLCanvas final : public QOpenGLWidget
        * @param[in] elapsedTime
        */
       void HandleGamepadInput(const std::chrono::milliseconds& elapsedTime);
+
+      /**
+       * @brief HandleGamepadKeyInput
+       *
+       * @param gamepad
+       * @param elapsedTime
+       */
+      void HandleGamepadKeyInput(
+         const Gamepad& gamepad,
+         const std::chrono::milliseconds& elapsedTime);
 
       /**
        * @brief Handles left and right trigger input.
@@ -173,22 +187,18 @@ class GLCanvas final : public QOpenGLWidget
 
       bool m_isPaintingSuspended{ false };
       bool m_isVisualizationLoaded{ false };
-
       bool m_isLeftTriggerDown{ false };
       bool m_isRightTriggerDown{ false };
-
       bool m_isLeftMouseButtonDown{ false };
-
       bool m_isCursorHidden{ false };
 
       Controller& m_controller;
 
       MainWindow& m_mainWindow;
 
-      std::unique_ptr<GraphicsDevice> m_graphicsDevice{ nullptr };
+      QOpenGLExtraFunctions m_graphicsDevice;
 
-      std::unique_ptr<QTimer> m_frameRedrawTimer{ nullptr };
-      std::unique_ptr<QTimer> m_inputCaptureTimer{ nullptr };
+      QTimer m_frameRedrawTimer{ nullptr };
 
       std::chrono::system_clock::time_point m_lastFrameDrawTime
       {

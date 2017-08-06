@@ -1,6 +1,6 @@
 #include "debuggingRayAsset.h"
 
-DebuggingRayAsset::DebuggingRayAsset(GraphicsDevice& device) :
+DebuggingRayAsset::DebuggingRayAsset(QOpenGLExtraFunctions& device) :
    LineAsset{ device }
 {
 }

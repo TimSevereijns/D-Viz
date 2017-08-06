@@ -5,10 +5,10 @@
 
 #include "../Utilities/colorGradient.hpp"
 
-#include <QOpenGLTexture>
-
 struct VizFile;
-template<typename DataType> class TreeNode;
+
+template<typename DataType>
+class TreeNode;
 
 /**
  * @brief The VisualizationAsset class implements the functionality needed to represent the
@@ -18,7 +18,7 @@ class VisualizationAsset final : public SceneAsset
 {
    public:
 
-      VisualizationAsset(GraphicsDevice& device);
+      VisualizationAsset(QOpenGLExtraFunctions& device);
 
       bool LoadShaders() override;
 

@@ -3,11 +3,11 @@
 
 #include "lineAsset.h"
 
-class DebuggingRayAsset : public LineAsset
+class DebuggingRayAsset final : public LineAsset
 {
    public:
 
-      DebuggingRayAsset(GraphicsDevice& device);
+      DebuggingRayAsset(QOpenGLExtraFunctions& device);
 
       bool Render(
          const Camera& camera,

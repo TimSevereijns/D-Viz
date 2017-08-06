@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += 3drender-private gui opengl gamepad
+QT += 3drender-private gui opengl gamepad
 
 greaterThan(QT_MAJOR_VERSION, 5): QT += widgets 3dcore
 
@@ -13,9 +13,9 @@ TEMPLATE = app
 CONFIG += c++1z
 
 # Generate PDBs for Release builds:
-win32:QMAKE_LFLAGS_RELEASE+=/MAP
+win32:QMAKE_LFLAGS_RELEASE += /MAP
 win32:QMAKE_CFLAGS_RELEASE += /Zi
-win32:QMAKE_LFLAGS_RELEASE +=/debug /opt:ref
+win32:QMAKE_LFLAGS_RELEASE += /debug /opt:ref
 
 # Bump up the warning level to W4:
 QMAKE_CFLAGS_WARN_ON -= -W3
@@ -45,7 +45,6 @@ SOURCES += \
    Viewport/camera.cpp \
    Viewport/canvasContextMenu.cpp \
    Viewport/glCanvas.cpp \
-   Viewport/graphicsDevice.cpp \
    Visualizations/squarifiedTreemap.cpp \
    Visualizations/visualization.cpp \
    Windows/aboutDialog.cpp \
@@ -83,7 +82,6 @@ HEADERS  += \
    Viewport/camera.h \
    Viewport/canvasContextMenu.h \
    Viewport/glCanvas.h \
-   Viewport/graphicsDevice.h \
    Visualizations/squarifiedTreemap.h \
    Visualizations/visualization.h \
    Windows/aboutDialog.h \

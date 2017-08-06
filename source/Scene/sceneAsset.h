@@ -4,15 +4,17 @@
 #include "../DataStructs/light.h"
 #include "../optionsManager.h"
 #include "../Viewport/camera.h"
-#include "../Viewport/graphicsDevice.h"
 #include "../Visualizations/visualization.h"
 
 #include <QOpenGLBuffer>
+#include <QOpenGLExtraFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 
 struct VizFile;
-template<typename DataType> class TreeNode;
+
+template<typename DataType>
+class TreeNode;
 
 /**
  * @brief The SceneAsset class is an abstract base class that can be used to simplify the management
@@ -28,16 +30,8 @@ class SceneAsset
          DESELECT
       };
 
-      /**
-       * @brief Constructor
-       *
-       * @param[in] device          @see GraphicsDevice
-       */
-      explicit SceneAsset(GraphicsDevice& device);
+      explicit SceneAsset(QOpenGLExtraFunctions& device);
 
-      /**
-       * @brief Destructor.
-       */
       virtual ~SceneAsset();
 
       /**
@@ -158,7 +152,7 @@ class SceneAsset
       QVector<QVector3D> m_rawVertices;
       QVector<QVector3D> m_rawColors;
 
-      GraphicsDevice& m_graphicsDevice;
+      QOpenGLExtraFunctions& m_graphicsDevice;
 };
 
 #endif // SCENEASSET_H

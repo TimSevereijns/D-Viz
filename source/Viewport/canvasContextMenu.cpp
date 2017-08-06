@@ -2,14 +2,13 @@
 
 #include <assert.h>
 
-CanvasContextMenu::CanvasContextMenu(KeyboardManager& keyboardManager)
-   : m_keyboardManager{ keyboardManager }
+CanvasContextMenu::CanvasContextMenu(KeyboardManager& keyboardManager) :
+   m_keyboardManager{ keyboardManager }
 {
 }
 
 void CanvasContextMenu::keyReleaseEvent(QKeyEvent* event)
 {
-   assert(event);
    if (!event)
    {
       return;
