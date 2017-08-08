@@ -115,7 +115,6 @@ void Controller::GenerateNewVisualization()
 
    if (!HasVisualizationBeenLoaded() || m_visualizationParameters.forceNewScan)
    {
-      //m_treeMap.reset(new SquarifiedTreeMap{ m_visualizationParameters });
       m_treeMap = std::make_unique<SquarifiedTreeMap>(m_visualizationParameters);
       m_mainWindow->ScanDrive(m_visualizationParameters);
    }
@@ -226,6 +225,7 @@ void Controller::SelectNodeViaRay(
    }
    else
    {
+      // @todo Walking the entire tree isn't exactly efficient; consider improvement...
       // @todo Walking the entire tree isn't exactly efficient; find a better way...
       const auto nodeCount = std::count_if(
          Tree<VizFile>::LeafIterator{ m_treeMap->GetTree().GetRoot() },
@@ -499,9 +499,4 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node
 
    assert(completePath.size() > 0);
    return completePath + node->file.extension;
-}
-
-void Controller::ShowInFileExplorer(const Tree<VizFile>::Node& node)
-{
-   OperatingSystemSpecific::LaunchFileExplorer(node);
 }

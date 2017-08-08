@@ -6,6 +6,7 @@
 #include "Utilities/scopeExit.hpp"
 #include "Viewport/glCanvas.h"
 
+#include <boost/algorithm/string.hpp>
 #include <spdlog/spdlog.h>
 
 #include <cassert>
@@ -20,20 +21,35 @@
 
 Constants::FileSize::Prefix ActivePrefix = Constants::FileSize::Prefix::BINARY;
 
+namespace
+{
+   /**
+    * @returns True if the path is equal to the drive root.
+    */
+   auto DoesPathRepresentEntireDrive(const std::experimental::filesystem::path& path)
+   {
+      if (path.empty())
+      {
+         return false;
+      }
+
+      return boost::algorithm::ends_with(path.native().c_str(),
+         L":" + std::wstring{ OperatingSystemSpecific::PREFERRED_SLASH });
+   }
+}
+
 MainWindow::MainWindow(
    Controller& controller,
    QWidget* parent /* = nullptr */)
    :
    QMainWindow{ parent },
    m_controller{ controller },
-   m_optionsManager{ std::make_shared<OptionsManager>() },
-   m_ui{ std::make_unique<Ui::MainWindow>() }
+   m_optionsManager{ std::make_shared<OptionsManager>() }
 {
-   assert(m_ui);
-   m_ui->setupUi(this);
+   m_ui.setupUi(this);
 
    m_glCanvas = std::make_unique<GLCanvas>(controller, this);
-   m_ui->canvasLayout->addWidget(m_glCanvas.get());
+   m_ui.canvasLayout->addWidget(m_glCanvas.get());
 
    SetupMenus();
    SetupGamepad();
@@ -44,22 +60,22 @@ void MainWindow::SetupSidebar()
 {
    SetupFileSizePruningDropdown();
 
-   connect(m_ui->directoriesOnlyCheckBox, &QCheckBox::stateChanged, this, [&] (int state)
+   connect(m_ui.directoriesOnlyCheckBox, &QCheckBox::stateChanged, this, [&] (int state)
    {
       m_showDirectoriesOnly = (state == Qt::Checked);
    });
 
-   connect(m_ui->directoryGradientCheckBox, &QCheckBox::stateChanged, this, [&] (int state)
+   connect(m_ui.directoryGradientCheckBox, &QCheckBox::stateChanged, this, [&] (int state)
    {
       m_useDirectoryGradient = (state == Qt::Checked);
    });
 
-   connect(m_ui->pruneTreeButton, &QPushButton::clicked, this, [&]
-   {
-      const auto pruneSizeIndex = m_ui->pruneSizeComboBox->currentIndex();
+   connect(m_ui.pruneTreeButton, &QPushButton::clicked, this, [&]
+   { // @todo Consider moving this logic onto the Controller...
+      const auto pruneSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
 
       VisualizationParameters parameters;
-      parameters.rootDirectory = m_directoryToVisualize;
+      parameters.rootDirectory = m_rootPath;
       parameters.onlyShowDirectories = m_showDirectoriesOnly;
       parameters.useDirectoryGradient = m_useDirectoryGradient;
       parameters.forceNewScan = false;
@@ -67,44 +83,44 @@ void MainWindow::SetupSidebar()
 
       m_controller.SetVisualizationParameters(parameters);
 
-      if (!m_directoryToVisualize.empty())
+      if (!m_rootPath.empty())
       {
          m_glCanvas->ReloadVisualization();
       }
    });
 
-   connect(m_ui->fieldOfViewSlider, &QSlider::valueChanged, this, [&] (int fieldOfView)
+   connect(m_ui.fieldOfViewSlider, &QSlider::valueChanged, this, [&] (int fieldOfView)
    {
       m_glCanvas->SetFieldOfView(static_cast<float>(fieldOfView));
    });
 
-   connect(m_ui->cameraSpeedSpinner,
+   connect(m_ui.cameraSpeedSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
       m_optionsManager.get(), &OptionsManager::OnCameraMovementSpeedChanged);
 
-   connect(m_ui->mouseSensitivitySpinner,
+   connect(m_ui.mouseSensitivitySpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
       m_optionsManager.get(), &OptionsManager::OnMouseSensitivityChanged);
 
-   connect(m_ui->ambientCoefficientSpinner,
+   connect(m_ui.ambientCoefficientSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
       m_optionsManager.get(), &OptionsManager::OnAmbientCoefficientChanged);
 
-   connect(m_ui->attenuationSpinner,
+   connect(m_ui.attenuationSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
       m_optionsManager.get(), &OptionsManager::OnAttenuationChanged);
 
-   connect(m_ui->shininesSpinner,
+   connect(m_ui.shininesSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
       m_optionsManager.get(), &OptionsManager::OnShininessChanged);
 
-   connect(m_ui->attachLightToCameraCheckBox,
+   connect(m_ui.attachLightToCameraCheckBox,
       static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
       m_optionsManager.get(), &OptionsManager::OnAttachLightToCameraStateChanged);
 
    const auto onNewSearchQuery = [&]
    {
-      const auto searchQuery = m_ui->searchBox->text().toStdWString();
+      const auto searchQuery = m_ui.searchBox->text().toStdWString();
 
       const auto deselectionCallback = [&] (auto& nodes)
       {
@@ -116,8 +132,8 @@ void MainWindow::SetupSidebar()
          m_glCanvas->HighlightNodes(nodes);
       };
 
-      const bool shouldSearchFiles = m_ui->searchFilesCheckBox->isChecked();
-      const bool shouldSearchDirectories = m_ui->searchDirectoriesCheckBox->isChecked();
+      const bool shouldSearchFiles = m_ui.searchFilesCheckBox->isChecked();
+      const bool shouldSearchDirectories = m_ui.searchDirectoriesCheckBox->isChecked();
 
       m_controller.SearchTreeMap(
          searchQuery,
@@ -127,17 +143,17 @@ void MainWindow::SetupSidebar()
          shouldSearchDirectories);
    };
 
-   connect(m_ui->searchBox, &QLineEdit::returnPressed, onNewSearchQuery);
+   connect(m_ui.searchBox, &QLineEdit::returnPressed, onNewSearchQuery);
 
-   connect(m_ui->searchButton, &QPushButton::clicked, onNewSearchQuery);
+   connect(m_ui.searchButton, &QPushButton::clicked, onNewSearchQuery);
 
-   connect(m_ui->searchDirectoriesCheckBox, &QCheckBox::stateChanged,
+   connect(m_ui.searchDirectoriesCheckBox, &QCheckBox::stateChanged,
       m_optionsManager.get(), &OptionsManager::OnShouldSearchDirectoriesChanged);
 
-   connect(m_ui->searchFilesCheckBox, &QCheckBox::stateChanged,
+   connect(m_ui.searchFilesCheckBox, &QCheckBox::stateChanged,
       m_optionsManager.get(), &OptionsManager::OnShouldSearchFilesChanged);
 
-   connect(m_ui->showBreakdownButton, &QPushButton::clicked, this, [&]
+   connect(m_ui.showBreakdownButton, &QPushButton::clicked, this, [&]
    {
       if (!m_breakdownDialog)
       {
@@ -150,12 +166,12 @@ void MainWindow::SetupSidebar()
 
 void MainWindow::SetupFileSizePruningDropdown()
 {
-   m_ui->pruneSizeComboBox->clear();
+   m_ui.pruneSizeComboBox->clear();
 
    std::for_each(std::begin(m_fileSizeOptions), std::end(m_fileSizeOptions),
       [&] (const auto& pair)
    {
-      m_ui->pruneSizeComboBox->addItem(pair.second, static_cast<qulonglong>(pair.first));
+      m_ui.pruneSizeComboBox->addItem(pair.second, static_cast<qulonglong>(pair.first));
    });
 
    statusBar()->clearMessage();
@@ -175,7 +191,7 @@ void MainWindow::SetupGamepad()
 
 std::wstring MainWindow::GetDirectoryToVisualize() const
 {
-   return m_directoryToVisualize;
+   return m_rootPath;
 }
 
 void MainWindow::SetupMenus()
@@ -285,12 +301,15 @@ void MainWindow::OnFileMenuNewScan()
       return;
    }
 
-   m_directoryToVisualize = selectedDirectory.toStdWString();
+   m_rootPath = selectedDirectory.toStdWString();
 
-   const auto fileSizeIndex = m_ui->pruneSizeComboBox->currentIndex();
+   const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
+   log->info(fmt::format("Started a new scan at: \"{}\"", m_rootPath.string()));
+
+   const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
 
    VisualizationParameters parameters;
-   parameters.rootDirectory = m_directoryToVisualize;
+   parameters.rootDirectory = m_rootPath;
    parameters.onlyShowDirectories = m_showDirectoriesOnly;
    parameters.forceNewScan = true;
    parameters.minimumFileSize = m_fileSizeOptions[fileSizeIndex].first;
@@ -388,28 +407,48 @@ void MainWindow::ComputeProgress(
 {
    assert(m_occupiedDiskSpace > 0);
 
-   // This clamps to percentage to just below 100%. Progress can report as being more than 100%
-   // due to an issue in the std::experimental::filesystem code, which causes it to report junctions
-   // as regular old directories (without ever triggering the is_symlink(...) check.
+   // @todo Performing this test on every iteration is bit silly:
+   if (DoesPathRepresentEntireDrive(m_rootPath))
+   {
+      // @todo Progress can report as being more than 100% due to an issue in the implementation of
+      // std::experimental::filesystem. This issue causes the API to report junctions as regular old
+      // directories instead of some type of link. This means that any junctions will be scanned and
+      // counted against the total.
 
-   //const auto percentComplete = std::min(99.99,
-   //   100 * (static_cast<double>(bytesProcessed) / static_cast<double>(m_occupiedDiskSpace)));
+      const auto percentComplete =
+         100 * (static_cast<double>(bytesProcessed) / static_cast<double>(m_occupiedDiskSpace));
 
-   const auto percentComplete =
-      100 * (static_cast<double>(bytesProcessed) / static_cast<double>(m_occupiedDiskSpace));
+      std::wstringstream message;
+      message.imbue(std::locale{ "" });
+      message.precision(2);
+      message
+         << std::fixed
+         << L"Files Scanned: "
+         << numberOfFilesScanned
+         << L"  |  "
+         << percentComplete
+         << L"% Complete";
 
-   std::wstringstream message;
-   message.imbue(std::locale{ "" });
-   message.precision(2);
-   message
-      << std::fixed
-      << L"Files Scanned: "
-      << numberOfFilesScanned
-      << L"  |  "
-      << percentComplete
-      << L"% Complete";
+      SetStatusBarMessage(message.str());
+   }
+   else
+   {
+      const auto sizeAndUnits = Controller::ConvertFileSizeToAppropriateUnits(bytesProcessed);
 
-   SetStatusBarMessage(message.str());
+      std::wstringstream message;
+      message.imbue(std::locale{ "" });
+      message.precision(2);
+      message
+         << std::fixed
+         << L"Files Scanned: " << numberOfFilesScanned
+         << L"  |  "
+         << sizeAndUnits.first
+         << L" "
+         << sizeAndUnits.second
+         << " and counting...";
+
+      SetStatusBarMessage(message.str());
+   }
 }
 
 void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
@@ -449,7 +488,7 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
       m_glCanvas->ReloadVisualization();
 
       m_controller.AllowUserInteractionWithModel(true);
-      m_ui->showBreakdownButton->setEnabled(true);
+      m_ui.showBreakdownButton->setEnabled(true);
    };
 
    const DriveScanningParameters scanningParameters
@@ -460,7 +499,7 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
    };
 
    m_controller.AllowUserInteractionWithModel(false);
-   m_ui->showBreakdownButton->setEnabled(false);
+   m_ui.showBreakdownButton->setEnabled(false);
 
    m_scanner.StartScanning(scanningParameters);
 }
@@ -501,12 +540,12 @@ void MainWindow::AskUserToLimitFileSize(
 
 void MainWindow::SetFieldOfViewSlider(int fieldOfView)
 {
-   m_ui->fieldOfViewSlider->setValue(fieldOfView);
+   m_ui.fieldOfViewSlider->setValue(fieldOfView);
 }
 
 void MainWindow::SetCameraSpeedSpinner(double speed)
 {
-   m_ui->cameraSpeedSpinner->setValue(speed);
+   m_ui.cameraSpeedSpinner->setValue(speed);
 }
 
 void MainWindow::SetFilePruningComboBoxValue(std::uintmax_t minimum)
@@ -524,12 +563,12 @@ void MainWindow::SetFilePruningComboBoxValue(std::uintmax_t minimum)
       return;
    }
 
-   const int targetIndex = m_ui->pruneSizeComboBox->findData(
+   const int targetIndex = m_ui.pruneSizeComboBox->findData(
       static_cast<qulonglong>(match->first));
 
    if (targetIndex != -1)
    {
-      m_ui->pruneSizeComboBox->setCurrentIndex(targetIndex);
+      m_ui.pruneSizeComboBox->setCurrentIndex(targetIndex);
    }
 }
 

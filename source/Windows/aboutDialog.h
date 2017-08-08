@@ -3,8 +3,6 @@
 
 #include <QDialog>
 
-#include <memory>
-
 #include "ui_aboutDialog.h"
 
 class AboutDialog final : public QDialog
@@ -17,7 +15,7 @@ class AboutDialog final : public QDialog
 
    private:
 
-      std::unique_ptr<Ui::AboutDialog> m_ui;
+      Ui::AboutDialog m_ui;
 };
 
 #endif // ABOUTDIALOG_H

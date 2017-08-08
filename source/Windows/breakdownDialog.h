@@ -7,7 +7,6 @@
 #include "scanBreakdownModel.h"
 
 #include <functional>
-#include <memory>
 
 #include "ui_breakdownDialog.h"
 
@@ -59,7 +58,7 @@ class BreakdownDialog final : public QDialog
 
       void AdjustColumnWidthsToFitViewport();
 
-      std::unique_ptr<Ui::breakdownDialog> m_ui;
+      Ui::breakdownDialog m_ui;
 
       ScanBreakdownModel m_model;
       ScanBreakdownFilterProxyModel m_proxyModel;

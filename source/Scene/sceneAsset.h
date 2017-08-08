@@ -24,7 +24,7 @@ class SceneAsset
 {
    public:
 
-      enum class UpdateAction
+      enum struct UpdateAction : short
       {
          SELECT = 0,
          DESELECT

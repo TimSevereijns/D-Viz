@@ -9,6 +9,7 @@
 #include "Scene/lightMarkerAsset.h"
 #include "Scene/visualizationAsset.h"
 #include "Stopwatch/Stopwatch.hpp"
+#include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Visualizations/squarifiedTreemap.h"
 
@@ -421,9 +422,19 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
    }
 
    menu.addSeparator();
+
+   menu.addAction("Isolate File Type", [&]
+   {
+      constexpr auto clearSelected{ true };
+      m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
+      // @todo Relaad the visualization with updated parameters.
+   });
+
+   menu.addSeparator();
+
    menu.addAction("Show in Explorer", [&]
    {
-      Controller::ShowInFileExplorer(*selectedNode);
+      OperatingSystemSpecific::LaunchFileExplorer(*selectedNode);
    });
 
    const QPoint globalPoint = mapToGlobal(point);

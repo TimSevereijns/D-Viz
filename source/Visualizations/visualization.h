@@ -25,6 +25,8 @@ struct VisualizationParameters
 
    std::uint64_t minimumFileSize{ 0 }; ///< The minimum size a file should be before it shows up.
 
+   boost::optional<std::wstring> isolatedExtension{ }; ///< Only show files matching this type.
+
    bool forceNewScan{ true };          ///< Whether a new scan should take place.
    bool onlyShowDirectories{ false };  ///< Whether only directories should be shown.
    bool useDirectoryGradient{ false }; ///< Whether to use gradient coloring for the directories.

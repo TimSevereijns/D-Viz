@@ -210,18 +210,19 @@ class MainWindow final : public QMainWindow
          QAction aboutDialog{ nullptr };
       } m_helpMenuWrapper;
 
+      Ui::MainWindow m_ui{ };
+
       std::unique_ptr<GLCanvas> m_glCanvas{ nullptr };
 
       std::unique_ptr<AboutDialog> m_aboutDialog{ nullptr };
 
       std::unique_ptr<BreakdownDialog> m_breakdownDialog{ nullptr };
 
-      std::unique_ptr<Ui::MainWindow> m_ui{ nullptr };
-
       std::shared_ptr<OptionsManager> m_optionsManager{ nullptr };
 
       std::wstring m_searchQuery{ };
-      std::wstring m_directoryToVisualize{ };
+
+      std::experimental::filesystem::path m_rootPath{ };
 
       std::vector<std::pair<std::uintmax_t, QString>> m_binaryFileSizeOptions
       {
@@ -250,6 +251,12 @@ class MainWindow final : public QMainWindow
          { Constants::FileSize::Decimal::ONE_GIGABYTE * 5,   "< 5 GB"   },
          { Constants::FileSize::Decimal::ONE_GIGABYTE * 10,  "< 10 GB"  }
       };
+
+      static_assert(
+         std::is_same_v<
+            decltype(m_binaryFileSizeOptions),
+            decltype(m_decimalFileSizeOptions)>,
+         "The underlying types of the pruning options must be identical!");
 
       decltype(m_binaryFileSizeOptions)& m_fileSizeOptions{ m_binaryFileSizeOptions };
 };

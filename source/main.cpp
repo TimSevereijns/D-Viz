@@ -17,7 +17,9 @@ int main(int argc, char* argv[])
    spdlog::basic_logger_mt(Constants::Logging::LOG_NAME, "./log.txt");
 #endif
 
-   spdlog::get(Constants::Logging::LOG_NAME)->info("Starting D-Viz...");
+   const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
+   log->info("--------------------------------");
+   log->info("Starting D-Viz...");
 
    qRegisterMetaType<std::uintmax_t>("std::uintmax_t");
    qRegisterMetaType<std::shared_ptr<Tree<VizFile>>>("std::shared_ptr<Tree<VizFile>>");

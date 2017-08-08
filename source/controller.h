@@ -196,13 +196,6 @@ class Controller
       static std::wstring ResolveCompleteFilePath(const Tree<VizFile>::Node& node);
 
       /**
-       * @brief Opens the selected file in Windows File Explorer.
-       *
-       * @param[in] node            The node that represents the file to open.
-       */
-      static void ShowInFileExplorer(const Tree<VizFile>::Node& node);
-
-      /**
        * @brief Prints selection details to the main window's status bar.
        */
       void PrintSelectionDetailsToStatusBar();
