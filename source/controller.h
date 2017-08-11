@@ -11,6 +11,8 @@
 
 #include <QVector3D>
 
+struct ScanningProgress;
+
 class MainWindow;
 class GLCanvas;
 
@@ -168,11 +170,9 @@ class Controller
          const std::function<void (const Tree<VizFile>::Node* const)>& selectionCallback);
 
       /**
-       * @brief Helper function to set the specifed vertex and block count in the bottom status bar.
-       *
-       * @param[in] nodeCount       The number of nodes that are currently selected or highlighted.
+       * @brief Helper function to print visualization metadata to the bottom status bar.
        */
-      void PrintMetadataToStatusBar(std::uint32_t nodeCount);
+      void PrintMetadataToStatusBar();
 
       /**
        * @brief Converts the given size of the file from bytes to the most human readable units.
@@ -212,6 +212,13 @@ class Controller
        */
       bool IsUserAllowedToInteractWithModel() const;
 
+      /**
+       * @brief Saves the results of the scan.
+       *
+       * @param[in] progress        @see ScanningProgress
+       */
+      void SaveScanResults(const ScanningProgress& progress);
+
    private:
 
       template<typename NodeSelectorType>
@@ -230,6 +237,11 @@ class Controller
       std::vector<const Tree<VizFile>::Node*> m_highlightedNodes;
 
       VisualizationParameters m_visualizationParameters;
+
+      // @todo Move these onto the VizualizationModel class:
+      std::uintmax_t m_filesInCurrentVisualization{ 0 };
+      std::uintmax_t m_directoriesInCurrentVisualization{ 0 };
+      std::uintmax_t m_totalBytesInCurrentVisualization{ 0 };
 };
 
 #endif // CONTROLLER_H

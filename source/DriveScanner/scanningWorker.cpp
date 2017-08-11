@@ -148,7 +148,7 @@ namespace
     *
     * @param[in] path               The initial enty path at which to start the scan.
     *
-    * @returns A pair of vectors containing partitioned, scannable files. The first element in the
+    * @returns A pair of vectors containing scannable files. The first element in the
     * pair contains the directories, and the second element contains the regular files.
     */
    std::pair<std::vector<NodeAndPath>, std::vector<NodeAndPath>>
@@ -294,7 +294,7 @@ void ScanningWorker::ProcessFile(
       return;
    }
 
-   m_progress.numberOfBytesProcessed.fetch_add(fileSize);
+   m_progress.bytesProcessed.fetch_add(fileSize);
 
    const FileInfo fileInfo
    {
@@ -358,7 +358,7 @@ void ScanningWorker::ProcessDirectory(
 
       treeNode.AppendChild(VizFile{ directoryInfo });
 
-      m_progress.filesScanned.fetch_add(1);
+      m_progress.directoriesScanned.fetch_add(1);
 
       auto itr = std::experimental::filesystem::directory_iterator{ path };
       IterateOverDirectoryAndScan(itr, *treeNode.GetLastChild());
@@ -444,7 +444,7 @@ void ScanningWorker::Start()
          std::thread::hardware_concurrency(),
          Constants::Concurrency::THREAD_LIMIT);
 
-      for (unsigned int i{ 0 }; i < numberOfThreads; ++i)
+      for (auto i{ 0u }; i < numberOfThreads; ++i)
       {
          scanningThreads.emplace_back([&] () noexcept { ProcessQueue(taskQueue, resultQueue); });
       }

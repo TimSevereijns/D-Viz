@@ -1,6 +1,7 @@
 #include "mainWindow.h"
 
 #include "constants.h"
+#include "DataStructs/scanningProgress.hpp"
 #include "optionsManager.h"
 #include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
@@ -23,18 +24,21 @@ Constants::FileSize::Prefix ActivePrefix = Constants::FileSize::Prefix::BINARY;
 
 namespace
 {
-   /**
-    * @returns True if the path is equal to the drive root.
-    */
-   auto DoesPathRepresentEntireDrive(const std::experimental::filesystem::path& path)
+   void LogScanCompletion(const ScanningProgress& progress)
    {
-      if (path.empty())
-      {
-         return false;
-      }
+      const auto filesScanned = progress.filesScanned.load();
+      const auto directoriesScanned = progress.directoriesScanned.load();
+      const auto bytesProcessed = progress.bytesProcessed.load();
 
-      return boost::algorithm::ends_with(path.native().c_str(),
-         L":" + std::wstring{ OperatingSystemSpecific::PREFERRED_SLASH });
+      const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
+
+      log->info(
+         fmt::format("Scanned: {} directories and {} files, representing {} bytes",
+         directoriesScanned,
+         filesScanned,
+         bytesProcessed));
+
+      log->flush();
    }
 }
 
@@ -328,6 +332,8 @@ void MainWindow::OnFPSReadoutToggled(bool isEnabled)
 
 void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
 {
+   // @todo emit a signal that the breakdown dialog can hook up to.
+
    m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(true);
    m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.blockSignals(true);
 
@@ -348,6 +354,8 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
 
 void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
 {
+   // @todo emit a signal that the breakdown dialog can hook up to.
+
    m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(true);
    m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.blockSignals(true);
 
@@ -401,14 +409,15 @@ void MainWindow::LaunchAboutDialog()
    m_aboutDialog->show();
 }
 
-void MainWindow::ComputeProgress(
-   const std::uintmax_t numberOfFilesScanned,
-   const std::uintmax_t bytesProcessed)
+void MainWindow::ComputeProgress(const ScanningProgress& progress)
 {
    assert(m_occupiedDiskSpace > 0);
 
-   // @todo Performing this test on every iteration is bit silly:
-   if (DoesPathRepresentEntireDrive(m_rootPath))
+   const auto filesScanned = progress.filesScanned.load();
+   const auto bytesProcessed = progress.bytesProcessed.load();
+
+   const auto doesPathRepresentEntireDrive{ m_rootPath.string() == m_rootPath.root_path() };
+   if (doesPathRepresentEntireDrive)
    {
       // @todo Progress can report as being more than 100% due to an issue in the implementation of
       // std::experimental::filesystem. This issue causes the API to report junctions as regular old
@@ -424,7 +433,7 @@ void MainWindow::ComputeProgress(
       message
          << std::fixed
          << L"Files Scanned: "
-         << numberOfFilesScanned
+         << filesScanned
          << L"  |  "
          << percentComplete
          << L"% Complete";
@@ -440,7 +449,7 @@ void MainWindow::ComputeProgress(
       message.precision(2);
       message
          << std::fixed
-         << L"Files Scanned: " << numberOfFilesScanned
+         << L"Files Scanned: " << filesScanned
          << L"  |  "
          << sizeAndUnits.first
          << L" "
@@ -455,23 +464,20 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
 {
    m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(vizParameters.rootDirectory);
 
-   const auto progressHandler =
-      [this] (const std::uintmax_t numberOfFilesScanned, const std::uintmax_t bytesProcessed)
+   const auto progressHandler = [this] (const ScanningProgress& progress)
    {
-      ComputeProgress(numberOfFilesScanned, bytesProcessed);
+      ComputeProgress(progress);
    };
 
-   const auto completionHandler = [&, vizParameters]
-      (const std::uintmax_t numberOfFilesScanned,
-      const std::uintmax_t bytesProcessed,
+   const auto completionHandler = [&, vizParameters] (
+      const ScanningProgress& progress,
       std::shared_ptr<Tree<VizFile>> scanningResults) mutable
    {
-      const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
-      log->info(fmt::format("Scanned: {} files, representing {} bytes",
-         numberOfFilesScanned, bytesProcessed));
-      log->flush();
+      ComputeProgress(progress);
 
-      ComputeProgress(numberOfFilesScanned, bytesProcessed);
+      LogScanCompletion(progress);
+
+      m_controller.SaveScanResults(progress);
 
       QCursor previousCursor = cursor();
       setCursor(Qt::WaitCursor);
@@ -479,7 +485,9 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
 
       QApplication::processEvents();
 
-      AskUserToLimitFileSize(numberOfFilesScanned, vizParameters);
+      const auto filesScanned = progress.filesScanned.load();
+      AskUserToLimitFileSize(filesScanned, vizParameters);
+
       m_controller.SetVisualizationParameters(vizParameters);
 
       m_controller.ParseResults(scanningResults);
@@ -505,7 +513,7 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
 }
 
 void MainWindow::AskUserToLimitFileSize(
-   const uintmax_t numberOfFilesScanned,
+   std::uintmax_t numberOfFilesScanned,
    VisualizationParameters& parameters)
 {
    assert(numberOfFilesScanned > 0);

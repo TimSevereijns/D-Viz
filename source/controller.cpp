@@ -225,30 +225,21 @@ void Controller::SelectNodeViaRay(
    }
    else
    {
-      // @todo Walking the entire tree isn't exactly efficient; consider improvement...
-      // @todo Walking the entire tree isn't exactly efficient; find a better way...
-      const auto nodeCount = std::count_if(
-         Tree<VizFile>::LeafIterator{ m_treeMap->GetTree().GetRoot() },
-         Tree<VizFile>::LeafIterator{ },
-         [] (Tree<VizFile>::const_reference /*node*/)
-      {
-         return true;
-      });
-
-      PrintMetadataToStatusBar(static_cast<uint32_t>(nodeCount));
+      PrintMetadataToStatusBar();
    }
 }
 
-void Controller::PrintMetadataToStatusBar(uint32_t nodeCount)
+void Controller::PrintMetadataToStatusBar()
 {
    std::wstringstream message;
-   message.imbue(std::locale(""));
+   message.imbue(std::locale{ "" });
    message
       << std::fixed
-      << nodeCount * Block::VERTICES_PER_BLOCK
-      << L" vertices, representing "
-      << nodeCount
-      << L" files.";
+      << L"Scanned "
+      << m_filesInCurrentVisualization
+      << L" files and "
+      << m_directoriesInCurrentVisualization
+      << L" directories.";
 
    m_mainWindow->SetStatusBarMessage(message.str());
 }
@@ -287,6 +278,13 @@ void Controller::AllowUserInteractionWithModel(bool allowInteraction)
 bool Controller::IsUserAllowedToInteractWithModel() const
 {
    return m_allowInteractionWithModel;
+}
+
+void Controller::SaveScanResults(const ScanningProgress& progress)
+{
+   m_filesInCurrentVisualization = progress.filesScanned.load();
+   m_directoriesInCurrentVisualization = progress.directoriesScanned.load();
+   m_totalBytesInCurrentVisualization = progress.bytesProcessed.load();
 }
 
 void Controller::ClearSelectedNode()
@@ -466,10 +464,9 @@ std::pair<double, std::wstring> Controller::ConvertFileSizeToAppropriateUnits(
          return ConvertToBinaryPrefix(sizeInBytes);
       case Constants::FileSize::Prefix::DECIMAL:
          return ConvertToDecimalPrefix(sizeInBytes);
-      default:
-         assert(false);
    }
 
+   assert(false);
    return std::make_pair<double, std::wstring>( 0, L"Whoops" );
 }
 

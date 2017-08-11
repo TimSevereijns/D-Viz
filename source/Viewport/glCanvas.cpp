@@ -152,7 +152,8 @@ void GLCanvas::ReloadVisualization()
    }
 
    assert(blockCount == vizAsset->GetBlockCount());
-   m_controller.PrintMetadataToStatusBar(blockCount);
+
+   m_controller.PrintMetadataToStatusBar();
 }
 
 void GLCanvas::SetFieldOfView(float fieldOfView)

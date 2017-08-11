@@ -8,20 +8,14 @@
 
 void DriveScanner::HandleProgressUpdates()
 {
-   const auto filesScanned = m_progress.filesScanned.load();
-   const auto numberOfBytesProcessed = m_progress.numberOfBytesProcessed.load();
-
-   m_parameters.onProgressUpdateCallback(filesScanned, numberOfBytesProcessed);
+   m_parameters.onProgressUpdateCallback(m_progress);
 }
 
 void DriveScanner::HandleCompletion(std::shared_ptr<Tree<VizFile>> fileTree)
 {
-   const auto filesScanned = m_progress.filesScanned.load();
-   const auto numberOfBytesProcessed = m_progress.numberOfBytesProcessed.load();
-
    m_progressUpdateTimer->stop();
 
-   m_parameters.onScanCompletedCallback(filesScanned, numberOfBytesProcessed, fileTree);
+   m_parameters.onScanCompletedCallback(m_progress, fileTree);
 }
 
 void DriveScanner::HandleMessageBox(const QString& message)

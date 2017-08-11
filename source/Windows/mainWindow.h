@@ -15,6 +15,8 @@
 
 #include "ui_mainWindow.h"
 
+struct ScanningProgress;
+
 class MainWindow final : public QMainWindow
 {
    Q_OBJECT
@@ -135,14 +137,12 @@ class MainWindow final : public QMainWindow
        * @param[in] parameters               @see VisualizationParameters
        */
       void AskUserToLimitFileSize(
-         const std::uintmax_t numberOfFilesScanned,
+         std::uintmax_t numberOfFilesScanned,
          VisualizationParameters& parameters);
 
       void SetFilePruningComboBoxValue(std::uintmax_t minimum);
 
-      void ComputeProgress(
-         const std::uintmax_t numberOfFilesScanned,
-         const std::uintmax_t bytesProcessed);
+      void ComputeProgress(const ScanningProgress& progress);
 
       void LaunchAboutDialog();
 
