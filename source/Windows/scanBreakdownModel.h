@@ -5,6 +5,7 @@
 
 #include "../controller.h"
 #include "../DataStructs/vizFile.h"
+#include "../Utilities/utilities.hpp"
 
 #include <Tree/Tree.hpp>
 
@@ -13,32 +14,6 @@
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
-
-namespace
-{
-   std::once_flag stringStreamSetupFlag;
-
-   template<
-      typename Type,
-      typename = std::enable_if<std::is_arithmetic<Type>::value>
-   >
-   static auto ConvertToFormattedSizeString(const Type& number)
-   {
-      static std::wstringstream stringStream;
-
-      std::call_once(stringStreamSetupFlag,
-         [&] () noexcept
-      {
-         stringStream.imbue(std::locale{ "" });
-      });
-
-      stringStream.str(std::wstring{ });
-      stringStream.clear();
-
-      stringStream << number;
-      return stringStream.str();
-   }
-}
 
 struct FileExtensionAndTotalSize
 {
@@ -55,7 +30,7 @@ struct FileExtensionAndTotalSize
        totalSize{ extensionAndSize.second }
     {
         const auto fileSize = Controller::ConvertFileSizeToAppropriateUnits(totalSize);
-        formattedSize = ConvertToFormattedSizeString(fileSize.first) + L" " + fileSize.second;
+        formattedSize = Utilities::FormatWithCommas(fileSize.first) + L" " + fileSize.second;
     }
 };
 

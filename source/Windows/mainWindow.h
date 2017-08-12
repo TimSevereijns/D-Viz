@@ -100,30 +100,27 @@ class MainWindow final : public QMainWindow
        */
       Gamepad& GetGamepad();
 
-   public slots:
+   private slots:
 
-      /**
-       * @brief OnFileMenuNewScan
-       */
       void OnFileMenuNewScan();
 
-      /**
-       * @brief OnFPSReadoutToggled
-       * @param isEnabled
-       */
       void OnFPSReadoutToggled(bool isEnabled);
 
-      /**
-       * @brief SwitchToBinaryPrefix
-       * @param useBinary
-       */
       void SwitchToBinaryPrefix(bool useBinary);
 
-      /**
-       * @brief SwitchToDecimalPrefix
-       * @param useDecimal
-       */
       void SwitchToDecimalPrefix(bool useDecimal);
+
+      void OnNewSearchQuery();
+
+      void PruneTree();
+
+      void OnFieldOfViewChange(int fieldOfView);
+
+      void OnDirectoryPruningChange(int state);
+
+      void OnGradientUseChange(int state);
+
+      void OnShowBreakdownButtonPressed();
 
    private:
 
@@ -258,7 +255,7 @@ class MainWindow final : public QMainWindow
             decltype(m_decimalFileSizeOptions)>,
          "The underlying types of the pruning options must be identical!");
 
-      decltype(m_binaryFileSizeOptions)& m_fileSizeOptions{ m_binaryFileSizeOptions };
+      decltype(m_binaryFileSizeOptions)* m_fileSizeOptions{ &m_binaryFileSizeOptions };
 };
 
 #endif // MAINWINDOW_H

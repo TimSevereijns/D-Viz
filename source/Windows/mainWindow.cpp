@@ -5,6 +5,7 @@
 #include "optionsManager.h"
 #include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
+#include "Utilities/utilities.hpp"
 #include "Viewport/glCanvas.h"
 
 #include <boost/algorithm/string.hpp>
@@ -64,39 +65,32 @@ void MainWindow::SetupSidebar()
 {
    SetupFileSizePruningDropdown();
 
-   connect(m_ui.directoriesOnlyCheckBox, &QCheckBox::stateChanged, this, [&] (int state)
-   {
-      m_showDirectoriesOnly = (state == Qt::Checked);
-   });
+   connect(m_ui.directoriesOnlyCheckBox, &QCheckBox::stateChanged,
+      this, &MainWindow::OnDirectoryPruningChange);
 
-   connect(m_ui.directoryGradientCheckBox, &QCheckBox::stateChanged, this, [&] (int state)
-   {
-      m_useDirectoryGradient = (state == Qt::Checked);
-   });
+   connect(m_ui.directoryGradientCheckBox, &QCheckBox::stateChanged,
+      this, &MainWindow::OnGradientUseChange);
 
-   connect(m_ui.pruneTreeButton, &QPushButton::clicked, this, [&]
-   { // @todo Consider moving this logic onto the Controller...
-      const auto pruneSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
+   connect(m_ui.pruneTreeButton, &QPushButton::clicked,
+      this, &MainWindow::PruneTree);
 
-      VisualizationParameters parameters;
-      parameters.rootDirectory = m_rootPath;
-      parameters.onlyShowDirectories = m_showDirectoriesOnly;
-      parameters.useDirectoryGradient = m_useDirectoryGradient;
-      parameters.forceNewScan = false;
-      parameters.minimumFileSize = m_fileSizeOptions[pruneSizeIndex].first;
+   connect(m_ui.fieldOfViewSlider, &QSlider::valueChanged,
+      this, &MainWindow::OnFieldOfViewChange);
 
-      m_controller.SetVisualizationParameters(parameters);
+   connect(m_ui.searchBox, &QLineEdit::returnPressed,
+      this, &MainWindow::OnNewSearchQuery);
 
-      if (!m_rootPath.empty())
-      {
-         m_glCanvas->ReloadVisualization();
-      }
-   });
+   connect(m_ui.searchButton, &QPushButton::clicked,
+      this, &MainWindow::OnNewSearchQuery);
 
-   connect(m_ui.fieldOfViewSlider, &QSlider::valueChanged, this, [&] (int fieldOfView)
-   {
-      m_glCanvas->SetFieldOfView(static_cast<float>(fieldOfView));
-   });
+   connect(m_ui.showBreakdownButton, &QPushButton::clicked,
+      this, &MainWindow::OnShowBreakdownButtonPressed);
+
+   connect(m_ui.searchDirectoriesCheckBox, &QCheckBox::stateChanged,
+      m_optionsManager.get(), &OptionsManager::OnShouldSearchDirectoriesChanged);
+
+   connect(m_ui.searchFilesCheckBox, &QCheckBox::stateChanged,
+      m_optionsManager.get(), &OptionsManager::OnShouldSearchFilesChanged);
 
    connect(m_ui.cameraSpeedSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
@@ -121,62 +115,22 @@ void MainWindow::SetupSidebar()
    connect(m_ui.attachLightToCameraCheckBox,
       static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
       m_optionsManager.get(), &OptionsManager::OnAttachLightToCameraStateChanged);
-
-   const auto onNewSearchQuery = [&]
-   {
-      const auto searchQuery = m_ui.searchBox->text().toStdWString();
-
-      const auto deselectionCallback = [&] (auto& nodes)
-      {
-         m_glCanvas->RestoreHighlightedNodes(nodes);
-      };
-
-      const auto selectionCallback = [&] (auto& nodes)
-      {
-         m_glCanvas->HighlightNodes(nodes);
-      };
-
-      const bool shouldSearchFiles = m_ui.searchFilesCheckBox->isChecked();
-      const bool shouldSearchDirectories = m_ui.searchDirectoriesCheckBox->isChecked();
-
-      m_controller.SearchTreeMap(
-         searchQuery,
-         deselectionCallback,
-         selectionCallback,
-         shouldSearchFiles,
-         shouldSearchDirectories);
-   };
-
-   connect(m_ui.searchBox, &QLineEdit::returnPressed, onNewSearchQuery);
-
-   connect(m_ui.searchButton, &QPushButton::clicked, onNewSearchQuery);
-
-   connect(m_ui.searchDirectoriesCheckBox, &QCheckBox::stateChanged,
-      m_optionsManager.get(), &OptionsManager::OnShouldSearchDirectoriesChanged);
-
-   connect(m_ui.searchFilesCheckBox, &QCheckBox::stateChanged,
-      m_optionsManager.get(), &OptionsManager::OnShouldSearchFilesChanged);
-
-   connect(m_ui.showBreakdownButton, &QPushButton::clicked, this, [&]
-   {
-      if (!m_breakdownDialog)
-      {
-         m_breakdownDialog = std::make_unique<BreakdownDialog>(this);
-      }
-
-      m_breakdownDialog->show();
-   });
 }
 
 void MainWindow::SetupFileSizePruningDropdown()
 {
+   const auto currentIndex = m_ui.pruneSizeComboBox->currentIndex();
+
    m_ui.pruneSizeComboBox->clear();
 
-   std::for_each(std::begin(m_fileSizeOptions), std::end(m_fileSizeOptions),
-      [&] (const auto& pair)
+   std::for_each(std::begin(*m_fileSizeOptions), std::end(*m_fileSizeOptions),
+      [&] (const auto& numberOfBytesAndUnits)
    {
-      m_ui.pruneSizeComboBox->addItem(pair.second, static_cast<qulonglong>(pair.first));
+      m_ui.pruneSizeComboBox->addItem(numberOfBytesAndUnits.second,
+         static_cast<qulonglong>(numberOfBytesAndUnits.first));
    });
+
+   m_ui.pruneSizeComboBox->setCurrentIndex(currentIndex == -1 ? 0 : currentIndex);
 
    statusBar()->clearMessage();
 }
@@ -212,14 +166,16 @@ void MainWindow::SetupFileMenu()
    m_fileMenuWrapper.newScan.setStatusTip("Start a new visualization.");
    m_fileMenuWrapper.newScan.setShortcuts(QKeySequence::New);
 
-   connect(&m_fileMenuWrapper.newScan, &QAction::triggered, this, &MainWindow::OnFileMenuNewScan);
+   connect(&m_fileMenuWrapper.newScan, &QAction::triggered,
+      this, &MainWindow::OnFileMenuNewScan);
 
    m_fileMenuWrapper.exit.setParent(this);
    m_fileMenuWrapper.exit.setText("Exit");
    m_fileMenuWrapper.exit.setStatusTip("Exit the program.");
    m_fileMenuWrapper.exit.setShortcuts(QKeySequence::Quit);
 
-   connect(&m_fileMenuWrapper.exit, &QAction::triggered, this, &MainWindow::close);
+   connect(&m_fileMenuWrapper.exit, &QAction::triggered,
+      this, &MainWindow::close);
 
    m_fileMenu.setTitle("File");
    m_fileMenu.addAction(&m_fileMenuWrapper.newScan);
@@ -235,8 +191,8 @@ void MainWindow::SetupOptionsMenu()
    m_optionsMenuWrapper.toggleFrameTime.setStatusTip("Toggle frame-time readout in titlebar.");
    m_optionsMenuWrapper.toggleFrameTime.setCheckable(true);
 
-   connect(&m_optionsMenuWrapper.toggleFrameTime, &QAction::toggled, this,
-      &MainWindow::OnFPSReadoutToggled);
+   connect(&m_optionsMenuWrapper.toggleFrameTime, &QAction::toggled,
+      this, &MainWindow::OnFPSReadoutToggled);
 
    m_optionsMenu.setTitle("Options");
    m_optionsMenu.addAction(&m_optionsMenuWrapper.toggleFrameTime);
@@ -257,8 +213,8 @@ void MainWindow::SetupFileSizeSubMenu()
    subMenuWrapper.binaryPrefix.setCheckable(true);
    subMenuWrapper.binaryPrefix.setChecked(true);
 
-   connect(&subMenuWrapper.binaryPrefix, &QAction::toggled, this,
-      &MainWindow::SwitchToBinaryPrefix);
+   connect(&subMenuWrapper.binaryPrefix, &QAction::toggled,
+      this, &MainWindow::SwitchToBinaryPrefix);
 
    subMenuWrapper.decimalPrefix.setParent(&m_optionsMenu);
    subMenuWrapper.decimalPrefix.setText("Decimal Prefix");
@@ -267,8 +223,8 @@ void MainWindow::SetupFileSizeSubMenu()
    subMenuWrapper.decimalPrefix.setCheckable(true);
    subMenuWrapper.decimalPrefix.setChecked(false);
 
-   connect(&subMenuWrapper.decimalPrefix, &QAction::toggled, this,
-      &MainWindow::SwitchToDecimalPrefix);
+   connect(&subMenuWrapper.decimalPrefix, &QAction::toggled,
+      this, &MainWindow::SwitchToDecimalPrefix);
 
    m_optionsMenuWrapper.fileSizeMenu.setTitle("File Size Units");
    m_optionsMenuWrapper.fileSizeMenu.addAction(&subMenuWrapper.binaryPrefix);
@@ -283,8 +239,8 @@ void MainWindow::SetupHelpMenu()
    m_helpMenuWrapper.aboutDialog.setText("About");
    m_helpMenuWrapper.aboutDialog.setStatusTip("About D-Viz");
 
-   connect(&m_helpMenuWrapper.aboutDialog, &QAction::triggered, this,
-      &MainWindow::LaunchAboutDialog);
+   connect(&m_helpMenuWrapper.aboutDialog, &QAction::triggered,
+      this, &MainWindow::LaunchAboutDialog);
 
    m_helpMenu.setTitle("Help");
    m_helpMenu.addAction(&m_helpMenuWrapper.aboutDialog);
@@ -316,7 +272,7 @@ void MainWindow::OnFileMenuNewScan()
    parameters.rootDirectory = m_rootPath;
    parameters.onlyShowDirectories = m_showDirectoriesOnly;
    parameters.forceNewScan = true;
-   parameters.minimumFileSize = m_fileSizeOptions[fileSizeIndex].first;
+   parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
    m_controller.SetVisualizationParameters(parameters);
    m_controller.GenerateNewVisualization();
@@ -348,8 +304,20 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
 
    ActivePrefix = Constants::FileSize::Prefix::BINARY;
 
-   m_fileSizeOptions = m_binaryFileSizeOptions;
+   m_fileSizeOptions = &m_binaryFileSizeOptions;
    SetupFileSizePruningDropdown();
+
+   const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
+   if (fileSizeIndex < 1)
+   {
+      return;
+   }
+
+   auto parameters = m_controller.GetVisualizationParameters();
+   parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
+   m_controller.SetVisualizationParameters(parameters);
+
+   m_glCanvas->ReloadVisualization();
 }
 
 void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
@@ -370,8 +338,89 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
 
    ActivePrefix = Constants::FileSize::Prefix::DECIMAL;
 
-   m_fileSizeOptions = m_decimalFileSizeOptions;
+   m_fileSizeOptions = &m_decimalFileSizeOptions;
    SetupFileSizePruningDropdown();
+
+   const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
+   if (fileSizeIndex < 1)
+   {
+      return;
+   }
+
+   auto parameters = m_controller.GetVisualizationParameters();
+   parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
+   m_controller.SetVisualizationParameters(parameters);
+
+   m_glCanvas->ReloadVisualization();
+}
+
+void MainWindow::OnNewSearchQuery()
+{
+   const auto searchQuery = m_ui.searchBox->text().toStdWString();
+
+   const auto deselectionCallback = [&] (auto& nodes)
+   {
+      m_glCanvas->RestoreHighlightedNodes(nodes);
+   };
+
+   const auto selectionCallback = [&] (auto& nodes)
+   {
+      m_glCanvas->HighlightNodes(nodes);
+   };
+
+   const bool shouldSearchFiles = m_ui.searchFilesCheckBox->isChecked();
+   const bool shouldSearchDirectories = m_ui.searchDirectoriesCheckBox->isChecked();
+
+   m_controller.SearchTreeMap(
+      searchQuery,
+      deselectionCallback,
+      selectionCallback,
+      shouldSearchFiles,
+      shouldSearchDirectories);
+}
+
+void MainWindow::PruneTree()
+{
+   const auto pruneSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
+
+   VisualizationParameters parameters;
+   parameters.rootDirectory = m_rootPath;
+   parameters.onlyShowDirectories = m_showDirectoriesOnly;
+   parameters.useDirectoryGradient = m_useDirectoryGradient;
+   parameters.forceNewScan = false;
+   parameters.minimumFileSize = m_fileSizeOptions->at(pruneSizeIndex).first;
+
+   m_controller.SetVisualizationParameters(parameters);
+
+   if (!m_rootPath.empty())
+   {
+      m_glCanvas->ReloadVisualization();
+   }
+}
+
+void MainWindow::OnFieldOfViewChange(int fieldOfView)
+{
+   m_glCanvas->SetFieldOfView(static_cast<float>(fieldOfView));
+}
+
+void MainWindow::OnDirectoryPruningChange(int state)
+{
+   m_showDirectoriesOnly = (state == Qt::Checked);
+}
+
+void MainWindow::OnGradientUseChange(int state)
+{
+   m_useDirectoryGradient = (state == Qt::Checked);
+}
+
+void MainWindow::OnShowBreakdownButtonPressed()
+{
+   if (!m_breakdownDialog)
+   {
+      m_breakdownDialog = std::make_unique<BreakdownDialog>(this);
+   }
+
+   m_breakdownDialog->show();
 }
 
 bool MainWindow::ShouldShowFrameTime() const
@@ -421,42 +470,26 @@ void MainWindow::ComputeProgress(const ScanningProgress& progress)
    {
       // @todo Progress can report as being more than 100% due to an issue in the implementation of
       // std::experimental::filesystem. This issue causes the API to report junctions as regular old
-      // directories instead of some type of link. This means that any junctions will be scanned and
-      // counted against the total.
+      // directories instead of some type of link. This means that instead of being skipped, any
+      // junctions encountered during scanning will be explored and counted against the byte total.
 
       const auto percentComplete =
          100 * (static_cast<double>(bytesProcessed) / static_cast<double>(m_occupiedDiskSpace));
 
-      std::wstringstream message;
-      message.imbue(std::locale{ "" });
-      message.precision(2);
-      message
-         << std::fixed
-         << L"Files Scanned: "
-         << filesScanned
-         << L"  |  "
-         << percentComplete
-         << L"% Complete";
+      const auto message = fmt::format(L"Files Scanned: {}  |  {:03.2f}% Complete",
+         Utilities::FormatWithCommas(filesScanned),
+         percentComplete);
 
-      SetStatusBarMessage(message.str());
+      SetStatusBarMessage(message.c_str());
    }
    else
    {
       const auto sizeAndUnits = Controller::ConvertFileSizeToAppropriateUnits(bytesProcessed);
 
-      std::wstringstream message;
-      message.imbue(std::locale{ "" });
-      message.precision(2);
-      message
-         << std::fixed
-         << L"Files Scanned: " << filesScanned
-         << L"  |  "
-         << sizeAndUnits.first
-         << L" "
-         << sizeAndUnits.second
-         << " and counting...";
+      const auto message = fmt::format(L"Files Scanned: {}  |  {:03.2f} {} and counting...",
+         Utilities::FormatWithCommas(filesScanned), sizeAndUnits.first, sizeAndUnits.second);
 
-      SetStatusBarMessage(message.str());
+      SetStatusBarMessage(message.c_str());
    }
 }
 
@@ -559,14 +592,14 @@ void MainWindow::SetCameraSpeedSpinner(double speed)
 void MainWindow::SetFilePruningComboBoxValue(std::uintmax_t minimum)
 {
    const auto match = std::find_if(
-      std::begin(m_fileSizeOptions),
-      std::end(m_fileSizeOptions),
+      std::begin(*m_fileSizeOptions),
+      std::end(*m_fileSizeOptions),
       [minimum] (const auto& pair) noexcept
    {
       return pair.first >= minimum;
    });
 
-   if (match == std::end(m_fileSizeOptions))
+   if (match == std::end(*m_fileSizeOptions))
    {
       return;
    }

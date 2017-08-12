@@ -79,6 +79,7 @@ HEADERS  += \
    Utilities/operatingSystemSpecific.hpp \
    Utilities/scopeExit.hpp \
    Utilities/threadSafeQueue.hpp \
+   Utilities/utilities.hpp \
    Viewport/camera.h \
    Viewport/canvasContextMenu.h \
    Viewport/glCanvas.h \
