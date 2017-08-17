@@ -483,10 +483,10 @@ void MainWindow::ComputeProgress(const ScanningProgress& progress)
    }
    else
    {
-      const auto sizeAndUnits = Controller::ConvertFileSizeToAppropriateUnits(bytesProcessed);
+      const auto [size, units] = Controller::ConvertFileSizeToAppropriateUnits(bytesProcessed);
 
       const auto message = fmt::format(L"Files Scanned: {}  |  {:03.2f} {} and counting...",
-         Utilities::StringifyWithDigitSeparators(filesScanned), sizeAndUnits.first, sizeAndUnits.second);
+         Utilities::StringifyWithDigitSeparators(filesScanned), size, units);
 
       SetStatusBarMessage(message.c_str());
    }

@@ -219,18 +219,13 @@ void Controller::SelectNodeAndUpdateStatusBar(
    const auto fileSize = node->GetData().file.size;
    assert(fileSize > 0);
 
-   const auto sizeAndUnits = Controller::ConvertFileSizeToAppropriateUnits(fileSize);
-   const auto isInBytes = (sizeAndUnits.second == BYTES_READOUT_STRING);
+   const auto [size, units] = Controller::ConvertFileSizeToAppropriateUnits(fileSize);
+   const auto isInBytes = (units == BYTES_READOUT_STRING);
 
    std::wstringstream message;
    message.imbue(std::locale{ "" });
    message.precision(isInBytes ? 0 : 2);
-   message
-      << Controller::ResolveCompleteFilePath(*node)
-      << L"  |  "
-      << std::fixed
-      << sizeAndUnits.first
-      << sizeAndUnits.second;
+   message << Controller::ResolveCompleteFilePath(*node) << L"  |  " << size << units;
 
    assert(message.str().size() > 0);
    m_mainWindow->SetStatusBarMessage(message.str());
@@ -289,20 +284,16 @@ void Controller::PrintSelectionDetailsToStatusBar()
       selectionSizeInBytes += node->GetData().file.size;
    }
 
-   const auto sizeAndUnits = Controller::ConvertFileSizeToAppropriateUnits(selectionSizeInBytes);
-   const auto isInBytes = (sizeAndUnits.second == BYTES_READOUT_STRING);
+   const auto [size, units] = Controller::ConvertFileSizeToAppropriateUnits(selectionSizeInBytes);
+   const auto isInBytes = (units == BYTES_READOUT_STRING);
 
    std::wstringstream message;
    message.imbue(std::locale{ "" });
    message.precision(isInBytes ? 0 : 2);
    message
-      << L"Highlighted "
-      << m_highlightedNodes.size()
+      << L"Highlighted " << m_highlightedNodes.size()
       << (m_highlightedNodes.size() == 1 ? L" node" : L" nodes")
-      << L", representing "
-      << std::fixed
-      << sizeAndUnits.first
-      << sizeAndUnits.second;
+      << L", representing " << size << units;
 
    m_mainWindow->SetStatusBarMessage(message.str());
 }
@@ -504,7 +495,7 @@ std::pair<double, std::wstring> Controller::ConvertFileSizeToAppropriateUnits(
    }
 
    assert(false);
-   return std::make_pair<double, std::wstring>( 0, L"Whoops" );
+   return std::make_pair<double, std::wstring>( 0, L"Congrats, you've found a bug!" );
 }
 
 std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node)

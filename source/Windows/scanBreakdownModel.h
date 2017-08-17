@@ -29,8 +29,8 @@ struct FileExtensionAndTotalSize
        fileExtension{ extensionAndSize.first },
        totalSize{ extensionAndSize.second }
     {
-        const auto fileSize = Controller::ConvertFileSizeToAppropriateUnits(totalSize);
-        formattedSize = Utilities::StringifyWithDigitSeparators(fileSize.first) + L" " + fileSize.second;
+        const auto [size, units] = Controller::ConvertFileSizeToAppropriateUnits(totalSize);
+        formattedSize = Utilities::StringifyWithDigitSeparators(size) + L" " + units;
     }
 };
 
