@@ -30,7 +30,7 @@ struct FileExtensionAndTotalSize
        totalSize{ extensionAndSize.second }
     {
         const auto fileSize = Controller::ConvertFileSizeToAppropriateUnits(totalSize);
-        formattedSize = Utilities::FormatWithCommas(fileSize.first) + L" " + fileSize.second;
+        formattedSize = Utilities::StringifyWithDigitSeparators(fileSize.first) + L" " + fileSize.second;
     }
 };
 

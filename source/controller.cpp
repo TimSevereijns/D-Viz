@@ -8,7 +8,7 @@
 #include "Windows/mainWindow.h"
 
 #include <ArenaAllocator/ArenaAllocator.hpp>
-#include <boost/algorithm/string/predicate.hpp>
+
 #include <spdlog/spdlog.h>
 #include <Stopwatch/Stopwatch.hpp>
 
@@ -17,6 +17,43 @@
 #include <utility>
 
 #include <QCursor>
+
+/**
+ * @warning Undefined Behaviour Ahead!
+ *
+ * When I enabled all the latest toys with the `/std:c++latest` flag, I also appear to have broken
+ * a few Boost libraries. The issue appears to be that those Boost libraries still use classes
+ * that have been removed in C++17. Two of those classes are `std::unary_function` and
+ * `std::binary_function`.
+ *
+ * There appear to be a few possible workarounds to this issue, but the quickest appears to be the
+ * reintroduction of the missing classes. The Standard dictates that adding anything to the `std::`
+ * namespace outside of a Standard Library implementation is Undefined Behaviour. Since it is
+ * extremely unlikely that this will cause anything to blow up, I'll take my chances...
+ *
+ * @note It would appear that Boost 1.65 Beta 1 has addressed the issue. Can't wait...
+ *
+ * @todo Fix this once Boost 1.65 is available---obviously!
+ */
+namespace std
+{
+    template <class _Arg, class _Result>
+    struct unary_function
+    {
+        typedef _Arg argument_type;
+        typedef _Result result_type;
+    };
+
+    template <class _Arg1, class _Arg2, class _Result>
+    struct binary_function
+    {
+        typedef _Arg1 first_argument_type;
+        typedef _Arg2 second_argument_type;
+        typedef _Result result_type;
+    };
+}
+
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace
 {

@@ -427,20 +427,19 @@ void ScanningWorker::Start()
 
    Stopwatch<std::chrono::seconds>([&] () noexcept
    {
-      std::pair<std::vector<NodeAndPath>, std::vector<NodeAndPath>> directoriesAndFiles =
-         CreateTaskItems(m_parameters.path);
+      auto [directories, files] = CreateTaskItems(m_parameters.path);
 
       ThreadSafeQueue<NodeAndPath> resultQueue;
       ThreadSafeQueue<NodeAndPath> taskQueue;
 
-      for (auto&& directory : directoriesAndFiles.first)
+      for (auto&& directory : directories)
       {
          taskQueue.Emplace(std::move(directory));
       }
 
       std::vector<std::thread> scanningThreads;
 
-      const auto numberOfThreads = (std::min)(
+      const auto numberOfThreads = std::min(
          std::thread::hardware_concurrency(),
          Constants::Concurrency::THREAD_LIMIT);
 
@@ -449,7 +448,7 @@ void ScanningWorker::Start()
          scanningThreads.emplace_back([&] () noexcept { ProcessQueue(taskQueue, resultQueue); });
       }
 
-      for (auto&& file : directoriesAndFiles.second)
+      for (auto&& file : files)
       {
          ProcessFile(file.path, *theTree->GetRoot());
       }

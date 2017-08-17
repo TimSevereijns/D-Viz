@@ -8,7 +8,6 @@
 #include "Utilities/utilities.hpp"
 #include "Viewport/glCanvas.h"
 
-#include <boost/algorithm/string.hpp>
 #include <spdlog/spdlog.h>
 
 #include <cassert>
@@ -477,7 +476,7 @@ void MainWindow::ComputeProgress(const ScanningProgress& progress)
          100 * (static_cast<double>(bytesProcessed) / static_cast<double>(m_occupiedDiskSpace));
 
       const auto message = fmt::format(L"Files Scanned: {}  |  {:03.2f}% Complete",
-         Utilities::FormatWithCommas(filesScanned),
+         Utilities::StringifyWithDigitSeparators(filesScanned),
          percentComplete);
 
       SetStatusBarMessage(message.c_str());
@@ -487,7 +486,7 @@ void MainWindow::ComputeProgress(const ScanningProgress& progress)
       const auto sizeAndUnits = Controller::ConvertFileSizeToAppropriateUnits(bytesProcessed);
 
       const auto message = fmt::format(L"Files Scanned: {}  |  {:03.2f} {} and counting...",
-         Utilities::FormatWithCommas(filesScanned), sizeAndUnits.first, sizeAndUnits.second);
+         Utilities::StringifyWithDigitSeparators(filesScanned), sizeAndUnits.first, sizeAndUnits.second);
 
       SetStatusBarMessage(message.c_str());
    }
@@ -594,9 +593,9 @@ void MainWindow::SetFilePruningComboBoxValue(std::uintmax_t minimum)
    const auto match = std::find_if(
       std::begin(*m_fileSizeOptions),
       std::end(*m_fileSizeOptions),
-      [minimum] (const auto& pair) noexcept
+      [minimum] (const auto& sizeAndUnits) noexcept
    {
-      return pair.first >= minimum;
+      return sizeAndUnits.first >= minimum;
    });
 
    if (match == std::end(*m_fileSizeOptions))

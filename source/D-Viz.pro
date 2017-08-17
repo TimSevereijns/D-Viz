@@ -13,9 +13,11 @@ TEMPLATE = app
 CONFIG += c++1z
 
 # Generate PDBs for Release builds:
-win32:QMAKE_LFLAGS_RELEASE += /MAP
 win32:QMAKE_CFLAGS_RELEASE += /Zi
-win32:QMAKE_LFLAGS_RELEASE += /debug /opt:ref
+win32:QMAKE_LFLAGS_RELEASE += /MAP /debug /opt:ref
+
+# Unlock all the fun toys:
+QMAKE_CXXFLAGS += /std:c++latest
 
 # Bump up the warning level to W4:
 QMAKE_CFLAGS_WARN_ON -= -W3

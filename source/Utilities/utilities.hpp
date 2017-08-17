@@ -12,7 +12,7 @@ namespace Utilities
    }
 
    template<typename NumericType>
-   static auto FormatWithCommas(NumericType number)
+   static auto StringifyWithDigitSeparators(NumericType number)
    {
       static_assert(std::is_arithmetic_v<NumericType>, "Please pass in a numeric type.");
 
@@ -22,7 +22,6 @@ namespace Utilities
          [&] () noexcept
       {
          stream.imbue(std::locale{ "" });
-         stream.precision(2);
       });
 
       stream.str(std::wstring{ });
