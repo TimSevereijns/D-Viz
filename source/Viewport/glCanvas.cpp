@@ -89,7 +89,7 @@ GLCanvas::GLCanvas(
    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
    setFormat(format);
 
-   connect(&m_frameRedrawTimer, SIGNAL(timeout()), this, SLOT(RunMainLoop()));
+   connect(&m_frameRedrawTimer, &QTimer::timeout, this, &GLCanvas::RunMainLoop);
    m_frameRedrawTimer.start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
 }
 

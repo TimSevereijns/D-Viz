@@ -26,17 +26,13 @@ namespace
 {
    void LogScanCompletion(const ScanningProgress& progress)
    {
-      const auto filesScanned = progress.filesScanned.load();
-      const auto directoriesScanned = progress.directoriesScanned.load();
-      const auto bytesProcessed = progress.bytesProcessed.load();
-
       const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
 
       log->info(
          fmt::format("Scanned: {} directories and {} files, representing {} bytes",
-         directoriesScanned,
-         filesScanned,
-         bytesProcessed));
+         progress.directoriesScanned.load(),
+         progress.filesScanned.load(),
+         progress.bytesProcessed.load()));
 
       log->flush();
    }
@@ -559,6 +555,7 @@ void MainWindow::AskUserToLimitFileSize(
    QMessageBox messageBox;
    messageBox.setIcon(QMessageBox::Warning);
    messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+   messageBox.setDefaultButton(QMessageBox::Yes);
    messageBox.setText(
       "More than a quarter million files were scanned. "
       "Would you like to limit the visualized files to those 1 MiB or larger in "
@@ -616,7 +613,7 @@ void MainWindow::SetStatusBarMessage(
    const std::wstring& message,
    int timeout /* = 0*/)
 {
-   auto* statusBar = this->statusBar();
+   auto* const statusBar = this->statusBar();
    if (!statusBar)
    {
       return;

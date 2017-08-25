@@ -31,7 +31,8 @@ void DriveScanner::StartScanning(const DriveScanningParameters& parameters)
 {
    m_progress.Reset();
    m_progressUpdateTimer = std::make_unique<QTimer>(this);
-   connect(m_progressUpdateTimer.get(), SIGNAL(timeout()), this, SLOT(HandleProgressUpdates()));
+   connect(m_progressUpdateTimer.get(), &QTimer::timeout,
+      this, &DriveScanner::HandleProgressUpdates);
 
    m_parameters = parameters;
 
@@ -41,20 +42,14 @@ void DriveScanner::StartScanning(const DriveScanningParameters& parameters)
 
    m_progressUpdateTimer->start(250);
 
-   connect(worker, SIGNAL(Finished(std::shared_ptr<Tree<VizFile>>)),
-      this, SLOT(HandleCompletion(std::shared_ptr<Tree<VizFile>>)));
+   connect(worker, &ScanningWorker::Finished, this, &DriveScanner::HandleCompletion);
+   connect(worker, &ScanningWorker::Finished, worker, &ScanningWorker::deleteLater);
+   connect(worker, &ScanningWorker::ProgressUpdate, this, &DriveScanner::HandleProgressUpdates);
+   connect(worker, &ScanningWorker::ShowMessageBox,
+      this, &DriveScanner::HandleMessageBox, Qt::BlockingQueuedConnection);
 
-   connect(worker, SIGNAL(Finished(std::shared_ptr<Tree<VizFile>>)),
-      worker, SLOT(deleteLater()));
-
-   connect(worker, SIGNAL(ProgressUpdate()),
-      this, SLOT(HandleProgressUpdates()));
-
-   connect(worker, SIGNAL(ShowMessageBox(const QString&)),
-      this, SLOT(HandleMessageBox(const QString&)), Qt::BlockingQueuedConnection);
-
-   connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-   connect(thread, SIGNAL(started()), worker, SLOT(Start()));
+   connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+   connect(thread, &QThread::started, worker, &ScanningWorker::Start);
 
    thread->start();
 }

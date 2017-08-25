@@ -20,7 +20,7 @@
 
 namespace
 {
-   const auto* const BYTES_READOUT_STRING = L" bytes";
+   constexpr const wchar_t BYTES_READOUT_STRING[] = L" bytes";
 
    template<std::size_t ArenaSize = 512>
    using WideStackString =
@@ -35,8 +35,11 @@ namespace
       >;
 
    /**
-    * @note The input is implicitly converted to a `double` so that we don't end up performing
-    * integer division.
+    * @brief Converts bytes to binary prefix size and notation.
+    *
+    * @param[in] sizeInBytes
+    *
+    * @returns A pair containing the numeric file size, and the associated units.
     */
    std::pair<double, std::wstring> ConvertToBinaryPrefix(double sizeInBytes)
    {
@@ -68,8 +71,11 @@ namespace
    }
 
    /**
-    * @note The input is implicitly converted to a `double` so that we don't end up performing
-    * integer division.
+    * @brief Converts bytes to decimal prefix size and notation.
+    *
+    * @param[in] sizeInBytes
+    *
+    * @returns A pair containing the numeric file size, and the associated units.
     */
    std::pair<double, std::wstring> ConvertToDecimalPrefix(double sizeInBytes)
    {
@@ -184,8 +190,6 @@ void Controller::SelectNodeAndUpdateStatusBar(
 
    const auto [size, units] = Controller::ConvertFileSizeToAppropriateUnits(fileSize);
    const auto isInBytes = (units == BYTES_READOUT_STRING);
-
-   std::cout << size << std::endl;
 
    std::wstringstream message;
    message.imbue(std::locale{ "" });
