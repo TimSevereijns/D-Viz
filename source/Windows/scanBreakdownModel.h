@@ -4,41 +4,16 @@
 #include <QAbstractTableModel>
 
 #include "../controller.h"
+#include "../DataStructs/vizFile.h"
+#include "../Utilities/utilities.hpp"
 
-#include "../DataStructs/vizNode.h"
-#include "../ThirdParty/Tree.hpp"
+#include <Tree/Tree.hpp>
 
 #include <mutex>
 #include <sstream>
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
-
-namespace
-{
-   std::once_flag stringStreamSetupFlag;
-
-   template<
-      typename Type,
-      typename = std::enable_if<std::is_arithmetic_v<Type>>
-   >
-   static auto ConvertToFormattedSizeString(const Type& number)
-   {
-      static std::wstringstream stringStream;
-
-      std::call_once(stringStreamSetupFlag,
-         [&] () noexcept
-      {
-         stringStream.imbue(std::locale{ "" });
-      });
-
-      stringStream.str(std::wstring{ });
-      stringStream.clear();
-
-      stringStream << number;
-      return stringStream.str();
-   }
-}
 
 struct FileExtensionAndTotalSize
 {
@@ -48,37 +23,39 @@ struct FileExtensionAndTotalSize
 
     FileExtensionAndTotalSize() = default;
 
-    FileExtensionAndTotalSize(const std::pair<const std::wstring, std::uintmax_t>& extensionAndSize) :
+    FileExtensionAndTotalSize(
+       const std::pair<const std::wstring, std::uintmax_t>& extensionAndSize)
+       :
        fileExtension{ extensionAndSize.first },
        totalSize{ extensionAndSize.second }
     {
-        const auto fileSize = Controller::ConvertFileSizeToAppropriateUnits(totalSize);
-        formattedSize = ConvertToFormattedSizeString(fileSize.first) + L" " + fileSize.second;
+        const auto [size, units] = Controller::ConvertFileSizeToAppropriateUnits(totalSize);
+        formattedSize = Utilities::StringifyWithDigitSeparators(size) + L" " + units;
     }
 };
 
 Q_DECLARE_METATYPE( FileExtensionAndTotalSize );
 
-class ScanBreakdownModel : public QAbstractTableModel
+class ScanBreakdownModel final : public QAbstractTableModel
 {
    friend class BreakdownDialog;
 
    public:
 
-      int rowCount(const QModelIndex& parent) const final override;
+      int rowCount(const QModelIndex& parent) const override;
 
-      int columnCount(const QModelIndex& parent) const final override;
+      int columnCount(const QModelIndex& parent) const override;
 
       QVariant headerData(
          int section,
          Qt::Orientation orientation,
-         int role) const final override;
+         int role) const override;
 
       QVariant data(
          const QModelIndex& index,
-         int role) const final override;
+         int role) const override;
 
-      void insert(const TreeNode<VizNode>& node);
+      void insert(const Tree<VizFile>::Node& node);
 
    private:
 

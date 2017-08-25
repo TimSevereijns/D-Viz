@@ -48,13 +48,6 @@ class OptionsManager : public QObject
       void OnShininessChanged(const double newShininess);
 
       /**
-       * @brief Sets whether the XBox controller is to be used.
-       *
-       * @param[in] useController   Pass in true to enable the use of the XBox controller.
-       */
-      void OnUseXBoxControllerStateChanged(const bool useController);
-
-      /**
        * @brief Updates the attachment of the primary light to the camera.
        *
        * @param[in] attached        Pass in true to attach light number one to the camera.
@@ -94,8 +87,6 @@ class OptionsManager : public QObject
 
       int m_fieldOfView{ 45 };
 
-      bool m_isXboxControllerConnected{ false };
-      bool m_useXBoxController{ false };
       bool m_isLightAttachedToCamera{ true };
       bool m_shouldSearchDirectories{ false };
       bool m_shouldSearchFiles{ true };

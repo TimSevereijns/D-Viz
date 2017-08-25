@@ -5,7 +5,7 @@
 
 #include <QMenu>
 
-class CanvasContextMenu : public QMenu
+class CanvasContextMenu final : public QMenu
 {
    public:
 

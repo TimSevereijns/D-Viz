@@ -6,8 +6,8 @@ namespace
    constexpr auto PROGRAM_TEXCOORD_ATTRIBUTE{ 1 };
 }
 
-TexturePreviewAsset::TexturePreviewAsset(GraphicsDevice& graphicsDevice)
-   : SceneAsset{ graphicsDevice }
+TexturePreviewAsset::TexturePreviewAsset(QOpenGLExtraFunctions& graphicsContext) :
+   SceneAsset{ graphicsContext }
 {
 }
 

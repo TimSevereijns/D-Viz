@@ -11,7 +11,7 @@ class GridAsset final : public LineAsset
 {
    public:
 
-      explicit GridAsset(GraphicsDevice& device);
+      explicit GridAsset(QOpenGLExtraFunctions& device);
 
       bool Render(
          const Camera& camera,

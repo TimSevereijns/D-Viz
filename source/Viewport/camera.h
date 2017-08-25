@@ -218,7 +218,7 @@ class Camera
        *
        * @returns A ray extending into the scene from the near plane to the far plane.
        */
-      Qt3DRender::QRay3D ShootRayIntoScene(const QPoint& widgetCoordinates) const;
+      Qt3DRender::RayCasting::QRay3D ShootRayIntoScene(const QPoint& widgetCoordinates) const;
 
       /**
        * @brief Determines whether a point is in front of the camera plane.

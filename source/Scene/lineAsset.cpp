@@ -1,6 +1,6 @@
 #include "lineAsset.h"
 
-LineAsset::LineAsset(GraphicsDevice& device) :
+LineAsset::LineAsset(QOpenGLExtraFunctions& device) :
    SceneAsset{ device }
 {
 }

@@ -1,6 +1,10 @@
 #include "visualization.h"
 
+#include "../constants.h"
+
 #include <boost/optional.hpp>
+#include <spdlog/spdlog.h>
+#include <Stopwatch/Stopwatch.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -12,9 +16,6 @@
 
 // @todo Replace the use of this class with something more stable.
 #include <Qt3DRender/private/qray3d_p.h>
-
-#include "../constants.h"
-#include "../ThirdParty/Stopwatch.hpp"
 
 namespace
 {
@@ -39,7 +40,7 @@ namespace
     * error, or boost::none if no such intersection exists.
     */
    boost::optional<QVector3D> DoesRayIntersectPlane(
-      const Qt3DRender::QRay3D& ray,
+      const Qt3DRender::RayCasting::QRay3D& ray,
       const QVector3D& pointOnPlane,
       const QVector3D& planeNormal)
    {
@@ -71,7 +72,7 @@ namespace
     * @return The closest intersection point, or boost::none should anything weird occur.
     */
    boost::optional<QVector3D> FindClosestIntersectionPoint(
-      const Qt3DRender::QRay3D& ray,
+      const Qt3DRender::RayCasting::QRay3D& ray,
       const std::vector<QVector3D>& allIntersections)
    {
       const auto& closest = std::min_element(std::begin(allIntersections), std::end(allIntersections),
@@ -97,7 +98,7 @@ namespace
     * @returns The point of intersection should it exist; boost::none otherwise.
     */
    boost::optional<QVector3D> DoesRayIntersectBlock(
-      const Qt3DRender::QRay3D& ray,
+      const Qt3DRender::RayCasting::QRay3D& ray,
       const Block& block)
    {
       std::vector<QVector3D> allIntersections;
@@ -226,7 +227,7 @@ namespace
     *
     * @param[out] node              The node to advance.
     */
-   void AdvanceToNextNonDescendant(TreeNode<VizNode>*& node)
+   void AdvanceToNextNonDescendant(Tree<VizFile>::Node*& node)
    {
       if (node->GetNextSibling())
       {
@@ -250,7 +251,7 @@ namespace
       }
    }
 
-   using IntersectionPointAndNode = std::pair<QVector3D, TreeNode<VizNode>*>;
+   using IntersectionPointAndNode = std::pair<QVector3D, Tree<VizFile>::Node*>;
 
    /**
     * @brief Iterates over all nodes in the scene, placing all intersections in a vector.
@@ -261,10 +262,10 @@ namespace
     * @param[in] node               The current node being hit-tested.
     */
    std::vector<IntersectionPointAndNode> FindAllIntersections(
-      const Qt3DRender::QRay3D& ray,
+      const Qt3DRender::RayCasting::QRay3D& ray,
       const Camera& camera,
       const VisualizationParameters& parameters,
-      TreeNode<VizNode>* node)
+      Tree<VizFile>::Node* node)
    {
       std::vector<IntersectionPointAndNode> allIntersections;
 
@@ -315,7 +316,7 @@ const float VisualizationModel::ROOT_BLOCK_WIDTH = 1000.0f;
 const float VisualizationModel::ROOT_BLOCK_DEPTH = 1000.0f;
 
 VisualizationModel::VisualizationModel(const VisualizationParameters& parameters) :
-   m_vizParameters(parameters)
+   m_vizParameters{ parameters }
 {
 }
 
@@ -361,9 +362,9 @@ void VisualizationModel::UpdateBoundingBoxes()
    });
 }
 
-TreeNode<VizNode>* VisualizationModel::FindNearestIntersection(
+Tree<VizFile>::Node* VisualizationModel::FindNearestIntersection(
    const Camera& camera,
-   const Qt3DRender::QRay3D& ray,
+   const Qt3DRender::RayCasting::QRay3D& ray,
    const VisualizationParameters& parameters) const
 {
    if (!m_hasDataBeenParsed)
@@ -371,11 +372,11 @@ TreeNode<VizNode>* VisualizationModel::FindNearestIntersection(
       return nullptr;
    }
 
-   TreeNode<VizNode>* nearestIntersection = nullptr;
+   Tree<VizFile>::Node* nearestIntersection = nullptr;
 
    Stopwatch<std::chrono::microseconds>([&]
    {
-      const auto headNode = m_theTree->GetHead();
+      const auto headNode = m_theTree->GetRoot();
       const auto allIntersections = FindAllIntersections(ray, camera, parameters, headNode);
 
       if (allIntersections.empty())
@@ -390,24 +391,28 @@ TreeNode<VizNode>* VisualizationModel::FindNearestIntersection(
       });
 
       nearestIntersection = closest->second;
-   }, "Node selected in ");
+   }, [] (const auto& elapsed, const auto& units) noexcept
+   {
+      spdlog::get(Constants::Logging::LOG_NAME)->info(
+         fmt::format("Selected node in: {} {}", elapsed.count(), units));
+   });
 
    return nearestIntersection;
 }
 
-Tree<VizNode>& VisualizationModel::GetTree()
+Tree<VizFile>& VisualizationModel::GetTree()
 {
    assert(m_theTree);
    return *m_theTree;
 }
 
-const Tree<VizNode>& VisualizationModel::GetTree() const
+const Tree<VizFile>& VisualizationModel::GetTree() const
 {
    assert(m_theTree);
    return *m_theTree;
 }
 
-void VisualizationModel::SortNodes(Tree<VizNode>& tree)
+void VisualizationModel::SortNodes(Tree<VizFile>& tree)
 {
    for (auto& node : tree)
    {

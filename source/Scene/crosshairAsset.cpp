@@ -11,7 +11,7 @@ namespace
     *
     * @returns All the vertices needed to draw the crosshair.
     */
-   auto CreateCrosshairVertices(const QPoint center)
+   auto CreateCrosshairVertices(const QPoint& center)
    {
       QVector<QVector3D> vertices;
       vertices.reserve(4);
@@ -44,7 +44,7 @@ namespace
    }
 }
 
-CrosshairAsset::CrosshairAsset(GraphicsDevice& device) :
+CrosshairAsset::CrosshairAsset(QOpenGLExtraFunctions& device) :
    LineAsset{ device }
 {
    m_rawColors = CreateCrosshairColors();

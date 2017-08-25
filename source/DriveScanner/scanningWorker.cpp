@@ -1,12 +1,13 @@
 #include "driveScanner.h"
+
 #include "scanningWorker.h"
 
+#include <spdlog/spdlog.h>
+#include <Stopwatch/Stopwatch.hpp>
+
 #include "../constants.h"
-
-#include "../ThirdParty/Stopwatch.hpp"
-#include "../ThirdParty/ThreadSafeQueue.hpp"
-
 #include "../Utilities/ignoreUnused.hpp"
+#include "../Utilities/threadSafeQueue.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -40,6 +41,8 @@ namespace
    std::uintmax_t GetFileSizeUsingWinAPI(const std::experimental::filesystem::path& path)
    {
       std::uintmax_t fileSize{ 0 };
+
+      IgnoreUnused(path, fileSize);
 
 #ifdef Q_OS_WIN
       WIN32_FIND_DATA fileData;
@@ -90,9 +93,9 @@ namespace
     *
     * @param[in, out] tree           The tree to be pruned.
     */
-   void PruneEmptyFilesAndDirectories(Tree<VizNode>& tree)
+   void PruneEmptyFilesAndDirectories(Tree<VizFile>& tree)
    {
-      std::vector<TreeNode<VizNode>*> toBeDeleted;
+      std::vector<Tree<VizFile>::Node*> toBeDeleted;
 
       for (auto&& node : tree)
       {
@@ -109,7 +112,9 @@ namespace
          node->DeleteFromTree();
       }
 
-      std::cout << "Number of Sizeless Files Removed: " << nodesRemoved << std::endl;
+      spdlog::get(Constants::Logging::LOG_NAME)->info(
+         fmt::format("Number of Sizeless Files Removed: {}", nodesRemoved)
+      );
    }
 
    /**
@@ -118,13 +123,13 @@ namespace
     *
     * @param[in, out] tree          The tree whose nodes need their directory sizes computed.
     */
-   void ComputeDirectorySizes(Tree<VizNode>& tree)
+   void ComputeDirectorySizes(Tree<VizFile>& tree)
    {
       for (auto&& node : tree)
       {
          const FileInfo fileInfo = node->file;
 
-         TreeNode<VizNode>* parent = node.GetParent();
+         Tree<VizFile>::Node* parent = node.GetParent();
          if (!parent)
          {
             return;
@@ -143,7 +148,7 @@ namespace
     *
     * @param[in] path               The initial enty path at which to start the scan.
     *
-    * @returns A pair of vectors containing partitioned, scannable files. The first element in the
+    * @returns A pair of vectors containing scannable files. The first element in the
     * pair contains the directories, and the second element contains the regular files.
     */
    std::pair<std::vector<NodeAndPath>, std::vector<NodeAndPath>>
@@ -153,7 +158,10 @@ namespace
       auto itr = std::experimental::filesystem::directory_iterator{ path, errorCode };
       if (errorCode)
       {
-         std::cout << "Could not create directory iterator.\n";
+         const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
+         log->error("Could not create directory iterator!");
+         log->flush();
+
          return { };
       }
 
@@ -171,7 +179,7 @@ namespace
 
          constexpr std::uintmax_t fileSizeToBeComputedLater{ 0 };
 
-         const VizNode node
+         const VizFile node
          {
             FileInfo
             {
@@ -184,7 +192,7 @@ namespace
 
          NodeAndPath nodeAndPath
          {
-            std::make_unique<TreeNode<VizNode>>(std::move(node)),
+            std::make_unique<Tree<VizFile>::Node>(std::move(node)),
             std::move(path)
          };
 
@@ -211,7 +219,7 @@ namespace
     */
    void BuildFinalTree(
       ThreadSafeQueue<NodeAndPath>& queue,
-      Tree<VizNode>& fileTree)
+      Tree<VizFile>& fileTree)
    {
       while (!queue.IsEmpty())
       {
@@ -223,7 +231,7 @@ namespace
             break;
          }
 
-         fileTree.GetHead()->AppendChild(*nodeAndPath.node);
+         fileTree.GetRoot()->AppendChild(*nodeAndPath.node);
          nodeAndPath.node.release();
       }
    }
@@ -239,7 +247,7 @@ ScanningWorker::ScanningWorker(
 {
 }
 
-std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
+std::shared_ptr<Tree<VizFile>> ScanningWorker::CreateTreeAndRootNode()
 {
    assert(std::experimental::filesystem::is_directory(m_parameters.path));
    if (!std::experimental::filesystem::is_directory(m_parameters.path))
@@ -266,18 +274,18 @@ std::shared_ptr<Tree<VizNode>> ScanningWorker::CreateTreeAndRootNode()
       FileType::DIRECTORY
    };
 
-   const VizNode rootNode
+   const VizFile rootNode
    {
       fileInfo,
       rootBlock
    };
 
-   return std::make_shared<Tree<VizNode>>(Tree<VizNode>(rootNode));
+   return std::make_shared<Tree<VizFile>>(rootNode);
 }
 
 void ScanningWorker::ProcessFile(
    const std::experimental::filesystem::path& path,
-   TreeNode<VizNode>& treeNode) noexcept
+   Tree<VizFile>::Node& treeNode) noexcept
 {
    std::uintmax_t fileSize = ComputeFileSize(path);
 
@@ -286,7 +294,7 @@ void ScanningWorker::ProcessFile(
       return;
    }
 
-   m_progress.numberOfBytesProcessed.fetch_add(fileSize);
+   m_progress.bytesProcessed.fetch_add(fileSize);
 
    const FileInfo fileInfo
    {
@@ -296,14 +304,14 @@ void ScanningWorker::ProcessFile(
       FileType::REGULAR
    };
 
-   treeNode.AppendChild(VizNode{ fileInfo });
+   treeNode.AppendChild(VizFile{ fileInfo });
 
    m_progress.filesScanned.fetch_add(1);
 }
 
 void ScanningWorker::ProcessDirectory(
    const std::experimental::filesystem::path& path,
-   TreeNode<VizNode>& treeNode)
+   Tree<VizFile>::Node& treeNode)
 {
    bool isRegularFile = false;
    try
@@ -348,9 +356,9 @@ void ScanningWorker::ProcessDirectory(
          FileType::DIRECTORY
       };
 
-      treeNode.AppendChild(VizNode{ directoryInfo });
+      treeNode.AppendChild(VizFile{ directoryInfo });
 
-      m_progress.filesScanned.fetch_add(1);
+      m_progress.directoriesScanned.fetch_add(1);
 
       auto itr = std::experimental::filesystem::directory_iterator{ path };
       IterateOverDirectoryAndScan(itr, *treeNode.GetLastChild());
@@ -359,7 +367,7 @@ void ScanningWorker::ProcessDirectory(
 
 void ScanningWorker::IterateOverDirectoryAndScan(
    std::experimental::filesystem::directory_iterator& itr,
-   TreeNode<VizNode>& treeNode) noexcept
+   Tree<VizFile>::Node& treeNode) noexcept
 {
    const auto end = std::experimental::filesystem::directory_iterator{ };
    while (itr != end)
@@ -380,12 +388,15 @@ void ScanningWorker::ProcessQueue(
       const auto successfullyPopped = taskQueue.TryPop(nodeAndPath);
       if (!successfullyPopped)
       {
-      	assert(false);
+         assert(false);
          break;
       }
 
+      auto startingDirectory =
+         std::experimental::filesystem::directory_iterator{ nodeAndPath.path };
+
       IterateOverDirectoryAndScan(
-         std::experimental::filesystem::directory_iterator{ nodeAndPath.path },
+         startingDirectory,
          *nodeAndPath.node);
 
       {
@@ -416,36 +427,30 @@ void ScanningWorker::Start()
 
    Stopwatch<std::chrono::seconds>([&] () noexcept
    {
-      std::pair<std::vector<NodeAndPath>, std::vector<NodeAndPath>> directoriesAndFiles =
-         CreateTaskItems(m_parameters.path);
+      auto [directories, files] = CreateTaskItems(m_parameters.path);
 
       ThreadSafeQueue<NodeAndPath> resultQueue;
       ThreadSafeQueue<NodeAndPath> taskQueue;
 
-      for (auto&& directory : directoriesAndFiles.first)
+      for (auto&& directory : directories)
       {
          taskQueue.Emplace(std::move(directory));
       }
 
       std::vector<std::thread> scanningThreads;
 
-      const auto numberOfThreads = (std::min)(std::thread::hardware_concurrency(),
+      const auto numberOfThreads = std::min(
+         std::thread::hardware_concurrency(),
          Constants::Concurrency::THREAD_LIMIT);
 
-      for (unsigned int i{ 0 }; i < numberOfThreads; ++i)
+      for (auto i{ 0u }; i < numberOfThreads; ++i)
       {
-         scanningThreads.emplace_back(std::thread
-         {
-            [&taskQueue, &resultQueue, this] () noexcept
-            {
-               ProcessQueue(taskQueue, resultQueue);
-            }
-         });
+         scanningThreads.emplace_back([&] () noexcept { ProcessQueue(taskQueue, resultQueue); });
       }
 
-      for (auto&& file : directoriesAndFiles.second)
+      for (auto&& file : files)
       {
-         ProcessFile(file.path, *theTree->GetHead());
+         ProcessFile(file.path, *theTree->GetRoot());
       }
 
       for (auto&& thread : scanningThreads)
@@ -454,7 +459,11 @@ void ScanningWorker::Start()
       }
 
       BuildFinalTree(resultQueue, *theTree);
-   }, "Scanned Drive in ");
+   }, [] (const auto& elapsed, const auto& units) noexcept
+   {
+      spdlog::get(Constants::Logging::LOG_NAME)->info(
+         fmt::format("Scanned Drive in: {} {}", elapsed.count(), units));
+   });
 
    ComputeDirectorySizes(*theTree);
    PruneEmptyFilesAndDirectories(*theTree);

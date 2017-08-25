@@ -10,7 +10,7 @@ class LightMarkerAsset final : public LineAsset
 {
    public:
 
-      explicit LightMarkerAsset(GraphicsDevice& device);
+      explicit LightMarkerAsset(QOpenGLExtraFunctions& device);
 
       bool Render(
          const Camera& camera,

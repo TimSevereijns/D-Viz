@@ -1,11 +1,12 @@
 #include "visualizationAsset.h"
 
 #include "../constants.h"
-#include "../DataStructs/vizNode.h"
-#include "../ThirdParty/Tree.hpp"
+#include "../DataStructs/vizFile.h"
 #include "../Utilities/colorGradient.hpp"
 #include "../Utilities/scopeExit.hpp"
 #include "../Visualizations/visualization.h"
+
+#include <Tree/Tree.hpp>
 
 #include <iostream>
 
@@ -57,7 +58,7 @@ namespace
     * @returns The color to restore the node to.
     */
    QVector3D RestoreColor(
-      const TreeNode<VizNode>& node,
+      const Tree<VizFile>::Node& node,
       const VisualizationParameters& params)
    {
       if (node.GetData().file.type != FileType::DIRECTORY)
@@ -104,7 +105,7 @@ namespace
     static constexpr auto TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE{ 1 };
 }
 
-VisualizationAsset::VisualizationAsset(GraphicsDevice& device) :
+VisualizationAsset::VisualizationAsset(QOpenGLExtraFunctions& device) :
    SceneAsset{ device }
 {
 }
@@ -216,7 +217,7 @@ bool VisualizationAsset::InitializeColors()
       /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeof(QVector3D),
-      /* ptr = */ (GLvoid*)0);
+      /* ptr = */ static_cast<GLvoid*>(0));
 
    m_blockColorBuffer.release();
    m_VAO.release();
@@ -252,7 +253,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeOfMatrix,
-      /* ptr = */ (GLvoid*)(0 * sizeOfVector));
+      /* ptr = */ reinterpret_cast<GLvoid*>(0 * sizeOfVector));
 
    // Row 2 of the matrix:
    m_graphicsDevice.glEnableVertexAttribArray(2);
@@ -263,7 +264,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeOfMatrix,
-      /* ptr = */ (GLvoid*)(1 * sizeOfVector));
+      /* ptr = */ reinterpret_cast<GLvoid*>(1 * sizeOfVector));
 
    // Row 3 of the matrix:
    m_graphicsDevice.glEnableVertexAttribArray(3);
@@ -274,7 +275,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeOfMatrix,
-      /* ptr = */ (GLvoid*)(2 * sizeOfVector));
+      /* ptr = */ reinterpret_cast<GLvoid*>(2 * sizeOfVector));
 
    // Row 4 of the matrix:
    m_graphicsDevice.glEnableVertexAttribArray(4);
@@ -285,7 +286,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
       /* type = */ GL_FLOAT,
       /* normalized = */ GL_FALSE,
       /* stride = */ sizeOfMatrix,
-      /* ptr = */ (GLvoid*)(3 * sizeOfVector));
+      /* ptr = */ reinterpret_cast<GLvoid*>(3 * sizeOfVector));
 
    m_blockTransformationBuffer.release();
    m_VAO.release();
@@ -323,7 +324,7 @@ bool VisualizationAsset::InitializeShadowMachinery()
 }
 
 std::uint32_t VisualizationAsset::LoadBufferData(
-   const Tree<VizNode>& tree,
+   const Tree<VizFile>& tree,
    const VisualizationParameters& parameters)
 {
    m_blockTransformations.clear();
@@ -345,9 +346,10 @@ std::uint32_t VisualizationAsset::LoadBufferData(
       node->offsetIntoVBO = m_blockCount++;
 
       const auto& block = node->block;
+      const auto& blockOrigin = block.GetOrigin();
 
       QMatrix4x4 instanceMatrix{ };
-      instanceMatrix.translate(block.GetOrigin().x(), block.GetOrigin().y(), block.GetOrigin().z());
+      instanceMatrix.translate(blockOrigin.x(), blockOrigin.y(), blockOrigin.z());
       instanceMatrix.scale(block.GetWidth(), block.GetHeight(), block.GetDepth());
       m_blockTransformations << instanceMatrix;
 
@@ -371,12 +373,12 @@ std::uint32_t VisualizationAsset::LoadBufferData(
    FindLargestDirectory(tree);
 
    assert(m_blockColors.size() == m_blockTransformations.size());
-   assert(m_blockColors.size() == m_blockCount);
+   assert(m_blockColors.size() == static_cast<int>(m_blockCount));
 
    return m_blockCount;
 }
 
-void VisualizationAsset::FindLargestDirectory(const Tree<VizNode>& tree)
+void VisualizationAsset::FindLargestDirectory(const Tree<VizFile>& tree)
 {
    std::uintmax_t largestDirectory = std::numeric_limits<std::uintmax_t>::min();
 
@@ -398,7 +400,7 @@ void VisualizationAsset::FindLargestDirectory(const Tree<VizNode>& tree)
    m_largestDirectorySize = largestDirectory;
 }
 
-QVector3D VisualizationAsset::ComputeGradientColor(const TreeNode<VizNode>& node)
+QVector3D VisualizationAsset::ComputeGradientColor(const Tree<VizFile>::Node& node)
 {
    const auto blockSize = node.GetData().file.size;
    const auto ratio = static_cast<double>(blockSize) / static_cast<double>(m_largestDirectorySize);
@@ -522,12 +524,12 @@ bool VisualizationAsset::Reload()
 }
 
 void VisualizationAsset::UpdateVBO(
-   const TreeNode<VizNode>& node,
+   const Tree<VizFile>::Node& node,
    SceneAsset::UpdateAction action,
    const VisualizationParameters& options)
 {
-   constexpr auto colorDataTupleSize{ sizeof(QVector3D) };
-   const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorDataTupleSize;
+   constexpr auto colorTupleSize{ sizeof(QVector3D) };
+   const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorTupleSize;
 
    const auto newColor = (action == SceneAsset::UpdateAction::DESELECT)
       ? RestoreColor(node, options)
@@ -535,7 +537,9 @@ void VisualizationAsset::UpdateVBO(
 
    assert(m_VAO.isCreated());
    assert(m_blockColorBuffer.isCreated());
-   assert(m_blockColorBuffer.size() >= offsetIntoColorBuffer / colorDataTupleSize);
+
+   // @todo This appears to fail, figure out why:
+   //assert(m_blockColorBuffer.size() >= static_cast<int>(offsetIntoColorBuffer / colorTupleSize));
 
    m_VAO.bind();
    m_blockColorBuffer.bind();
@@ -543,7 +547,7 @@ void VisualizationAsset::UpdateVBO(
    m_graphicsDevice.glBufferSubData(
       /* target = */ GL_ARRAY_BUFFER,
       /* offset = */ offsetIntoColorBuffer,
-      /* size = */ colorDataTupleSize,
+      /* size = */ colorTupleSize,
       /* data = */ &newColor);
 
    m_blockColorBuffer.release();

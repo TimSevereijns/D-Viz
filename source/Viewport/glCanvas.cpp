@@ -1,22 +1,24 @@
 #include "glCanvas.h"
 
 #include "../constants.h"
-#include "../ThirdParty/stopwatch.hpp"
 
+#include "canvasContextMenu.h"
 #include "Scene/crosshairAsset.h"
 #include "Scene/debuggingRayAsset.h"
 #include "Scene/gridAsset.h"
 #include "Scene/lightMarkerAsset.h"
 #include "Scene/texturePreviewAsset.h"
 #include "Scene/visualizationAsset.h"
-
-#include "canvasContextMenu.h"
+#include "Stopwatch/Stopwatch.hpp"
+#include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Visualizations/squarifiedTreemap.h"
 
 #include <QApplication>
 #include <QMenu>
 #include <QMessageBox>
+
+#include <spdlog/spdlog.h>
 
 #include <iostream>
 
@@ -89,33 +91,32 @@ GLCanvas::GLCanvas(
    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
    setFormat(format);
 
-   m_frameRedrawTimer = std::make_unique<QTimer>(this);
-   connect(m_frameRedrawTimer.get(), SIGNAL(timeout()), this, SLOT(update()));
-   m_frameRedrawTimer->start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
+   connect(&m_frameRedrawTimer, &QTimer::timeout, this, &GLCanvas::RunMainLoop);
+   m_frameRedrawTimer.start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
+}
 
-   m_inputCaptureTimer = std::make_unique<QTimer>(this);
-   connect(m_inputCaptureTimer.get(), SIGNAL(timeout()), this, SLOT(HandleInput()));
-   m_inputCaptureTimer->start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
+void GLCanvas::RunMainLoop()
+{
+  HandleUserInput();
+  update();
 }
 
 void GLCanvas::initializeGL()
 {
-   m_graphicsDevice = std::make_unique<GraphicsDevice>();
+   m_graphicsDevice.initializeOpenGLFunctions();
 
-   m_graphicsDevice->glEnable(GL_DEPTH_TEST);
-   m_graphicsDevice->glEnable(GL_CULL_FACE);
-   m_graphicsDevice->glEnable(GL_MULTISAMPLE);
-   m_graphicsDevice->glEnable(GL_LINE_SMOOTH);
+   m_graphicsDevice.glEnable(GL_DEPTH_TEST);
+   m_graphicsDevice.glEnable(GL_CULL_FACE);
+   m_graphicsDevice.glEnable(GL_MULTISAMPLE);
+   m_graphicsDevice.glEnable(GL_LINE_SMOOTH);
 
-   m_sceneAssets.emplace_back(std::make_unique<GridAsset>(*m_graphicsDevice));
-   m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(*m_graphicsDevice));
-   m_sceneAssets.emplace_back(std::make_unique<CrosshairAsset>(*m_graphicsDevice));
-   m_sceneAssets.emplace_back(std::make_unique<LightMarkerAsset>(*m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<GridAsset>(m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<CrosshairAsset>(m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<LightMarkerAsset>(m_graphicsDevice));
    //m_sceneAssets.emplace_back(std::make_unique<TexturePreviewAsset>(*m_graphicsDevice));
 
-   auto* const lightMarkers = dynamic_cast<LightMarkerAsset*>(m_sceneAssets[LIGHT_MARKERS].get());
-   assert(lightMarkers);
-
+   auto* const lightMarkers = static_cast<LightMarkerAsset*>(m_sceneAssets[LIGHT_MARKERS].get());
    InitializeLightMarkers(m_lights, *lightMarkers);
 
    for (const auto& asset : m_sceneAssets)
@@ -132,7 +133,7 @@ void GLCanvas::resizeGL(int width, int height)
       height = 1;
    }
 
-   m_graphicsDevice->glViewport(0, 0, width, height);
+   m_graphicsDevice.glViewport(0, 0, width, height);
 
    m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
 }
@@ -140,13 +141,12 @@ void GLCanvas::resizeGL(int width, int height)
 void GLCanvas::ReloadVisualization()
 {
    const bool previousSuspensionState = m_isPaintingSuspended;
-   m_isPaintingSuspended = true;
    ON_SCOPE_EXIT noexcept { m_isPaintingSuspended = previousSuspensionState; };
 
-   auto* const vizAsset = dynamic_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
-   assert(vizAsset);
+   m_isPaintingSuspended = true;
 
    const auto parameters = m_controller.GetVisualizationParameters();
+   auto* const vizAsset = static_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
    const auto blockCount = vizAsset->LoadBufferData(m_controller.GetTree(), parameters);
 
    for (const auto& asset : m_sceneAssets)
@@ -154,18 +154,18 @@ void GLCanvas::ReloadVisualization()
       asset->Reload();
    }
 
-   assert (blockCount == vizAsset->GetBlockCount());
-   m_controller.PrintMetadataToStatusBar(blockCount);
+   assert(blockCount == vizAsset->GetBlockCount());
+
+   m_controller.PrintMetadataToStatusBar();
 }
 
-void GLCanvas::SetFieldOfView(const float fieldOfView)
+void GLCanvas::SetFieldOfView(float fieldOfView)
 {
    m_camera.SetFieldOfView(fieldOfView);
 }
 
 void GLCanvas::keyPressEvent(QKeyEvent* const event)
 {
-   assert(event);
    if (!event)
    {
       return;
@@ -177,7 +177,7 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
       return;
    }
 
-   const auto state = KeyboardManager::KEY_STATE::DOWN;
+   constexpr auto state = KeyboardManager::KEY_STATE::DOWN;
    m_keyboardManager.UpdateKeyState(static_cast<Qt::Key>(event->key()), state);
 
    event->accept();
@@ -185,7 +185,6 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
 
 void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
 {
-   assert(event);
    if (!event)
    {
       return;
@@ -197,7 +196,7 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
       return;
    }
 
-   const auto state = KeyboardManager::KEY_STATE::UP;
+   constexpr auto state = KeyboardManager::KEY_STATE::UP;
    m_keyboardManager.UpdateKeyState(static_cast<Qt::Key>(event->key()), state);
 
    event->accept();
@@ -205,7 +204,6 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
 
 void GLCanvas::mousePressEvent(QMouseEvent* const event)
 {
-   assert(event);
    if (!event)
    {
       return;
@@ -238,7 +236,6 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
 
 void GLCanvas::mouseReleaseEvent(QMouseEvent* const event)
 {
-   assert(event);
    if (!event)
    {
       return;
@@ -261,7 +258,6 @@ void GLCanvas::mouseReleaseEvent(QMouseEvent* const event)
 
 void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 {
-   assert(event);
    if (!event)
    {
       return;
@@ -308,7 +304,6 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 
 void GLCanvas::wheelEvent(QWheelEvent* const event)
 {
-   assert(event);
    if (!event)
    {
       return;
@@ -334,7 +329,8 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
          m_optionsManager->m_cameraMovementSpeed -= 0.01;
       }
 
-      m_mainWindow.SetCameraSpeedSpinner(static_cast<double>(m_optionsManager->m_cameraMovementSpeed));
+      const auto newSpeed = static_cast<double>(m_optionsManager->m_cameraMovementSpeed);
+      m_mainWindow.SetCameraSpeedSpinner(newSpeed);
    }
    else
    {
@@ -351,7 +347,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    }
 }
 
-void GLCanvas::SelectNode(const TreeNode<VizNode>* const node)
+void GLCanvas::SelectNode(const Tree<VizFile>::Node* const node)
 {
    m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
       *node,
@@ -370,7 +366,7 @@ void GLCanvas::RestoreSelectedNode()
    }
 }
 
-void GLCanvas::HighlightNodes(std::vector<const TreeNode<VizNode>*>& nodes)
+void GLCanvas::HighlightNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
 {
    for (const auto* const node : nodes)
    {
@@ -378,7 +374,7 @@ void GLCanvas::HighlightNodes(std::vector<const TreeNode<VizNode>*>& nodes)
    }
 }
 
-void GLCanvas::RestoreHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes)
+void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
 {
    for (const auto* const node : nodes)
    {
@@ -418,12 +414,10 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
    if (selectedNode->GetData().file.type == FileType::REGULAR)
    {
-      const auto entryText =
-         QString::fromStdWString(L"Highlight All ")
-         + QString::fromStdWString(selectedNode->GetData().file.extension)
-         + QString::fromStdWString(L" Files");
+      fmt::WMemoryWriter writer;
+      writer << L"Highlight All " << selectedNode->GetData().file.extension << L" Files";
 
-      menu.addAction(entryText, [&]
+      menu.addAction(QString::fromStdWString(writer.c_str()), [&]
       {
          constexpr auto clearSelected{ true };
          m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
@@ -432,32 +426,41 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
    }
 
    menu.addSeparator();
+
+   menu.addAction("Isolate File Type", [&]
+   {
+      constexpr auto clearSelected{ true };
+      m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
+      // @todo Relaad the visualization with updated parameters.
+   });
+
+   menu.addSeparator();
+
    menu.addAction("Show in Explorer", [&]
    {
-      Controller::ShowInFileExplorer(*selectedNode);
+      OperatingSystemSpecific::LaunchFileExplorer(*selectedNode);
    });
 
    const QPoint globalPoint = mapToGlobal(point);
    menu.exec(globalPoint);
 }
 
-void GLCanvas::HandleInput()
+void GLCanvas::HandleUserInput()
 {
    assert(m_optionsManager);
 
    const auto now = std::chrono::system_clock::now();
    ON_SCOPE_EXIT noexcept { m_lastCameraPositionUpdatelTime = now; };
 
-   if (m_optionsManager->m_useXBoxController && m_mainWindow.IsXboxControllerConnected())
-   {
-      HandleXBoxControllerInput();
+   const auto millisecondsElapsedSinceLastUpdate =
+      std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastCameraPositionUpdatelTime);
 
-       return;
-   }
+   HandleGamepadInput(millisecondsElapsedSinceLastUpdate);
+   HandleKeyboardInput(millisecondsElapsedSinceLastUpdate);
+}
 
-   const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-      now - m_lastCameraPositionUpdatelTime).count();
-
+void GLCanvas::HandleKeyboardInput(const std::chrono::milliseconds& elapsedTime)
+{
    const bool isWKeyDown = m_keyboardManager.IsKeyDown(Qt::Key_W);
    const bool isAKeyDown = m_keyboardManager.IsKeyDown(Qt::Key_A);
    const bool isSKeyDown = m_keyboardManager.IsKeyDown(Qt::Key_S);
@@ -468,6 +471,7 @@ void GLCanvas::HandleInput()
       return;
    }
 
+   const auto millisecondsElapsed = elapsedTime.count();
    const auto cameraSpeed = m_optionsManager->m_cameraMovementSpeed;
 
    if (isWKeyDown)
@@ -491,129 +495,123 @@ void GLCanvas::HandleInput()
    }
 }
 
-void GLCanvas::HandleXBoxControllerInput()
+void GLCanvas::HandleGamepadInput(const std::chrono::milliseconds& elapsedTime)
 {
-   const auto millisecondsElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::system_clock::now() - m_lastCameraPositionUpdatelTime).count();
+   if (!m_mainWindow.GetGamepad().isConnected())
+   {
+      return;
+   }
 
-   const XboxController::State& controllerState = m_mainWindow.GetXboxControllerState();
-   const XboxController& controller = m_mainWindow.GetXboxControllerManager();
+   const auto& gamepad = m_mainWindow.GetGamepad();
 
+   HandleGamepadKeyInput(gamepad, elapsedTime);
+   HandleGamepadThumbstickInput(gamepad);
+   HandleGamepadTriggerInput(gamepad);
+}
+
+void GLCanvas::HandleGamepadKeyInput(
+   const Gamepad& gamepad,
+   const std::chrono::milliseconds& elapsedTime)
+{
+   const auto millisecondsElapsed = elapsedTime.count();
    const auto cameraSpeed =
-       m_optionsManager->m_cameraMovementSpeed / Constants::Xbox::MOVEMENT_AMPLIFICATION;
+      m_optionsManager->m_cameraMovementSpeed / Constants::Input::MOVEMENT_AMPLIFICATION;
 
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_UP))
+   if (gamepad.buttonUp())
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Forward());
    }
 
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_LEFT))
+   if (gamepad.buttonLeft())
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Left());
    }
 
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_DOWN))
+   if (gamepad.buttonDown())
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Backward());
    }
 
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_DPAD_RIGHT))
+   if (gamepad.buttonRight())
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Right());
    }
 
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_LEFT_SHOULDER))
+   if (gamepad.buttonL1())
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Down());
    }
 
-   if (controller.IsButtonDown(XINPUT_GAMEPAD_RIGHT_SHOULDER))
+   if (gamepad.buttonR1())
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Up());
    }
-
-   HandleXboxThumbstickInput(controllerState);
-   HandleXboxTriggerInput(controllerState);
 }
 
-void GLCanvas::HandleXboxThumbstickInput(const XboxController::State& controllerState)
+void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
 {
-   if (controllerState.rightThumbX || controllerState.rightThumbY)
+   if (gamepad.axisRightX() || gamepad.axisRightY())
    {
       const auto pitch =
-         Constants::Xbox::MOVEMENT_AMPLIFICATION
+         Constants::Input::MOVEMENT_AMPLIFICATION
          * m_optionsManager->m_mouseSensitivity
-         * -controllerState.rightThumbY;
+         * gamepad.axisRightY();
 
       const auto yaw =
-         Constants::Xbox::MOVEMENT_AMPLIFICATION
+         Constants::Input::MOVEMENT_AMPLIFICATION
          * m_optionsManager->m_mouseSensitivity
-         * controllerState.rightThumbX;
+         * gamepad.axisRightX();
 
       m_camera.OffsetOrientation(pitch, yaw);
    }
 
-   if (controllerState.leftThumbY)
+   if (gamepad.axisLeftY())
    {
       m_camera.OffsetPosition(
-         Constants::Xbox::MOVEMENT_AMPLIFICATION
+         Constants::Input::MOVEMENT_AMPLIFICATION
          * m_optionsManager->m_cameraMovementSpeed
-         * controllerState.leftThumbY
+         * -gamepad.axisLeftY()
          * m_camera.Forward());
    }
 
-   if (controllerState.leftThumbX)
+   if (gamepad.axisLeftX())
    {
       m_camera.OffsetPosition(
-         Constants::Xbox::MOVEMENT_AMPLIFICATION
+         Constants::Input::MOVEMENT_AMPLIFICATION
          * m_optionsManager->m_cameraMovementSpeed
-         * controllerState.leftThumbX
+         * gamepad.axisLeftX()
          * m_camera.Right());
    }
 }
 
-void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerState)
+void GLCanvas::HandleGamepadTriggerInput(const Gamepad& gamepad)
 {
-   const bool isLeftTriggerThresholdExceeded =
-      controllerState.leftTrigger > Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD;
-
-   if (!m_isLeftTriggerDown && isLeftTriggerThresholdExceeded)
+   if (!m_isLeftTriggerDown && gamepad.IsLeftTriggerDown())
    {
       m_isLeftTriggerDown = true;
 
       auto* const crosshairAsset =
-         dynamic_cast<CrosshairAsset*>(m_sceneAssets[Asset::CROSSHAIR].get());
+         static_cast<CrosshairAsset*>(m_sceneAssets[Asset::CROSSHAIR].get());
 
-      assert(crosshairAsset);
-      if (crosshairAsset)
-      {
-         crosshairAsset->Show(m_camera);
-      }
+      crosshairAsset->Show(m_camera);
    }
-   else if (m_isLeftTriggerDown && !isLeftTriggerThresholdExceeded)
+   else if (m_isLeftTriggerDown && !gamepad.IsLeftTriggerDown())
    {
-      m_isLeftTriggerDown = false;
+       m_isLeftTriggerDown = false;
 
       auto* const crosshairAsset =
-         dynamic_cast<CrosshairAsset*>(m_sceneAssets[Asset::CROSSHAIR].get());
+         static_cast<CrosshairAsset*>(m_sceneAssets[Asset::CROSSHAIR].get());
 
-      assert(crosshairAsset);
-      if (crosshairAsset)
-      {
-         crosshairAsset->Hide();
-      }
+      crosshairAsset->Hide();
    }
 
-   const bool isRightTriggerThresholdExceeded =
-      controllerState.rightTrigger > Constants::Xbox::TRIGGER_ACTUATION_THRESHOLD;
-
-   if (!m_isRightTriggerDown && isRightTriggerThresholdExceeded)
+   if (!m_isRightTriggerDown && gamepad.IsRightTriggerDown())
    {
       m_isRightTriggerDown = true;
 
       SelectNodeViaRay(m_camera.GetViewport().center());
    }
-   else if (m_isRightTriggerDown && !isRightTriggerThresholdExceeded)
+   else if (m_isRightTriggerDown && !gamepad.IsRightTriggerDown())
    {
       m_isRightTriggerDown = false;
    }
@@ -621,16 +619,14 @@ void GLCanvas::HandleXboxTriggerInput(const XboxController::State& controllerSta
 
 void GLCanvas::SelectNodeViaRay(const QPoint& rayOrigin)
 {
-   const auto deselectionCallback = [&] (std::vector<const TreeNode<VizNode>*>& nodes)
+   const auto deselectionCallback = [&] (std::vector<const Tree<VizFile>::Node*>& nodes)
    {
       RestoreHighlightedNodes(nodes);
       RestoreSelectedNode();
    };
 
    const auto selectionCallback = [&] (auto* node) { SelectNode(node); };
-
    const auto ray = m_camera.ShootRayIntoScene(rayOrigin);
-
    m_controller.SelectNodeViaRay(m_camera, ray, deselectionCallback, selectionCallback );
 }
 
@@ -662,15 +658,15 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
 
 void GLCanvas::paintGL()
 {
+   if (m_isPaintingSuspended)
+   {
+      return;
+   }
+
    const auto elapsedTime = Stopwatch<std::chrono::microseconds>(
       [&] () noexcept
    {
-      if (m_isPaintingSuspended)
-      {
-         return;
-      }
-
-      m_graphicsDevice->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       assert(m_optionsManager);
       if (m_optionsManager->m_isLightAttachedToCamera)

@@ -28,8 +28,8 @@ QVariant ScanBreakdownModel::headerData(
    {
       switch (section)
       {
-         case 0: return QString("File Type");
-         case 1: return QString("Cumulative Size");
+         case 0: return QString{ "File Type" };
+         case 1: return QString{ "Cumulative Size" };
       }
    }
 
@@ -64,14 +64,14 @@ QVariant ScanBreakdownModel::data(
       }
       else if (index.column() == 1)
       {
-         return data.totalSize;
+         return static_cast<qulonglong>(data.totalSize);
       }
    }
 
    return { };
 }
 
-void ScanBreakdownModel::insert(const TreeNode<VizNode>& node)
+void ScanBreakdownModel::insert(const Tree<VizFile>::Node& node)
 {
    const auto& file = node->file;
    if (file.type != FileType::REGULAR)
@@ -93,6 +93,8 @@ void ScanBreakdownModel::FinalizeInsertion()
 {
    assert(!m_fileTypeMap.empty() && m_fileTypeVector.empty());
 
-   std::copy(std::begin(m_fileTypeMap), std::end(m_fileTypeMap),
+   std::copy(
+      std::begin(m_fileTypeMap),
+      std::end(m_fileTypeMap),
       std::back_inserter(m_fileTypeVector));
 }

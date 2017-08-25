@@ -25,11 +25,6 @@ void OptionsManager::OnShininessChanged(const double newShininess)
    m_materialShininess = static_cast<float>(newShininess);
 }
 
-void OptionsManager::OnUseXBoxControllerStateChanged(const bool useController)
-{
-   m_useXBoxController = useController;
-}
-
 void OptionsManager::OnAttachLightToCameraStateChanged(const bool attached)
 {
    m_isLightAttachedToCamera = attached;

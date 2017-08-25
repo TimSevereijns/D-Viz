@@ -1,0 +1,12 @@
+[submodule "Foreign/ArenaAllocator"]
+	path = Foreign/ArenaAllocator
+	url = git@github.com:TimSevereijns/ArenaAllocator.git
+[submodule "Foreign/Stopwatch"]
+	path = Foreign/Stopwatch
+	url = git@github.com:TimSevereijns/Stopwatch.git
+[submodule "Foreign/Tree"]
+	path = Foreign/Tree
+	url = git@github.com:TimSevereijns/Tree.git
+[submodule "Foreign/Spdlog"]
+	path = Foreign/Spdlog
+	url = https://github.com/gabime/spdlog.git

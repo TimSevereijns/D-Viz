@@ -93,7 +93,7 @@ namespace
    }
 }
 
-GridAsset::GridAsset(GraphicsDevice& device) :
+GridAsset::GridAsset(QOpenGLExtraFunctions& device) :
    LineAsset{ device }
 {
    m_rawVertices = CreateOriginMarkerAndGridVertices();

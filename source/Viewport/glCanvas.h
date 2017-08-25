@@ -8,7 +8,6 @@
 #include "HID/keyboardManager.h"
 #include "optionsManager.h"
 #include "Scene/sceneAsset.h"
-#include "Viewport/graphicsDevice.h"
 #include "Visualizations/visualization.h"
 #include "Windows/mainWindow.h"
 
@@ -27,7 +26,7 @@
  * individual scene assets that make up the entire visualization. Camera movement and scene
  * interaction are also handled by this class.
  */
-class GLCanvas : public QOpenGLWidget
+class GLCanvas final : public QOpenGLWidget
 {
    Q_OBJECT
 
@@ -63,7 +62,7 @@ class GLCanvas : public QOpenGLWidget
        *
        * @param[in] node            The node whose visual representation is to be repainted.
        */
-      inline void SelectNode(const TreeNode<VizNode>* const node);
+      inline void SelectNode(const Tree<VizFile>::Node* const node);
 
       /**
        * @brief Restores the color of the selected node back to its unselected state.
@@ -73,12 +72,12 @@ class GLCanvas : public QOpenGLWidget
       /**
        * @brief HighlightSelectedNodes
        */
-      void HighlightNodes(std::vector<const TreeNode<VizNode>*>& nodes);
+      void HighlightNodes(std::vector<const Tree<VizFile>::Node*>& nodes);
 
       /**
        * @brief Returns any highlighted nodes back to their unhighlighted colors.
        */
-      void RestoreHighlightedNodes(std::vector<const TreeNode<VizNode>*>& nodes);
+      void RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& nodes);
 
    protected:
 
@@ -97,11 +96,16 @@ class GLCanvas : public QOpenGLWidget
    private slots:
 
       /**
-       * @brief Handles keyboard, mouse, and Xbox controller input.
+       * @brief Handles keyboard, mouse, and gamepad input, and also updates the OpenGL canvas.
        */
-      void HandleInput();
+      void RunMainLoop();
 
    private:
+
+      /**
+       * @brief Handle Input
+       */
+      void HandleUserInput();
 
       /**
        * @brief Records the elapsed frame time.
@@ -119,23 +123,42 @@ class GLCanvas : public QOpenGLWidget
       void ShowContextMenu(const QPoint& point);
 
       /**
-       * @brief Handles the input from the Xbox controller.
+       * @brief HandleKeyboardInput
+       *
+       * @param[in] elapsedTime
        */
-      void HandleXBoxControllerInput();
+      void HandleKeyboardInput(const std::chrono::milliseconds& elapsedTime);
 
       /**
-       * @brief Handles Xbox left and right trigger input.
+       * @brief Handles the input from the gamepad controller.
        *
-       * @param[in] controllerState    The current state of the controller.
+       * @param[in] elapsedTime
        */
-      void HandleXboxTriggerInput(const XboxController::State& controllerState);
+      void HandleGamepadInput(const std::chrono::milliseconds& elapsedTime);
 
       /**
-       * @brief Handles Xbox thumb stick input.
+       * @brief HandleGamepadKeyInput
        *
-       * @param[in] controllerState    The current state of the controller.
+       * @param gamepad
+       * @param elapsedTime
        */
-      void HandleXboxThumbstickInput(const XboxController::State& controllerState);
+      void HandleGamepadKeyInput(
+         const Gamepad& gamepad,
+         const std::chrono::milliseconds& elapsedTime);
+
+      /**
+       * @brief Handles left and right trigger input.
+       *
+       * @param[in] gamepad
+       */
+      void HandleGamepadTriggerInput(const Gamepad& gamepad);
+
+      /**
+       * @brief Handles thumb stick inputs.
+       *
+       * @param[in] gamepad.
+       */
+      void HandleGamepadThumbstickInput(const Gamepad& gamepad);
 
       /**
        * @brief Compiles and loads the OpenGL shader program for the visualization.
@@ -164,22 +187,18 @@ class GLCanvas : public QOpenGLWidget
 
       bool m_isPaintingSuspended{ false };
       bool m_isVisualizationLoaded{ false };
-
       bool m_isLeftTriggerDown{ false };
       bool m_isRightTriggerDown{ false };
-
       bool m_isLeftMouseButtonDown{ false };
-
       bool m_isCursorHidden{ false };
 
       Controller& m_controller;
 
       MainWindow& m_mainWindow;
 
-      std::unique_ptr<GraphicsDevice> m_graphicsDevice{ nullptr };
+      QOpenGLExtraFunctions m_graphicsDevice;
 
-      std::unique_ptr<QTimer> m_frameRedrawTimer{ nullptr };
-      std::unique_ptr<QTimer> m_inputCaptureTimer{ nullptr };
+      QTimer m_frameRedrawTimer{ nullptr };
 
       std::chrono::system_clock::time_point m_lastFrameDrawTime
       {

@@ -12,7 +12,7 @@ class TexturePreviewAsset : public SceneAsset
 {
 public:
 
-   explicit TexturePreviewAsset(GraphicsDevice& graphicsDevice);
+   explicit TexturePreviewAsset(QOpenGLExtraFunctions& graphicsContext);
 
    bool Initialize() override;
 

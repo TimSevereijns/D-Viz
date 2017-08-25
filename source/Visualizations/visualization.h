@@ -10,9 +10,9 @@
 #include <memory>
 #include <numeric>
 
-#include "../ThirdParty/Tree.hpp"
+#include <Tree/Tree.hpp>
 
-#include "../DataStructs/vizNode.h"
+#include "../DataStructs/vizFile.h"
 #include "../Viewport/camera.h"
 
 /**
@@ -24,6 +24,8 @@ struct VisualizationParameters
    std::wstring rootDirectory{ L"" };  ///< The path to the root directory
 
    std::uint64_t minimumFileSize{ 0 }; ///< The minimum size a file should be before it shows up.
+
+   boost::optional<std::wstring> isolatedExtension{ }; ///< Only show files matching this type.
 
    bool forceNewScan{ true };          ///< Whether a new scan should take place.
    bool onlyShowDirectories{ false };  ///< Whether only directories should be shown.
@@ -56,7 +58,7 @@ class VisualizationModel
        *
        * @param[in, out] theTree    The unparsed scan results.
        */
-      virtual void Parse(const std::shared_ptr<Tree<VizNode>>& theTree) = 0;
+      virtual void Parse(const std::shared_ptr<Tree<VizFile>>& theTree) = 0;
 
       /**
        * @brief Updates the minimum Axis-Aligned Bounding Boxes (AABB) for each node in the tree.
@@ -80,22 +82,22 @@ class VisualizationModel
        * @returns A pointer to the TreeNode that was clicked on, and nullptr if no intersection
        * exists.
        */
-      TreeNode<VizNode>* FindNearestIntersection(
+      Tree<VizFile>::Node* FindNearestIntersection(
          const Camera& camera,
-         const Qt3DRender::QRay3D& ray,
+         const Qt3DRender::RayCasting::QRay3D& ray,
          const VisualizationParameters& parameters) const;
 
       /**
        * @brief GetTree
        * @return
        */
-      Tree<VizNode>& GetTree();
+      Tree<VizFile>& GetTree();
 
       /**
        * @brief GetTree
        * @return
        */
-      const Tree<VizNode>& GetTree() const;
+      const Tree<VizFile>& GetTree() const;
 
       /**
        * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each
@@ -103,11 +105,11 @@ class VisualizationModel
        *
        * @param[in, out] tree           The tree to be sorted.
        */
-      static void SortNodes(Tree<VizNode>& tree);
+      static void SortNodes(Tree<VizFile>& tree);
 
    protected:
 
-      std::shared_ptr<Tree<VizNode>> m_theTree{ nullptr };
+      std::shared_ptr<Tree<VizFile>> m_theTree{ nullptr };
 
       bool m_hasDataBeenParsed{ false };
 

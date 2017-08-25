@@ -52,3 +52,7 @@ Temporary Items
 build-D-Viz-*-Debug/
 build-D-Viz-*-Release/
 
+
+*.tlog
+
+Foreign/

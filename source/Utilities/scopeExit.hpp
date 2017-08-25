@@ -25,8 +25,9 @@ struct ScopeExit
    ScopeExit(ScopeExit&&) = default;
    ScopeExit& operator=(ScopeExit&&) = default;
 
-   private:
-      LambdaType m_lambda;
+private:
+
+   LambdaType m_lambda;
 };
 
 namespace
@@ -51,9 +52,11 @@ inline ScopeExit<LambdaType> operator+(const DummyStruct&, LambdaType&& lambda)
    return ScopeExit<LambdaType>{ std::forward<LambdaType>(lambda) };
 }
 
-#define JOIN_TWO_STRINGS(str1, str2) str1 ## str2
+#define NONEXPANDING_CONCAT(A, B) A ## B
+
+#define CONCAT(A, B) NONEXPANDING_CONCAT(A, B)
 
 #define ON_SCOPE_EXIT \
-   auto JOIN_TWO_STRINGS(scope_exit_, __LINE__) = DummyStruct{ } + [=] ()
+   auto CONCAT(scope_exit_, __LINE__) = DummyStruct{ } + [=] ()
 
 #endif // SCOPEEXIT_HPP

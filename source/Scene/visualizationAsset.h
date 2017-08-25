@@ -11,8 +11,10 @@
 #include <QOpenGLFrameBufferObject>
 #include <QOpenGLTexture>
 
-struct VizNode;
-template<typename DataType> class TreeNode;
+struct VizFile;
+
+template<typename DataType>
+class TreeNode;
 
 /**
  * @brief The VisualizationAsset class implements the functionality needed to represent the
@@ -22,7 +24,7 @@ class VisualizationAsset final : public SceneAsset
 {
    public:
 
-      VisualizationAsset(GraphicsDevice& device);
+      VisualizationAsset(QOpenGLExtraFunctions& device);
 
       bool LoadShaders() override;
 
@@ -36,7 +38,7 @@ class VisualizationAsset final : public SceneAsset
       bool Reload() override;
 
       void UpdateVBO(
-         const TreeNode<VizNode>& node,
+         const Tree<VizFile>::Node& node,
          UpdateAction action,
          const VisualizationParameters& options) override;
 
@@ -55,7 +57,7 @@ class VisualizationAsset final : public SceneAsset
        * @returns The number of blocks that have been loaded into the buffer.
        */
       std::uint32_t LoadBufferData(
-         const Tree<VizNode>& tree,
+         const Tree<VizFile>& tree,
          const VisualizationParameters& parameters);
 
       /**
@@ -74,9 +76,9 @@ class VisualizationAsset final : public SceneAsset
          const std::vector<Light>& lights,
          const OptionsManager& settings);
 
-      QVector3D ComputeGradientColor(const TreeNode<VizNode>& node);
+      QVector3D ComputeGradientColor(const Tree<VizFile>::Node& node);
 
-      void FindLargestDirectory(const Tree<VizNode>& tree);
+      void FindLargestDirectory(const Tree<VizFile>& tree);
 
       bool InitializeReferenceBlock();
       bool InitializeColors();

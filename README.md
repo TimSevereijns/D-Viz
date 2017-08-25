@@ -8,23 +8,17 @@ For information on how to set up and build the project, please see the Wiki.
 
 ## Screenshots
 
-![Example 1]
-(https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example1.png)
+![Example 1](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example1.png)
 
-![Example 2]
-(https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example3.png)
+![Example 2](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example3.png)
 
-![Example 3]
-(https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example5.png)
+![Example 3](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example5.png)
 
-![Example 4]
-(https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example9.png)
+![Example 4](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example9.png)
 
-![Example 5]
-(https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example11.png)
+![Example 5](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example11.png)
 
-![Example 6]
-(https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example12.png)
+![Example 6](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/Example12.png)
 
 ## Notes
 
