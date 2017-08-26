@@ -39,6 +39,7 @@ SOURCES += \
    optionsManager.cpp \
    Scene/crosshairAsset.cpp \
    Scene/debuggingRayAsset.cpp \
+   Scene/frustumAsset.cpp \
    Scene/gridAsset.cpp \
    Scene/lightMarkerAsset.cpp \
    Scene/lineAsset.cpp \
@@ -72,6 +73,7 @@ HEADERS  += \
    optionsManager.h \
    Scene/crosshairAsset.h \
    Scene/debuggingRayAsset.h \
+   Scene/frustumAsset.h \
    Scene/gridAsset.h \
    Scene/lightMarkerAsset.h \
    Scene/lineAsset.h \

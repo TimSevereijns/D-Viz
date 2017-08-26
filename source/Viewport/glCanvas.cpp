@@ -5,6 +5,7 @@
 #include "canvasContextMenu.h"
 #include "Scene/crosshairAsset.h"
 #include "Scene/debuggingRayAsset.h"
+#include "Scene/frustumAsset.h"
 #include "Scene/gridAsset.h"
 #include "Scene/lightMarkerAsset.h"
 #include "Scene/texturePreviewAsset.h"
@@ -33,14 +34,15 @@ namespace
       TREEMAP,          ///< VisualizationAsset
       CROSSHAIR,        ///< CrosshairAsset
       LIGHT_MARKERS,    ///< LightMarkerAsset
-      TEXTURE_PREVIEW   ///< TexturePreviewAsset
+      //TEXTURE_PREVIEW,  ///< TexturePreviewAsset
+      FRUSTUM           ///< FrustumAsset
    };
 
    /**
     * @brief Computes and sets the vertex and color data for the light markers.
     *
     * @param[in] lights                   The lights in the scene to be marked.
-    * @param[in, out] lightMarkerAsset    The scene asset to be updated
+    * @param[out] lightMarkerAsset        The scene asset to be updated
     */
    void InitializeLightMarkers(
       const std::vector<Light>& lights,
@@ -69,6 +71,61 @@ namespace
       lightMarkerAsset.SetVertexData(std::move(vertices));
       lightMarkerAsset.SetColorData(std::move(colors));
    }
+
+   /**
+    * @brief InitializeShadowCasterFrustum
+    *
+    * @param[out] frustumAsset
+    */
+   void InitializeShadowCasterFrustum(
+      const Camera& camera,
+      FrustumAsset& frustumAsset)
+   {
+      frustumAsset.ClearBuffers();
+
+      std::vector<QVector3D> unitCube
+      {
+         { -1, -1, -1 }, { +1, -1, -1 },
+         { +1, +1, -1 }, { -1, +1, -1 },
+         { -1, -1, +1 }, { +1, -1, +1 },
+         { +1, +1, +1 }, { -1, +1, +1 }
+      };
+
+      const auto invertedProjectionViewMatrix = camera.GetProjectionViewMatrix().inverted();
+      for (auto& corner : unitCube)
+      {
+         corner = invertedProjectionViewMatrix.map(corner);
+      }
+
+      QVector<QVector3D> vertices;
+      vertices
+         // Near plane outline:
+         << unitCube[0] << unitCube[1]
+         << unitCube[1] << unitCube[2]
+         << unitCube[2] << unitCube[3]
+         << unitCube[3] << unitCube[0]
+         // Far plane outline:
+         << unitCube[4] << unitCube[5]
+         << unitCube[5] << unitCube[6]
+         << unitCube[6] << unitCube[7]
+         << unitCube[7] << unitCube[4]
+         // Side plane outline:
+         << unitCube[0] << unitCube[4]
+         << unitCube[1] << unitCube[5]
+         << unitCube[2] << unitCube[6]
+         << unitCube[3] << unitCube[7];
+
+      QVector<QVector3D> colors;
+      for (auto index{ 0 }; index < vertices.size(); ++index)
+      {
+         colors << Constants::Colors::CORAL;
+      }
+
+      frustumAsset.SetVertexData(std::move(vertices));
+      frustumAsset.SetColorData(std::move(colors));
+
+      frustumAsset.Reload();
+   }
 }
 
 GLCanvas::GLCanvas(
@@ -82,6 +139,7 @@ GLCanvas::GLCanvas(
    m_optionsManager = m_mainWindow.GetOptionsManager();
 
    m_camera.SetPosition(QVector3D{ 500, 100, 0 });
+   m_camera.SetFarPlane(4000.0f);
 
    setFocusPolicy(Qt::StrongFocus);
 
@@ -114,7 +172,8 @@ void GLCanvas::initializeGL()
    m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<CrosshairAsset>(m_graphicsDevice));
    m_sceneAssets.emplace_back(std::make_unique<LightMarkerAsset>(m_graphicsDevice));
-   //m_sceneAssets.emplace_back(std::make_unique<TexturePreviewAsset>(*m_graphicsDevice));
+   //m_sceneAssets.emplace_back(std::make_unique<TexturePreviewAsset>(m_graphicsDevice));
+   m_sceneAssets.emplace_back(std::make_unique<FrustumAsset>(m_graphicsDevice));
 
    auto* const lightMarkers = static_cast<LightMarkerAsset*>(m_sceneAssets[LIGHT_MARKERS].get());
    InitializeLightMarkers(m_lights, *lightMarkers);
@@ -134,8 +193,16 @@ void GLCanvas::resizeGL(int width, int height)
    }
 
    m_graphicsDevice.glViewport(0, 0, width, height);
-
    m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
+
+   Camera shadowCam = m_camera;
+   shadowCam.SetPosition(QVector3D{ -200.0f, 500.0f, 200.0f });
+   shadowCam.SetOrientation(25.0f, 45.0f);
+   shadowCam.SetNearPlane(250.0f);
+   shadowCam.SetFarPlane(800.0f);
+
+   auto* const lightFrustum = static_cast<FrustumAsset*>(m_sceneAssets[FRUSTUM].get());
+   InitializeShadowCasterFrustum(shadowCam, *lightFrustum);
 }
 
 void GLCanvas::ReloadVisualization()

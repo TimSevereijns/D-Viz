@@ -42,6 +42,7 @@ namespace Constants
       const static QVector3D HOT_PINK        { 1.0f,           105.0f / 255.0f,  180.0f / 255.0f  };
       const static QVector3D FILE_GREEN      { 0.5f,                      1.0f,             0.5f  };
       const static QVector3D WHITE           { 1.0f,                      1.0f,             1.0f  };
+      const static QVector3D CORAL           { 1.0f,           127.0f / 255.0f,    80.0f / 255.0f };
    }
 
    namespace Graphics

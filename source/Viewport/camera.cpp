@@ -175,12 +175,12 @@ Qt3DRender::RayCasting::QRay3D Camera::ShootRayIntoScene(const QPoint& widgetCoo
    const QVector3D nearPlanePoint = Unproject(glCoordinates, 0.0f, QMatrix4x4{ });
    const QVector3D farPlanePoint = Unproject(glCoordinates, 1.0f, QMatrix4x4{ });
 
-   const auto direction = QVector3D(nearPlanePoint - farPlanePoint).normalized();
+   const auto direction = QVector3D(farPlanePoint - nearPlanePoint).normalized();
 
    const Qt3DRender::RayCasting::QRay3D ray
    {
       nearPlanePoint,
-      -direction
+      direction
    };
 
    return ray;
