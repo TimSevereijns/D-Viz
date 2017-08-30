@@ -68,21 +68,20 @@ namespace
          colors << Constants::Colors::WHITE;
       }
 
-      lightMarkerAsset.SetVertexData(std::move(vertices));
-      lightMarkerAsset.SetColorData(std::move(colors));
+      lightMarkerAsset.SetVertexCoordinates(std::move(vertices));
+      lightMarkerAsset.SetVertexColors(std::move(colors));
    }
 
    /**
-    * @brief InitializeShadowCasterFrustum
+    * @brief GenerateFrustum
     *
-    * @param[out] frustumAsset
+    * @param camera
+    * @param frustumAsset
     */
-   void InitializeShadowCasterFrustum(
+   void GenerateFrustum(
       const Camera& camera,
       FrustumAsset& frustumAsset)
    {
-      frustumAsset.ClearBuffers();
-
       std::vector<QVector3D> unitCube
       {
          { -1, -1, -1 }, { +1, -1, -1 },
@@ -121,8 +120,91 @@ namespace
          colors << Constants::Colors::CORAL;
       }
 
-      frustumAsset.SetVertexData(std::move(vertices));
-      frustumAsset.SetColorData(std::move(colors));
+      frustumAsset.AddVertexCoordinates(std::move(vertices));
+      frustumAsset.AddVertexColors(std::move(colors));
+   }
+
+   /**
+    * @brief CalculateShadowMapCascades
+    *
+    * @param cascadeCount
+    * @param camera
+    */
+   auto CalculateShadowMapCascades(
+      int cascadeCount,
+      const Camera& camera)
+   {
+      const double nearPlane = camera.GetNearPlane();
+      const double farPlane = camera.GetFarPlane();
+      const double planeRatio = farPlane / nearPlane;
+
+      auto previousCascadeStart{ nearPlane };
+
+      std::vector<std::pair<double, double>> cascadeDistances;
+      for (auto index{ 1.0 }; index < cascadeCount; ++index)
+      {
+         const auto cascade = nearPlane * std::pow(planeRatio, index / cascadeCount);
+         cascadeDistances.emplace_back(std::make_pair(previousCascadeStart, cascade));
+         previousCascadeStart = cascade;
+      }
+
+      cascadeDistances.emplace_back(std::make_pair(previousCascadeStart, farPlane));
+
+      return cascadeDistances;
+   }
+
+   /**
+    * @brief DrawMainCameraFrustum
+    *
+    * @param frustumAsset
+    */
+   void DrawMainCameraFrustum(FrustumAsset& frustumAsset)
+   {
+      Camera camera;
+      camera.SetPosition(QVector3D{ 500, 100, 0 });
+      camera.SetOrientation(0.0f, 0.0f);
+      camera.SetNearPlane(1.0f);
+      camera.SetFarPlane(2000.0f);
+
+      constexpr auto cascadeCount{ 4 };
+      const auto cascades = CalculateShadowMapCascades(cascadeCount, camera);
+
+      for (const auto& nearAndFarPlanes : cascades)
+      {
+         camera.SetNearPlane(nearAndFarPlanes.first);
+         camera.SetFarPlane(nearAndFarPlanes.second);
+
+         GenerateFrustum(camera, frustumAsset);
+      }
+   }
+
+   /**
+    * @brief DrawShadowCasterFrustum
+    *
+    * @param frustumAsset
+    */
+   void DrawShadowCasterFrustum(FrustumAsset& frustumAsset)
+   {
+      Camera camera;
+      camera.SetPosition(QVector3D{ -200.0f, 500.0f, 200.0f });
+      camera.SetOrientation(25.0f, 45.0f);
+      camera.SetNearPlane(250.0f);
+      camera.SetFarPlane(800.0f);
+
+      GenerateFrustum(camera, frustumAsset);
+   }
+
+   /**
+    * @brief DrawFrustra
+    *
+    * @param frustumAsset
+    */
+   void GenerateFrustra(FrustumAsset& frustumAsset)
+   {
+      frustumAsset.ClearBuffers();
+
+      DrawMainCameraFrustum(frustumAsset);
+      DrawShadowCasterFrustum(frustumAsset);
 
       frustumAsset.Reload();
    }
@@ -195,14 +277,8 @@ void GLCanvas::resizeGL(int width, int height)
    m_graphicsDevice.glViewport(0, 0, width, height);
    m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
 
-   Camera shadowCam = m_camera;
-   shadowCam.SetPosition(QVector3D{ -200.0f, 500.0f, 200.0f });
-   shadowCam.SetOrientation(25.0f, 45.0f);
-   shadowCam.SetNearPlane(250.0f);
-   shadowCam.SetFarPlane(800.0f);
-
-   auto* const lightFrustum = static_cast<FrustumAsset*>(m_sceneAssets[FRUSTUM].get());
-   InitializeShadowCasterFrustum(shadowCam, *lightFrustum);
+   auto* const lightFrustum = static_cast<FrustumAsset*>(m_sceneAssets[Asset::FRUSTUM].get());
+   GenerateFrustra(*lightFrustum);
 }
 
 void GLCanvas::ReloadVisualization()

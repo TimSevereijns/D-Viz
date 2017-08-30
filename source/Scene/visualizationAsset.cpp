@@ -101,8 +101,8 @@ namespace
       return shadowCam.GetProjectionViewMatrix();
    }
 
-    static constexpr auto TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE{ 0 };
-    static constexpr auto TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE{ 1 };
+    constexpr auto TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE{ 0 };
+    constexpr auto TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE{ 1 };
 }
 
 VisualizationAsset::VisualizationAsset(QOpenGLExtraFunctions& device) :

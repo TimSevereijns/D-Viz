@@ -7,8 +7,8 @@ FrustumAsset::FrustumAsset(QOpenGLExtraFunctions& renderingContext) :
 
 bool FrustumAsset::Render(
    const Camera& camera,
-   const std::vector<Light>& lights,
-   const OptionsManager& settings)
+   const std::vector<Light>& /*lights*/,
+   const OptionsManager& /*settings*/)
 {
    m_mainShader.bind();
    m_mainShader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());

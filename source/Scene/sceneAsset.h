@@ -94,14 +94,30 @@ class SceneAsset
        *
        * @param[in] data            The asset vertices and normals.
        */
-      void SetVertexData(QVector<QVector3D>&& data);
+      void SetVertexCoordinates(QVector<QVector3D>&& positionData);
 
       /**
        * @brief Set the color data associated with the asset in question.
        *
        * @param[in] data            The vertex colors.
        */
-      void SetColorData(QVector<QVector3D>&& data);
+      void SetVertexColors(QVector<QVector3D>&& colorData);
+
+      /**
+       * @brief Adds more vertex positions the existing collection. Make sure to also insert an
+       * equal number of vertex colors by calling AddVertexColors.
+       *
+       * @param[in] positionData    The new vertices to be added.
+       */
+      void AddVertexCoordinates(QVector<QVector3D>&& positionData);
+
+      /**
+       * @brief Adds more vertex colors the existing collection. Make sure to also insert an
+       * equal number of vertex positions by calling AddVertexCoordinates.
+       *
+       * @param[in] positionData    The new vertices to be added.
+       */
+      void AddVertexColors(QVector<QVector3D>&& colorData);
 
       /**
        * @brief Retrieves vizualization vertex count.

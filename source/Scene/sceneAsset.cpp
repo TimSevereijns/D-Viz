@@ -45,16 +45,26 @@ bool SceneAsset::IsAssetLoaded() const
    return !(m_rawVertices.empty() && m_rawColors.empty());
 }
 
-void SceneAsset::SetVertexData(QVector<QVector3D>&& data)
+void SceneAsset::SetVertexCoordinates(QVector<QVector3D>&& data)
 {
    m_rawVertices.clear();
    m_rawVertices.append(std::move(data));
 }
 
-void SceneAsset::SetColorData(QVector<QVector3D>&& data)
+void SceneAsset::SetVertexColors(QVector<QVector3D>&& data)
 {
    m_rawColors.clear();
    m_rawColors.append(std::move(data));
+}
+
+void SceneAsset::AddVertexCoordinates(QVector<QVector3D>&& positionData)
+{
+   m_rawVertices.append(std::move(positionData));
+}
+
+void SceneAsset::AddVertexColors(QVector<QVector3D>&& colorData)
+{
+   m_rawColors.append(std::move(colorData));
 }
 
 unsigned int SceneAsset::GetVertexCount() const
