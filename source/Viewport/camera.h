@@ -198,7 +198,7 @@ class Camera
        *
        * @returns The current field of view in degrees.
        */
-      float GetFieldOfView() const noexcept;
+      float GetVerticalFieldOfView() const noexcept;
 
       /**
        * @brief Increases the field of view by five degrees.
@@ -261,6 +261,11 @@ class Camera
        * @returns Distance to far plane.
        */
       float GetFarPlane() const noexcept;
+
+      /**
+       * @returns The current aspect ratio.
+       */
+      float GetAspectRatio() const noexcept;
 
 private:
 

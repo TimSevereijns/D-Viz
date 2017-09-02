@@ -222,6 +222,11 @@ float Camera::GetFarPlane() const noexcept
    return m_farPlane;
 }
 
+float Camera::GetAspectRatio() const noexcept
+{
+   return m_aspectRatio;
+}
+
 QRect Camera::GetViewport() const noexcept
 {
    return m_viewport;
@@ -243,7 +248,7 @@ void Camera::SetFieldOfView(const float angle) noexcept
    }
 }
 
-float Camera::GetFieldOfView() const noexcept
+float Camera::GetVerticalFieldOfView() const noexcept
 {
    return m_fieldOfView;
 }

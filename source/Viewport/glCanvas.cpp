@@ -72,13 +72,71 @@ namespace
       lightMarkerAsset.SetVertexColors(std::move(colors));
    }
 
+   struct Frustum
+   {
+      struct Plane
+      {
+         PrecisePoint center;
+         double width;
+         double height;
+
+         auto TopLeft() const noexcept
+         {
+            return QVector3D
+            {
+               static_cast<float>(center.x() - (width * 0.5)),
+               static_cast<float>(center.y() + (height * 0.5)),
+               static_cast<float>(center.z())
+            };
+         }
+
+         auto TopRight() const noexcept
+         {
+            return QVector3D
+            {
+               static_cast<float>(center.x() + (width * 0.5)),
+               static_cast<float>(center.y() + (height * 0.5)),
+               static_cast<float>(center.z())
+            };
+         }
+
+         auto BottomLeft() const noexcept
+         {
+            return QVector3D
+            {
+               static_cast<float>(center.x() - (width * 0.5)),
+               static_cast<float>(center.y() - (height * 0.5)),
+               static_cast<float>(center.z())
+            };
+         }
+
+         auto BottomRight() const noexcept
+         {
+            return QVector3D
+            {
+               static_cast<float>(center.x() + (width * 0.5)),
+               static_cast<float>(center.y() - (height * 0.5)),
+               static_cast<float>(center.z())
+            };
+         }
+      };
+
+      auto Depth() const noexcept
+      {
+         return farPlane.center.z() - nearPlane.center.z();
+      }
+
+      Plane nearPlane;
+      Plane farPlane;
+   };
+
    /**
     * @brief GenerateFrustum
     *
     * @param camera
     * @param frustumAsset
     */
-   void GenerateFrustum(
+   auto GenerateFrustum(
       const Camera& camera,
       FrustumAsset& frustumAsset)
    {
@@ -114,6 +172,24 @@ namespace
          << unitCube[2] << unitCube[6]
          << unitCube[3] << unitCube[7];
 
+      const auto cameraPosition = camera.GetPosition();
+
+      Frustum frustum;
+
+      frustum.nearPlane = Frustum::Plane
+      {
+         PrecisePoint{ cameraPosition.x(), cameraPosition.y(), unitCube[0].z() },
+         unitCube[2].x() - unitCube[0].x(),
+         unitCube[3].y() - unitCube[0].y()
+      };
+
+      frustum.farPlane = Frustum::Plane
+      {
+         PrecisePoint{ cameraPosition.x(), cameraPosition.y(), unitCube[4].z() },
+         unitCube[6].x() - unitCube[4].x(),
+         unitCube[7].y() - unitCube[4].y()
+      };
+
       QVector<QVector3D> colors;
       for (auto index{ 0 }; index < vertices.size(); ++index)
       {
@@ -122,6 +198,8 @@ namespace
 
       frustumAsset.AddVertexCoordinates(std::move(vertices));
       frustumAsset.AddVertexColors(std::move(colors));
+
+      return frustum;
    }
 
    /**
@@ -130,7 +208,7 @@ namespace
     * @param cascadeCount
     * @param camera
     */
-   auto CalculateShadowMapCascades(
+   auto GenerateShadowMapCascades(
       int cascadeCount,
       const Camera& camera)
    {
@@ -154,28 +232,94 @@ namespace
    }
 
    /**
+    * @brief GenerateFrustraBoundingBoxes
+    *
+    * @param frustumAsset
+    */
+   void GenerateFrustaBoundingBoxes(
+      const std::vector<Frustum>& frusta,
+      FrustumAsset& frustumAsset)
+   {
+      QVector<QVector3D> vertices;
+      for (const auto& frustum : frusta)
+      {
+         const QVector3D depth{ 0.0f, 0.0f, static_cast<float>(frustum.Depth()) };
+
+         auto nearBottomLeft = frustum.farPlane.BottomLeft();
+         nearBottomLeft -= depth;
+
+         auto nearBottomRight = frustum.farPlane.BottomRight();
+         nearBottomRight -= depth;
+
+         auto nearTopLeft = frustum.farPlane.TopLeft();
+         nearTopLeft -= depth;
+
+         auto nearTopRight = frustum.farPlane.TopRight();
+         nearTopRight -= depth;
+
+         vertices
+            // Near Plane Outline:
+            << nearBottomLeft  << nearBottomRight
+            << nearBottomRight << nearTopRight
+            << nearTopRight    << nearTopLeft
+            << nearTopLeft     << nearBottomLeft
+            // Far Plane Outline:
+            << frustum.farPlane.BottomLeft()  << frustum.farPlane.BottomRight()
+            << frustum.farPlane.BottomRight() << frustum.farPlane.TopRight()
+            << frustum.farPlane.TopRight()    << frustum.farPlane.TopLeft()
+            << frustum.farPlane.TopLeft()     << frustum.farPlane.BottomLeft()
+            // Side Plane Outline:
+            << nearBottomLeft  << frustum.farPlane.BottomLeft()
+            << nearBottomRight << frustum.farPlane.BottomRight()
+            << nearTopRight    << frustum.farPlane.TopRight()
+            << nearTopLeft     << frustum.farPlane.TopLeft();
+      }
+
+      QVector<QVector3D> colors;
+      for (auto index{ 0 }; index < vertices.size(); ++index)
+      {
+         colors << Constants::Colors::HOT_PINK;
+      }
+
+      frustumAsset.AddVertexCoordinates(std::move(vertices));
+      frustumAsset.AddVertexColors(std::move(colors));
+   }
+
+   /**
     * @brief DrawMainCameraFrustum
     *
     * @param frustumAsset
     */
-   void DrawMainCameraFrustum(FrustumAsset& frustumAsset)
+   void GenerateCameraFrusta(FrustumAsset& frustumAsset)
    {
       Camera camera;
       camera.SetPosition(QVector3D{ 500, 100, 0 });
+      camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ 500, 500 } });
       camera.SetOrientation(0.0f, 0.0f);
       camera.SetNearPlane(1.0f);
       camera.SetFarPlane(2000.0f);
 
-      constexpr auto cascadeCount{ 4 };
-      const auto cascades = CalculateShadowMapCascades(cascadeCount, camera);
+      constexpr auto cascadeCount{ 3 };
+      const auto cascades = GenerateShadowMapCascades(cascadeCount, camera);
+
+//      for (auto& cascade : cascades)
+//      {
+//         std::cout << "Near: " << cascade.first << ", Far: " << cascade.second << std::endl;
+//      }
+
+      std::vector<Frustum> frusta;
+      frusta.reserve(cascades.size());
 
       for (const auto& nearAndFarPlanes : cascades)
       {
          camera.SetNearPlane(nearAndFarPlanes.first);
          camera.SetFarPlane(nearAndFarPlanes.second);
 
-         GenerateFrustum(camera, frustumAsset);
+         auto&& frustum = GenerateFrustum(camera, frustumAsset);
+         frusta.emplace_back(std::forward<Frustum>(frustum));
       }
+
+      GenerateFrustaBoundingBoxes(frusta, frustumAsset);
    }
 
    /**
@@ -183,7 +327,7 @@ namespace
     *
     * @param frustumAsset
     */
-   void DrawShadowCasterFrustum(FrustumAsset& frustumAsset)
+   void GenerateShadowCasterFrustum(FrustumAsset& frustumAsset)
    {
       Camera camera;
       camera.SetPosition(QVector3D{ -200.0f, 500.0f, 200.0f });
@@ -197,14 +341,16 @@ namespace
    /**
     * @brief DrawFrustra
     *
+    * @note See http://ogldev.atspace.co.uk/www/tutorial49/tutorial49.html
+    *
     * @param frustumAsset
     */
-   void GenerateFrustra(FrustumAsset& frustumAsset)
+   void GenerateFrusta(FrustumAsset& frustumAsset)
    {
       frustumAsset.ClearBuffers();
 
-      DrawMainCameraFrustum(frustumAsset);
-      DrawShadowCasterFrustum(frustumAsset);
+      GenerateCameraFrusta(frustumAsset);
+      //GenerateShadowCasterFrustum(frustumAsset);
 
       frustumAsset.Reload();
    }
@@ -278,7 +424,7 @@ void GLCanvas::resizeGL(int width, int height)
    m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
 
    auto* const lightFrustum = static_cast<FrustumAsset*>(m_sceneAssets[Asset::FRUSTUM].get());
-   GenerateFrustra(*lightFrustum);
+   GenerateFrusta(*lightFrustum);
 }
 
 void GLCanvas::ReloadVisualization()
@@ -486,7 +632,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
          m_camera.DecreaseFieldOfView();
       }
 
-      m_mainWindow.SetFieldOfViewSlider(static_cast<float>(m_camera.GetFieldOfView()));
+      m_mainWindow.SetFieldOfViewSlider(static_cast<float>(m_camera.GetVerticalFieldOfView()));
    }
 }
 
