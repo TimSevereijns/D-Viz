@@ -45,7 +45,6 @@ SOURCES += \
    Scene/lightMarkerAsset.cpp \
    Scene/lineAsset.cpp \
    Scene/sceneAsset.cpp \
-   Scene/visualizationAsset.cpp \
    Viewport/camera.cpp \
    Viewport/canvasContextMenu.cpp \
    Viewport/glCanvas.cpp \
@@ -54,7 +53,8 @@ SOURCES += \
    Windows/aboutDialog.cpp \
    Windows/breakdownDialog.cpp \
    Windows/mainWindow.cpp \
-   Windows/scanBreakdownModel.cpp
+   Windows/scanBreakdownModel.cpp \
+    Scene/treemapAsset.cpp
 
 HEADERS  += \
    constants.h \
@@ -77,7 +77,6 @@ HEADERS  += \
    Scene/lightMarkerAsset.h \
    Scene/lineAsset.h \
    Scene/sceneAsset.h \
-   Scene/visualizationAsset.h \
    Utilities/colorGradient.hpp \
    Utilities/ignoreUnused.hpp \
    Utilities/operatingSystemSpecific.hpp \
@@ -92,7 +91,8 @@ HEADERS  += \
    Windows/aboutDialog.h \
    Windows/breakdownDialog.h \
    Windows/mainWindow.h \
-   Windows/scanBreakdownModel.h
+   Windows/scanBreakdownModel.h \
+    Scene/treemapAsset.h
 
 FORMS    += \
    Windows/aboutDialog.ui \

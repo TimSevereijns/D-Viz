@@ -1,4 +1,4 @@
-#include "visualizationAsset.h"
+#include "treemapAsset.h"
 
 #include "../constants.h"
 #include "../DataStructs/vizFile.h"
@@ -86,17 +86,17 @@ namespace
    }
 }
 
-VisualizationAsset::VisualizationAsset(QOpenGLExtraFunctions& device) :
+TreemapAsset::TreemapAsset(QOpenGLExtraFunctions& device) :
    SceneAsset{ device }
 {
 }
 
-bool VisualizationAsset::LoadShaders()
+bool TreemapAsset::LoadShaders()
 {
    return SceneAsset::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
 }
 
-bool VisualizationAsset::Initialize()
+bool TreemapAsset::Initialize()
 {
    const bool unitBlockInitialized = InitializeReferenceBlock();
    const bool colorsInitialized = InitializeColors();
@@ -111,7 +111,7 @@ bool VisualizationAsset::Initialize()
    return overallSuccess;
 }
 
-bool VisualizationAsset::InitializeReferenceBlock()
+bool TreemapAsset::InitializeReferenceBlock()
 {
    if (!m_VAO.isCreated())
    {
@@ -163,7 +163,7 @@ bool VisualizationAsset::InitializeReferenceBlock()
    return true;
 }
 
-bool VisualizationAsset::InitializeColors()
+bool TreemapAsset::InitializeColors()
 {
    if (!m_VAO.isCreated())
    {
@@ -195,7 +195,7 @@ bool VisualizationAsset::InitializeColors()
    return true;
 }
 
-bool VisualizationAsset::InitializeBlockTransformations()
+bool TreemapAsset::InitializeBlockTransformations()
 {
    if (!m_VAO.isCreated())
    {
@@ -264,7 +264,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
    return true;
 }
 
-std::uint32_t VisualizationAsset::LoadBufferData(
+std::uint32_t TreemapAsset::LoadBufferData(
    const Tree<VizFile>& tree,
    const VisualizationParameters& parameters)
 {
@@ -319,7 +319,7 @@ std::uint32_t VisualizationAsset::LoadBufferData(
    return m_blockCount;
 }
 
-void VisualizationAsset::FindLargestDirectory(const Tree<VizFile>& tree)
+void TreemapAsset::FindLargestDirectory(const Tree<VizFile>& tree)
 {
    std::uintmax_t largestDirectory = std::numeric_limits<std::uintmax_t>::min();
 
@@ -341,7 +341,7 @@ void VisualizationAsset::FindLargestDirectory(const Tree<VizFile>& tree)
    m_largestDirectorySize = largestDirectory;
 }
 
-QVector3D VisualizationAsset::ComputeGradientColor(const Tree<VizFile>::Node& node)
+QVector3D TreemapAsset::ComputeGradientColor(const Tree<VizFile>::Node& node)
 {
    const auto blockSize = node.GetData().file.size;
    const auto ratio = static_cast<double>(blockSize) / static_cast<double>(m_largestDirectorySize);
@@ -350,17 +350,17 @@ QVector3D VisualizationAsset::ComputeGradientColor(const Tree<VizFile>::Node& no
    return finalColor;
 }
 
-std::uint32_t VisualizationAsset::GetBlockCount() const
+std::uint32_t TreemapAsset::GetBlockCount() const
 {
    return m_blockCount;
 }
 
-bool VisualizationAsset::IsAssetLoaded() const
+bool TreemapAsset::IsAssetLoaded() const
 {
    return !(m_blockTransformations.empty() && m_blockColors.empty());
 }
 
-bool VisualizationAsset::Render(
+bool TreemapAsset::Render(
    const Camera& camera,
    const std::vector<Light>& lights,
    const OptionsManager& settings)
@@ -398,7 +398,7 @@ bool VisualizationAsset::Render(
    return true;
 }
 
-bool VisualizationAsset::Reload()
+bool TreemapAsset::Reload()
 {
    InitializeReferenceBlock();
    InitializeColors();
@@ -407,7 +407,7 @@ bool VisualizationAsset::Reload()
    return true;
 }
 
-void VisualizationAsset::UpdateVBO(
+void TreemapAsset::UpdateVBO(
    const Tree<VizFile>::Node& node,
    SceneAsset::UpdateAction action,
    const VisualizationParameters& options)

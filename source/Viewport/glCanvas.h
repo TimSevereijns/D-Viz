@@ -192,6 +192,24 @@ class GLCanvas final : public QOpenGLWidget
       bool m_isLeftMouseButtonDown{ false };
       bool m_isCursorHidden{ false };
 
+      template<typename AssetType>
+      AssetType* GetAsset(const std::string& assetName) noexcept
+      {
+         const auto itr = std::find_if(std::begin(m_sceneAssets), std::end(m_sceneAssets),
+           [&] (const auto& nameAndPtr) noexcept
+         {
+            return nameAndPtr.name == assetName;
+         });
+
+         if (itr == std::end(m_sceneAssets))
+         {
+            assert(false);
+            return nullptr;
+         }
+
+         return reinterpret_cast<AssetType*>(itr->pointer.get());
+      }
+
       Controller& m_controller;
 
       MainWindow& m_mainWindow;
@@ -234,7 +252,16 @@ class GLCanvas final : public QOpenGLWidget
 
       QPoint m_lastMousePosition;
 
-      std::vector<std::unique_ptr<SceneAsset>> m_sceneAssets;
+      struct AssetNameAndPtr
+      {
+          std::string name;
+          std::unique_ptr<SceneAsset> pointer;
+      };
+
+      // @note Using an unsorted, linear container to store and retrieve assets is likely to
+      // outperform std::unordered_map for a small number of assets. If the asset count should ever
+      // grow past, say, 30 assets, then a std::unordered_map might start to make more sense.
+      std::vector<AssetNameAndPtr> m_sceneAssets;
 
       std::deque<int> m_frameTimeDeque;
 };
