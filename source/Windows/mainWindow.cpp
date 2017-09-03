@@ -144,7 +144,7 @@ void MainWindow::SetupGamepad()
 
 std::wstring MainWindow::GetDirectoryToVisualize() const
 {
-   return m_rootPath;
+   return m_rootPath.wstring();
 }
 
 void MainWindow::SetupMenus()
@@ -264,7 +264,7 @@ void MainWindow::OnFileMenuNewScan()
    const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
 
    VisualizationParameters parameters;
-   parameters.rootDirectory = m_rootPath;
+   parameters.rootDirectory = m_rootPath.wstring();
    parameters.onlyShowDirectories = m_showDirectoriesOnly;
    parameters.forceNewScan = true;
    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
@@ -379,7 +379,7 @@ void MainWindow::PruneTree()
    const auto pruneSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
 
    VisualizationParameters parameters;
-   parameters.rootDirectory = m_rootPath;
+   parameters.rootDirectory = m_rootPath.wstring();
    parameters.onlyShowDirectories = m_showDirectoriesOnly;
    parameters.useDirectoryGradient = m_useDirectoryGradient;
    parameters.forceNewScan = false;

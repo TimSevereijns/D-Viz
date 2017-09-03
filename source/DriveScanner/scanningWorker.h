@@ -16,7 +16,7 @@
 #include "../DataStructs/block.h"
 #include "../DataStructs/driveScanningParameters.h"
 #include "../DataStructs/fileInfo.h"
-#include "../DataStructs/scanningprogress.hpp"
+#include "../DataStructs/scanningProgress.hpp"
 #include "../DataStructs/vizFile.h"
 #include "../Visualizations/visualization.h"
 

@@ -17,7 +17,9 @@ win32:QMAKE_CFLAGS_RELEASE += /Zi
 win32:QMAKE_LFLAGS_RELEASE += /MAP /debug /opt:ref
 
 # Unlock all the fun toys:
-QMAKE_CXXFLAGS += /std:c++latest
+win32:QMAKE_CXXFLAGS += /std:c++latest
+
+unix:INCLUDEPATH += /usr/include/c++/7.2.0
 
 # Bump up the warning level to W4:
 QMAKE_CFLAGS_WARN_ON -= -W3
@@ -62,7 +64,7 @@ HEADERS  += \
    DataStructs/light.h \
    DataStructs/driveScanningParameters.h \
    DataStructs/precisePoint.h \
-   DataStructs/scanningprogress.hpp \
+   DataStructs/scanningProgress.hpp \
    DataStructs/vizFile.cpp \
    DriveScanner/driveScanner.h \
    DriveScanner/scanningWorker.h \
@@ -103,7 +105,6 @@ INCLUDEPATH += \
    ../Foreign/Stopwatch/source \
    ../Foreign/Tree/source \
    ../Foreign/ArenaAllocator/source
-
 
 DISTFILES += \
    Shaders/visualizationFragmentShader.frag \
