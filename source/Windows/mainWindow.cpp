@@ -24,6 +24,11 @@ Constants::FileSize::Prefix ActivePrefix = Constants::FileSize::Prefix::BINARY;
 
 namespace
 {
+   /**
+    * @brief Helper function to be called once scanning completes.
+    *
+    * @param[in] progress           The final results from the scan.
+    */
    void LogScanCompletion(const ScanningProgress& progress)
    {
       const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
@@ -36,6 +41,58 @@ namespace
 
       log->flush();
    }
+
+   /**
+    * @brief Switches to a different set of entries for the file pruning drop-down menu.
+    *
+    * @param[in] prefix             The desired unit prefix.
+    *
+    * @returns A pointer to a const static vector containing the menu values.
+    */
+   const std::vector<std::pair<std::uintmax_t, QString>>* SwitchPruningMenuPrefix(
+      Constants::FileSize::Prefix prefix)
+   {
+      switch (prefix)
+      {
+         case Constants::FileSize::Prefix::DECIMAL:
+            const static auto decimal = std::vector<std::pair<std::uintmax_t, QString>>
+            {
+               { 0u,                                               "Show All" },
+               { Constants::FileSize::Decimal::ONE_KILOBYTE,       "< 1 KB"   },
+               { Constants::FileSize::Decimal::ONE_MEGABYTE,       "< 1 MB"   },
+               { Constants::FileSize::Decimal::ONE_MEGABYTE * 10,  "< 10 MB"  },
+               { Constants::FileSize::Decimal::ONE_MEGABYTE * 100, "< 100 MB" },
+               { Constants::FileSize::Decimal::ONE_MEGABYTE * 250, "< 250 MB" },
+               { Constants::FileSize::Decimal::ONE_MEGABYTE * 500, "< 500 MB" },
+               { Constants::FileSize::Decimal::ONE_GIGABYTE,       "< 1 GB"   },
+               { Constants::FileSize::Decimal::ONE_GIGABYTE * 5,   "< 5 GB"   },
+               { Constants::FileSize::Decimal::ONE_GIGABYTE * 10,  "< 10 GB"  }
+            };
+
+            return &decimal;
+
+         case Constants::FileSize::Prefix::BINARY:
+            const static auto binary = std::vector<std::pair<std::uintmax_t, QString>>
+            {
+               { 0u,                                              "Show All"  },
+               { Constants::FileSize::Binary::ONE_KIBIBYTE,       "< 1 KiB"   },
+               { Constants::FileSize::Binary::ONE_MEBIBYTE,       "< 1 MiB"   },
+               { Constants::FileSize::Binary::ONE_MEBIBYTE * 10,  "< 10 MiB"  },
+               { Constants::FileSize::Binary::ONE_MEBIBYTE * 100, "< 100 MiB" },
+               { Constants::FileSize::Binary::ONE_MEBIBYTE * 250, "< 250 MiB" },
+               { Constants::FileSize::Binary::ONE_MEBIBYTE * 500, "< 500 MiB" },
+               { Constants::FileSize::Binary::ONE_GIBIBYTE,       "< 1 GiB"   },
+               { Constants::FileSize::Binary::ONE_GIBIBYTE * 5,   "< 5 GiB"   },
+               { Constants::FileSize::Binary::ONE_GIBIBYTE * 10,  "< 10 GiB"  }
+            };
+
+            return &binary;
+
+         default: assert(!"Type not supported.");
+
+         return nullptr;
+      }
+   }
 }
 
 MainWindow::MainWindow(
@@ -44,7 +101,8 @@ MainWindow::MainWindow(
    :
    QMainWindow{ parent },
    m_controller{ controller },
-   m_optionsManager{ std::make_shared<OptionsManager>() }
+   m_optionsManager{ std::make_shared<OptionsManager>() },
+   m_fileSizeOptions{ SwitchPruningMenuPrefix(Constants::FileSize::Prefix::BINARY) }
 {
    m_ui.setupUi(this);
 
@@ -114,6 +172,11 @@ void MainWindow::SetupSidebar()
 
 void MainWindow::SetupFileSizePruningDropdown()
 {
+//   if (!m_fileSizeOptions)
+//   {
+//      return;
+//   }
+
    const auto currentIndex = m_ui.pruneSizeComboBox->currentIndex();
 
    m_ui.pruneSizeComboBox->clear();
@@ -298,8 +361,8 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
    m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.setChecked(false);
 
    ActivePrefix = Constants::FileSize::Prefix::BINARY;
+   m_fileSizeOptions = SwitchPruningMenuPrefix(ActivePrefix);
 
-   m_fileSizeOptions = &m_binaryFileSizeOptions;
    SetupFileSizePruningDropdown();
 
    const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
@@ -332,8 +395,8 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
    m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.setChecked(true);
 
    ActivePrefix = Constants::FileSize::Prefix::DECIMAL;
+   m_fileSizeOptions = SwitchPruningMenuPrefix(ActivePrefix);
 
-   m_fileSizeOptions = &m_decimalFileSizeOptions;
    SetupFileSizePruningDropdown();
 
    const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();

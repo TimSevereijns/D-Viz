@@ -221,41 +221,7 @@ class MainWindow final : public QMainWindow
 
       std::experimental::filesystem::path m_rootPath{ };
 
-      std::vector<std::pair<std::uintmax_t, QString>> m_binaryFileSizeOptions
-      {
-         { 0u,                                              "Show All"  },
-         { Constants::FileSize::Binary::ONE_KIBIBYTE,       "< 1 KiB"   },
-         { Constants::FileSize::Binary::ONE_MEBIBYTE,       "< 1 MiB"   },
-         { Constants::FileSize::Binary::ONE_MEBIBYTE * 10,  "< 10 MiB"  },
-         { Constants::FileSize::Binary::ONE_MEBIBYTE * 100, "< 100 MiB" },
-         { Constants::FileSize::Binary::ONE_MEBIBYTE * 250, "< 250 MiB" },
-         { Constants::FileSize::Binary::ONE_MEBIBYTE * 500, "< 500 MiB" },
-         { Constants::FileSize::Binary::ONE_GIBIBYTE,       "< 1 GiB"   },
-         { Constants::FileSize::Binary::ONE_GIBIBYTE * 5,   "< 5 GiB"   },
-         { Constants::FileSize::Binary::ONE_GIBIBYTE * 10,  "< 10 GiB"  }
-      };
-
-      std::vector<std::pair<std::uintmax_t, QString>> m_decimalFileSizeOptions
-      {
-         { 0u,                                               "Show All" },
-         { Constants::FileSize::Decimal::ONE_KILOBYTE,       "< 1 KB"   },
-         { Constants::FileSize::Decimal::ONE_MEGABYTE,       "< 1 MB"   },
-         { Constants::FileSize::Decimal::ONE_MEGABYTE * 10,  "< 10 MB"  },
-         { Constants::FileSize::Decimal::ONE_MEGABYTE * 100, "< 100 MB" },
-         { Constants::FileSize::Decimal::ONE_MEGABYTE * 250, "< 250 MB" },
-         { Constants::FileSize::Decimal::ONE_MEGABYTE * 500, "< 500 MB" },
-         { Constants::FileSize::Decimal::ONE_GIGABYTE,       "< 1 GB"   },
-         { Constants::FileSize::Decimal::ONE_GIGABYTE * 5,   "< 5 GB"   },
-         { Constants::FileSize::Decimal::ONE_GIGABYTE * 10,  "< 10 GB"  }
-      };
-
-      static_assert(
-         std::is_same_v<
-            decltype(m_binaryFileSizeOptions),
-            decltype(m_decimalFileSizeOptions)>,
-         "The underlying types of the pruning options must be identical!");
-
-      decltype(m_binaryFileSizeOptions)* m_fileSizeOptions{ &m_binaryFileSizeOptions };
+      const std::vector<std::pair<std::uintmax_t, QString>>* m_fileSizeOptions{ nullptr };
 };
 
 #endif // MAINWINDOW_H

@@ -207,7 +207,7 @@ class GLCanvas final : public QOpenGLWidget
             return nullptr;
          }
 
-         return reinterpret_cast<AssetType*>(itr->pointer.get());
+         return static_cast<AssetType*>(itr->pointer.get());
       }
 
       Controller& m_controller;
@@ -259,7 +259,7 @@ class GLCanvas final : public QOpenGLWidget
       };
 
       // @note Using an unsorted, linear container to store and retrieve assets is likely to
-      // outperform std::unordered_map for a small number of assets. If the asset count should ever
+      // outperform std::unordered_map for a small number of assets. Should the asset count ever
       // grow past, say, 30 assets, then a std::unordered_map might start to make more sense.
       std::vector<AssetNameAndPtr> m_sceneAssets;
 
