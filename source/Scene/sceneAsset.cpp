@@ -8,11 +8,6 @@ SceneAsset::SceneAsset(QOpenGLExtraFunctions& device) :
 {
 }
 
-SceneAsset::~SceneAsset()
-{
-   ClearBuffers();
-}
-
 bool SceneAsset::ClearBuffers()
 {
    m_vertexBuffer.destroy();
@@ -72,4 +67,14 @@ void SceneAsset::UpdateVBO(
    UpdateAction,
    const VisualizationParameters&)
 {
+}
+
+void SceneAsset::EnableRendering() noexcept
+{
+   m_shouldRender = true;
+}
+
+void SceneAsset::DisableRendering() noexcept
+{
+   m_shouldRender = false;
 }

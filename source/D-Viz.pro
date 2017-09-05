@@ -16,9 +16,10 @@ CONFIG += c++1z
 win32:QMAKE_CFLAGS_RELEASE += /Zi
 win32:QMAKE_LFLAGS_RELEASE += /MAP /debug /opt:ref
 
-# Unlock all the fun toys:
+# Unlock all the fun toys on Windows:
 win32:QMAKE_CXXFLAGS += /std:c++latest
 
+# @todo Make this more generic, or remove it altogether.
 unix:INCLUDEPATH += /usr/include/c++/7.2.0
 
 # Bump up the warning level to W4:
@@ -45,6 +46,7 @@ SOURCES += \
    Scene/lightMarkerAsset.cpp \
    Scene/lineAsset.cpp \
    Scene/sceneAsset.cpp \
+   Scene/treemapAsset.cpp \
    Viewport/camera.cpp \
    Viewport/canvasContextMenu.cpp \
    Viewport/glCanvas.cpp \
@@ -53,8 +55,7 @@ SOURCES += \
    Windows/aboutDialog.cpp \
    Windows/breakdownDialog.cpp \
    Windows/mainWindow.cpp \
-   Windows/scanBreakdownModel.cpp \
-    Scene/treemapAsset.cpp
+   Windows/scanBreakdownModel.cpp
 
 HEADERS  += \
    constants.h \
@@ -77,6 +78,7 @@ HEADERS  += \
    Scene/lightMarkerAsset.h \
    Scene/lineAsset.h \
    Scene/sceneAsset.h \
+   Scene/treemapAsset.h \
    Utilities/colorGradient.hpp \
    Utilities/ignoreUnused.hpp \
    Utilities/operatingSystemSpecific.hpp \
@@ -91,8 +93,7 @@ HEADERS  += \
    Windows/aboutDialog.h \
    Windows/breakdownDialog.h \
    Windows/mainWindow.h \
-   Windows/scanBreakdownModel.h \
-    Scene/treemapAsset.h
+   Windows/scanBreakdownModel.h
 
 FORMS    += \
    Windows/aboutDialog.ui \

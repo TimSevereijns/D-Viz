@@ -32,7 +32,7 @@ class SceneAsset
 
       explicit SceneAsset(QOpenGLExtraFunctions& device);
 
-      virtual ~SceneAsset();
+      virtual ~SceneAsset() = default;
 
       /**
        * @brief Loads the vertex and color data into the OpenGL buffers. Use
@@ -128,6 +128,16 @@ class SceneAsset
          UpdateAction action,
          const VisualizationParameters& options);
 
+      /**
+       * @brief EnableRendering
+       */
+      void EnableRendering() noexcept;
+
+      /**
+       * @brief DisableRendering
+       */
+      void DisableRendering() noexcept;
+
    protected:
 
       /**
@@ -141,6 +151,8 @@ class SceneAsset
       bool LoadShaders(
          const QString& vertexShaderName,
          const QString& fragmentShaderName);
+
+      bool m_shouldRender{ true };
 
       QOpenGLBuffer m_vertexBuffer;
       QOpenGLBuffer m_colorBuffer;

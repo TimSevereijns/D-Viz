@@ -8,6 +8,11 @@
 #include "HID/keyboardManager.h"
 #include "optionsManager.h"
 #include "Scene/sceneAsset.h"
+#include "Scene/crosshairAsset.h"
+#include "Scene/debuggingRayAsset.h"
+#include "Scene/gridAsset.h"
+#include "Scene/lightMarkerAsset.h"
+#include "Scene/treemapAsset.h"
 #include "Visualizations/visualization.h"
 #include "Windows/mainWindow.h"
 
@@ -18,6 +23,39 @@
 #include <QOpenGLWidget>
 #include <QTimer>
 #include <QVector3D>
+
+namespace Asset
+{
+   struct Tag
+   {
+      using AssetType = void;
+      virtual int GetID() const noexcept { return 0; }
+   };
+
+   struct Grid final : Tag
+   {
+      using AssetType = GridAsset;
+      int GetID() const noexcept override { return 1; }
+   };
+
+   struct Crosshair final : Tag
+   {
+       using AssetType = CrosshairAsset;
+       int GetID() const noexcept override { return 2; }
+   };
+
+   struct Treemap final : Tag
+   {
+      using AssetType = TreemapAsset;
+      int GetID() const noexcept override { return 3; }
+   };
+
+   struct LightMarker final : Tag
+   {
+      using AssetType = LightMarkerAsset;
+      int GetID() const noexcept override { return 4; }
+   };
+}
 
 /**
  * @brief The GLCanvas class represents the canvas object on which the visualization is to be drawn.
@@ -78,6 +116,18 @@ class GLCanvas final : public QOpenGLWidget
        * @brief Returns any highlighted nodes back to their unhighlighted colors.
        */
       void RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& nodes);
+
+      /**
+       * @brief ToggleRenderState
+       *
+       * @param desiredState
+       */
+      template<typename TagType>
+      void ToggleRenderState(bool /*desiredState*/) const noexcept
+      {
+         auto* const asset = GetAsset<TagType>();
+         asset->DisableRendering();
+      }
 
    protected:
 
@@ -192,13 +242,13 @@ class GLCanvas final : public QOpenGLWidget
       bool m_isLeftMouseButtonDown{ false };
       bool m_isCursorHidden{ false };
 
-      template<typename AssetType>
-      AssetType* GetAsset(const std::string& assetName) noexcept
+      template<typename RequestedType>
+      typename RequestedType::AssetType* GetAsset() const noexcept
       {
          const auto itr = std::find_if(std::begin(m_sceneAssets), std::end(m_sceneAssets),
-           [&] (const auto& nameAndPtr) noexcept
+           [targetID = RequestedType().GetID()] (const auto& tagAndAsset) noexcept
          {
-            return nameAndPtr.name == assetName;
+            return tagAndAsset.tag->GetID() == targetID;
          });
 
          if (itr == std::end(m_sceneAssets))
@@ -207,7 +257,7 @@ class GLCanvas final : public QOpenGLWidget
             return nullptr;
          }
 
-         return static_cast<AssetType*>(itr->pointer.get());
+         return static_cast<typename RequestedType::AssetType*>(itr->asset.get());
       }
 
       Controller& m_controller;
@@ -252,16 +302,16 @@ class GLCanvas final : public QOpenGLWidget
 
       QPoint m_lastMousePosition;
 
-      struct AssetNameAndPtr
+      struct TagAndAsset
       {
-          std::string name;
-          std::unique_ptr<SceneAsset> pointer;
+         std::unique_ptr<Asset::Tag> tag;
+         std::unique_ptr<SceneAsset> asset;
       };
 
       // @note Using an unsorted, linear container to store and retrieve assets is likely to
       // outperform std::unordered_map for a small number of assets. Should the asset count ever
       // grow past, say, 30 assets, then a std::unordered_map might start to make more sense.
-      std::vector<AssetNameAndPtr> m_sceneAssets;
+      std::vector<TagAndAsset> m_sceneAssets;
 
       std::deque<int> m_frameTimeDeque;
 };

@@ -49,7 +49,7 @@ namespace
     *
     * @returns A pointer to a const static vector containing the menu values.
     */
-   const std::vector<std::pair<std::uintmax_t, QString>>* SwitchPruningMenuPrefix(
+   const std::vector<std::pair<std::uintmax_t, QString>>* SwitchPruningMenuEntries(
       Constants::FileSize::Prefix prefix)
    {
       switch (prefix)
@@ -102,7 +102,7 @@ MainWindow::MainWindow(
    QMainWindow{ parent },
    m_controller{ controller },
    m_optionsManager{ std::make_shared<OptionsManager>() },
-   m_fileSizeOptions{ SwitchPruningMenuPrefix(Constants::FileSize::Prefix::BINARY) }
+   m_fileSizeOptions{ SwitchPruningMenuEntries(Constants::FileSize::Prefix::BINARY) }
 {
    m_ui.setupUi(this);
 
@@ -172,12 +172,7 @@ void MainWindow::SetupSidebar()
 
 void MainWindow::SetupFileSizePruningDropdown()
 {
-//   if (!m_fileSizeOptions)
-//   {
-//      return;
-//   }
-
-   const auto currentIndex = m_ui.pruneSizeComboBox->currentIndex();
+   const auto previousIndex = m_ui.pruneSizeComboBox->currentIndex();
 
    m_ui.pruneSizeComboBox->clear();
 
@@ -188,7 +183,7 @@ void MainWindow::SetupFileSizePruningDropdown()
          static_cast<qulonglong>(numberOfBytesAndUnits.first));
    });
 
-   m_ui.pruneSizeComboBox->setCurrentIndex(currentIndex == -1 ? 0 : currentIndex);
+   m_ui.pruneSizeComboBox->setCurrentIndex(previousIndex == -1 ? 0 : previousIndex);
 
    statusBar()->clearMessage();
 }
@@ -214,12 +209,15 @@ void MainWindow::SetupMenus()
 {
    SetupFileMenu();
    SetupOptionsMenu();
+
+   // @todo Guard this menu with a boolean of some sort:
+   SetupDebuggingMenu();
+
    SetupHelpMenu();
 }
 
 void MainWindow::SetupFileMenu()
 {
-   m_fileMenuWrapper.newScan.setParent(this);
    m_fileMenuWrapper.newScan.setText("New Scan...");
    m_fileMenuWrapper.newScan.setStatusTip("Start a new visualization.");
    m_fileMenuWrapper.newScan.setShortcuts(QKeySequence::New);
@@ -227,7 +225,6 @@ void MainWindow::SetupFileMenu()
    connect(&m_fileMenuWrapper.newScan, &QAction::triggered,
       this, &MainWindow::OnFileMenuNewScan);
 
-   m_fileMenuWrapper.exit.setParent(this);
    m_fileMenuWrapper.exit.setText("Exit");
    m_fileMenuWrapper.exit.setStatusTip("Exit the program.");
    m_fileMenuWrapper.exit.setShortcuts(QKeySequence::Quit);
@@ -244,7 +241,6 @@ void MainWindow::SetupFileMenu()
 
 void MainWindow::SetupOptionsMenu()
 {
-   m_optionsMenuWrapper.toggleFrameTime.setParent(this);
    m_optionsMenuWrapper.toggleFrameTime.setText("Show Frame Time");
    m_optionsMenuWrapper.toggleFrameTime.setStatusTip("Toggle frame-time readout in titlebar.");
    m_optionsMenuWrapper.toggleFrameTime.setCheckable(true);
@@ -264,7 +260,6 @@ void MainWindow::SetupFileSizeSubMenu()
 {
    auto& subMenuWrapper = m_optionsMenuWrapper.fileSizeMenuWrapper;
 
-   subMenuWrapper.binaryPrefix.setParent(&m_optionsMenu);
    subMenuWrapper.binaryPrefix.setText("Binary Prefix");
    subMenuWrapper.binaryPrefix.setStatusTip(
       "Use base-two units, such as kibibytes and mebibytes. This is the default on Windows.");
@@ -274,7 +269,6 @@ void MainWindow::SetupFileSizeSubMenu()
    connect(&subMenuWrapper.binaryPrefix, &QAction::toggled,
       this, &MainWindow::SwitchToBinaryPrefix);
 
-   subMenuWrapper.decimalPrefix.setParent(&m_optionsMenu);
    subMenuWrapper.decimalPrefix.setText("Decimal Prefix");
    subMenuWrapper.decimalPrefix.setStatusTip(
       "Use base-ten units, such as kilobytes and megabytes.");
@@ -289,6 +283,44 @@ void MainWindow::SetupFileSizeSubMenu()
    m_optionsMenuWrapper.fileSizeMenu.addAction(&subMenuWrapper.decimalPrefix);
 
    m_optionsMenu.addMenu(&m_optionsMenuWrapper.fileSizeMenu);
+}
+
+void MainWindow::SetupDebuggingMenu()
+{
+   auto& renderMenuWrapper = m_debuggingMenuWrapper.renderMenuWrapper;
+   auto& renderMenu = m_debuggingMenuWrapper.renderMenu;
+
+   renderMenuWrapper.origin.setText("Origin");
+   renderMenuWrapper.origin.setCheckable(true);
+   renderMenuWrapper.origin.setChecked(false);
+
+   connect(&renderMenuWrapper.origin, &QAction::toggle,
+      this, &MainWindow::OnRenderOriginToggled);
+
+   renderMenuWrapper.grid.setText("Grid");
+   renderMenuWrapper.grid.setCheckable(true);
+   renderMenuWrapper.grid.setChecked(false);
+
+   connect(&renderMenuWrapper.grid, &QAction::toggle,
+      this, &MainWindow::OnRenderGridToggled);
+
+   renderMenuWrapper.lightMarkers.setText("Light Markers");
+   renderMenuWrapper.lightMarkers.setCheckable(true);
+   renderMenuWrapper.lightMarkers.setChecked(false);
+
+   connect(&renderMenuWrapper.lightMarkers, &QAction::toggle,
+      this, &MainWindow::OnRenderLightMarkersToggled);
+
+   renderMenu.setTitle("Render");
+   renderMenu.setStatusTip("Toggle visual debugging aides.");
+   renderMenu.addAction(&renderMenuWrapper.origin);
+   renderMenu.addAction(&renderMenuWrapper.grid);
+   renderMenu.addAction(&renderMenuWrapper.lightMarkers);
+
+   m_debuggingMenu.setTitle("Debugging");
+   m_debuggingMenu.addMenu(&renderMenu);
+
+   menuBar()->addMenu(&m_debuggingMenu);
 }
 
 void MainWindow::SetupHelpMenu()
@@ -346,10 +378,12 @@ void MainWindow::OnFPSReadoutToggled(bool isEnabled)
 
 void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
 {
-   // @todo emit a signal that the breakdown dialog can hook up to.
+   // @todo Emit a signal that the breakdown dialog can hook up to.
 
-   m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(true);
-   m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.blockSignals(true);
+   auto& menuWrapper = m_optionsMenuWrapper.fileSizeMenuWrapper;
+
+   menuWrapper.binaryPrefix.blockSignals(true);
+   menuWrapper.decimalPrefix.blockSignals(true);
 
    ON_SCOPE_EXIT
    {
@@ -357,11 +391,11 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
       m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(false);
    };
 
-   m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.setChecked(true);
-   m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.setChecked(false);
+   menuWrapper.binaryPrefix.setChecked(true);
+   menuWrapper.decimalPrefix.setChecked(false);
 
    ActivePrefix = Constants::FileSize::Prefix::BINARY;
-   m_fileSizeOptions = SwitchPruningMenuPrefix(ActivePrefix);
+   m_fileSizeOptions = SwitchPruningMenuEntries(ActivePrefix);
 
    SetupFileSizePruningDropdown();
 
@@ -380,10 +414,12 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
 
 void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
 {
-   // @todo emit a signal that the breakdown dialog can hook up to.
+   // @todo Emit a signal that the breakdown dialog can hook up to.
 
-   m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(true);
-   m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.blockSignals(true);
+   auto& menuWrapper = m_optionsMenuWrapper.fileSizeMenuWrapper;
+
+   menuWrapper.binaryPrefix.blockSignals(true);
+   menuWrapper.decimalPrefix.blockSignals(true);
 
    ON_SCOPE_EXIT
    {
@@ -391,11 +427,11 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
       m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(false);
    };
 
-   m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.setChecked(false);
-   m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.setChecked(true);
+   menuWrapper.binaryPrefix.setChecked(false);
+   menuWrapper.decimalPrefix.setChecked(true);
 
    ActivePrefix = Constants::FileSize::Prefix::DECIMAL;
-   m_fileSizeOptions = SwitchPruningMenuPrefix(ActivePrefix);
+   m_fileSizeOptions = SwitchPruningMenuEntries(ActivePrefix);
 
    SetupFileSizePruningDropdown();
 
@@ -479,6 +515,21 @@ void MainWindow::OnShowBreakdownButtonPressed()
    }
 
    m_breakdownDialog->show();
+}
+
+void MainWindow::OnRenderOriginToggled()
+{
+   // @todo Separate the origin from the rest of the grid.
+}
+
+void MainWindow::OnRenderGridToggled()
+{
+   m_glCanvas->ToggleRenderState<Asset::Grid>(false);
+}
+
+void MainWindow::OnRenderLightMarkersToggled()
+{
+   m_glCanvas->ToggleRenderState<Asset::LightMarker>(false);
 }
 
 bool MainWindow::ShouldShowFrameTime() const
@@ -565,7 +616,6 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
       std::shared_ptr<Tree<VizFile>> scanningResults) mutable
    {
       ComputeProgress(progress);
-
       LogScanCompletion(progress);
 
       m_controller.SaveScanResults(progress);
@@ -580,7 +630,6 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
       AskUserToLimitFileSize(filesScanned, vizParameters);
 
       m_controller.SetVisualizationParameters(vizParameters);
-
       m_controller.ParseResults(scanningResults);
       m_controller.UpdateBoundingBoxes();
 

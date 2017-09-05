@@ -122,6 +122,12 @@ class MainWindow final : public QMainWindow
 
       void OnShowBreakdownButtonPressed();
 
+      void OnRenderOriginToggled();
+
+      void OnRenderGridToggled();
+
+      void OnRenderLightMarkersToggled();
+
    private:
 
       void ScanDrive(VisualizationParameters& vizParameters);
@@ -148,6 +154,7 @@ class MainWindow final : public QMainWindow
       void SetupFileMenu();
       void SetupFileSizeSubMenu();
       void SetupOptionsMenu();
+      void SetupDebuggingMenu();
       void SetupHelpMenu();
       void SetupSidebar();
       void SetupGamepad();
@@ -165,25 +172,36 @@ class MainWindow final : public QMainWindow
 
       std::unique_ptr<Gamepad> m_gamepad{ std::make_unique<Gamepad>(0, this) };
 
+      Ui::MainWindow m_ui{ };
+
+      std::unique_ptr<GLCanvas> m_glCanvas{ nullptr };
+      std::unique_ptr<AboutDialog> m_aboutDialog{ nullptr };
+      std::unique_ptr<BreakdownDialog> m_breakdownDialog{ nullptr };
+
+      std::shared_ptr<OptionsManager> m_optionsManager{ nullptr };
+
+      std::wstring m_searchQuery{ };
+
+      std::experimental::filesystem::path m_rootPath{ };
+
+      const std::vector<std::pair<std::uintmax_t, QString>>* m_fileSizeOptions{ nullptr };
+
+      // @note The remainder of this header is dedicated to the various menus that exist within
+      // the main window. Since some of these menus are submenus of other menus, the variable
+      // declaration order is critical to ensuring proper lifetime management. In other words,
+      // be careful in modifying this section; any errors likely won't show up until the program
+      // exits.
+
       QMenu m_fileMenu{ nullptr };
 
-      /**
-       * @brief Wraps everything that constitutes the "File" menu.
-       */
       struct FileMenu
       {
          QAction newScan{ nullptr };
          QAction exit{ nullptr };
       } m_fileMenuWrapper;
 
-      // @note Since any sub-menus of this menu will reference this menu as a parent, it's
-      // imperative that this menu outlive any of its sub-menus. In other words, make sure that
-      // this menu is declared before any of its sub-menus in this class.
       QMenu m_optionsMenu{ nullptr };
 
-      /**
-       * @brief Wraps everything that constitutes the "Options" menu.
-       */
       struct OptionsMenu
       {
          QMenu fileSizeMenu{ nullptr };
@@ -197,31 +215,26 @@ class MainWindow final : public QMainWindow
          QAction toggleFrameTime{ nullptr };
       } m_optionsMenuWrapper;
 
+      QMenu m_debuggingMenu{ nullptr };
+
+      struct DebuggingMenu
+      {
+         QMenu renderMenu{ nullptr };
+
+         struct RenderMenuWrapper
+         {
+            QAction origin{ nullptr };
+            QAction grid{ nullptr };
+            QAction lightMarkers{ nullptr };
+         } renderMenuWrapper;
+      } m_debuggingMenuWrapper;
+
       QMenu m_helpMenu{ nullptr };
 
-      /**
-       * @brief Wraps everything that constitutes the "Help" menu.
-       */
       struct HelpMenu
       {
          QAction aboutDialog{ nullptr };
       } m_helpMenuWrapper;
-
-      Ui::MainWindow m_ui{ };
-
-      std::unique_ptr<GLCanvas> m_glCanvas{ nullptr };
-
-      std::unique_ptr<AboutDialog> m_aboutDialog{ nullptr };
-
-      std::unique_ptr<BreakdownDialog> m_breakdownDialog{ nullptr };
-
-      std::shared_ptr<OptionsManager> m_optionsManager{ nullptr };
-
-      std::wstring m_searchQuery{ };
-
-      std::experimental::filesystem::path m_rootPath{ };
-
-      const std::vector<std::pair<std::uintmax_t, QString>>* m_fileSizeOptions{ nullptr };
 };
 
 #endif // MAINWINDOW_H
