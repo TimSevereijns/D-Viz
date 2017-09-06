@@ -55,6 +55,7 @@ namespace
       switch (prefix)
       {
          case Constants::FileSize::Prefix::DECIMAL:
+         {
             const static auto decimal = std::vector<std::pair<std::uintmax_t, QString>>
             {
                { 0u,                                               "Show All" },
@@ -70,8 +71,9 @@ namespace
             };
 
             return &decimal;
-
+         }
          case Constants::FileSize::Prefix::BINARY:
+         {
             const static auto binary = std::vector<std::pair<std::uintmax_t, QString>>
             {
                { 0u,                                              "Show All"  },
@@ -87,7 +89,7 @@ namespace
             };
 
             return &binary;
-
+         }
          default: assert(!"Type not supported.");
 
          return nullptr;
@@ -294,21 +296,21 @@ void MainWindow::SetupDebuggingMenu()
    renderMenuWrapper.origin.setCheckable(true);
    renderMenuWrapper.origin.setChecked(false);
 
-   connect(&renderMenuWrapper.origin, &QAction::toggle,
-      this, &MainWindow::OnRenderOriginToggled);
+//   connect(&renderMenuWrapper.origin, &QAction::toggled,
+//      this, &MainWindow::OnRenderOriginToggled);
 
    renderMenuWrapper.grid.setText("Grid");
    renderMenuWrapper.grid.setCheckable(true);
-   renderMenuWrapper.grid.setChecked(false);
+   renderMenuWrapper.grid.setChecked(true);
 
-   connect(&renderMenuWrapper.grid, &QAction::toggle,
+   connect(&renderMenuWrapper.grid, &QAction::toggled,
       this, &MainWindow::OnRenderGridToggled);
 
    renderMenuWrapper.lightMarkers.setText("Light Markers");
    renderMenuWrapper.lightMarkers.setCheckable(true);
-   renderMenuWrapper.lightMarkers.setChecked(false);
+   renderMenuWrapper.lightMarkers.setChecked(true);
 
-   connect(&renderMenuWrapper.lightMarkers, &QAction::toggle,
+   connect(&renderMenuWrapper.lightMarkers, &QAction::toggled,
       this, &MainWindow::OnRenderLightMarkersToggled);
 
    renderMenu.setTitle("Render");
@@ -517,19 +519,19 @@ void MainWindow::OnShowBreakdownButtonPressed()
    m_breakdownDialog->show();
 }
 
-void MainWindow::OnRenderOriginToggled()
+void MainWindow::OnRenderOriginToggled(bool /*isEnabled*/)
 {
    // @todo Separate the origin from the rest of the grid.
 }
 
-void MainWindow::OnRenderGridToggled()
+void MainWindow::OnRenderGridToggled(bool isEnabled)
 {
-   m_glCanvas->ToggleRenderState<Asset::Grid>(false);
+   m_glCanvas->ToggleAssetVisibility<Asset::Grid>(isEnabled);
 }
 
-void MainWindow::OnRenderLightMarkersToggled()
+void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
 {
-   m_glCanvas->ToggleRenderState<Asset::LightMarker>(false);
+   m_glCanvas->ToggleAssetVisibility<Asset::LightMarker>(isEnabled);
 }
 
 bool MainWindow::ShouldShowFrameTime() const
@@ -656,8 +658,6 @@ void MainWindow::AskUserToLimitFileSize(
    std::uintmax_t numberOfFilesScanned,
    VisualizationParameters& parameters)
 {
-   assert(numberOfFilesScanned > 0);
-
    if (numberOfFilesScanned < 250'000
       || parameters.minimumFileSize >= Constants::FileSize::Binary::ONE_MEBIBYTE)
    {

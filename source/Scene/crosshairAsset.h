@@ -3,6 +3,9 @@
 
 #include "lineAsset.h"
 
+/**
+ * @brief A simple crosshair overlay that's rendered over the visualization.
+ */
 class CrosshairAsset final : public LineAsset
 {
    public:
@@ -18,14 +21,10 @@ class CrosshairAsset final : public LineAsset
        * @brief Loads the necessary vertex and color data into the graphics buffers so as to show
        * the crosshair.
        *
-       * @param[in] camera          The camera onto which the crosshair is to be overlaid.
+       * @param[in] canvasCenter    The center of the canvas, which is where the crosshair is to be
+       *                            overlaid.
        */
-      void Show(const Camera& camera);
-
-      /**
-       * @brief Clears the buffers, thereby "hiding" the crosshair.
-       */
-      void Hide();
+      void SetCrosshairLocation(const QPoint& canvasCenter);
 };
 
 #endif // NODESELECTIONCROSSHAIR_H

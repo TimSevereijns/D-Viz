@@ -133,7 +133,3 @@ bool GridAsset::Render(
    return true;
 }
 
-bool GridAsset::Reload()
-{
-   return true;
-}

@@ -12,7 +12,7 @@ bool LightMarkerAsset::Render(
 {
    if (!m_shouldRender)
    {
-     return false;
+      return false;
    }
 
    m_shader.bind();
@@ -32,10 +32,5 @@ bool LightMarkerAsset::Render(
    m_shader.release();
    m_VAO.release();
 
-   return true;
-}
-
-bool LightMarkerAsset::Reload()
-{
    return true;
 }

@@ -10,8 +10,8 @@ SceneAsset::SceneAsset(QOpenGLExtraFunctions& device) :
 
 bool SceneAsset::ClearBuffers()
 {
-   m_vertexBuffer.destroy();
-   m_colorBuffer.destroy();
+   m_rawVertices.clear();
+   m_rawColors.clear();
 
    return true;
 }
@@ -62,19 +62,19 @@ unsigned int SceneAsset::GetColorCount() const
    return static_cast<unsigned int>(m_rawColors.size());
 }
 
+void SceneAsset::Show()
+{
+   m_shouldRender = true;
+}
+
+void SceneAsset::Hide()
+{
+   m_shouldRender = false;
+}
+
 void SceneAsset::UpdateVBO(
    const Tree<VizFile>::Node&,
    UpdateAction,
    const VisualizationParameters&)
 {
-}
-
-void SceneAsset::EnableRendering() noexcept
-{
-   m_shouldRender = true;
-}
-
-void SceneAsset::DisableRendering() noexcept
-{
-   m_shouldRender = false;
 }

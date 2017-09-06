@@ -89,6 +89,11 @@ bool LineAsset::Render(
    const std::vector<Light>&,
    const OptionsManager&)
 {
+   if (!m_shouldRender)
+   {
+      return false;
+   }
+
    m_shader.bind();
    m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 

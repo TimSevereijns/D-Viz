@@ -4,7 +4,7 @@
 #include "lineAsset.h"
 
 /**
- * @brief Simple marker to highlight the position of the lights.
+ * @brief Series of markers to highlight the position of the lights.
  */
 class LightMarkerAsset final : public LineAsset
 {
@@ -15,9 +15,7 @@ class LightMarkerAsset final : public LineAsset
       bool Render(
          const Camera& camera,
          const std::vector<Light>& lights,
-         const OptionsManager& settings) final override;
-
-      bool Reload() override;
+         const OptionsManager& settings) override;
 };
 
 #endif // LIGHTMARKERASSET_H

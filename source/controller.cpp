@@ -121,6 +121,9 @@ void Controller::GenerateNewVisualization()
 
    if (!HasVisualizationBeenLoaded() || m_visualizationParameters.forceNewScan)
    {
+      m_highlightedNodes.clear();
+      m_selectedNode = nullptr;
+
       m_treeMap = std::make_unique<SquarifiedTreeMap>(m_visualizationParameters);
       m_mainWindow->ScanDrive(m_visualizationParameters);
    }

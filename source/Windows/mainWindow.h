@@ -122,11 +122,11 @@ class MainWindow final : public QMainWindow
 
       void OnShowBreakdownButtonPressed();
 
-      void OnRenderOriginToggled();
+      void OnRenderOriginToggled(bool isEnabled);
 
-      void OnRenderGridToggled();
+      void OnRenderGridToggled(bool isEnabled);
 
-      void OnRenderLightMarkersToggled();
+      void OnRenderLightMarkersToggled(bool isEnabled);
 
    private:
 

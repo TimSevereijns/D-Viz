@@ -123,10 +123,18 @@ class GLCanvas final : public QOpenGLWidget
        * @param desiredState
        */
       template<typename TagType>
-      void ToggleRenderState(bool /*desiredState*/) const noexcept
+      void ToggleAssetVisibility(bool desiredState) const noexcept
       {
          auto* const asset = GetAsset<TagType>();
-         asset->DisableRendering();
+
+         if (desiredState == true)
+         {
+            asset->Show();
+         }
+         else
+         {
+            asset->Hide();
+         }
       }
 
    protected:
@@ -138,7 +146,7 @@ class GLCanvas final : public QOpenGLWidget
       void keyPressEvent(QKeyEvent* event) override;
       void keyReleaseEvent(QKeyEvent* event) override;
 
-      void mouseReleaseEvent(QMouseEvent *) override;
+      void mouseReleaseEvent(QMouseEvent* event) override;
       void mousePressEvent(QMouseEvent* event) override;
       void mouseMoveEvent(QMouseEvent* event) override;
       void wheelEvent(QWheelEvent* event) override;
@@ -242,11 +250,11 @@ class GLCanvas final : public QOpenGLWidget
       bool m_isLeftMouseButtonDown{ false };
       bool m_isCursorHidden{ false };
 
-      template<typename RequestedType>
-      typename RequestedType::AssetType* GetAsset() const noexcept
+      template<typename RequestedAsset>
+      typename RequestedAsset::AssetType* GetAsset() const noexcept
       {
          const auto itr = std::find_if(std::begin(m_sceneAssets), std::end(m_sceneAssets),
-           [targetID = RequestedType().GetID()] (const auto& tagAndAsset) noexcept
+           [targetID = RequestedAsset{ }.GetID()] (const auto& tagAndAsset) noexcept
          {
             return tagAndAsset.tag->GetID() == targetID;
          });
@@ -257,7 +265,7 @@ class GLCanvas final : public QOpenGLWidget
             return nullptr;
          }
 
-         return static_cast<typename RequestedType::AssetType*>(itr->asset.get());
+         return static_cast<typename RequestedAsset::AssetType*>(itr->asset.get());
       }
 
       Controller& m_controller;

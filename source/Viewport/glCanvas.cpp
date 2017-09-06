@@ -435,15 +435,6 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
    menu.addSeparator();
 
-   menu.addAction("Isolate File Type", [&]
-   {
-      constexpr auto clearSelected{ true };
-      m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
-      // @todo Relaad the visualization with updated parameters.
-   });
-
-   menu.addSeparator();
-
    menu.addAction("Show in Explorer", [&]
    {
       OperatingSystemSpecific::LaunchFileExplorer(*selectedNode);
@@ -599,14 +590,14 @@ void GLCanvas::HandleGamepadTriggerInput(const Gamepad& gamepad)
       m_isLeftTriggerDown = true;
 
       auto* const crosshair = GetAsset<Asset::Crosshair>();
-      crosshair->Show(m_camera);
+      crosshair->SetCrosshairLocation(m_camera.GetViewport().center());
    }
    else if (m_isLeftTriggerDown && !gamepad.IsLeftTriggerDown())
    {
-       m_isLeftTriggerDown = false;
+      m_isLeftTriggerDown = false;
 
-       auto* const crosshair = GetAsset<Asset::Crosshair>();
-       crosshair->Hide();
+      auto* const crosshair = GetAsset<Asset::Crosshair>();
+      crosshair->Hide();
    }
 
    if (!m_isRightTriggerDown && gamepad.IsRightTriggerDown())
@@ -681,7 +672,6 @@ void GLCanvas::paintGL()
 
       for (const auto& tagAndAsset : m_sceneAssets)
       {
-         assert(tagAndAsset.asset);
          tagAndAsset.asset->Render(m_camera, m_lights, *m_optionsManager);
       }
    }).GetElapsedTime();
