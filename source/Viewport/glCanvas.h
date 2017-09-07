@@ -12,6 +12,7 @@
 #include "Scene/debuggingRayAsset.h"
 #include "Scene/gridAsset.h"
 #include "Scene/lightMarkerAsset.h"
+#include "Scene/originMarkerAsset.h"
 #include "Scene/treemapAsset.h"
 #include "Visualizations/visualization.h"
 #include "Windows/mainWindow.h"
@@ -32,28 +33,34 @@ namespace Asset
       virtual int GetID() const noexcept { return 0; }
    };
 
+   struct OriginMarker final : Tag
+   {
+      using AssetType = OriginMarkerAsset;
+      int GetID() const noexcept override { return 1; }
+   };
+
    struct Grid final : Tag
    {
       using AssetType = GridAsset;
-      int GetID() const noexcept override { return 1; }
+      int GetID() const noexcept override { return 2; }
    };
 
    struct Crosshair final : Tag
    {
        using AssetType = CrosshairAsset;
-       int GetID() const noexcept override { return 2; }
+       int GetID() const noexcept override { return 3; }
    };
 
    struct Treemap final : Tag
    {
       using AssetType = TreemapAsset;
-      int GetID() const noexcept override { return 3; }
+      int GetID() const noexcept override { return 4; }
    };
 
    struct LightMarker final : Tag
    {
       using AssetType = LightMarkerAsset;
-      int GetID() const noexcept override { return 4; }
+      int GetID() const noexcept override { return 5; }
    };
 }
 

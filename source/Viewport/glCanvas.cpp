@@ -100,6 +100,12 @@ void GLCanvas::initializeGL()
 
    m_sceneAssets.emplace_back(TagAndAsset
    {
+      std::make_unique<Asset::OriginMarker>(),
+      std::make_unique<OriginMarkerAsset>(m_graphicsDevice)
+   });
+
+   m_sceneAssets.emplace_back(TagAndAsset
+   {
       std::make_unique<Asset::Treemap>(),
       std::make_unique<TreemapAsset>(m_graphicsDevice)
    });

@@ -294,10 +294,10 @@ void MainWindow::SetupDebuggingMenu()
 
    renderMenuWrapper.origin.setText("Origin");
    renderMenuWrapper.origin.setCheckable(true);
-   renderMenuWrapper.origin.setChecked(false);
+   renderMenuWrapper.origin.setChecked(true);
 
-//   connect(&renderMenuWrapper.origin, &QAction::toggled,
-//      this, &MainWindow::OnRenderOriginToggled);
+   connect(&renderMenuWrapper.origin, &QAction::toggled,
+      this, &MainWindow::OnRenderOriginToggled);
 
    renderMenuWrapper.grid.setText("Grid");
    renderMenuWrapper.grid.setCheckable(true);
@@ -519,9 +519,9 @@ void MainWindow::OnShowBreakdownButtonPressed()
    m_breakdownDialog->show();
 }
 
-void MainWindow::OnRenderOriginToggled(bool /*isEnabled*/)
+void MainWindow::OnRenderOriginToggled(bool isEnabled)
 {
-   // @todo Separate the origin from the rest of the grid.
+   m_glCanvas->ToggleAssetVisibility<Asset::OriginMarker>(isEnabled);
 }
 
 void MainWindow::OnRenderGridToggled(bool isEnabled)

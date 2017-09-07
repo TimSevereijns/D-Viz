@@ -52,10 +52,7 @@ CrosshairAsset::CrosshairAsset(QOpenGLExtraFunctions& device) :
 
 void CrosshairAsset::SetCrosshairLocation(const QPoint& canvasCenter)
 {
-   if (m_rawVertices.empty())
-   {
-      m_rawVertices = CreateCrosshairVertices(canvasCenter);
-   }
+   m_rawVertices = CreateCrosshairVertices(canvasCenter);
 
    Reload();
 }
