@@ -92,35 +92,11 @@ void GLCanvas::initializeGL()
    m_graphicsDevice.glEnable(GL_MULTISAMPLE);
    m_graphicsDevice.glEnable(GL_LINE_SMOOTH);
 
-   m_sceneAssets.emplace_back(TagAndAsset
-   {
-      std::make_unique<Asset::Grid>(),
-      std::make_unique<GridAsset>(m_graphicsDevice)
-   });
-
-   m_sceneAssets.emplace_back(TagAndAsset
-   {
-      std::make_unique<Asset::OriginMarker>(),
-      std::make_unique<OriginMarkerAsset>(m_graphicsDevice)
-   });
-
-   m_sceneAssets.emplace_back(TagAndAsset
-   {
-      std::make_unique<Asset::Treemap>(),
-      std::make_unique<TreemapAsset>(m_graphicsDevice)
-   });
-
-   m_sceneAssets.emplace_back(TagAndAsset
-   {
-      std::make_unique<Asset::Crosshair>(),
-      std::make_unique<CrosshairAsset>(m_graphicsDevice)
-   });
-
-   m_sceneAssets.emplace_back(TagAndAsset
-   {
-      std::make_unique<Asset::LightMarker>(),
-      std::make_unique<LightMarkerAsset>(m_graphicsDevice)
-   });
+   RegisterAsset<Asset::Grid>();
+   RegisterAsset<Asset::OriginMarker>();
+   RegisterAsset<Asset::Treemap>();
+   RegisterAsset<Asset::Crosshair>();
+   RegisterAsset<Asset::LightMarker>();
 
    auto* lightMarkers = GetAsset<Asset::LightMarker>();
    InitializeLightMarkers(m_lights, *lightMarkers);

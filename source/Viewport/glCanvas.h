@@ -250,13 +250,13 @@ class GLCanvas final : public QOpenGLWidget
        */
       void SelectNodeViaRay(const QPoint& rayOrigin);
 
-      bool m_isPaintingSuspended{ false };
-      bool m_isVisualizationLoaded{ false };
-      bool m_isLeftTriggerDown{ false };
-      bool m_isRightTriggerDown{ false };
-      bool m_isLeftMouseButtonDown{ false };
-      bool m_isCursorHidden{ false };
-
+      /**
+       * @brief Helper function that turns scene asset retrieval into a simple one-liner.
+       *
+       * @tparam RequestedAsset     The tag specifying the type of the asset that is to be
+       *                            retrieved. Note that this function implies that there can only
+       *                            be one asset of each type.
+       */
       template<typename RequestedAsset>
       typename RequestedAsset::AssetType* GetAsset() const noexcept
       {
@@ -274,6 +274,29 @@ class GLCanvas final : public QOpenGLWidget
 
          return static_cast<typename RequestedAsset::AssetType*>(itr->asset.get());
       }
+
+      /**
+       * @brief Helper function that turns scene asset registration into a simple one-liner.
+       *
+       * @tparam AssetTag           The tag specifying the type of asset to register. Note that this
+       *                            function implies that there can only be one asset of each type.
+       */
+      template<typename AssetTag>
+      void RegisterAsset()
+      {
+         m_sceneAssets.emplace_back(TagAndAsset
+         {
+            std::make_unique<AssetTag>(),
+            std::make_unique<AssetTag::AssetType>(m_graphicsDevice)
+         });
+      }
+
+      bool m_isPaintingSuspended{ false };
+      bool m_isVisualizationLoaded{ false };
+      bool m_isLeftTriggerDown{ false };
+      bool m_isRightTriggerDown{ false };
+      bool m_isLeftMouseButtonDown{ false };
+      bool m_isCursorHidden{ false };
 
       Controller& m_controller;
 
