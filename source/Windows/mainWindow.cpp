@@ -539,12 +539,12 @@ void MainWindow::OnRenderGridToggled(bool isEnabled)
 
 void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
 {
-   m_glCanvas->ToggleAssetVisibility<Asset::LightMarker>(isEnabled);
+   m_glCanvas->ToggleAssetVisibility<Asset::LightMarkers>(isEnabled);
 }
 
 void MainWindow::OnRenderFrustumToggled(bool isEnabled)
 {
-   m_glCanvas->ToggleAssetVisibility<Asset::Frustum>(isEnabled);
+   m_glCanvas->ToggleAssetVisibility<Asset::Frusta>(isEnabled);
 }
 
 bool MainWindow::ShouldShowFrameTime() const

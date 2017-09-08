@@ -58,13 +58,13 @@ namespace Asset
       int GetID() const noexcept override { return 4; }
    };
 
-   struct LightMarker final : Tag
+   struct LightMarkers final : Tag
    {
       using AssetType = LightMarkerAsset;
       int GetID() const noexcept override { return 5; }
    };
 
-   struct Frustum final : Tag
+   struct Frusta final : Tag
    {
       using AssetType = FrustumAsset;
       int GetID() const noexcept override { return 6; }

@@ -11,10 +11,12 @@ class FrustumAsset final : public LineAsset
    public:
       explicit FrustumAsset(QOpenGLExtraFunctions& device);
 
-   bool Render(
-      const Camera& camera,
-      const std::vector<Light>& lights,
-      const OptionsManager& settings) override;
+      bool Render(
+         const Camera& camera,
+         const std::vector<Light>& lights,
+         const OptionsManager& settings) override;
+
+      void GenerateFrusta(const Camera& camera);
 };
 
 #endif // FRUSTUMASSET_H
