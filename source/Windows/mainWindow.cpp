@@ -313,11 +313,19 @@ void MainWindow::SetupDebuggingMenu()
    connect(&renderMenuWrapper.lightMarkers, &QAction::toggled,
       this, &MainWindow::OnRenderLightMarkersToggled);
 
+   renderMenuWrapper.frustum.setText("Frustum");
+   renderMenuWrapper.frustum.setCheckable(true);
+   renderMenuWrapper.frustum.setChecked(true);
+
+   connect(&renderMenuWrapper.frustum, &QAction::toggled,
+      this, &MainWindow::OnRenderFrustumToggled);
+
    renderMenu.setTitle("Render");
    renderMenu.setStatusTip("Toggle visual debugging aides.");
    renderMenu.addAction(&renderMenuWrapper.origin);
    renderMenu.addAction(&renderMenuWrapper.grid);
    renderMenu.addAction(&renderMenuWrapper.lightMarkers);
+   renderMenu.addAction(&renderMenuWrapper.frustum);
 
    m_debuggingMenu.setTitle("Debugging");
    m_debuggingMenu.addMenu(&renderMenu);
@@ -532,6 +540,11 @@ void MainWindow::OnRenderGridToggled(bool isEnabled)
 void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
 {
    m_glCanvas->ToggleAssetVisibility<Asset::LightMarker>(isEnabled);
+}
+
+void MainWindow::OnRenderFrustumToggled(bool isEnabled)
+{
+   m_glCanvas->ToggleAssetVisibility<Asset::Frustum>(isEnabled);
 }
 
 bool MainWindow::ShouldShowFrameTime() const

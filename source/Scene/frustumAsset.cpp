@@ -10,6 +10,11 @@ bool FrustumAsset::Render(
    const std::vector<Light>& /*lights*/,
    const OptionsManager& /*settings*/)
 {
+   if (!m_shouldRender)
+   {
+      return false;
+   }
+
    m_mainShader.bind();
    m_mainShader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 

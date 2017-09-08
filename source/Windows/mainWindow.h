@@ -128,6 +128,8 @@ class MainWindow final : public QMainWindow
 
       void OnRenderLightMarkersToggled(bool isEnabled);
 
+      void OnRenderFrustumToggled(bool isEnabled);
+
    private:
 
       void ScanDrive(VisualizationParameters& vizParameters);
@@ -226,6 +228,7 @@ class MainWindow final : public QMainWindow
             QAction origin{ nullptr };
             QAction grid{ nullptr };
             QAction lightMarkers{ nullptr };
+            QAction frustum{ nullptr };
          } renderMenuWrapper;
       } m_debuggingMenuWrapper;
 
