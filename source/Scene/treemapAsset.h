@@ -20,11 +20,11 @@ class TreeNode;
  * @brief The VisualizationAsset class implements the functionality needed to represent the
  * main visualization scene asset.
  */
-class VisualizationAsset final : public SceneAsset
+class TreemapAsset final : public SceneAsset
 {
    public:
 
-      VisualizationAsset(QOpenGLExtraFunctions& device);
+      TreemapAsset(QOpenGLExtraFunctions& device);
 
       bool LoadShaders() override;
 

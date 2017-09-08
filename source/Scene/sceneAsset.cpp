@@ -8,15 +8,10 @@ SceneAsset::SceneAsset(QOpenGLExtraFunctions& device) :
 {
 }
 
-SceneAsset::~SceneAsset()
-{
-   ClearBuffers();
-}
-
 bool SceneAsset::ClearBuffers()
 {
-   m_vertexBuffer.destroy();
-   m_colorBuffer.destroy();
+   m_rawVertices.clear();
+   m_rawColors.clear();
 
    return true;
 }
@@ -75,6 +70,16 @@ unsigned int SceneAsset::GetVertexCount() const
 unsigned int SceneAsset::GetColorCount() const
 {
    return static_cast<unsigned int>(m_rawColors.size());
+}
+
+void SceneAsset::Show()
+{
+   m_shouldRender = true;
+}
+
+void SceneAsset::Hide()
+{
+   m_shouldRender = false;
 }
 
 void SceneAsset::UpdateVBO(

@@ -3,13 +3,6 @@
 #include "../constants.h"
 
 #include "canvasContextMenu.h"
-#include "Scene/crosshairAsset.h"
-#include "Scene/debuggingRayAsset.h"
-#include "Scene/frustumAsset.h"
-#include "Scene/gridAsset.h"
-#include "Scene/lightMarkerAsset.h"
-#include "Scene/texturePreviewAsset.h"
-#include "Scene/visualizationAsset.h"
 #include "Stopwatch/Stopwatch.hpp"
 #include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
@@ -25,19 +18,6 @@
 
 namespace
 {
-   /**
-    * @brief Provides an easier way to index into the asset vector, than memorizing indices.
-    */
-   enum Asset
-   {
-      GRID = 0,         ///< GridAsset
-      TREEMAP,          ///< VisualizationAsset
-      CROSSHAIR,        ///< CrosshairAsset
-      LIGHT_MARKERS,    ///< LightMarkerAsset
-      //TEXTURE_PREVIEW,  ///< TexturePreviewAsset
-      FRUSTUM           ///< FrustumAsset
-   };
-
    /**
     * @brief Computes and sets the vertex and color data for the light markers.
     *
@@ -396,20 +376,20 @@ void GLCanvas::initializeGL()
    m_graphicsDevice.glEnable(GL_MULTISAMPLE);
    m_graphicsDevice.glEnable(GL_LINE_SMOOTH);
 
-   m_sceneAssets.emplace_back(std::make_unique<GridAsset>(m_graphicsDevice));
-   m_sceneAssets.emplace_back(std::make_unique<VisualizationAsset>(m_graphicsDevice));
-   m_sceneAssets.emplace_back(std::make_unique<CrosshairAsset>(m_graphicsDevice));
-   m_sceneAssets.emplace_back(std::make_unique<LightMarkerAsset>(m_graphicsDevice));
-   //m_sceneAssets.emplace_back(std::make_unique<TexturePreviewAsset>(m_graphicsDevice));
-   m_sceneAssets.emplace_back(std::make_unique<FrustumAsset>(m_graphicsDevice));
+   RegisterAsset<Asset::Grid>();
+   RegisterAsset<Asset::OriginMarker>();
+   RegisterAsset<Asset::Treemap>();
+   RegisterAsset<Asset::Crosshair>();
+   RegisterAsset<Asset::LightMarker>();
+   RegisterAsset<Asset::Frustum>();
 
-   auto* const lightMarkers = static_cast<LightMarkerAsset*>(m_sceneAssets[LIGHT_MARKERS].get());
+   auto* lightMarkers = GetAsset<Asset::LightMarker>();
    InitializeLightMarkers(m_lights, *lightMarkers);
 
-   for (const auto& asset : m_sceneAssets)
+   for (const auto& tagAndAsset : m_sceneAssets)
    {
-      asset->LoadShaders();
-      asset->Initialize();
+      tagAndAsset.asset->LoadShaders();
+      tagAndAsset.asset->Initialize();
    }
 }
 
@@ -423,7 +403,7 @@ void GLCanvas::resizeGL(int width, int height)
    m_graphicsDevice.glViewport(0, 0, width, height);
    m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
 
-   auto* const lightFrustum = static_cast<FrustumAsset*>(m_sceneAssets[Asset::FRUSTUM].get());
+   auto* const lightFrustum = GetAsset<Asset::Frustum>();
    GenerateFrusta(*lightFrustum);
 }
 
@@ -434,16 +414,16 @@ void GLCanvas::ReloadVisualization()
 
    m_isPaintingSuspended = true;
 
+   auto* const treemap = GetAsset<Asset::Treemap>();
    const auto parameters = m_controller.GetVisualizationParameters();
-   auto* const vizAsset = static_cast<VisualizationAsset*>(m_sceneAssets[Asset::TREEMAP].get());
-   const auto blockCount = vizAsset->LoadBufferData(m_controller.GetTree(), parameters);
+   const auto blockCount = treemap->LoadBufferData(m_controller.GetTree(), parameters);
 
-   for (const auto& asset : m_sceneAssets)
+   for (const auto& tagAndAsset : m_sceneAssets)
    {
-      asset->Reload();
+      tagAndAsset.asset->Reload();
    }
 
-   assert(blockCount == vizAsset->GetBlockCount());
+   assert(blockCount == treemap->GetBlockCount());
 
    m_controller.PrintMetadataToStatusBar();
 }
@@ -638,7 +618,9 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
 void GLCanvas::SelectNode(const Tree<VizFile>::Node* const node)
 {
-   m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
+   auto* const treemap = GetAsset<Asset::Treemap>();
+
+   treemap->UpdateVBO(
       *node,
       SceneAsset::UpdateAction::SELECT,
       m_controller.GetVisualizationParameters());
@@ -646,13 +628,17 @@ void GLCanvas::SelectNode(const Tree<VizFile>::Node* const node)
 
 void GLCanvas::RestoreSelectedNode()
 {
-   if (m_controller.GetSelectedNode())
+   if (!m_controller.GetSelectedNode())
    {
-      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
-         *m_controller.GetSelectedNode(),
-         SceneAsset::UpdateAction::DESELECT,
-         m_controller.GetVisualizationParameters());
+      return;
    }
+
+   auto* const treemap = GetAsset<Asset::Treemap>();
+
+   treemap->UpdateVBO(
+      *m_controller.GetSelectedNode(),
+      SceneAsset::UpdateAction::DESELECT,
+      m_controller.GetVisualizationParameters());
 }
 
 void GLCanvas::HighlightNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
@@ -665,9 +651,11 @@ void GLCanvas::HighlightNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
 
 void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
 {
+   auto* const treemap = GetAsset<Asset::Treemap>();
+
    for (const auto* const node : nodes)
    {
-      m_sceneAssets[Asset::TREEMAP]->UpdateVBO(
+      treemap->UpdateVBO(
          *node,
          SceneAsset::UpdateAction::DESELECT,
          m_controller.GetVisualizationParameters());
@@ -713,15 +701,6 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
          m_controller.HighlightAllMatchingExtensions(*selectedNode, selectionCallback);
       });
    }
-
-   menu.addSeparator();
-
-   menu.addAction("Isolate File Type", [&]
-   {
-      constexpr auto clearSelected{ true };
-      m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
-      // @todo Relaad the visualization with updated parameters.
-   });
 
    menu.addSeparator();
 
@@ -879,19 +858,15 @@ void GLCanvas::HandleGamepadTriggerInput(const Gamepad& gamepad)
    {
       m_isLeftTriggerDown = true;
 
-      auto* const crosshairAsset =
-         static_cast<CrosshairAsset*>(m_sceneAssets[Asset::CROSSHAIR].get());
-
-      crosshairAsset->Show(m_camera);
+      auto* const crosshair = GetAsset<Asset::Crosshair>();
+      crosshair->SetCrosshairLocation(m_camera.GetViewport().center());
    }
    else if (m_isLeftTriggerDown && !gamepad.IsLeftTriggerDown())
    {
-       m_isLeftTriggerDown = false;
+      m_isLeftTriggerDown = false;
 
-      auto* const crosshairAsset =
-         static_cast<CrosshairAsset*>(m_sceneAssets[Asset::CROSSHAIR].get());
-
-      crosshairAsset->Hide();
+      auto* const crosshair = GetAsset<Asset::Crosshair>();
+      crosshair->Hide();
    }
 
    if (!m_isRightTriggerDown && gamepad.IsRightTriggerDown())
@@ -964,10 +939,9 @@ void GLCanvas::paintGL()
          m_lights.front().position = m_camera.GetPosition();
       }
 
-      for (const auto& asset : m_sceneAssets)
+      for (const auto& tagAndAsset : m_sceneAssets)
       {
-         assert(asset);
-         asset->Render(m_camera, m_lights, *m_optionsManager);
+         tagAndAsset.asset->Render(m_camera, m_lights, *m_optionsManager);
       }
    }).GetElapsedTime();
 

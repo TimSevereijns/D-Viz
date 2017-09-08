@@ -1,26 +1,19 @@
 #include "gridAsset.h"
 
-#include "../Visualizations/visualization.h"
-
 namespace
 {
    /**
-    * @brief Creates the vertices needed to render the coordinate system origin marker.
+    * @brief Creates the vertices needed to render the grid.
     *
     * @returns A vector of vertices.
     */
-   auto CreateOriginMarkerAndGridVertices()
+   auto CreateGridVertices()
    {
-      const float axisLength = VisualizationModel::ROOT_BLOCK_WIDTH;
-
       QVector<QVector3D> vertices;
-      vertices.reserve(46);
+      vertices.reserve(44);
       vertices
-         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(axisLength, 0.0f, 0.0f)   // X-axis
-         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 100.0f, 0.0f)       // Y-axis
-         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 0.0f, -axisLength)  // Z-axis
-
          // Grid (Z-axis):
+         << QVector3D( 0.0f,   0.0f,  0.0f) << QVector3D(   0.0f, 0.0f, -1000.0f)
          << QVector3D( 100.0f, 0.0f,  0.0f) << QVector3D( 100.0f, 0.0f, -1000.0f)
          << QVector3D( 200.0f, 0.0f,  0.0f) << QVector3D( 200.0f, 0.0f, -1000.0f)
          << QVector3D( 300.0f, 0.0f,  0.0f) << QVector3D( 300.0f, 0.0f, -1000.0f)
@@ -33,6 +26,7 @@ namespace
          << QVector3D(1000.0f, 0.0f,  0.0f) << QVector3D(1000.0f, 0.0f, -1000.0f)
 
          // Grid (X-axis):
+         << QVector3D(0.0f, 0.0f,     0.0f) << QVector3D(1000.0f, 0.0f,     0.0f)
          << QVector3D(0.0f, 0.0f,  -100.0f) << QVector3D(1000.0f, 0.0f,  -100.0f)
          << QVector3D(0.0f, 0.0f,  -200.0f) << QVector3D(1000.0f, 0.0f,  -200.0f)
          << QVector3D(0.0f, 0.0f,  -300.0f) << QVector3D(1000.0f, 0.0f,  -300.0f)
@@ -48,20 +42,17 @@ namespace
    }
 
    /**
-    * @brief Creates the vertex colors needed to paint the origin marker.
+    * @brief Creates the vertex colors needed to paint the grid.
     *
     * @returns A vector of vertex colors.
     */
-   auto CreateOriginMarkerAndGridColors()
+   auto CreateGridColors()
    {
       QVector<QVector3D> colors;
-      colors.reserve(46);
+      colors.reserve(44);
       colors
-         << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)  // X-axis (red)
-         << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)  // Y-axis (green)
-         << QVector3D(0.0f, 0.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f)  // Z-axis (blue)
-
          // Grid (Z-axis):
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
          << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
          << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
          << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
@@ -76,6 +67,7 @@ namespace
          << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
 
          // Grid (X-axis):
+         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
          << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
          << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
          << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
@@ -96,8 +88,8 @@ namespace
 GridAsset::GridAsset(QOpenGLExtraFunctions& device) :
    LineAsset{ device }
 {
-   m_rawVertices = CreateOriginMarkerAndGridVertices();
-   m_rawColors = CreateOriginMarkerAndGridColors();
+   m_rawVertices = CreateGridVertices();
+   m_rawColors = CreateGridColors();
 }
 
 bool GridAsset::Render(
@@ -105,21 +97,20 @@ bool GridAsset::Render(
    const std::vector<Light>&,
    const OptionsManager&)
 {
+   if (!m_shouldRender)
+   {
+      return false;
+   }
+
    m_mainShader.bind();
    m_mainShader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 
    m_VAO.bind();
 
-   m_graphicsDevice.glLineWidth(2);
-   m_graphicsDevice.glDrawArrays(
-      /* mode = */ GL_LINES,
-      /* first = */ 0,
-      /* count = */ 6);
-
    m_graphicsDevice.glLineWidth(1);
    m_graphicsDevice.glDrawArrays(
       /* mode = */ GL_LINES,
-      /* first = */ 6,
+      /* first = */ 0,
       /* count = */ m_rawVertices.size());
 
    m_mainShader.release();
@@ -128,7 +119,3 @@ bool GridAsset::Render(
    return true;
 }
 
-bool GridAsset::Reload()
-{
-   return true;
-}

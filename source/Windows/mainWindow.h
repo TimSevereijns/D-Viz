@@ -122,6 +122,12 @@ class MainWindow final : public QMainWindow
 
       void OnShowBreakdownButtonPressed();
 
+      void OnRenderOriginToggled(bool isEnabled);
+
+      void OnRenderGridToggled(bool isEnabled);
+
+      void OnRenderLightMarkersToggled(bool isEnabled);
+
    private:
 
       void ScanDrive(VisualizationParameters& vizParameters);
@@ -148,6 +154,7 @@ class MainWindow final : public QMainWindow
       void SetupFileMenu();
       void SetupFileSizeSubMenu();
       void SetupOptionsMenu();
+      void SetupDebuggingMenu();
       void SetupHelpMenu();
       void SetupSidebar();
       void SetupGamepad();
@@ -165,25 +172,36 @@ class MainWindow final : public QMainWindow
 
       std::unique_ptr<Gamepad> m_gamepad{ std::make_unique<Gamepad>(0, this) };
 
+      Ui::MainWindow m_ui{ };
+
+      std::unique_ptr<GLCanvas> m_glCanvas{ nullptr };
+      std::unique_ptr<AboutDialog> m_aboutDialog{ nullptr };
+      std::unique_ptr<BreakdownDialog> m_breakdownDialog{ nullptr };
+
+      std::shared_ptr<OptionsManager> m_optionsManager{ nullptr };
+
+      std::wstring m_searchQuery{ };
+
+      std::experimental::filesystem::path m_rootPath{ };
+
+      const std::vector<std::pair<std::uintmax_t, QString>>* m_fileSizeOptions{ nullptr };
+
+      // @note The remainder of this header is dedicated to the various menus that exist within
+      // the main window. Since some of these menus are submenus of other menus, the variable
+      // declaration order is critical to ensuring proper lifetime management. In other words,
+      // be careful in modifying this section; any errors likely won't show up until the program
+      // exits.
+
       QMenu m_fileMenu{ nullptr };
 
-      /**
-       * @brief Wraps everything that constitutes the "File" menu.
-       */
       struct FileMenu
       {
          QAction newScan{ nullptr };
          QAction exit{ nullptr };
       } m_fileMenuWrapper;
 
-      // @note Since any sub-menus of this menu will reference this menu as a parent, it's
-      // imperative that this menu outlive any of its sub-menus. In other words, make sure that
-      // this menu is declared before any of its sub-menus in this class.
       QMenu m_optionsMenu{ nullptr };
 
-      /**
-       * @brief Wraps everything that constitutes the "Options" menu.
-       */
       struct OptionsMenu
       {
          QMenu fileSizeMenu{ nullptr };
@@ -197,65 +215,26 @@ class MainWindow final : public QMainWindow
          QAction toggleFrameTime{ nullptr };
       } m_optionsMenuWrapper;
 
+      QMenu m_debuggingMenu{ nullptr };
+
+      struct DebuggingMenu
+      {
+         QMenu renderMenu{ nullptr };
+
+         struct RenderMenuWrapper
+         {
+            QAction origin{ nullptr };
+            QAction grid{ nullptr };
+            QAction lightMarkers{ nullptr };
+         } renderMenuWrapper;
+      } m_debuggingMenuWrapper;
+
       QMenu m_helpMenu{ nullptr };
 
-      /**
-       * @brief Wraps everything that constitutes the "Help" menu.
-       */
       struct HelpMenu
       {
          QAction aboutDialog{ nullptr };
       } m_helpMenuWrapper;
-
-      Ui::MainWindow m_ui{ };
-
-      std::unique_ptr<GLCanvas> m_glCanvas{ nullptr };
-
-      std::unique_ptr<AboutDialog> m_aboutDialog{ nullptr };
-
-      std::unique_ptr<BreakdownDialog> m_breakdownDialog{ nullptr };
-
-      std::shared_ptr<OptionsManager> m_optionsManager{ nullptr };
-
-      std::wstring m_searchQuery{ };
-
-      std::experimental::filesystem::path m_rootPath{ };
-
-      std::vector<std::pair<std::uintmax_t, QString>> m_binaryFileSizeOptions
-      {
-         { 0u,                                              "Show All"  },
-         { Constants::FileSize::Binary::ONE_KIBIBYTE,       "< 1 KiB"   },
-         { Constants::FileSize::Binary::ONE_MEBIBYTE,       "< 1 MiB"   },
-         { Constants::FileSize::Binary::ONE_MEBIBYTE * 10,  "< 10 MiB"  },
-         { Constants::FileSize::Binary::ONE_MEBIBYTE * 100, "< 100 MiB" },
-         { Constants::FileSize::Binary::ONE_MEBIBYTE * 250, "< 250 MiB" },
-         { Constants::FileSize::Binary::ONE_MEBIBYTE * 500, "< 500 MiB" },
-         { Constants::FileSize::Binary::ONE_GIBIBYTE,       "< 1 GiB"   },
-         { Constants::FileSize::Binary::ONE_GIBIBYTE * 5,   "< 5 GiB"   },
-         { Constants::FileSize::Binary::ONE_GIBIBYTE * 10,  "< 10 GiB"  }
-      };
-
-      std::vector<std::pair<std::uintmax_t, QString>> m_decimalFileSizeOptions
-      {
-         { 0u,                                               "Show All" },
-         { Constants::FileSize::Decimal::ONE_KILOBYTE,       "< 1 KB"   },
-         { Constants::FileSize::Decimal::ONE_MEGABYTE,       "< 1 MB"   },
-         { Constants::FileSize::Decimal::ONE_MEGABYTE * 10,  "< 10 MB"  },
-         { Constants::FileSize::Decimal::ONE_MEGABYTE * 100, "< 100 MB" },
-         { Constants::FileSize::Decimal::ONE_MEGABYTE * 250, "< 250 MB" },
-         { Constants::FileSize::Decimal::ONE_MEGABYTE * 500, "< 500 MB" },
-         { Constants::FileSize::Decimal::ONE_GIGABYTE,       "< 1 GB"   },
-         { Constants::FileSize::Decimal::ONE_GIGABYTE * 5,   "< 5 GB"   },
-         { Constants::FileSize::Decimal::ONE_GIGABYTE * 10,  "< 10 GB"  }
-      };
-
-      static_assert(
-         std::is_same_v<
-            decltype(m_binaryFileSizeOptions),
-            decltype(m_decimalFileSizeOptions)>,
-         "The underlying types of the pruning options must be identical!");
-
-      decltype(m_binaryFileSizeOptions)* m_fileSizeOptions{ &m_binaryFileSizeOptions };
 };
 
 #endif // MAINWINDOW_H

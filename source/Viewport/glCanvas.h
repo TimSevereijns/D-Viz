@@ -8,6 +8,13 @@
 #include "HID/keyboardManager.h"
 #include "optionsManager.h"
 #include "Scene/sceneAsset.h"
+#include "Scene/crosshairAsset.h"
+#include "Scene/debuggingRayAsset.h"
+#include "Scene/frustumAsset.h"
+#include "Scene/gridAsset.h"
+#include "Scene/lightMarkerAsset.h"
+#include "Scene/originMarkerAsset.h"
+#include "Scene/treemapAsset.h"
 #include "Visualizations/visualization.h"
 #include "Windows/mainWindow.h"
 
@@ -18,6 +25,51 @@
 #include <QOpenGLWidget>
 #include <QTimer>
 #include <QVector3D>
+
+namespace Asset
+{
+   struct Tag
+   {
+      using AssetType = void;
+      virtual int GetID() const noexcept { return 0; }
+   };
+
+   struct OriginMarker final : Tag
+   {
+      using AssetType = OriginMarkerAsset;
+      int GetID() const noexcept override { return 1; }
+   };
+
+   struct Grid final : Tag
+   {
+      using AssetType = GridAsset;
+      int GetID() const noexcept override { return 2; }
+   };
+
+   struct Crosshair final : Tag
+   {
+       using AssetType = CrosshairAsset;
+       int GetID() const noexcept override { return 3; }
+   };
+
+   struct Treemap final : Tag
+   {
+      using AssetType = TreemapAsset;
+      int GetID() const noexcept override { return 4; }
+   };
+
+   struct LightMarker final : Tag
+   {
+      using AssetType = LightMarkerAsset;
+      int GetID() const noexcept override { return 5; }
+   };
+
+   struct Frustum final : Tag
+   {
+      using AssetType = FrustumAsset;
+      int GetID() const noexcept override { return 6; }
+   };
+}
 
 /**
  * @brief The GLCanvas class represents the canvas object on which the visualization is to be drawn.
@@ -79,6 +131,26 @@ class GLCanvas final : public QOpenGLWidget
        */
       void RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& nodes);
 
+      /**
+       * @brief ToggleRenderState
+       *
+       * @param desiredState
+       */
+      template<typename TagType>
+      void ToggleAssetVisibility(bool desiredState) const noexcept
+      {
+         auto* const asset = GetAsset<TagType>();
+
+         if (desiredState == true)
+         {
+            asset->Show();
+         }
+         else
+         {
+            asset->Hide();
+         }
+      }
+
    protected:
 
       void initializeGL() override;
@@ -88,7 +160,7 @@ class GLCanvas final : public QOpenGLWidget
       void keyPressEvent(QKeyEvent* event) override;
       void keyReleaseEvent(QKeyEvent* event) override;
 
-      void mouseReleaseEvent(QMouseEvent *) override;
+      void mouseReleaseEvent(QMouseEvent* event) override;
       void mousePressEvent(QMouseEvent* event) override;
       void mouseMoveEvent(QMouseEvent* event) override;
       void wheelEvent(QWheelEvent* event) override;
@@ -185,6 +257,47 @@ class GLCanvas final : public QOpenGLWidget
        */
       void SelectNodeViaRay(const QPoint& rayOrigin);
 
+      /**
+       * @brief Helper function that turns scene asset retrieval into a simple one-liner.
+       *
+       * @tparam RequestedAsset     The tag specifying the type of the asset that is to be
+       *                            retrieved. Note that this function implies that there can only
+       *                            be one asset of each type.
+       */
+      template<typename RequestedAsset>
+      typename RequestedAsset::AssetType* GetAsset() const noexcept
+      {
+         const auto itr = std::find_if(std::begin(m_sceneAssets), std::end(m_sceneAssets),
+           [targetID = RequestedAsset{ }.GetID()] (const auto& tagAndAsset) noexcept
+         {
+            return tagAndAsset.tag->GetID() == targetID;
+         });
+
+         if (itr == std::end(m_sceneAssets))
+         {
+            assert(false);
+            return nullptr;
+         }
+
+         return static_cast<typename RequestedAsset::AssetType*>(itr->asset.get());
+      }
+
+      /**
+       * @brief Helper function that turns scene asset registration into a simple one-liner.
+       *
+       * @tparam AssetTag           The tag specifying the type of asset to register. Note that this
+       *                            function implies that there can only be one asset of each type.
+       */
+      template<typename AssetTag>
+      void RegisterAsset()
+      {
+         m_sceneAssets.emplace_back(TagAndAsset
+         {
+            std::make_unique<AssetTag>(),
+            std::make_unique<AssetTag::AssetType>(m_graphicsDevice)
+         });
+      }
+
       bool m_isPaintingSuspended{ false };
       bool m_isVisualizationLoaded{ false };
       bool m_isLeftTriggerDown{ false };
@@ -234,7 +347,16 @@ class GLCanvas final : public QOpenGLWidget
 
       QPoint m_lastMousePosition;
 
-      std::vector<std::unique_ptr<SceneAsset>> m_sceneAssets;
+      struct TagAndAsset
+      {
+         std::unique_ptr<Asset::Tag> tag;
+         std::unique_ptr<SceneAsset> asset;
+      };
+
+      // @note Using an unsorted, linear container to store and retrieve assets is likely to
+      // outperform std::unordered_map for a small number of assets. Should the asset count ever
+      // grow past, say, 30 assets, then a std::unordered_map might start to make more sense.
+      std::vector<TagAndAsset> m_sceneAssets;
 
       std::deque<int> m_frameTimeDeque;
 };

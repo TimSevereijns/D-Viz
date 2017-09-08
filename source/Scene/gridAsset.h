@@ -17,8 +17,6 @@ class GridAsset final : public LineAsset
          const Camera& camera,
          const std::vector<Light>& lights,
          const OptionsManager& settings) override;
-
-      bool Reload() override;
 };
 
 #endif // GRIDASSET_H

@@ -50,16 +50,9 @@ CrosshairAsset::CrosshairAsset(QOpenGLExtraFunctions& device) :
    m_rawColors = CreateCrosshairColors();
 }
 
-void CrosshairAsset::Show(const Camera& camera)
+void CrosshairAsset::SetCrosshairLocation(const QPoint& canvasCenter)
 {
-   m_rawVertices = CreateCrosshairVertices(camera.GetViewport().center());
-
-   Reload();
-}
-
-void CrosshairAsset::Hide()
-{
-   m_rawVertices.clear();
+   m_rawVertices = CreateCrosshairVertices(canvasCenter);
 
    Reload();
 }
@@ -69,6 +62,11 @@ bool CrosshairAsset::Render(
    const std::vector<Light>&,
    const OptionsManager&)
 {
+   if (!m_shouldRender)
+   {
+      return false;
+   }
+
    const auto& viewport = camera.GetViewport();
    QMatrix4x4 orthoMatrix;
    orthoMatrix.ortho(

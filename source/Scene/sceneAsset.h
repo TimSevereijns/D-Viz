@@ -32,7 +32,7 @@ class SceneAsset
 
       explicit SceneAsset(QOpenGLExtraFunctions& device);
 
-      virtual ~SceneAsset();
+      virtual ~SceneAsset() = default;
 
       /**
        * @brief Loads the vertex and color data into the OpenGL buffers. Use
@@ -82,6 +82,8 @@ class SceneAsset
 
       /**
        * @brief Performs all actions necessary to update the data in the OpenGL buffers.
+       * Implementing and calling this function is especially important if the size of the vertex
+       * and color buffers ever changes.
        *
        * @param[in] camera          The camera associated with the OpenGL context.
        *
@@ -134,6 +136,21 @@ class SceneAsset
       unsigned int GetColorCount() const;
 
       /**
+       * @brief Specifies that this asset should be drawn with the next invocation of the rendering
+       * loop.
+       */
+      virtual void Show();
+
+      /**
+       * @brief Specifies that this asset should not be drawn with the next invocation of the
+       * rendering loop.
+       *
+       * @note Memory intensive assets should consider whether it might be wise to unload vertex and
+       * color data buffers if the asset is to remain hidden for a while.
+       */
+      virtual void Hide();
+
+      /**
        * @brief Updates the portion of the VBO associated with the specified TreeNode.
        *
        * @param[in] node            The TreeNode whose visualization should be updated.
@@ -145,6 +162,8 @@ class SceneAsset
          const VisualizationParameters& options);
 
    protected:
+
+      bool m_shouldRender{ true };
 
       /**
        * @brief Helper function to compile and load the specified OpenGL shaders.

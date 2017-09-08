@@ -13,15 +13,14 @@ TEMPLATE = app
 CONFIG += c++1z
 
 # Generate PDBs for Release builds:
-win32:QMAKE_CFLAGS_RELEASE += /Zi
+win32:QMAKE_CFLAGS_RELEASE += /Zi /GL
 win32:QMAKE_LFLAGS_RELEASE += /MAP /debug /opt:ref
 
-# Unlock all the fun toys:
-QMAKE_CXXFLAGS += /std:c++latest
+# Unlock all the fun toys on Windows:
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
-# Bump up the warning level to W4:
-QMAKE_CFLAGS_WARN_ON -= -W3
-QMAKE_CFLAGS_WARN_ON += -W4
+# @todo Make this more generic, or remove it altogether.
+unix:INCLUDEPATH += /usr/include/c++/7.2.0
 
 SOURCES += \
    controller.cpp \
@@ -43,9 +42,10 @@ SOURCES += \
    Scene/gridAsset.cpp \
    Scene/lightMarkerAsset.cpp \
    Scene/lineAsset.cpp \
+   Scene/originMarkerAsset.cpp \
    Scene/sceneAsset.cpp \
    Scene/texturePreviewAsset.cpp \
-   Scene/visualizationAsset.cpp \
+   Scene/treemapAsset.cpp \
    Viewport/camera.cpp \
    Viewport/canvasContextMenu.cpp \
    Viewport/glCanvas.cpp \
@@ -56,7 +56,7 @@ SOURCES += \
    Windows/mainWindow.cpp \
    Windows/scanBreakdownModel.cpp
 
-HEADERS  += \
+HEADERS += \
    constants.h \
    controller.h \
    DataStructs/block.h \
@@ -64,7 +64,7 @@ HEADERS  += \
    DataStructs/light.h \
    DataStructs/driveScanningParameters.h \
    DataStructs/precisePoint.h \
-   DataStructs/scanningprogress.hpp \
+   DataStructs/scanningProgress.hpp \
    DataStructs/vizFile.cpp \
    DriveScanner/driveScanner.h \
    DriveScanner/scanningWorker.h \
@@ -77,9 +77,10 @@ HEADERS  += \
    Scene/gridAsset.h \
    Scene/lightMarkerAsset.h \
    Scene/lineAsset.h \
+   Scene/originMarkerAsset.h \
    Scene/sceneAsset.h \
    Scene/texturePreviewAsset.h \
-   Scene/visualizationAsset.h \
+   Scene/treemapAsset.h \
    Utilities/colorGradient.hpp \
    Utilities/ignoreUnused.hpp \
    Utilities/operatingSystemSpecific.hpp \
@@ -96,7 +97,7 @@ HEADERS  += \
    Windows/mainWindow.h \
    Windows/scanBreakdownModel.h
 
-FORMS    += \
+FORMS += \
    Windows/aboutDialog.ui \
    Windows/breakdownDialog.ui \
    Windows/mainWindow.ui
@@ -107,7 +108,6 @@ INCLUDEPATH += \
    ../Foreign/Stopwatch/source \
    ../Foreign/Tree/source \
    ../Foreign/ArenaAllocator/source
-
 
 DISTFILES += \
    Shaders/visualizationFragmentShader.frag \

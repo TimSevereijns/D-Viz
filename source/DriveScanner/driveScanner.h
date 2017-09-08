@@ -10,7 +10,7 @@
 #include <string>
 
 #include "../DataStructs/driveScanningParameters.h"
-#include "../DataStructs/scanningprogress.hpp"
+#include "../DataStructs/scanningProgress.hpp"
 
 #include "scanningWorker.h"
 

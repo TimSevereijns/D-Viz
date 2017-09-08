@@ -1,4 +1,4 @@
-#include "visualizationAsset.h"
+#include "treemapAsset.h"
 
 #include "../constants.h"
 #include "../DataStructs/vizFile.h"
@@ -105,12 +105,12 @@ namespace
     constexpr auto TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE{ 1 };
 }
 
-VisualizationAsset::VisualizationAsset(QOpenGLExtraFunctions& device) :
+TreemapAsset::TreemapAsset(QOpenGLExtraFunctions& device) :
    SceneAsset{ device }
 {
 }
 
-bool VisualizationAsset::LoadShaders()
+bool TreemapAsset::LoadShaders()
 {
    m_shadowMapShader.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/Shaders/shadowMapping.vert");
    m_shadowMapShader.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/Shaders/shadowMapping.frag");
@@ -122,7 +122,7 @@ bool VisualizationAsset::LoadShaders()
    return success;
 }
 
-bool VisualizationAsset::Initialize()
+bool TreemapAsset::Initialize()
 {
    const bool unitBlockInitialized = InitializeReferenceBlock();
    const bool transformationsInitialized = InitializeBlockTransformations();
@@ -141,7 +141,7 @@ bool VisualizationAsset::Initialize()
    return overallSuccess;
 }
 
-bool VisualizationAsset::InitializeReferenceBlock()
+bool TreemapAsset::InitializeReferenceBlock()
 {
    if (!m_VAO.isCreated())
    {
@@ -193,7 +193,7 @@ bool VisualizationAsset::InitializeReferenceBlock()
    return true;
 }
 
-bool VisualizationAsset::InitializeColors()
+bool TreemapAsset::InitializeColors()
 {
    if (!m_VAO.isCreated())
    {
@@ -225,7 +225,7 @@ bool VisualizationAsset::InitializeColors()
    return true;
 }
 
-bool VisualizationAsset::InitializeBlockTransformations()
+bool TreemapAsset::InitializeBlockTransformations()
 {
    if (!m_VAO.isCreated())
    {
@@ -294,7 +294,7 @@ bool VisualizationAsset::InitializeBlockTransformations()
    return true;
 }
 
-bool VisualizationAsset::InitializeShadowMachinery()
+bool TreemapAsset::InitializeShadowMachinery()
 {
    m_VAO.bind();
    m_referenceBlockBuffer.bind();
@@ -323,7 +323,8 @@ bool VisualizationAsset::InitializeShadowMachinery()
    return true;
 }
 
-std::uint32_t VisualizationAsset::LoadBufferData(
+
+std::uint32_t TreemapAsset::LoadBufferData(
    const Tree<VizFile>& tree,
    const VisualizationParameters& parameters)
 {
@@ -378,11 +379,11 @@ std::uint32_t VisualizationAsset::LoadBufferData(
    return m_blockCount;
 }
 
-void VisualizationAsset::FindLargestDirectory(const Tree<VizFile>& tree)
+void TreemapAsset::FindLargestDirectory(const Tree<VizFile>& tree)
 {
    std::uintmax_t largestDirectory = std::numeric_limits<std::uintmax_t>::min();
 
-   for (auto&& node : tree)
+   for (auto& node : tree)
    {
       if (node.GetData().file.type != FileType::DIRECTORY)
       {
@@ -400,7 +401,7 @@ void VisualizationAsset::FindLargestDirectory(const Tree<VizFile>& tree)
    m_largestDirectorySize = largestDirectory;
 }
 
-QVector3D VisualizationAsset::ComputeGradientColor(const Tree<VizFile>::Node& node)
+QVector3D TreemapAsset::ComputeGradientColor(const Tree<VizFile>::Node& node)
 {
    const auto blockSize = node.GetData().file.size;
    const auto ratio = static_cast<double>(blockSize) / static_cast<double>(m_largestDirectorySize);
@@ -409,17 +410,17 @@ QVector3D VisualizationAsset::ComputeGradientColor(const Tree<VizFile>::Node& no
    return finalColor;
 }
 
-std::uint32_t VisualizationAsset::GetBlockCount() const
+std::uint32_t TreemapAsset::GetBlockCount() const
 {
    return m_blockCount;
 }
 
-bool VisualizationAsset::IsAssetLoaded() const
+bool TreemapAsset::IsAssetLoaded() const
 {
    return !(m_blockTransformations.empty() && m_blockColors.empty());
 }
 
-bool VisualizationAsset::RenderShadowPass(const Camera& camera)
+bool TreemapAsset::RenderShadowPass(const Camera& camera)
 {
    // In order to fix Peter-panning artifacts, we'll temporarily cull front faces:
    m_graphicsDevice.glCullFace(GL_FRONT);
@@ -459,7 +460,7 @@ bool VisualizationAsset::RenderShadowPass(const Camera& camera)
    return true;
 }
 
-bool VisualizationAsset::RenderMainPass(
+bool TreemapAsset::RenderMainPass(
    const Camera& camera,
    const std::vector<Light>& lights,
    const OptionsManager& settings)
@@ -497,7 +498,7 @@ bool VisualizationAsset::RenderMainPass(
    return true;
 }
 
-bool VisualizationAsset::Render(
+bool TreemapAsset::Render(
    const Camera& camera,
    const std::vector<Light>& lights,
    const OptionsManager& settings)
@@ -514,16 +515,17 @@ bool VisualizationAsset::Render(
    return true;
 }
 
-bool VisualizationAsset::Reload()
+
+bool TreemapAsset::Reload()
 {
    InitializeReferenceBlock();
-   InitializeBlockTransformations();
    InitializeColors();
+   InitializeBlockTransformations();
 
    return true;
 }
 
-void VisualizationAsset::UpdateVBO(
+void TreemapAsset::UpdateVBO(
    const Tree<VizFile>::Node& node,
    SceneAsset::UpdateAction action,
    const VisualizationParameters& options)
@@ -554,7 +556,7 @@ void VisualizationAsset::UpdateVBO(
    m_VAO.release();
 }
 
-bool VisualizationAsset::LoadTexturePreviewShaders()
+bool TreemapAsset::LoadTexturePreviewShaders()
 {
    if (!m_texturePreviewShader.addShaderFromSourceFile(QOpenGLShader::Vertex,
       ":/Shaders/texturePreview.vert"))
@@ -571,7 +573,7 @@ bool VisualizationAsset::LoadTexturePreviewShaders()
    return m_texturePreviewShader.link();
 }
 
-bool VisualizationAsset::InitializeTexturePreviewer()
+bool TreemapAsset::InitializeTexturePreviewer()
 {
    static constexpr int coordinates[4][3] =
    {
@@ -609,7 +611,7 @@ bool VisualizationAsset::InitializeTexturePreviewer()
    return true;
 }
 
-void VisualizationAsset::RenderDepthMapPreview()
+void TreemapAsset::RenderDepthMapPreview()
 {
    // Simply using Normalized Device Coordinates (NDC), and an arbitrary choice of view planes.
    QMatrix4x4 orthoMatrix;

@@ -24,6 +24,11 @@ Constants::FileSize::Prefix ActivePrefix = Constants::FileSize::Prefix::BINARY;
 
 namespace
 {
+   /**
+    * @brief Helper function to be called once scanning completes.
+    *
+    * @param[in] progress           The final results from the scan.
+    */
    void LogScanCompletion(const ScanningProgress& progress)
    {
       const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
@@ -36,6 +41,60 @@ namespace
 
       log->flush();
    }
+
+   /**
+    * @brief Switches to a different set of entries for the file pruning drop-down menu.
+    *
+    * @param[in] prefix             The desired unit prefix.
+    *
+    * @returns A pointer to a const static vector containing the menu values.
+    */
+   const std::vector<std::pair<std::uintmax_t, QString>>* SwitchPruningMenuEntries(
+      Constants::FileSize::Prefix prefix)
+   {
+      switch (prefix)
+      {
+         case Constants::FileSize::Prefix::DECIMAL:
+         {
+            const static auto decimal = std::vector<std::pair<std::uintmax_t, QString>>
+            {
+               { 0u,                                               "Show All" },
+               { Constants::FileSize::Decimal::ONE_KILOBYTE,       "< 1 KB"   },
+               { Constants::FileSize::Decimal::ONE_MEGABYTE,       "< 1 MB"   },
+               { Constants::FileSize::Decimal::ONE_MEGABYTE * 10,  "< 10 MB"  },
+               { Constants::FileSize::Decimal::ONE_MEGABYTE * 100, "< 100 MB" },
+               { Constants::FileSize::Decimal::ONE_MEGABYTE * 250, "< 250 MB" },
+               { Constants::FileSize::Decimal::ONE_MEGABYTE * 500, "< 500 MB" },
+               { Constants::FileSize::Decimal::ONE_GIGABYTE,       "< 1 GB"   },
+               { Constants::FileSize::Decimal::ONE_GIGABYTE * 5,   "< 5 GB"   },
+               { Constants::FileSize::Decimal::ONE_GIGABYTE * 10,  "< 10 GB"  }
+            };
+
+            return &decimal;
+         }
+         case Constants::FileSize::Prefix::BINARY:
+         {
+            const static auto binary = std::vector<std::pair<std::uintmax_t, QString>>
+            {
+               { 0u,                                              "Show All"  },
+               { Constants::FileSize::Binary::ONE_KIBIBYTE,       "< 1 KiB"   },
+               { Constants::FileSize::Binary::ONE_MEBIBYTE,       "< 1 MiB"   },
+               { Constants::FileSize::Binary::ONE_MEBIBYTE * 10,  "< 10 MiB"  },
+               { Constants::FileSize::Binary::ONE_MEBIBYTE * 100, "< 100 MiB" },
+               { Constants::FileSize::Binary::ONE_MEBIBYTE * 250, "< 250 MiB" },
+               { Constants::FileSize::Binary::ONE_MEBIBYTE * 500, "< 500 MiB" },
+               { Constants::FileSize::Binary::ONE_GIBIBYTE,       "< 1 GiB"   },
+               { Constants::FileSize::Binary::ONE_GIBIBYTE * 5,   "< 5 GiB"   },
+               { Constants::FileSize::Binary::ONE_GIBIBYTE * 10,  "< 10 GiB"  }
+            };
+
+            return &binary;
+         }
+         default: assert(!"Type not supported.");
+
+         return nullptr;
+      }
+   }
 }
 
 MainWindow::MainWindow(
@@ -44,7 +103,8 @@ MainWindow::MainWindow(
    :
    QMainWindow{ parent },
    m_controller{ controller },
-   m_optionsManager{ std::make_shared<OptionsManager>() }
+   m_optionsManager{ std::make_shared<OptionsManager>() },
+   m_fileSizeOptions{ SwitchPruningMenuEntries(Constants::FileSize::Prefix::BINARY) }
 {
    m_ui.setupUi(this);
 
@@ -114,7 +174,7 @@ void MainWindow::SetupSidebar()
 
 void MainWindow::SetupFileSizePruningDropdown()
 {
-   const auto currentIndex = m_ui.pruneSizeComboBox->currentIndex();
+   const auto previousIndex = m_ui.pruneSizeComboBox->currentIndex();
 
    m_ui.pruneSizeComboBox->clear();
 
@@ -125,7 +185,7 @@ void MainWindow::SetupFileSizePruningDropdown()
          static_cast<qulonglong>(numberOfBytesAndUnits.first));
    });
 
-   m_ui.pruneSizeComboBox->setCurrentIndex(currentIndex == -1 ? 0 : currentIndex);
+   m_ui.pruneSizeComboBox->setCurrentIndex(previousIndex == -1 ? 0 : previousIndex);
 
    statusBar()->clearMessage();
 }
@@ -144,19 +204,22 @@ void MainWindow::SetupGamepad()
 
 std::wstring MainWindow::GetDirectoryToVisualize() const
 {
-   return m_rootPath;
+   return m_rootPath.wstring();
 }
 
 void MainWindow::SetupMenus()
 {
    SetupFileMenu();
    SetupOptionsMenu();
+
+   // @todo Guard this menu with a boolean of some sort:
+   SetupDebuggingMenu();
+
    SetupHelpMenu();
 }
 
 void MainWindow::SetupFileMenu()
 {
-   m_fileMenuWrapper.newScan.setParent(this);
    m_fileMenuWrapper.newScan.setText("New Scan...");
    m_fileMenuWrapper.newScan.setStatusTip("Start a new visualization.");
    m_fileMenuWrapper.newScan.setShortcuts(QKeySequence::New);
@@ -164,7 +227,6 @@ void MainWindow::SetupFileMenu()
    connect(&m_fileMenuWrapper.newScan, &QAction::triggered,
       this, &MainWindow::OnFileMenuNewScan);
 
-   m_fileMenuWrapper.exit.setParent(this);
    m_fileMenuWrapper.exit.setText("Exit");
    m_fileMenuWrapper.exit.setStatusTip("Exit the program.");
    m_fileMenuWrapper.exit.setShortcuts(QKeySequence::Quit);
@@ -181,7 +243,6 @@ void MainWindow::SetupFileMenu()
 
 void MainWindow::SetupOptionsMenu()
 {
-   m_optionsMenuWrapper.toggleFrameTime.setParent(this);
    m_optionsMenuWrapper.toggleFrameTime.setText("Show Frame Time");
    m_optionsMenuWrapper.toggleFrameTime.setStatusTip("Toggle frame-time readout in titlebar.");
    m_optionsMenuWrapper.toggleFrameTime.setCheckable(true);
@@ -201,7 +262,6 @@ void MainWindow::SetupFileSizeSubMenu()
 {
    auto& subMenuWrapper = m_optionsMenuWrapper.fileSizeMenuWrapper;
 
-   subMenuWrapper.binaryPrefix.setParent(&m_optionsMenu);
    subMenuWrapper.binaryPrefix.setText("Binary Prefix");
    subMenuWrapper.binaryPrefix.setStatusTip(
       "Use base-two units, such as kibibytes and mebibytes. This is the default on Windows.");
@@ -211,7 +271,6 @@ void MainWindow::SetupFileSizeSubMenu()
    connect(&subMenuWrapper.binaryPrefix, &QAction::toggled,
       this, &MainWindow::SwitchToBinaryPrefix);
 
-   subMenuWrapper.decimalPrefix.setParent(&m_optionsMenu);
    subMenuWrapper.decimalPrefix.setText("Decimal Prefix");
    subMenuWrapper.decimalPrefix.setStatusTip(
       "Use base-ten units, such as kilobytes and megabytes.");
@@ -226,6 +285,44 @@ void MainWindow::SetupFileSizeSubMenu()
    m_optionsMenuWrapper.fileSizeMenu.addAction(&subMenuWrapper.decimalPrefix);
 
    m_optionsMenu.addMenu(&m_optionsMenuWrapper.fileSizeMenu);
+}
+
+void MainWindow::SetupDebuggingMenu()
+{
+   auto& renderMenuWrapper = m_debuggingMenuWrapper.renderMenuWrapper;
+   auto& renderMenu = m_debuggingMenuWrapper.renderMenu;
+
+   renderMenuWrapper.origin.setText("Origin");
+   renderMenuWrapper.origin.setCheckable(true);
+   renderMenuWrapper.origin.setChecked(true);
+
+   connect(&renderMenuWrapper.origin, &QAction::toggled,
+      this, &MainWindow::OnRenderOriginToggled);
+
+   renderMenuWrapper.grid.setText("Grid");
+   renderMenuWrapper.grid.setCheckable(true);
+   renderMenuWrapper.grid.setChecked(true);
+
+   connect(&renderMenuWrapper.grid, &QAction::toggled,
+      this, &MainWindow::OnRenderGridToggled);
+
+   renderMenuWrapper.lightMarkers.setText("Light Markers");
+   renderMenuWrapper.lightMarkers.setCheckable(true);
+   renderMenuWrapper.lightMarkers.setChecked(true);
+
+   connect(&renderMenuWrapper.lightMarkers, &QAction::toggled,
+      this, &MainWindow::OnRenderLightMarkersToggled);
+
+   renderMenu.setTitle("Render");
+   renderMenu.setStatusTip("Toggle visual debugging aides.");
+   renderMenu.addAction(&renderMenuWrapper.origin);
+   renderMenu.addAction(&renderMenuWrapper.grid);
+   renderMenu.addAction(&renderMenuWrapper.lightMarkers);
+
+   m_debuggingMenu.setTitle("Debugging");
+   m_debuggingMenu.addMenu(&renderMenu);
+
+   menuBar()->addMenu(&m_debuggingMenu);
 }
 
 void MainWindow::SetupHelpMenu()
@@ -264,7 +361,7 @@ void MainWindow::OnFileMenuNewScan()
    const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
 
    VisualizationParameters parameters;
-   parameters.rootDirectory = m_rootPath;
+   parameters.rootDirectory = m_rootPath.wstring();
    parameters.onlyShowDirectories = m_showDirectoriesOnly;
    parameters.forceNewScan = true;
    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
@@ -283,10 +380,12 @@ void MainWindow::OnFPSReadoutToggled(bool isEnabled)
 
 void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
 {
-   // @todo emit a signal that the breakdown dialog can hook up to.
+   // @todo Emit a signal that the breakdown dialog can hook up to.
 
-   m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(true);
-   m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.blockSignals(true);
+   auto& menuWrapper = m_optionsMenuWrapper.fileSizeMenuWrapper;
+
+   menuWrapper.binaryPrefix.blockSignals(true);
+   menuWrapper.decimalPrefix.blockSignals(true);
 
    ON_SCOPE_EXIT
    {
@@ -294,12 +393,12 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
       m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(false);
    };
 
-   m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.setChecked(true);
-   m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.setChecked(false);
+   menuWrapper.binaryPrefix.setChecked(true);
+   menuWrapper.decimalPrefix.setChecked(false);
 
    ActivePrefix = Constants::FileSize::Prefix::BINARY;
+   m_fileSizeOptions = SwitchPruningMenuEntries(ActivePrefix);
 
-   m_fileSizeOptions = &m_binaryFileSizeOptions;
    SetupFileSizePruningDropdown();
 
    const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
@@ -317,10 +416,12 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
 
 void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
 {
-   // @todo emit a signal that the breakdown dialog can hook up to.
+   // @todo Emit a signal that the breakdown dialog can hook up to.
 
-   m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(true);
-   m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.blockSignals(true);
+   auto& menuWrapper = m_optionsMenuWrapper.fileSizeMenuWrapper;
+
+   menuWrapper.binaryPrefix.blockSignals(true);
+   menuWrapper.decimalPrefix.blockSignals(true);
 
    ON_SCOPE_EXIT
    {
@@ -328,12 +429,12 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
       m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(false);
    };
 
-   m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.setChecked(false);
-   m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.setChecked(true);
+   menuWrapper.binaryPrefix.setChecked(false);
+   menuWrapper.decimalPrefix.setChecked(true);
 
    ActivePrefix = Constants::FileSize::Prefix::DECIMAL;
+   m_fileSizeOptions = SwitchPruningMenuEntries(ActivePrefix);
 
-   m_fileSizeOptions = &m_decimalFileSizeOptions;
    SetupFileSizePruningDropdown();
 
    const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
@@ -379,7 +480,7 @@ void MainWindow::PruneTree()
    const auto pruneSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
 
    VisualizationParameters parameters;
-   parameters.rootDirectory = m_rootPath;
+   parameters.rootDirectory = m_rootPath.wstring();
    parameters.onlyShowDirectories = m_showDirectoriesOnly;
    parameters.useDirectoryGradient = m_useDirectoryGradient;
    parameters.forceNewScan = false;
@@ -416,6 +517,21 @@ void MainWindow::OnShowBreakdownButtonPressed()
    }
 
    m_breakdownDialog->show();
+}
+
+void MainWindow::OnRenderOriginToggled(bool isEnabled)
+{
+   m_glCanvas->ToggleAssetVisibility<Asset::OriginMarker>(isEnabled);
+}
+
+void MainWindow::OnRenderGridToggled(bool isEnabled)
+{
+   m_glCanvas->ToggleAssetVisibility<Asset::Grid>(isEnabled);
+}
+
+void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
+{
+   m_glCanvas->ToggleAssetVisibility<Asset::LightMarker>(isEnabled);
 }
 
 bool MainWindow::ShouldShowFrameTime() const
@@ -502,7 +618,6 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
       std::shared_ptr<Tree<VizFile>> scanningResults) mutable
    {
       ComputeProgress(progress);
-
       LogScanCompletion(progress);
 
       m_controller.SaveScanResults(progress);
@@ -517,7 +632,6 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
       AskUserToLimitFileSize(filesScanned, vizParameters);
 
       m_controller.SetVisualizationParameters(vizParameters);
-
       m_controller.ParseResults(scanningResults);
       m_controller.UpdateBoundingBoxes();
 
@@ -544,8 +658,6 @@ void MainWindow::AskUserToLimitFileSize(
    std::uintmax_t numberOfFilesScanned,
    VisualizationParameters& parameters)
 {
-   assert(numberOfFilesScanned > 0);
-
    if (numberOfFilesScanned < 250'000
       || parameters.minimumFileSize >= Constants::FileSize::Binary::ONE_MEBIBYTE)
    {

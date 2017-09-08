@@ -10,6 +10,11 @@ bool LightMarkerAsset::Render(
    const std::vector<Light>&,
    const OptionsManager&)
 {
+   if (!m_shouldRender)
+   {
+      return false;
+   }
+
    m_mainShader.bind();
    m_mainShader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 
@@ -27,10 +32,5 @@ bool LightMarkerAsset::Render(
    m_mainShader.release();
    m_VAO.release();
 
-   return true;
-}
-
-bool LightMarkerAsset::Reload()
-{
    return true;
 }
