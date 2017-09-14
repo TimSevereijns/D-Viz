@@ -90,6 +90,8 @@ GridAsset::GridAsset(QOpenGLExtraFunctions& device) :
 {
    m_rawVertices = CreateGridVertices();
    m_rawColors = CreateGridColors();
+
+   m_shouldRender = false;
 }
 
 bool GridAsset::Render(

@@ -64,7 +64,7 @@ GLCanvas::GLCanvas(
    m_optionsManager = m_mainWindow.GetOptionsManager();
 
    m_camera.SetPosition(QVector3D{ 500, 100, 0 });
-   m_camera.SetFarPlane(4000.0f);
+   m_camera.SetFarPlane(10'000.0f);
 
    setFocusPolicy(Qt::StrongFocus);
 

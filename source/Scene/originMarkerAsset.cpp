@@ -44,6 +44,8 @@ OriginMarkerAsset::OriginMarkerAsset(QOpenGLExtraFunctions& graphicsContext) :
 {
    m_rawVertices = CreateMarkerVertices();
    m_rawColors = CreateMarkerColors();
+
+   m_shouldRender = false;
 }
 
 bool OriginMarkerAsset::Render(

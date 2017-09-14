@@ -294,21 +294,21 @@ void MainWindow::SetupDebuggingMenu()
 
    renderMenuWrapper.origin.setText("Origin");
    renderMenuWrapper.origin.setCheckable(true);
-   renderMenuWrapper.origin.setChecked(true);
+   renderMenuWrapper.origin.setChecked(false);
 
    connect(&renderMenuWrapper.origin, &QAction::toggled,
       this, &MainWindow::OnRenderOriginToggled);
 
    renderMenuWrapper.grid.setText("Grid");
    renderMenuWrapper.grid.setCheckable(true);
-   renderMenuWrapper.grid.setChecked(true);
+   renderMenuWrapper.grid.setChecked(false);
 
    connect(&renderMenuWrapper.grid, &QAction::toggled,
       this, &MainWindow::OnRenderGridToggled);
 
    renderMenuWrapper.lightMarkers.setText("Light Markers");
    renderMenuWrapper.lightMarkers.setCheckable(true);
-   renderMenuWrapper.lightMarkers.setChecked(true);
+   renderMenuWrapper.lightMarkers.setChecked(false);
 
    connect(&renderMenuWrapper.lightMarkers, &QAction::toggled,
       this, &MainWindow::OnRenderLightMarkersToggled);

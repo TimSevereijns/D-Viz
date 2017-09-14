@@ -3,6 +3,7 @@
 LightMarkerAsset::LightMarkerAsset(QOpenGLExtraFunctions& device) :
    LineAsset{ device }
 {
+   m_shouldRender = false;
 }
 
 bool LightMarkerAsset::Render(
