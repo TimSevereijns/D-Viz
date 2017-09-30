@@ -69,9 +69,9 @@ class TreemapAsset final : public SceneAsset
 
       void RenderDepthMapPreview();
 
-      bool RenderShadowPass(const Camera& camera);
+      void RenderShadowPass(const Camera& camera);
 
-      bool RenderMainPass(
+      void RenderMainPass(
          const Camera& camera,
          const std::vector<Light>& lights,
          const OptionsManager& settings);
@@ -105,6 +105,11 @@ class TreemapAsset final : public SceneAsset
       QOpenGLShaderProgram m_shadowMapShader;
       QOpenGLShaderProgram m_texturePreviewShader;
 
+      Camera m_shadowCamera;
+
+      static constexpr auto SHADOW_MAP_WIDTH{ 8192 };
+      static constexpr auto SHADOW_MAP_HEIGHT{ 8192 };
+
       QOpenGLFramebufferObject m_shadowMapFrameBuffer
       {
          SHADOW_MAP_WIDTH,
@@ -113,9 +118,6 @@ class TreemapAsset final : public SceneAsset
          GL_TEXTURE_2D,
          GL_R32F
       };
-
-      static constexpr int SHADOW_MAP_WIDTH{ 8192 };
-      static constexpr int SHADOW_MAP_HEIGHT{ 8192 };
 
       QMatrix4x4 m_lightSpaceTransformationMatrix;
 };

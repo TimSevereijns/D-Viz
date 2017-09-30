@@ -13,9 +13,8 @@ namespace
     * @brief Generates all of the frustum vertices for the specified camera.
     *
     * @param[in] camera             Main scene camera.
-    * @param[in, out] frustumAsset  The main frustum scene asset.
     */
-   auto GenerateFrustum(const Camera& camera)
+   auto ComputeFrustumCorners(const Camera& camera)
    {
       std::vector<QVector3D> unitCube
       {
@@ -31,23 +30,36 @@ namespace
          corner = worldToView.map(corner);
       }
 
+      return unitCube;
+   }
+
+   /**
+    * @brief Generates a frustum outline.
+    *
+    * @param[in] camera             Main scene camera.
+    * @param[in, out] frustumAsset  The main frustum scene asset.
+    */
+   auto GenerateFrustum(const Camera& camera)
+   {
+      const auto frustum = ComputeFrustumCorners(camera);
+
       std::vector<QVector3D> vertices
       {
          // Near plane outline:
-         unitCube[0], unitCube[1],
-         unitCube[1], unitCube[2],
-         unitCube[2], unitCube[3],
-         unitCube[3], unitCube[0],
+         frustum[0], frustum[1],
+         frustum[1], frustum[2],
+         frustum[2], frustum[3],
+         frustum[3], frustum[0],
          // Far plane outline:
-         unitCube[4], unitCube[5],
-         unitCube[5], unitCube[6],
-         unitCube[6], unitCube[7],
-         unitCube[7], unitCube[4],
+         frustum[4], frustum[5],
+         frustum[5], frustum[6],
+         frustum[6], frustum[7],
+         frustum[7], frustum[4],
          // Side plane outline:
-         unitCube[0], unitCube[4],
-         unitCube[1], unitCube[5],
-         unitCube[2], unitCube[6],
-         unitCube[3], unitCube[7]
+         frustum[0], frustum[4],
+         frustum[1], frustum[5],
+         frustum[2], frustum[6],
+         frustum[3], frustum[7]
       };
 
       return vertices;
@@ -181,10 +193,10 @@ namespace
          mutableCamera.SetNearPlane(nearAndFarPlanes.first);
          mutableCamera.SetFarPlane(nearAndFarPlanes.second);
 
-         frusta.emplace_back(GenerateFrustum(mutableCamera));
+         frusta.emplace_back(ComputeFrustumCorners(mutableCamera));
       }
 
-      const auto worldToLight = shadowCamera.GetViewMatrix();
+      const auto worldToLight = shadowCamera.GetProjectionViewMatrix();
 
       QVector<QVector3D> vertices;
       vertices.reserve(24 * cascadeCount);
@@ -295,15 +307,14 @@ void FrustumAsset::GenerateFrusta(const Camera& camera)
 
    Camera renderCamera = camera;
    renderCamera.SetPosition(QVector3D{ 500, 100, 0 });
-   renderCamera.SetOrientation(0.0f, -45.0f);
+   renderCamera.SetOrientation(0.0f, 0.0f);
    renderCamera.SetNearPlane(1.0f);
    renderCamera.SetFarPlane(2000.0f);
 
    Camera shadowCamera = camera;
-   shadowCamera.SetPosition(QVector3D{ -1500.0f, 500.0f, 500.0f });
-   shadowCamera.SetOrientation(15.0f, 45.0f);
+   shadowCamera.SetPosition(QVector3D{ -200.0f, 500.0f, 200.0f });
+   shadowCamera.SetOrientation(25.0f, 45.0f);
    shadowCamera.SetNearPlane(250.0f);
-   shadowCamera.SetFarPlane(800.0f);
 
    RenderCascadeBoundingBoxes(*this, renderCamera, shadowCamera);
 

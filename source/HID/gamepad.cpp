@@ -2,7 +2,7 @@
 
 Gamepad::Gamepad(
    int deviceId,
-   QObject*parent)
+   QObject* parent)
    :
    QGamepad{ deviceId, parent }
 {

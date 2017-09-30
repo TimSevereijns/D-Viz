@@ -13,6 +13,146 @@
 namespace
 {
    /**
+    * @brief Generates all of the frustum vertices for the specified camera.
+    *
+    * @param[in] camera             Main scene camera.
+    */
+   auto ComputeFrustumCorners(const Camera& camera)
+   {
+      std::vector<QVector3D> unitCube
+      {
+         { -1, -1, -1 }, { +1, -1, -1 },
+         { +1, +1, -1 }, { -1, +1, -1 },
+         { -1, -1, +1 }, { +1, -1, +1 },
+         { +1, +1, +1 }, { -1, +1, +1 }
+      };
+
+      const auto worldToView = camera.GetProjectionViewMatrix().inverted();
+      for (auto& corner : unitCube)
+      {
+         corner = worldToView.map(corner);
+      }
+
+      return unitCube;
+   }
+
+   /**
+    * @brief Computes the ideal split locations for each frustum cascade.
+    *
+    * @param[in] cascadeCount       The desired number of shadow mapping cascades.
+    * @param[in] camera             The main scene camera.
+    */
+   auto GenerateShadowMapCascades(
+      int cascadeCount,
+      const Camera& camera)
+   {
+      const double nearPlane = camera.GetNearPlane();
+      const double farPlane = camera.GetFarPlane();
+      const double planeRatio = farPlane / nearPlane;
+
+      auto previousCascadeStart{ nearPlane };
+
+      std::vector<std::pair<double, double>> cascadeDistances;
+      for (auto index{ 1.0 }; index < cascadeCount; ++index)
+      {
+         const auto cascade = nearPlane * std::pow(planeRatio, index / cascadeCount);
+         cascadeDistances.emplace_back(std::make_pair(previousCascadeStart, cascade));
+         previousCascadeStart = cascade;
+      }
+
+      cascadeDistances.emplace_back(std::make_pair(previousCascadeStart, farPlane));
+
+      return cascadeDistances;
+   }
+
+   struct BoundingBox
+   {
+      float left;
+      float right;
+      float bottom;
+      float top;
+      float back;
+      float front;
+   };
+
+   /**
+    * @brief Calculates an Axis Aligned Bounding Box (AABB) for each of the frustum splits.
+    *
+    * @param[in] renderCamera       The main camera used to render the scene. Mainly use is to get
+    *                               the aspect ratio of the outline correct.
+    * @param[in] shadowCamera       The camera that is to render the scene from the light caster's
+    *                               perspective.
+    */
+   auto ComputeFrustumSplitBoundingBoxes(
+      const Camera& renderCamera,
+      const Camera& shadowCamera)
+   {
+      constexpr auto cascadeCount{ 3 };
+      const auto cascades = GenerateShadowMapCascades(cascadeCount, renderCamera);
+
+      std::vector<std::vector<QVector3D>> frusta;
+      frusta.reserve(cascadeCount);
+
+      auto mutableCamera = renderCamera;
+      for (const auto& nearAndFarPlanes : cascades)
+      {
+         mutableCamera.SetNearPlane(nearAndFarPlanes.first);
+         mutableCamera.SetFarPlane(nearAndFarPlanes.second);
+
+         frusta.emplace_back(ComputeFrustumCorners(mutableCamera));
+      }
+
+      std::vector<BoundingBox> boundingBoxes;
+      boundingBoxes.reserve(cascadeCount);
+
+      const auto worldToLight = shadowCamera.GetProjectionViewMatrix();
+
+      for (const auto& frustum : frusta)
+      {
+         auto minX = std::numeric_limits<float>::max();
+         auto maxX = std::numeric_limits<float>::lowest();
+
+         auto minY = std::numeric_limits<float>::max();
+         auto maxY = std::numeric_limits<float>::lowest();
+
+         auto minZ = std::numeric_limits<float>::max();
+         auto maxZ = std::numeric_limits<float>::lowest();
+
+         // Compute bounding box in light space:
+         for (const auto& vertex : frustum)
+         {
+            const auto mappedVertex = worldToLight.map(vertex);
+
+            minX = std::min(minX, mappedVertex.x());
+            maxX = std::max(maxX, mappedVertex.x());
+
+            minY = std::min(minY, mappedVertex.y());
+            maxY = std::max(maxY, mappedVertex.y());
+
+            minZ = std::min(minZ, mappedVertex.z());
+            maxZ = std::max(maxZ, mappedVertex.z());
+         }
+
+         auto boundingBox = BoundingBox
+         {
+            /* left   = */ minX,
+            /* right  = */ maxX,
+            /* bottom = */ minY,
+            /* top    = */ maxY,
+            /* back   = */ maxZ,
+            /* front  = */ minZ
+         };
+
+         boundingBoxes.emplace_back(std::move(boundingBox));
+      }
+
+      return boundingBoxes;
+   }
+}
+
+namespace
+{
+   /**
     * @brief SetUniformLights is a helper function to easily set all values of the GLSL defined
     * struct.
     *
@@ -94,11 +234,11 @@ namespace
     */
    QMatrix4x4 ComputeLightTransformationMatrix(const Camera& camera)
    {
-      Camera shadowCam = camera;
-      shadowCam.SetPosition(QVector3D{ -200.0f, 500.0f, 200.0f });
-      shadowCam.SetOrientation(25.0f, 45.0f);
-      shadowCam.SetNearPlane(250.0f);
-      return shadowCam.GetProjectionViewMatrix();
+      Camera shadowCamera = camera;
+      shadowCamera.SetPosition(QVector3D{ -200.0f, 500.0f, 200.0f });
+      shadowCamera.SetOrientation(25.0f, 45.0f);
+      shadowCamera.SetNearPlane(250.0f);
+      return shadowCamera.GetProjectionViewMatrix();
    }
 
     constexpr auto TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE{ 0 };
@@ -323,7 +463,6 @@ bool TreemapAsset::InitializeShadowMachinery()
    return true;
 }
 
-
 std::uint32_t TreemapAsset::LoadBufferData(
    const Tree<VizFile>& tree,
    const VisualizationParameters& parameters)
@@ -420,7 +559,7 @@ bool TreemapAsset::IsAssetLoaded() const
    return !(m_blockTransformations.empty() && m_blockColors.empty());
 }
 
-bool TreemapAsset::RenderShadowPass(const Camera& camera)
+void TreemapAsset::RenderShadowPass(const Camera& camera)
 {
    // In order to fix Peter-panning artifacts, we'll temporarily cull front faces:
    m_graphicsDevice.glCullFace(GL_FRONT);
@@ -430,7 +569,19 @@ bool TreemapAsset::RenderShadowPass(const Camera& camera)
    m_shadowMapFrameBuffer.bind();
    m_shadowMapShader.bind();
 
-   m_shadowMapShader.setUniformValue("lightProjectionViewMatrix",
+   // @todo Move to Constants namespace for easier debugging...
+   Camera shadowCamera = camera;
+   shadowCamera.SetPosition(QVector3D{ -1000.0f, 500.0f, 1000.0f });
+   shadowCamera.SetOrientation(5.0f, 45.0f);
+   shadowCamera.SetNearPlane(400.0f);
+
+//   const BoundingBox frustumSplitBoundingBox = ComputeFrustumSplitBoundingBoxes(camera, shadowCamera)[2];
+//   // @todo Compute projection-view matrix for frustum split...
+//   QMatrix4x4 projectionViewMatrix;
+//   projectionViewMatrix.perspective();
+
+   m_shadowMapShader.setUniformValue(
+      "lightProjectionViewMatrix",
       ComputeLightTransformationMatrix(camera));
 
    m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -456,11 +607,9 @@ bool TreemapAsset::RenderShadowPass(const Camera& camera)
    m_graphicsDevice.glViewport(0, 0, viewport.width(), viewport.height());
 
    m_graphicsDevice.glCullFace(GL_BACK);
-
-   return true;
 }
 
-bool TreemapAsset::RenderMainPass(
+void TreemapAsset::RenderMainPass(
    const Camera& camera,
    const std::vector<Light>& lights,
    const OptionsManager& settings)
@@ -494,8 +643,6 @@ bool TreemapAsset::RenderMainPass(
    m_VAO.release();
 
    m_mainShader.release();
-
-   return true;
 }
 
 bool TreemapAsset::Render(

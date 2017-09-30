@@ -83,7 +83,7 @@ float ComputeShadowAttenuation()
    float cosTheta = dot(vertexNormal, fragmentToLight);
 
    float bias = 0.00000001;
-   float shadow = distanceToFragment - bias < distanceToOccluder  ? 1.0 : 0.0;
+   float shadow = distanceToFragment - bias < distanceToOccluder  ? 1.0 : 0.3;
 
    // Percent Closer Filtering:
 //   float shadow = 0.0;
@@ -112,15 +112,6 @@ void main(void)
    vec3 fragmentToCamera = normalize(cameraPosition - vec3(vertexPosition));
 
    vec3 linearColor = vec3(0.0f);
-
-   // Calculate the contribution of the light attached to the camera:
-//   vec3 linearColor = ComputeLightContribution(
-//      allLights[0],
-//      vertexColor,
-//      vertexNormal,
-//      vertexPosition.xyz,
-//      fragmentToCamera,
-//      /* includeAmbient = */ true);
 
    // Calculate the contribution of the shadow casting light:
    linearColor += ComputeShadowAttenuation() *

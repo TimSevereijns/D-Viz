@@ -1,5 +1,5 @@
-#ifndef NODESELECTIONCROSSHAIR_H
-#define NODESELECTIONCROSSHAIR_H
+#ifndef CROSSHAIRASSET_H
+#define CROSSHAIRASSET_H
 
 #include "lineAsset.h"
 
@@ -27,4 +27,4 @@ class CrosshairAsset final : public LineAsset
       void SetCrosshairLocation(const QPoint& canvasCenter);
 };
 
-#endif // NODESELECTIONCROSSHAIR_H
+#endif // CROSSHAIRASSET_H
