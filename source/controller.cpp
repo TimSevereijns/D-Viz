@@ -7,7 +7,7 @@
 #include "Visualizations/squarifiedTreemap.h"
 #include "Windows/mainWindow.h"
 
-#include <ArenaAllocator/ArenaAllocator.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <spdlog/spdlog.h>
 #include <Stopwatch/Stopwatch.hpp>
@@ -21,18 +21,6 @@
 namespace
 {
    constexpr const wchar_t BYTES_READOUT_STRING[] = L" bytes";
-
-   template<std::size_t ArenaSize = 512>
-   using WideStackString =
-      std::basic_string<
-         wchar_t,
-         std::char_traits<wchar_t>,
-         ArenaAllocator<
-            wchar_t,
-            ArenaSize,
-            alignof(wchar_t)
-         >
-      >;
 
    /**
     * @brief Converts bytes to binary prefix size and notation.
@@ -409,17 +397,12 @@ void Controller::SearchTreeMap(
 
    const auto selector = [&]
    {
-      // Using a stack allocated string (along with case sensitive comparison) appears to be about
-      // 25-30% percent faster compared to a regular heap allocated string:
-      // 212ms vs 316ms for ~750,000 files scanned on an old Intel Q9450.
-      //WideStackString<540>::allocator_type::arena_type stringArena{ };
-      //WideStackString<540> fullName{ std::move(stringArena) };
-      //fullName.resize(260); ///< Resize to prevent reallocation with later append operations.
+      std::wstring fileAndExtension;
+      fileAndExtension.resize(260); ///< Resize to prevent reallocation with append operations.
 
-      std::wstring fullName;
-      fullName.resize(260);
+      const auto lowercaseQuery = boost::algorithm::to_lower_copy(searchQuery);
 
-      Stopwatch<std::chrono::milliseconds>([&] ()
+      Stopwatch<std::chrono::milliseconds>([&] () noexcept
       {
          std::for_each(
             Tree<VizFile>::PostOrderIterator{ GetTree().GetRoot() },
@@ -435,10 +418,14 @@ void Controller::SearchTreeMap(
                return;
             }
 
-            fullName = file.name.data();
-            fullName.append(file.extension.data());
+            fileAndExtension = file.name;
+            fileAndExtension.append(file.extension);
 
-            if (!boost::icontains(fullName, searchQuery))
+            boost::algorithm::to_lower(fileAndExtension);
+
+            // @note We're converting everyting to lowercase before hand
+            // (instead of using `boost::icontains(...)`), since doing so is about twice as fast.
+            if (!boost::contains(fileAndExtension, lowercaseQuery))
             {
                return;
             }

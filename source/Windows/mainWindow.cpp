@@ -49,7 +49,7 @@ namespace
     *
     * @returns A pointer to a const static vector containing the menu values.
     */
-   const std::vector<std::pair<std::uintmax_t, QString>>* SwitchPruningMenuEntries(
+   const std::vector<std::pair<std::uintmax_t, QString>>* GeneratePruningMenuEntries(
       Constants::FileSize::Prefix prefix)
    {
       switch (prefix)
@@ -104,7 +104,7 @@ MainWindow::MainWindow(
    QMainWindow{ parent },
    m_controller{ controller },
    m_optionsManager{ std::make_shared<OptionsManager>() },
-   m_fileSizeOptions{ SwitchPruningMenuEntries(Constants::FileSize::Prefix::BINARY) }
+   m_fileSizeOptions{ GeneratePruningMenuEntries(Constants::FileSize::Prefix::BINARY) }
 {
    m_ui.setupUi(this);
 
@@ -397,7 +397,7 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
    menuWrapper.decimalPrefix.setChecked(false);
 
    ActivePrefix = Constants::FileSize::Prefix::BINARY;
-   m_fileSizeOptions = SwitchPruningMenuEntries(ActivePrefix);
+   m_fileSizeOptions = GeneratePruningMenuEntries(ActivePrefix);
 
    SetupFileSizePruningDropdown();
 
@@ -433,7 +433,7 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
    menuWrapper.decimalPrefix.setChecked(true);
 
    ActivePrefix = Constants::FileSize::Prefix::DECIMAL;
-   m_fileSizeOptions = SwitchPruningMenuEntries(ActivePrefix);
+   m_fileSizeOptions = GeneratePruningMenuEntries(ActivePrefix);
 
    SetupFileSizePruningDropdown();
 
