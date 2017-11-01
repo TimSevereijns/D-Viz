@@ -6,6 +6,58 @@
 #include <cmath>
 #include <limits>
 
+namespace Literals
+{
+   namespace Numeric
+   {
+      namespace Binary
+      {
+         constexpr auto operator""_KiB(unsigned long long value) noexcept -> std::size_t
+         {
+            return value * 1'024;
+         }
+
+         constexpr auto operator""_MiB(unsigned long long value) noexcept
+         {
+            return value * 1'024 * 1_KiB;
+         }
+
+         constexpr auto operator""_GiB(unsigned long long value) noexcept
+         {
+            return value * 1'024 * 1_MiB;
+         }
+
+         constexpr auto operator""_TiB(unsigned long long value) noexcept
+         {
+            return value * 1'024 * 1_GiB;
+         }
+      }
+
+      namespace Decimal
+      {
+         constexpr auto operator""_KB(unsigned long long value) noexcept -> std::size_t
+         {
+            return value * 1'000;
+         }
+
+         constexpr auto operator""_MB(unsigned long long value) noexcept
+         {
+            return value * 1'000 * 1_KB;
+         }
+
+         constexpr auto operator""_GB(unsigned long long value) noexcept
+         {
+            return value * 1'000 * 1_MB;
+         }
+
+         constexpr auto operator""_TB(unsigned long long value) noexcept
+         {
+            return value * 1'000 * 1_GB;
+         }
+      }
+   }
+}
+
 namespace Constants
 {
    namespace FileSize
@@ -15,22 +67,6 @@ namespace Constants
          BINARY,
          DECIMAL
       };
-
-      namespace Binary
-      {
-         const static auto ONE_KIBIBYTE = static_cast<std::uintmax_t>(std::pow(2, 10));
-         const static auto ONE_MEBIBYTE = static_cast<std::uintmax_t>(std::pow(2, 20));
-         const static auto ONE_GIBIBYTE = static_cast<std::uintmax_t>(std::pow(2, 30));
-         const static auto ONE_TEBIBYTE = static_cast<std::uintmax_t>(std::pow(2, 40));
-      }
-
-      namespace Decimal
-      {
-         const static auto ONE_KILOBYTE = static_cast<std::uintmax_t>(std::pow(10, 3));
-         const static auto ONE_MEGABYTE = static_cast<std::uintmax_t>(std::pow(10, 6));
-         const static auto ONE_GIGABYTE = static_cast<std::uintmax_t>(std::pow(10, 9));
-         const static auto ONE_TERABYTE = static_cast<std::uintmax_t>(std::pow(10, 12));
-      }
    }
 
    namespace Colors

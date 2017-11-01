@@ -31,31 +31,33 @@ namespace
     */
    std::pair<double, std::wstring> ConvertToBinaryPrefix(double sizeInBytes)
    {
-      if (sizeInBytes < Constants::FileSize::Binary::ONE_KIBIBYTE)
+      using namespace Literals::Numeric::Binary;
+
+      if (sizeInBytes < 1_KiB)
       {
          return std::make_pair<double, std::wstring>(std::move(sizeInBytes), BYTES_READOUT_STRING);
       }
 
-      if (sizeInBytes < Constants::FileSize::Binary::ONE_MEBIBYTE)
+      if (sizeInBytes < 1_MiB)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::Binary::ONE_KIBIBYTE, L" KiB");
+            sizeInBytes / 1_KiB, L" KiB");
       }
 
-      if (sizeInBytes < Constants::FileSize::Binary::ONE_GIBIBYTE)
+      if (sizeInBytes < 1_GiB)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::Binary::ONE_MEBIBYTE, L" MiB");
+            sizeInBytes / 1_MiB, L" MiB");
       }
 
-      if (sizeInBytes < Constants::FileSize::Binary::ONE_TEBIBYTE)
+      if (sizeInBytes < 1_TiB)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::Binary::ONE_GIBIBYTE, L" GiB");
+            sizeInBytes / 1_GiB, L" GiB");
       }
 
       return std::make_pair<double, std::wstring>(
-         sizeInBytes / Constants::FileSize::Binary::ONE_TEBIBYTE, L" TiB");
+         sizeInBytes / 1_TiB, L" TiB");
    }
 
    /**
@@ -67,31 +69,33 @@ namespace
     */
    std::pair<double, std::wstring> ConvertToDecimalPrefix(double sizeInBytes)
    {
-      if (sizeInBytes < Constants::FileSize::Decimal::ONE_KILOBYTE)
+      using namespace Literals::Numeric::Decimal;
+
+      if (sizeInBytes < 1_KB)
       {
          return std::make_pair<double, std::wstring>(std::move(sizeInBytes), BYTES_READOUT_STRING);
       }
 
-      if (sizeInBytes < Constants::FileSize::Decimal::ONE_MEGABYTE)
+      if (sizeInBytes < 1_MB)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::Decimal::ONE_KILOBYTE, L" KB");
+            sizeInBytes / 1_KB, L" KB");
       }
 
-      if (sizeInBytes < Constants::FileSize::Decimal::ONE_GIGABYTE)
+      if (sizeInBytes < 1_GB)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::Decimal::ONE_MEGABYTE, L" MB");
+            sizeInBytes / 1_MB, L" MB");
       }
 
-      if (sizeInBytes < Constants::FileSize::Decimal::ONE_TERABYTE)
+      if (sizeInBytes < 1_TB)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::Decimal::ONE_GIGABYTE, L" GB");
+            sizeInBytes / 1_GB, L" GB");
       }
 
       return std::make_pair<double, std::wstring>(
-         sizeInBytes / Constants::FileSize::Decimal::ONE_TERABYTE, L" TB");
+         sizeInBytes / 1_TB, L" TB");
    }
 }
 
