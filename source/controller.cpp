@@ -1,6 +1,9 @@
 #include "controller.h"
 
 #include "constants.h"
+#include "globals.h"
+#include "literals.h"
+
 #include "Utilities/ignoreUnused.hpp"
 #include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
@@ -438,7 +441,7 @@ void Controller::SearchTreeMap(
          });
       }, [] (const auto& elapsed, const auto& units) noexcept
       {
-         spdlog::get(Constants::Logging::LOG_NAME)->info(
+         spdlog::get(Constants::Logging::DEFAULT_LOG)->info(
             fmt::format("Search Completed in: {} {}", elapsed.count(), units));
       });
    };
@@ -449,7 +452,7 @@ void Controller::SearchTreeMap(
 std::pair<double, std::wstring> Controller::ConvertFileSizeToAppropriateUnits(
    std::uintmax_t sizeInBytes)
 {
-   switch (ActivePrefix)
+   switch (Globals::ActivePrefix)
    {
       case Constants::FileSize::Prefix::BINARY:
          return ConvertToBinaryPrefix(sizeInBytes);

@@ -38,7 +38,7 @@ BreakdownDialog::BreakdownDialog(QWidget* parent) :
       }
    }, [] (const auto& elapsed, const auto& units) noexcept
    {
-      spdlog::get(Constants::Logging::LOG_NAME)->info(
+      spdlog::get(Constants::Logging::DEFAULT_LOG)->info(
          fmt::format("Built break-down model in: {} {}", elapsed.count(), units));
    });
 

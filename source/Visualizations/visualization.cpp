@@ -393,7 +393,7 @@ Tree<VizFile>::Node* VisualizationModel::FindNearestIntersection(
       nearestIntersection = closest->second;
    }, [] (const auto& elapsed, const auto& units) noexcept
    {
-      spdlog::get(Constants::Logging::LOG_NAME)->info(
+      spdlog::get(Constants::Logging::DEFAULT_LOG)->info(
          fmt::format("Selected node in: {} {}", elapsed.count(), units));
    });
 

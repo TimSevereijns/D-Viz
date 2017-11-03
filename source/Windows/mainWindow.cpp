@@ -1,6 +1,9 @@
 #include "mainWindow.h"
 
 #include "constants.h"
+#include "globals.h"
+#include "literals.h"
+
 #include "DataStructs/scanningProgress.hpp"
 #include "optionsManager.h"
 #include "Utilities/operatingSystemSpecific.hpp"
@@ -20,8 +23,6 @@
 #include <QMenuBar>
 #include <QMessageBox>
 
-Constants::FileSize::Prefix ActivePrefix = Constants::FileSize::Prefix::BINARY;
-
 namespace
 {
    /**
@@ -31,7 +32,7 @@ namespace
     */
    void LogScanCompletion(const ScanningProgress& progress)
    {
-      const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
+      const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
 
       log->info(
          fmt::format("Scanned: {} directories and {} files, representing {} bytes",
@@ -362,7 +363,7 @@ void MainWindow::OnFileMenuNewScan()
 
    m_rootPath = selectedDirectory.toStdWString();
 
-   const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
+   const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
    log->info(fmt::format("Started a new scan at: \"{}\"", m_rootPath.string()));
 
    const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
@@ -403,8 +404,8 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
    menuWrapper.binaryPrefix.setChecked(true);
    menuWrapper.decimalPrefix.setChecked(false);
 
-   ActivePrefix = Constants::FileSize::Prefix::BINARY;
-   m_fileSizeOptions = GeneratePruningMenuEntries(ActivePrefix);
+   Globals::ActivePrefix = Constants::FileSize::Prefix::BINARY;
+   m_fileSizeOptions = GeneratePruningMenuEntries(Globals::ActivePrefix);
 
    SetupFileSizePruningDropdown();
 
@@ -439,8 +440,8 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
    menuWrapper.binaryPrefix.setChecked(false);
    menuWrapper.decimalPrefix.setChecked(true);
 
-   ActivePrefix = Constants::FileSize::Prefix::DECIMAL;
-   m_fileSizeOptions = GeneratePruningMenuEntries(ActivePrefix);
+   Globals::ActivePrefix = Constants::FileSize::Prefix::DECIMAL;
+   m_fileSizeOptions = GeneratePruningMenuEntries(Globals::ActivePrefix);
 
    SetupFileSizePruningDropdown();
 
