@@ -3,16 +3,19 @@
 
 #include "lineAsset.h"
 
-class DebuggingRayAsset final : public LineAsset
+namespace Asset
 {
-   public:
+   class DebuggingRay final : public Line
+   {
+      public:
 
-      DebuggingRayAsset(QOpenGLExtraFunctions& device);
+         DebuggingRay(QOpenGLExtraFunctions& openGL);
 
-      bool Render(
-         const Camera& camera,
-         const std::vector<Light>& lights,
-         const OptionsManager& settings) override;
-};
+         bool Render(
+            const Camera& camera,
+            const std::vector<Light>& lights,
+            const OptionsManager& settings) override;
+   };
+}
 
 #endif // DEBUGGINGRAYASSET_H

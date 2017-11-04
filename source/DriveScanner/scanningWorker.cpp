@@ -112,7 +112,7 @@ namespace
          node->DeleteFromTree();
       }
 
-      spdlog::get(Constants::Logging::LOG_NAME)->info(
+      spdlog::get(Constants::Logging::DEFAULT_LOG)->info(
          fmt::format("Number of Sizeless Files Removed: {}", nodesRemoved)
       );
    }
@@ -158,7 +158,7 @@ namespace
       auto itr = std::experimental::filesystem::directory_iterator{ path, errorCode };
       if (errorCode)
       {
-         const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
+         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
          log->error("Could not create directory iterator!");
          log->flush();
 
@@ -461,7 +461,7 @@ void ScanningWorker::Start()
       BuildFinalTree(resultQueue, *theTree);
    }, [] (const auto& elapsed, const auto& units) noexcept
    {
-      spdlog::get(Constants::Logging::LOG_NAME)->info(
+      spdlog::get(Constants::Logging::DEFAULT_LOG)->info(
          fmt::format("Scanned Drive in: {} {}", elapsed.count(), units));
    });
 

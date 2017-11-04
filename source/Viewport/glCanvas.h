@@ -7,7 +7,7 @@
 #include "DriveScanner/driveScanner.h"
 #include "HID/keyboardManager.h"
 #include "optionsManager.h"
-#include "Scene/sceneAsset.h"
+#include "Scene/baseAsset.h"
 #include "Scene/crosshairAsset.h"
 #include "Scene/debuggingRayAsset.h"
 #include "Scene/frustumAsset.h"
@@ -26,49 +26,53 @@
 #include <QTimer>
 #include <QVector3D>
 
+// @todo Move these to a separate file.
 namespace Asset
 {
-   struct Tag
+   namespace Tag
    {
-      using AssetType = void;
-      virtual int GetID() const noexcept { return 0; }
-   };
+      struct Base
+      {
+         using AssetType = void;
+         virtual int GetID() const noexcept { return 0; }
+      };
 
-   struct OriginMarker final : Tag
-   {
-      using AssetType = OriginMarkerAsset;
-      int GetID() const noexcept override { return 1; }
-   };
+      struct OriginMarker final : Base
+      {
+         using AssetType = Asset::OriginMarker;
+         int GetID() const noexcept override { return 1; }
+      };
 
-   struct Grid final : Tag
-   {
-      using AssetType = GridAsset;
-      int GetID() const noexcept override { return 2; }
-   };
+      struct Grid final : Base
+      {
+         using AssetType = Asset::Grid;
+         int GetID() const noexcept override { return 2; }
+      };
 
-   struct Crosshair final : Tag
-   {
-       using AssetType = CrosshairAsset;
-       int GetID() const noexcept override { return 3; }
-   };
+      struct Crosshair final : Base
+      {
+          using AssetType = Asset::Crosshair;
+          int GetID() const noexcept override { return 3; }
+      };
 
-   struct Treemap final : Tag
-   {
-      using AssetType = TreemapAsset;
-      int GetID() const noexcept override { return 4; }
-   };
+      struct Treemap final : Base
+      {
+         using AssetType = Asset::Treemap;
+         int GetID() const noexcept override { return 4; }
+      };
 
-   struct LightMarkers final : Tag
-   {
-      using AssetType = LightMarkerAsset;
-      int GetID() const noexcept override { return 5; }
-   };
+      struct LightMarkers final : Base
+      {
+         using AssetType = Asset::LightMarker;
+         int GetID() const noexcept override { return 5; }
+      };
 
-   struct Frusta final : Tag
-   {
-      using AssetType = FrustumAsset;
-      int GetID() const noexcept override { return 6; }
-   };
+      struct Frusta final : Base
+      {
+         using AssetType = Asset::Frustum;
+         int GetID() const noexcept override { return 6; }
+      };
+   }
 }
 
 /**
@@ -261,8 +265,8 @@ class GLCanvas final : public QOpenGLWidget
        * @brief Helper function that turns scene asset retrieval into a simple one-liner.
        *
        * @tparam RequestedAsset     The tag specifying the type of the asset that is to be
-       *                            retrieved. Note that this function implies that there can only
-       *                            be one asset of each type.
+       *                            retrieved. Note that we're implicitly assuming that we'll only
+       *                            store one instance of each type.
        */
       template<typename RequestedAsset>
       typename RequestedAsset::AssetType* GetAsset() const noexcept
@@ -285,8 +289,9 @@ class GLCanvas final : public QOpenGLWidget
       /**
        * @brief Helper function that turns scene asset registration into a simple one-liner.
        *
-       * @tparam AssetTag           The tag specifying the type of asset to register. Note that this
-       *                            function implies that there can only be one asset of each type.
+       * @tparam AssetTag           The tag specifying the type of asset to register. Note that
+       *                            we're implicitly assuming that we'll only store one instance of
+       *                            each type.
        */
       template<typename AssetTag>
       void RegisterAsset()
@@ -349,8 +354,8 @@ class GLCanvas final : public QOpenGLWidget
 
       struct TagAndAsset
       {
-         std::unique_ptr<Asset::Tag> tag;
-         std::unique_ptr<SceneAsset> asset;
+         std::unique_ptr<Asset::Tag::Base> tag;
+         std::unique_ptr<Asset::Base> asset;
       };
 
       // @note Using an unsorted, linear container to store and retrieve assets is likely to

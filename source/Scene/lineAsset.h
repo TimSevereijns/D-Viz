@@ -1,33 +1,36 @@
 #ifndef LINEASSET_H
 #define LINEASSET_H
 
-#include "sceneAsset.h"
+#include "baseAsset.h"
 
-/**
- * @brief The LineAsset class
- */
-class LineAsset : public SceneAsset
+namespace Asset
 {
-   public:
+   /**
+    * @brief The LineAsset class
+    */
+   class Line : public Base
+   {
+      public:
 
-      explicit LineAsset(QOpenGLExtraFunctions& device);
+         explicit Line(QOpenGLExtraFunctions& openGL);
 
-      bool LoadShaders() override;
+         bool LoadShaders() override;
 
-      bool Initialize() override;
+         bool Initialize() override;
 
-      bool Render(
-         const Camera& camera,
-         const std::vector<Light>& light,
-         const OptionsManager& settings) override;
+         bool Render(
+            const Camera& camera,
+            const std::vector<Light>& light,
+            const OptionsManager& settings) override;
 
-      bool Reload() override;
+         bool Reload() override;
 
-   private:
+      private:
 
-      bool InitializeVertexBuffers();
+         bool InitializeVertexBuffers();
 
-      bool InitializeColorBuffers();
-};
+         bool InitializeColorBuffers();
+   };
+}
 
 #endif // LINEASSET_H

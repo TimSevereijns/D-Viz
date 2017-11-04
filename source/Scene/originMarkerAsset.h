@@ -3,16 +3,19 @@
 
 #include "lineAsset.h"
 
-class OriginMarkerAsset : public LineAsset
+namespace Asset
 {
-   public:
+   class OriginMarker final : public Line
+   {
+      public:
 
-      explicit OriginMarkerAsset(QOpenGLExtraFunctions& graphicsContext);
+         explicit OriginMarker(QOpenGLExtraFunctions& openGL);
 
-      bool Render(
-         const Camera& camera,
-         const std::vector<Light>& lights,
-         const OptionsManager& settings) override;
-};
+         bool Render(
+            const Camera& camera,
+            const std::vector<Light>& lights,
+            const OptionsManager& settings) override;
+   };
+}
 
 #endif // ORIGINMARKERASSET_H

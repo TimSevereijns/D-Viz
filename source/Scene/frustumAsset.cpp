@@ -102,7 +102,7 @@ namespace
     *                               the aspect ratio of the outline correct.
     */
    void GenerateCameraFrusta(
-      FrustumAsset& frustumAsset,
+      Asset::Frustum& frustumAsset,
       const Camera& camera)
    {
       Camera mutableCamera = camera;
@@ -148,7 +148,7 @@ namespace
     *                               the aspect ratio of the outline correct.
     */
    void GenerateShadowCasterFrustum(
-      FrustumAsset& frustumAsset,
+      Asset::Frustum& frustumAsset,
       const Camera& camera)
    {
       const auto& frustum = GenerateFrustum(camera);
@@ -177,7 +177,7 @@ namespace
     *                               perspective.
     */
    void RenderCascadeBoundingBoxes(
-      FrustumAsset& frustumAsset,
+      Asset::Frustum& frustumAsset,
       const Camera& renderCamera,
       const Camera& shadowCamera)
    {
@@ -266,60 +266,63 @@ namespace
    }
 }
 
-FrustumAsset::FrustumAsset(QOpenGLExtraFunctions& renderingContext) :
-   LineAsset{ renderingContext }
+namespace Asset
 {
-}
-
-bool FrustumAsset::Render(
-   const Camera& camera,
-   const std::vector<Light>& /*lights*/,
-   const OptionsManager& /*settings*/)
-{
-   if (!m_shouldRender)
+   Frustum::Frustum(QOpenGLExtraFunctions& openGL) :
+      Line{ openGL }
    {
-      return false;
    }
 
-   m_mainShader.bind();
-   m_mainShader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
+   bool Frustum::Render(
+      const Camera& camera,
+      const std::vector<Light>& /*lights*/,
+      const OptionsManager& /*settings*/)
+   {
+      if (!m_shouldRender)
+      {
+         return false;
+      }
 
-   m_VAO.bind();
+      m_mainShader.bind();
+      m_mainShader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 
-   m_graphicsDevice.glLineWidth(2);
+      m_VAO.bind();
 
-   m_graphicsDevice.glDrawArrays(
-      /* mode = */ GL_LINES,
-      /* first = */ 0,
-      /* count = */ m_rawVertices.size());
+      m_openGL.glLineWidth(2);
 
-   m_graphicsDevice.glLineWidth(1);
+      m_openGL.glDrawArrays(
+         /* mode = */ GL_LINES,
+         /* first = */ 0,
+         /* count = */ m_rawVertices.size());
 
-   m_mainShader.release();
-   m_VAO.release();
+      m_openGL.glLineWidth(1);
 
-   return true;
-}
+      m_mainShader.release();
+      m_VAO.release();
 
-void FrustumAsset::GenerateFrusta(const Camera& camera)
-{
-   ClearBuffers();
+      return true;
+   }
 
-   Camera renderCamera = camera;
-   renderCamera.SetPosition(QVector3D{ 500, 100, 0 });
-   renderCamera.SetOrientation(0.0f, 0.0f);
-   renderCamera.SetNearPlane(1.0f);
-   renderCamera.SetFarPlane(2000.0f);
+   void Frustum::GenerateFrusta(const Camera& camera)
+   {
+      ClearBuffers();
 
-   Camera shadowCamera = camera;
-   shadowCamera.SetPosition(QVector3D{ -200.0f, 500.0f, 200.0f });
-   shadowCamera.SetOrientation(25.0f, 45.0f);
-   shadowCamera.SetNearPlane(250.0f);
+      Camera renderCamera = camera;
+      renderCamera.SetPosition(QVector3D{ 500, 100, 0 });
+      renderCamera.SetOrientation(0.0f, 0.0f);
+      renderCamera.SetNearPlane(1.0f);
+      renderCamera.SetFarPlane(2000.0f);
 
-   RenderCascadeBoundingBoxes(*this, renderCamera, shadowCamera);
+      Camera shadowCamera = camera;
+      shadowCamera.SetPosition(QVector3D{ -200.0f, 500.0f, 200.0f });
+      shadowCamera.SetOrientation(25.0f, 45.0f);
+      shadowCamera.SetNearPlane(250.0f);
 
-   GenerateCameraFrusta(*this, renderCamera);
-   GenerateShadowCasterFrustum(*this, shadowCamera);
+      RenderCascadeBoundingBoxes(*this, renderCamera, shadowCamera);
 
-   Reload();
+      GenerateCameraFrusta(*this, renderCamera);
+      GenerateShadowCasterFrustum(*this, shadowCamera);
+
+      Reload();
+   }
 }

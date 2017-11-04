@@ -3,20 +3,23 @@
 
 #include "lineAsset.h"
 
-/**
- * @brief The frustumAsset class
- */
-class FrustumAsset final : public LineAsset
+namespace Asset
 {
-   public:
-      explicit FrustumAsset(QOpenGLExtraFunctions& device);
+   /**
+    * @brief The frustumAsset class
+    */
+   class Frustum final : public Line
+   {
+      public:
+         explicit Frustum(QOpenGLExtraFunctions& openGL);
 
-      bool Render(
-         const Camera& camera,
-         const std::vector<Light>& lights,
-         const OptionsManager& settings) override;
+         bool Render(
+            const Camera& camera,
+            const std::vector<Light>& lights,
+            const OptionsManager& settings) override;
 
-      void GenerateFrusta(const Camera& camera);
-};
+         void GenerateFrusta(const Camera& camera);
+   };
+}
 
 #endif // FRUSTUMASSET_H

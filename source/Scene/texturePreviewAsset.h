@@ -6,32 +6,35 @@
 #include <QImage>
 #include <QOpenGLTexture>
 
-#include "sceneAsset.h"
+#include "baseAsset.h"
 
-class TexturePreviewAsset : public SceneAsset
+namespace Asset
 {
-public:
+   class TexturePreview : public Base
+   {
+   public:
 
-   explicit TexturePreviewAsset(QOpenGLExtraFunctions& graphicsContext);
+      explicit TexturePreview(QOpenGLExtraFunctions& openGL);
 
-   bool Initialize() override;
+      bool Initialize() override;
 
-   bool LoadShaders() override;
+      bool LoadShaders() override;
 
-   bool Render(
-      const Camera &camera,
-      const std::vector<Light>& light,
-      const OptionsManager& settings) override;
+      bool Render(
+         const Camera &camera,
+         const std::vector<Light>& light,
+         const OptionsManager& settings) override;
 
-   bool Reload() override;
+      bool Reload() override;
 
-   void SetTexture(const QImage &texture);
+      void SetTexture(const QImage &texture);
 
-private:
+   private:
 
-   QOpenGLBuffer m_VBO;
+      QOpenGLBuffer m_VBO;
 
-   std::unique_ptr<QOpenGLTexture> m_texture;
-};
+      std::unique_ptr<QOpenGLTexture> m_texture;
+   };
+}
 
 #endif // TEXTUREPREVIEWASSET_H

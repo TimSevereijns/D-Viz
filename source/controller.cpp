@@ -1,13 +1,16 @@
 #include "controller.h"
 
 #include "constants.h"
+#include "globals.h"
+#include "literals.h"
+
 #include "Utilities/ignoreUnused.hpp"
 #include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Visualizations/squarifiedTreemap.h"
 #include "Windows/mainWindow.h"
 
-#include <ArenaAllocator/ArenaAllocator.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <spdlog/spdlog.h>
 #include <Stopwatch/Stopwatch.hpp>
@@ -22,18 +25,6 @@ namespace
 {
    constexpr const wchar_t BYTES_READOUT_STRING[] = L" bytes";
 
-   template<std::size_t ArenaSize = 512>
-   using WideStackString =
-      std::basic_string<
-         wchar_t,
-         std::char_traits<wchar_t>,
-         ArenaAllocator<
-            wchar_t,
-            ArenaSize,
-            alignof(wchar_t)
-         >
-      >;
-
    /**
     * @brief Converts bytes to binary prefix size and notation.
     *
@@ -43,31 +34,33 @@ namespace
     */
    std::pair<double, std::wstring> ConvertToBinaryPrefix(double sizeInBytes)
    {
-      if (sizeInBytes < Constants::FileSize::Binary::ONE_KIBIBYTE)
+      using namespace Literals::Numeric::Binary;
+
+      if (sizeInBytes < 1_KiB)
       {
          return std::make_pair<double, std::wstring>(std::move(sizeInBytes), BYTES_READOUT_STRING);
       }
 
-      if (sizeInBytes < Constants::FileSize::Binary::ONE_MEBIBYTE)
+      if (sizeInBytes < 1_MiB)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::Binary::ONE_KIBIBYTE, L" KiB");
+            sizeInBytes / 1_KiB, L" KiB");
       }
 
-      if (sizeInBytes < Constants::FileSize::Binary::ONE_GIBIBYTE)
+      if (sizeInBytes < 1_GiB)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::Binary::ONE_MEBIBYTE, L" MiB");
+            sizeInBytes / 1_MiB, L" MiB");
       }
 
-      if (sizeInBytes < Constants::FileSize::Binary::ONE_TEBIBYTE)
+      if (sizeInBytes < 1_TiB)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::Binary::ONE_GIBIBYTE, L" GiB");
+            sizeInBytes / 1_GiB, L" GiB");
       }
 
       return std::make_pair<double, std::wstring>(
-         sizeInBytes / Constants::FileSize::Binary::ONE_TEBIBYTE, L" TiB");
+         sizeInBytes / 1_TiB, L" TiB");
    }
 
    /**
@@ -79,31 +72,33 @@ namespace
     */
    std::pair<double, std::wstring> ConvertToDecimalPrefix(double sizeInBytes)
    {
-      if (sizeInBytes < Constants::FileSize::Decimal::ONE_KILOBYTE)
+      using namespace Literals::Numeric::Decimal;
+
+      if (sizeInBytes < 1_KB)
       {
          return std::make_pair<double, std::wstring>(std::move(sizeInBytes), BYTES_READOUT_STRING);
       }
 
-      if (sizeInBytes < Constants::FileSize::Decimal::ONE_MEGABYTE)
+      if (sizeInBytes < 1_MB)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::Decimal::ONE_KILOBYTE, L" KB");
+            sizeInBytes / 1_KB, L" KB");
       }
 
-      if (sizeInBytes < Constants::FileSize::Decimal::ONE_GIGABYTE)
+      if (sizeInBytes < 1_GB)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::Decimal::ONE_MEGABYTE, L" MB");
+            sizeInBytes / 1_MB, L" MB");
       }
 
-      if (sizeInBytes < Constants::FileSize::Decimal::ONE_TERABYTE)
+      if (sizeInBytes < 1_TB)
       {
          return std::make_pair<double, std::wstring>(
-            sizeInBytes / Constants::FileSize::Decimal::ONE_GIGABYTE, L" GB");
+            sizeInBytes / 1_GB, L" GB");
       }
 
       return std::make_pair<double, std::wstring>(
-         sizeInBytes / Constants::FileSize::Decimal::ONE_TERABYTE, L" TB");
+         sizeInBytes / 1_TB, L" TB");
    }
 }
 
@@ -409,17 +404,12 @@ void Controller::SearchTreeMap(
 
    const auto selector = [&]
    {
-      // Using a stack allocated string (along with case sensitive comparison) appears to be about
-      // 25-30% percent faster compared to a regular heap allocated string:
-      // 212ms vs 316ms for ~750,000 files scanned on an old Intel Q9450.
-      //WideStackString<540>::allocator_type::arena_type stringArena{ };
-      //WideStackString<540> fullName{ std::move(stringArena) };
-      //fullName.resize(260); ///< Resize to prevent reallocation with later append operations.
+      std::wstring fileAndExtension;
+      fileAndExtension.resize(260); ///< Resize to prevent reallocation with append operations.
 
-      std::wstring fullName;
-      fullName.resize(260);
+      const auto lowercaseQuery = boost::algorithm::to_lower_copy(searchQuery);
 
-      Stopwatch<std::chrono::milliseconds>([&] ()
+      Stopwatch<std::chrono::milliseconds>([&] () noexcept
       {
          std::for_each(
             Tree<VizFile>::PostOrderIterator{ GetTree().GetRoot() },
@@ -435,10 +425,14 @@ void Controller::SearchTreeMap(
                return;
             }
 
-            fullName = file.name.data();
-            fullName.append(file.extension.data());
+            fileAndExtension = file.name;
+            fileAndExtension.append(file.extension);
 
-            if (!boost::icontains(fullName, searchQuery))
+            boost::algorithm::to_lower(fileAndExtension);
+
+            // @note We're converting everyting to lowercase before hand
+            // (instead of using `boost::icontains(...)`), since doing so is about twice as fast.
+            if (!boost::contains(fileAndExtension, lowercaseQuery))
             {
                return;
             }
@@ -447,7 +441,7 @@ void Controller::SearchTreeMap(
          });
       }, [] (const auto& elapsed, const auto& units) noexcept
       {
-         spdlog::get(Constants::Logging::LOG_NAME)->info(
+         spdlog::get(Constants::Logging::DEFAULT_LOG)->info(
             fmt::format("Search Completed in: {} {}", elapsed.count(), units));
       });
    };
@@ -458,7 +452,7 @@ void Controller::SearchTreeMap(
 std::pair<double, std::wstring> Controller::ConvertFileSizeToAppropriateUnits(
    std::uintmax_t sizeInBytes)
 {
-   switch (ActivePrefix)
+   switch (Globals::ActivePrefix)
    {
       case Constants::FileSize::Prefix::BINARY:
          return ConvertToBinaryPrefix(sizeInBytes);

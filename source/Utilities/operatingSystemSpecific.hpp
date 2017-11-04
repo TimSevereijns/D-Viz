@@ -63,7 +63,7 @@ namespace OperatingSystemSpecific
 
        assert(wasOperationSuccessful);
 
-       const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
+       const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
        log->info(fmt::format("Disk Size:  {} bytes", totalNumberOfBytes));
        log->info(fmt::format("Free Space: {} bytes", totalNumberOfFreeBytes));
 
@@ -101,7 +101,7 @@ namespace OperatingSystemSpecific
        const auto totalNumberOfBytes = diskInfo.f_blocks * diskInfo.f_bsize;
        const auto totalNumberOfFreeBytes = diskInfo.f_bfree * diskInfo.f_bsize;
 
-       const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
+       const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
        log->info(fmt::format("Disk Size:  {} bytes", totalNumberOfBytes));
        log->info(fmt::format("Free Space: {} bytes", totalNumberOfFreeBytes));
 

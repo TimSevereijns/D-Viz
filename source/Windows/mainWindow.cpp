@@ -1,6 +1,9 @@
 #include "mainWindow.h"
 
 #include "constants.h"
+#include "globals.h"
+#include "literals.h"
+
 #include "DataStructs/scanningProgress.hpp"
 #include "optionsManager.h"
 #include "Utilities/operatingSystemSpecific.hpp"
@@ -20,8 +23,6 @@
 #include <QMenuBar>
 #include <QMessageBox>
 
-Constants::FileSize::Prefix ActivePrefix = Constants::FileSize::Prefix::BINARY;
-
 namespace
 {
    /**
@@ -31,7 +32,7 @@ namespace
     */
    void LogScanCompletion(const ScanningProgress& progress)
    {
-      const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
+      const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
 
       log->info(
          fmt::format("Scanned: {} directories and {} files, representing {} bytes",
@@ -49,48 +50,55 @@ namespace
     *
     * @returns A pointer to a const static vector containing the menu values.
     */
-   const std::vector<std::pair<std::uintmax_t, QString>>* SwitchPruningMenuEntries(
+   const std::vector<std::pair<std::uintmax_t, QString>>* GeneratePruningMenuEntries(
       Constants::FileSize::Prefix prefix)
    {
       switch (prefix)
       {
          case Constants::FileSize::Prefix::DECIMAL:
          {
+            using namespace Literals::Numeric::Decimal;
+
             const static auto decimal = std::vector<std::pair<std::uintmax_t, QString>>
             {
-               { 0u,                                               "Show All" },
-               { Constants::FileSize::Decimal::ONE_KILOBYTE,       "< 1 KB"   },
-               { Constants::FileSize::Decimal::ONE_MEGABYTE,       "< 1 MB"   },
-               { Constants::FileSize::Decimal::ONE_MEGABYTE * 10,  "< 10 MB"  },
-               { Constants::FileSize::Decimal::ONE_MEGABYTE * 100, "< 100 MB" },
-               { Constants::FileSize::Decimal::ONE_MEGABYTE * 250, "< 250 MB" },
-               { Constants::FileSize::Decimal::ONE_MEGABYTE * 500, "< 500 MB" },
-               { Constants::FileSize::Decimal::ONE_GIGABYTE,       "< 1 GB"   },
-               { Constants::FileSize::Decimal::ONE_GIGABYTE * 5,   "< 5 GB"   },
-               { Constants::FileSize::Decimal::ONE_GIGABYTE * 10,  "< 10 GB"  }
+               { 0u,     "Show All" },
+               { 1_KB,   "< 1 KB"   },
+               { 1_MB,   "< 1 MB"   },
+               { 10_MB,  "< 10 MB"  },
+               { 100_MB, "< 100 MB" },
+               { 250_MB, "< 250 MB" },
+               { 500_MB, "< 500 MB" },
+               { 1_GB,   "< 1 GB"   },
+               { 5_GB,   "< 5 GB"   },
+               { 10_GB,  "< 10 GB"  }
             };
 
             return &decimal;
          }
          case Constants::FileSize::Prefix::BINARY:
          {
+            using namespace Literals::Numeric::Binary;
+
             const static auto binary = std::vector<std::pair<std::uintmax_t, QString>>
             {
-               { 0u,                                              "Show All"  },
-               { Constants::FileSize::Binary::ONE_KIBIBYTE,       "< 1 KiB"   },
-               { Constants::FileSize::Binary::ONE_MEBIBYTE,       "< 1 MiB"   },
-               { Constants::FileSize::Binary::ONE_MEBIBYTE * 10,  "< 10 MiB"  },
-               { Constants::FileSize::Binary::ONE_MEBIBYTE * 100, "< 100 MiB" },
-               { Constants::FileSize::Binary::ONE_MEBIBYTE * 250, "< 250 MiB" },
-               { Constants::FileSize::Binary::ONE_MEBIBYTE * 500, "< 500 MiB" },
-               { Constants::FileSize::Binary::ONE_GIBIBYTE,       "< 1 GiB"   },
-               { Constants::FileSize::Binary::ONE_GIBIBYTE * 5,   "< 5 GiB"   },
-               { Constants::FileSize::Binary::ONE_GIBIBYTE * 10,  "< 10 GiB"  }
+               { 0u,     "Show All" },
+               { 1_KiB,   "< 1 KiB"   },
+               { 1_MiB,   "< 1 MiB"   },
+               { 10_MiB,  "< 10 MiB"  },
+               { 100_MiB, "< 100 MiB" },
+               { 250_MiB, "< 250 MiB" },
+               { 500_MiB, "< 500 MiB" },
+               { 1_GiB,   "< 1 GiB"   },
+               { 5_GiB,   "< 5 GiB"   },
+               { 10_GiB,  "< 10 GiB"  }
             };
 
             return &binary;
          }
-         default: assert(!"Type not supported.");
+         default:
+         {
+            assert(!"Type not supported.");
+         }
 
          return nullptr;
       }
@@ -104,7 +112,7 @@ MainWindow::MainWindow(
    QMainWindow{ parent },
    m_controller{ controller },
    m_optionsManager{ std::make_shared<OptionsManager>() },
-   m_fileSizeOptions{ SwitchPruningMenuEntries(Constants::FileSize::Prefix::BINARY) }
+   m_fileSizeOptions{ GeneratePruningMenuEntries(Constants::FileSize::Prefix::BINARY) }
 {
    m_ui.setupUi(this);
 
@@ -363,7 +371,7 @@ void MainWindow::OnFileMenuNewScan()
 
    m_rootPath = selectedDirectory.toStdWString();
 
-   const auto& log = spdlog::get(Constants::Logging::LOG_NAME);
+   const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
    log->info(fmt::format("Started a new scan at: \"{}\"", m_rootPath.string()));
 
    const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
@@ -404,8 +412,8 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
    menuWrapper.binaryPrefix.setChecked(true);
    menuWrapper.decimalPrefix.setChecked(false);
 
-   ActivePrefix = Constants::FileSize::Prefix::BINARY;
-   m_fileSizeOptions = SwitchPruningMenuEntries(ActivePrefix);
+   Globals::ActivePrefix = Constants::FileSize::Prefix::BINARY;
+   m_fileSizeOptions = GeneratePruningMenuEntries(Globals::ActivePrefix);
 
    SetupFileSizePruningDropdown();
 
@@ -440,8 +448,8 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
    menuWrapper.binaryPrefix.setChecked(false);
    menuWrapper.decimalPrefix.setChecked(true);
 
-   ActivePrefix = Constants::FileSize::Prefix::DECIMAL;
-   m_fileSizeOptions = SwitchPruningMenuEntries(ActivePrefix);
+   Globals::ActivePrefix = Constants::FileSize::Prefix::DECIMAL;
+   m_fileSizeOptions = GeneratePruningMenuEntries(Globals::ActivePrefix);
 
    SetupFileSizePruningDropdown();
 
@@ -529,22 +537,22 @@ void MainWindow::OnShowBreakdownButtonPressed()
 
 void MainWindow::OnRenderOriginToggled(bool isEnabled)
 {
-   m_glCanvas->ToggleAssetVisibility<Asset::OriginMarker>(isEnabled);
+   m_glCanvas->ToggleAssetVisibility<Asset::Tag::OriginMarker>(isEnabled);
 }
 
 void MainWindow::OnRenderGridToggled(bool isEnabled)
 {
-   m_glCanvas->ToggleAssetVisibility<Asset::Grid>(isEnabled);
+   m_glCanvas->ToggleAssetVisibility<Asset::Tag::Grid>(isEnabled);
 }
 
 void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
 {
-   m_glCanvas->ToggleAssetVisibility<Asset::LightMarkers>(isEnabled);
+   m_glCanvas->ToggleAssetVisibility<Asset::Tag::LightMarkers>(isEnabled);
 }
 
 void MainWindow::OnRenderFrustumToggled(bool isEnabled)
 {
-   m_glCanvas->ToggleAssetVisibility<Asset::Frusta>(isEnabled);
+   m_glCanvas->ToggleAssetVisibility<Asset::Tag::Frusta>(isEnabled);
 }
 
 bool MainWindow::ShouldShowFrameTime() const
@@ -671,8 +679,9 @@ void MainWindow::AskUserToLimitFileSize(
    std::uintmax_t numberOfFilesScanned,
    VisualizationParameters& parameters)
 {
-   if (numberOfFilesScanned < 250'000
-      || parameters.minimumFileSize >= Constants::FileSize::Binary::ONE_MEBIBYTE)
+   using namespace Literals::Numeric::Binary;
+
+   if (numberOfFilesScanned < 250'000 || parameters.minimumFileSize >= 1_MiB)
    {
       return;
    }
@@ -690,8 +699,8 @@ void MainWindow::AskUserToLimitFileSize(
    switch (election)
    {
       case QMessageBox::Yes:
-         parameters.minimumFileSize = Constants::FileSize::Binary::ONE_MEBIBYTE;
-         SetFilePruningComboBoxValue(Constants::FileSize::Binary::ONE_MEBIBYTE);
+         parameters.minimumFileSize = 1_MiB;
+         SetFilePruningComboBoxValue(1_MiB);
          return;
       case QMessageBox::No:
          return;

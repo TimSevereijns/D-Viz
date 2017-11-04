@@ -36,6 +36,7 @@ SOURCES += \
    HID/keyboardManager.cpp \
    main.cpp \
    optionsManager.cpp \
+   Scene/baseAsset.cpp \
    Scene/crosshairAsset.cpp \
    Scene/debuggingRayAsset.cpp \
    Scene/frustumAsset.cpp \
@@ -43,7 +44,6 @@ SOURCES += \
    Scene/lightMarkerAsset.cpp \
    Scene/lineAsset.cpp \
    Scene/originMarkerAsset.cpp \
-   Scene/sceneAsset.cpp \
    Scene/texturePreviewAsset.cpp \
    Scene/treemapAsset.cpp \
    Viewport/camera.cpp \
@@ -68,9 +68,12 @@ HEADERS += \
    DataStructs/vizFile.cpp \
    DriveScanner/driveScanner.h \
    DriveScanner/scanningWorker.h \
+   globals.h \
    HID/gamepad.h \
    HID/keyboardManager.h \
+   literals.h \
    optionsManager.h \
+   Scene/baseAsset.cpp \
    Scene/crosshairAsset.h \
    Scene/debuggingRayAsset.h \
    Scene/frustumAsset.h \
@@ -78,7 +81,6 @@ HEADERS += \
    Scene/lightMarkerAsset.h \
    Scene/lineAsset.h \
    Scene/originMarkerAsset.h \
-   Scene/sceneAsset.h \
    Scene/texturePreviewAsset.h \
    Scene/treemapAsset.h \
    Utilities/colorGradient.hpp \
@@ -95,7 +97,8 @@ HEADERS += \
    Windows/aboutDialog.h \
    Windows/breakdownDialog.h \
    Windows/mainWindow.h \
-   Windows/scanBreakdownModel.h
+   Windows/scanBreakdownModel.h \
+    Scene/baseAsset.h
 
 FORMS += \
    Windows/aboutDialog.ui \
