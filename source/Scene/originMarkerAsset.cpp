@@ -39,36 +39,39 @@ namespace
    }
 }
 
-OriginMarkerAsset::OriginMarkerAsset(QOpenGLExtraFunctions& graphicsContext) :
-   LineAsset{ graphicsContext }
+namespace Asset
 {
-   m_rawVertices = CreateMarkerVertices();
-   m_rawColors = CreateMarkerColors();
-}
-
-bool OriginMarkerAsset::Render(
-   const Camera& camera,
-   const std::vector<Light>&,
-   const OptionsManager&)
-{
-   if (!m_shouldRender)
+   OriginMarker::OriginMarker(QOpenGLExtraFunctions& openGL) :
+      Line{ openGL }
    {
-      return false;
+      m_rawVertices = CreateMarkerVertices();
+      m_rawColors = CreateMarkerColors();
    }
 
-   m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
+   bool OriginMarker::Render(
+      const Camera& camera,
+      const std::vector<Light>&,
+      const OptionsManager&)
+   {
+      if (!m_shouldRender)
+      {
+         return false;
+      }
 
-   m_VAO.bind();
+      m_shader.bind();
+      m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 
-   m_graphicsDevice.glLineWidth(2);
-   m_graphicsDevice.glDrawArrays(
-      /* mode = */ GL_LINES,
-      /* first = */ 0,
-      /* count = */ m_rawVertices.size());
+      m_VAO.bind();
 
-   m_shader.release();
-   m_VAO.release();
+      m_openGL.glLineWidth(2);
+      m_openGL.glDrawArrays(
+         /* mode = */ GL_LINES,
+         /* first = */ 0,
+         /* count = */ m_rawVertices.size());
 
-   return true;
+      m_shader.release();
+      m_VAO.release();
+
+      return true;
+   }
 }

@@ -36,13 +36,13 @@ SOURCES += \
    HID/keyboardManager.cpp \
    main.cpp \
    optionsManager.cpp \
+   Scene/baseAsset.cpp \
    Scene/crosshairAsset.cpp \
    Scene/debuggingRayAsset.cpp \
    Scene/gridAsset.cpp \
    Scene/lightMarkerAsset.cpp \
    Scene/lineAsset.cpp \
    Scene/originMarkerAsset.cpp \
-   Scene/sceneAsset.cpp \
    Scene/treemapAsset.cpp \
    Viewport/camera.cpp \
    Viewport/canvasContextMenu.cpp \
@@ -71,13 +71,13 @@ HEADERS += \
    HID/keyboardManager.h \
    literals.h \
    optionsManager.h \
+   Scene/baseAsset.cpp \
    Scene/crosshairAsset.h \
    Scene/debuggingRayAsset.h \
    Scene/gridAsset.h \
    Scene/lightMarkerAsset.h \
    Scene/lineAsset.h \
    Scene/originMarkerAsset.h \
-   Scene/sceneAsset.h \
    Scene/treemapAsset.h \
    Utilities/colorGradient.hpp \
    Utilities/ignoreUnused.hpp \
@@ -93,7 +93,8 @@ HEADERS += \
    Windows/aboutDialog.h \
    Windows/breakdownDialog.h \
    Windows/mainWindow.h \
-   Windows/scanBreakdownModel.h
+   Windows/scanBreakdownModel.h \
+    Scene/baseAsset.h
 
 FORMS += \
    Windows/aboutDialog.ui \

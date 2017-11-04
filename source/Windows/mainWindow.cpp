@@ -529,17 +529,17 @@ void MainWindow::OnShowBreakdownButtonPressed()
 
 void MainWindow::OnRenderOriginToggled(bool isEnabled)
 {
-   m_glCanvas->ToggleAssetVisibility<Asset::OriginMarker>(isEnabled);
+   m_glCanvas->ToggleAssetVisibility<Asset::Tag::OriginMarker>(isEnabled);
 }
 
 void MainWindow::OnRenderGridToggled(bool isEnabled)
 {
-   m_glCanvas->ToggleAssetVisibility<Asset::Grid>(isEnabled);
+   m_glCanvas->ToggleAssetVisibility<Asset::Tag::Grid>(isEnabled);
 }
 
 void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
 {
-   m_glCanvas->ToggleAssetVisibility<Asset::LightMarker>(isEnabled);
+   m_glCanvas->ToggleAssetVisibility<Asset::Tag::LightMarker>(isEnabled);
 }
 
 bool MainWindow::ShouldShowFrameTime() const

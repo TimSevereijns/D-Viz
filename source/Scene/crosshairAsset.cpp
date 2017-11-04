@@ -44,57 +44,60 @@ namespace
    }
 }
 
-CrosshairAsset::CrosshairAsset(QOpenGLExtraFunctions& device) :
-   LineAsset{ device }
+namespace Asset
 {
-   m_rawColors = CreateCrosshairColors();
-}
-
-void CrosshairAsset::SetCrosshairLocation(const QPoint& canvasCenter)
-{
-   m_rawVertices = CreateCrosshairVertices(canvasCenter);
-
-   Reload();
-}
-
-bool CrosshairAsset::Render(
-   const Camera& camera,
-   const std::vector<Light>&,
-   const OptionsManager&)
-{
-   if (!m_shouldRender)
+   Crosshair::Crosshair(QOpenGLExtraFunctions& openGL) :
+      Line{ openGL }
    {
-      return false;
+      m_rawColors = CreateCrosshairColors();
    }
 
-   const auto& viewport = camera.GetViewport();
-   QMatrix4x4 orthoMatrix;
-   orthoMatrix.ortho(
-      viewport.left(),
-      viewport.right(),
-      viewport.bottom(),
-      viewport.top(),
-      camera.GetNearPlane(),
-      camera.GetFarPlane());
+   void Crosshair::SetCrosshairLocation(const QPoint& canvasCenter)
+   {
+      m_rawVertices = CreateCrosshairVertices(canvasCenter);
 
-   QMatrix4x4 identityMatrix;
-   identityMatrix.setToIdentity();
+      Reload();
+   }
 
-   const auto mvpMatrix = orthoMatrix * identityMatrix;
+   bool Crosshair::Render(
+      const Camera& camera,
+      const std::vector<Light>&,
+      const OptionsManager&)
+   {
+      if (!m_shouldRender)
+      {
+         return false;
+      }
 
-   m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", mvpMatrix);
+      const auto& viewport = camera.GetViewport();
+      QMatrix4x4 orthoMatrix;
+      orthoMatrix.ortho(
+         viewport.left(),
+         viewport.right(),
+         viewport.bottom(),
+         viewport.top(),
+         camera.GetNearPlane(),
+         camera.GetFarPlane());
 
-   m_VAO.bind();
+      QMatrix4x4 identityMatrix;
+      identityMatrix.setToIdentity();
 
-   m_graphicsDevice.glLineWidth(2);
-   m_graphicsDevice.glDrawArrays(
-      /* mode = */ GL_LINES,
-      /* first = */ 0,
-      /* count = */ m_rawVertices.size());
+      const auto mvpMatrix = orthoMatrix * identityMatrix;
 
-   m_VAO.release();
-   m_shader.release();
+      m_shader.bind();
+      m_shader.setUniformValue("mvpMatrix", mvpMatrix);
 
-   return true;
+      m_VAO.bind();
+
+      m_openGL.glLineWidth(2);
+      m_openGL.glDrawArrays(
+         /* mode = */ GL_LINES,
+         /* first = */ 0,
+         /* count = */ m_rawVertices.size());
+
+      m_VAO.release();
+      m_shader.release();
+
+      return true;
+   }
 }

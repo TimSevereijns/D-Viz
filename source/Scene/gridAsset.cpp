@@ -85,37 +85,39 @@ namespace
    }
 }
 
-GridAsset::GridAsset(QOpenGLExtraFunctions& device) :
-   LineAsset{ device }
+namespace Asset
 {
-   m_rawVertices = CreateGridVertices();
-   m_rawColors = CreateGridColors();
-}
-
-bool GridAsset::Render(
-   const Camera& camera,
-   const std::vector<Light>&,
-   const OptionsManager&)
-{
-   if (!m_shouldRender)
+   Grid::Grid(QOpenGLExtraFunctions& openGL) :
+      Line{ openGL }
    {
-      return false;
+      m_rawVertices = CreateGridVertices();
+      m_rawColors = CreateGridColors();
    }
 
-   m_shader.bind();
-   m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
+   bool Grid::Render(
+      const Camera& camera,
+      const std::vector<Light>&,
+      const OptionsManager&)
+   {
+      if (!m_shouldRender)
+      {
+         return false;
+      }
 
-   m_VAO.bind();
+      m_shader.bind();
+      m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 
-   m_graphicsDevice.glLineWidth(1);
-   m_graphicsDevice.glDrawArrays(
-      /* mode = */ GL_LINES,
-      /* first = */ 0,
-      /* count = */ m_rawVertices.size());
+      m_VAO.bind();
 
-   m_shader.release();
-   m_VAO.release();
+      m_openGL.glLineWidth(1);
+      m_openGL.glDrawArrays(
+         /* mode = */ GL_LINES,
+         /* first = */ 0,
+         /* count = */ m_rawVertices.size());
 
-   return true;
+      m_shader.release();
+      m_VAO.release();
+
+      return true;
+   }
 }
-

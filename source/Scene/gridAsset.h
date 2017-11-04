@@ -3,20 +3,23 @@
 
 #include "lineAsset.h"
 
-/**
- * @brief The GridAsset class implements the setup and rendering logic for the yellow grid that
- * appears under the visualization.
- */
-class GridAsset final : public LineAsset
+namespace Asset
 {
-   public:
+   /**
+    * @brief The GridAsset class implements the setup and rendering logic for the yellow grid that
+    * appears under the visualization.
+    */
+   class Grid final : public Line
+   {
+      public:
 
-      explicit GridAsset(QOpenGLExtraFunctions& device);
+         explicit Grid(QOpenGLExtraFunctions& openGL);
 
-      bool Render(
-         const Camera& camera,
-         const std::vector<Light>& lights,
-         const OptionsManager& settings) override;
-};
+         bool Render(
+            const Camera& camera,
+            const std::vector<Light>& lights,
+            const OptionsManager& settings) override;
+   };
+}
 
 #endif // GRIDASSET_H

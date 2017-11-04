@@ -26,7 +26,7 @@ namespace
     */
    void InitializeLightMarkers(
       const std::vector<Light>& lights,
-      LightMarkerAsset& lightMarkerAsset)
+      Asset::LightMarker& lightMarkerAsset)
    {
       constexpr auto verticesPerMarker{ 6 };
 
@@ -92,13 +92,13 @@ void GLCanvas::initializeGL()
    m_graphicsDevice.glEnable(GL_MULTISAMPLE);
    m_graphicsDevice.glEnable(GL_LINE_SMOOTH);
 
-   RegisterAsset<Asset::Grid>();
-   RegisterAsset<Asset::OriginMarker>();
-   RegisterAsset<Asset::Treemap>();
-   RegisterAsset<Asset::Crosshair>();
-   RegisterAsset<Asset::LightMarker>();
+   RegisterAsset<Asset::Tag::Grid>();
+   RegisterAsset<Asset::Tag::OriginMarker>();
+   RegisterAsset<Asset::Tag::Treemap>();
+   RegisterAsset<Asset::Tag::Crosshair>();
+   RegisterAsset<Asset::Tag::LightMarker>();
 
-   auto* lightMarkers = GetAsset<Asset::LightMarker>();
+   auto* lightMarkers = GetAsset<Asset::Tag::LightMarker>();
    InitializeLightMarkers(m_lights, *lightMarkers);
 
    for (const auto& tagAndAsset : m_sceneAssets)
@@ -127,7 +127,7 @@ void GLCanvas::ReloadVisualization()
 
    m_isPaintingSuspended = true;
 
-   auto* const treemap = GetAsset<Asset::Treemap>();
+   auto* const treemap = GetAsset<Asset::Tag::Treemap>();
    const auto parameters = m_controller.GetVisualizationParameters();
    const auto blockCount = treemap->LoadBufferData(m_controller.GetTree(), parameters);
 
@@ -331,11 +331,11 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
 void GLCanvas::SelectNode(const Tree<VizFile>::Node* const node)
 {
-   auto* const treemap = GetAsset<Asset::Treemap>();
+   auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
    treemap->UpdateVBO(
       *node,
-      SceneAsset::UpdateAction::SELECT,
+      Asset::UpdateAction::SELECT,
       m_controller.GetVisualizationParameters());
 }
 
@@ -346,11 +346,11 @@ void GLCanvas::RestoreSelectedNode()
       return;
    }
 
-   auto* const treemap = GetAsset<Asset::Treemap>();
+   auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
    treemap->UpdateVBO(
       *m_controller.GetSelectedNode(),
-      SceneAsset::UpdateAction::DESELECT,
+      Asset::UpdateAction::DESELECT,
       m_controller.GetVisualizationParameters());
 }
 
@@ -364,13 +364,13 @@ void GLCanvas::HighlightNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
 
 void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
 {
-   auto* const treemap = GetAsset<Asset::Treemap>();
+   auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
    for (const auto* const node : nodes)
    {
       treemap->UpdateVBO(
          *node,
-         SceneAsset::UpdateAction::DESELECT,
+         Asset::UpdateAction::DESELECT,
          m_controller.GetVisualizationParameters());
    }
 }
@@ -571,14 +571,14 @@ void GLCanvas::HandleGamepadTriggerInput(const Gamepad& gamepad)
    {
       m_isLeftTriggerDown = true;
 
-      auto* const crosshair = GetAsset<Asset::Crosshair>();
+      auto* const crosshair = GetAsset<Asset::Tag::Crosshair>();
       crosshair->SetCrosshairLocation(m_camera.GetViewport().center());
    }
    else if (m_isLeftTriggerDown && !gamepad.IsLeftTriggerDown())
    {
       m_isLeftTriggerDown = false;
 
-      auto* const crosshair = GetAsset<Asset::Crosshair>();
+      auto* const crosshair = GetAsset<Asset::Tag::Crosshair>();
       crosshair->Hide();
    }
 

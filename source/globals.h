@@ -6,7 +6,7 @@
 /**
  * @note This namespace is intended for globally visible objects that are supposed to be mutable.
  * Simply using the `static` keyword isn't enough in these cases, since the `static` keyword gives
- * a variable internal linkage, meaning that each translation copy will end up with its own copy of
+ * a variable internal linkage, meaning that each translation unit will end up with its own copy of
  * the relevant object. Declaring such a variable as an `extern` variable isn't super clean either
  * since you can't declare and define all at once, and it doesn't necessarily solve all linkage
  * issues that might arise---these issues, however, appear to have been addressed in C++17. The
