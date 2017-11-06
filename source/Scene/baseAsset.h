@@ -18,10 +18,10 @@ class TreeNode;
 
 namespace Asset
 {
-   enum struct UpdateAction : short
+   enum struct Event : short
    {
-      SELECT = 0,
-      DESELECT
+      SELECTION = 0,
+      DESELECTION
    };
 
    /**
@@ -145,12 +145,10 @@ namespace Asset
           */
          virtual void UpdateVBO(
             const Tree<VizFile>::Node& node,
-            UpdateAction action,
+            Event action,
             const VisualizationParameters& options);
 
       protected:
-
-         bool m_shouldRender{ true };
 
          /**
           * @brief Helper function to compile and load the specified OpenGL shaders.
@@ -163,6 +161,8 @@ namespace Asset
          bool LoadShaders(
             const QString& vertexShaderName,
             const QString& fragmentShaderName);
+
+         bool m_shouldRender{ true };
 
          QOpenGLBuffer m_vertexBuffer;
          QOpenGLBuffer m_colorBuffer;

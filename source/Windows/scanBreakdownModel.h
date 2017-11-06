@@ -1,5 +1,5 @@
-#ifndef SCANBREAKDOWNENTRY_H
-#define SCANBREAKDOWNENTRY_H
+#ifndef SCANBREAKDOWNMODEL_H
+#define SCANBREAKDOWNMODEL_H
 
 #include <QAbstractTableModel>
 
@@ -66,4 +66,4 @@ class ScanBreakdownModel final : public QAbstractTableModel
       std::unordered_map<std::wstring, std::uintmax_t> m_fileTypeMap;
 };
 
-#endif // SCANBREAKDOWNENTRY_H
+#endif // SCANBREAKDOWNMODEL_H

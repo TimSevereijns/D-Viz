@@ -411,13 +411,13 @@ namespace Asset
 
    void Treemap::UpdateVBO(
       const Tree<VizFile>::Node& node,
-      Asset::UpdateAction action,
+      Asset::Event action,
       const VisualizationParameters& options)
    {
       constexpr auto colorTupleSize{ sizeof(QVector3D) };
       const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorTupleSize;
 
-      const auto newColor = (action == Asset::UpdateAction::DESELECT)
+      const auto newColor = (action == Asset::Event::DESELECTION)
          ? RestoreColor(node, options)
          : Constants::Colors::CANARY_YELLOW;
 

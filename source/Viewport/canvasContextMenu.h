@@ -9,7 +9,7 @@ class CanvasContextMenu final : public QMenu
 {
    public:
 
-      CanvasContextMenu(KeyboardManager& keyboardManager);
+      explicit CanvasContextMenu(KeyboardManager& keyboardManager);
 
    protected:
 

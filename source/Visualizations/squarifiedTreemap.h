@@ -24,8 +24,8 @@ class SquarifiedTreeMap : public VisualizationModel
       Block ComputeRemainingArea(const Block& block);
 
       /**
-       * @brief ComputeShortestEdgeOfRemainingArea calculates the shortest dimension (width or depth)
-       * of the remaining bounds available to build within.
+       * @brief ComputeShortestEdgeOfRemainingArea calculates the shortest dimension (width or
+       * depth) of the remaining bounds available to build within.
        *
        * @param[in] node               The node being built upon.
        *
@@ -37,7 +37,8 @@ class SquarifiedTreeMap : public VisualizationModel
        * @brief Calculates the worst aspect ratio of all items accepted into the row along with one
        * optional candidate item.
        *
-       * @param[in] row                   The nodes that have been placed in the current real estate.
+       * @param[in] row                   The nodes that have been placed in the current real
+       *                                  estate.
        * @param[in] candidateSize         The size of the candidate node that is to be considered
        *                                  for inclusion in the current row. Zero is no candidate
        *                                  necessary.
