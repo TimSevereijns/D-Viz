@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 #ifdef Q_OS_WIN
    spdlog::basic_logger_mt(Constants::Logging::DEFAULT_LOG, ".\\log.txt");
 #else
-   spdlog::basic_logger_mt(Constants::Logging::LOG_NAME, "./log.txt");
+   spdlog::basic_logger_mt(Constants::Logging::DEFAULT_LOG, "./log.txt");
 #endif
 
    const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);

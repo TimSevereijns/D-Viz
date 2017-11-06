@@ -292,7 +292,7 @@ class GLCanvas final : public QOpenGLWidget
          m_sceneAssets.emplace_back(TagAndAsset
          {
             std::make_unique<AssetTag>(),
-            std::make_unique<AssetTag::AssetType>(m_graphicsDevice)
+            std::make_unique<typename AssetTag::AssetType>(m_graphicsDevice)
          });
       }
 

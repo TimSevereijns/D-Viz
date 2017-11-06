@@ -1,8 +1,31 @@
 #ifndef LITERALS_H
 #define LITERALS_H
 
+#include <cassert>
+
 namespace Literals
 {
+   namespace Colors
+   {
+      constexpr auto operator""_R(const unsigned long long value) noexcept
+      {
+         assert(value < 256);
+         return value / 255.0f;
+      }
+
+      constexpr auto operator""_G(unsigned long long value) noexcept
+      {
+         assert(value < 256);
+         return value / 255.0f;
+      }
+
+      constexpr auto operator""_B(unsigned long long value) noexcept
+      {
+         assert(value < 256);
+         return value / 255.0f;
+      }
+   }
+
    namespace Numeric
    {
       namespace Binary

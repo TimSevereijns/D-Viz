@@ -3,6 +3,8 @@
 
 #include <QVector3D>
 
+#include "literals.h"
+
 namespace Constants
 {
    namespace FileSize
@@ -15,14 +17,16 @@ namespace Constants
    }
 
    namespace Colors
-   {                                         // Red,                     Green,              Blue
-      const static QVector3D RED             { 1.0f,                      0.0f,              0.0f };
-      const static QVector3D GREEN           { 0.0f,                      1.0f,              0.0f };
-      const static QVector3D BLUE            { 0.0f,                      0.0f,              1.0f };
-      const static QVector3D CANARY_YELLOW   { 1.0f,           239.0f / 255.0f,             0.0f  };
-      const static QVector3D HOT_PINK        { 1.0f,           105.0f / 255.0f,  180.0f / 255.0f  };
-      const static QVector3D FILE_GREEN      { 0.5f,                      1.0f,             0.5f  };
-      const static QVector3D WHITE           { 1.0f,                      1.0f,             1.0f  };
+   {
+      using namespace Literals::Colors;
+
+      constexpr static QVector3D RED           { 255_R, 000_G, 000_B };
+      constexpr static QVector3D GREEN         { 000_R, 001_G, 000_B };
+      constexpr static QVector3D BLUE          { 000_R, 000_G, 001_B };
+      constexpr static QVector3D CANARY_YELLOW { 255_R, 239_G, 000_B };
+      constexpr static QVector3D HOT_PINK      { 255_R, 105_G, 180_B };
+      constexpr static QVector3D FILE_GREEN    { 128_R, 255_G, 128_B };
+      constexpr static QVector3D WHITE         { 255_R, 255_G, 255_B };
    }
 
    namespace Graphics

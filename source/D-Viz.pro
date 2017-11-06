@@ -71,7 +71,7 @@ HEADERS += \
    HID/keyboardManager.h \
    literals.h \
    optionsManager.h \
-   Scene/baseAsset.cpp \
+   Scene/baseAsset.h \
    Scene/crosshairAsset.h \
    Scene/debuggingRayAsset.h \
    Scene/gridAsset.h \
@@ -93,8 +93,7 @@ HEADERS += \
    Windows/aboutDialog.h \
    Windows/breakdownDialog.h \
    Windows/mainWindow.h \
-   Windows/scanBreakdownModel.h \
-    Scene/baseAsset.h
+   Windows/scanBreakdownModel.h
 
 FORMS += \
    Windows/aboutDialog.ui \
@@ -103,10 +102,10 @@ FORMS += \
 
 INCLUDEPATH += \
    ../../boost \
+   ../Foreign/RapidJson/include \
    ../Foreign/Spdlog/include \
    ../Foreign/Stopwatch/source \
-   ../Foreign/Tree/source \
-   ../Foreign/ArenaAllocator/source
+   ../Foreign/Tree/source
 
 DISTFILES += \
    Shaders/visualizationFragmentShader.frag \

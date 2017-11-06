@@ -10,3 +10,8 @@
 [submodule "Foreign/Spdlog"]
 	path = Foreign/Spdlog
 	url = https://github.com/gabime/spdlog.git
+    branch = v0.14.0
+[submodule "Foreign/RapidJson"]
+	path = Foreign/RapidJson
+	url = https://github.com/Tencent/rapidjson.git
+    branch = v1.1.0
