@@ -91,4 +91,14 @@ namespace Settings
    {
       return m_fileColors;
    }
+
+   const VisualizationParameters& Manager::GetVisualizationParameters() const
+   {
+      return m_visualizationParameters;
+   }
+
+   void Manager::SetVisualizationParameters(const VisualizationParameters& parameters)
+   {
+      m_visualizationParameters = parameters;
+   }
 }

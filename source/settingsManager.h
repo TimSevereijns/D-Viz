@@ -102,6 +102,10 @@ namespace Settings
 
          const JsonDocument& GetFileColors() const;
 
+         const VisualizationParameters& GetVisualizationParameters() const;
+
+         void SetVisualizationParameters(const VisualizationParameters& parameters);
+
       private:
 
          double m_cameraSpeed{ 0.25 };
@@ -118,6 +122,8 @@ namespace Settings
          bool m_shouldSearchFiles{ true };
 
          JsonDocument m_fileColors;
+
+         VisualizationParameters m_visualizationParameters;
    };
 }
 
