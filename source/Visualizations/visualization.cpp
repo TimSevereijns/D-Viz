@@ -264,7 +264,7 @@ namespace
    std::vector<IntersectionPointAndNode> FindAllIntersections(
       const Qt3DRender::RayCasting::QRay3D& ray,
       const Camera& camera,
-      const VisualizationParameters& parameters,
+      const Settings::VisualizationParameters& parameters,
       Tree<VizFile>::Node* node)
    {
       std::vector<IntersectionPointAndNode> allIntersections;
@@ -315,7 +315,7 @@ const float VisualizationModel::BLOCK_HEIGHT = 2.0f;
 const float VisualizationModel::ROOT_BLOCK_WIDTH = 1000.0f;
 const float VisualizationModel::ROOT_BLOCK_DEPTH = 1000.0f;
 
-VisualizationModel::VisualizationModel(const VisualizationParameters& parameters) :
+VisualizationModel::VisualizationModel(const Settings::VisualizationParameters& parameters) :
    m_vizParameters{ parameters }
 {
 }
@@ -365,7 +365,7 @@ void VisualizationModel::UpdateBoundingBoxes()
 Tree<VizFile>::Node* VisualizationModel::FindNearestIntersection(
    const Camera& camera,
    const Qt3DRender::RayCasting::QRay3D& ray,
-   const VisualizationParameters& parameters) const
+   const Settings::VisualizationParameters& parameters) const
 {
    if (!m_hasDataBeenParsed)
    {

@@ -61,8 +61,6 @@ GLCanvas::GLCanvas(
    m_controller{ controller },
    m_mainWindow{ *(reinterpret_cast<MainWindow*>(parent)) }
 {
-   m_optionsManager = m_mainWindow.GetOptionsManager();
-
    m_camera.SetPosition(QVector3D{ 500, 100, 0 });
 
    setFocusPolicy(Qt::StrongFocus);
@@ -128,7 +126,7 @@ void GLCanvas::ReloadVisualization()
    m_isPaintingSuspended = true;
 
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
-   const auto parameters = m_controller.GetVisualizationParameters();
+   const auto parameters = m_mainWindow.GetSettingsManager().GetVisualizationParameters();
    const auto blockCount = treemap->LoadBufferData(m_controller.GetTree(), parameters);
 
    for (const auto& tagAndAsset : m_sceneAssets)
@@ -277,8 +275,8 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
       }
 
       m_camera.OffsetOrientation(
-         m_optionsManager->m_mouseSensitivity * deltaY,
-         m_optionsManager->m_mouseSensitivity * deltaX);
+         m_mainWindow.GetSettingsManager().GetMouseSensitivity() * deltaY,
+         m_mainWindow.GetSettingsManager().GetMouseSensitivity() * deltaX);
    }
 
    event->accept();
@@ -298,34 +296,32 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
       return;
    }
 
-   const int delta = event->delta();
+   const auto cameraSpeed = m_mainWindow.GetSettingsManager().GetCameraSpeed();
+   const auto delta = event->delta();
 
    if (m_keyboardManager.IsKeyUp(Qt::Key_Shift))
    {
-      if (delta > 0 && m_optionsManager->m_cameraMovementSpeed < 1.0)
+      if (delta > 0 && cameraSpeed < 1.0)
       {
-         m_optionsManager->m_cameraMovementSpeed += 0.01;
+         m_mainWindow.SetCameraSpeedSpinner(cameraSpeed + 0.01);
       }
-      else if (delta < 0 && m_optionsManager->m_cameraMovementSpeed > 0.01)
+      else if (delta < 0 && cameraSpeed > 0.01)
       {
-         m_optionsManager->m_cameraMovementSpeed -= 0.01;
+         m_mainWindow.SetCameraSpeedSpinner(cameraSpeed - 0.01);
       }
-
-      const auto newSpeed = static_cast<double>(m_optionsManager->m_cameraMovementSpeed);
-      m_mainWindow.SetCameraSpeedSpinner(newSpeed);
    }
    else
    {
       if (delta < 0)
       {
-        m_camera.IncreaseFieldOfView();
+         m_camera.IncreaseFieldOfView();
       }
       else if (delta > 0)
       {
          m_camera.DecreaseFieldOfView();
       }
 
-      m_mainWindow.SetFieldOfViewSlider(static_cast<float>(m_camera.GetFieldOfView()));
+      m_mainWindow.SetFieldOfViewSlider(m_camera.GetFieldOfView());
    }
 }
 
@@ -336,7 +332,7 @@ void GLCanvas::SelectNode(const Tree<VizFile>::Node* const node)
    treemap->UpdateVBO(
       *node,
       Asset::Event::SELECTION,
-      m_controller.GetVisualizationParameters());
+      m_mainWindow.GetSettingsManager().GetVisualizationParameters());
 }
 
 void GLCanvas::RestoreSelectedNode()
@@ -351,7 +347,7 @@ void GLCanvas::RestoreSelectedNode()
    treemap->UpdateVBO(
       *m_controller.GetSelectedNode(),
       Asset::Event::DESELECTION,
-      m_controller.GetVisualizationParameters());
+      m_mainWindow.GetSettingsManager().GetVisualizationParameters());
 }
 
 void GLCanvas::HighlightNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
@@ -366,12 +362,14 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& 
 {
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
+   const auto& parameters = m_mainWindow.GetSettingsManager().GetVisualizationParameters();
+
    for (const auto* const node : nodes)
    {
       treemap->UpdateVBO(
          *node,
          Asset::Event::DESELECTION,
-         m_controller.GetVisualizationParameters());
+         parameters);
    }
 }
 
@@ -428,8 +426,6 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
 void GLCanvas::HandleUserInput()
 {
-   assert(m_optionsManager);
-
    const auto now = std::chrono::system_clock::now();
    ON_SCOPE_EXIT noexcept { m_lastCameraPositionUpdatelTime = now; };
 
@@ -453,7 +449,7 @@ void GLCanvas::HandleKeyboardInput(const std::chrono::milliseconds& elapsedTime)
    }
 
    const auto millisecondsElapsed = elapsedTime.count();
-   const auto cameraSpeed = m_optionsManager->m_cameraMovementSpeed;
+   const auto cameraSpeed = m_mainWindow.GetSettingsManager().GetCameraSpeed();
 
    if (isWKeyDown)
    {
@@ -496,7 +492,7 @@ void GLCanvas::HandleGamepadKeyInput(
 {
    const auto millisecondsElapsed = elapsedTime.count();
    const auto cameraSpeed =
-      m_optionsManager->m_cameraMovementSpeed / Constants::Input::MOVEMENT_AMPLIFICATION;
+      m_mainWindow.GetSettingsManager().GetCameraSpeed() / Constants::Input::MOVEMENT_AMPLIFICATION;
 
    if (gamepad.buttonUp())
    {
@@ -535,12 +531,12 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
    {
       const auto pitch =
          Constants::Input::MOVEMENT_AMPLIFICATION
-         * m_optionsManager->m_mouseSensitivity
+         * m_mainWindow.GetSettingsManager().GetMouseSensitivity()
          * gamepad.axisRightY();
 
       const auto yaw =
          Constants::Input::MOVEMENT_AMPLIFICATION
-         * m_optionsManager->m_mouseSensitivity
+         * m_mainWindow.GetSettingsManager().GetMouseSensitivity()
          * gamepad.axisRightX();
 
       m_camera.OffsetOrientation(pitch, yaw);
@@ -550,7 +546,7 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
    {
       m_camera.OffsetPosition(
          Constants::Input::MOVEMENT_AMPLIFICATION
-         * m_optionsManager->m_cameraMovementSpeed
+         * m_mainWindow.GetSettingsManager().GetCameraSpeed()
          * -gamepad.axisLeftY()
          * m_camera.Forward());
    }
@@ -559,7 +555,7 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
    {
       m_camera.OffsetPosition(
          Constants::Input::MOVEMENT_AMPLIFICATION
-         * m_optionsManager->m_cameraMovementSpeed
+         * m_mainWindow.GetSettingsManager().GetCameraSpeed()
          * gamepad.axisLeftX()
          * m_camera.Right());
    }
@@ -645,8 +641,7 @@ void GLCanvas::paintGL()
    {
       m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      assert(m_optionsManager);
-      if (m_optionsManager->m_isLightAttachedToCamera)
+      if (m_mainWindow.GetSettingsManager().IsPrimaryLightAttachedToCamera())
       {
          assert(m_lights.size() > 0);
          m_lights.front().position = m_camera.GetPosition();
@@ -654,7 +649,7 @@ void GLCanvas::paintGL()
 
       for (const auto& tagAndAsset : m_sceneAssets)
       {
-         tagAndAsset.asset->Render(m_camera, m_lights, *m_optionsManager);
+         tagAndAsset.asset->Render(m_camera, m_lights, m_mainWindow.GetSettingsManager());
       }
    }).GetElapsedTime();
 

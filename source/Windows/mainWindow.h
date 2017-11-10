@@ -43,21 +43,30 @@ class MainWindow final : public QMainWindow
       /**
        * @brief Sets the field of view.
        *
-       * @param fieldOfView
+       * @note This function will update both the UI as well as the backing value.
+       *
+       * @param[in] fieldOfView     The new value to set the field of view to.
        */
       void SetFieldOfViewSlider(int fieldOfView);
 
       /**
        * @brief Sets the camera movement speed.
        *
-       * @param speed
+       * @note This function will update both the UI as well as the backing value.
+       *
+       * @param[in] speed           The new value to set the camera's speed to.
        */
       void SetCameraSpeedSpinner(double speed);
 
       /**
        * @returns The options manager.
        */
-      std::shared_ptr<OptionsManager> GetOptionsManager();
+      Settings::Manager& GetSettingsManager();
+
+      /**
+       * @overload
+       */
+      const Settings::Manager& GetSettingsManager() const;
 
       /**
        * @brief Sets a temporary message in the status bar.
@@ -130,7 +139,8 @@ class MainWindow final : public QMainWindow
 
    private:
 
-      void ScanDrive(VisualizationParameters& vizParameters);
+      // @todo Passing the parameters in should now be unnecessary:
+      void ScanDrive(Settings::VisualizationParameters& parameters);
 
       /**
        * @brief Prompts the user if he or she would like to set a lower bound on which files are
@@ -138,10 +148,12 @@ class MainWindow final : public QMainWindow
        *
        * @param[in] numberOfFilesScanned     The number of scanned files that can be visualized.
        * @param[in] parameters               @see VisualizationParameters
+       *
+       * @returns True if the user applied a limitation.
        */
-      void AskUserToLimitFileSize(
+      bool AskUserToLimitFileSize(
          std::uintmax_t numberOfFilesScanned,
-         VisualizationParameters& parameters);
+         Settings::VisualizationParameters& parameters);
 
       void SetFilePruningComboBoxValue(std::uintmax_t minimum);
 
@@ -172,17 +184,17 @@ class MainWindow final : public QMainWindow
 
       std::unique_ptr<Gamepad> m_gamepad{ std::make_unique<Gamepad>(0, this) };
 
-      Ui::MainWindow m_ui{ };
+      Ui::MainWindow m_ui;
 
       std::unique_ptr<GLCanvas> m_glCanvas{ nullptr };
       std::unique_ptr<AboutDialog> m_aboutDialog{ nullptr };
       std::unique_ptr<BreakdownDialog> m_breakdownDialog{ nullptr };
 
-      std::shared_ptr<OptionsManager> m_optionsManager{ nullptr };
+      Settings::Manager m_settingsManager;
 
-      std::wstring m_searchQuery{ };
+      std::wstring m_searchQuery;
 
-      std::experimental::filesystem::path m_rootPath{ };
+      std::experimental::filesystem::path m_rootPath;
 
       const std::vector<std::pair<std::uintmax_t, QString>>* m_fileSizeOptions{ nullptr };
 
@@ -204,6 +216,8 @@ class MainWindow final : public QMainWindow
 
       struct OptionsMenu
       {
+         QAction toggleFrameTime{ nullptr };
+
          QMenu fileSizeMenu{ nullptr };
 
          struct FileSizeMenu
@@ -211,8 +225,6 @@ class MainWindow final : public QMainWindow
             QAction binaryPrefix{ nullptr };
             QAction decimalPrefix{ nullptr };
          } fileSizeMenuWrapper;
-
-         QAction toggleFrameTime{ nullptr };
       } m_optionsMenuWrapper;
 
       QMenu m_debuggingMenu{ nullptr };

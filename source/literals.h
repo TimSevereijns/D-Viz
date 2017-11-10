@@ -5,27 +5,6 @@
 
 namespace Literals
 {
-   namespace Colors
-   {
-      constexpr auto operator""_R(unsigned long long value) noexcept
-      {
-         assert(value < 256.0f);
-         return value / 255.0f;
-      }
-
-      constexpr auto operator""_G(unsigned long long value) noexcept
-      {
-         assert(value < 256.0f);
-         return value / 255.0f;
-      }
-
-      constexpr auto operator""_B(unsigned long long value) noexcept
-      {
-         assert(value < 256.0f);
-         return value / 255.0f;
-      }
-   }
-
    namespace Numeric
    {
       namespace Binary

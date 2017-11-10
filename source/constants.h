@@ -5,6 +5,18 @@
 
 #include "literals.h"
 
+#ifdef Q_OS_WIN
+   #undef RGB
+#endif
+
+namespace
+{
+   constexpr QVector3D RGB(int red, int green, int blue) noexcept
+   {
+      return { red / 255.0f, green / 255.0f, blue / 255.0f };
+   }
+}
+
 namespace Constants
 {
    namespace FileSize
@@ -18,15 +30,13 @@ namespace Constants
 
    namespace Colors
    {
-      using namespace Literals::Colors;
-
-      constexpr static QVector3D RED           { 255_R, 000_G, 000_B };
-      constexpr static QVector3D GREEN         { 000_R, 001_G, 000_B };
-      constexpr static QVector3D BLUE          { 000_R, 000_G, 001_B };
-      constexpr static QVector3D CANARY_YELLOW { 255_R, 239_G, 000_B };
-      constexpr static QVector3D HOT_PINK      { 255_R, 105_G, 180_B };
-      constexpr static QVector3D FILE_GREEN    { 128_R, 255_G, 128_B };
-      constexpr static QVector3D WHITE         { 255_R, 255_G, 255_B };
+      constexpr static auto RED           = RGB(255,    0,    0);
+      constexpr static auto GREEN         = RGB(  0,    1,    0);
+      constexpr static auto BLUE          = RGB(  0,    0,    1);
+      constexpr static auto CANARY_YELLOW = RGB(255,  239,    0);
+      constexpr static auto HOT_PINK      = RGB(255,  105,  180);
+      constexpr static auto FILE_GREEN    = RGB(128,  255,  128);
+      constexpr static auto WHITE         = RGB(255,  255,  255);
    }
 
    namespace Graphics

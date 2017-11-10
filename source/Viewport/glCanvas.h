@@ -6,7 +6,7 @@
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
 #include "HID/keyboardManager.h"
-#include "optionsManager.h"
+#include "settingsManager.h"
 #include "Scene/baseAsset.h"
 #include "Scene/crosshairAsset.h"
 #include "Scene/debuggingRayAsset.h"
@@ -334,8 +334,6 @@ class GLCanvas final : public QOpenGLWidget
          Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
          Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, -VisualizationModel::ROOT_BLOCK_DEPTH } }
       };
-
-      std::shared_ptr<OptionsManager> m_optionsManager;
 
       Camera m_camera;
 

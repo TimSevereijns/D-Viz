@@ -109,18 +109,21 @@ bool Controller::HasVisualizationBeenLoaded() const
 
 void Controller::GenerateNewVisualization()
 {
-   if (m_visualizationParameters.rootDirectory.empty())
+   // @todo Investigate this copy:
+   auto parameters = m_mainWindow->GetSettingsManager().GetVisualizationParameters();
+
+   if (parameters.rootDirectory.empty())
    {
       return;
    }
 
-   if (!HasVisualizationBeenLoaded() || m_visualizationParameters.forceNewScan)
+   if (!HasVisualizationBeenLoaded() || parameters.forceNewScan)
    {
       m_highlightedNodes.clear();
       m_selectedNode = nullptr;
 
-      m_treeMap = std::make_unique<SquarifiedTreeMap>(m_visualizationParameters);
-      m_mainWindow->ScanDrive(m_visualizationParameters);
+      m_treeMap = std::make_unique<SquarifiedTreeMap>(parameters);
+      m_mainWindow->ScanDrive(parameters);
    }
 }
 
@@ -137,16 +140,6 @@ Tree<VizFile>& Controller::GetTree()
 const Tree<VizFile>& Controller::GetTree() const
 {
    return m_treeMap->GetTree();
-}
-
-const VisualizationParameters& Controller::GetVisualizationParameters() const
-{
-   return m_visualizationParameters;
-}
-
-void Controller::SetVisualizationParameters(const VisualizationParameters& parameters)
-{
-   m_visualizationParameters = parameters;
 }
 
 const std::vector<const Tree<VizFile>::Node*>& Controller::GetHighlightedNodes() const
@@ -216,8 +209,10 @@ void Controller::SelectNodeViaRay(
    constexpr auto clearSelected{ true };
    ClearHighlightedNodes(deselectionCallback, clearSelected);
 
+   const auto& parameters = m_mainWindow->GetSettingsManager().GetVisualizationParameters();
+
    // @todo Remove the camera from the parameter list; just pass in a point...
-   const auto* node = m_treeMap->FindNearestIntersection(camera, ray, m_visualizationParameters);
+   const auto* node = m_treeMap->FindNearestIntersection(camera, ray, parameters);
    if (node)
    {
       SelectNodeAndUpdateStatusBar(node, selectionCallback);
@@ -340,6 +335,8 @@ void Controller::HighlightDescendants(
    const Tree<VizFile>::Node& node,
    const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback)
 {
+   const auto& parameters = m_mainWindow->GetSettingsManager().GetVisualizationParameters();
+
    const auto selector = [&]
    {
       std::for_each(
@@ -347,8 +344,8 @@ void Controller::HighlightDescendants(
          Tree<VizFile>::LeafIterator{ },
          [&] (Tree<VizFile>::const_reference node)
       {
-         if ((m_visualizationParameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
-            || node->file.size < m_visualizationParameters.minimumFileSize)
+         if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
+            || node->file.size < parameters.minimumFileSize)
          {
             return;
          }
@@ -364,6 +361,8 @@ void Controller::HighlightAllMatchingExtensions(
    const Tree<VizFile>::Node& sampleNode,
    const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback)
 {
+   const auto& parameters = m_mainWindow->GetSettingsManager().GetVisualizationParameters();
+
    const auto selector = [&]
    {
       std::for_each(
@@ -371,8 +370,8 @@ void Controller::HighlightAllMatchingExtensions(
          Tree<VizFile>::LeafIterator{ },
          [&] (Tree<VizFile>::const_reference node)
       {
-         if ((m_visualizationParameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
-            || node->file.size < m_visualizationParameters.minimumFileSize
+         if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
+            || node->file.size < parameters.minimumFileSize
             || node->file.extension != sampleNode->file.extension)
          {
             return;
@@ -402,6 +401,8 @@ void Controller::SearchTreeMap(
    constexpr auto clearSelected{ true };
    ClearHighlightedNodes(deselectionCallback, clearSelected);
 
+   const auto& parameters = m_mainWindow->GetSettingsManager().GetVisualizationParameters();
+
    const auto selector = [&]
    {
       std::wstring fileAndExtension;
@@ -418,7 +419,7 @@ void Controller::SearchTreeMap(
          {
             const auto& file = node->file;
 
-            if (file.size < m_visualizationParameters.minimumFileSize
+            if (file.size < parameters.minimumFileSize
                || (!shouldSearchDirectories && file.type == FileType::DIRECTORY)
                || (!shouldSearchFiles && file.type == FileType::REGULAR))
             {

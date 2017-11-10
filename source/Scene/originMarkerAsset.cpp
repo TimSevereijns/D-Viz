@@ -51,7 +51,7 @@ namespace Asset
    bool OriginMarker::Render(
       const Camera& camera,
       const std::vector<Light>&,
-      const OptionsManager&)
+      const Settings::Manager&)
    {
       if (!m_shouldRender)
       {

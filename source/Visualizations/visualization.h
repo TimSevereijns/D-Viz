@@ -13,24 +13,8 @@
 #include <Tree/Tree.hpp>
 
 #include "../DataStructs/vizFile.h"
+#include "../settings.h"
 #include "../Viewport/camera.h"
-
-/**
- * @brief The VisualizationParameters struct represents the gamut of visualization parameters that
- * can be set to control when visualization updates occur, as well as what nodes get included.
- */
-struct VisualizationParameters
-{
-   std::wstring rootDirectory{ L"" };  ///< The path to the root directory
-
-   std::uint64_t minimumFileSize{ 0 }; ///< The minimum size a file should be before it shows up.
-
-   boost::optional<std::wstring> isolatedExtension{ }; ///< Only show files matching this type.
-
-   bool forceNewScan{ true };          ///< Whether a new scan should take place.
-   bool onlyShowDirectories{ false };  ///< Whether only directories should be shown.
-   bool useDirectoryGradient{ false }; ///< Whether to use gradient coloring for the directories.
-};
 
 /**
  * @brief Base visualization class.
@@ -39,7 +23,7 @@ class VisualizationModel
 {
    public:
 
-      explicit VisualizationModel(const VisualizationParameters& parameters);
+      explicit VisualizationModel(const Settings::VisualizationParameters& parameters);
 
       virtual ~VisualizationModel() = default;
 
@@ -85,7 +69,7 @@ class VisualizationModel
       Tree<VizFile>::Node* FindNearestIntersection(
          const Camera& camera,
          const Qt3DRender::RayCasting::QRay3D& ray,
-         const VisualizationParameters& parameters) const;
+         const Settings::VisualizationParameters& parameters) const;
 
       /**
        * @brief GetTree
@@ -113,7 +97,8 @@ class VisualizationModel
 
       bool m_hasDataBeenParsed{ false };
 
-      VisualizationParameters m_vizParameters;
+      // @todo Is this copy necessary?
+      Settings::VisualizationParameters m_vizParameters;
 };
 
 #endif // VISUALIZATIONMODEL_H

@@ -2,7 +2,7 @@
 #define BASEASSET_H
 
 #include "../DataStructs/light.h"
-#include "../optionsManager.h"
+#include "../settingsManager.h"
 #include "../Viewport/camera.h"
 #include "../Visualizations/visualization.h"
 
@@ -74,7 +74,7 @@ namespace Asset
          virtual bool Render(
             const Camera& camera,
             const std::vector<Light>& light,
-            const OptionsManager& settings) = 0;
+            const Settings::Manager& settings) = 0;
 
          /**
           * @brief Determines whether the scene asset has been loaded.
@@ -146,7 +146,7 @@ namespace Asset
          virtual void UpdateVBO(
             const Tree<VizFile>::Node& node,
             Event action,
-            const VisualizationParameters& options);
+            const Settings::VisualizationParameters& options);
 
       protected:
 

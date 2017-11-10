@@ -77,7 +77,7 @@ namespace Asset
    void Base::UpdateVBO(
       const Tree<VizFile>::Node&,
       Event,
-      const VisualizationParameters&)
+      const Settings::VisualizationParameters&)
    {
    }
 }

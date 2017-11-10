@@ -10,7 +10,7 @@ class SquarifiedTreeMap : public VisualizationModel
 {
    public:
 
-      SquarifiedTreeMap(const VisualizationParameters& parameters);
+      SquarifiedTreeMap(const Settings::VisualizationParameters& parameters);
 
       void Parse(const std::shared_ptr<Tree<VizFile>>& theTree) override;
 

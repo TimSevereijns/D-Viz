@@ -13,8 +13,8 @@ class TreeNode;
 namespace Asset
 {
    /**
-    * @brief The VisualizationAsset class implements the functionality needed to represent the
-    * main visualization scene asset.
+    * @brief The Treemap class implements the functionality needed to represent the main
+    * visualization asset.
     */
    class Treemap final : public Base
    {
@@ -38,7 +38,7 @@ namespace Asset
          bool Render(
             const Camera& camera,
             const std::vector<Light>& lights,
-            const OptionsManager& settings) override;
+            const Settings::Manager& settings) override;
 
          /**
           * @see Asset::Base::Reload(...)
@@ -50,8 +50,8 @@ namespace Asset
           */
          void UpdateVBO(
             const Tree<VizFile>::Node& node,
-            Event action,
-            const VisualizationParameters& options) override;
+            Asset::Event action,
+            const Settings::VisualizationParameters& options) override;
 
          /**
           * @see Asset::Base::IsAssetLoaded(...)
@@ -72,7 +72,7 @@ namespace Asset
           */
          std::uint32_t LoadBufferData(
             const Tree<VizFile>& tree,
-            const VisualizationParameters& parameters);
+            const Settings::VisualizationParameters& parameters);
 
          /**
           * @returns The number of blocks that are currently loaded into the visualization asset.
@@ -82,6 +82,10 @@ namespace Asset
       private:
 
          QVector3D ComputeGradientColor(const Tree<VizFile>::Node& node);
+
+         void ComputeAppropriateBlockColor(
+               const Tree<VizFile>::Node& node,
+               const Settings::VisualizationParameters& parameters);
 
          void FindLargestDirectory(const Tree<VizFile>& tree);
 

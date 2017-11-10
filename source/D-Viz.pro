@@ -35,7 +35,6 @@ SOURCES += \
    HID/gamepad.cpp \
    HID/keyboardManager.cpp \
    main.cpp \
-   optionsManager.cpp \
    Scene/baseAsset.cpp \
    Scene/crosshairAsset.cpp \
    Scene/debuggingRayAsset.cpp \
@@ -44,6 +43,8 @@ SOURCES += \
    Scene/lineAsset.cpp \
    Scene/originMarkerAsset.cpp \
    Scene/treemapAsset.cpp \
+   settings.cpp \
+   settingsManager.cpp \
    Viewport/camera.cpp \
    Viewport/canvasContextMenu.cpp \
    Viewport/glCanvas.cpp \
@@ -70,7 +71,6 @@ HEADERS += \
    HID/gamepad.h \
    HID/keyboardManager.h \
    literals.h \
-   optionsManager.h \
    Scene/baseAsset.h \
    Scene/crosshairAsset.h \
    Scene/debuggingRayAsset.h \
@@ -79,6 +79,8 @@ HEADERS += \
    Scene/lineAsset.h \
    Scene/originMarkerAsset.h \
    Scene/treemapAsset.h \
+   settings.h \
+   settingsManager.h \
    Utilities/colorGradient.hpp \
    Utilities/ignoreUnused.hpp \
    Utilities/operatingSystemSpecific.hpp \

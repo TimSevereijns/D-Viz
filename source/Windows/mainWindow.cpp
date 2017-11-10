@@ -5,7 +5,8 @@
 #include "literals.h"
 
 #include "DataStructs/scanningProgress.hpp"
-#include "optionsManager.h"
+#include "settings.h"
+#include "settingsManager.h"
 #include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Utilities/utilities.hpp"
@@ -111,7 +112,7 @@ MainWindow::MainWindow(
    :
    QMainWindow{ parent },
    m_controller{ controller },
-   m_optionsManager{ std::make_shared<OptionsManager>() },
+   m_settingsManager{ std::experimental::filesystem::current_path().append(L"colors.json") },
    m_fileSizeOptions{ GeneratePruningMenuEntries(Constants::FileSize::Prefix::BINARY) }
 {
    m_ui.setupUi(this);
@@ -150,34 +151,34 @@ void MainWindow::SetupSidebar()
       this, &MainWindow::OnShowBreakdownButtonPressed);
 
    connect(m_ui.searchDirectoriesCheckBox, &QCheckBox::stateChanged,
-      m_optionsManager.get(), &OptionsManager::OnShouldSearchDirectoriesChanged);
+      &m_settingsManager, &Settings::Manager::OnShouldSearchDirectoriesChanged);
 
    connect(m_ui.searchFilesCheckBox, &QCheckBox::stateChanged,
-      m_optionsManager.get(), &OptionsManager::OnShouldSearchFilesChanged);
+      &m_settingsManager, &Settings::Manager::OnShouldSearchFilesChanged);
 
    connect(m_ui.cameraSpeedSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-      m_optionsManager.get(), &OptionsManager::OnCameraMovementSpeedChanged);
+      &m_settingsManager, &Settings::Manager::OnCameraSpeedChanged);
 
    connect(m_ui.mouseSensitivitySpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-      m_optionsManager.get(), &OptionsManager::OnMouseSensitivityChanged);
+      &m_settingsManager, &Settings::Manager::OnMouseSensitivityChanged);
 
    connect(m_ui.ambientCoefficientSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-      m_optionsManager.get(), &OptionsManager::OnAmbientCoefficientChanged);
+      &m_settingsManager, &Settings::Manager::OnAmbientLightCoefficientChanged);
 
    connect(m_ui.attenuationSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-      m_optionsManager.get(), &OptionsManager::OnAttenuationChanged);
+      &m_settingsManager, &Settings::Manager::OnLightAttenuationChanged);
 
    connect(m_ui.shininesSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-      m_optionsManager.get(), &OptionsManager::OnShininessChanged);
+      &m_settingsManager, &Settings::Manager::OnMaterialShininessChanged);
 
    connect(m_ui.attachLightToCameraCheckBox,
       static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
-      m_optionsManager.get(), &OptionsManager::OnAttachLightToCameraStateChanged);
+      &m_settingsManager, &Settings::Manager::OnAttachLightToCameraStateChanged);
 }
 
 void MainWindow::SetupFileSizePruningDropdown()
@@ -368,13 +369,14 @@ void MainWindow::OnFileMenuNewScan()
 
    const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
 
-   VisualizationParameters parameters;
+   Settings::VisualizationParameters parameters;
    parameters.rootDirectory = m_rootPath.wstring();
    parameters.onlyShowDirectories = m_showDirectoriesOnly;
    parameters.forceNewScan = true;
    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
-   m_controller.SetVisualizationParameters(parameters);
+   m_settingsManager.SetVisualizationParameters(parameters);
+
    m_controller.GenerateNewVisualization();
 }
 
@@ -415,9 +417,10 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
       return;
    }
 
-   auto parameters = m_controller.GetVisualizationParameters();
+   // @todo Get rid of the copy of the visualization parameters:
+   auto parameters = m_settingsManager.GetVisualizationParameters();
    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
-   m_controller.SetVisualizationParameters(parameters);
+   m_settingsManager.SetVisualizationParameters(parameters);
 
    m_glCanvas->ReloadVisualization();
 }
@@ -451,9 +454,10 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
       return;
    }
 
-   auto parameters = m_controller.GetVisualizationParameters();
+   // @todo Get rid of the copy of the visualization parameters:
+   auto parameters = m_settingsManager.GetVisualizationParameters();
    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
-   m_controller.SetVisualizationParameters(parameters);
+   m_settingsManager.SetVisualizationParameters(parameters);
 
    m_glCanvas->ReloadVisualization();
 }
@@ -487,14 +491,14 @@ void MainWindow::PruneTree()
 {
    const auto pruneSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
 
-   VisualizationParameters parameters;
+   Settings::VisualizationParameters parameters;
    parameters.rootDirectory = m_rootPath.wstring();
    parameters.onlyShowDirectories = m_showDirectoriesOnly;
    parameters.useDirectoryGradient = m_useDirectoryGradient;
    parameters.forceNewScan = false;
    parameters.minimumFileSize = m_fileSizeOptions->at(pruneSizeIndex).first;
 
-   m_controller.SetVisualizationParameters(parameters);
+   m_settingsManager.SetVisualizationParameters(parameters);
 
    if (!m_rootPath.empty())
    {
@@ -612,16 +616,16 @@ void MainWindow::ComputeProgress(const ScanningProgress& progress)
    }
 }
 
-void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
+void MainWindow::ScanDrive(Settings::VisualizationParameters& parameters)
 {
-   m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(vizParameters.rootDirectory);
+   m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(parameters.rootDirectory);
 
    const auto progressHandler = [this] (const ScanningProgress& progress)
    {
       ComputeProgress(progress);
    };
 
-   const auto completionHandler = [&, vizParameters] (
+   const auto completionHandler = [&, parameters] (
       const ScanningProgress& progress,
       std::shared_ptr<Tree<VizFile>> scanningResults) mutable
    {
@@ -637,9 +641,13 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
       QApplication::processEvents();
 
       const auto filesScanned = progress.filesScanned.load();
-      AskUserToLimitFileSize(filesScanned, vizParameters);
+      const auto limitationApplied = AskUserToLimitFileSize(filesScanned, parameters);
 
-      m_controller.SetVisualizationParameters(vizParameters);
+      if (limitationApplied)
+      {
+         m_settingsManager.SetVisualizationParameters(parameters);
+      }
+
       m_controller.ParseResults(scanningResults);
       m_controller.UpdateBoundingBoxes();
 
@@ -651,7 +659,7 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
 
    const DriveScanningParameters scanningParameters
    {
-      vizParameters.rootDirectory,
+      parameters.rootDirectory,
       progressHandler,
       completionHandler
    };
@@ -662,15 +670,15 @@ void MainWindow::ScanDrive(VisualizationParameters& vizParameters)
    m_scanner.StartScanning(scanningParameters);
 }
 
-void MainWindow::AskUserToLimitFileSize(
+bool MainWindow::AskUserToLimitFileSize(
    std::uintmax_t numberOfFilesScanned,
-   VisualizationParameters& parameters)
+   Settings::VisualizationParameters& parameters)
 {
    using namespace Literals::Numeric::Binary;
 
    if (numberOfFilesScanned < 250'000 || parameters.minimumFileSize >= 1_MiB)
    {
-      return;
+      return false;
    }
 
    QMessageBox messageBox;
@@ -688,12 +696,14 @@ void MainWindow::AskUserToLimitFileSize(
       case QMessageBox::Yes:
          parameters.minimumFileSize = 1_MiB;
          SetFilePruningComboBoxValue(1_MiB);
-         return;
+         return true;
       case QMessageBox::No:
-         return;
+         return false;
       default:
          assert(false);
    }
+
+   return false;
 }
 
 void MainWindow::SetFieldOfViewSlider(int fieldOfView)
@@ -743,7 +753,12 @@ void MainWindow::SetStatusBarMessage(
    statusBar->showMessage(QString::fromStdWString(message), timeout);
 }
 
-std::shared_ptr<OptionsManager> MainWindow::GetOptionsManager()
+Settings::Manager& MainWindow::GetSettingsManager()
 {
-   return m_optionsManager;
+   return m_settingsManager;
+}
+
+const Settings::Manager& MainWindow::GetSettingsManager() const
+{
+   return m_settingsManager;
 }

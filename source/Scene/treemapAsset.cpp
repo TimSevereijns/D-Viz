@@ -22,7 +22,7 @@ namespace
     */
    void SetUniformLights(
       const std::vector<Light>& lights,
-      const OptionsManager& settings,
+      const Settings::Manager& settings,
       QOpenGLShaderProgram& shader)
    {
       for (size_t i = 0; i < lights.size(); i++)
@@ -43,8 +43,8 @@ namespace
 
          shader.setUniformValue(position.c_str(), lights[i].position);
          shader.setUniformValue(intensity.c_str(), lights[i].intensity);
-         shader.setUniformValue(attenuation.c_str(), settings.m_lightAttenuationFactor);
-         shader.setUniformValue(ambientCoefficient.c_str(), settings.m_ambientCoefficient);
+         shader.setUniformValue(attenuation.c_str(), settings.GetLightAttentuationFactor());
+         shader.setUniformValue(ambientCoefficient.c_str(), settings.GetAmbientLightCoefficient());
       }
    }
 
@@ -59,7 +59,7 @@ namespace
     */
    QVector3D RestoreColor(
       const Tree<VizFile>::Node& node,
-      const VisualizationParameters& params)
+      const Settings::VisualizationParameters& params)
    {
       if (node.GetData().file.type != FileType::DIRECTORY)
       {
@@ -268,7 +268,7 @@ namespace Asset
 
    std::uint32_t Treemap::LoadBufferData(
       const Tree<VizFile>& tree,
-      const VisualizationParameters& parameters)
+      const Settings::VisualizationParameters& parameters)
    {
       m_blockTransformations.clear();
       m_blockColors.clear();
@@ -296,21 +296,7 @@ namespace Asset
          instanceMatrix.scale(block.GetWidth(), block.GetHeight(), block.GetDepth());
          m_blockTransformations << instanceMatrix;
 
-         if (node->file.type == FileType::DIRECTORY)
-         {
-            if (parameters.useDirectoryGradient)
-            {
-               m_blockColors << ComputeGradientColor(node);
-            }
-            else
-            {
-               m_blockColors << Constants::Colors::WHITE;
-            }
-         }
-         else if (node->file.type == FileType::REGULAR)
-         {
-            m_blockColors << Constants::Colors::FILE_GREEN;
-         }
+         ComputeAppropriateBlockColor(node, parameters);
       }
 
       FindLargestDirectory(tree);
@@ -352,6 +338,27 @@ namespace Asset
       return finalColor;
    }
 
+   void Treemap::ComputeAppropriateBlockColor(
+      const Tree<VizFile>::Node& node,
+      const Settings::VisualizationParameters& parameters)
+   {
+      if (node->file.type == FileType::DIRECTORY)
+      {
+         if (parameters.useDirectoryGradient)
+         {
+            m_blockColors << ComputeGradientColor(node);
+         }
+         else
+         {
+            m_blockColors << Constants::Colors::WHITE;
+         }
+      }
+      else if (node->file.type == FileType::REGULAR)
+      {
+         m_blockColors << Constants::Colors::FILE_GREEN;
+      }
+   }
+
    std::uint32_t Treemap::GetBlockCount() const
    {
       return m_blockCount;
@@ -365,7 +372,7 @@ namespace Asset
    bool Treemap::Render(
       const Camera& camera,
       const std::vector<Light>& lights,
-      const OptionsManager& settings)
+      const Settings::Manager& settings)
    {
       if (!IsAssetLoaded())
       {
@@ -377,7 +384,7 @@ namespace Asset
       m_shader.setUniformValue("viewMatrix", camera.GetViewMatrix());
 
       m_shader.setUniformValue("cameraPosition", camera.GetPosition());
-      m_shader.setUniformValue("materialShininess", settings.m_materialShininess);
+      m_shader.setUniformValue("materialShininess", settings.GetMaterialShininess());
 
       SetUniformLights(lights, settings, m_shader);
 
@@ -412,7 +419,7 @@ namespace Asset
    void Treemap::UpdateVBO(
       const Tree<VizFile>::Node& node,
       Asset::Event action,
-      const VisualizationParameters& options)
+      const Settings::VisualizationParameters& options)
    {
       constexpr auto colorTupleSize{ sizeof(QVector3D) };
       const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorTupleSize;

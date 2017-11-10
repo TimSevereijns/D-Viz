@@ -4,6 +4,9 @@
 #include <QApplication>
 #include <spdlog/spdlog.h>
 
+#undef RAPIDJSON_HAS_STDSTRING
+#define RAPIDJSON_HAS_STDSTRING 1
+
 template<typename NodeDataType>
 class Tree;
 

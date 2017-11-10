@@ -17,7 +17,7 @@ namespace Asset
          bool Render(
             const Camera& camera,
             const std::vector<Light>& lights,
-            const OptionsManager& settings) override;
+            const Settings::Manager& settings) override;
    };
 }
 

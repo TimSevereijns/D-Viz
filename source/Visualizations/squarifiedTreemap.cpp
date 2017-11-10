@@ -150,7 +150,7 @@ namespace
    }
 }
 
-SquarifiedTreeMap::SquarifiedTreeMap(const VisualizationParameters& parameters) :
+SquarifiedTreeMap::SquarifiedTreeMap(const Settings::VisualizationParameters& parameters) :
    VisualizationModel{ parameters }
 {
 }

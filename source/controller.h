@@ -52,16 +52,6 @@ class Controller
       const Tree<VizFile>& GetTree() const;
 
       /**
-       * @returns A reference to the current visualization parameters.
-       */
-      const VisualizationParameters& GetVisualizationParameters() const;
-
-      /**
-       * @brief Updates the visualization parameters.
-       */
-      void SetVisualizationParameters(const VisualizationParameters& parameters);
-
-      /**
        * @returns A reference to the currently highlighted nodes. Highlighted nodes are distinct
        * from the selected node (of which there can be only one).
        */
@@ -235,8 +225,6 @@ class Controller
       std::unique_ptr<VisualizationModel> m_treeMap{ nullptr };
 
       std::vector<const Tree<VizFile>::Node*> m_highlightedNodes;
-
-      VisualizationParameters m_visualizationParameters;
 
       // @todo Move these onto the VizualizationModel class:
       std::uintmax_t m_filesInCurrentVisualization{ 0 };
