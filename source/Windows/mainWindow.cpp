@@ -375,9 +375,9 @@ void MainWindow::OnFileMenuNewScan()
    parameters.forceNewScan = true;
    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
-   m_settingsManager.SetVisualizationParameters(parameters);
+   m_settingsManager.SetVisualizationParameters(std::move(parameters));
 
-   m_controller.GenerateNewVisualization();
+   ScanDrive(m_settingsManager.GetVisualizationParameters());
 }
 
 void MainWindow::OnFPSReadoutToggled(bool isEnabled)
@@ -417,10 +417,8 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
       return;
    }
 
-   // @todo Get rid of the copy of the visualization parameters:
-   auto parameters = m_settingsManager.GetVisualizationParameters();
+   auto& parameters = m_settingsManager.GetVisualizationParameters();
    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
-   m_settingsManager.SetVisualizationParameters(parameters);
 
    m_glCanvas->ReloadVisualization();
 }
@@ -454,10 +452,8 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
       return;
    }
 
-   // @todo Get rid of the copy of the visualization parameters:
-   auto parameters = m_settingsManager.GetVisualizationParameters();
+   auto& parameters = m_settingsManager.GetVisualizationParameters();
    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
-   m_settingsManager.SetVisualizationParameters(parameters);
 
    m_glCanvas->ReloadVisualization();
 }
@@ -627,7 +623,7 @@ void MainWindow::ScanDrive(Settings::VisualizationParameters& parameters)
 
    const auto completionHandler = [&, parameters] (
       const ScanningProgress& progress,
-      std::shared_ptr<Tree<VizFile>> scanningResults) mutable
+      const std::shared_ptr<Tree<VizFile>>& scanningResults) mutable
    {
       ComputeProgress(progress);
       LogScanCompletion(progress);
@@ -640,13 +636,7 @@ void MainWindow::ScanDrive(Settings::VisualizationParameters& parameters)
 
       QApplication::processEvents();
 
-      const auto filesScanned = progress.filesScanned.load();
-      const auto limitationApplied = AskUserToLimitFileSize(filesScanned, parameters);
-
-      if (limitationApplied)
-      {
-         m_settingsManager.SetVisualizationParameters(parameters);
-      }
+      AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
 
       m_controller.ParseResults(scanningResults);
       m_controller.UpdateBoundingBoxes();
@@ -657,17 +647,19 @@ void MainWindow::ScanDrive(Settings::VisualizationParameters& parameters)
       m_ui.showBreakdownButton->setEnabled(true);
    };
 
-   const DriveScanningParameters scanningParameters
+   m_controller.ResetVisualization();
+
+   m_controller.AllowUserInteractionWithModel(false);
+   m_ui.showBreakdownButton->setEnabled(false);
+
+   DriveScanningParameters scanningParameters
    {
       parameters.rootDirectory,
       progressHandler,
       completionHandler
    };
 
-   m_controller.AllowUserInteractionWithModel(false);
-   m_ui.showBreakdownButton->setEnabled(false);
-
-   m_scanner.StartScanning(scanningParameters);
+   m_scanner.StartScanning(std::move(scanningParameters));
 }
 
 bool MainWindow::AskUserToLimitFileSize(
@@ -694,13 +686,22 @@ bool MainWindow::AskUserToLimitFileSize(
    switch (election)
    {
       case QMessageBox::Yes:
+      {
          parameters.minimumFileSize = 1_MiB;
+         m_settingsManager.SetVisualizationParameters(parameters);
+
          SetFilePruningComboBoxValue(1_MiB);
+
          return true;
+      }
       case QMessageBox::No:
+      {
          return false;
+      }
       default:
+      {
          assert(false);
+      }
    }
 
    return false;

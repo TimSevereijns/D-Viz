@@ -48,15 +48,11 @@ class ThreadSafeQueue;
 /**
  * @brief The ScanningWorker class
  */
-class ScanningWorker : public QObject
+class ScanningWorker final : public QObject
 {
    Q_OBJECT
 
    public:
-
-      using NodePtr = std::unique_ptr<Tree<VizFile>::Node>;
-
-      static constexpr std::uintmax_t SIZE_UNDEFINED{ 0 };
 
       explicit ScanningWorker(
          const DriveScanningParameters& parameters,
@@ -83,7 +79,7 @@ class ScanningWorker : public QObject
        *
        * @param[in] fileTree        A pointer to the final tree representing the scanned drive.
        */
-      void Finished(std::shared_ptr<Tree<VizFile>> fileTree);
+      void Finished(const std::shared_ptr<Tree<VizFile>>& fileTree);
 
       /**
        * @brief Signals drive scanning progress updates.
@@ -99,6 +95,13 @@ class ScanningWorker : public QObject
 
    private:
 
+      /**
+       * @brief Allows a single thread to pull a task from the task queue for processing, placing
+       * the eventual result on the results queue.
+       *
+       * @param[in] taskQueue       A queue full of directories in need of processing.
+       * @param[out] resultsQueue   A empty queue where scanned directories results will end up.
+       */
       void ProcessQueue(
          ThreadSafeQueue<NodeAndPath>& taskQueue,
          ThreadSafeQueue<NodeAndPath>& resultsQueue) noexcept;
@@ -135,7 +138,12 @@ class ScanningWorker : public QObject
          std::experimental::filesystem::directory_iterator& itr,
          Tree<VizFile>::Node& treeNode) noexcept;
 
+      /**
+       * @return An initial root node.
+       */
       std::shared_ptr<Tree<VizFile>> CreateTreeAndRootNode();
+
+      static constexpr std::uintmax_t SIZE_UNDEFINED{ 0 };
 
       DriveScanningParameters m_parameters;
 

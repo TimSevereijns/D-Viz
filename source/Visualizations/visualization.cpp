@@ -315,11 +315,6 @@ const float VisualizationModel::BLOCK_HEIGHT = 2.0f;
 const float VisualizationModel::ROOT_BLOCK_WIDTH = 1000.0f;
 const float VisualizationModel::ROOT_BLOCK_DEPTH = 1000.0f;
 
-VisualizationModel::VisualizationModel(const Settings::VisualizationParameters& parameters) :
-   m_vizParameters{ parameters }
-{
-}
-
 void VisualizationModel::UpdateBoundingBoxes()
 {
    assert(m_hasDataBeenParsed);

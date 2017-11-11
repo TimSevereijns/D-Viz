@@ -34,7 +34,7 @@ class Controller
       /**
        * @brief Generates a new visualization.
        */
-      void GenerateNewVisualization();
+      void ResetVisualization();
 
       /**
        * @returns A pointer to the selected node.

@@ -89,23 +89,17 @@ class MainWindow final : public QMainWindow
       std::wstring GetSearchQuery() const;
 
       /**
-       * @brief GetController
-       *
-       * @return
+       * @returns A reference to the model controller for the treemap visualization.
        */
       Controller& GetController();
 
       /**
-       * @brief GetCanvas
-       *
-       * @return
+       * @returns A reference to the OpenGL canvas.
        */
       GLCanvas& GetCanvas();
 
       /**
-       * @brief GetGamepad
-       *
-       * @return
+       * @returns A reference to the gamepad instance.
        */
       Gamepad& GetGamepad();
 
@@ -139,7 +133,6 @@ class MainWindow final : public QMainWindow
 
    private:
 
-      // @todo Passing the parameters in should now be unnecessary:
       void ScanDrive(Settings::VisualizationParameters& parameters);
 
       /**

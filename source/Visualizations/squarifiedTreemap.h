@@ -6,11 +6,9 @@
 /**
  * @brief Represents the squarified treemap visualization.
  */
-class SquarifiedTreeMap : public VisualizationModel
+class SquarifiedTreeMap final : public VisualizationModel
 {
    public:
-
-      SquarifiedTreeMap(const Settings::VisualizationParameters& parameters);
 
       void Parse(const std::shared_ptr<Tree<VizFile>>& theTree) override;
 

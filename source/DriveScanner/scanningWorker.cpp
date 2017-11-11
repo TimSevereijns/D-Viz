@@ -247,7 +247,7 @@ ScanningWorker::ScanningWorker(
 {
 }
 
-std::shared_ptr<Tree<VizFile>> ScanningWorker::CreateTreeAndRootNode()
+std::shared_ptr<Tree<VizFile> > ScanningWorker::CreateTreeAndRootNode()
 {
    assert(std::experimental::filesystem::is_directory(m_parameters.path));
    if (!std::experimental::filesystem::is_directory(m_parameters.path))
@@ -274,13 +274,13 @@ std::shared_ptr<Tree<VizFile>> ScanningWorker::CreateTreeAndRootNode()
       FileType::DIRECTORY
    };
 
-   const VizFile rootNode
+   VizFile rootNode
    {
       fileInfo,
       rootBlock
    };
 
-   return std::make_shared<Tree<VizFile>>(rootNode);
+   return std::make_shared<Tree<VizFile>>(std::move(rootNode));
 }
 
 void ScanningWorker::ProcessFile(

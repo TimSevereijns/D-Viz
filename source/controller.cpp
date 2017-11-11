@@ -107,24 +107,12 @@ bool Controller::HasVisualizationBeenLoaded() const
    return m_treeMap != nullptr;
 }
 
-void Controller::GenerateNewVisualization()
+void Controller::ResetVisualization()
 {
-   // @todo Investigate this copy:
-   auto parameters = m_mainWindow->GetSettingsManager().GetVisualizationParameters();
+   m_highlightedNodes.clear();
 
-   if (parameters.rootDirectory.empty())
-   {
-      return;
-   }
-
-   if (!HasVisualizationBeenLoaded() || parameters.forceNewScan)
-   {
-      m_highlightedNodes.clear();
-      m_selectedNode = nullptr;
-
-      m_treeMap = std::make_unique<SquarifiedTreeMap>(parameters);
-      m_mainWindow->ScanDrive(parameters);
-   }
+   m_selectedNode = nullptr;
+   m_treeMap = nullptr;
 }
 
 const Tree<VizFile>::Node* Controller::GetSelectedNode() const
@@ -157,6 +145,9 @@ void Controller::SetView(MainWindow* window)
 
 void Controller::ParseResults(const std::shared_ptr<Tree<VizFile>>& results)
 {
+   assert(!m_treeMap);
+
+   m_treeMap = std::make_unique<SquarifiedTreeMap>();
    m_treeMap->Parse(results);
 }
 

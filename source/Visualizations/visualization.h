@@ -17,13 +17,13 @@
 #include "../Viewport/camera.h"
 
 /**
- * @brief Base visualization class.
+ * @brief Base class for the visualization model.
  */
 class VisualizationModel
 {
    public:
 
-      explicit VisualizationModel(const Settings::VisualizationParameters& parameters);
+      VisualizationModel() = default;
 
       virtual ~VisualizationModel() = default;
 
@@ -72,14 +72,12 @@ class VisualizationModel
          const Settings::VisualizationParameters& parameters) const;
 
       /**
-       * @brief GetTree
-       * @return
+       * @returns A reference to the directory tree.
        */
       Tree<VizFile>& GetTree();
 
       /**
-       * @brief GetTree
-       * @return
+       * @overload
        */
       const Tree<VizFile>& GetTree() const;
 
@@ -93,12 +91,11 @@ class VisualizationModel
 
    protected:
 
+      // @note The tree is stored in a shared pointer so that it can be passed through the Qt
+      // signaling framework; any type passed through it needs to be copy-constructible.
       std::shared_ptr<Tree<VizFile>> m_theTree{ nullptr };
 
       bool m_hasDataBeenParsed{ false };
-
-      // @todo Is this copy necessary?
-      Settings::VisualizationParameters m_vizParameters;
 };
 
 #endif // VISUALIZATIONMODEL_H

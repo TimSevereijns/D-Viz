@@ -11,7 +11,7 @@ void DriveScanner::HandleProgressUpdates()
    m_parameters.onProgressUpdateCallback(m_progress);
 }
 
-void DriveScanner::HandleCompletion(std::shared_ptr<Tree<VizFile>> fileTree)
+void DriveScanner::HandleCompletion(const std::shared_ptr<Tree<VizFile>>& fileTree)
 {
    m_progressUpdateTimer->stop();
 

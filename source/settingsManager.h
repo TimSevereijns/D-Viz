@@ -104,6 +104,8 @@ namespace Settings
 
          const VisualizationParameters& GetVisualizationParameters() const;
 
+         VisualizationParameters& GetVisualizationParameters();
+
          void SetVisualizationParameters(const VisualizationParameters& parameters);
 
       private:

@@ -25,7 +25,6 @@
 #include <QTimer>
 #include <QVector3D>
 
-// @todo Move these to a separate file.
 namespace Asset
 {
    namespace Tag
@@ -178,9 +177,6 @@ class GLCanvas final : public QOpenGLWidget
 
       /**
        * @brief Records the elapsed frame time.
-       *
-       * @todo Double-check that this is actually a sane way of doing it, or if I'm missing
-       * something.
        */
       void UpdateFrameTime(const std::chrono::microseconds& elapsedTime);
 

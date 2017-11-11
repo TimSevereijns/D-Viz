@@ -61,7 +61,7 @@ namespace Asset
          /**
           * @brief Loads the TreeMap nodes into the necessary graphics buffers.
           *
-          * @todo Passing the tree in as a const reference is a bit of a lie, since the nodes can
+          * @note Passing the tree in as a const reference is a bit of a lie, since the nodes can
           * still be (and are) modifiable. Consider fixing this.
           *
           * @param[in] tree            The tree to pull the visualized TreeMap information from.

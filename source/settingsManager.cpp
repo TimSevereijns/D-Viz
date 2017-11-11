@@ -97,6 +97,11 @@ namespace Settings
       return m_visualizationParameters;
    }
 
+   VisualizationParameters& Manager::GetVisualizationParameters()
+   {
+      return m_visualizationParameters;
+   }
+
    void Manager::SetVisualizationParameters(const VisualizationParameters& parameters)
    {
       m_visualizationParameters = parameters;
