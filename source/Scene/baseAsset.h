@@ -142,11 +142,12 @@ namespace Asset
           *
           * @param[in] node            The TreeNode whose visualization should be updated.
           * @param[in] action          The type of update to perform on the target VBO segment.
+          * @param[in] settings        @todo
           */
          virtual void UpdateVBO(
             const Tree<VizFile>::Node& node,
             Event action,
-            const Settings::VisualizationParameters& options);
+            const Settings::Manager& settings);
 
       protected:
 

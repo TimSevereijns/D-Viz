@@ -3,7 +3,10 @@
 
 #include "settings.h"
 
+#include "unordered_map"
+
 #include <QObject>
+#include <QVector3D>
 
 namespace Settings
 {
@@ -100,13 +103,14 @@ namespace Settings
 
          bool IsPrimaryLightAttachedToCamera() const;
 
-         const JsonDocument& GetFileColors() const;
+         const std::unordered_map<std::wstring, QVector3D>& GetFileColorsMap() const;
 
          const VisualizationParameters& GetVisualizationParameters() const;
 
          VisualizationParameters& GetVisualizationParameters();
 
-         void SetVisualizationParameters(const VisualizationParameters& parameters);
+         VisualizationParameters& SetVisualizationParameters(
+            const VisualizationParameters& parameters);
 
       private:
 
@@ -123,7 +127,9 @@ namespace Settings
          bool m_shouldSearchDirectories{ false };
          bool m_shouldSearchFiles{ true };
 
-         JsonDocument m_fileColors;
+         JsonDocument m_fileColorsJson;
+
+         std::unordered_map<std::wstring, QVector3D> m_fileColorsMap;
 
          VisualizationParameters m_visualizationParameters;
    };

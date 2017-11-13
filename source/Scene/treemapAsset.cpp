@@ -2,6 +2,7 @@
 
 #include "../constants.h"
 #include "../DataStructs/vizFile.h"
+#include "../settings.h"
 #include "../Utilities/colorGradient.hpp"
 #include "../Utilities/scopeExit.hpp"
 #include "../Visualizations/visualization.h"
@@ -268,12 +269,14 @@ namespace Asset
 
    std::uint32_t Treemap::LoadBufferData(
       const Tree<VizFile>& tree,
-      const Settings::VisualizationParameters& parameters)
+      const Settings::Manager& settings)
    {
       m_blockTransformations.clear();
       m_blockColors.clear();
 
       m_blockCount = 0;
+
+      const auto& parameters = settings.GetVisualizationParameters();
 
       for (Tree<VizFile>::Node& node : tree)
       {
@@ -296,7 +299,7 @@ namespace Asset
          instanceMatrix.scale(block.GetWidth(), block.GetHeight(), block.GetDepth());
          m_blockTransformations << instanceMatrix;
 
-         ComputeAppropriateBlockColor(node, parameters);
+         ComputeAppropriateBlockColor(node, settings);
       }
 
       FindLargestDirectory(tree);
@@ -340,11 +343,21 @@ namespace Asset
 
    void Treemap::ComputeAppropriateBlockColor(
       const Tree<VizFile>::Node& node,
-      const Settings::VisualizationParameters& parameters)
+      const Settings::Manager& settings)
    {
+      // @todo Perform the color map lookup conditionally.
+
+      const auto& coloringMap = settings.GetFileColorsMap();
+      const auto itr = coloringMap.find(node->file.extension);
+      if (itr != std::end(coloringMap))
+      {
+         m_blockColors << itr->second;
+         return;
+      }
+
       if (node->file.type == FileType::DIRECTORY)
       {
-         if (parameters.useDirectoryGradient)
+         if (settings.GetVisualizationParameters().useDirectoryGradient)
          {
             m_blockColors << ComputeGradientColor(node);
          }
@@ -419,13 +432,13 @@ namespace Asset
    void Treemap::UpdateVBO(
       const Tree<VizFile>::Node& node,
       Asset::Event action,
-      const Settings::VisualizationParameters& options)
+      const Settings::Manager& settings)
    {
       constexpr auto colorTupleSize{ sizeof(QVector3D) };
       const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorTupleSize;
 
       const auto newColor = (action == Asset::Event::DESELECTION)
-         ? RestoreColor(node, options)
+         ? RestoreColor(node, settings.GetVisualizationParameters())
          : Constants::Colors::CANARY_YELLOW;
 
       assert(m_VAO.isCreated());

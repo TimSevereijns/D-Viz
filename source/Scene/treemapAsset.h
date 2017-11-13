@@ -51,7 +51,7 @@ namespace Asset
          void UpdateVBO(
             const Tree<VizFile>::Node& node,
             Asset::Event action,
-            const Settings::VisualizationParameters& options) override;
+            const Settings::Manager& settings) override;
 
          /**
           * @see Asset::Base::IsAssetLoaded(...)
@@ -65,14 +65,14 @@ namespace Asset
           * still be (and are) modifiable. Consider fixing this.
           *
           * @param[in] tree            The tree to pull the visualized TreeMap information from.
-          * @param[in] parameters      The current visualization parameters that will govern what
-          *                            nodes will be visualized.
+          * @param[in] settings        A reference to the settings manager so that the visualization
+          *                            can take into account the current settings.
           *
           * @returns The number of blocks that have been loaded into the buffer.
           */
          std::uint32_t LoadBufferData(
             const Tree<VizFile>& tree,
-            const Settings::VisualizationParameters& parameters);
+            const Settings::Manager& settings);
 
          /**
           * @returns The number of blocks that are currently loaded into the visualization asset.
@@ -84,8 +84,8 @@ namespace Asset
          QVector3D ComputeGradientColor(const Tree<VizFile>::Node& node);
 
          void ComputeAppropriateBlockColor(
-               const Tree<VizFile>::Node& node,
-               const Settings::VisualizationParameters& parameters);
+            const Tree<VizFile>::Node& node,
+            const Settings::Manager& settings);
 
          void FindLargestDirectory(const Tree<VizFile>& tree);
 

@@ -126,8 +126,8 @@ void GLCanvas::ReloadVisualization()
    m_isPaintingSuspended = true;
 
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
-   const auto parameters = m_mainWindow.GetSettingsManager().GetVisualizationParameters();
-   const auto blockCount = treemap->LoadBufferData(m_controller.GetTree(), parameters);
+   const auto& settings = m_mainWindow.GetSettingsManager();
+   const auto blockCount = treemap->LoadBufferData(m_controller.GetTree(), settings);
 
    for (const auto& tagAndAsset : m_sceneAssets)
    {
@@ -332,7 +332,7 @@ void GLCanvas::SelectNode(const Tree<VizFile>::Node* const node)
    treemap->UpdateVBO(
       *node,
       Asset::Event::SELECTION,
-      m_mainWindow.GetSettingsManager().GetVisualizationParameters());
+      m_mainWindow.GetSettingsManager());
 }
 
 void GLCanvas::RestoreSelectedNode()
@@ -347,7 +347,7 @@ void GLCanvas::RestoreSelectedNode()
    treemap->UpdateVBO(
       *m_controller.GetSelectedNode(),
       Asset::Event::DESELECTION,
-      m_mainWindow.GetSettingsManager().GetVisualizationParameters());
+      m_mainWindow.GetSettingsManager());
 }
 
 void GLCanvas::HighlightNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
@@ -362,14 +362,12 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& 
 {
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
-   const auto& parameters = m_mainWindow.GetSettingsManager().GetVisualizationParameters();
-
    for (const auto* const node : nodes)
    {
       treemap->UpdateVBO(
          *node,
          Asset::Event::DESELECTION,
-         parameters);
+         m_mainWindow.GetSettingsManager());
    }
 }
 

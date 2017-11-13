@@ -1,10 +1,52 @@
-#include "SettingsManager.h"
+#include "settingsManager.h"
+
+namespace
+{
+   /**
+    * @brief ConvertColorConfigFromJsonToMap
+    *
+    * @todo Add more runtime error-checking.
+    *
+    * @param[in] json
+    * @param[out] map
+    */
+   void ConvertColorConfigFromJsonToMap(
+      Settings::JsonDocument& json,
+      std::unordered_map<std::wstring, QVector3D>& map)
+   {
+         if (!json.IsObject())
+         {
+            return;
+         }
+
+         for (const auto& category : json.GetObject())
+         {
+            assert(category.value.IsObject());
+
+            for(const auto& coloring : category.value.GetObject())
+            {
+               assert(coloring.value.IsArray());
+
+               const auto colorArray = coloring.value.GetArray();
+               QVector3D colorVector
+               {
+                  colorArray[0].GetFloat() / 255.0f,
+                  colorArray[1].GetFloat() / 255.0f,
+                  colorArray[2].GetFloat() / 255.0f
+               };
+
+               map.emplace(coloring.name.GetString(), std::move(colorVector));
+            }
+         }
+   }
+}
 
 namespace Settings
 {
    Manager::Manager(const std::experimental::filesystem::path& colorConfigFile) :
-      m_fileColors{ std::move(Settings::LoadColorSettingsFromDisk(colorConfigFile)) }
+      m_fileColorsJson{ std::move(Settings::LoadColorSettingsFromDisk(colorConfigFile)) }
    {
+      ConvertColorConfigFromJsonToMap(m_fileColorsJson, m_fileColorsMap);
    }
 
    void Manager::OnCameraSpeedChanged(double speed)
@@ -87,9 +129,9 @@ namespace Settings
       return m_isLightAttachedToCamera;
    }
 
-   const JsonDocument& Manager::GetFileColors() const
+   const std::unordered_map<std::wstring, QVector3D>& Manager::GetFileColorsMap() const
    {
-      return m_fileColors;
+      return m_fileColorsMap;
    }
 
    const VisualizationParameters& Manager::GetVisualizationParameters() const
@@ -102,8 +144,10 @@ namespace Settings
       return m_visualizationParameters;
    }
 
-   void Manager::SetVisualizationParameters(const VisualizationParameters& parameters)
+   VisualizationParameters& Manager::SetVisualizationParameters(
+      const VisualizationParameters& parameters)
    {
       m_visualizationParameters = parameters;
+      return m_visualizationParameters;
    }
 }

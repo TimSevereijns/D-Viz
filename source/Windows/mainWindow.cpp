@@ -375,9 +375,101 @@ void MainWindow::OnFileMenuNewScan()
    parameters.forceNewScan = true;
    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
-   m_settingsManager.SetVisualizationParameters(std::move(parameters));
+   auto& savedParameters = m_settingsManager.SetVisualizationParameters(std::move(parameters));
+   ScanDrive(savedParameters);
+}
 
-   ScanDrive(m_settingsManager.GetVisualizationParameters());
+void MainWindow::ScanDrive(Settings::VisualizationParameters& parameters)
+{
+   m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(parameters.rootDirectory);
+
+   const auto progressHandler = [this] (const ScanningProgress& progress)
+   {
+      ComputeProgress(progress);
+   };
+
+   const auto completionHandler = [&, parameters] (
+      const ScanningProgress& progress,
+      const std::shared_ptr<Tree<VizFile>>& scanningResults) mutable
+   {
+      ComputeProgress(progress);
+      LogScanCompletion(progress);
+
+      m_controller.SaveScanResults(progress);
+
+      QCursor previousCursor = cursor();
+      setCursor(Qt::WaitCursor);
+      ON_SCOPE_EXIT{ setCursor(previousCursor); };
+      QApplication::processEvents();
+
+      AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
+
+      m_controller.ParseResults(scanningResults);
+      m_controller.UpdateBoundingBoxes();
+
+      m_glCanvas->ReloadVisualization();
+
+      m_controller.AllowUserInteractionWithModel(true);
+      m_ui.showBreakdownButton->setEnabled(true);
+   };
+
+   m_controller.ResetVisualization();
+
+   m_controller.AllowUserInteractionWithModel(false);
+   m_ui.showBreakdownButton->setEnabled(false);
+
+   DriveScanningParameters scanningParameters
+   {
+      parameters.rootDirectory,
+      progressHandler,
+      completionHandler
+   };
+
+   m_scanner.StartScanning(std::move(scanningParameters));
+}
+
+bool MainWindow::AskUserToLimitFileSize(
+   std::uintmax_t numberOfFilesScanned,
+   Settings::VisualizationParameters& parameters)
+{
+   using namespace Literals::Numeric::Binary;
+
+   if (numberOfFilesScanned < 250'000 || parameters.minimumFileSize >= 1_MiB)
+   {
+      return false;
+   }
+
+   QMessageBox messageBox;
+   messageBox.setIcon(QMessageBox::Warning);
+   messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+   messageBox.setDefaultButton(QMessageBox::Yes);
+   messageBox.setText(
+      "More than a quarter million files were scanned. "
+      "Would you like to limit the visualized files to those 1 MiB or larger in "
+      "order to reduce the load on the GPU and system memory?");
+
+   const auto election = messageBox.exec();
+   switch (election)
+   {
+      case QMessageBox::Yes:
+      {
+         parameters.minimumFileSize = 1_MiB;
+         m_settingsManager.SetVisualizationParameters(parameters);
+         SetFilePruningComboBoxValue(1_MiB);
+
+         return true;
+      }
+      case QMessageBox::No:
+      {
+         return false;
+      }
+      default:
+      {
+         assert(false);
+      }
+   }
+
+   return false;
 }
 
 void MainWindow::OnFPSReadoutToggled(bool isEnabled)
@@ -610,101 +702,6 @@ void MainWindow::ComputeProgress(const ScanningProgress& progress)
 
       SetStatusBarMessage(message.c_str());
    }
-}
-
-void MainWindow::ScanDrive(Settings::VisualizationParameters& parameters)
-{
-   m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(parameters.rootDirectory);
-
-   const auto progressHandler = [this] (const ScanningProgress& progress)
-   {
-      ComputeProgress(progress);
-   };
-
-   const auto completionHandler = [&, parameters] (
-      const ScanningProgress& progress,
-      const std::shared_ptr<Tree<VizFile>>& scanningResults) mutable
-   {
-      ComputeProgress(progress);
-      LogScanCompletion(progress);
-
-      m_controller.SaveScanResults(progress);
-
-      QCursor previousCursor = cursor();
-      setCursor(Qt::WaitCursor);
-      ON_SCOPE_EXIT{ setCursor(previousCursor); };
-
-      QApplication::processEvents();
-
-      AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
-
-      m_controller.ParseResults(scanningResults);
-      m_controller.UpdateBoundingBoxes();
-
-      m_glCanvas->ReloadVisualization();
-
-      m_controller.AllowUserInteractionWithModel(true);
-      m_ui.showBreakdownButton->setEnabled(true);
-   };
-
-   m_controller.ResetVisualization();
-
-   m_controller.AllowUserInteractionWithModel(false);
-   m_ui.showBreakdownButton->setEnabled(false);
-
-   DriveScanningParameters scanningParameters
-   {
-      parameters.rootDirectory,
-      progressHandler,
-      completionHandler
-   };
-
-   m_scanner.StartScanning(std::move(scanningParameters));
-}
-
-bool MainWindow::AskUserToLimitFileSize(
-   std::uintmax_t numberOfFilesScanned,
-   Settings::VisualizationParameters& parameters)
-{
-   using namespace Literals::Numeric::Binary;
-
-   if (numberOfFilesScanned < 250'000 || parameters.minimumFileSize >= 1_MiB)
-   {
-      return false;
-   }
-
-   QMessageBox messageBox;
-   messageBox.setIcon(QMessageBox::Warning);
-   messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-   messageBox.setDefaultButton(QMessageBox::Yes);
-   messageBox.setText(
-      "More than a quarter million files were scanned. "
-      "Would you like to limit the visualized files to those 1 MiB or larger in "
-      "order to reduce the load on the GPU and system memory?");
-
-   const auto election = messageBox.exec();
-   switch (election)
-   {
-      case QMessageBox::Yes:
-      {
-         parameters.minimumFileSize = 1_MiB;
-         m_settingsManager.SetVisualizationParameters(parameters);
-
-         SetFilePruningComboBoxValue(1_MiB);
-
-         return true;
-      }
-      case QMessageBox::No:
-      {
-         return false;
-      }
-      default:
-      {
-         assert(false);
-      }
-   }
-
-   return false;
 }
 
 void MainWindow::SetFieldOfViewSlider(int fieldOfView)
