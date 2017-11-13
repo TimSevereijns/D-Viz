@@ -7,6 +7,8 @@
 #include "../Utilities/scopeExit.hpp"
 #include "../Visualizations/visualization.h"
 
+#include <boost/optional.hpp>
+
 #include <Tree/Tree.hpp>
 
 #include <iostream>
@@ -26,7 +28,7 @@ namespace
       const Settings::Manager& settings,
       QOpenGLShaderProgram& shader)
    {
-      for (size_t i = 0; i < lights.size(); i++)
+      for (std::size_t i = 0; i < lights.size(); i++)
       {
          const auto indexString = std::to_string(i);
 
@@ -50,24 +52,53 @@ namespace
    }
 
    /**
+    * @brief Determines the appropriate color for the file based on the user-configurable color set
+    * in the color.json file.
+    *
+    * @param[in] node               The node whose color needs to be restored.
+    * @param[in] settings           The settings that will determine the color.
+    *
+    * @returns The appropriate color found in the color map.
+    */
+   boost::optional<QVector3D> DetermineColorFromExtension(
+      const Tree<VizFile>::Node& node,
+      const Settings::Manager& settings)
+   {
+      const auto& coloringMap = settings.GetFileColorsMap();
+      const auto itr = coloringMap.find(node->file.extension);
+      if (itr == std::end(coloringMap))
+      {
+         return boost::none;
+      }
+
+      return itr->second;
+   }
+
+   /**
     * @brief Restores the previously selected node to its non-selected color based on the rendering
     * settings.
     *
     * @param[in] node               The node whose color needs to be restored.
-    * @param[in] params             The rendering settings that will determine the color.
+    * @param[in] settings           The settings that will determine the color.
     *
     * @returns The color to restore the node to.
     */
    QVector3D RestoreColor(
       const Tree<VizFile>::Node& node,
-      const Settings::VisualizationParameters& params)
+      const Settings::Manager& settings)
    {
+      const auto fileColor = DetermineColorFromExtension(node, settings);
+      if (fileColor)
+      {
+         return *fileColor;
+      }
+
       if (node.GetData().file.type != FileType::DIRECTORY)
       {
          return Constants::Colors::FILE_GREEN;
       }
 
-      if (!params.useDirectoryGradient)
+      if (!settings.GetVisualizationParameters().useDirectoryGradient)
       {
          return Constants::Colors::WHITE;
       }
@@ -335,7 +366,8 @@ namespace Asset
    QVector3D Treemap::ComputeGradientColor(const Tree<VizFile>::Node& node)
    {
       const auto blockSize = node.GetData().file.size;
-      const auto ratio = static_cast<double>(blockSize) / static_cast<double>(m_largestDirectorySize);
+      const auto ratio =
+         static_cast<long double>(blockSize) / static_cast<long double>(m_largestDirectorySize);
 
       const auto finalColor = m_directoryColorGradient.GetColorAtValue(static_cast<float>(ratio));
       return finalColor;
@@ -347,11 +379,10 @@ namespace Asset
    {
       // @todo Perform the color map lookup conditionally.
 
-      const auto& coloringMap = settings.GetFileColorsMap();
-      const auto itr = coloringMap.find(node->file.extension);
-      if (itr != std::end(coloringMap))
+      const auto fileColor = DetermineColorFromExtension(node, settings);
+      if (fileColor)
       {
-         m_blockColors << itr->second;
+         m_blockColors << *fileColor;
          return;
       }
 
@@ -438,7 +469,7 @@ namespace Asset
       const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorTupleSize;
 
       const auto newColor = (action == Asset::Event::DESELECTION)
-         ? RestoreColor(node, settings.GetVisualizationParameters())
+         ? RestoreColor(node, settings)
          : Constants::Colors::CANARY_YELLOW;
 
       assert(m_VAO.isCreated());

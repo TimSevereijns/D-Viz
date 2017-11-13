@@ -76,7 +76,7 @@ namespace Asset
 
    void Base::UpdateVBO(
       const Tree<VizFile>::Node&,
-      Event,
+      Asset::Event,
       const Settings::Manager&)
    {
    }
