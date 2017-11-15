@@ -75,6 +75,20 @@ namespace Asset
             const Settings::Manager& settings);
 
          /**
+          * @brief Reloads the color buffer without touching the other buffers.
+          *
+          * @note Calling this function without populating the corresponding block transformation
+          * and reference block buffers is likely to have unintended consequences.
+          *
+          * @param[in] tree            The tree to pull the visualized TreeMap information from.
+          * @param[in] settings        A reference to the settings manager so that the visualization
+          *                            can take into account the current settings.
+          */
+         void ReloadColorBufferData(
+            const Tree<VizFile>& tree,
+            const Settings::Manager& settings);
+
+         /**
           * @returns The number of blocks that are currently loaded into the visualization asset.
           */
          std::uint32_t GetBlockCount() const;

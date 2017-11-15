@@ -10,12 +10,12 @@
 #include <spdlog/spdlog.h>
 
 #ifdef Q_OS_WIN
-#include <ShlObj.h>
-#include <Objbase.h>
+   #include <ShlObj.h>
+   #include <Objbase.h>
 #endif
 
 #ifdef Q_OS_LINUX
-#include <sys/statvfs.h>
+   #include <sys/statvfs.h>
 #endif
 
 /**

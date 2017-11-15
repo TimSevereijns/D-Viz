@@ -1,52 +1,78 @@
 #include "settingsManager.h"
 
+#include <spdlog/spdlog.h>
+
+#include <constants.h>
+
+#ifdef Q_OS_WIN
+   #undef GetObject
+#endif
+
 namespace
 {
    /**
-    * @brief ConvertColorConfigFromJsonToMap
+    * @brief Populates the passed in map with the flattened content of the JSON document.
     *
-    * @todo Add more runtime error-checking.
-    *
-    * @param[in] json
-    * @param[out] map
+    * @param[in] json               The JSON document containing the file color information.
+    * @param[out] map               The map that is to contain the flattened JSON data.
     */
-   void ConvertColorConfigFromJsonToMap(
-      Settings::JsonDocument& json,
-      std::unordered_map<std::wstring, QVector3D>& map)
+   void PopulateColorMapFromJsonDocument(
+      const Settings::JsonDocument& json,
+      Settings::ColorMap& map)
    {
-         if (!json.IsObject())
+      if (!json.IsObject())
+      {
+         return;
+      }
+
+      auto encounteredError{ false };
+
+      for (const auto& category : json.GetObject())
+      {
+         if (!category.value.IsObject())
          {
-            return;
+            encounteredError = true;
+            continue;
          }
 
-         for (const auto& category : json.GetObject())
-         {
-            assert(category.value.IsObject());
+         std::unordered_map<std::wstring, QVector3D> extensionMap;
 
-            for(const auto& coloring : category.value.GetObject())
+         for (const auto& coloring : category.value.GetObject())
+         {
+            if (!coloring.value.IsArray())
             {
-               assert(coloring.value.IsArray());
-
-               const auto colorArray = coloring.value.GetArray();
-               QVector3D colorVector
-               {
-                  colorArray[0].GetFloat() / 255.0f,
-                  colorArray[1].GetFloat() / 255.0f,
-                  colorArray[2].GetFloat() / 255.0f
-               };
-
-               map.emplace(coloring.name.GetString(), std::move(colorVector));
+               encounteredError = true;
+               continue;
             }
+
+            const auto colorArray = coloring.value.GetArray();
+            QVector3D colorVector
+            {
+               colorArray[0].GetFloat() / 255.0f,
+               colorArray[1].GetFloat() / 255.0f,
+               colorArray[2].GetFloat() / 255.0f
+            };
+
+            extensionMap.emplace(coloring.name.GetString(), std::move(colorVector));
          }
+
+         map.emplace(category.name.GetString(), std::move(extensionMap));
+      }
+
+      if (encounteredError)
+      {
+         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+         log->error("Encountered an error converting JSON document to file color map.");
+      }
    }
 }
 
 namespace Settings
 {
    Manager::Manager(const std::experimental::filesystem::path& colorConfigFile) :
-      m_fileColorsJson{ std::move(Settings::LoadColorSettingsFromDisk(colorConfigFile)) }
+      m_fileColorJsonDocument{ std::move(Settings::LoadColorSettingsFromDisk(colorConfigFile)) }
    {
-      ConvertColorConfigFromJsonToMap(m_fileColorsJson, m_fileColorsMap);
+      PopulateColorMapFromJsonDocument(m_fileColorJsonDocument, m_colorMap);
    }
 
    void Manager::OnCameraSpeedChanged(double speed)
@@ -129,9 +155,19 @@ namespace Settings
       return m_isLightAttachedToCamera;
    }
 
-   const std::unordered_map<std::wstring, QVector3D>& Manager::GetFileColorsMap() const
+   const ColorMap& Manager::GetFileColorMap() const
    {
-      return m_fileColorsMap;
+      return m_colorMap;
+   }
+
+   const std::wstring& Manager::GetColorScheme() const
+   {
+      return m_colorScheme;
+   }
+
+   void Manager::SetColorScheme(const std::wstring& scheme)
+   {
+      m_colorScheme = scheme;
    }
 
    const VisualizationParameters& Manager::GetVisualizationParameters() const

@@ -10,6 +10,8 @@
 
 namespace Settings
 {
+   using ColorMap = std::unordered_map<std::wstring, std::unordered_map<std::wstring, QVector3D>>;
+
    /**
     * @brief The central class responsible for run-time settings.
     */
@@ -103,7 +105,11 @@ namespace Settings
 
          bool IsPrimaryLightAttachedToCamera() const;
 
-         const std::unordered_map<std::wstring, QVector3D>& GetFileColorsMap() const;
+         const ColorMap& GetFileColorMap() const;
+
+         const std::wstring& GetColorScheme() const;
+
+         void SetColorScheme(const std::wstring& scheme);
 
          const VisualizationParameters& GetVisualizationParameters() const;
 
@@ -127,9 +133,11 @@ namespace Settings
          bool m_shouldSearchDirectories{ false };
          bool m_shouldSearchFiles{ true };
 
-         JsonDocument m_fileColorsJson;
+         JsonDocument m_fileColorJsonDocument;
 
-         std::unordered_map<std::wstring, QVector3D> m_fileColorsMap;
+         ColorMap m_colorMap;
+
+         std::wstring m_colorScheme{ L"Default" };
 
          VisualizationParameters m_visualizationParameters;
    };

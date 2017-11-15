@@ -12,8 +12,6 @@
 #include <QMenu>
 #include <QMessageBox>
 
-#include <spdlog/spdlog.h>
-
 #include <iostream>
 
 namespace
@@ -126,6 +124,8 @@ void GLCanvas::ReloadVisualization()
    m_isPaintingSuspended = true;
 
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
+   assert(treemap);
+
    const auto& settings = m_mainWindow.GetSettingsManager();
    const auto blockCount = treemap->LoadBufferData(m_controller.GetTree(), settings);
 
@@ -137,6 +137,15 @@ void GLCanvas::ReloadVisualization()
    assert(blockCount == treemap->GetBlockCount());
 
    m_controller.PrintMetadataToStatusBar();
+}
+
+void GLCanvas::ReloadColorScheme()
+{
+   auto* const treemap = GetAsset<Asset::Tag::Treemap>();
+   assert(treemap);
+
+   treemap->ReloadColorBufferData(m_controller.GetTree(), m_mainWindow.GetSettingsManager());
+   treemap->Reload();
 }
 
 void GLCanvas::SetFieldOfView(float fieldOfView)

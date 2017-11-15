@@ -131,6 +131,8 @@ class MainWindow final : public QMainWindow
 
       void OnRenderLightMarkersToggled(bool isEnabled);
 
+      void OnColorSchemeChanged(const QString& scheme);
+
    private:
 
       void ScanDrive(Settings::VisualizationParameters& parameters);
@@ -155,6 +157,7 @@ class MainWindow final : public QMainWindow
       void LaunchAboutDialog();
 
       void SetupMenus();
+      void SetupColorSchemeDropdown();
       void SetupFileSizePruningDropdown();
       void SetupFileMenu();
       void SetupFileSizeSubMenu();

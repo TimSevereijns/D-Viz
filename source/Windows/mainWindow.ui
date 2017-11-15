@@ -78,6 +78,16 @@
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
+      <widget class="QLabel" name="colorSchemeLabel">
+       <property name="text">
+        <string>Color Scheme:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="colorSchemeComboBox"/>
+     </item>
+     <item>
       <widget class="QLabel" name="pruneTreeLabel">
        <property name="text">
         <string>Prune Tree:</string>

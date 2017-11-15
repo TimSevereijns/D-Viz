@@ -127,6 +127,7 @@ MainWindow::MainWindow(
 
 void MainWindow::SetupSidebar()
 {
+   SetupColorSchemeDropdown();
    SetupFileSizePruningDropdown();
 
    connect(m_ui.directoriesOnlyCheckBox, &QCheckBox::stateChanged,
@@ -149,6 +150,9 @@ void MainWindow::SetupSidebar()
 
    connect(m_ui.showBreakdownButton, &QPushButton::clicked,
       this, &MainWindow::OnShowBreakdownButtonPressed);
+
+   connect(m_ui.colorSchemeComboBox, &QComboBox::currentTextChanged,
+      this, &MainWindow::OnColorSchemeChanged);
 
    connect(m_ui.searchDirectoriesCheckBox, &QCheckBox::stateChanged,
       &m_settingsManager, &Settings::Manager::OnShouldSearchDirectoriesChanged);
@@ -179,6 +183,21 @@ void MainWindow::SetupSidebar()
    connect(m_ui.attachLightToCameraCheckBox,
       static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
       &m_settingsManager, &Settings::Manager::OnAttachLightToCameraStateChanged);
+}
+
+void MainWindow::SetupColorSchemeDropdown()
+{
+   m_ui.colorSchemeComboBox->clear();
+
+   const auto& defaultScheme = QString::fromStdWString(L"Default");
+   m_ui.colorSchemeComboBox->addItem(defaultScheme, defaultScheme);
+
+   const auto& colorMap = m_settingsManager.GetFileColorMap();
+   for (const auto& extensionMap : colorMap)
+   {
+      const auto& categoryName = QString::fromStdWString(extensionMap.first);
+      m_ui.colorSchemeComboBox->addItem(categoryName, categoryName);
+   }
 }
 
 void MainWindow::SetupFileSizePruningDropdown()
@@ -632,6 +651,12 @@ void MainWindow::OnRenderGridToggled(bool isEnabled)
 void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
 {
    m_glCanvas->ToggleAssetVisibility<Asset::Tag::LightMarker>(isEnabled);
+}
+
+void MainWindow::OnColorSchemeChanged(const QString& scheme)
+{
+   m_settingsManager.SetColorScheme(scheme.toStdWString());
+   m_glCanvas->ReloadColorScheme();
 }
 
 bool MainWindow::ShouldShowFrameTime() const

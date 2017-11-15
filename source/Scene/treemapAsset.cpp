@@ -64,14 +64,22 @@ namespace
       const Tree<VizFile>::Node& node,
       const Settings::Manager& settings)
    {
-      const auto& coloringMap = settings.GetFileColorsMap();
-      const auto itr = coloringMap.find(node->file.extension);
-      if (itr == std::end(coloringMap))
+      const auto& activeColorScheme = settings.GetColorScheme();
+
+      const auto& colorMap = settings.GetFileColorMap();
+      const auto categoryItr = colorMap.find(activeColorScheme);
+      if (categoryItr == std::end(colorMap))
       {
          return boost::none;
       }
 
-      return itr->second;
+      const auto extensionItr = categoryItr->second.find(node->file.extension);
+      if (extensionItr == std::end(categoryItr->second))
+      {
+         return boost::none;
+      }
+
+      return extensionItr->second;
    }
 
    /**
@@ -309,7 +317,7 @@ namespace Asset
 
       const auto& parameters = settings.GetVisualizationParameters();
 
-      for (Tree<VizFile>::Node& node : tree)
+      for (auto& node : tree)
       {
          const bool fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
          const bool notTheRightFileType =
@@ -339,6 +347,29 @@ namespace Asset
       assert(m_blockColors.size() == static_cast<int>(m_blockCount));
 
       return m_blockCount;
+   }
+
+   void Treemap::ReloadColorBufferData(
+      const Tree<VizFile>& tree,
+      const Settings::Manager& settings)
+   {
+      m_blockColors.clear();
+
+      const auto& parameters = settings.GetVisualizationParameters();
+
+      for (const auto& node : tree)
+      {
+         const bool fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
+         const bool notTheRightFileType =
+            parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY;
+
+         if (notTheRightFileType || fileIsTooSmall)
+         {
+            continue;
+         }
+
+         ComputeAppropriateBlockColor(node, settings);
+      }
    }
 
    void Treemap::FindLargestDirectory(const Tree<VizFile>& tree)

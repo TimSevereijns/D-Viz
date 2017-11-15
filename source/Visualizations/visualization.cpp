@@ -19,14 +19,12 @@
 
 namespace
 {
-   constexpr double EPSILON = 0.0001;
-
-   const QVector3D POSITIVE_X_NORMAL{  1,  0,  0 };
-   const QVector3D POSITIVE_Y_NORMAL{  0,  1,  0 };
-   const QVector3D POSITIVE_Z_NORMAL{  0,  0,  1 };
-   const QVector3D NEGATIVE_X_NORMAL{ -1,  0,  0 };
-   const QVector3D NEGATIVE_Y_NORMAL{  0, -1,  0 };
-   const QVector3D NEGATIVE_Z_NORMAL{  0,  0, -1 };
+   constexpr QVector3D POSITIVE_X_NORMAL{  1.0f,  0.0f,  0.0f };
+   constexpr QVector3D POSITIVE_Y_NORMAL{  0.0f,  1.0f,  0.0f };
+   constexpr QVector3D POSITIVE_Z_NORMAL{  0.0f,  0.0f,  1.0f };
+   constexpr QVector3D NEGATIVE_X_NORMAL{ -1.0f,  0.0f,  0.0f };
+   constexpr QVector3D NEGATIVE_Y_NORMAL{  0.0f, -1.0f,  0.0f };
+   constexpr QVector3D NEGATIVE_Z_NORMAL{  0.0f,  0.0f, -1.0f };
 
    /**
     * @brief Calculates whether the specified ray hits the specified plane, given a margin of error,
@@ -44,8 +42,10 @@ namespace
       const QVector3D& pointOnPlane,
       const QVector3D& planeNormal)
    {
+      constexpr auto epsilon{ 0.0001 };
+
       const double denominator = QVector3D::dotProduct(ray.direction(), planeNormal);
-      if (std::abs(denominator) < EPSILON)
+      if (std::abs(denominator) < epsilon)
       {
          return boost::none;
       }
@@ -53,7 +53,7 @@ namespace
       const double numerator = QVector3D::dotProduct(pointOnPlane - ray.origin(), planeNormal);
 
       const double scalar = numerator / denominator;
-      const bool doesRayHitPlane = std::abs(scalar) > EPSILON;
+      const bool doesRayHitPlane = std::abs(scalar) > epsilon;
 
       if (!doesRayHitPlane)
       {

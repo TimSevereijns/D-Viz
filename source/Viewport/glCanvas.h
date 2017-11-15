@@ -99,6 +99,11 @@ class GLCanvas final : public QOpenGLWidget
       void ReloadVisualization();
 
       /**
+       * @brief ReloadColorScheme
+       */
+      void ReloadColorScheme();
+
+      /**
        * @brief Sets the current field of view for the camera.
        *
        * @param[in] fieldOfView     The new field of view.
