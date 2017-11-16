@@ -99,9 +99,9 @@ class GLCanvas final : public QOpenGLWidget
       void ReloadVisualization();
 
       /**
-       * @brief ReloadColorScheme
+       * @brief Applies the currently active color scheme, as set via the Settings::Manager.
        */
-      void ReloadColorScheme();
+      void ApplyColorScheme();
 
       /**
        * @brief Sets the current field of view for the camera.
@@ -212,7 +212,7 @@ class GLCanvas final : public QOpenGLWidget
        * @param gamepad
        * @param elapsedTime
        */
-      void HandleGamepadKeyInput(
+      void HandleGamepadButtonInput(
          const Gamepad& gamepad,
          const std::chrono::milliseconds& elapsedTime);
 

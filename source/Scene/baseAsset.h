@@ -92,7 +92,7 @@ namespace Asset
           *
           * @returns True if the operation succeeded.
           */
-         virtual bool Reload() = 0;
+         virtual bool Refresh() = 0;
 
          /**
           * @brief Sets the vertex data associated with the asset in question.

@@ -206,12 +206,11 @@ void MainWindow::SetupFileSizePruningDropdown()
 
    m_ui.pruneSizeComboBox->clear();
 
-   std::for_each(std::begin(*m_fileSizeOptions), std::end(*m_fileSizeOptions),
-      [&] (const auto& numberOfBytesAndUnits)
+   for (const auto& fileSizeAndUnits : *m_fileSizeOptions)
    {
-      m_ui.pruneSizeComboBox->addItem(numberOfBytesAndUnits.second,
-         static_cast<qulonglong>(numberOfBytesAndUnits.first));
-   });
+      m_ui.pruneSizeComboBox->addItem(fileSizeAndUnits.second,
+         static_cast<qulonglong>(fileSizeAndUnits.first));
+   }
 
    m_ui.pruneSizeComboBox->setCurrentIndex(previousIndex == -1 ? 0 : previousIndex);
 
@@ -378,6 +377,7 @@ void MainWindow::OnFileMenuNewScan()
 
    if (selectedDirectory.isEmpty())
    {
+      assert(false);
       return;
    }
 
@@ -401,6 +401,7 @@ void MainWindow::OnFileMenuNewScan()
 void MainWindow::ScanDrive(Settings::VisualizationParameters& parameters)
 {
    m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(parameters.rootDirectory);
+   assert(m_occupiedDiskSpace > 0);
 
    const auto progressHandler = [this] (const ScanningProgress& progress)
    {
@@ -583,8 +584,8 @@ void MainWindow::OnNewSearchQuery()
       m_glCanvas->HighlightNodes(nodes);
    };
 
-   const bool shouldSearchFiles = m_ui.searchFilesCheckBox->isChecked();
-   const bool shouldSearchDirectories = m_ui.searchDirectoriesCheckBox->isChecked();
+   const auto shouldSearchFiles = m_ui.searchFilesCheckBox->isChecked();
+   const auto shouldSearchDirectories = m_ui.searchDirectoriesCheckBox->isChecked();
 
    m_controller.SearchTreeMap(
       searchQuery,
@@ -656,7 +657,7 @@ void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
 void MainWindow::OnColorSchemeChanged(const QString& scheme)
 {
    m_settingsManager.SetColorScheme(scheme.toStdWString());
-   m_glCanvas->ReloadColorScheme();
+   m_glCanvas->ApplyColorScheme();
 }
 
 bool MainWindow::ShouldShowFrameTime() const
@@ -676,11 +677,13 @@ Controller& MainWindow::GetController()
 
 GLCanvas& MainWindow::GetCanvas()
 {
+   assert(m_glCanvas);
    return *m_glCanvas;
 }
 
 Gamepad& MainWindow::GetGamepad()
 {
+   assert(m_gamepad);
    return *m_gamepad;
 }
 

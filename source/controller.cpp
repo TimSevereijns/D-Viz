@@ -122,11 +122,15 @@ const Tree<VizFile>::Node* Controller::GetSelectedNode() const
 
 Tree<VizFile>& Controller::GetTree()
 {
+   assert(m_treeMap);
+
    return m_treeMap->GetTree();
 }
 
 const Tree<VizFile>& Controller::GetTree() const
 {
+   assert(m_treeMap);
+
    return m_treeMap->GetTree();
 }
 
@@ -153,6 +157,8 @@ void Controller::ParseResults(const std::shared_ptr<Tree<VizFile>>& results)
 
 void Controller::UpdateBoundingBoxes()
 {
+   assert(m_treeMap);
+
    m_treeMap->UpdateBoundingBoxes();
 }
 
@@ -194,8 +200,6 @@ void Controller::SelectNodeViaRay(
    {
       return;
    }
-
-   assert(m_treeMap);
 
    constexpr auto clearSelected{ true };
    ClearHighlightedNodes(deselectionCallback, clearSelected);
@@ -333,7 +337,7 @@ void Controller::HighlightDescendants(
       std::for_each(
          Tree<VizFile>::LeafIterator{ &node },
          Tree<VizFile>::LeafIterator{ },
-         [&] (Tree<VizFile>::const_reference node)
+         [&] (const auto& node)
       {
          if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
             || node->file.size < parameters.minimumFileSize)
@@ -359,7 +363,7 @@ void Controller::HighlightAllMatchingExtensions(
       std::for_each(
          Tree<VizFile>::LeafIterator{ GetTree().GetRoot() },
          Tree<VizFile>::LeafIterator{ },
-         [&] (Tree<VizFile>::const_reference node)
+         [&] (const auto& node)
       {
          if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
             || node->file.size < parameters.minimumFileSize
@@ -406,7 +410,7 @@ void Controller::SearchTreeMap(
          std::for_each(
             Tree<VizFile>::PostOrderIterator{ GetTree().GetRoot() },
             Tree<VizFile>::PostOrderIterator{ },
-            [&] (Tree<VizFile>::const_reference node)
+            [&] (const auto& node)
          {
             const auto& file = node->file;
 
@@ -423,7 +427,7 @@ void Controller::SearchTreeMap(
             boost::algorithm::to_lower(fileAndExtension);
 
             // @note We're converting everyting to lowercase before hand
-            // (instead of using `boost::icontains(...)`), since doing so is about twice as fast.
+            // (instead of using `boost::icontains(...)`), since doing so is significantly faster.
             if (!boost::contains(fileAndExtension, lowercaseQuery))
             {
                return;

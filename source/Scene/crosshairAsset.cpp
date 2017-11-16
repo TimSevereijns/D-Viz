@@ -56,7 +56,7 @@ namespace Asset
    {
       m_rawVertices = CreateCrosshairVertices(canvasCenter);
 
-      Reload();
+      Refresh();
    }
 
    bool Crosshair::Render(

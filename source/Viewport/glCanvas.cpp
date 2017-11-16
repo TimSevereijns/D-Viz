@@ -124,14 +124,13 @@ void GLCanvas::ReloadVisualization()
    m_isPaintingSuspended = true;
 
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
-   assert(treemap);
 
    const auto& settings = m_mainWindow.GetSettingsManager();
    const auto blockCount = treemap->LoadBufferData(m_controller.GetTree(), settings);
 
    for (const auto& tagAndAsset : m_sceneAssets)
    {
-      tagAndAsset.asset->Reload();
+      tagAndAsset.asset->Refresh();
    }
 
    assert(blockCount == treemap->GetBlockCount());
@@ -139,13 +138,12 @@ void GLCanvas::ReloadVisualization()
    m_controller.PrintMetadataToStatusBar();
 }
 
-void GLCanvas::ReloadColorScheme()
+void GLCanvas::ApplyColorScheme()
 {
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
-   assert(treemap);
 
    treemap->ReloadColorBufferData(m_controller.GetTree(), m_mainWindow.GetSettingsManager());
-   treemap->Reload();
+   treemap->Refresh();
 }
 
 void GLCanvas::SetFieldOfView(float fieldOfView)
@@ -336,6 +334,8 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
 void GLCanvas::SelectNode(const Tree<VizFile>::Node* const node)
 {
+   assert(node);
+
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
    treemap->UpdateVBO(
@@ -488,12 +488,12 @@ void GLCanvas::HandleGamepadInput(const std::chrono::milliseconds& elapsedTime)
 
    const auto& gamepad = m_mainWindow.GetGamepad();
 
-   HandleGamepadKeyInput(gamepad, elapsedTime);
+   HandleGamepadButtonInput(gamepad, elapsedTime);
    HandleGamepadThumbstickInput(gamepad);
    HandleGamepadTriggerInput(gamepad);
 }
 
-void GLCanvas::HandleGamepadKeyInput(
+void GLCanvas::HandleGamepadButtonInput(
    const Gamepad& gamepad,
    const std::chrono::milliseconds& elapsedTime)
 {

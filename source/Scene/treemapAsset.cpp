@@ -64,10 +64,8 @@ namespace
       const Tree<VizFile>::Node& node,
       const Settings::Manager& settings)
    {
-      const auto& activeColorScheme = settings.GetColorScheme();
-
       const auto& colorMap = settings.GetFileColorMap();
-      const auto categoryItr = colorMap.find(activeColorScheme);
+      const auto categoryItr = colorMap.find(settings.GetActiveColorScheme());
       if (categoryItr == std::end(colorMap))
       {
          return boost::none;
@@ -163,9 +161,9 @@ namespace Asset
       const auto referenceBlock = Block
       {
          PrecisePoint{ 0.0, 0.0, 0.0 },
-         1.0,
-         1.0,
-         1.0,
+         /* width =  */ 1.0,
+         /* height = */ 1.0,
+         /* depth =  */ 1.0,
          /* generateVertices = */ true
       };
 
@@ -384,12 +382,13 @@ namespace Asset
          }
 
          const auto directorySize = node.GetData().file.size;
-
          if (directorySize > largestDirectory)
          {
             largestDirectory = directorySize;
          }
       }
+
+      assert(largestDirectory > std::numeric_limits<std::uintmax_t>::min());
 
       m_largestDirectorySize = largestDirectory;
    }
@@ -482,7 +481,7 @@ namespace Asset
       return true;
    }
 
-   bool Treemap::Reload()
+   bool Treemap::Refresh()
    {
       InitializeReferenceBlock();
       InitializeColors();
@@ -496,18 +495,16 @@ namespace Asset
       Asset::Event action,
       const Settings::Manager& settings)
    {
+      assert(m_VAO.isCreated());
+      assert(m_blockColorBuffer.isCreated());
+      assert(static_cast<int>(node->offsetIntoVBO) < m_blockCount);
+
       constexpr auto colorTupleSize{ sizeof(QVector3D) };
       const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorTupleSize;
 
       const auto newColor = (action == Asset::Event::DESELECTION)
          ? RestoreColor(node, settings)
          : Constants::Colors::CANARY_YELLOW;
-
-      assert(m_VAO.isCreated());
-      assert(m_blockColorBuffer.isCreated());
-
-      // @todo This appears to fail, figure out why:
-      //assert(m_blockColorBuffer.size() >= static_cast<int>(offsetIntoColorBuffer / colorTupleSize));
 
       m_VAO.bind();
       m_blockColorBuffer.bind();

@@ -43,7 +43,7 @@ namespace Asset
          /**
           * @see Asset::Base::Reload(...)
           */
-         bool Reload() override;
+         bool Refresh() override;
 
          /**
           * @see Asset::Base::UpdateVBO(...)

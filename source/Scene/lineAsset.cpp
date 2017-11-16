@@ -112,7 +112,7 @@ namespace Asset
       return true;
    }
 
-   bool Line::Reload()
+   bool Line::Refresh()
    {
       InitializeVertexBuffers();
       InitializeColorBuffers();

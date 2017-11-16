@@ -37,15 +37,15 @@ namespace
 
          std::unordered_map<std::wstring, QVector3D> extensionMap;
 
-         for (const auto& coloring : category.value.GetObject())
+         for (const auto& extension : category.value.GetObject())
          {
-            if (!coloring.value.IsArray())
+            if (!extension.value.IsArray())
             {
                encounteredError = true;
                continue;
             }
 
-            const auto colorArray = coloring.value.GetArray();
+            const auto colorArray = extension.value.GetArray();
             QVector3D colorVector
             {
                colorArray[0].GetFloat() / 255.0f,
@@ -53,7 +53,7 @@ namespace
                colorArray[2].GetFloat() / 255.0f
             };
 
-            extensionMap.emplace(coloring.name.GetString(), std::move(colorVector));
+            extensionMap.emplace(extension.name.GetString(), std::move(colorVector));
          }
 
          map.emplace(category.name.GetString(), std::move(extensionMap));
@@ -160,7 +160,7 @@ namespace Settings
       return m_colorMap;
    }
 
-   const std::wstring& Manager::GetColorScheme() const
+   const std::wstring& Manager::GetActiveColorScheme() const
    {
       return m_colorScheme;
    }

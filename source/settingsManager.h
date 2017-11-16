@@ -107,7 +107,7 @@ namespace Settings
 
          const ColorMap& GetFileColorMap() const;
 
-         const std::wstring& GetColorScheme() const;
+         const std::wstring& GetActiveColorScheme() const;
 
          void SetColorScheme(const std::wstring& scheme);
 
