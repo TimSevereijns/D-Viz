@@ -9,7 +9,9 @@ namespace Asset
    {
       public:
 
-         explicit OriginMarker(QOpenGLExtraFunctions& openGL);
+         explicit OriginMarker(
+            QOpenGLExtraFunctions& openGL,
+            bool isInitiallyVisible);
 
          /**
           * @see Asset::Base::Render(...)

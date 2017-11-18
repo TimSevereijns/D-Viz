@@ -41,8 +41,11 @@ namespace
 
 namespace Asset
 {
-   OriginMarker::OriginMarker(QOpenGLExtraFunctions& openGL) :
-      Line{ openGL }
+   OriginMarker::OriginMarker(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      Line{ openGL, isInitiallyVisible }
    {
       m_rawVertices = CreateMarkerVertices();
       m_rawColors = CreateMarkerColors();

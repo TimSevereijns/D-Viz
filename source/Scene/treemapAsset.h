@@ -20,7 +20,9 @@ namespace Asset
    {
       public:
 
-         explicit Treemap(QOpenGLExtraFunctions& openGL);
+         explicit Treemap(
+            QOpenGLExtraFunctions& openGL,
+            bool isInitiallyVisible);
 
          /**
           * @see Asset::Base::LoadShaders(...)

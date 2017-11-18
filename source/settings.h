@@ -11,7 +11,7 @@ namespace Settings
 {
    using JsonDocument = rapidjson::GenericDocument<rapidjson::UTF16<wchar_t>>;
 
-   JsonDocument LoadColorSettingsFromDisk(const std::experimental::filesystem::path& path);
+   JsonDocument ParseJsonDocument(const std::experimental::filesystem::path& path);
 
    /**
     * @brief The VisualizationParameters struct represents the gamut of visualization parameters that

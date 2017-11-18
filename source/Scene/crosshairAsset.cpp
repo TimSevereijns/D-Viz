@@ -46,8 +46,11 @@ namespace
 
 namespace Asset
 {
-   Crosshair::Crosshair(QOpenGLExtraFunctions& openGL) :
-      Line{ openGL }
+   Crosshair::Crosshair(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      Line{ openGL, isInitiallyVisible }
    {
       m_rawColors = CreateCrosshairColors();
    }

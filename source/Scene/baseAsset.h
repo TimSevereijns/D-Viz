@@ -32,7 +32,9 @@ namespace Asset
    {
       public:
 
-         explicit Base(QOpenGLExtraFunctions& openGL);
+         explicit Base(
+            QOpenGLExtraFunctions& openGL,
+            bool isInitiallyVisible);
 
          virtual ~Base() = default;
 

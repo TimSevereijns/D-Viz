@@ -126,8 +126,11 @@ namespace
 
 namespace Asset
 {
-   Treemap::Treemap(QOpenGLExtraFunctions& openGL) :
-      Base{ openGL }
+   Treemap::Treemap(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      Base{ openGL, isInitiallyVisible }
    {
    }
 

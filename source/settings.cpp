@@ -112,7 +112,7 @@ namespace
 
 namespace Settings
 {
-   JsonDocument LoadColorSettingsFromDisk(const std::experimental::filesystem::path& path)
+   JsonDocument ParseJsonDocument(const std::experimental::filesystem::path& path)
    {
       std::ifstream fileStream{ path.string() };
       rapidjson::IStreamWrapper streamWrapper{ fileStream };

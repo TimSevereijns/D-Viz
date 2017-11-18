@@ -12,7 +12,9 @@ namespace Asset
    {
       public:
 
-         explicit Crosshair(QOpenGLExtraFunctions& openGL);
+         explicit Crosshair(
+            QOpenGLExtraFunctions& openGL,
+            bool isInitiallyVisible);
 
          /**
           * @see Asset::Base::Render(...)

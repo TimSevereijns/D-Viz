@@ -4,6 +4,7 @@
 #include "settings.h"
 
 #include "unordered_map"
+#include "variant"
 
 #include <QObject>
 #include <QVector3D>
@@ -11,6 +12,9 @@
 namespace Settings
 {
    using ColorMap = std::unordered_map<std::wstring, std::unordered_map<std::wstring, QVector3D>>;
+
+   using PreferencesVariant = std::variant<bool, int, float, std::wstring>;
+   using PreferencesMap = std::unordered_map<std::wstring, PreferencesVariant>;
 
    /**
     * @brief The central class responsible for run-time settings.
@@ -21,7 +25,9 @@ namespace Settings
 
       public:
 
-         Manager(const std::experimental::filesystem::path& colorConfigFile);
+         Manager(
+            const std::experimental::filesystem::path& colorFile,
+            const std::experimental::filesystem::path& preferencesFile);
 
       public slots:
 
@@ -107,6 +113,8 @@ namespace Settings
 
          const ColorMap& GetFileColorMap() const;
 
+         const PreferencesMap& GetPreferenceMap() const;
+
          const std::wstring& GetActiveColorScheme() const;
 
          void SetColorScheme(const std::wstring& scheme);
@@ -133,9 +141,12 @@ namespace Settings
          bool m_shouldSearchDirectories{ false };
          bool m_shouldSearchFiles{ true };
 
+         // @todo There's no real need to keep these around, I think...
          JsonDocument m_fileColorJsonDocument;
+         JsonDocument m_generalSettingsJsonDocument;
 
          ColorMap m_colorMap;
+         PreferencesMap m_preferencesMap;
 
          std::wstring m_colorScheme{ L"Default" };
 

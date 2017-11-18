@@ -9,7 +9,9 @@ namespace Asset
    {
       public:
 
-         explicit DebuggingRay(QOpenGLExtraFunctions& openGL);
+         explicit DebuggingRay(
+            QOpenGLExtraFunctions& openGL,
+            bool isInitiallyVisible);
 
          /**
           * @see Asset::Base::Render(...)

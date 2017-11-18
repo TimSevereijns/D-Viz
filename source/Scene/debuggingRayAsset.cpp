@@ -2,8 +2,11 @@
 
 namespace Asset
 {
-   DebuggingRay::DebuggingRay(QOpenGLExtraFunctions& openGL) :
-      Line{ openGL }
+   DebuggingRay::DebuggingRay(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      Line{ openGL, isInitiallyVisible }
    {
    }
 

@@ -9,8 +9,12 @@
 
 namespace Asset
 {
-   Base::Base(QOpenGLExtraFunctions& openGL) :
-      m_openGL{ openGL }
+   Base::Base(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      m_openGL{ openGL },
+      m_shouldRender{ isInitiallyVisible }
    {
    }
 

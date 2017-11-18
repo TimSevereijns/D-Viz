@@ -2,8 +2,11 @@
 
 namespace Asset
 {
-   Line::Line(QOpenGLExtraFunctions& openGL) :
-      Base{ openGL }
+   Line::Line(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      Base{ openGL, isInitiallyVisible }
    {
    }
 

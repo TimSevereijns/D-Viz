@@ -65,14 +65,78 @@ namespace
          log->error("Encountered an error converting JSON document to file color map.");
       }
    }
+
+   /**
+    * @brief Populates the passed in map with the content of the JSON document.
+    *
+    * @param[in] json               The JSON document containing the file color information.
+    * @param[out] map               The map that is to contain the flattened JSON data.
+    */
+   void PopulatePreferencesMapFromJsonDocument(
+      const Settings::JsonDocument& json,
+      Settings::PreferencesMap& map)
+   {
+      if (!json.IsObject())
+      {
+         return;
+      }
+
+      auto encounteredError{ false };
+
+      for (const auto& setting : json.GetObject())
+      {
+         if (setting.value.IsBool())
+         {
+            Settings::PreferencesVariant variant{ setting.value.GetBool() };
+            map.emplace(setting.name.GetString(), std::move(variant));
+
+            continue;
+         }
+
+         if (setting.value.IsInt())
+         {
+            Settings::PreferencesVariant variant{ setting.value.GetInt() };
+            map.emplace(setting.name.GetString(), std::move(variant));
+
+            continue;
+         }
+
+         if (setting.value.IsFloat())
+         {
+            Settings::PreferencesVariant variant{ setting.value.GetFloat() };
+            map.emplace(setting.name.GetString(), std::move(variant));
+
+            continue;
+         }
+
+         if (setting.value.IsString())
+         {
+            Settings::PreferencesVariant variant{ setting.value.GetString() };
+            map.emplace(setting.name.GetString(), std::move(variant));
+
+            continue;
+         }
+      }
+
+      if (encounteredError)
+      {
+         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+         log->error("Encountered unsupported type while parsing the configuration JSON file.");
+      }
+   }
 }
 
 namespace Settings
 {
-   Manager::Manager(const std::experimental::filesystem::path& colorConfigFile) :
-      m_fileColorJsonDocument{ std::move(Settings::LoadColorSettingsFromDisk(colorConfigFile)) }
+   Manager::Manager(
+      const std::experimental::filesystem::path& colorFile,
+      const std::experimental::filesystem::path& preferencesFile)
+      :
+      m_fileColorJsonDocument{ std::move(Settings::ParseJsonDocument(colorFile)) },
+      m_generalSettingsJsonDocument{ std::move(Settings::ParseJsonDocument(preferencesFile)) }
    {
       PopulateColorMapFromJsonDocument(m_fileColorJsonDocument, m_colorMap);
+      PopulatePreferencesMapFromJsonDocument(m_generalSettingsJsonDocument, m_preferencesMap);
    }
 
    void Manager::OnCameraSpeedChanged(double speed)
@@ -158,6 +222,11 @@ namespace Settings
    const ColorMap& Manager::GetFileColorMap() const
    {
       return m_colorMap;
+   }
+
+   const PreferencesMap& Manager::GetPreferenceMap() const
+   {
+      return m_preferencesMap;
    }
 
    const std::wstring& Manager::GetActiveColorScheme() const

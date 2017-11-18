@@ -33,36 +33,48 @@ namespace Asset
       {
          using AssetType = void;
          virtual int GetID() const noexcept { return 0; }
+
+         static constexpr wchar_t Name[] = L"Base";
       };
 
       struct OriginMarker final : Base
       {
          using AssetType = Asset::OriginMarker;
          int GetID() const noexcept override { return 1; }
+
+         static constexpr wchar_t Name[] = L"OriginMarker";
       };
 
       struct Grid final : Base
       {
          using AssetType = Asset::Grid;
          int GetID() const noexcept override { return 2; }
+
+         static constexpr wchar_t Name[] = L"Grid";
       };
 
       struct Crosshair final : Base
       {
           using AssetType = Asset::Crosshair;
           int GetID() const noexcept override { return 3; }
+
+          static constexpr wchar_t Name[] = L"Crosshair";
       };
 
       struct Treemap final : Base
       {
          using AssetType = Asset::Treemap;
          int GetID() const noexcept override { return 4; }
+
+         static constexpr wchar_t Name[] = L"Treemap";
       };
 
       struct LightMarker final : Base
       {
          using AssetType = Asset::LightMarker;
          int GetID() const noexcept override { return 5; }
+
+         static constexpr wchar_t Name[] = L"LightMarker";
       };
    }
 }
@@ -290,10 +302,24 @@ class GLCanvas final : public QOpenGLWidget
       template<typename AssetTag>
       void RegisterAsset()
       {
+         const auto& preferences = m_mainWindow.GetSettingsManager().GetPreferenceMap();
+
+         auto isInitiallyVisible{ true };
+
+         const auto itr = preferences.find(std::wstring{ L"show" } + AssetTag::Name);
+         if (itr != std::end(preferences))
+         {
+            const auto desiredVisibility = std::get_if<bool>(&itr->second);
+            if (desiredVisibility)
+            {
+               isInitiallyVisible = *desiredVisibility;
+            }
+         }
+
          m_sceneAssets.emplace_back(TagAndAsset
          {
             std::make_unique<AssetTag>(),
-            std::make_unique<typename AssetTag::AssetType>(m_graphicsDevice)
+            std::make_unique<typename AssetTag::AssetType>(m_graphicsDevice, isInitiallyVisible)
          });
       }
 

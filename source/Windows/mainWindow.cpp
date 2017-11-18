@@ -104,6 +104,22 @@ namespace
          return nullptr;
       }
    }
+
+   /**
+    * @returns The full path to the JSON file that contains the color mapping.
+    */
+   auto GetColorJsonPath()
+   {
+      return std::experimental::filesystem::current_path().append(L"colors.json");
+   }
+
+   /**
+    * @returns The full path to the JSON file that contains the user preferences.
+    */
+   auto GetPreferencesJsonPath()
+   {
+      return std::experimental::filesystem::current_path().append(L"preferences.json");
+   }
 }
 
 MainWindow::MainWindow(
@@ -112,7 +128,7 @@ MainWindow::MainWindow(
    :
    QMainWindow{ parent },
    m_controller{ controller },
-   m_settingsManager{ std::experimental::filesystem::current_path().append(L"colors.json") },
+   m_settingsManager{ GetColorJsonPath(), GetPreferencesJsonPath() },
    m_fileSizeOptions{ GeneratePruningMenuEntries(Constants::FileSize::Prefix::BINARY) }
 {
    m_ui.setupUi(this);
@@ -403,7 +419,7 @@ void MainWindow::ScanDrive(Settings::VisualizationParameters& parameters)
    m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(parameters.rootDirectory);
    assert(m_occupiedDiskSpace > 0);
 
-   const auto progressHandler = [this] (const ScanningProgress& progress)
+   const auto progressHandler = [&] (const ScanningProgress& progress)
    {
       ComputeProgress(progress);
    };

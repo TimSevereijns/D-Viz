@@ -12,7 +12,9 @@ namespace Asset
    {
       public:
 
-         explicit Line(QOpenGLExtraFunctions& openGL);
+         explicit Line(
+            QOpenGLExtraFunctions& openGL,
+            bool isInitiallyVisible);
 
          /**
           * @see Asset::Base::LoadShaders(...)

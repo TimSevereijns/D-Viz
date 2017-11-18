@@ -13,7 +13,9 @@ namespace Asset
    {
       public:
 
-         explicit Grid(QOpenGLExtraFunctions& openGL);
+         explicit Grid(
+            QOpenGLExtraFunctions& openGL,
+            bool isInitiallyVisible);
 
          /**
           * @see Asset::Base::Render(...)

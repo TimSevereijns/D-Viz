@@ -87,8 +87,11 @@ namespace
 
 namespace Asset
 {
-   Grid::Grid(QOpenGLExtraFunctions& openGL) :
-      Line{ openGL }
+   Grid::Grid(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      Line{ openGL, isInitiallyVisible }
    {
       m_rawVertices = CreateGridVertices();
       m_rawColors = CreateGridColors();
