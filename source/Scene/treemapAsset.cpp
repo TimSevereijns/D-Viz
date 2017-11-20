@@ -500,7 +500,7 @@ namespace Asset
    {
       assert(m_VAO.isCreated());
       assert(m_blockColorBuffer.isCreated());
-      assert(static_cast<int>(node->offsetIntoVBO) < m_blockCount);
+      assert(node->offsetIntoVBO < m_blockCount);
 
       constexpr auto colorTupleSize{ sizeof(QVector3D) };
       const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorTupleSize;

@@ -165,8 +165,6 @@ namespace Asset
             const QString& vertexShaderName,
             const QString& fragmentShaderName);
 
-         bool m_shouldRender{ true };
-
          QOpenGLBuffer m_vertexBuffer;
          QOpenGLBuffer m_colorBuffer;
 
@@ -178,6 +176,8 @@ namespace Asset
          QVector<QVector3D> m_rawColors;
 
          QOpenGLExtraFunctions& m_openGL;
+
+         bool m_shouldRender{ true };
    };
 }
 

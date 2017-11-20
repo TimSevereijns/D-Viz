@@ -1,6 +1,7 @@
 #include "glCanvas.h"
 
 #include "../constants.h"
+#include "../Windows/mainWindow.h"
 
 #include "canvasContextMenu.h"
 #include "Stopwatch/Stopwatch.hpp"
@@ -101,6 +102,63 @@ void GLCanvas::initializeGL()
    {
       tagAndAsset.asset->LoadShaders();
       tagAndAsset.asset->Initialize();
+   }
+}
+
+template<typename AssetTag>
+void GLCanvas::RegisterAsset()
+{
+   const auto& preferences = m_mainWindow.GetSettingsManager().GetPreferenceMap();
+
+   auto isInitiallyVisible{ true };
+
+   const auto itr = preferences.find(std::wstring{ L"show" } + AssetTag::Name);
+   if (itr != std::end(preferences))
+   {
+      const auto* desiredVisibility = std::get_if<bool>(&itr->second);
+      if (desiredVisibility)
+      {
+         isInitiallyVisible = *desiredVisibility;
+      }
+   }
+
+   m_sceneAssets.emplace_back(TagAndAsset
+   {
+      std::make_unique<AssetTag>(),
+      std::make_unique<typename AssetTag::AssetType>(m_graphicsDevice, isInitiallyVisible)
+   });
+}
+
+template<typename RequestedAsset>
+typename RequestedAsset::AssetType* GLCanvas::GetAsset() const noexcept
+{
+   const auto itr = std::find_if(std::begin(m_sceneAssets), std::end(m_sceneAssets),
+     [targetID = RequestedAsset{ }.GetID()] (const auto& tagAndAsset) noexcept
+   {
+      return tagAndAsset.tag->GetID() == targetID;
+   });
+
+   if (itr == std::end(m_sceneAssets))
+   {
+      assert(false);
+      return nullptr;
+   }
+
+   return static_cast<typename RequestedAsset::AssetType*>(itr->asset.get());
+}
+
+template<typename TagType>
+void GLCanvas::ToggleAssetVisibility(bool desiredState) const noexcept
+{
+   auto* const asset = GetAsset<TagType>();
+
+   if (desiredState == true)
+   {
+      asset->Show();
+   }
+   else
+   {
+      asset->Hide();
    }
 }
 
@@ -665,3 +723,9 @@ void GLCanvas::paintGL()
       UpdateFrameTime(elapsedTime);
    }
 }
+
+template void GLCanvas::ToggleAssetVisibility<Asset::Tag::OriginMarker>(bool) const noexcept;
+
+template void GLCanvas::ToggleAssetVisibility<Asset::Tag::Grid>(bool) const noexcept;
+
+template void GLCanvas::ToggleAssetVisibility<Asset::Tag::LightMarker>(bool) const noexcept;

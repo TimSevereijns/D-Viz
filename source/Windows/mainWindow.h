@@ -167,6 +167,8 @@ class MainWindow final : public QMainWindow
       void SetupSidebar();
       void SetupGamepad();
 
+      void SetDebuggingMenuState();
+
       Controller& m_controller;
 
       DriveScanner m_scanner;

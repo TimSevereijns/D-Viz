@@ -6,7 +6,6 @@
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
 #include "HID/keyboardManager.h"
-#include "settingsManager.h"
 #include "Scene/baseAsset.h"
 #include "Scene/crosshairAsset.h"
 #include "Scene/debuggingRayAsset.h"
@@ -14,8 +13,8 @@
 #include "Scene/lightMarkerAsset.h"
 #include "Scene/originMarkerAsset.h"
 #include "Scene/treemapAsset.h"
+#include "settingsManager.h"
 #include "Visualizations/visualization.h"
-#include "Windows/mainWindow.h"
 
 #include <chrono>
 #include <deque>
@@ -24,6 +23,8 @@
 #include <QOpenGLWidget>
 #include <QTimer>
 #include <QVector3D>
+
+class Gamepad;
 
 namespace Asset
 {
@@ -145,24 +146,12 @@ class GLCanvas final : public QOpenGLWidget
       void RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& nodes);
 
       /**
-       * @brief ToggleRenderState
+       * @brief Toggles an asset's visibility.
        *
-       * @param desiredState
+       * @param[in] desiredState    Pass in true if the asset should be visible.
        */
       template<typename TagType>
-      void ToggleAssetVisibility(bool desiredState) const noexcept
-      {
-         auto* const asset = GetAsset<TagType>();
-
-         if (desiredState == true)
-         {
-            asset->Show();
-         }
-         else
-         {
-            asset->Hide();
-         }
-      }
+      void ToggleAssetVisibility(bool desiredState) const noexcept;
 
    protected:
 
@@ -275,22 +264,7 @@ class GLCanvas final : public QOpenGLWidget
        *                            store one instance of each type.
        */
       template<typename RequestedAsset>
-      typename RequestedAsset::AssetType* GetAsset() const noexcept
-      {
-         const auto itr = std::find_if(std::begin(m_sceneAssets), std::end(m_sceneAssets),
-           [targetID = RequestedAsset{ }.GetID()] (const auto& tagAndAsset) noexcept
-         {
-            return tagAndAsset.tag->GetID() == targetID;
-         });
-
-         if (itr == std::end(m_sceneAssets))
-         {
-            assert(false);
-            return nullptr;
-         }
-
-         return static_cast<typename RequestedAsset::AssetType*>(itr->asset.get());
-      }
+      typename RequestedAsset::AssetType* GetAsset() const noexcept;
 
       /**
        * @brief Helper function that turns scene asset registration into a simple one-liner.
@@ -300,28 +274,7 @@ class GLCanvas final : public QOpenGLWidget
        *                            each type.
        */
       template<typename AssetTag>
-      void RegisterAsset()
-      {
-         const auto& preferences = m_mainWindow.GetSettingsManager().GetPreferenceMap();
-
-         auto isInitiallyVisible{ true };
-
-         const auto itr = preferences.find(std::wstring{ L"show" } + AssetTag::Name);
-         if (itr != std::end(preferences))
-         {
-            const auto desiredVisibility = std::get_if<bool>(&itr->second);
-            if (desiredVisibility)
-            {
-               isInitiallyVisible = *desiredVisibility;
-            }
-         }
-
-         m_sceneAssets.emplace_back(TagAndAsset
-         {
-            std::make_unique<AssetTag>(),
-            std::make_unique<typename AssetTag::AssetType>(m_graphicsDevice, isInitiallyVisible)
-         });
-      }
+      void RegisterAsset();
 
       bool m_isPaintingSuspended{ false };
       bool m_isVisualizationLoaded{ false };
@@ -359,7 +312,8 @@ class GLCanvas final : public QOpenGLWidget
          Light{ QVector3D{ 0.0f, 80.0f, 0.0f } },
          Light{ QVector3D{ 0.0f, 80.0f, -VisualizationModel::ROOT_BLOCK_DEPTH } },
          Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
-         Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, -VisualizationModel::ROOT_BLOCK_DEPTH } }
+         Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f,
+            -VisualizationModel::ROOT_BLOCK_DEPTH } }
       };
 
       Camera m_camera;

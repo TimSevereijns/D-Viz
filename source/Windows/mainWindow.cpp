@@ -139,6 +139,8 @@ MainWindow::MainWindow(
    SetupMenus();
    SetupGamepad();
    SetupSidebar();
+
+   SetDebuggingMenuState();
 }
 
 void MainWindow::SetupSidebar()
@@ -381,6 +383,49 @@ void MainWindow::SetupHelpMenu()
    m_helpMenu.addAction(&m_helpMenuWrapper.aboutDialog);
 
    menuBar()->addMenu(&m_helpMenu);
+}
+
+void MainWindow::SetDebuggingMenuState()
+{
+   auto& renderMenuWrapper = m_debuggingMenuWrapper.renderMenuWrapper;
+
+   const auto& preferences = m_settingsManager.GetPreferenceMap();
+
+   const auto shouldShowOriginItr = preferences.find(L"showOriginMarker");
+   if (shouldShowOriginItr != std::end(preferences))
+   {
+      const auto* desiredVisibility = std::get_if<bool>(&shouldShowOriginItr->second);
+      if (desiredVisibility)
+      {
+         renderMenuWrapper.origin.blockSignals(true);
+         renderMenuWrapper.origin.setChecked(*desiredVisibility);
+         renderMenuWrapper.origin.blockSignals(false);
+      }
+   }
+
+   const auto shouldShowGridItr = preferences.find(L"showGrid");
+   if (shouldShowGridItr != std::end(preferences))
+   {
+      const auto* desiredVisibility = std::get_if<bool>(&shouldShowGridItr->second);
+      if (desiredVisibility)
+      {
+         renderMenuWrapper.grid.blockSignals(true);
+         renderMenuWrapper.grid.setChecked(*desiredVisibility);
+         renderMenuWrapper.grid.blockSignals(false);
+      }
+   }
+
+   const auto shouldShowLightMarkerItr = preferences.find(L"showLightMarker");
+   if (shouldShowLightMarkerItr != std::end(preferences))
+   {
+      const auto* desiredVisibility = std::get_if<bool>(&shouldShowLightMarkerItr->second);
+      if (desiredVisibility)
+      {
+         renderMenuWrapper.lightMarkers.blockSignals(true);
+         renderMenuWrapper.lightMarkers.setChecked(*desiredVisibility);
+         renderMenuWrapper.lightMarkers.blockSignals(false);
+      }
+   }
 }
 
 void MainWindow::OnFileMenuNewScan()
