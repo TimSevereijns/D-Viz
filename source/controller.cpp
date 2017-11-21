@@ -426,7 +426,7 @@ void Controller::SearchTreeMap(
 
             boost::algorithm::to_lower(fileAndExtension);
 
-            // @note We're converting everyting to lowercase before hand
+            // @note We're converting everything to lowercase before hand
             // (instead of using `boost::icontains(...)`), since doing so is significantly faster.
             if (!boost::contains(fileAndExtension, lowercaseQuery))
             {
@@ -451,9 +451,13 @@ std::pair<double, std::wstring> Controller::ConvertFileSizeToAppropriateUnits(
    switch (Globals::ActivePrefix)
    {
       case Constants::FileSize::Prefix::BINARY:
+      {
          return ConvertToBinaryPrefix(sizeInBytes);
+      }
       case Constants::FileSize::Prefix::DECIMAL:
+      {
          return ConvertToDecimalPrefix(sizeInBytes);
+      }
    }
 
    assert(false);

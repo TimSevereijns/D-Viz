@@ -64,6 +64,7 @@ namespace
       const Tree<VizFile>::Node& node,
       const Settings::Manager& settings)
    {
+      // @todo This first lookup should be easy to avoid in loops...
       const auto& colorMap = settings.GetFileColorMap();
       const auto categoryItr = colorMap.find(settings.GetActiveColorScheme());
       if (categoryItr == std::end(colorMap))

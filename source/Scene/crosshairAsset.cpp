@@ -16,10 +16,10 @@ namespace
       QVector<QVector3D> vertices;
       vertices.reserve(4);
       vertices
-         << QVector3D(center.x() - 20, center.y(), -4.0f)
-         << QVector3D(center.x() + 20, center.y(), -4.0f)
-         << QVector3D(center.x(), center.y() - 20, -4.0f)
-         << QVector3D(center.x(), center.y() + 20, -4.0f);
+         << QVector3D{ static_cast<float>(center.x() - 20), static_cast<float>(center.y()), -4.0f }
+         << QVector3D{ static_cast<float>(center.x() + 20), static_cast<float>(center.y()), -4.0f }
+         << QVector3D{ static_cast<float>(center.x()), static_cast<float>(center.y() - 20), -4.0f }
+         << QVector3D{ static_cast<float>(center.x()), static_cast<float>(center.y() + 20), -4.0f };
 
       return vertices;
    }
@@ -35,10 +35,10 @@ namespace
       QVector<QVector3D> colors;
       colors.reserve(4);
       colors
-         << QVector3D(1.0f, 1.0f, 1.0f)
-         << QVector3D(1.0f, 1.0f, 1.0f)
-         << QVector3D(1.0f, 1.0f, 1.0f)
-         << QVector3D(1.0f, 1.0f, 1.0f);
+         << QVector3D{ 1.0f, 1.0f, 1.0f }
+         << QVector3D{ 1.0f, 1.0f, 1.0f }
+         << QVector3D{ 1.0f, 1.0f, 1.0f }
+         << QVector3D{ 1.0f, 1.0f, 1.0f };
 
       return colors;
    }
