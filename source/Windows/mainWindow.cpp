@@ -5,8 +5,8 @@
 #include "literals.h"
 
 #include "DataStructs/scanningProgress.hpp"
-#include "settings.h"
-#include "settingsManager.h"
+#include "Settings/settings.h"
+#include "Settings/settingsManager.h"
 #include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Utilities/utilities.hpp"
@@ -391,41 +391,20 @@ void MainWindow::SetDebuggingMenuState()
 
    const auto& preferences = m_settingsManager.GetPreferenceMap();
 
-   const auto shouldShowOriginItr = preferences.find(L"showOriginMarker");
-   if (shouldShowOriginItr != std::end(preferences))
-   {
-      const auto* desiredVisibility = std::get_if<bool>(&shouldShowOriginItr->second);
-      if (desiredVisibility)
-      {
-         renderMenuWrapper.origin.blockSignals(true);
-         renderMenuWrapper.origin.setChecked(*desiredVisibility);
-         renderMenuWrapper.origin.blockSignals(false);
-      }
-   }
+   const auto shouldShowOrigin = preferences.GetValueOrDefault(L"showOriginMarker", true);
+   renderMenuWrapper.origin.blockSignals(true);
+   renderMenuWrapper.origin.setChecked(shouldShowOrigin);
+   renderMenuWrapper.origin.blockSignals(false);
 
-   const auto shouldShowGridItr = preferences.find(L"showGrid");
-   if (shouldShowGridItr != std::end(preferences))
-   {
-      const auto* desiredVisibility = std::get_if<bool>(&shouldShowGridItr->second);
-      if (desiredVisibility)
-      {
-         renderMenuWrapper.grid.blockSignals(true);
-         renderMenuWrapper.grid.setChecked(*desiredVisibility);
-         renderMenuWrapper.grid.blockSignals(false);
-      }
-   }
+   const auto shouldShowGrid = preferences.GetValueOrDefault(L"showGrid", true);
+   renderMenuWrapper.grid.blockSignals(true);
+   renderMenuWrapper.grid.setChecked(shouldShowGrid);
+   renderMenuWrapper.grid.blockSignals(false);
 
-   const auto shouldShowLightMarkerItr = preferences.find(L"showLightMarker");
-   if (shouldShowLightMarkerItr != std::end(preferences))
-   {
-      const auto* desiredVisibility = std::get_if<bool>(&shouldShowLightMarkerItr->second);
-      if (desiredVisibility)
-      {
-         renderMenuWrapper.lightMarkers.blockSignals(true);
-         renderMenuWrapper.lightMarkers.setChecked(*desiredVisibility);
-         renderMenuWrapper.lightMarkers.blockSignals(false);
-      }
-   }
+   const auto shouldShowLightMarkers = preferences.GetValueOrDefault(L"showLightMarker", true);
+   renderMenuWrapper.lightMarkers.blockSignals(true);
+   renderMenuWrapper.lightMarkers.setChecked(shouldShowLightMarkers);
+   renderMenuWrapper.lightMarkers.blockSignals(false);
 }
 
 void MainWindow::OnFileMenuNewScan()

@@ -2,7 +2,7 @@
 
 #include "../constants.h"
 #include "../DataStructs/vizFile.h"
-#include "../settings.h"
+#include "../Settings/settings.h"
 #include "../Utilities/colorGradient.hpp"
 #include "../Utilities/scopeExit.hpp"
 #include "../Visualizations/visualization.h"

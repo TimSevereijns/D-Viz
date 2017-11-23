@@ -43,8 +43,8 @@ SOURCES += \
    Scene/lineAsset.cpp \
    Scene/originMarkerAsset.cpp \
    Scene/treemapAsset.cpp \
-   settings.cpp \
-   settingsManager.cpp \
+   Settings/settings.cpp \
+   Settings/settingsManager.cpp \
    Viewport/camera.cpp \
    Viewport/canvasContextMenu.cpp \
    Viewport/glCanvas.cpp \
@@ -79,8 +79,9 @@ HEADERS += \
    Scene/lineAsset.h \
    Scene/originMarkerAsset.h \
    Scene/treemapAsset.h \
-   settings.h \
-   settingsManager.h \
+   Settings/preferencesMap.hpp \
+   Settings/settings.h \
+   Settings/settingsManager.h \
    Utilities/colorGradient.hpp \
    Utilities/ignoreUnused.hpp \
    Utilities/operatingSystemSpecific.hpp \

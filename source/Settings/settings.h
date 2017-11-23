@@ -14,8 +14,9 @@ namespace Settings
    JsonDocument ParseJsonDocument(const std::experimental::filesystem::path& path);
 
    /**
-    * @brief The VisualizationParameters struct represents the gamut of visualization parameters that
-    * can be set to control when visualization updates occur, as well as what nodes get included.
+    * @brief The VisualizationParameters struct represents the gamut of visualization parameters
+    * that can be set to control when visualization updates occur, as well as what nodes get
+    * included.
     */
    struct VisualizationParameters
    {

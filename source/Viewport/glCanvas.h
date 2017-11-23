@@ -13,7 +13,7 @@
 #include "Scene/lightMarkerAsset.h"
 #include "Scene/originMarkerAsset.h"
 #include "Scene/treemapAsset.h"
-#include "settingsManager.h"
+#include "Settings/settingsManager.h"
 #include "Visualizations/visualization.h"
 
 #include <chrono>

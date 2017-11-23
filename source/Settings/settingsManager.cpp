@@ -87,32 +87,32 @@ namespace
       {
          if (setting.value.IsBool())
          {
-            Settings::PreferencesVariant variant{ setting.value.GetBool() };
-            map.emplace(setting.name.GetString(), std::move(variant));
+            Settings::PreferencesMap::Entry variant{ setting.value.GetBool() };
+            map.Emplace(setting.name.GetString(), std::move(variant));
 
             continue;
          }
 
          if (setting.value.IsInt())
          {
-            Settings::PreferencesVariant variant{ setting.value.GetInt() };
-            map.emplace(setting.name.GetString(), std::move(variant));
+            Settings::PreferencesMap::Entry variant{ setting.value.GetInt() };
+            map.Emplace(setting.name.GetString(), std::move(variant));
 
             continue;
          }
 
          if (setting.value.IsFloat())
          {
-            Settings::PreferencesVariant variant{ setting.value.GetFloat() };
-            map.emplace(setting.name.GetString(), std::move(variant));
+            Settings::PreferencesMap::Entry variant{ setting.value.GetFloat() };
+            map.Emplace(setting.name.GetString(), std::move(variant));
 
             continue;
          }
 
          if (setting.value.IsString())
          {
-            Settings::PreferencesVariant variant{ setting.value.GetString() };
-            map.emplace(setting.name.GetString(), std::move(variant));
+            Settings::PreferencesMap::Entry variant{ setting.value.GetString() };
+            map.Emplace(setting.name.GetString(), std::move(variant));
 
             continue;
          }

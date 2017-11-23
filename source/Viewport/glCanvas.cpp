@@ -108,19 +108,9 @@ void GLCanvas::initializeGL()
 template<typename AssetTag>
 void GLCanvas::RegisterAsset()
 {
+   const auto assetName = std::wstring{ L"show" } + AssetTag::Name;
    const auto& preferences = m_mainWindow.GetSettingsManager().GetPreferenceMap();
-
-   auto isInitiallyVisible{ true };
-
-   const auto itr = preferences.find(std::wstring{ L"show" } + AssetTag::Name);
-   if (itr != std::end(preferences))
-   {
-      const auto* desiredVisibility = std::get_if<bool>(&itr->second);
-      if (desiredVisibility)
-      {
-         isInitiallyVisible = *desiredVisibility;
-      }
-   }
+   const auto isInitiallyVisible = preferences.GetValueOrDefault(assetName, true);
 
    m_sceneAssets.emplace_back(TagAndAsset
    {

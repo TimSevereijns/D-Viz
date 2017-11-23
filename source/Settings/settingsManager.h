@@ -1,10 +1,13 @@
 #ifndef SETTINGSMANAGER_H
 #define SETTINGSMANAGER_H
 
+#include "preferencesMap.hpp"
 #include "settings.h"
 
-#include "unordered_map"
-#include "variant"
+#include <string_view>
+#include <type_traits>
+#include <unordered_map>
+#include <variant>
 
 #include <QObject>
 #include <QVector3D>
@@ -12,9 +15,6 @@
 namespace Settings
 {
    using ColorMap = std::unordered_map<std::wstring, std::unordered_map<std::wstring, QVector3D>>;
-
-   using PreferencesVariant = std::variant<bool, int, float, std::wstring>;
-   using PreferencesMap = std::unordered_map<std::wstring, PreferencesVariant>;
 
    /**
     * @brief The central class responsible for run-time settings.

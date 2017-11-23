@@ -2,7 +2,7 @@
 #define BASEASSET_H
 
 #include "../DataStructs/light.h"
-#include "../settingsManager.h"
+#include "../Settings/settingsManager.h"
 #include "../Viewport/camera.h"
 #include "../Visualizations/visualization.h"
 

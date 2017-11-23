@@ -13,7 +13,7 @@
 #include <Tree/Tree.hpp>
 
 #include "../DataStructs/vizFile.h"
-#include "../settings.h"
+#include "../Settings/settings.h"
 #include "../Viewport/camera.h"
 
 /**
