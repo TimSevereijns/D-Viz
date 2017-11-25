@@ -87,33 +87,25 @@ namespace
       {
          if (setting.value.IsBool())
          {
-            Settings::PreferencesMap::Entry variant{ setting.value.GetBool() };
-            map.Emplace(setting.name.GetString(), std::move(variant));
-
+            map.Emplace(setting.name.GetString(), setting.value.GetBool());
             continue;
          }
 
          if (setting.value.IsInt())
          {
-            Settings::PreferencesMap::Entry variant{ setting.value.GetInt() };
-            map.Emplace(setting.name.GetString(), std::move(variant));
-
+            map.Emplace(setting.name.GetString(), setting.value.GetInt());
             continue;
          }
 
          if (setting.value.IsFloat())
          {
-            Settings::PreferencesMap::Entry variant{ setting.value.GetFloat() };
-            map.Emplace(setting.name.GetString(), std::move(variant));
-
+            map.Emplace(setting.name.GetString(), setting.value.GetFloat());
             continue;
          }
 
          if (setting.value.IsString())
          {
-            Settings::PreferencesMap::Entry variant{ setting.value.GetString() };
-            map.Emplace(setting.name.GetString(), std::move(variant));
-
+            map.Emplace(setting.name.GetString(), setting.value.GetString());
             continue;
          }
       }
