@@ -3,9 +3,29 @@
 
 #include <string>
 #include <string_view>
+#include <typeinfo>
 #include <type_traits>
 #include <unordered_map>
 #include <variant>
+
+namespace
+{
+   template<
+      typename,
+      typename = void
+   >
+   struct IsSupportedType : std::false_type
+   {
+   };
+
+   template<typename Type>
+   struct IsSupportedType<
+      Type,
+      std::void_t<decltype(Settings::PreferencesMap::Entry{ std::declval<std::decay_t<Type>&>() })>
+   > : std::true_type
+   {
+   };
+}
 
 namespace Settings
 {
@@ -23,12 +43,12 @@ namespace Settings
           */
          template<typename DataType>
          void Emplace(
-            std::wstring_view name,
+            std::wstring name,
             DataType&& data)
          {
             static_assert(
-               std::is_same_v<std::decay_t<DataType>, Entry>,
-               "The value being inserted must be a variant; see Settings::PreferencesMap::Entry.");
+               IsSupportedType<DataType>::value,
+               "The preferences map doesn't support the insertion of the given type.");
 
             m_map.emplace(std::move(name), std::forward<DataType>(data));
          }
@@ -46,6 +66,10 @@ namespace Settings
             std::wstring_view query,
             ReturnType&& defaultValue) const
          {
+            static_assert(
+               IsSupportedType<DataType>::value,
+               "The preferences map doesn't support the retrieval of the given type.");
+
             const auto itr = m_map.find(query.data());
             if (itr == std::end(m_map))
             {
