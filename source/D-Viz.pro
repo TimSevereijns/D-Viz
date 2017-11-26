@@ -67,7 +67,6 @@ HEADERS += \
    DataStructs/vizFile.cpp \
    DriveScanner/driveScanner.h \
    DriveScanner/scanningWorker.h \
-   globals.h \
    HID/gamepad.h \
    HID/keyboardManager.h \
    literals.h \

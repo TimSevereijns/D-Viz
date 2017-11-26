@@ -1,6 +1,7 @@
 #ifndef SETTINGSMANAGER_H
 #define SETTINGSMANAGER_H
 
+#include "constants.h"
 #include "preferencesMap.hpp"
 #include "settings.h"
 
@@ -126,6 +127,10 @@ namespace Settings
          VisualizationParameters& SetVisualizationParameters(
             const VisualizationParameters& parameters);
 
+         void SetActiveNumericPrefix(Constants::FileSize::Prefix prefix);
+
+         Constants::FileSize::Prefix GetActiveNumericPrefix() const;
+
       private:
 
          double m_cameraSpeed{ 0.25 };
@@ -151,6 +156,8 @@ namespace Settings
          std::wstring m_colorScheme{ L"Default" };
 
          VisualizationParameters m_visualizationParameters;
+
+         Constants::FileSize::Prefix m_activeNumericPrefix;
    };
 }
 

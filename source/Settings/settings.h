@@ -11,6 +11,13 @@ namespace Settings
 {
    using JsonDocument = rapidjson::GenericDocument<rapidjson::UTF16<wchar_t>>;
 
+   /**
+    * @brief Helper function to parse a JSON file on disk.
+    *
+    * @param[in] path               Path to the JSON file.
+    *
+    * @returns A parsed JSON document.
+    */
    JsonDocument ParseJsonDocument(const std::experimental::filesystem::path& path);
 
    /**

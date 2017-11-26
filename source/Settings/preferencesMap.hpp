@@ -8,8 +8,16 @@
 #include <unordered_map>
 #include <variant>
 
+namespace Settings
+{
+   class PreferencesMap;
+}
+
 namespace
 {
+   /**
+    * @brief Base case for the detection of preference map supported data types.
+    */
    template<
       typename,
       typename = void
@@ -18,6 +26,10 @@ namespace
    {
    };
 
+   /**
+    * @brief Specialization to be selected if the data type is the one that can be inserted into
+    * the preference map.
+    */
    template<typename Type>
    struct IsSupportedType<
       Type,
@@ -67,7 +79,7 @@ namespace Settings
             ReturnType&& defaultValue) const
          {
             static_assert(
-               IsSupportedType<DataType>::value,
+               IsSupportedType<ReturnType>::value,
                "The preferences map doesn't support the retrieval of the given type.");
 
             const auto itr = m_map.find(query.data());

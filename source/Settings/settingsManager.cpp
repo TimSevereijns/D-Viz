@@ -247,4 +247,14 @@ namespace Settings
       m_visualizationParameters = parameters;
       return m_visualizationParameters;
    }
+
+   void Manager::SetActiveNumericPrefix(Constants::FileSize::Prefix prefix)
+   {
+      m_activeNumericPrefix = prefix;
+   }
+
+   Constants::FileSize::Prefix Manager::GetActiveNumericPrefix() const
+   {
+      return m_activeNumericPrefix;
+   }
 }

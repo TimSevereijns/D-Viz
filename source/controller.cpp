@@ -1,9 +1,9 @@
 #include "controller.h"
 
 #include "constants.h"
-#include "globals.h"
 #include "literals.h"
 
+#include "Settings/settingsManager.h"
 #include "Utilities/ignoreUnused.hpp"
 #include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
@@ -176,13 +176,14 @@ void Controller::SelectNodeAndUpdateStatusBar(
    const auto fileSize = node->GetData().file.size;
    assert(fileSize > 0);
 
-   const auto [size, units] = Controller::ConvertFileSizeToAppropriateUnits(fileSize);
+   const auto prefix = m_mainWindow->GetSettingsManager().GetActiveNumericPrefix();
+   const auto [prefixedSize, units] = Controller::ConvertFileSizeToAppropriateUnits(fileSize, prefix);
    const auto isInBytes = (units == BYTES_READOUT_STRING);
 
    std::wstringstream message;
    message.imbue(std::locale{ "" });
    message.precision(isInBytes ? 0 : 2);
-   message << std::fixed << Controller::ResolveCompleteFilePath(*node) << L"  |  " << size << units;
+   message << std::fixed << Controller::ResolveCompleteFilePath(*node) << L"  |  " << prefixedSize << units;
 
    assert(message.str().size() > 0);
    m_mainWindow->SetStatusBarMessage(message.str());
@@ -235,13 +236,14 @@ void Controller::PrintMetadataToStatusBar()
 
 void Controller::PrintSelectionDetailsToStatusBar()
 {
-   std::uintmax_t selectionSizeInBytes{ 0 };
+   std::uintmax_t sizeInBytes{ 0 };
    for (const auto* const node : m_highlightedNodes)
    {
-      selectionSizeInBytes += node->GetData().file.size;
+      sizeInBytes += node->GetData().file.size;
    }
 
-   const auto [size, units] = Controller::ConvertFileSizeToAppropriateUnits(selectionSizeInBytes);
+   const auto prefix = m_mainWindow->GetSettingsManager().GetActiveNumericPrefix();
+   const auto [prefixedSize, units] = Controller::ConvertFileSizeToAppropriateUnits(sizeInBytes, prefix);
    const auto isInBytes = (units == BYTES_READOUT_STRING);
 
    std::wstringstream message;
@@ -250,7 +252,7 @@ void Controller::PrintSelectionDetailsToStatusBar()
    message
       << L"Highlighted " << m_highlightedNodes.size()
       << (m_highlightedNodes.size() == 1 ? L" node" : L" nodes")
-      << L", representing " << size << units;
+      << L", representing " << prefixedSize << units;
 
    m_mainWindow->SetStatusBarMessage(message.str());
 }
@@ -446,9 +448,10 @@ void Controller::SearchTreeMap(
 }
 
 std::pair<double, std::wstring> Controller::ConvertFileSizeToAppropriateUnits(
-   std::uintmax_t sizeInBytes)
+   std::uintmax_t sizeInBytes,
+   Constants::FileSize::Prefix prefix)
 {
-   switch (Globals::ActivePrefix)
+   switch (prefix)
    {
       case Constants::FileSize::Prefix::BINARY:
       {

@@ -93,8 +93,26 @@ void ScanBreakdownModel::FinalizeInsertion()
 {
    assert(!m_fileTypeMap.empty() && m_fileTypeVector.empty());
 
-   std::copy(
+   std::transform(
       std::begin(m_fileTypeMap),
       std::end(m_fileTypeMap),
-      std::back_inserter(m_fileTypeVector));
+      std::back_inserter(m_fileTypeVector),
+      [&] (const auto& extensionAndTotalSize)
+   {
+      const auto& [fileExtension, totalSize] = extensionAndTotalSize;
+      const auto& prefix = Constants::FileSize::Prefix::BINARY; //< @todo Pull from preferences...
+
+      const auto [prefixedSize, prefixUnits] =
+         Controller::ConvertFileSizeToAppropriateUnits(totalSize, prefix);
+
+      auto sizeLabel =
+         Utilities::StringifyWithDigitSeparators(prefixedSize) + L" " + prefixUnits;
+
+      return RowModel
+      {
+         fileExtension,
+         std::move(sizeLabel),
+         static_cast<std::uintmax_t>(totalSize)
+      };
+   });
 }

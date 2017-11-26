@@ -3,6 +3,7 @@
 
 #include <QAbstractTableModel>
 
+#include "../constants.h"
 #include "../controller.h"
 #include "../DataStructs/vizFile.h"
 #include "../Utilities/utilities.hpp"
@@ -15,26 +16,27 @@
 #include <unordered_map>
 #include <vector>
 
-struct FileExtensionAndTotalSize
+struct RowModel
 {
-    std::wstring fileExtension;
-    std::wstring formattedSize;
-    std::uintmax_t totalSize;
+   std::wstring fileExtension;
+   std::wstring formattedSize;
+   std::uintmax_t totalSize;
 
-    FileExtensionAndTotalSize() = default;
+   RowModel() = default;
 
-    FileExtensionAndTotalSize(
-       const std::pair<const std::wstring, std::uintmax_t>& extensionAndSize)
-       :
-       fileExtension{ extensionAndSize.first },
-       totalSize{ extensionAndSize.second }
-    {
-        const auto [size, units] = Controller::ConvertFileSizeToAppropriateUnits(totalSize);
-        formattedSize = Utilities::StringifyWithDigitSeparators(size) + L" " + units;
-    }
+   RowModel(
+      std::wstring extension,
+      std::wstring formattedSize,
+      std::uintmax_t size)
+      :
+      fileExtension{ std::move(extension) },
+      formattedSize{ std::move(formattedSize) },
+      totalSize{ std::move(size) }
+   {
+   }
 };
 
-Q_DECLARE_METATYPE( FileExtensionAndTotalSize );
+Q_DECLARE_METATYPE( RowModel );
 
 class ScanBreakdownModel final : public QAbstractTableModel
 {
@@ -61,7 +63,7 @@ class ScanBreakdownModel final : public QAbstractTableModel
 
       void FinalizeInsertion();
 
-      std::vector<FileExtensionAndTotalSize> m_fileTypeVector;
+      std::vector<RowModel> m_fileTypeVector;
 
       std::unordered_map<std::wstring, std::uintmax_t> m_fileTypeMap;
 };

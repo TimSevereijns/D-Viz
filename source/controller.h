@@ -1,6 +1,8 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
+#include "constants.h"
+
 #include "DataStructs/light.h"
 #include "DataStructs/vizFile.h"
 #include "DriveScanner/driveScanner.h"
@@ -169,12 +171,14 @@ class Controller
        *
        * @param[in] sizeInBytes     The size (in bytes) to be converted to a more appropriate
        * unit.
+       * @param[in] prefix          The desired prefix.
        *
        * @returns A std::pair encapsulating the converted file size, and corresponding unit readout
        * string.
        */
       static std::pair<double, std::wstring> ConvertFileSizeToAppropriateUnits(
-         std::uintmax_t sizeInBytes);
+         std::uintmax_t sizeInBytes,
+         Constants::FileSize::Prefix prefix);
 
       /**
        * @brief Computes the absolute file path of the selected node by traveling up tree.

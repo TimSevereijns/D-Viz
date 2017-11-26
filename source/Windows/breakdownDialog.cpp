@@ -27,7 +27,7 @@ BreakdownDialog::BreakdownDialog(QWidget* parent) :
       return;
    }
 
-   Stopwatch<std::chrono::milliseconds>([&] ()
+   Stopwatch<std::chrono::milliseconds>([&]
    {
       for (const auto& node : tree)
       {

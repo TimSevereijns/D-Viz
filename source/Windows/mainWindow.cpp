@@ -1,7 +1,6 @@
 #include "mainWindow.h"
 
 #include "constants.h"
-#include "globals.h"
 #include "literals.h"
 
 #include "DataStructs/scanningProgress.hpp"
@@ -120,6 +119,23 @@ namespace
    {
       return std::experimental::filesystem::current_path().append(L"preferences.json");
    }
+
+   /**
+    * @brief The Scoped Cursor struct provides an easy wait to set a specific cursor for the
+    * duration of a given scope.
+    */
+   struct ScopedCursor
+   {
+      ScopedCursor(Qt::CursorShape desiredCursor)
+      {
+         QApplication::setOverrideCursor(desiredCursor);
+      }
+
+      ~ScopedCursor()
+      {
+         QApplication::restoreOverrideCursor();
+      }
+   };
 }
 
 MainWindow::MainWindow(
@@ -457,12 +473,10 @@ void MainWindow::ScanDrive(Settings::VisualizationParameters& parameters)
 
       m_controller.SaveScanResults(progress);
 
-      QCursor previousCursor = cursor();
-      setCursor(Qt::WaitCursor);
-      ON_SCOPE_EXIT{ setCursor(previousCursor); };
-      QApplication::processEvents();
-
       AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
+
+      const ScopedCursor waitCursor{ Qt::WaitCursor };
+      IgnoreUnused(waitCursor);
 
       m_controller.ParseResults(scanningResults);
       m_controller.UpdateBoundingBoxes();
@@ -558,8 +572,8 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
    menuWrapper.binaryPrefix.setChecked(true);
    menuWrapper.decimalPrefix.setChecked(false);
 
-   Globals::ActivePrefix = Constants::FileSize::Prefix::BINARY;
-   m_fileSizeOptions = GeneratePruningMenuEntries(Globals::ActivePrefix);
+   m_settingsManager.SetActiveNumericPrefix(Constants::FileSize::Prefix::BINARY);
+   m_fileSizeOptions = GeneratePruningMenuEntries(Constants::FileSize::Prefix::BINARY);
 
    SetupFileSizePruningDropdown();
 
@@ -593,8 +607,8 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
    menuWrapper.binaryPrefix.setChecked(false);
    menuWrapper.decimalPrefix.setChecked(true);
 
-   Globals::ActivePrefix = Constants::FileSize::Prefix::DECIMAL;
-   m_fileSizeOptions = GeneratePruningMenuEntries(Globals::ActivePrefix);
+   m_settingsManager.SetActiveNumericPrefix(Constants::FileSize::Prefix::DECIMAL);
+   m_fileSizeOptions = GeneratePruningMenuEntries(Constants::FileSize::Prefix::DECIMAL);
 
    SetupFileSizePruningDropdown();
 
@@ -626,6 +640,11 @@ void MainWindow::OnNewSearchQuery()
 
    const auto shouldSearchFiles = m_ui.searchFilesCheckBox->isChecked();
    const auto shouldSearchDirectories = m_ui.searchDirectoriesCheckBox->isChecked();
+
+   const ScopedCursor waitCursor{ Qt::WaitCursor };
+   IgnoreUnused(waitCursor);
+
+   QApplication::processEvents();
 
    m_controller.SearchTreeMap(
       searchQuery,
@@ -742,7 +761,7 @@ void MainWindow::ComputeProgress(const ScanningProgress& progress)
    assert(m_occupiedDiskSpace > 0);
 
    const auto filesScanned = progress.filesScanned.load();
-   const auto bytesProcessed = progress.bytesProcessed.load();
+   const auto sizeInBytes = progress.bytesProcessed.load();
 
    const auto doesPathRepresentEntireDrive{ m_rootPath.string() == m_rootPath.root_path() };
    if (doesPathRepresentEntireDrive)
@@ -753,7 +772,7 @@ void MainWindow::ComputeProgress(const ScanningProgress& progress)
       // junctions encountered during scanning will be explored and counted against the byte total.
 
       const auto percentComplete =
-         100 * (static_cast<double>(bytesProcessed) / static_cast<double>(m_occupiedDiskSpace));
+         100 * (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
 
       const auto message = fmt::format(L"Files Scanned: {}  |  {:03.2f}% Complete",
          Utilities::StringifyWithDigitSeparators(filesScanned),
@@ -763,7 +782,8 @@ void MainWindow::ComputeProgress(const ScanningProgress& progress)
    }
    else
    {
-      const auto [size, units] = Controller::ConvertFileSizeToAppropriateUnits(bytesProcessed);
+      const auto prefix = m_settingsManager.GetActiveNumericPrefix();
+      const auto [size, units] = Controller::ConvertFileSizeToAppropriateUnits(sizeInBytes, prefix);
 
       const auto message = fmt::format(L"Files Scanned: {}  |  {:03.2f} {} and counting...",
          Utilities::StringifyWithDigitSeparators(filesScanned), size, units);
