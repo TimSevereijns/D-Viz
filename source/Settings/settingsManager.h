@@ -157,7 +157,7 @@ namespace Settings
 
          VisualizationParameters m_visualizationParameters;
 
-         Constants::FileSize::Prefix m_activeNumericPrefix;
+         Constants::FileSize::Prefix m_activeNumericPrefix{ Constants::FileSize::Prefix::BINARY };
    };
 }
 

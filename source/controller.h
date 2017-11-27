@@ -176,7 +176,7 @@ class Controller
        * @returns A std::pair encapsulating the converted file size, and corresponding unit readout
        * string.
        */
-      static std::pair<double, std::wstring> ConvertFileSizeToAppropriateUnits(
+      static std::pair<double, std::wstring> ConvertFileSizeToNumericPrefix(
          std::uintmax_t sizeInBytes,
          Constants::FileSize::Prefix prefix);
 

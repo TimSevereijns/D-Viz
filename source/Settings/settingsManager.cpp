@@ -108,6 +108,19 @@ namespace
             map.Emplace(setting.name.GetString(), setting.value.GetString());
             continue;
          }
+
+         if (setting.value.IsArray())
+         {
+            const auto colorArray = setting.value.GetArray();
+            QVector3D colorVector
+            {
+               colorArray[0].GetFloat() / 255.0f,
+               colorArray[1].GetFloat() / 255.0f,
+               colorArray[2].GetFloat() / 255.0f
+            };
+
+            map.Emplace(setting.name.GetString(), std::move(colorVector));
+         }
       }
 
       if (encounteredError)

@@ -16,6 +16,11 @@
 #include <unordered_map>
 #include <vector>
 
+namespace Settings
+{
+   class Manager;
+}
+
 struct RowModel
 {
    std::wstring fileExtension;
@@ -61,7 +66,7 @@ class ScanBreakdownModel final : public QAbstractTableModel
 
    private:
 
-      void FinalizeInsertion();
+      void FinalizeInsertion(const Settings::Manager& settingsManager);
 
       std::vector<RowModel> m_fileTypeVector;
 

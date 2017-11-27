@@ -20,8 +20,9 @@ namespace Asset
 {
    enum struct Event : short
    {
-      SELECTION = 0,
-      DESELECTION
+      SELECT = 0,
+      HIGHLIGHT,
+      RESTORE
    };
 
    /**

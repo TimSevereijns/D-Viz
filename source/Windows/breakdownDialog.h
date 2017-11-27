@@ -59,6 +59,8 @@ class BreakdownDialog final : public QDialog
 
       void AdjustColumnWidthsToFitViewport();
 
+      MainWindow& m_mainWindow;
+
       Ui::breakdownDialog m_ui;
 
       ScanBreakdownModel m_model;

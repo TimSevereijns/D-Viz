@@ -1,6 +1,7 @@
 #include "scanBreakdownModel.h"
 
 #include "../controller.h"
+#include "../Settings/settingsManager.h"
 
 #include <iterator>
 
@@ -89,9 +90,11 @@ void ScanBreakdownModel::insert(const Tree<VizFile>::Node& node)
    }
 }
 
-void ScanBreakdownModel::FinalizeInsertion()
+void ScanBreakdownModel::FinalizeInsertion(const Settings::Manager& settingsManager)
 {
    assert(!m_fileTypeMap.empty() && m_fileTypeVector.empty());
+
+   const auto prefix = settingsManager.GetActiveNumericPrefix();
 
    std::transform(
       std::begin(m_fileTypeMap),
@@ -100,10 +103,9 @@ void ScanBreakdownModel::FinalizeInsertion()
       [&] (const auto& extensionAndTotalSize)
    {
       const auto& [fileExtension, totalSize] = extensionAndTotalSize;
-      const auto& prefix = Constants::FileSize::Prefix::BINARY; //< @todo Pull from preferences...
 
       const auto [prefixedSize, prefixUnits] =
-         Controller::ConvertFileSizeToAppropriateUnits(totalSize, prefix);
+         Controller::ConvertFileSizeToNumericPrefix(totalSize, prefix);
 
       auto sizeLabel =
          Utilities::StringifyWithDigitSeparators(prefixedSize) + L" " + prefixUnits;

@@ -388,7 +388,7 @@ void GLCanvas::SelectNode(const Tree<VizFile>::Node* const node)
 
    treemap->UpdateVBO(
       *node,
-      Asset::Event::SELECTION,
+      Asset::Event::SELECT,
       m_mainWindow.GetSettingsManager());
 }
 
@@ -403,15 +403,20 @@ void GLCanvas::RestoreSelectedNode()
 
    treemap->UpdateVBO(
       *m_controller.GetSelectedNode(),
-      Asset::Event::DESELECTION,
+      Asset::Event::RESTORE,
       m_mainWindow.GetSettingsManager());
 }
 
 void GLCanvas::HighlightNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
 {
+   auto* const treemap = GetAsset<Asset::Tag::Treemap>();
+
    for (const auto* const node : nodes)
    {
-      SelectNode(node);
+      treemap->UpdateVBO(
+         *node,
+         Asset::Event::HIGHLIGHT,
+         m_mainWindow.GetSettingsManager());
    }
 }
 
@@ -423,7 +428,7 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& 
    {
       treemap->UpdateVBO(
          *node,
-         Asset::Event::DESELECTION,
+         Asset::Event::RESTORE,
          m_mainWindow.GetSettingsManager());
    }
 }

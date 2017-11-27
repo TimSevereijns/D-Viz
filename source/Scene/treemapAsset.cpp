@@ -506,9 +506,20 @@ namespace Asset
       constexpr auto colorTupleSize{ sizeof(QVector3D) };
       const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorTupleSize;
 
-      const auto newColor = (action == Asset::Event::DESELECTION)
-         ? RestoreColor(node, settings)
-         : Constants::Colors::CANARY_YELLOW;
+      QVector3D newColor;
+
+      if (action == Asset::Event::SELECT)
+      {
+         newColor = Constants::Colors::CANARY_YELLOW;
+      }
+      else if (action == Asset::Event::HIGHLIGHT)
+      {
+         newColor = Constants::Colors::HOT_PINK;
+      }
+      else
+      {
+         newColor = RestoreColor(node, settings);
+      }
 
       m_VAO.bind();
       m_blockColorBuffer.bind();

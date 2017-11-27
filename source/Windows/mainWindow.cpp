@@ -644,8 +644,6 @@ void MainWindow::OnNewSearchQuery()
    const ScopedCursor waitCursor{ Qt::WaitCursor };
    IgnoreUnused(waitCursor);
 
-   QApplication::processEvents();
-
    m_controller.SearchTreeMap(
       searchQuery,
       deselectionCallback,
@@ -783,7 +781,7 @@ void MainWindow::ComputeProgress(const ScanningProgress& progress)
    else
    {
       const auto prefix = m_settingsManager.GetActiveNumericPrefix();
-      const auto [size, units] = Controller::ConvertFileSizeToAppropriateUnits(sizeInBytes, prefix);
+      const auto [size, units] = Controller::ConvertFileSizeToNumericPrefix(sizeInBytes, prefix);
 
       const auto message = fmt::format(L"Files Scanned: {}  |  {:03.2f} {} and counting...",
          Utilities::StringifyWithDigitSeparators(filesScanned), size, units);

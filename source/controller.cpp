@@ -43,24 +43,20 @@ namespace
 
       if (sizeInBytes < 1_MiB)
       {
-         return std::make_pair<double, std::wstring>(
-            sizeInBytes / 1_KiB, L" KiB");
+         return std::make_pair<double, std::wstring>(sizeInBytes / 1_KiB, L" KiB");
       }
 
       if (sizeInBytes < 1_GiB)
       {
-         return std::make_pair<double, std::wstring>(
-            sizeInBytes / 1_MiB, L" MiB");
+         return std::make_pair<double, std::wstring>(sizeInBytes / 1_MiB, L" MiB");
       }
 
       if (sizeInBytes < 1_TiB)
       {
-         return std::make_pair<double, std::wstring>(
-            sizeInBytes / 1_GiB, L" GiB");
+         return std::make_pair<double, std::wstring>(sizeInBytes / 1_GiB, L" GiB");
       }
 
-      return std::make_pair<double, std::wstring>(
-         sizeInBytes / 1_TiB, L" TiB");
+      return std::make_pair<double, std::wstring>(sizeInBytes / 1_TiB, L" TiB");
    }
 
    /**
@@ -81,24 +77,20 @@ namespace
 
       if (sizeInBytes < 1_MB)
       {
-         return std::make_pair<double, std::wstring>(
-            sizeInBytes / 1_KB, L" KB");
+         return std::make_pair<double, std::wstring>(sizeInBytes / 1_KB, L" KB");
       }
 
       if (sizeInBytes < 1_GB)
       {
-         return std::make_pair<double, std::wstring>(
-            sizeInBytes / 1_MB, L" MB");
+         return std::make_pair<double, std::wstring>(sizeInBytes / 1_MB, L" MB");
       }
 
       if (sizeInBytes < 1_TB)
       {
-         return std::make_pair<double, std::wstring>(
-            sizeInBytes / 1_GB, L" GB");
+         return std::make_pair<double, std::wstring>(sizeInBytes / 1_GB, L" GB");
       }
 
-      return std::make_pair<double, std::wstring>(
-         sizeInBytes / 1_TB, L" TB");
+      return std::make_pair<double, std::wstring>(sizeInBytes / 1_TB, L" TB");
    }
 }
 
@@ -177,13 +169,14 @@ void Controller::SelectNodeAndUpdateStatusBar(
    assert(fileSize > 0);
 
    const auto prefix = m_mainWindow->GetSettingsManager().GetActiveNumericPrefix();
-   const auto [prefixedSize, units] = Controller::ConvertFileSizeToAppropriateUnits(fileSize, prefix);
+   const auto [prefixedSize, units] = ConvertFileSizeToNumericPrefix(fileSize, prefix);
    const auto isInBytes = (units == BYTES_READOUT_STRING);
 
    std::wstringstream message;
    message.imbue(std::locale{ "" });
    message.precision(isInBytes ? 0 : 2);
-   message << std::fixed << Controller::ResolveCompleteFilePath(*node) << L"  |  " << prefixedSize << units;
+   message << std::fixed << Controller::ResolveCompleteFilePath(*node) << L"  |  "
+      << prefixedSize << units;
 
    assert(message.str().size() > 0);
    m_mainWindow->SetStatusBarMessage(message.str());
@@ -236,14 +229,14 @@ void Controller::PrintMetadataToStatusBar()
 
 void Controller::PrintSelectionDetailsToStatusBar()
 {
-   std::uintmax_t sizeInBytes{ 0 };
+   std::uintmax_t totalBytes{ 0 };
    for (const auto* const node : m_highlightedNodes)
    {
-      sizeInBytes += node->GetData().file.size;
+      totalBytes += node->GetData().file.size;
    }
 
    const auto prefix = m_mainWindow->GetSettingsManager().GetActiveNumericPrefix();
-   const auto [prefixedSize, units] = Controller::ConvertFileSizeToAppropriateUnits(sizeInBytes, prefix);
+   const auto [prefixedSize, units] = ConvertFileSizeToNumericPrefix(totalBytes, prefix);
    const auto isInBytes = (units == BYTES_READOUT_STRING);
 
    std::wstringstream message;
@@ -447,7 +440,7 @@ void Controller::SearchTreeMap(
    ProcessSelection(selector, selectionCallback);
 }
 
-std::pair<double, std::wstring> Controller::ConvertFileSizeToAppropriateUnits(
+std::pair<double, std::wstring> Controller::ConvertFileSizeToNumericPrefix(
    std::uintmax_t sizeInBytes,
    Constants::FileSize::Prefix prefix)
 {
