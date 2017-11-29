@@ -42,7 +42,7 @@ namespace
    {
       std::uintmax_t fileSize{ 0 };
 
-      IgnoreUnused(path, fileSize);
+      IgnoreUnused(path);
 
 #ifdef Q_OS_WIN
       WIN32_FIND_DATA fileData;
@@ -57,6 +57,45 @@ namespace
 #endif
 
       return fileSize;
+   }
+
+   /**
+    * @brief Detects reparse points.
+    *
+    * @note This function exists to work around limitations imposed by the Windows implementation of
+    * std::experimental::filesystem. This issue causes the API to report junctions as regular old
+    * directories instead of as some type of link, or reparse point. This issue makes it impossible
+    * to know if a given path should be explored or skipped.
+    *
+    * @note This function assumes that the path exists, and that it points to a directory!
+    *
+    * @todo Distinguishing junctions from symlinks isn't as simple as just detecting reparse points.
+    * We have to delve deeper!
+    *
+    * @param[in] path               The path to the directory that is to be tested.
+    *
+    * @returns True if the path points to a symbolic link, or some other reparse point.
+    */
+   bool IsReparsePoint(const std::experimental::filesystem::path& path)
+   {
+#ifdef Q_OS_WIN
+     const auto attributes = GetFileAttributesW(path.c_str());
+     const auto isReparsePoint = (attributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
+
+     if (isReparsePoint)
+     {
+        std::lock_guard<std::mutex> lock{ streamMutex };
+        IgnoreUnused(lock);
+
+        std::wcout << "Skipping reparse point: \"" << path.wstring() << "\"\n";
+     }
+
+     return isReparsePoint;
+#endif
+
+#ifdef Q_OS_LINUX
+      return std::experimental::filesystem::is_symlink(path);
+#endif
    }
 
    /**
@@ -105,7 +144,7 @@ namespace
          }
       }
 
-      const size_t nodesRemoved = toBeDeleted.size();
+      const auto nodesRemoved = toBeDeleted.size();
 
       for (auto* node : toBeDeleted)
       {
@@ -172,6 +211,12 @@ namespace
       while (itr != end)
       {
          const auto path = itr->path();
+
+         if (IsReparsePoint(path))
+         {
+            ++itr;
+            continue;
+         }
 
          const auto fileType = std::experimental::filesystem::is_directory(path)
             ? FileType::DIRECTORY
@@ -329,15 +374,20 @@ void ScanningWorker::ProcessDirectory(
    {
       ProcessFile(path, treeNode);
    }
-   else if (std::experimental::filesystem::is_directory(path)
-      && !std::experimental::filesystem::is_symlink(path))
+   else if (std::experimental::filesystem::is_directory(path) && !IsReparsePoint(path))
    {
       try
       {
          // In some edge-cases, the Windows operating system doesn't allow anyone to access certain
          // directories, and attempts to do so will result in exceptional behaviour---pun intended.
          // In order to deal with these rare cases, we'll need to rely on a try-catch to keep going.
-         // One example of a problematic directory in Windows 7 is: "C:\System Volume Information".
+         // Example of such problematic directory in Windows 7 include:
+         //
+         // * "C:\System Volume Information"
+         // * "C:\hiberfil.sys"
+         // * "C:\pagefile.sys"
+         // * "C:\swapfile.sys"
+
          if (std::experimental::filesystem::is_empty(path))
          {
             return;

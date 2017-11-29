@@ -764,17 +764,12 @@ void MainWindow::ComputeProgress(const ScanningProgress& progress)
    const auto doesPathRepresentEntireDrive{ m_rootPath.string() == m_rootPath.root_path() };
    if (doesPathRepresentEntireDrive)
    {
-      // @todo Progress can report as being more than 100% due to an issue in the implementation of
-      // std::experimental::filesystem. This issue causes the API to report junctions as regular old
-      // directories instead of some type of link. This means that instead of being skipped, any
-      // junctions encountered during scanning will be explored and counted against the byte total.
-
-      const auto percentComplete =
+      const auto percentage =
          100 * (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
 
       const auto message = fmt::format(L"Files Scanned: {}  |  {:03.2f}% Complete",
          Utilities::StringifyWithDigitSeparators(filesScanned),
-         percentComplete);
+         percentage);
 
       SetStatusBarMessage(message.c_str());
    }

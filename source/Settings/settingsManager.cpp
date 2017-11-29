@@ -137,8 +137,8 @@ namespace Settings
       const std::experimental::filesystem::path& colorFile,
       const std::experimental::filesystem::path& preferencesFile)
       :
-      m_fileColorJsonDocument{ std::move(Settings::ParseJsonDocument(colorFile)) },
-      m_generalSettingsJsonDocument{ std::move(Settings::ParseJsonDocument(preferencesFile)) }
+      m_fileColorJsonDocument{ Settings::ParseJsonDocument(colorFile) },
+      m_generalSettingsJsonDocument{ Settings::ParseJsonDocument(preferencesFile) }
    {
       PopulateColorMapFromJsonDocument(m_fileColorJsonDocument, m_colorMap);
       PopulatePreferencesMapFromJsonDocument(m_generalSettingsJsonDocument, m_preferencesMap);
