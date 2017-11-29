@@ -60,6 +60,15 @@ class Controller
       const std::vector<const Tree<VizFile>::Node*>& GetHighlightedNodes() const;
 
       /**
+       * @brief Determines whether the node is currently highlighted.
+       *
+       * @param[in] node            The node whose extension is to be highlighted.
+       *
+       * @returns True if the given node is currently highlighted; false otherwise.
+       */
+      bool IsNodeHighlighted(const Tree<VizFile>::Node& node) const;
+
+      /**
        * @brief Parses the drive scan results.
        *
        * @param[in] results         The scan results to be parsed.
@@ -152,13 +161,13 @@ class Controller
        *
        * @param[in] camera              The camera from which the ray was shot.
        * @param[in] ray                 The picking ray.
-       * @param[in] deselectionCallback UI callback to clear the canvas of selection highlights.
-       * @param[in] selectionCallback   UI callback to highlight matching nodes on the canvas.
+       * @param[in] deselectionCallback UI callback to clear the previous selection.
+       * @param[in] selectionCallback   UI callback to select the matching nodes on the canvas.
        */
       void SelectNodeViaRay(
          const Camera& camera,
          const Qt3DRender::RayCasting::QRay3D& ray,
-         const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& deselectionCallback,
+         const std::function<void (const Tree<VizFile>::Node* const)>& deselectionCallback,
          const std::function<void (const Tree<VizFile>::Node* const)>& selectionCallback);
 
       /**

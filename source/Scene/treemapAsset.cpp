@@ -508,17 +508,22 @@ namespace Asset
 
       QVector3D newColor;
 
-      if (action == Asset::Event::SELECT)
+      switch (action)
       {
-         newColor = Constants::Colors::CANARY_YELLOW;
-      }
-      else if (action == Asset::Event::HIGHLIGHT)
-      {
-         newColor = Constants::Colors::HOT_PINK;
-      }
-      else
-      {
-         newColor = RestoreColor(node, settings);
+         case Asset::Event::SELECT:
+         {
+            newColor = Constants::Colors::CANARY_YELLOW;
+            break;
+         }
+         case Asset::Event::HIGHLIGHT:
+         {
+            newColor = Constants::Colors::HOT_PINK;
+            break;
+         }
+         default:
+         {
+            newColor = RestoreColor(node, settings);
+         }
       }
 
       m_VAO.bind();

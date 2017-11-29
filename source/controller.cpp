@@ -131,6 +131,15 @@ const std::vector<const Tree<VizFile>::Node*>& Controller::GetHighlightedNodes()
    return m_highlightedNodes;
 }
 
+bool Controller::IsNodeHighlighted(const Tree<VizFile>::Node& node) const
+{
+   return std::any_of(std::begin(m_highlightedNodes), std::end(m_highlightedNodes),
+      [target = std::addressof(node)] (auto ptr) noexcept
+   {
+      return ptr == target;
+   });
+}
+
 void Controller::SetView(MainWindow* window)
 {
    assert(m_mainWindow == nullptr);
@@ -187,7 +196,7 @@ void Controller::SelectNodeAndUpdateStatusBar(
 void Controller::SelectNodeViaRay(
    const Camera& camera,
    const Qt3DRender::RayCasting::QRay3D& ray,
-   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& deselectionCallback,
+   const std::function<void (const Tree<VizFile>::Node* const)>& deselectionCallback,
    const std::function<void (const Tree<VizFile>::Node* const)>& selectionCallback)
 {
    if (!HasVisualizationBeenLoaded() || !IsUserAllowedToInteractWithModel())
@@ -195,12 +204,10 @@ void Controller::SelectNodeViaRay(
       return;
    }
 
-   constexpr auto clearSelected{ true };
-   ClearHighlightedNodes(deselectionCallback, clearSelected);
+   deselectionCallback(m_selectedNode);
+   m_selectedNode = nullptr;
 
    const auto& parameters = m_mainWindow->GetSettingsManager().GetVisualizationParameters();
-
-   // @todo Remove the camera from the parameter list; just pass in a point...
    const auto* node = m_treeMap->FindNearestIntersection(camera, ray, parameters);
    if (node)
    {
@@ -276,7 +283,22 @@ void Controller::ClearHighlightedNodes(
    const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback,
    bool clearSelected)
 {
-   if (clearSelected && m_selectedNode)
+   if (IsNodeHighlighted(*m_selectedNode))
+   {
+      const auto victim = std::find_if(
+         std::begin(m_highlightedNodes),
+         std::end(m_highlightedNodes),
+         [target = m_selectedNode] (auto ptr) noexcept
+      {
+         return ptr == target;
+      });
+
+      if (victim != std::end(m_highlightedNodes))
+      {
+         m_highlightedNodes.erase(victim);
+      }
+   }
+   else if (clearSelected && m_selectedNode)
    {
       m_highlightedNodes.emplace_back(m_selectedNode);
    }
@@ -367,7 +389,10 @@ void Controller::HighlightAllMatchingExtensions(
             return;
          }
 
-         m_highlightedNodes.emplace_back(&node);
+         if (&node != m_selectedNode)
+         {
+            m_highlightedNodes.emplace_back(&node);
+         }
       });
    };
 
@@ -421,7 +446,7 @@ void Controller::SearchTreeMap(
 
             boost::algorithm::to_lower(fileAndExtension);
 
-            // @note We're converting everything to lowercase before hand
+            // @note We're converting everything to lowercase beforehand
             // (instead of using `boost::icontains(...)`), since doing so is significantly faster.
             if (!boost::contains(fileAndExtension, lowercaseQuery))
             {

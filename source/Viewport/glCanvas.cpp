@@ -382,7 +382,10 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
 void GLCanvas::SelectNode(const Tree<VizFile>::Node* const node)
 {
-   assert(node);
+   if (!node)
+   {
+      return;
+   }
 
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
@@ -392,9 +395,9 @@ void GLCanvas::SelectNode(const Tree<VizFile>::Node* const node)
       m_mainWindow.GetSettingsManager());
 }
 
-void GLCanvas::RestoreSelectedNode()
+void GLCanvas::RestoreSelectedNode(const Tree<VizFile>::Node* const node)
 {
-   if (!m_controller.GetSelectedNode())
+   if (!node)
    {
       return;
    }
@@ -402,8 +405,8 @@ void GLCanvas::RestoreSelectedNode()
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
    treemap->UpdateVBO(
-      *m_controller.GetSelectedNode(),
-      Asset::Event::RESTORE,
+      *node,
+      m_controller.IsNodeHighlighted(*node) ? Asset::Event::HIGHLIGHT : Asset::Event::RESTORE,
       m_mainWindow.GetSettingsManager());
 }
 
@@ -446,6 +449,14 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
    CanvasContextMenu menu{ m_keyboardManager };
 
+   menu.addAction("Clear Highlights", [&]
+   {
+      constexpr auto clearSelected{ false };
+      m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
+   });
+
+   menu.addSeparator();
+
    menu.addAction("Highlight Ancestors", [&]
    {
       constexpr auto clearSelected{ true };
@@ -467,7 +478,7 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
       menu.addAction(QString::fromStdWString(writer.c_str()), [&]
       {
-         constexpr auto clearSelected{ true };
+         constexpr auto clearSelected{ false };
          m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
          m_controller.HighlightAllMatchingExtensions(*selectedNode, selectionCallback);
       });
@@ -652,13 +663,9 @@ void GLCanvas::HandleGamepadTriggerInput(const Gamepad& gamepad)
 
 void GLCanvas::SelectNodeViaRay(const QPoint& rayOrigin)
 {
-   const auto deselectionCallback = [&] (std::vector<const Tree<VizFile>::Node*>& nodes)
-   {
-      RestoreHighlightedNodes(nodes);
-      RestoreSelectedNode();
-   };
-
    const auto selectionCallback = [&] (auto* node) { SelectNode(node); };
+   const auto deselectionCallback = [&] (auto* node) { RestoreSelectedNode(node); };
+
    const auto ray = m_camera.ShootRayIntoScene(rayOrigin);
    m_controller.SelectNodeViaRay(m_camera, ray, deselectionCallback, selectionCallback );
 }

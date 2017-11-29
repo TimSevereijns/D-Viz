@@ -132,8 +132,10 @@ class GLCanvas final : public QOpenGLWidget
 
       /**
        * @brief Restores the color of the selected node back to its unselected state.
+       *
+       * @param[in] node            The node whose visual representation is to be repainted.
        */
-      void RestoreSelectedNode();
+      inline void RestoreSelectedNode(const Tree<VizFile>::Node* const node);
 
       /**
        * @brief HighlightSelectedNodes

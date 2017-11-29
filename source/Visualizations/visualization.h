@@ -59,6 +59,8 @@ class VisualizationModel
        * This search operation is carried out with aid of the minimum Axis-Aligned Bounding Boxes
        * (AABB) that surround each node and its descendants.
        *
+       * @todo Remove the camera from the parameter list; just pass in a point..
+       *
        * @param[in] camera          The camera from which the ray originated.
        * @param[in] ray             The picking ray.
        * @param[in] parameters      @see VisualizationParameters. Used to prune disqualified nodes.
