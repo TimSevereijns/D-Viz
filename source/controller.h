@@ -137,14 +137,23 @@ class Controller
        * to its unhighlighted color.
        *
        * @param[in] callback        UI callback to highlight matching nodes on the canvas.
-       * @param[in] clearSelected   Pass in true if the primary selection target is to be cleared.
        */
       void ClearHighlightedNodes(
-         const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback,
-         bool clearSelected);
+         const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback);
 
       /**
        * @brief Selects the passed in node.
+       *
+       * @param[in] node               A pointer to the node to be selected.
+       * @param[in] selectorCallback   UI callback to highlight matching node on the canvas.
+       */
+      void SelectNode(
+         const Tree<VizFile>::Node* const node,
+         const std::function<void (const Tree<VizFile>::Node* const)>& selectorCallback);
+
+      /**
+       * @brief Selects the passed in node, and updates the status bar with information about the
+       * node.
        *
        * @param[in] node               A pointer to the node to be selected.
        * @param[in] selectorCallback   UI callback to highlight matching node on the canvas.

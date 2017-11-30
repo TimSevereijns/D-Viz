@@ -163,7 +163,7 @@ void Controller::UpdateBoundingBoxes()
    m_treeMap->UpdateBoundingBoxes();
 }
 
-void Controller::SelectNodeAndUpdateStatusBar(
+void Controller::SelectNode(
    const Tree<VizFile>::Node* const node,
    const std::function<void (const Tree<VizFile>::Node* const)>& selectorCallback)
 {
@@ -173,6 +173,15 @@ void Controller::SelectNodeAndUpdateStatusBar(
    }
 
    m_selectedNode = node;
+
+   selectorCallback(node);
+}
+
+void Controller::SelectNodeAndUpdateStatusBar(
+   const Tree<VizFile>::Node* const node,
+   const std::function<void (const Tree<VizFile>::Node* const)>& selectorCallback)
+{
+   SelectNode(node, selectorCallback);
 
    const auto fileSize = node->GetData().file.size;
    assert(fileSize > 0);
@@ -189,8 +198,6 @@ void Controller::SelectNodeAndUpdateStatusBar(
 
    assert(message.str().size() > 0);
    m_mainWindow->SetStatusBarMessage(message.str());
-
-   selectorCallback(node);
 }
 
 void Controller::SelectNodeViaRay(
@@ -280,36 +287,28 @@ void Controller::ClearSelectedNode()
 }
 
 void Controller::ClearHighlightedNodes(
-   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback,
-   bool clearSelected)
+   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback)
 {
-   if (IsNodeHighlighted(*m_selectedNode))
+   if (m_highlightedNodes.size() == 0)
    {
-      const auto victim = std::find_if(
-         std::begin(m_highlightedNodes),
-         std::end(m_highlightedNodes),
-         [target = m_selectedNode] (auto ptr) noexcept
-      {
-         return ptr == target;
-      });
-
-      if (victim != std::end(m_highlightedNodes))
-      {
-         m_highlightedNodes.erase(victim);
-      }
+      return;
    }
-   else if (clearSelected && m_selectedNode)
+
+   const auto victim = std::find_if(
+      std::begin(m_highlightedNodes),
+      std::end(m_highlightedNodes),
+      [target = m_selectedNode] (auto ptr) noexcept
    {
-      m_highlightedNodes.emplace_back(m_selectedNode);
+      return ptr == target;
+   });
+
+   if (victim != std::end(m_highlightedNodes))
+   {
+      m_highlightedNodes.erase(victim);
    }
 
    callback(m_highlightedNodes);
    m_highlightedNodes.clear();
-
-   if (clearSelected && m_selectedNode)
-   {
-      m_selectedNode = nullptr;
-   }
 }
 
 template<typename NodeSelectorType>
@@ -331,13 +330,12 @@ void Controller::HighlightAncestors(
 {
    const auto selector = [&]
    {
-      auto* currentNode = &node;
-      do
+      auto* currentNode = node.GetParent();
+      while (currentNode)
       {
          m_highlightedNodes.emplace_back(currentNode);
          currentNode = currentNode->GetParent();
       }
-      while (currentNode);
    };
 
    ProcessSelection(selector, callback);
@@ -389,10 +387,7 @@ void Controller::HighlightAllMatchingExtensions(
             return;
          }
 
-         if (&node != m_selectedNode)
-         {
-            m_highlightedNodes.emplace_back(&node);
-         }
+         m_highlightedNodes.emplace_back(&node);
       });
    };
 
@@ -413,8 +408,7 @@ void Controller::SearchTreeMap(
       return;
    }
 
-   constexpr auto clearSelected{ true };
-   ClearHighlightedNodes(deselectionCallback, clearSelected);
+   ClearHighlightedNodes(deselectionCallback);
 
    const auto& parameters = m_mainWindow->GetSettingsManager().GetVisualizationParameters();
 

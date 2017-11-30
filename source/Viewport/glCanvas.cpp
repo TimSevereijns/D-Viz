@@ -438,61 +438,66 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& 
 
 void GLCanvas::ShowContextMenu(const QPoint& point)
 {
-   const auto* const selectedNode = m_controller.GetSelectedNode();
-   if (!selectedNode)
-   {
-      return;
-   }
-
-   const auto deselectionCallback = [&] (auto& nodes) { RestoreHighlightedNodes(nodes); };
-   const auto selectionCallback = [&] (auto& nodes) { HighlightNodes(nodes); };
+   const auto unhighlightCallback = [&] (auto& nodes) { RestoreHighlightedNodes(nodes); };
+   const auto highlightCallback = [&] (auto& nodes) { HighlightNodes(nodes); };
+   const auto selectionCallback = [&] (auto* node) { SelectNode(node); };
 
    CanvasContextMenu menu{ m_keyboardManager };
 
-   menu.addAction("Clear Highlights", [&]
+   const auto thereExistHighlightedNodes = m_controller.GetHighlightedNodes().size() > 0;
+
+   if (thereExistHighlightedNodes)
    {
-      constexpr auto clearSelected{ false };
-      m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
-   });
-
-   menu.addSeparator();
-
-   menu.addAction("Highlight Ancestors", [&]
-   {
-      constexpr auto clearSelected{ true };
-      m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
-      m_controller.HighlightAncestors(*selectedNode, selectionCallback);
-   });
-
-   menu.addAction("Highlight Descendants", [&]
-   {
-      constexpr auto clearSelected{ true };
-      m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
-      m_controller.HighlightDescendants(*selectedNode, selectionCallback);
-   });
-
-   if (selectedNode->GetData().file.type == FileType::REGULAR)
-   {
-      fmt::WMemoryWriter writer;
-      writer << L"Highlight All " << selectedNode->GetData().file.extension << L" Files";
-
-      menu.addAction(QString::fromStdWString(writer.c_str()), [&]
+      menu.addAction("Clear Highlights", [&]
       {
-         constexpr auto clearSelected{ false };
-         m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
-         m_controller.HighlightAllMatchingExtensions(*selectedNode, selectionCallback);
+         m_controller.ClearHighlightedNodes(unhighlightCallback);
+      });
+
+      menu.addSeparator();
+   }
+
+   const auto* const selectedNode = m_controller.GetSelectedNode();
+
+   if (selectedNode)
+   {
+      menu.addAction("Highlight Ancestors", [&]
+      {
+         m_controller.ClearHighlightedNodes(unhighlightCallback);
+         m_controller.HighlightAncestors(*selectedNode, highlightCallback);
+      });
+
+      menu.addAction("Highlight Descendants", [&]
+      {
+         m_controller.ClearHighlightedNodes(unhighlightCallback);
+         m_controller.HighlightDescendants(*selectedNode, highlightCallback);
+      });
+
+      if (selectedNode->GetData().file.type == FileType::REGULAR)
+      {
+         fmt::WMemoryWriter writer;
+         writer << L"Highlight All " << selectedNode->GetData().file.extension << L" Files";
+
+         menu.addAction(QString::fromStdWString(writer.c_str()), [&]
+         {
+            m_controller.ClearHighlightedNodes(unhighlightCallback);
+            m_controller.HighlightAllMatchingExtensions(*selectedNode, highlightCallback);
+            m_controller.SelectNode(m_controller.GetSelectedNode(), selectionCallback);
+         });
+      }
+
+      menu.addSeparator();
+
+      menu.addAction("Show in Explorer", [&]
+      {
+         OperatingSystemSpecific::LaunchFileExplorer(*selectedNode);
       });
    }
 
-   menu.addSeparator();
-
-   menu.addAction("Show in Explorer", [&]
+   if (thereExistHighlightedNodes || selectedNode)
    {
-      OperatingSystemSpecific::LaunchFileExplorer(*selectedNode);
-   });
-
-   const QPoint globalPoint = mapToGlobal(point);
-   menu.exec(globalPoint);
+      const QPoint globalPoint = mapToGlobal(point);
+      menu.exec(globalPoint);
+   }
 }
 
 void GLCanvas::HandleUserInput()
