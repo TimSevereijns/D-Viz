@@ -223,7 +223,7 @@ void MainWindow::SetupColorSchemeDropdown()
 {
    m_ui.colorSchemeComboBox->clear();
 
-   const auto& defaultScheme = QString::fromStdWString(L"Default");
+   const auto& defaultScheme = QString::fromStdWString(Constants::ColorScheme::DEFAULT);
    m_ui.colorSchemeComboBox->addItem(defaultScheme, defaultScheme);
 
    const auto& colorMap = m_settingsManager.GetFileColorMap();
@@ -273,8 +273,10 @@ void MainWindow::SetupMenus()
    SetupFileMenu();
    SetupOptionsMenu();
 
-   // @todo Guard this menu with a boolean of some sort:
-   SetupDebuggingMenu();
+   if (m_settingsManager.GetPreferenceMap().GetValueOrDefault(L"showDebuggingMenu", false))
+   {
+      SetupDebuggingMenu();
+   }
 
    SetupHelpMenu();
 }
@@ -655,13 +657,14 @@ void MainWindow::OnNewSearchQuery()
 void MainWindow::PruneTree()
 {
    const auto pruneSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
+   const auto minimumSize = m_fileSizeOptions->at(pruneSizeIndex).first;
 
    Settings::VisualizationParameters parameters;
    parameters.rootDirectory = m_rootPath.wstring();
    parameters.onlyShowDirectories = m_showDirectoriesOnly;
    parameters.useDirectoryGradient = m_useDirectoryGradient;
    parameters.forceNewScan = false;
-   parameters.minimumFileSize = m_fileSizeOptions->at(pruneSizeIndex).first;
+   parameters.minimumFileSize = minimumSize;
 
    m_settingsManager.SetVisualizationParameters(parameters);
 

@@ -36,7 +36,13 @@ namespace Constants
       constexpr static auto CANARY_YELLOW = RGB(255,  239,    0);
       constexpr static auto HOT_PINK      = RGB(255,  105,  180);
       constexpr static auto FILE_GREEN    = RGB(128,  255,  128);
+      constexpr static auto SLATE_GRAY    = RGB(112,  128,  144);
       constexpr static auto WHITE         = RGB(255,  255,  255);
+   }
+
+   namespace ColorScheme
+   {
+      constexpr static auto& DEFAULT{ L"Default" };
    }
 
    namespace Graphics

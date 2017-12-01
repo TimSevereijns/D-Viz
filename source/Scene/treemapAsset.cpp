@@ -411,13 +411,17 @@ namespace Asset
       const Tree<VizFile>::Node& node,
       const Settings::Manager& settings)
    {
-      // @todo Perform the color map lookup conditionally.
+      // @todo Need to also take into consideration whether the node is highlighted or selected,
+      // since we don't want to get out of sync with the controller's view of the world.
 
-      const auto fileColor = DetermineColorFromExtension(node, settings);
-      if (fileColor)
+      if (settings.GetActiveColorScheme() != Constants::ColorScheme::DEFAULT)
       {
-         m_blockColors << *fileColor;
-         return;
+         const auto fileColor = DetermineColorFromExtension(node, settings);
+         if (fileColor)
+         {
+            m_blockColors << *fileColor;
+            return;
+         }
       }
 
       if (node->file.type == FileType::DIRECTORY)
@@ -517,7 +521,7 @@ namespace Asset
          }
          case Asset::Event::HIGHLIGHT:
          {
-            newColor = Constants::Colors::HOT_PINK;
+            newColor = Constants::Colors::SLATE_GRAY;
             break;
          }
          default:
