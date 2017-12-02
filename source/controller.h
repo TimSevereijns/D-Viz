@@ -148,8 +148,8 @@ class Controller
        * @param[in] selectorCallback   UI callback to highlight matching node on the canvas.
        */
       void SelectNode(
-         const Tree<VizFile>::Node* const node,
-         const std::function<void (const Tree<VizFile>::Node* const)>& selectorCallback);
+         const Tree<VizFile>::Node& node,
+         const std::function<void (const Tree<VizFile>::Node&)>& selectorCallback);
 
       /**
        * @brief Selects the passed in node, and updates the status bar with information about the
@@ -159,8 +159,8 @@ class Controller
        * @param[in] selectorCallback   UI callback to highlight matching node on the canvas.
        */
       void SelectNodeAndUpdateStatusBar(
-         const Tree<VizFile>::Node* const node,
-         const std::function<void (const Tree<VizFile>::Node* const)>& selectorCallback);
+         const Tree<VizFile>::Node& node,
+         const std::function<void (const Tree<VizFile>::Node&)>& selectorCallback);
 
       /**
        * @brief Uses the passed in ray to select the nearest node from the perspective of the
@@ -176,8 +176,8 @@ class Controller
       void SelectNodeViaRay(
          const Camera& camera,
          const Qt3DRender::RayCasting::QRay3D& ray,
-         const std::function<void (const Tree<VizFile>::Node* const)>& deselectionCallback,
-         const std::function<void (const Tree<VizFile>::Node* const)>& selectionCallback);
+         const std::function<void (const Tree<VizFile>::Node&)>& deselectionCallback,
+         const std::function<void (const Tree<VizFile>::Node&)>& selectionCallback);
 
       /**
        * @brief Helper function to print visualization metadata to the bottom status bar.
@@ -188,7 +188,7 @@ class Controller
        * @brief Converts the given size of the file from bytes to the most human readable units.
        *
        * @param[in] sizeInBytes     The size (in bytes) to be converted to a more appropriate
-       * unit.
+       *                            unit.
        * @param[in] prefix          The desired prefix.
        *
        * @returns A std::pair encapsulating the converted file size, and corresponding unit readout

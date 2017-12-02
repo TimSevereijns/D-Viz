@@ -380,33 +380,23 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    }
 }
 
-void GLCanvas::SelectNode(const Tree<VizFile>::Node* const node)
+void GLCanvas::SelectNode(const Tree<VizFile>::Node& node)
 {
-   if (!node)
-   {
-      return;
-   }
-
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
    treemap->UpdateVBO(
-      *node,
+      node,
       Asset::Event::SELECT,
       m_mainWindow.GetSettingsManager());
 }
 
-void GLCanvas::RestoreSelectedNode(const Tree<VizFile>::Node* const node)
+void GLCanvas::RestoreSelectedNode(const Tree<VizFile>::Node& node)
 {
-   if (!node)
-   {
-      return;
-   }
-
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
    treemap->UpdateVBO(
-      *node,
-      m_controller.IsNodeHighlighted(*node) ? Asset::Event::HIGHLIGHT : Asset::Event::RESTORE,
+      node,
+      m_controller.IsNodeHighlighted(node) ? Asset::Event::HIGHLIGHT : Asset::Event::RESTORE,
       m_mainWindow.GetSettingsManager());
 }
 
@@ -440,7 +430,7 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 {
    const auto unhighlightCallback = [&] (auto& nodes) { RestoreHighlightedNodes(nodes); };
    const auto highlightCallback = [&] (auto& nodes) { HighlightNodes(nodes); };
-   const auto selectionCallback = [&] (auto* node) { SelectNode(node); };
+   const auto selectionCallback = [&] (auto& node) { SelectNode(node); };
 
    CanvasContextMenu menu{ m_keyboardManager };
 
@@ -481,7 +471,7 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
          {
             m_controller.ClearHighlightedNodes(unhighlightCallback);
             m_controller.HighlightAllMatchingExtensions(*selectedNode, highlightCallback);
-            m_controller.SelectNode(m_controller.GetSelectedNode(), selectionCallback);
+            m_controller.SelectNode(*selectedNode, selectionCallback);
          });
       }
 
@@ -668,8 +658,8 @@ void GLCanvas::HandleGamepadTriggerInput(const Gamepad& gamepad)
 
 void GLCanvas::SelectNodeViaRay(const QPoint& rayOrigin)
 {
-   const auto selectionCallback = [&] (auto* node) { SelectNode(node); };
-   const auto deselectionCallback = [&] (auto* node) { RestoreSelectedNode(node); };
+   const auto selectionCallback = [&] (auto& node) { SelectNode(node); };
+   const auto deselectionCallback = [&] (auto& node) { RestoreSelectedNode(node); };
 
    const auto ray = m_camera.ShootRayIntoScene(rayOrigin);
    m_controller.SelectNodeViaRay(m_camera, ray, deselectionCallback, selectionCallback );

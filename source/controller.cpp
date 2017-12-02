@@ -164,26 +164,21 @@ void Controller::UpdateBoundingBoxes()
 }
 
 void Controller::SelectNode(
-   const Tree<VizFile>::Node* const node,
-   const std::function<void (const Tree<VizFile>::Node* const)>& selectorCallback)
+   const Tree<VizFile>::Node& node,
+   const std::function<void (const Tree<VizFile>::Node&)>& selectorCallback)
 {
-   if (!node)
-   {
-      return;
-   }
-
-   m_selectedNode = node;
+   m_selectedNode = &node;
 
    selectorCallback(node);
 }
 
 void Controller::SelectNodeAndUpdateStatusBar(
-   const Tree<VizFile>::Node* const node,
-   const std::function<void (const Tree<VizFile>::Node* const)>& selectorCallback)
+   const Tree<VizFile>::Node& node,
+   const std::function<void (const Tree<VizFile>::Node&)>& selectorCallback)
 {
    SelectNode(node, selectorCallback);
 
-   const auto fileSize = node->GetData().file.size;
+   const auto fileSize = node->file.size;
    assert(fileSize > 0);
 
    const auto prefix = m_mainWindow->GetSettingsManager().GetActiveNumericPrefix();
@@ -193,32 +188,35 @@ void Controller::SelectNodeAndUpdateStatusBar(
    std::wstringstream message;
    message.imbue(std::locale{ "" });
    message.precision(isInBytes ? 0 : 2);
-   message << std::fixed << Controller::ResolveCompleteFilePath(*node) << L"  |  "
-      << prefixedSize << units;
+   message
+      << std::fixed
+      << Controller::ResolveCompleteFilePath(node)
+      << L"  |  "
+      << prefixedSize
+      << units;
 
-   assert(message.str().size() > 0);
    m_mainWindow->SetStatusBarMessage(message.str());
 }
 
 void Controller::SelectNodeViaRay(
    const Camera& camera,
    const Qt3DRender::RayCasting::QRay3D& ray,
-   const std::function<void (const Tree<VizFile>::Node* const)>& deselectionCallback,
-   const std::function<void (const Tree<VizFile>::Node* const)>& selectionCallback)
+   const std::function<void (const Tree<VizFile>::Node&)>& deselectionCallback,
+   const std::function<void (const Tree<VizFile>::Node&)>& selectionCallback)
 {
    if (!HasVisualizationBeenLoaded() || !IsUserAllowedToInteractWithModel())
    {
       return;
    }
 
-   deselectionCallback(m_selectedNode);
+   deselectionCallback(*m_selectedNode);
    m_selectedNode = nullptr;
 
    const auto& parameters = m_mainWindow->GetSettingsManager().GetVisualizationParameters();
    const auto* node = m_treeMap->FindNearestIntersection(camera, ray, parameters);
    if (node)
    {
-      SelectNodeAndUpdateStatusBar(node, selectionCallback);
+      SelectNodeAndUpdateStatusBar(*node, selectionCallback);
    }
    else
    {
@@ -257,9 +255,12 @@ void Controller::PrintSelectionDetailsToStatusBar()
    message.imbue(std::locale{ "" });
    message.precision(isInBytes ? 0 : 2);
    message
+      << std::fixed
       << L"Highlighted " << m_highlightedNodes.size()
       << (m_highlightedNodes.size() == 1 ? L" node" : L" nodes")
-      << L", representing " << prefixedSize << units;
+      << L", representing "
+      << prefixedSize
+      << units;
 
    m_mainWindow->SetStatusBarMessage(message.str());
 }
