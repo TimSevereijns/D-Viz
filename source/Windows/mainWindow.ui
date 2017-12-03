@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -116,7 +116,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pruneTreeButton">
+      <widget class="QPushButton" name="applyButton">
        <property name="text">
         <string>Apply</string>
        </property>
@@ -264,26 +264,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Material Shininess:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDoubleSpinBox" name="shininesSpinner">
-       <property name="minimum">
-        <double>1.000000000000000</double>
-       </property>
-       <property name="maximum">
-        <double>100.000000000000000</double>
-       </property>
-       <property name="value">
-        <double>80.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QCheckBox" name="attachLightToCameraCheckBox">
        <property name="text">
         <string>Attach Primary Light to Camera</string>
@@ -314,7 +294,10 @@
         <string/>
        </property>
        <property name="placeholderText">
-        <string>Search</string>
+        <string>Case Sensitive Search</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -337,6 +320,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="searchButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Search and Highlight</string>
        </property>

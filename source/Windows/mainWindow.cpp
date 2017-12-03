@@ -122,7 +122,7 @@ namespace
 
    /**
     * @brief The Scoped Cursor struct provides an easy wait to set a specific cursor for the
-    * duration of a given scope.
+    * duration of the resulting variable.
     */
    struct ScopedCursor
    {
@@ -170,8 +170,8 @@ void MainWindow::SetupSidebar()
    connect(m_ui.directoryGradientCheckBox, &QCheckBox::stateChanged,
       this, &MainWindow::OnGradientUseChange);
 
-   connect(m_ui.pruneTreeButton, &QPushButton::clicked,
-      this, &MainWindow::PruneTree);
+   connect(m_ui.applyButton, &QPushButton::clicked,
+      this, &MainWindow::OnApplyButtonPressed);
 
    connect(m_ui.fieldOfViewSlider, &QSlider::valueChanged,
       this, &MainWindow::OnFieldOfViewChange);
@@ -179,14 +179,14 @@ void MainWindow::SetupSidebar()
    connect(m_ui.searchBox, &QLineEdit::returnPressed,
       this, &MainWindow::OnNewSearchQuery);
 
+   connect(m_ui.searchBox, &QLineEdit::textChanged,
+      this, &MainWindow::OnSearchQueryTextChanged);
+
    connect(m_ui.searchButton, &QPushButton::clicked,
       this, &MainWindow::OnNewSearchQuery);
 
    connect(m_ui.showBreakdownButton, &QPushButton::clicked,
       this, &MainWindow::OnShowBreakdownButtonPressed);
-
-   connect(m_ui.colorSchemeComboBox, &QComboBox::currentTextChanged,
-      this, &MainWindow::OnColorSchemeChanged);
 
    connect(m_ui.searchDirectoriesCheckBox, &QCheckBox::stateChanged,
       &m_settingsManager, &Settings::Manager::OnShouldSearchDirectoriesChanged);
@@ -209,10 +209,6 @@ void MainWindow::SetupSidebar()
    connect(m_ui.attenuationSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
       &m_settingsManager, &Settings::Manager::OnLightAttenuationChanged);
-
-   connect(m_ui.shininesSpinner,
-      static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-      &m_settingsManager, &Settings::Manager::OnMaterialShininessChanged);
 
    connect(m_ui.attachLightToCameraCheckBox,
       static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
@@ -654,6 +650,17 @@ void MainWindow::OnNewSearchQuery()
       shouldSearchDirectories);
 }
 
+void MainWindow::OnSearchQueryTextChanged(const QString& text)
+{
+   m_ui.searchButton->setEnabled(text.size());
+}
+
+void MainWindow::OnApplyButtonPressed()
+{
+   PruneTree();
+   ApplyColorScheme();
+}
+
 void MainWindow::PruneTree()
 {
    const auto pruneSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
@@ -672,6 +679,14 @@ void MainWindow::PruneTree()
    {
       m_glCanvas->ReloadVisualization();
    }
+}
+
+void MainWindow::ApplyColorScheme()
+{
+   const auto colorScheme = m_ui.colorSchemeComboBox->currentText().toStdWString();
+   m_settingsManager.SetColorScheme(colorScheme);
+
+   m_glCanvas->ApplyColorScheme();
 }
 
 void MainWindow::OnFieldOfViewChange(int fieldOfView)
@@ -712,12 +727,6 @@ void MainWindow::OnRenderGridToggled(bool isEnabled)
 void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
 {
    m_glCanvas->ToggleAssetVisibility<Asset::Tag::LightMarker>(isEnabled);
-}
-
-void MainWindow::OnColorSchemeChanged(const QString& scheme)
-{
-   m_settingsManager.SetColorScheme(scheme.toStdWString());
-   m_glCanvas->ApplyColorScheme();
 }
 
 bool MainWindow::ShouldShowFrameTime() const

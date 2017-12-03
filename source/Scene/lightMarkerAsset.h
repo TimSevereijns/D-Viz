@@ -12,7 +12,10 @@ namespace Asset
    {
       public:
 
-         explicit LightMarker(
+         /**
+          * @see Asset::Base::Base(...)
+          */
+         LightMarker(
             QOpenGLExtraFunctions& openGL,
             bool isInitiallyVisible);
          /**

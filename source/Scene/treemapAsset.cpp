@@ -16,8 +16,7 @@
 namespace
 {
    /**
-    * @brief SetUniformLights is a helper function to easily set all values of the GLSL defined
-    * struct.
+    * @brief Helper function to set all values of the GLSL defined light struct.
     *
     * @param[in] lights             Vector of lights to be loaded into the shader program.
     * @param[in] settings           Additional scene rendering settings.
@@ -64,7 +63,6 @@ namespace
       const Tree<VizFile>::Node& node,
       const Settings::Manager& settings)
    {
-      // @todo This first lookup should be easy to avoid in loops...
       const auto& colorMap = settings.GetFileColorMap();
       const auto categoryItr = colorMap.find(settings.GetActiveColorScheme());
       if (categoryItr == std::end(colorMap))
@@ -462,17 +460,16 @@ namespace Asset
       }
 
       m_shader.bind();
+
       m_shader.setUniformValue("projectionMatrix", camera.GetProjectionMatrix());
       m_shader.setUniformValue("viewMatrix", camera.GetViewMatrix());
-
       m_shader.setUniformValue("cameraPosition", camera.GetPosition());
+
+      // @todo Both of these features should be set once per instance of the Treemap:
       m_shader.setUniformValue("materialShininess", settings.GetMaterialShininess());
+      m_shader.setUniformValue("materialSpecularColor", settings.GetSpecularColor());
 
       SetUniformLights(lights, settings, m_shader);
-
-      // @todo No need to set this repeatedly now that the color isn't controlled by the UI.
-      const QVector3D specularColor{ 0.0f, 0.0f, 0.0f };
-      m_shader.setUniformValue("materialSpecularColor", specularColor);
 
       m_VAO.bind();
 

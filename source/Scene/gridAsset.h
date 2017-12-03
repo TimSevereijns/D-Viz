@@ -13,7 +13,10 @@ namespace Asset
    {
       public:
 
-         explicit Grid(
+         /**
+          * @see Asset::Base::Base(...)
+          */
+         Grid(
             QOpenGLExtraFunctions& openGL,
             bool isInitiallyVisible);
 

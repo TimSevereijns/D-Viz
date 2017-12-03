@@ -6,13 +6,17 @@
 namespace Asset
 {
    /**
-    * @brief The LineAsset class
+    * @brief The Line Asset class can be used to render any scene asset that is composed primarily
+    * of lines.
     */
    class Line : public Base
    {
       public:
 
-         explicit Line(
+         /**
+          * @see Asset::Base::Base(...)
+          */
+         Line(
             QOpenGLExtraFunctions& openGL,
             bool isInitiallyVisible);
 

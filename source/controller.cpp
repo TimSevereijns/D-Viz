@@ -209,8 +209,11 @@ void Controller::SelectNodeViaRay(
       return;
    }
 
-   deselectionCallback(*m_selectedNode);
-   m_selectedNode = nullptr;
+   if (m_selectedNode)
+   {
+      deselectionCallback(*m_selectedNode);
+      m_selectedNode = nullptr;
+   }
 
    const auto& parameters = m_mainWindow->GetSettingsManager().GetVisualizationParameters();
    const auto* node = m_treeMap->FindNearestIntersection(camera, ray, parameters);

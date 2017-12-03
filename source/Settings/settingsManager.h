@@ -61,13 +61,6 @@ namespace Settings
          void OnLightAttenuationChanged(double attenuation);
 
          /**
-          * @brief Should be called when the block material shininess changes.
-          *
-          * @param[in] shininess    The new shininess value.
-          */
-         void OnMaterialShininessChanged(double shininess);
-
-         /**
           * @brief Updates the attachment of the primary light to the camera.
           *
           * @param[in] attached        Pass in true to attach light number one to the camera.
@@ -109,6 +102,8 @@ namespace Settings
          float GetAmbientLightCoefficient() const;
 
          float GetMaterialShininess() const;
+
+         QVector3D GetSpecularColor() const;
 
          bool IsPrimaryLightAttachedToCamera() const;
 

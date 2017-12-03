@@ -115,7 +115,9 @@ class MainWindow final : public QMainWindow
 
       void OnNewSearchQuery();
 
-      void PruneTree();
+      void OnSearchQueryTextChanged(const QString& text);
+
+      void OnApplyButtonPressed();
 
       void OnFieldOfViewChange(int fieldOfView);
 
@@ -131,26 +133,19 @@ class MainWindow final : public QMainWindow
 
       void OnRenderLightMarkersToggled(bool isEnabled);
 
-      void OnColorSchemeChanged(const QString& scheme);
-
    private:
 
       void ScanDrive(Settings::VisualizationParameters& parameters);
 
-      /**
-       * @brief Prompts the user if he or she would like to set a lower bound on which files are
-       * visualized.
-       *
-       * @param[in] numberOfFilesScanned     The number of scanned files that can be visualized.
-       * @param[in] parameters               @see VisualizationParameters
-       *
-       * @returns True if the user applied a limitation.
-       */
       bool AskUserToLimitFileSize(
          std::uintmax_t numberOfFilesScanned,
          Settings::VisualizationParameters& parameters);
 
       void SetFilePruningComboBoxValue(std::uintmax_t minimum);
+
+      void PruneTree();
+
+      void ApplyColorScheme();
 
       void ComputeProgress(const ScanningProgress& progress);
 

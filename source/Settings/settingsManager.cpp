@@ -164,11 +164,6 @@ namespace Settings
       m_lightAttenuationFactor = static_cast<float>(attenuation);
    }
 
-   void Manager::OnMaterialShininessChanged(double shininess)
-   {
-      m_materialShininess = static_cast<float>(shininess);
-   }
-
    void Manager::OnAttachLightToCameraStateChanged(bool attached)
    {
       m_isLightAttachedToCamera = attached;
@@ -217,6 +212,11 @@ namespace Settings
    float Manager::GetMaterialShininess() const
    {
       return m_materialShininess;
+   }
+
+   QVector3D Manager::GetSpecularColor() const
+   {
+      return Constants::Colors::WHITE;
    }
 
    bool Manager::IsPrimaryLightAttachedToCamera() const

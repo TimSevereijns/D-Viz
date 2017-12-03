@@ -13,14 +13,17 @@ class TreeNode;
 namespace Asset
 {
    /**
-    * @brief The Treemap class implements the functionality needed to represent the main
-    * visualization asset.
+    * @brief The Treemap class implements the functionality needed to render the treemap to the
+    * OpenGL canvas.
     */
    class Treemap final : public Base
    {
       public:
 
-         explicit Treemap(
+         /**
+          * @see Asset::Base::Base(...)
+          */
+         Treemap(
             QOpenGLExtraFunctions& openGL,
             bool isInitiallyVisible);
 

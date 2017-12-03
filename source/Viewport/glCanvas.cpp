@@ -190,8 +190,21 @@ void GLCanvas::ApplyColorScheme()
 {
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
+   const auto deselectionCallback = [&] (auto& nodes)
+   {
+      RestoreHighlightedNodes(nodes);
+   };
+
+   m_controller.ClearHighlightedNodes(deselectionCallback);
+
    treemap->ReloadColorBufferData(m_controller.GetTree(), m_mainWindow.GetSettingsManager());
    treemap->Refresh();
+
+   const auto* selectedNode = m_controller.GetSelectedNode();
+   if (selectedNode)
+   {
+      SelectNode(*selectedNode);
+   }
 }
 
 void GLCanvas::SetFieldOfView(float fieldOfView)

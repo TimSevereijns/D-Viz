@@ -33,7 +33,13 @@ namespace Asset
    {
       public:
 
-         explicit Base(
+         /**
+          * @brief Constructs a new instance of the Asset::Base class.
+          *
+          * @param[in] openGL                The OpenGL function bindings.
+          * @param[in] isInitiallyVisible    Whether the asset should be visible.
+          */
+         Base(
             QOpenGLExtraFunctions& openGL,
             bool isInitiallyVisible);
 
@@ -145,7 +151,7 @@ namespace Asset
           *
           * @param[in] node            The TreeNode whose visualization should be updated.
           * @param[in] action          The type of update to perform on the target VBO segment.
-          * @param[in] settings        @todo
+          * @param[in] settings        Any additional settings relevant to rendering.
           */
          virtual void UpdateVBO(
             const Tree<VizFile>::Node& node,
