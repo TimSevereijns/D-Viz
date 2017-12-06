@@ -704,6 +704,16 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
       + QString::fromStdWString(L" \xB5s / frame"));
 }
 
+void GLCanvas::DrawHUD()
+{
+   m_painter.begin(this);
+   m_painter.setPen(Qt::green);
+   m_painter.setFont(m_font);
+   m_painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+   m_painter.drawText(rect(), Qt::AlignCenter, "Qt");
+   m_painter.end();
+}
+
 void GLCanvas::paintGL()
 {
    if (m_isPaintingSuspended)
@@ -716,6 +726,11 @@ void GLCanvas::paintGL()
    {
       m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+      m_graphicsDevice.glEnable(GL_DEPTH_TEST);
+      m_graphicsDevice.glEnable(GL_CULL_FACE);
+      m_graphicsDevice.glEnable(GL_MULTISAMPLE);
+      m_graphicsDevice.glEnable(GL_LINE_SMOOTH);
+
       if (m_mainWindow.GetSettingsManager().IsPrimaryLightAttachedToCamera())
       {
          assert(m_lights.size() > 0);
@@ -726,6 +741,8 @@ void GLCanvas::paintGL()
       {
          tagAndAsset.asset->Render(m_camera, m_lights, m_mainWindow.GetSettingsManager());
       }
+
+      //DrawHUD();
    }).GetElapsedTime();
 
    if (m_mainWindow.ShouldShowFrameTime())

@@ -21,6 +21,7 @@
 #include <memory>
 
 #include <QOpenGLWidget>
+#include <QPainter>
 #include <QTimer>
 #include <QVector3D>
 
@@ -196,24 +197,27 @@ class GLCanvas final : public QOpenGLWidget
       void ShowContextMenu(const QPoint& point);
 
       /**
-       * @brief HandleKeyboardInput
+       * @brief Handles keyboard input.
        *
-       * @param[in] elapsedTime
+       * @param[in] elapsedTime     The time that has elapsed since the last processing of keyboard
+       *                            state.
        */
       void HandleKeyboardInput(const std::chrono::milliseconds& elapsedTime);
 
       /**
        * @brief Handles the input from the gamepad controller.
        *
-       * @param[in] elapsedTime
+       * @param[in] elapsedTime     The time that has elapsed since the last processing of gamepad
+       *                            state.
        */
       void HandleGamepadInput(const std::chrono::milliseconds& elapsedTime);
 
       /**
-       * @brief HandleGamepadKeyInput
+       * @brief Handles button input from the gamepad.
        *
-       * @param gamepad
-       * @param elapsedTime
+       * @param[in] gamepad         The gamepad controller.
+       * @param[in] elapsedTime     The time that has elapsed since the last processing of gamepad
+       *                            state.
        */
       void HandleGamepadButtonInput(
          const Gamepad& gamepad,
@@ -222,14 +226,14 @@ class GLCanvas final : public QOpenGLWidget
       /**
        * @brief Handles left and right trigger input.
        *
-       * @param[in] gamepad
+       * @param[in] gamepad         The gamepad controller.
        */
       void HandleGamepadTriggerInput(const Gamepad& gamepad);
 
       /**
        * @brief Handles thumb stick inputs.
        *
-       * @param[in] gamepad.
+       * @param[in] gamepad         The gamepad controller.
        */
       void HandleGamepadThumbstickInput(const Gamepad& gamepad);
 
@@ -254,9 +258,17 @@ class GLCanvas final : public QOpenGLWidget
       void PrepareOriginMarkerVertexBuffers();
 
       /**
-       * @brief SelectNodeViaRay
+       * @brief Uses a picking ray to select a node in the scene.
+       *
+       * @param[in] rayOrigin       The 2D coordinate on the OpenGL canvas from which the picking
+       *                            ray will be projected into the scene.
        */
       void SelectNodeViaRay(const QPoint& rayOrigin);
+
+      /**
+       * @brief Draws the various read-out on the viewport.
+       */
+      void DrawHUD();
 
       /**
        * @brief Helper function that turns scene asset retrieval into a simple one-liner.
@@ -290,6 +302,10 @@ class GLCanvas final : public QOpenGLWidget
       MainWindow& m_mainWindow;
 
       QOpenGLExtraFunctions m_graphicsDevice;
+
+      QPainter m_painter{ this };
+
+      QFont m_font{ "Helvetica", 30 };
 
       QTimer m_frameRedrawTimer{ nullptr };
 
