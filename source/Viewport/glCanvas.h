@@ -9,6 +9,7 @@
 #include "Scene/baseAsset.h"
 #include "Scene/crosshairAsset.h"
 #include "Scene/debuggingRayAsset.h"
+#include "Scene/gamepadMenuAsset.h"
 #include "Scene/gridAsset.h"
 #include "Scene/lightMarkerAsset.h"
 #include "Scene/originMarkerAsset.h"
@@ -77,6 +78,14 @@ namespace Asset
          int GetID() const noexcept override { return 5; }
 
          static constexpr wchar_t Name[] = L"LightMarker";
+      };
+
+      struct GamepadMenu final : Base
+      {
+         using AssetType = Asset::GamepadMenu;
+         int GetID() const noexcept override { return 6; }
+
+         static constexpr wchar_t Name[] = L"GamepadMenu";
       };
    }
 }
@@ -197,6 +206,11 @@ class GLCanvas final : public QOpenGLWidget
       void ShowContextMenu(const QPoint& point);
 
       /**
+       * @brief Generates and displays a gamepad-compatible context menu.
+       */
+      void ShowGamepadContextMenu();
+
+      /**
        * @brief Handles keyboard input.
        *
        * @param[in] elapsedTime     The time that has elapsed since the last processing of keyboard
@@ -268,7 +282,7 @@ class GLCanvas final : public QOpenGLWidget
       /**
        * @brief Draws the various read-out on the viewport.
        */
-      void DrawHUD();
+      void RenderText();
 
       /**
        * @brief Helper function that turns scene asset retrieval into a simple one-liner.
@@ -302,10 +316,6 @@ class GLCanvas final : public QOpenGLWidget
       MainWindow& m_mainWindow;
 
       QOpenGLExtraFunctions m_graphicsDevice;
-
-      QPainter m_painter{ this };
-
-      QFont m_font{ "Helvetica", 30 };
 
       QTimer m_frameRedrawTimer{ nullptr };
 

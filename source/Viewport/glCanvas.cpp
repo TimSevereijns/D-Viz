@@ -94,6 +94,7 @@ void GLCanvas::initializeGL()
    RegisterAsset<Asset::Tag::Treemap>();
    RegisterAsset<Asset::Tag::Crosshair>();
    RegisterAsset<Asset::Tag::LightMarker>();
+   RegisterAsset<Asset::Tag::GamepadMenu>();
 
    auto* lightMarkers = GetAsset<Asset::Tag::LightMarker>();
    InitializeLightMarkers(m_lights, *lightMarkers);
@@ -439,6 +440,23 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& 
    }
 }
 
+void GLCanvas::ShowGamepadContextMenu()
+{
+   std::vector<std::pair<QString, std::function<void ()>>> entries;
+   entries.emplace_back(std::make_pair("Clear Highlights", [&] {  }));
+   entries.emplace_back(std::make_pair("Highlight Ancestors", [&] {  }));
+   entries.emplace_back(std::make_pair("Highlight Descendants", [&] {  }));
+   entries.emplace_back(std::make_pair("Highlight All", [&] {  }));
+   entries.emplace_back(std::make_pair("Show in Explorer", [&] {  }));
+
+   auto* gamepadMenu = GetAsset<Asset::Tag::GamepadMenu>();
+
+   gamepadMenu->Construct(m_camera.GetViewport().center(), entries);
+   gamepadMenu->SetRenderContext(this);
+
+   gamepadMenu->Show();
+}
+
 void GLCanvas::ShowContextMenu(const QPoint& point)
 {
    const auto unhighlightCallback = [&] (auto& nodes) { RestoreHighlightedNodes(nodes); };
@@ -704,16 +722,6 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
       + QString::fromStdWString(L" \xB5s / frame"));
 }
 
-void GLCanvas::DrawHUD()
-{
-   m_painter.begin(this);
-   m_painter.setPen(Qt::green);
-   m_painter.setFont(m_font);
-   m_painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-   m_painter.drawText(rect(), Qt::AlignCenter, "Qt");
-   m_painter.end();
-}
-
 void GLCanvas::paintGL()
 {
    if (m_isPaintingSuspended)
@@ -741,8 +749,6 @@ void GLCanvas::paintGL()
       {
          tagAndAsset.asset->Render(m_camera, m_lights, m_mainWindow.GetSettingsManager());
       }
-
-      //DrawHUD();
    }).GetElapsedTime();
 
    if (m_mainWindow.ShouldShowFrameTime())

@@ -38,6 +38,7 @@ SOURCES += \
    Scene/baseAsset.cpp \
    Scene/crosshairAsset.cpp \
    Scene/debuggingRayAsset.cpp \
+   Scene/gamepadMenuAsset.cpp \
    Scene/gridAsset.cpp \
    Scene/lightMarkerAsset.cpp \
    Scene/lineAsset.cpp \
@@ -73,6 +74,7 @@ HEADERS += \
    Scene/baseAsset.h \
    Scene/crosshairAsset.h \
    Scene/debuggingRayAsset.h \
+   Scene/gamepadMenuAsset.h \
    Scene/gridAsset.h \
    Scene/lightMarkerAsset.h \
    Scene/lineAsset.h \
