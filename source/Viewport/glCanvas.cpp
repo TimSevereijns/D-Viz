@@ -442,23 +442,29 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& 
 
 void GLCanvas::ShowGamepadContextMenu()
 {
-   std::vector<std::pair<QString, std::function<void ()>>> entries;
-   entries.emplace_back(std::make_pair("Clear Highlights", [&] {  }));
-   entries.emplace_back(std::make_pair("Highlight Ancestors", [&] {  }));
-   entries.emplace_back(std::make_pair("Highlight Descendants", [&] {  }));
-   entries.emplace_back(std::make_pair("Highlight All", [&] {  }));
-   entries.emplace_back(std::make_pair("Show in Explorer", [&] {  }));
+   using Entry = Asset::GamepadMenu::Entry;
+
+   std::vector<Entry> entries;
+   entries.emplace_back(Entry{ QString{ "Clear Highlights" }, QPoint{ } , [&] { /*...*/ } });
+   entries.emplace_back(Entry{ QString{ "Highlight Ancestors" }, QPoint{ } , [&] { /*...*/ } });
+   entries.emplace_back(Entry{ QString{ "Highlight Descendants" }, QPoint{ } , [&] { /*...*/ } });
+   entries.emplace_back(Entry{ QString{ "Highlight All" }, QPoint{ } , [&] { /*...*/ } });
+   entries.emplace_back(Entry{ QString{ "Show in Explorer" }, QPoint{ } , [&] { /*...*/ } });
 
    auto* gamepadMenu = GetAsset<Asset::Tag::GamepadMenu>();
+   assert(gamepadMenu->IsAssetLoaded() == false);
 
-   gamepadMenu->Construct(m_camera.GetViewport().center(), entries);
+   gamepadMenu->ClearBuffers();
+   gamepadMenu->Construct(m_camera.GetViewport().center(), std::move(entries));
    gamepadMenu->SetRenderContext(this);
-
    gamepadMenu->Show();
 }
 
 void GLCanvas::ShowContextMenu(const QPoint& point)
 {
+   ShowGamepadContextMenu();
+   return;
+
    const auto unhighlightCallback = [&] (auto& nodes) { RestoreHighlightedNodes(nodes); };
    const auto highlightCallback = [&] (auto& nodes) { HighlightNodes(nodes); };
    const auto selectionCallback = [&] (auto& node) { SelectNode(node); };
@@ -620,6 +626,21 @@ void GLCanvas::HandleGamepadButtonInput(
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Up());
    }
+
+   if (!m_isGamepadMenuVisible && gamepad.buttonA())
+   {
+      m_isGamepadMenuVisible = true;
+
+      ShowGamepadContextMenu();
+   }
+   else if (m_isGamepadMenuVisible && !gamepad.buttonA())
+   {
+      m_isGamepadMenuVisible = false;
+
+      auto* gamepadMenu = GetAsset<Asset::Tag::GamepadMenu>();
+      gamepadMenu->Hide();
+      gamepadMenu->ClearBuffers();
+   }
 }
 
 void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
@@ -666,6 +687,7 @@ void GLCanvas::HandleGamepadTriggerInput(const Gamepad& gamepad)
 
       auto* const crosshair = GetAsset<Asset::Tag::Crosshair>();
       crosshair->SetCrosshairLocation(m_camera.GetViewport().center());
+      crosshair->Show();
    }
    else if (m_isLeftTriggerDown && !gamepad.IsLeftTriggerDown())
    {

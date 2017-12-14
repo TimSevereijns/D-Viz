@@ -76,7 +76,7 @@ namespace
    template<typename Type>
    struct IsSupportedType<
       Type,
-      std::void_t<decltype(Settings::PreferencesMap::Entry{ std::declval<std::decay_t<Type>&>() })>
+      std::void_t<decltype(Settings::PreferencesMap::Entry{ std::declval<Type&>() })>
    > : std::true_type
    {
    };
@@ -108,7 +108,7 @@ namespace Settings
       const auto itr = m_map.find(query.data());
       if (itr == std::end(m_map))
       {
-         return defaultValue;
+         return std::forward<RequestedType>(defaultValue);
       }
 
       const auto* encapsulatedValue = std::get_if<RequestedType>(&itr->second);

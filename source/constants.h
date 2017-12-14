@@ -31,8 +31,8 @@ namespace Constants
    namespace Colors
    {
       constexpr static auto RED           = RGB(255,    0,    0);
-      constexpr static auto GREEN         = RGB(  0,    1,    0);
-      constexpr static auto BLUE          = RGB(  0,    0,    1);
+      constexpr static auto GREEN         = RGB(  0,  255,    0);
+      constexpr static auto BLUE          = RGB(  0,    0,  255);
       constexpr static auto CANARY_YELLOW = RGB(255,  239,    0);
       constexpr static auto HOT_PINK      = RGB(255,  105,  180);
       constexpr static auto FILE_GREEN    = RGB(128,  255,  128);
@@ -64,6 +64,11 @@ namespace Constants
    namespace Logging
    {
       constexpr static auto& DEFAULT_LOG{ "D-Viz" };
+   }
+
+   namespace Math
+   {
+      constexpr static auto Pi = 3.14159265358979323846;
    }
 }
 

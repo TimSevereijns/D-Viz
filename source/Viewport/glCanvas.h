@@ -310,6 +310,7 @@ class GLCanvas final : public QOpenGLWidget
       bool m_isRightTriggerDown{ false };
       bool m_isLeftMouseButtonDown{ false };
       bool m_isCursorHidden{ false };
+      bool m_isGamepadMenuVisible{ false };
 
       Controller& m_controller;
 

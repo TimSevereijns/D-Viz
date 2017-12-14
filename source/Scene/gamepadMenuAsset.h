@@ -9,6 +9,7 @@
 
 #include <QFont>
 #include <QPainter>
+#include <QPoint>
 #include <QString>
 
 class GLCanvas;
@@ -21,6 +22,13 @@ namespace Asset
    class GamepadMenu final : public Line
    {
       public:
+
+         struct Entry
+         {
+            QString Label;
+            QPointF Position;
+            std::function<void ()> Action;
+         };
 
          /**
           * @see Asset::Base::Base(...)
@@ -38,21 +46,14 @@ namespace Asset
             const Settings::Manager& settings) override;
 
          /**
-          * @brief RenderText
-          *
-          * @param camera
-          */
-         void RenderText(const Camera& camera);
-
-         /**
           * @brief Construct
           *
           * @param origin
           * @param entries
           */
          void Construct(
-            QPoint origin,
-            const std::vector<std::pair<QString, std::function<void ()>>>& entries);
+            const QPoint& origin,
+            const std::vector<Entry>& entries);
 
          /**
           * @brief SetRenderContext
@@ -63,16 +64,22 @@ namespace Asset
 
       private:
 
+         void RenderLabels(const Camera& camera);
+
          void AddCircle(
             QPoint origin,
             int radius,
             int segmentCount);
 
+         QPoint m_menuOrigin;
+
          QPaintDevice* m_context{ nullptr };
 
          QPainter m_painter;
 
-         QFont m_font{ "Helvetica", 30 };
+         QFont m_font;
+
+         std::vector<Entry> m_entries;
    };
 }
 
