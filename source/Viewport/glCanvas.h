@@ -5,11 +5,11 @@
 #include "controller.h"
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
+#include "canvasGamepadContextMenu.h"
 #include "HID/keyboardManager.h"
 #include "Scene/baseAsset.h"
 #include "Scene/crosshairAsset.h"
 #include "Scene/debuggingRayAsset.h"
-#include "Scene/gamepadMenuAsset.h"
 #include "Scene/gridAsset.h"
 #include "Scene/lightMarkerAsset.h"
 #include "Scene/originMarkerAsset.h"
@@ -78,14 +78,6 @@ namespace Asset
          int GetID() const noexcept override { return 5; }
 
          static constexpr wchar_t Name[] = L"LightMarker";
-      };
-
-      struct GamepadMenu final : Base
-      {
-         using AssetType = Asset::GamepadMenu;
-         int GetID() const noexcept override { return 6; }
-
-         static constexpr wchar_t Name[] = L"GamepadMenu";
       };
    }
 }
@@ -310,7 +302,8 @@ class GLCanvas final : public QOpenGLWidget
       bool m_isRightTriggerDown{ false };
       bool m_isLeftMouseButtonDown{ false };
       bool m_isCursorHidden{ false };
-      bool m_isGamepadMenuVisible{ false };
+
+      std::unique_ptr<GamepadContextMenu> m_gamepadContextMenu{ nullptr };
 
       Controller& m_controller;
 

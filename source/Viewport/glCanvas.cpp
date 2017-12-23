@@ -4,6 +4,7 @@
 #include "../Windows/mainWindow.h"
 
 #include "canvasContextMenu.h"
+#include "canvasGamepadContextMenu.h"
 #include "Stopwatch/Stopwatch.hpp"
 #include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
@@ -94,7 +95,6 @@ void GLCanvas::initializeGL()
    RegisterAsset<Asset::Tag::Treemap>();
    RegisterAsset<Asset::Tag::Crosshair>();
    RegisterAsset<Asset::Tag::LightMarker>();
-   RegisterAsset<Asset::Tag::GamepadMenu>();
 
    auto* lightMarkers = GetAsset<Asset::Tag::LightMarker>();
    InitializeLightMarkers(m_lights, *lightMarkers);
@@ -442,29 +442,24 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& 
 
 void GLCanvas::ShowGamepadContextMenu()
 {
-   using Entry = Asset::GamepadMenu::Entry;
+   m_gamepadContextMenu = std::make_unique<GamepadContextMenu>(this);
 
-   std::vector<Entry> entries;
-   entries.emplace_back(Entry{ QString{ "Clear Highlights" }, QPoint{ } , [&] { /*...*/ } });
-   entries.emplace_back(Entry{ QString{ "Highlight Ancestors" }, QPoint{ } , [&] { /*...*/ } });
-   entries.emplace_back(Entry{ QString{ "Highlight Descendants" }, QPoint{ } , [&] { /*...*/ } });
-   entries.emplace_back(Entry{ QString{ "Highlight All" }, QPoint{ } , [&] { /*...*/ } });
-   entries.emplace_back(Entry{ QString{ "Show in Explorer" }, QPoint{ } , [&] { /*...*/ } });
+   m_gamepadContextMenu->AddEntry("Clear Highlights", [&] { /*...*/ });
+   m_gamepadContextMenu->AddEntry("Highlight Ancestors", [&] { /*...*/ });
+   m_gamepadContextMenu->AddEntry("Highlight Descendants", [&] { /*...*/ });
+   m_gamepadContextMenu->AddEntry("Highlight All", [&] { /*...*/ });
+   m_gamepadContextMenu->AddEntry("Show in Explorer", [&] { /*...*/ });
 
-   auto* gamepadMenu = GetAsset<Asset::Tag::GamepadMenu>();
-   assert(gamepadMenu->IsAssetLoaded() == false);
+   m_gamepadContextMenu->move(mapToGlobal(QPoint{ 0, 0 }));
+   m_gamepadContextMenu->resize(width(), height());
 
-   gamepadMenu->ClearBuffers();
-   gamepadMenu->Construct(m_camera.GetViewport().center(), std::move(entries));
-   gamepadMenu->SetRenderContext(this);
-   gamepadMenu->Show();
+   m_gamepadContextMenu->ComputeLayout();
+   m_gamepadContextMenu->show();
+   m_gamepadContextMenu->raise();
 }
 
 void GLCanvas::ShowContextMenu(const QPoint& point)
 {
-   ShowGamepadContextMenu();
-   return;
-
    const auto unhighlightCallback = [&] (auto& nodes) { RestoreHighlightedNodes(nodes); };
    const auto highlightCallback = [&] (auto& nodes) { HighlightNodes(nodes); };
    const auto selectionCallback = [&] (auto& node) { SelectNode(node); };
@@ -627,19 +622,17 @@ void GLCanvas::HandleGamepadButtonInput(
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Up());
    }
 
-   if (!m_isGamepadMenuVisible && gamepad.buttonA())
+   if (!m_gamepadContextMenu && gamepad.buttonA())
    {
-      m_isGamepadMenuVisible = true;
-
       ShowGamepadContextMenu();
    }
-   else if (m_isGamepadMenuVisible && !gamepad.buttonA())
+   else if (m_gamepadContextMenu && !gamepad.buttonA())
    {
-      m_isGamepadMenuVisible = false;
+      m_gamepadContextMenu.reset();
 
-      auto* gamepadMenu = GetAsset<Asset::Tag::GamepadMenu>();
-      gamepadMenu->Hide();
-      gamepadMenu->ClearBuffers();
+//      auto* gamepadMenu = GetAsset<Asset::Tag::GamepadMenu>();
+//      gamepadMenu->Hide();
+//      gamepadMenu->ClearBuffers();
    }
 }
 
@@ -756,11 +749,6 @@ void GLCanvas::paintGL()
    {
       m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      m_graphicsDevice.glEnable(GL_DEPTH_TEST);
-      m_graphicsDevice.glEnable(GL_CULL_FACE);
-      m_graphicsDevice.glEnable(GL_MULTISAMPLE);
-      m_graphicsDevice.glEnable(GL_LINE_SMOOTH);
-
       if (m_mainWindow.GetSettingsManager().IsPrimaryLightAttachedToCamera())
       {
          assert(m_lights.size() > 0);
@@ -779,8 +767,6 @@ void GLCanvas::paintGL()
    }
 }
 
-template void GLCanvas::ToggleAssetVisibility<Asset::Tag::OriginMarker>(bool) const noexcept;
-
 template void GLCanvas::ToggleAssetVisibility<Asset::Tag::Grid>(bool) const noexcept;
-
 template void GLCanvas::ToggleAssetVisibility<Asset::Tag::LightMarker>(bool) const noexcept;
+template void GLCanvas::ToggleAssetVisibility<Asset::Tag::OriginMarker>(bool) const noexcept;

@@ -38,7 +38,6 @@ SOURCES += \
    Scene/baseAsset.cpp \
    Scene/crosshairAsset.cpp \
    Scene/debuggingRayAsset.cpp \
-   Scene/gamepadMenuAsset.cpp \
    Scene/gridAsset.cpp \
    Scene/lightMarkerAsset.cpp \
    Scene/lineAsset.cpp \
@@ -48,6 +47,7 @@ SOURCES += \
    Settings/settingsManager.cpp \
    Viewport/camera.cpp \
    Viewport/canvasContextMenu.cpp \
+   Viewport/canvasGamepadContextMenu.cpp \
    Viewport/glCanvas.cpp \
    Visualizations/squarifiedTreemap.cpp \
    Visualizations/visualization.cpp \
@@ -74,7 +74,6 @@ HEADERS += \
    Scene/baseAsset.h \
    Scene/crosshairAsset.h \
    Scene/debuggingRayAsset.h \
-   Scene/gamepadMenuAsset.h \
    Scene/gridAsset.h \
    Scene/lightMarkerAsset.h \
    Scene/lineAsset.h \
@@ -91,6 +90,7 @@ HEADERS += \
    Utilities/utilities.hpp \
    Viewport/camera.h \
    Viewport/canvasContextMenu.h \
+   Viewport/canvasGamepadContextMenu.h \
    Viewport/glCanvas.h \
    Visualizations/squarifiedTreemap.h \
    Visualizations/visualization.h \
