@@ -442,13 +442,13 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& 
 
 void GLCanvas::ShowGamepadContextMenu()
 {
-   m_gamepadContextMenu = std::make_unique<GamepadContextMenu>(this);
+   m_gamepadContextMenu = new GamepadContextMenu{ m_mainWindow.GetGamepad(), this };
 
-   m_gamepadContextMenu->AddEntry("Clear Highlights", [&] { /*...*/ });
-   m_gamepadContextMenu->AddEntry("Highlight Ancestors", [&] { /*...*/ });
-   m_gamepadContextMenu->AddEntry("Highlight Descendants", [&] { /*...*/ });
-   m_gamepadContextMenu->AddEntry("Highlight All", [&] { /*...*/ });
-   m_gamepadContextMenu->AddEntry("Show in Explorer", [&] { /*...*/ });
+   m_gamepadContextMenu->AddEntry("Clear Highlights", [&] { std::cout << "1" << std::endl; });
+   m_gamepadContextMenu->AddEntry("Highlight Ancestors", [&] { std::cout << "2" << std::endl; });
+   m_gamepadContextMenu->AddEntry("Highlight Descendants", [&] { std::cout << "3" << std::endl; });
+   m_gamepadContextMenu->AddEntry("Highlight All", [&] { std::cout << "4" << std::endl; });
+   m_gamepadContextMenu->AddEntry("Show in Explorer", [&] { std::cout << "5" << std::endl; });
 
    m_gamepadContextMenu->move(mapToGlobal(QPoint{ 0, 0 }));
    m_gamepadContextMenu->resize(width(), height());
@@ -624,20 +624,21 @@ void GLCanvas::HandleGamepadButtonInput(
 
    if (!m_gamepadContextMenu && gamepad.buttonA())
    {
-      ShowGamepadContextMenu();
+      //ShowGamepadContextMenu();
    }
    else if (m_gamepadContextMenu && !gamepad.buttonA())
    {
-      m_gamepadContextMenu.reset();
-
-//      auto* gamepadMenu = GetAsset<Asset::Tag::GamepadMenu>();
-//      gamepadMenu->Hide();
-//      gamepadMenu->ClearBuffers();
+      //m_gamepadContextMenu->close();
    }
 }
 
 void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
 {
+   if (m_gamepadContextMenu)
+   {
+      return;
+   }
+
    if (gamepad.axisRightX() || gamepad.axisRightY())
    {
       const auto pitch =

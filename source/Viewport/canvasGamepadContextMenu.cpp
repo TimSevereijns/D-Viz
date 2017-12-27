@@ -2,9 +2,13 @@
 
 #include "../constants.h"
 
+#include "../HID/gamepad.h"
+
 #include <cmath>
+#include <iostream>
 
 #include <QFontMetrics>
+#include <QLine>
 #include <QString>
 #include <QPainter>
 
@@ -47,49 +51,73 @@ namespace
     *
     * @param[in] entry              A given menu entry.
     * @param[in] menuCenter         The center of the circular menu.
+    * @param[in] fontMetrics        The metrics for the font in which the labels are to be rendered.
     *
     * @returns The adjusted 2D origin for the menu entry.
     */
    auto AdjustTextOriginBasedOnLocation(
       const GamepadContextMenu::Entry entry,
-      const QPoint& menuCenter)
+      const QPoint& menuCenter,
+      const QFontMetrics& fontMetrics)
    {
       auto adjustedPosition{ entry.Position };
 
       if (entry.Position.x() == menuCenter.x())
       {
-         constexpr auto halfCharacterWidth{ 6 };
-         adjustedPosition -= QPoint{ entry.Label.size() * halfCharacterWidth, 0 };
+         const auto halfLabelWidth = fontMetrics.width(entry.Label) / 2;
+         adjustedPosition -= QPoint{ halfLabelWidth, 0 };
       }
       else if (entry.Position.x() < menuCenter.x())
       {
-         constexpr auto presumedCharacterWidth{ 12 };
-         adjustedPosition -= QPoint{ entry.Label.size() * presumedCharacterWidth, 0 };
+         const auto fullLabelWidth = fontMetrics.width(entry.Label);
+         adjustedPosition -= QPoint{ fullLabelWidth, 0 };
       }
 
       if (entry.Position.y() == menuCenter.y())
       {
-         constexpr auto halfCharacterHeight{ 6 };
-         adjustedPosition += QPoint{ 0, halfCharacterHeight };
+         const auto halfLabelHeight = fontMetrics.height() / 2;
+         adjustedPosition += QPoint{ 0, halfLabelHeight };
       }
       else if (entry.Position.y() > menuCenter.y())
       {
-         constexpr auto presumedCharacterHeight{ 12 };
-         adjustedPosition += QPoint{ 0, presumedCharacterHeight };
+         const auto fullLabelHeight = fontMetrics.height();
+         adjustedPosition += QPoint{ 0, fullLabelHeight };
       }
 
       return adjustedPosition;
    }
+
+   /**
+    * @brief Distance
+    *
+    * @param start
+    * @param end
+    */
+   auto Distance(
+      const QPoint& start,
+      const QPoint& end)
+   {
+       const auto xDelta = end.x() - start.x();
+       const auto yDelta = end.y() - start.y();
+
+       return std::sqrt(xDelta * xDelta + yDelta * yDelta);
+   }
+
 }
 
-GamepadContextMenu::GamepadContextMenu(QWidget* parent) :
-   QWidget{ parent }
+GamepadContextMenu::GamepadContextMenu(
+   const Gamepad& gamepad,
+   QWidget* parent)
+   :
+   QWidget{ parent },
+   m_gamepad{ gamepad }
 {
    setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
 
    setAttribute(Qt::WA_NoSystemBackground);
    setAttribute(Qt::WA_TranslucentBackground);
    setAttribute(Qt::WA_ShowWithoutActivating);
+   setAttribute(Qt::WA_DeleteOnClose);
 
    m_font.setFamily("Courier"); // @todo Look into using the QFontDatabase instead.
    m_font.setPointSize(16);
@@ -97,13 +125,46 @@ GamepadContextMenu::GamepadContextMenu(QWidget* parent) :
 
    m_pen.setColor(Qt::green);
    m_pen.setWidth(4);
+
+   connect(&m_inputTimer, &QTimer::timeout, this, &GamepadContextMenu::ProcessInput);
+   m_inputTimer.start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
+}
+
+void GamepadContextMenu::ProcessInput()
+{
+   constexpr auto radius{ 100 };
+
+   const auto x = m_gamepad.axisLeftX();
+   const auto y = m_gamepad.axisLeftY();
+
+   m_selectorDot = QPoint
+   {
+     static_cast<int>(x * radius) + width() / 2,
+     static_cast<int>(y * radius) + height() / 2
+   };
+
+   const auto selection = std::find_if(std::begin(m_entries), std::end(m_entries),
+      [&] (const auto& entry) noexcept
+   {
+      return Distance(m_selectorDot, entry.Position) < 64;
+   });
+
+   if (selection != std::end(m_entries))
+   {
+      m_entries[m_indexOfSelection].Color = Qt::green;
+
+      selection->Color = Qt::gray;
+      m_indexOfSelection = std::distance(std::begin(m_entries), selection);
+   }
+
+   repaint();
 }
 
 void GamepadContextMenu::AddEntry(
    const QString& label,
    const std::function<void ()>& action)
 {
-   Entry entry{ label, QPointF{ }, action };
+   Entry entry{ label, QPoint{ }, QColor{ Qt::green }, action };
    m_entries.emplace_back(std::move(entry));
 }
 
@@ -119,6 +180,11 @@ void GamepadContextMenu::paintEvent(QPaintEvent* /*event*/)
 {
    m_painter.begin(this);
 
+   m_pen.setColor(Qt::green);
+   m_painter.setPen(m_pen);
+
+   m_painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+
    const auto center = QPoint{ width() / 2, height() / 2 };
 
    RenderLabels(center);
@@ -129,20 +195,41 @@ void GamepadContextMenu::paintEvent(QPaintEvent* /*event*/)
 
 void GamepadContextMenu::RenderLabels(const QPoint& center)
 {
-   m_painter.setPen(m_pen);
    m_painter.setFont(m_font);
-   m_painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
    m_painter.drawText(rect(), Qt::AlignCenter, "D-Viz");
+
+   QFontMetrics fontMetrics{ m_font };
 
    for (const auto& entry : m_entries)
    {
-      const auto adjustedOrigin = AdjustTextOriginBasedOnLocation(entry, center);
-      m_painter.drawText(adjustedOrigin, entry.Label);
+      m_pen.setColor(entry.Color);
+      m_painter.setPen(m_pen);
+
+      const auto origin = AdjustTextOriginBasedOnLocation(entry, center, fontMetrics);
+      m_painter.drawText(origin, entry.Label);
    }
 }
 
 void GamepadContextMenu::RenderGeometry(const QPoint& center)
 {
+   m_pen.setColor(Qt::green);
+   m_painter.setPen(m_pen);
+
    constexpr auto radius{ 100 };
    m_painter.drawEllipse(center, radius, radius);
+
+   m_pen.setColor(Qt::red);
+   m_painter.setPen(m_pen);
+
+   m_painter.drawEllipse(m_selectorDot, 10, 10);
+}
+
+void GamepadContextMenu::ExecuteSelection()
+{
+   if (m_entries.size() < m_indexOfSelection)
+   {
+      return;
+   }
+
+   m_entries[m_indexOfSelection].Action();
 }

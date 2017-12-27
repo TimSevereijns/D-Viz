@@ -303,7 +303,7 @@ class GLCanvas final : public QOpenGLWidget
       bool m_isLeftMouseButtonDown{ false };
       bool m_isCursorHidden{ false };
 
-      std::unique_ptr<GamepadContextMenu> m_gamepadContextMenu{ nullptr };
+      GamepadContextMenu* m_gamepadContextMenu{ nullptr };
 
       Controller& m_controller;
 
