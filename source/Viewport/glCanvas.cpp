@@ -442,13 +442,60 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& 
 
 void GLCanvas::ShowGamepadContextMenu()
 {
+   const auto thereExistHighlightedNodes = m_controller.GetHighlightedNodes().size() > 0;
+   const auto* const selectedNode = m_controller.GetSelectedNode();
+
+   if (!thereExistHighlightedNodes && !selectedNode)
+   {
+      return;
+   }
+
+   const auto unhighlightCallback = [&] (auto& nodes) { RestoreHighlightedNodes(nodes); };
+   const auto highlightCallback = [&] (auto& nodes) { HighlightNodes(nodes); };
+   const auto selectionCallback = [&] (auto& node) { SelectNode(node); };
+
    m_gamepadContextMenu = new GamepadContextMenu{ m_mainWindow.GetGamepad(), this };
 
-   m_gamepadContextMenu->AddEntry("Clear Highlights", [&] { std::cout << "1" << std::endl; });
-   m_gamepadContextMenu->AddEntry("Highlight Ancestors", [&] { std::cout << "2" << std::endl; });
-   m_gamepadContextMenu->AddEntry("Highlight Descendants", [&] { std::cout << "3" << std::endl; });
-   m_gamepadContextMenu->AddEntry("Highlight All", [&] { std::cout << "4" << std::endl; });
-   m_gamepadContextMenu->AddEntry("Show in Explorer", [&] { std::cout << "5" << std::endl; });
+   if (thereExistHighlightedNodes)
+   {
+      m_gamepadContextMenu->AddEntry("Clear Highlights", [=]
+      {
+         m_controller.ClearHighlightedNodes(unhighlightCallback);
+      });
+   }
+
+   if (selectedNode)
+   {
+      m_gamepadContextMenu->AddEntry("Highlight Ancestors", [=]
+      {
+         m_controller.ClearHighlightedNodes(unhighlightCallback);
+         m_controller.HighlightAncestors(*selectedNode, highlightCallback);
+      });
+
+      m_gamepadContextMenu->AddEntry("Highlight Descendants", [=]
+      {
+         m_controller.ClearHighlightedNodes(unhighlightCallback);
+         m_controller.HighlightDescendants(*selectedNode, highlightCallback);
+      });
+
+      if (selectedNode->GetData().file.type == FileType::REGULAR)
+      {
+         fmt::WMemoryWriter writer;
+         writer << L"Highlight All " << selectedNode->GetData().file.extension << L" Files";
+
+         m_gamepadContextMenu->AddEntry(QString::fromStdWString(writer.c_str()), [=]
+         {
+            m_controller.ClearHighlightedNodes(unhighlightCallback);
+            m_controller.HighlightAllMatchingExtensions(*selectedNode, highlightCallback);
+            m_controller.SelectNode(*selectedNode, selectionCallback);
+         });
+      }
+
+      m_gamepadContextMenu->AddEntry("Show in Explorer", [=]
+      {
+         OperatingSystemSpecific::LaunchFileExplorer(*selectedNode);
+      });
+   }
 
    m_gamepadContextMenu->move(mapToGlobal(QPoint{ 0, 0 }));
    m_gamepadContextMenu->resize(width(), height());
@@ -460,13 +507,19 @@ void GLCanvas::ShowGamepadContextMenu()
 
 void GLCanvas::ShowContextMenu(const QPoint& point)
 {
+   const auto thereExistHighlightedNodes = m_controller.GetHighlightedNodes().size() > 0;
+   const auto* const selectedNode = m_controller.GetSelectedNode();
+
+   if (!thereExistHighlightedNodes && !selectedNode)
+   {
+      return;
+   }
+
    const auto unhighlightCallback = [&] (auto& nodes) { RestoreHighlightedNodes(nodes); };
    const auto highlightCallback = [&] (auto& nodes) { HighlightNodes(nodes); };
    const auto selectionCallback = [&] (auto& node) { SelectNode(node); };
 
    CanvasContextMenu menu{ m_keyboardManager };
-
-   const auto thereExistHighlightedNodes = m_controller.GetHighlightedNodes().size() > 0;
 
    if (thereExistHighlightedNodes)
    {
@@ -477,8 +530,6 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
       menu.addSeparator();
    }
-
-   const auto* const selectedNode = m_controller.GetSelectedNode();
 
    if (selectedNode)
    {
@@ -515,11 +566,8 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
       });
    }
 
-   if (thereExistHighlightedNodes || selectedNode)
-   {
-      const QPoint globalPoint = mapToGlobal(point);
-      menu.exec(globalPoint);
-   }
+   const QPoint globalPoint = mapToGlobal(point);
+   menu.exec(globalPoint);
 }
 
 void GLCanvas::HandleUserInput()
@@ -624,11 +672,14 @@ void GLCanvas::HandleGamepadButtonInput(
 
    if (!m_gamepadContextMenu && gamepad.buttonA())
    {
-      //ShowGamepadContextMenu();
+      ShowGamepadContextMenu();
    }
    else if (m_gamepadContextMenu && !gamepad.buttonA())
    {
-      //m_gamepadContextMenu->close();
+      m_gamepadContextMenu->ExecuteSelection();
+
+      m_gamepadContextMenu->close();
+      m_gamepadContextMenu = nullptr;
    }
 }
 

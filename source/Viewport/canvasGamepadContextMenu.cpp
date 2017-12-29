@@ -151,7 +151,10 @@ void GamepadContextMenu::ProcessInput()
 
    if (selection != std::end(m_entries))
    {
-      m_entries[m_indexOfSelection].Color = Qt::green;
+      if (m_indexOfSelection < std::numeric_limits<std::size_t>::max())
+      {
+         m_entries[m_indexOfSelection].Color = Qt::green;
+      }
 
       selection->Color = Qt::gray;
       m_indexOfSelection = std::distance(std::begin(m_entries), selection);
