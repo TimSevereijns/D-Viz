@@ -1,13 +1,13 @@
-#include "canvasContextMenu.h"
+#include "mouseContextMenu.h"
 
 #include <assert.h>
 
-CanvasContextMenu::CanvasContextMenu(KeyboardManager& keyboardManager) :
+MouseContextMenu::MouseContextMenu(KeyboardManager& keyboardManager) :
    m_keyboardManager{ keyboardManager }
 {
 }
 
-void CanvasContextMenu::keyReleaseEvent(QKeyEvent* event)
+void MouseContextMenu::keyReleaseEvent(QKeyEvent* event)
 {
    if (!event)
    {

@@ -1,4 +1,4 @@
-#include "canvasGamepadContextMenu.h"
+#include "gamepadContextMenu.h"
 
 #include "../constants.h"
 
@@ -88,10 +88,12 @@ namespace
    }
 
    /**
-    * @brief Distance
+    * @brief Computes the linear distance between two points.
     *
-    * @param start
-    * @param end
+    * @param[in] start              The first point.
+    * @param[in] end                The second point.
+    *
+    * @returns The linear distance between two points.
     */
    auto Distance(
       const QPoint& start,
@@ -119,7 +121,7 @@ GamepadContextMenu::GamepadContextMenu(
    setAttribute(Qt::WA_ShowWithoutActivating);
    setAttribute(Qt::WA_DeleteOnClose);
 
-   m_font.setFamily("Courier"); // @todo Look into using the QFontDatabase instead.
+   m_font.setFamily("Courier"); //< @todo Look into using the QFontDatabase instead.
    m_font.setPointSize(16);
    m_font.setBold(true);
 
@@ -151,12 +153,12 @@ void GamepadContextMenu::ProcessInput()
 
    if (selection != std::end(m_entries))
    {
-      if (m_indexOfSelection < std::numeric_limits<std::size_t>::max())
+      if (m_indexOfSelection < m_entries.size())
       {
          m_entries[m_indexOfSelection].Color = Qt::green;
       }
 
-      selection->Color = Qt::gray;
+      selection->Color = Qt::white;
       m_indexOfSelection = std::distance(std::begin(m_entries), selection);
    }
 
@@ -199,18 +201,26 @@ void GamepadContextMenu::paintEvent(QPaintEvent* /*event*/)
 void GamepadContextMenu::RenderLabels(const QPoint& center)
 {
    m_painter.setFont(m_font);
-   m_painter.drawText(rect(), Qt::AlignCenter, "D-Viz");
+   m_painter.setBrush(QColor{ 0, 0, 0, 128 });
 
-   QFontMetrics fontMetrics{ m_font };
+   const QFontMetrics fontMetrics{ m_font };
 
    for (const auto& entry : m_entries)
    {
+      const auto origin = AdjustTextOriginBasedOnLocation(entry, center, fontMetrics);
+
+      auto labelRect = fontMetrics.boundingRect(entry.Label);
+      labelRect.moveTo(origin.x() - 4, origin.y() - fontMetrics.ascent() + 1);
+
+      m_painter.setPen(Qt::NoPen);
+      m_painter.drawRect(labelRect);
+
       m_pen.setColor(entry.Color);
       m_painter.setPen(m_pen);
-
-      const auto origin = AdjustTextOriginBasedOnLocation(entry, center, fontMetrics);
       m_painter.drawText(origin, entry.Label);
    }
+
+   m_painter.setBrush(Qt::NoBrush);
 }
 
 void GamepadContextMenu::RenderGeometry(const QPoint& center)
@@ -221,7 +231,7 @@ void GamepadContextMenu::RenderGeometry(const QPoint& center)
    constexpr auto radius{ 100 };
    m_painter.drawEllipse(center, radius, radius);
 
-   m_pen.setColor(Qt::red);
+   m_pen.setColor(Qt::green);
    m_painter.setPen(m_pen);
 
    m_painter.drawEllipse(m_selectorDot, 10, 10);

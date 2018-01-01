@@ -5,7 +5,7 @@
 #include "controller.h"
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
-#include "canvasGamepadContextMenu.h"
+#include "gamepadContextMenu.h"
 #include "HID/keyboardManager.h"
 #include "Scene/baseAsset.h"
 #include "Scene/crosshairAsset.h"

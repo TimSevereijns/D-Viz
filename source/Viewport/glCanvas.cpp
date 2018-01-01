@@ -3,8 +3,8 @@
 #include "../constants.h"
 #include "../Windows/mainWindow.h"
 
-#include "canvasContextMenu.h"
-#include "canvasGamepadContextMenu.h"
+#include "mouseContextMenu.h"
+#include "gamepadContextMenu.h"
 #include "Stopwatch/Stopwatch.hpp"
 #include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
@@ -519,7 +519,7 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
    const auto highlightCallback = [&] (auto& nodes) { HighlightNodes(nodes); };
    const auto selectionCallback = [&] (auto& node) { SelectNode(node); };
 
-   CanvasContextMenu menu{ m_keyboardManager };
+   MouseContextMenu menu{ m_keyboardManager };
 
    if (thereExistHighlightedNodes)
    {

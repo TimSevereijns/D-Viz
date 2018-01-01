@@ -46,9 +46,9 @@ SOURCES += \
    Settings/settings.cpp \
    Settings/settingsManager.cpp \
    Viewport/camera.cpp \
-   Viewport/canvasContextMenu.cpp \
-   Viewport/canvasGamepadContextMenu.cpp \
+   Viewport/gamepadContextMenu.cpp \
    Viewport/glCanvas.cpp \
+   Viewport/mouseContextMenu.cpp \
    Visualizations/squarifiedTreemap.cpp \
    Visualizations/visualization.cpp \
    Windows/aboutDialog.cpp \
@@ -89,9 +89,9 @@ HEADERS += \
    Utilities/threadSafeQueue.hpp \
    Utilities/utilities.hpp \
    Viewport/camera.h \
-   Viewport/canvasContextMenu.h \
-   Viewport/canvasGamepadContextMenu.h \
+   Viewport/gamepadContextMenu.h \
    Viewport/glCanvas.h \
+   Viewport/mouseContextMenu.h \
    Visualizations/squarifiedTreemap.h \
    Visualizations/visualization.h \
    Windows/aboutDialog.h \
