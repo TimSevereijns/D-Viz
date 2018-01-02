@@ -148,7 +148,8 @@ void GamepadContextMenu::ProcessInput()
    const auto selection = std::find_if(std::begin(m_entries), std::end(m_entries),
       [&] (const auto& entry) noexcept
    {
-      return Distance(m_selectorDot, entry.Position) < 64;
+      constexpr auto reasonableDistanceToLabel{ 64 };
+      return Distance(m_selectorDot, entry.Position) < reasonableDistanceToLabel;
    });
 
    if (selection != std::end(m_entries))

@@ -167,7 +167,7 @@ void GLCanvas::resizeGL(int width, int height)
 
 void GLCanvas::ReloadVisualization()
 {
-   const bool previousSuspensionState = m_isPaintingSuspended;
+   const auto previousSuspensionState = m_isPaintingSuspended;
    ON_SCOPE_EXIT noexcept { m_isPaintingSuspended = previousSuspensionState; };
 
    m_isPaintingSuspended = true;
@@ -481,7 +481,7 @@ void GLCanvas::ShowGamepadContextMenu()
       if (selectedNode->GetData().file.type == FileType::REGULAR)
       {
          fmt::WMemoryWriter writer;
-         writer << L"Highlight All " << selectedNode->GetData().file.extension << L" Files";
+         writer << L"Highlight All \"" << selectedNode->GetData().file.extension << L"\" Files";
 
          m_gamepadContextMenu->AddEntry(QString::fromStdWString(writer.c_str()), [=]
          {
@@ -548,7 +548,7 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
       if (selectedNode->GetData().file.type == FileType::REGULAR)
       {
          fmt::WMemoryWriter writer;
-         writer << L"Highlight All " << selectedNode->GetData().file.extension << L" Files";
+         writer << L"Highlight All \"" << selectedNode->GetData().file.extension << L"\" Files";
 
          menu.addAction(QString::fromStdWString(writer.c_str()), [&]
          {
@@ -774,7 +774,7 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
 
    m_frameTimeDeque.emplace_back(static_cast<int>(elapsedTime.count()));
 
-   const int total = std::accumulate(std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0,
+   const auto total = std::accumulate(std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0,
       [] (const int runningTotal, const int frameTime) noexcept
    {
       return runningTotal + frameTime;
