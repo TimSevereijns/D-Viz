@@ -38,6 +38,7 @@ namespace Constants
       constexpr static auto FILE_GREEN    = RGB(128,  255,  128);
       constexpr static auto SLATE_GRAY    = RGB(112,  128,  144);
       constexpr static auto WHITE         = RGB(255,  255,  255);
+      constexpr static auto CORAL         = RGB(255,  127,   80);
    }
 
    namespace ColorScheme
