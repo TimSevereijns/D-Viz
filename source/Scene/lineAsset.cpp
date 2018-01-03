@@ -2,8 +2,11 @@
 
 namespace Asset
 {
-   Line::Line(QOpenGLExtraFunctions& openGL) :
-      Base{ openGL }
+   Line::Line(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      Base{ openGL, isInitiallyVisible }
    {
    }
 
@@ -89,7 +92,7 @@ namespace Asset
    bool Line::Render(
       const Camera& camera,
       const std::vector<Light>&,
-      const OptionsManager&)
+      const Settings::Manager&)
    {
       if (!m_shouldRender)
       {
@@ -112,7 +115,7 @@ namespace Asset
       return true;
    }
 
-   bool Line::Reload()
+   bool Line::Refresh()
    {
       InitializeVertexBuffers();
       InitializeColorBuffers();

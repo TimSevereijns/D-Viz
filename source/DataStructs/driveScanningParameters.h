@@ -20,9 +20,8 @@ struct DriveScanningParameters
 {
    using ProgressCallback = std::function<void (const ScanningProgress&)>;
 
-   using ScanCompleteCallback = std::function<void (
-      const ScanningProgress&,
-      std::shared_ptr<Tree<VizFile>> fileTree)>;
+   using ScanCompleteCallback =
+      std::function<void (const ScanningProgress&, std::shared_ptr<Tree<VizFile>> fileTree)>;
 
    std::wstring path{ };
 

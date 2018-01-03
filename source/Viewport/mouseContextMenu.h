@@ -5,11 +5,11 @@
 
 #include <QMenu>
 
-class CanvasContextMenu final : public QMenu
+class MouseContextMenu final : public QMenu
 {
    public:
 
-      CanvasContextMenu(KeyboardManager& keyboardManager);
+      explicit MouseContextMenu(KeyboardManager& keyboardManager);
 
    protected:
 

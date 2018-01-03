@@ -2,15 +2,18 @@
 
 namespace Asset
 {
-   DebuggingRay::DebuggingRay(QOpenGLExtraFunctions& openGL) :
-      Line{ openGL }
+   DebuggingRay::DebuggingRay(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      Line{ openGL, isInitiallyVisible }
    {
    }
 
    bool DebuggingRay::Render(
       const Camera& camera,
       const std::vector<Light>&,
-      const OptionsManager&)
+      const Settings::Manager&)
    {
       if (!m_shouldRender)
       {

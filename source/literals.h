@@ -1,6 +1,8 @@
 #ifndef LITERALS_H
 #define LITERALS_H
 
+#include <cassert>
+
 namespace Literals
 {
    namespace Numeric

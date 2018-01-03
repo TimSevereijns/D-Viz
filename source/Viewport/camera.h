@@ -175,7 +175,7 @@ class Camera
        *
        * @param[in] bounds          The current size of the viewport.
        */
-      void SetViewport(const QRect& size) noexcept;
+      void SetViewport(const QRect& prefixedSize) noexcept;
 
       /**
        * @brief Retrieves the dimensions of the viewport.

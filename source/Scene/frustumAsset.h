@@ -11,12 +11,15 @@ namespace Asset
    class Frustum final : public Line
    {
       public:
-         explicit Frustum(QOpenGLExtraFunctions& openGL);
+
+         explicit Frustum(
+            QOpenGLExtraFunctions& openGL,
+            bool isInitiallyVisible);
 
          bool Render(
             const Camera& camera,
             const std::vector<Light>& lights,
-            const OptionsManager& settings) override;
+            const Settings::Manager& settings) override;
 
          void GenerateFrusta(const Camera& camera);
    };

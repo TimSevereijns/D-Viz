@@ -15,9 +15,10 @@
 #include "scanningWorker.h"
 
 /**
- * @brief The DriveScanner class uses a dedicate thread to scan the specified drive or part thereof.
+ * @brief The Drive Scanner class uses a dedicate thread to scan the specified drive or part
+ * thereof.
  */
-class DriveScanner : public QObject
+class DriveScanner final : public QObject
 {
    Q_OBJECT
 
@@ -41,7 +42,7 @@ class DriveScanner : public QObject
        * @param[in] fileTree        The final tree representing the scanned drive (or a part
        *                            thereof).
        */
-      void HandleCompletion(std::shared_ptr<Tree<VizFile>> fileTree);
+      void HandleCompletion(const std::shared_ptr<Tree<VizFile>>& fileTree);
 
       /**
        * @brief Handle the ScanningWorker::ProgressUpdate signal.

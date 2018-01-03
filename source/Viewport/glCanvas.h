@@ -5,8 +5,8 @@
 #include "controller.h"
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
+#include "gamepadContextMenu.h"
 #include "HID/keyboardManager.h"
-#include "optionsManager.h"
 #include "Scene/baseAsset.h"
 #include "Scene/crosshairAsset.h"
 #include "Scene/debuggingRayAsset.h"
@@ -15,18 +15,20 @@
 #include "Scene/lightMarkerAsset.h"
 #include "Scene/originMarkerAsset.h"
 #include "Scene/treemapAsset.h"
+#include "Settings/settingsManager.h"
 #include "Visualizations/visualization.h"
-#include "Windows/mainWindow.h"
 
 #include <chrono>
 #include <deque>
 #include <memory>
 
 #include <QOpenGLWidget>
+#include <QPainter>
 #include <QTimer>
 #include <QVector3D>
 
-// @todo Move these to a separate file.
+class Gamepad;
+
 namespace Asset
 {
    namespace Tag
@@ -35,36 +37,48 @@ namespace Asset
       {
          using AssetType = void;
          virtual int GetID() const noexcept { return 0; }
+
+         static constexpr wchar_t Name[] = L"Base";
       };
 
       struct OriginMarker final : Base
       {
          using AssetType = Asset::OriginMarker;
          int GetID() const noexcept override { return 1; }
+
+         static constexpr wchar_t Name[] = L"OriginMarker";
       };
 
       struct Grid final : Base
       {
          using AssetType = Asset::Grid;
          int GetID() const noexcept override { return 2; }
+
+         static constexpr wchar_t Name[] = L"Grid";
       };
 
       struct Crosshair final : Base
       {
           using AssetType = Asset::Crosshair;
           int GetID() const noexcept override { return 3; }
+
+          static constexpr wchar_t Name[] = L"Crosshair";
       };
 
       struct Treemap final : Base
       {
          using AssetType = Asset::Treemap;
          int GetID() const noexcept override { return 4; }
+
+         static constexpr wchar_t Name[] = L"Treemap";
       };
 
-      struct LightMarkers final : Base
+      struct LightMarker final : Base
       {
          using AssetType = Asset::LightMarker;
          int GetID() const noexcept override { return 5; }
+
+         static constexpr wchar_t Name[] = L"LightMarker";
       };
 
       struct Frusta final : Base
@@ -107,6 +121,11 @@ class GLCanvas final : public QOpenGLWidget
       void ReloadVisualization();
 
       /**
+       * @brief Applies the currently active color scheme, as set via the Settings::Manager.
+       */
+      void ApplyColorScheme();
+
+      /**
        * @brief Sets the current field of view for the camera.
        *
        * @param[in] fieldOfView     The new field of view.
@@ -118,12 +137,14 @@ class GLCanvas final : public QOpenGLWidget
        *
        * @param[in] node            The node whose visual representation is to be repainted.
        */
-      inline void SelectNode(const Tree<VizFile>::Node* const node);
+      inline void SelectNode(const Tree<VizFile>::Node& node);
 
       /**
        * @brief Restores the color of the selected node back to its unselected state.
+       *
+       * @param[in] node            The node whose visual representation is to be repainted.
        */
-      void RestoreSelectedNode();
+      inline void RestoreSelectedNode(const Tree<VizFile>::Node& node);
 
       /**
        * @brief HighlightSelectedNodes
@@ -136,24 +157,12 @@ class GLCanvas final : public QOpenGLWidget
       void RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& nodes);
 
       /**
-       * @brief ToggleRenderState
+       * @brief Toggles an asset's visibility.
        *
-       * @param desiredState
+       * @param[in] desiredState    Pass in true if the asset should be visible.
        */
       template<typename TagType>
-      void ToggleAssetVisibility(bool desiredState) const noexcept
-      {
-         auto* const asset = GetAsset<TagType>();
-
-         if (desiredState == true)
-         {
-            asset->Show();
-         }
-         else
-         {
-            asset->Hide();
-         }
-      }
+      void ToggleAssetVisibility(bool desiredState) const noexcept;
 
    protected:
 
@@ -185,9 +194,6 @@ class GLCanvas final : public QOpenGLWidget
 
       /**
        * @brief Records the elapsed frame time.
-       *
-       * @todo Double-check that this is actually a sane way of doing it, or if I'm missing
-       * something.
        */
       void UpdateFrameTime(const std::chrono::microseconds& elapsedTime);
 
@@ -199,40 +205,48 @@ class GLCanvas final : public QOpenGLWidget
       void ShowContextMenu(const QPoint& point);
 
       /**
-       * @brief HandleKeyboardInput
+       * @brief Generates and displays a gamepad-compatible context menu.
+       */
+      void ShowGamepadContextMenu();
+
+      /**
+       * @brief Handles keyboard input.
        *
-       * @param[in] elapsedTime
+       * @param[in] elapsedTime     The time that has elapsed since the last processing of keyboard
+       *                            state.
        */
       void HandleKeyboardInput(const std::chrono::milliseconds& elapsedTime);
 
       /**
        * @brief Handles the input from the gamepad controller.
        *
-       * @param[in] elapsedTime
+       * @param[in] elapsedTime     The time that has elapsed since the last processing of gamepad
+       *                            state.
        */
       void HandleGamepadInput(const std::chrono::milliseconds& elapsedTime);
 
       /**
-       * @brief HandleGamepadKeyInput
+       * @brief Handles button input from the gamepad.
        *
-       * @param gamepad
-       * @param elapsedTime
+       * @param[in] gamepad         The gamepad controller.
+       * @param[in] elapsedTime     The time that has elapsed since the last processing of gamepad
+       *                            state.
        */
-      void HandleGamepadKeyInput(
+      void HandleGamepadButtonInput(
          const Gamepad& gamepad,
          const std::chrono::milliseconds& elapsedTime);
 
       /**
        * @brief Handles left and right trigger input.
        *
-       * @param[in] gamepad
+       * @param[in] gamepad         The gamepad controller.
        */
       void HandleGamepadTriggerInput(const Gamepad& gamepad);
 
       /**
        * @brief Handles thumb stick inputs.
        *
-       * @param[in] gamepad.
+       * @param[in] gamepad         The gamepad controller.
        */
       void HandleGamepadThumbstickInput(const Gamepad& gamepad);
 
@@ -257,9 +271,17 @@ class GLCanvas final : public QOpenGLWidget
       void PrepareOriginMarkerVertexBuffers();
 
       /**
-       * @brief SelectNodeViaRay
+       * @brief Uses a picking ray to select a node in the scene.
+       *
+       * @param[in] rayOrigin       The 2D coordinate on the OpenGL canvas from which the picking
+       *                            ray will be projected into the scene.
        */
       void SelectNodeViaRay(const QPoint& rayOrigin);
+
+      /**
+       * @brief Draws the various read-out on the viewport.
+       */
+      void RenderText();
 
       /**
        * @brief Helper function that turns scene asset retrieval into a simple one-liner.
@@ -269,22 +291,7 @@ class GLCanvas final : public QOpenGLWidget
        *                            store one instance of each type.
        */
       template<typename RequestedAsset>
-      typename RequestedAsset::AssetType* GetAsset() const noexcept
-      {
-         const auto itr = std::find_if(std::begin(m_sceneAssets), std::end(m_sceneAssets),
-           [targetID = RequestedAsset{ }.GetID()] (const auto& tagAndAsset) noexcept
-         {
-            return tagAndAsset.tag->GetID() == targetID;
-         });
-
-         if (itr == std::end(m_sceneAssets))
-         {
-            assert(false);
-            return nullptr;
-         }
-
-         return static_cast<typename RequestedAsset::AssetType*>(itr->asset.get());
-      }
+      typename RequestedAsset::AssetType* GetAsset() const noexcept;
 
       /**
        * @brief Helper function that turns scene asset registration into a simple one-liner.
@@ -294,14 +301,7 @@ class GLCanvas final : public QOpenGLWidget
        *                            each type.
        */
       template<typename AssetTag>
-      void RegisterAsset()
-      {
-         m_sceneAssets.emplace_back(TagAndAsset
-         {
-            std::make_unique<AssetTag>(),
-            std::make_unique<AssetTag::AssetType>(m_graphicsDevice)
-         });
-      }
+      void RegisterAsset();
 
       bool m_isPaintingSuspended{ false };
       bool m_isVisualizationLoaded{ false };
@@ -309,6 +309,8 @@ class GLCanvas final : public QOpenGLWidget
       bool m_isRightTriggerDown{ false };
       bool m_isLeftMouseButtonDown{ false };
       bool m_isCursorHidden{ false };
+
+      GamepadContextMenu* m_gamepadContextMenu{ nullptr };
 
       Controller& m_controller;
 
@@ -339,10 +341,9 @@ class GLCanvas final : public QOpenGLWidget
          Light{ QVector3D{ -200.0f, 250.0f, 200.0f } },
          Light{ QVector3D{ 0.0f, 80.0f, -VisualizationModel::ROOT_BLOCK_DEPTH } },
          Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
-         Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, -VisualizationModel::ROOT_BLOCK_DEPTH } }
+         Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f,
+            -VisualizationModel::ROOT_BLOCK_DEPTH } }
       };
-
-      std::shared_ptr<OptionsManager> m_optionsManager;
 
       Camera m_camera;
 

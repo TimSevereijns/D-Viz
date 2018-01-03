@@ -66,7 +66,7 @@ namespace Asset
    bool TexturePreview::Render(
       const Camera&,
       const std::vector<Light>&,
-      const OptionsManager&)
+      const Settings::Manager&)
    {
       // @note The viewport needs to match the coordinates seen in the `coordinates` array in the
       // Initialize(...) fuction.
@@ -106,7 +106,7 @@ namespace Asset
       return true;
    }
 
-   bool TexturePreview::Reload()
+   bool TexturePreview::Refresh()
    {
       return true;
    }

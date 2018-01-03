@@ -2,7 +2,7 @@
 #define BASEASSET_H
 
 #include "../DataStructs/light.h"
-#include "../optionsManager.h"
+#include "../Settings/settingsManager.h"
 #include "../Viewport/camera.h"
 #include "../Visualizations/visualization.h"
 
@@ -18,10 +18,11 @@ class TreeNode;
 
 namespace Asset
 {
-   enum struct UpdateAction : short
+   enum struct Event : short
    {
       SELECT = 0,
-      DESELECT
+      HIGHLIGHT,
+      RESTORE
    };
 
    /**
@@ -32,7 +33,15 @@ namespace Asset
    {
       public:
 
-         explicit Base(QOpenGLExtraFunctions& openGL);
+         /**
+          * @brief Constructs a new instance of the Asset::Base class.
+          *
+          * @param[in] openGL                The OpenGL function bindings.
+          * @param[in] isInitiallyVisible    Whether the asset should be visible.
+          */
+         Base(
+            QOpenGLExtraFunctions& openGL,
+            bool isInitiallyVisible);
 
          virtual ~Base() = default;
 
@@ -74,7 +83,7 @@ namespace Asset
          virtual bool Render(
             const Camera& camera,
             const std::vector<Light>& light,
-            const OptionsManager& settings) = 0;
+            const Settings::Manager& settings) = 0;
 
          /**
           * @brief Determines whether the scene asset has been loaded.
@@ -92,7 +101,7 @@ namespace Asset
           *
           * @returns True if the operation succeeded.
           */
-         virtual bool Reload() = 0;
+         virtual bool Refresh() = 0;
 
          /**
           * @brief Sets the vertex data associated with the asset in question.
@@ -158,15 +167,14 @@ namespace Asset
           *
           * @param[in] node            The TreeNode whose visualization should be updated.
           * @param[in] action          The type of update to perform on the target VBO segment.
+          * @param[in] settings        Any additional settings relevant to rendering.
           */
          virtual void UpdateVBO(
             const Tree<VizFile>::Node& node,
-            UpdateAction action,
-            const VisualizationParameters& options);
+            Event action,
+            const Settings::Manager& settings);
 
       protected:
-
-         bool m_shouldRender{ true };
 
          /**
           * @brief Helper function to compile and load the specified OpenGL shaders.
@@ -191,6 +199,8 @@ namespace Asset
          QVector<QVector3D> m_rawColors;
 
          QOpenGLExtraFunctions& m_openGL;
+
+         bool m_shouldRender{ true };
    };
 }
 

@@ -1,6 +1,7 @@
 #include "scanBreakdownModel.h"
 
 #include "../controller.h"
+#include "../Settings/settingsManager.h"
 
 #include <iterator>
 
@@ -89,12 +90,31 @@ void ScanBreakdownModel::insert(const Tree<VizFile>::Node& node)
    }
 }
 
-void ScanBreakdownModel::FinalizeInsertion()
+void ScanBreakdownModel::FinalizeInsertion(const Settings::Manager& settingsManager)
 {
    assert(!m_fileTypeMap.empty() && m_fileTypeVector.empty());
 
-   std::copy(
+   const auto prefix = settingsManager.GetActiveNumericPrefix();
+
+   std::transform(
       std::begin(m_fileTypeMap),
       std::end(m_fileTypeMap),
-      std::back_inserter(m_fileTypeVector));
+      std::back_inserter(m_fileTypeVector),
+      [&] (const auto& extensionAndTotalSize)
+   {
+      const auto& [fileExtension, totalSize] = extensionAndTotalSize;
+
+      const auto [prefixedSize, prefixUnits] =
+         Controller::ConvertFileSizeToNumericPrefix(totalSize, prefix);
+
+      auto sizeLabel =
+         Utilities::StringifyWithDigitSeparators(prefixedSize) + L" " + prefixUnits;
+
+      return RowModel
+      {
+         fileExtension,
+         std::move(sizeLabel),
+         static_cast<std::uintmax_t>(totalSize)
+      };
+   });
 }

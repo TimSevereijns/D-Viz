@@ -35,7 +35,6 @@ SOURCES += \
    HID/gamepad.cpp \
    HID/keyboardManager.cpp \
    main.cpp \
-   optionsManager.cpp \
    Scene/baseAsset.cpp \
    Scene/crosshairAsset.cpp \
    Scene/debuggingRayAsset.cpp \
@@ -46,9 +45,12 @@ SOURCES += \
    Scene/originMarkerAsset.cpp \
    Scene/texturePreviewAsset.cpp \
    Scene/treemapAsset.cpp \
+   Settings/settings.cpp \
+   Settings/settingsManager.cpp \
    Viewport/camera.cpp \
-   Viewport/canvasContextMenu.cpp \
+   Viewport/gamepadContextMenu.cpp \
    Viewport/glCanvas.cpp \
+   Viewport/mouseContextMenu.cpp \
    Visualizations/squarifiedTreemap.cpp \
    Visualizations/visualization.cpp \
    Windows/aboutDialog.cpp \
@@ -68,12 +70,10 @@ HEADERS += \
    DataStructs/vizFile.cpp \
    DriveScanner/driveScanner.h \
    DriveScanner/scanningWorker.h \
-   globals.h \
    HID/gamepad.h \
    HID/keyboardManager.h \
    literals.h \
-   optionsManager.h \
-   Scene/baseAsset.cpp \
+   Scene/baseAsset.h \
    Scene/crosshairAsset.h \
    Scene/debuggingRayAsset.h \
    Scene/frustumAsset.h \
@@ -83,6 +83,9 @@ HEADERS += \
    Scene/originMarkerAsset.h \
    Scene/texturePreviewAsset.h \
    Scene/treemapAsset.h \
+   Settings/preferencesMap.hpp \
+   Settings/settings.h \
+   Settings/settingsManager.h \
    Utilities/colorGradient.hpp \
    Utilities/ignoreUnused.hpp \
    Utilities/operatingSystemSpecific.hpp \
@@ -90,15 +93,15 @@ HEADERS += \
    Utilities/threadSafeQueue.hpp \
    Utilities/utilities.hpp \
    Viewport/camera.h \
-   Viewport/canvasContextMenu.h \
+   Viewport/gamepadContextMenu.h \
    Viewport/glCanvas.h \
+   Viewport/mouseContextMenu.h \
    Visualizations/squarifiedTreemap.h \
    Visualizations/visualization.h \
    Windows/aboutDialog.h \
    Windows/breakdownDialog.h \
    Windows/mainWindow.h \
-   Windows/scanBreakdownModel.h \
-    Scene/baseAsset.h
+   Windows/scanBreakdownModel.h
 
 FORMS += \
    Windows/aboutDialog.ui \
@@ -107,10 +110,10 @@ FORMS += \
 
 INCLUDEPATH += \
    ../../boost \
+   ../Foreign/RapidJson/include \
    ../Foreign/Spdlog/include \
    ../Foreign/Stopwatch/source \
-   ../Foreign/Tree/source \
-   ../Foreign/ArenaAllocator/source
+   ../Foreign/Tree/source
 
 DISTFILES += \
    Shaders/visualizationFragmentShader.frag \

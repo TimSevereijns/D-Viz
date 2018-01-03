@@ -150,11 +150,6 @@ namespace
    }
 }
 
-SquarifiedTreeMap::SquarifiedTreeMap(const VisualizationParameters& parameters) :
-   VisualizationModel{ parameters }
-{
-}
-
 Block SquarifiedTreeMap::ComputeRemainingArea(const Block& block)
 {
    const auto& originOfNextRow = block.GetNextRowOrigin();
@@ -501,11 +496,11 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizFile>>& theTree)
       VisualizationModel::ROOT_BLOCK_DEPTH
    };
 
-   theTree->GetRoot()->GetData().block = rootBlock;
+   m_theTree->GetRoot()->GetData().block = rootBlock;
 
    Stopwatch<std::chrono::milliseconds>([&]
    {
-      SquarifyRecursively(*theTree->GetRoot());
+      SquarifyRecursively(*m_theTree->GetRoot());
    }, [] (const auto& elapsed, const auto& units) noexcept
    {
       spdlog::get(Constants::Logging::DEFAULT_LOG)->info(

@@ -12,22 +12,20 @@
 #include <vector>
 
 BreakdownDialog::BreakdownDialog(QWidget* parent) :
-   QDialog{ parent }
+   QDialog{ parent },
+   m_mainWindow{ *(reinterpret_cast<MainWindow*>(parent)) }
 {
    m_ui.setupUi(this);
 
-   auto* const mainWindow = reinterpret_cast<MainWindow*>(parent);
-   assert(mainWindow);
-
-   const auto& controller = mainWindow->GetController();
-   const auto tree = controller.GetTree();
+   const auto& controller = m_mainWindow.GetController();
+   const auto& tree = controller.GetTree();
 
    if (tree.GetRoot()->GetChildCount() == 0)
    {
       return;
    }
 
-   Stopwatch<std::chrono::milliseconds>([&] ()
+   Stopwatch<std::chrono::milliseconds>([&]
    {
       for (const auto& node : tree)
       {
@@ -42,7 +40,7 @@ BreakdownDialog::BreakdownDialog(QWidget* parent) :
          fmt::format("Built break-down model in: {} {}", elapsed.count(), units));
    });
 
-   m_model.FinalizeInsertion();
+   m_model.FinalizeInsertion(m_mainWindow.GetSettingsManager());
 
    m_proxyModel.setSourceModel(&m_model);
    m_ui.tableView->setModel(&m_proxyModel);

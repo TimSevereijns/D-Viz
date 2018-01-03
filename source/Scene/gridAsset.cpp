@@ -13,30 +13,30 @@ namespace
       vertices.reserve(44);
       vertices
          // Grid (Z-axis):
-         << QVector3D( 0.0f,   0.0f,  0.0f) << QVector3D(   0.0f, 0.0f, -1000.0f)
-         << QVector3D( 100.0f, 0.0f,  0.0f) << QVector3D( 100.0f, 0.0f, -1000.0f)
-         << QVector3D( 200.0f, 0.0f,  0.0f) << QVector3D( 200.0f, 0.0f, -1000.0f)
-         << QVector3D( 300.0f, 0.0f,  0.0f) << QVector3D( 300.0f, 0.0f, -1000.0f)
-         << QVector3D( 400.0f, 0.0f,  0.0f) << QVector3D( 400.0f, 0.0f, -1000.0f)
-         << QVector3D( 500.0f, 0.0f,  0.0f) << QVector3D( 500.0f, 0.0f, -1000.0f)
-         << QVector3D( 600.0f, 0.0f,  0.0f) << QVector3D( 600.0f, 0.0f, -1000.0f)
-         << QVector3D( 700.0f, 0.0f,  0.0f) << QVector3D( 700.0f, 0.0f, -1000.0f)
-         << QVector3D( 800.0f, 0.0f,  0.0f) << QVector3D( 800.0f, 0.0f, -1000.0f)
-         << QVector3D( 900.0f, 0.0f,  0.0f) << QVector3D( 900.0f, 0.0f, -1000.0f)
-         << QVector3D(1000.0f, 0.0f,  0.0f) << QVector3D(1000.0f, 0.0f, -1000.0f)
+         << QVector3D{  0.0f,   0.0f,  0.0f } << QVector3D{    0.0f, 0.0f, -1000.0f }
+         << QVector3D{  100.0f, 0.0f,  0.0f } << QVector3D{  100.0f, 0.0f, -1000.0f }
+         << QVector3D{  200.0f, 0.0f,  0.0f } << QVector3D{  200.0f, 0.0f, -1000.0f }
+         << QVector3D{  300.0f, 0.0f,  0.0f } << QVector3D{  300.0f, 0.0f, -1000.0f }
+         << QVector3D{  400.0f, 0.0f,  0.0f } << QVector3D{  400.0f, 0.0f, -1000.0f }
+         << QVector3D{  500.0f, 0.0f,  0.0f } << QVector3D{  500.0f, 0.0f, -1000.0f }
+         << QVector3D{  600.0f, 0.0f,  0.0f } << QVector3D{  600.0f, 0.0f, -1000.0f }
+         << QVector3D{  700.0f, 0.0f,  0.0f } << QVector3D{  700.0f, 0.0f, -1000.0f }
+         << QVector3D{  800.0f, 0.0f,  0.0f } << QVector3D{  800.0f, 0.0f, -1000.0f }
+         << QVector3D{  900.0f, 0.0f,  0.0f } << QVector3D{  900.0f, 0.0f, -1000.0f }
+         << QVector3D{ 1000.0f, 0.0f,  0.0f } << QVector3D{ 1000.0f, 0.0f, -1000.0f}
 
          // Grid (X-axis):
-         << QVector3D(0.0f, 0.0f,     0.0f) << QVector3D(1000.0f, 0.0f,     0.0f)
-         << QVector3D(0.0f, 0.0f,  -100.0f) << QVector3D(1000.0f, 0.0f,  -100.0f)
-         << QVector3D(0.0f, 0.0f,  -200.0f) << QVector3D(1000.0f, 0.0f,  -200.0f)
-         << QVector3D(0.0f, 0.0f,  -300.0f) << QVector3D(1000.0f, 0.0f,  -300.0f)
-         << QVector3D(0.0f, 0.0f,  -400.0f) << QVector3D(1000.0f, 0.0f,  -400.0f)
-         << QVector3D(0.0f, 0.0f,  -500.0f) << QVector3D(1000.0f, 0.0f,  -500.0f)
-         << QVector3D(0.0f, 0.0f,  -600.0f) << QVector3D(1000.0f, 0.0f,  -600.0f)
-         << QVector3D(0.0f, 0.0f,  -700.0f) << QVector3D(1000.0f, 0.0f,  -700.0f)
-         << QVector3D(0.0f, 0.0f,  -800.0f) << QVector3D(1000.0f, 0.0f,  -800.0f)
-         << QVector3D(0.0f, 0.0f,  -900.0f) << QVector3D(1000.0f, 0.0f,  -900.0f)
-         << QVector3D(0.0f, 0.0f, -1000.0f) << QVector3D(1000.0f, 0.0f, -1000.0f);
+         << QVector3D{ 0.0f, 0.0f,     0.0f } << QVector3D{ 1000.0f, 0.0f,     0.0f }
+         << QVector3D{ 0.0f, 0.0f,  -100.0f } << QVector3D{ 1000.0f, 0.0f,  -100.0f }
+         << QVector3D{ 0.0f, 0.0f,  -200.0f } << QVector3D{ 1000.0f, 0.0f,  -200.0f }
+         << QVector3D{ 0.0f, 0.0f,  -300.0f } << QVector3D{ 1000.0f, 0.0f,  -300.0f }
+         << QVector3D{ 0.0f, 0.0f,  -400.0f } << QVector3D{ 1000.0f, 0.0f,  -400.0f }
+         << QVector3D{ 0.0f, 0.0f,  -500.0f } << QVector3D{ 1000.0f, 0.0f,  -500.0f }
+         << QVector3D{ 0.0f, 0.0f,  -600.0f } << QVector3D{ 1000.0f, 0.0f,  -600.0f }
+         << QVector3D{ 0.0f, 0.0f,  -700.0f } << QVector3D{ 1000.0f, 0.0f,  -700.0f }
+         << QVector3D{ 0.0f, 0.0f,  -800.0f } << QVector3D{ 1000.0f, 0.0f,  -800.0f }
+         << QVector3D{ 0.0f, 0.0f,  -900.0f } << QVector3D{ 1000.0f, 0.0f,  -900.0f }
+         << QVector3D{ 0.0f, 0.0f, -1000.0f } << QVector3D{ 1000.0f, 0.0f, -1000.0f };
 
       return vertices;
    }
@@ -52,34 +52,34 @@ namespace
       colors.reserve(44);
       colors
          // Grid (Z-axis):
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
 
          // Grid (X-axis):
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f)
-         << QVector3D(1.0f, 1.0f, 0.0f) << QVector3D(1.0f, 1.0f, 0.0f);
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+         << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f };
 
       return colors;
    }
@@ -87,8 +87,11 @@ namespace
 
 namespace Asset
 {
-   Grid::Grid(QOpenGLExtraFunctions& openGL) :
-      Line{ openGL }
+   Grid::Grid(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      Line{ openGL, isInitiallyVisible }
    {
       m_rawVertices = CreateGridVertices();
       m_rawColors = CreateGridColors();
@@ -97,7 +100,7 @@ namespace Asset
    bool Grid::Render(
       const Camera& camera,
       const std::vector<Light>&,
-      const OptionsManager&)
+      const Settings::Manager&)
    {
       if (!m_shouldRender)
       {

@@ -2,9 +2,12 @@
 
 #include "../constants.h"
 #include "../DataStructs/vizFile.h"
+#include "../Settings/settings.h"
 #include "../Utilities/colorGradient.hpp"
 #include "../Utilities/scopeExit.hpp"
 #include "../Visualizations/visualization.h"
+
+#include <boost/optional.hpp>
 
 #include <Tree/Tree.hpp>
 
@@ -163,10 +166,10 @@ namespace
     */
    void SetUniformLights(
       const std::vector<Light>& lights,
-      const OptionsManager& settings,
+      const Settings::Manager& settings,
       QOpenGLShaderProgram& shader)
    {
-      for (size_t i = 0; i < lights.size(); i++)
+      for (std::size_t i = 0; i < lights.size(); i++)
       {
          const auto indexString = std::to_string(i);
 
@@ -184,9 +187,38 @@ namespace
 
          shader.setUniformValue(position.c_str(), lights[i].position);
          shader.setUniformValue(intensity.c_str(), lights[i].intensity);
-         shader.setUniformValue(attenuation.c_str(), settings.m_lightAttenuationFactor);
-         shader.setUniformValue(ambientCoefficient.c_str(), settings.m_ambientCoefficient);
+         shader.setUniformValue(attenuation.c_str(), settings.GetLightAttentuationFactor());
+         shader.setUniformValue(ambientCoefficient.c_str(), settings.GetAmbientLightCoefficient());
       }
+   }
+
+   /**
+    * @brief Determines the appropriate color for the file based on the user-configurable color set
+    * in the color.json file.
+    *
+    * @param[in] node               The node whose color needs to be restored.
+    * @param[in] settings           The settings that will determine the color.
+    *
+    * @returns The appropriate color found in the color map.
+    */
+   boost::optional<QVector3D> DetermineColorFromExtension(
+      const Tree<VizFile>::Node& node,
+      const Settings::Manager& settings)
+   {
+      const auto& colorMap = settings.GetFileColorMap();
+      const auto categoryItr = colorMap.find(settings.GetActiveColorScheme());
+      if (categoryItr == std::end(colorMap))
+      {
+         return boost::none;
+      }
+
+      const auto extensionItr = categoryItr->second.find(node->file.extension);
+      if (extensionItr == std::end(categoryItr->second))
+      {
+         return boost::none;
+      }
+
+      return extensionItr->second;
    }
 
    /**
@@ -194,20 +226,26 @@ namespace
     * settings.
     *
     * @param[in] node               The node whose color needs to be restored.
-    * @param[in] params             The rendering settings that will determine the color.
+    * @param[in] settings           The settings that will determine the color.
     *
     * @returns The color to restore the node to.
     */
    QVector3D RestoreColor(
       const Tree<VizFile>::Node& node,
-      const VisualizationParameters& params)
+      const Settings::Manager& settings)
    {
+      const auto fileColor = DetermineColorFromExtension(node, settings);
+      if (fileColor)
+      {
+         return *fileColor;
+      }
+
       if (node.GetData().file.type != FileType::DIRECTORY)
       {
          return Constants::Colors::FILE_GREEN;
       }
 
-      if (!params.useDirectoryGradient)
+      if (!settings.GetVisualizationParameters().useDirectoryGradient)
       {
          return Constants::Colors::WHITE;
       }
@@ -248,8 +286,11 @@ namespace
 
 namespace Asset
 {
-   Treemap::Treemap(QOpenGLExtraFunctions& openGL) :
-      Base{ openGL }
+   Treemap::Treemap(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      Base{ openGL, isInitiallyVisible }
    {
    }
 
@@ -294,9 +335,9 @@ namespace Asset
       const auto referenceBlock = Block
       {
          PrecisePoint{ 0.0, 0.0, 0.0 },
-         1.0,
-         1.0,
-         1.0,
+         /* width =  */ 1.0,
+         /* height = */ 1.0,
+         /* depth =  */ 1.0,
          /* generateVertices = */ true
       };
 
@@ -468,14 +509,16 @@ namespace Asset
 
    std::uint32_t Treemap::LoadBufferData(
       const Tree<VizFile>& tree,
-      const VisualizationParameters& parameters)
+      const Settings::Manager& settings)
    {
       m_blockTransformations.clear();
       m_blockColors.clear();
 
       m_blockCount = 0;
 
-      for (auto&& node : tree)
+      const auto& parameters = settings.GetVisualizationParameters();
+
+      for (auto& node : tree)
       {
          const bool fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
          const bool notTheRightFileType =
@@ -496,21 +539,7 @@ namespace Asset
          instanceMatrix.scale(block.GetWidth(), block.GetHeight(), block.GetDepth());
          m_blockTransformations << instanceMatrix;
 
-         if (node->file.type == FileType::DIRECTORY)
-         {
-            if (parameters.useDirectoryGradient)
-            {
-               m_blockColors << ComputeGradientColor(node);
-            }
-            else
-            {
-               m_blockColors << Constants::Colors::WHITE;
-            }
-         }
-         else if (node->file.type == FileType::REGULAR)
-         {
-            m_blockColors << Constants::Colors::FILE_GREEN;
-         }
+         ComputeAppropriateBlockColor(node, settings);
       }
 
       FindLargestDirectory(tree);
@@ -519,6 +548,29 @@ namespace Asset
       assert(m_blockColors.size() == static_cast<int>(m_blockCount));
 
       return m_blockCount;
+   }
+
+   void Treemap::ReloadColorBufferData(
+      const Tree<VizFile>& tree,
+      const Settings::Manager& settings)
+   {
+      m_blockColors.clear();
+
+      const auto& parameters = settings.GetVisualizationParameters();
+
+      for (const auto& node : tree)
+      {
+         const bool fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
+         const bool notTheRightFileType =
+            parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY;
+
+         if (notTheRightFileType || fileIsTooSmall)
+         {
+            continue;
+         }
+
+         ComputeAppropriateBlockColor(node, settings);
+      }
    }
 
    void Treemap::FindLargestDirectory(const Tree<VizFile>& tree)
@@ -533,12 +585,13 @@ namespace Asset
          }
 
          const auto directorySize = node.GetData().file.size;
-
          if (directorySize > largestDirectory)
          {
             largestDirectory = directorySize;
          }
       }
+
+      assert(largestDirectory > std::numeric_limits<std::uintmax_t>::min());
 
       m_largestDirectorySize = largestDirectory;
    }
@@ -546,10 +599,45 @@ namespace Asset
    QVector3D Treemap::ComputeGradientColor(const Tree<VizFile>::Node& node)
    {
       const auto blockSize = node.GetData().file.size;
-      const auto ratio = static_cast<double>(blockSize) / static_cast<double>(m_largestDirectorySize);
+      const auto ratio =
+         static_cast<long double>(blockSize) / static_cast<long double>(m_largestDirectorySize);
 
       const auto finalColor = m_directoryColorGradient.GetColorAtValue(static_cast<float>(ratio));
       return finalColor;
+   }
+
+   void Treemap::ComputeAppropriateBlockColor(
+      const Tree<VizFile>::Node& node,
+      const Settings::Manager& settings)
+   {
+      // @todo Need to also take into consideration whether the node is highlighted or selected,
+      // since we don't want to get out of sync with the controller's view of the world.
+
+      if (settings.GetActiveColorScheme() != Constants::ColorScheme::DEFAULT)
+      {
+         const auto fileColor = DetermineColorFromExtension(node, settings);
+         if (fileColor)
+         {
+            m_blockColors << *fileColor;
+            return;
+         }
+      }
+
+      if (node->file.type == FileType::DIRECTORY)
+      {
+         if (settings.GetVisualizationParameters().useDirectoryGradient)
+         {
+            m_blockColors << ComputeGradientColor(node);
+         }
+         else
+         {
+            m_blockColors << Constants::Colors::WHITE;
+         }
+      }
+      else if (node->file.type == FileType::REGULAR)
+      {
+         m_blockColors << Constants::Colors::FILE_GREEN;
+      }
    }
 
    std::uint32_t Treemap::GetBlockCount() const
@@ -615,14 +703,14 @@ namespace Asset
    void Treemap::RenderMainPass(
       const Camera& camera,
       const std::vector<Light>& lights,
-      const OptionsManager& settings)
+      const Settings::Manager& settings)
    {
       m_openGL.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       m_mainShader.bind();
 
       m_mainShader.setUniformValue("cameraPosition", camera.GetPosition());
-      m_mainShader.setUniformValue("materialShininess", settings.m_materialShininess);
+      m_mainShader.setUniformValue("materialShininess", settings.GetMaterialShininess());
 
       const QMatrix4x4 lightProjectionViewMatrix = ComputeLightTransformationMatrix(camera);
 
@@ -651,7 +739,7 @@ namespace Asset
    bool Treemap::Render(
       const Camera& camera,
       const std::vector<Light>& lights,
-      const OptionsManager& settings)
+      const Settings::Manager& settings)
    {
       if (!IsAssetLoaded())
       {
@@ -665,7 +753,7 @@ namespace Asset
       return true;
    }
 
-   bool Treemap::Reload()
+   bool Treemap::Refresh()
    {
       InitializeReferenceBlock();
       InitializeColors();
@@ -676,21 +764,35 @@ namespace Asset
 
    void Treemap::UpdateVBO(
       const Tree<VizFile>::Node& node,
-      Asset::UpdateAction action,
-      const VisualizationParameters& options)
+      Asset::Event action,
+      const Settings::Manager& settings)
    {
+      assert(m_VAO.isCreated());
+      assert(m_blockColorBuffer.isCreated());
+      assert(node->offsetIntoVBO < m_blockCount);
+
       constexpr auto colorTupleSize{ sizeof(QVector3D) };
       const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorTupleSize;
 
-      const auto newColor = (action == Asset::UpdateAction::DESELECT)
-         ? RestoreColor(node, options)
-         : Constants::Colors::CANARY_YELLOW;
+      QVector3D newColor;
 
-      assert(m_VAO.isCreated());
-      assert(m_blockColorBuffer.isCreated());
-
-      // @todo This appears to fail, figure out why:
-      //assert(m_blockColorBuffer.size() >= static_cast<int>(offsetIntoColorBuffer / colorTupleSize));
+      switch (action)
+      {
+         case Asset::Event::SELECT:
+         {
+            newColor = Constants::Colors::CANARY_YELLOW;
+            break;
+         }
+         case Asset::Event::HIGHLIGHT:
+         {
+            newColor = Constants::Colors::SLATE_GRAY;
+            break;
+         }
+         default:
+         {
+            newColor = RestoreColor(node, settings);
+         }
+      }
 
       m_VAO.bind();
       m_blockColorBuffer.bind();

@@ -2,15 +2,18 @@
 
 namespace Asset
 {
-   LightMarker::LightMarker(QOpenGLExtraFunctions& openGL) :
-      Line{ openGL }
+   LightMarker::LightMarker(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      Line{ openGL, isInitiallyVisible }
    {
    }
 
    bool LightMarker::Render(
       const Camera& camera,
       const std::vector<Light>&,
-      const OptionsManager&)
+      const Settings::Manager&)
    {
       if (!m_shouldRender)
       {

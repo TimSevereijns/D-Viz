@@ -23,9 +23,9 @@ namespace Asset
       bool Render(
          const Camera &camera,
          const std::vector<Light>& light,
-         const OptionsManager& settings) override;
+         const Settings::Manager& settings) override;
 
-      bool Reload() override;
+      bool Refresh() override;
 
       void SetTexture(const QImage &texture);
 

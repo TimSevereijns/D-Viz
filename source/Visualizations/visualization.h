@@ -13,33 +13,17 @@
 #include <Tree/Tree.hpp>
 
 #include "../DataStructs/vizFile.h"
+#include "../Settings/settings.h"
 #include "../Viewport/camera.h"
 
 /**
- * @brief The VisualizationParameters struct represents the gamut of visualization parameters that
- * can be set to control when visualization updates occur, as well as what nodes get included.
- */
-struct VisualizationParameters
-{
-   std::wstring rootDirectory{ L"" };  ///< The path to the root directory
-
-   std::uint64_t minimumFileSize{ 0 }; ///< The minimum size a file should be before it shows up.
-
-   boost::optional<std::wstring> isolatedExtension{ }; ///< Only show files matching this type.
-
-   bool forceNewScan{ true };          ///< Whether a new scan should take place.
-   bool onlyShowDirectories{ false };  ///< Whether only directories should be shown.
-   bool useDirectoryGradient{ false }; ///< Whether to use gradient coloring for the directories.
-};
-
-/**
- * @brief Base visualization class.
+ * @brief Base class for the visualization model.
  */
 class VisualizationModel
 {
    public:
 
-      explicit VisualizationModel(const VisualizationParameters& parameters);
+      VisualizationModel() = default;
 
       virtual ~VisualizationModel() = default;
 
@@ -75,6 +59,8 @@ class VisualizationModel
        * This search operation is carried out with aid of the minimum Axis-Aligned Bounding Boxes
        * (AABB) that surround each node and its descendants.
        *
+       * @todo Remove the camera from the parameter list; just pass in a point..
+       *
        * @param[in] camera          The camera from which the ray originated.
        * @param[in] ray             The picking ray.
        * @param[in] parameters      @see VisualizationParameters. Used to prune disqualified nodes.
@@ -85,17 +71,15 @@ class VisualizationModel
       Tree<VizFile>::Node* FindNearestIntersection(
          const Camera& camera,
          const Qt3DRender::RayCasting::QRay3D& ray,
-         const VisualizationParameters& parameters) const;
+         const Settings::VisualizationParameters& parameters) const;
 
       /**
-       * @brief GetTree
-       * @return
+       * @returns A reference to the directory tree.
        */
       Tree<VizFile>& GetTree();
 
       /**
-       * @brief GetTree
-       * @return
+       * @overload
        */
       const Tree<VizFile>& GetTree() const;
 
@@ -109,11 +93,11 @@ class VisualizationModel
 
    protected:
 
+      // @note The tree is stored in a shared pointer so that it can be passed through the Qt
+      // signaling framework; any type passed through it needs to be copy-constructible.
       std::shared_ptr<Tree<VizFile>> m_theTree{ nullptr };
 
       bool m_hasDataBeenParsed{ false };
-
-      VisualizationParameters m_vizParameters;
 };
 
 #endif // VISUALIZATIONMODEL_H

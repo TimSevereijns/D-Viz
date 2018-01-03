@@ -159,6 +159,7 @@ namespace
 
       for (auto index{ 0 }; index < vertices.size(); ++index)
       {
+
          colors << Constants::Colors::CORAL;
       }
 
@@ -268,15 +269,18 @@ namespace
 
 namespace Asset
 {
-   Frustum::Frustum(QOpenGLExtraFunctions& openGL) :
-      Line{ openGL }
+   Frustum::Frustum(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      Line{ openGL, isInitiallyVisible }
    {
    }
 
    bool Frustum::Render(
       const Camera& camera,
       const std::vector<Light>& /*lights*/,
-      const OptionsManager& /*settings*/)
+      const Settings::Manager& /*settings*/)
    {
       if (!m_shouldRender)
       {
@@ -323,6 +327,6 @@ namespace Asset
       GenerateCameraFrusta(*this, renderCamera);
       GenerateShadowCasterFrustum(*this, shadowCamera);
 
-      Reload();
+      Refresh();
    }
 }

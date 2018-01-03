@@ -1,8 +1,10 @@
 #include "glCanvas.h"
 
 #include "../constants.h"
+#include "../Windows/mainWindow.h"
 
-#include "canvasContextMenu.h"
+#include "mouseContextMenu.h"
+#include "gamepadContextMenu.h"
 #include "Stopwatch/Stopwatch.hpp"
 #include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
@@ -11,8 +13,6 @@
 #include <QApplication>
 #include <QMenu>
 #include <QMessageBox>
-
-#include <spdlog/spdlog.h>
 
 #include <iostream>
 
@@ -61,8 +61,6 @@ GLCanvas::GLCanvas(
    m_controller{ controller },
    m_mainWindow{ *(reinterpret_cast<MainWindow*>(parent)) }
 {
-   m_optionsManager = m_mainWindow.GetOptionsManager();
-
    m_camera.SetPosition(QVector3D{ 500, 100, 0 });
    m_camera.SetFarPlane(10'000.0f);
 
@@ -97,16 +95,63 @@ void GLCanvas::initializeGL()
    RegisterAsset<Asset::Tag::OriginMarker>();
    RegisterAsset<Asset::Tag::Treemap>();
    RegisterAsset<Asset::Tag::Crosshair>();
-   RegisterAsset<Asset::Tag::LightMarkers>();
+   RegisterAsset<Asset::Tag::LightMarker>();
    RegisterAsset<Asset::Tag::Frusta>();
 
-   auto* lightMarkers = GetAsset<Asset::Tag::LightMarkers>();
+   auto* lightMarkers = GetAsset<Asset::Tag::LightMarker>();
    InitializeLightMarkers(m_lights, *lightMarkers);
 
    for (const auto& tagAndAsset : m_sceneAssets)
    {
       tagAndAsset.asset->LoadShaders();
       tagAndAsset.asset->Initialize();
+   }
+}
+
+template<typename AssetTag>
+void GLCanvas::RegisterAsset()
+{
+   const auto assetName = std::wstring{ L"show" } + AssetTag::Name;
+   const auto& preferences = m_mainWindow.GetSettingsManager().GetPreferenceMap();
+   const auto isInitiallyVisible = preferences.GetValueOrDefault(assetName, true);
+
+   m_sceneAssets.emplace_back(TagAndAsset
+   {
+      std::make_unique<AssetTag>(),
+      std::make_unique<typename AssetTag::AssetType>(m_graphicsDevice, isInitiallyVisible)
+   });
+}
+
+template<typename RequestedAsset>
+typename RequestedAsset::AssetType* GLCanvas::GetAsset() const noexcept
+{
+   const auto itr = std::find_if(std::begin(m_sceneAssets), std::end(m_sceneAssets),
+     [targetID = RequestedAsset{ }.GetID()] (const auto& tagAndAsset) noexcept
+   {
+      return tagAndAsset.tag->GetID() == targetID;
+   });
+
+   if (itr == std::end(m_sceneAssets))
+   {
+      assert(false);
+      return nullptr;
+   }
+
+   return static_cast<typename RequestedAsset::AssetType*>(itr->asset.get());
+}
+
+template<typename TagType>
+void GLCanvas::ToggleAssetVisibility(bool desiredState) const noexcept
+{
+   auto* const asset = GetAsset<TagType>();
+
+   if (desiredState == true)
+   {
+      asset->Show();
+   }
+   else
+   {
+      asset->Hide();
    }
 }
 
@@ -126,23 +171,45 @@ void GLCanvas::resizeGL(int width, int height)
 
 void GLCanvas::ReloadVisualization()
 {
-   const bool previousSuspensionState = m_isPaintingSuspended;
+   const auto previousSuspensionState = m_isPaintingSuspended;
    ON_SCOPE_EXIT noexcept { m_isPaintingSuspended = previousSuspensionState; };
 
    m_isPaintingSuspended = true;
 
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
-   const auto parameters = m_controller.GetVisualizationParameters();
-   const auto blockCount = treemap->LoadBufferData(m_controller.GetTree(), parameters);
+
+   const auto& settings = m_mainWindow.GetSettingsManager();
+   const auto blockCount = treemap->LoadBufferData(m_controller.GetTree(), settings);
 
    for (const auto& tagAndAsset : m_sceneAssets)
    {
-      tagAndAsset.asset->Reload();
+      tagAndAsset.asset->Refresh();
    }
 
    assert(blockCount == treemap->GetBlockCount());
 
    m_controller.PrintMetadataToStatusBar();
+}
+
+void GLCanvas::ApplyColorScheme()
+{
+   auto* const treemap = GetAsset<Asset::Tag::Treemap>();
+
+   const auto deselectionCallback = [&] (auto& nodes)
+   {
+      RestoreHighlightedNodes(nodes);
+   };
+
+   m_controller.ClearHighlightedNodes(deselectionCallback);
+
+   treemap->ReloadColorBufferData(m_controller.GetTree(), m_mainWindow.GetSettingsManager());
+   treemap->Refresh();
+
+   const auto* selectedNode = m_controller.GetSelectedNode();
+   if (selectedNode)
+   {
+      SelectNode(*selectedNode);
+   }
 }
 
 void GLCanvas::SetFieldOfView(float fieldOfView)
@@ -281,8 +348,8 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
       }
 
       m_camera.OffsetOrientation(
-         m_optionsManager->m_mouseSensitivity * deltaY,
-         m_optionsManager->m_mouseSensitivity * deltaX);
+         m_mainWindow.GetSettingsManager().GetMouseSensitivity() * deltaY,
+         m_mainWindow.GetSettingsManager().GetMouseSensitivity() * deltaX);
    }
 
    event->accept();
@@ -302,27 +369,25 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
       return;
    }
 
-   const int delta = event->delta();
+   const auto cameraSpeed = m_mainWindow.GetSettingsManager().GetCameraSpeed();
+   const auto delta = event->delta();
 
    if (m_keyboardManager.IsKeyUp(Qt::Key_Shift))
    {
-      if (delta > 0 && m_optionsManager->m_cameraMovementSpeed < 1.0)
+      if (delta > 0 && cameraSpeed < 1.0)
       {
-         m_optionsManager->m_cameraMovementSpeed += 0.01;
+         m_mainWindow.SetCameraSpeedSpinner(cameraSpeed + 0.01);
       }
-      else if (delta < 0 && m_optionsManager->m_cameraMovementSpeed > 0.01)
+      else if (delta < 0 && cameraSpeed > 0.01)
       {
-         m_optionsManager->m_cameraMovementSpeed -= 0.01;
+         m_mainWindow.SetCameraSpeedSpinner(cameraSpeed - 0.01);
       }
-
-      const auto newSpeed = static_cast<double>(m_optionsManager->m_cameraMovementSpeed);
-      m_mainWindow.SetCameraSpeedSpinner(newSpeed);
    }
    else
    {
       if (delta < 0)
       {
-        m_camera.IncreaseFieldOfView();
+         m_camera.IncreaseFieldOfView();
       }
       else if (delta > 0)
       {
@@ -333,36 +398,36 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    }
 }
 
-void GLCanvas::SelectNode(const Tree<VizFile>::Node* const node)
+void GLCanvas::SelectNode(const Tree<VizFile>::Node& node)
 {
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
    treemap->UpdateVBO(
-      *node,
-      Asset::UpdateAction::SELECT,
-      m_controller.GetVisualizationParameters());
+      node,
+      Asset::Event::SELECT,
+      m_mainWindow.GetSettingsManager());
 }
 
-void GLCanvas::RestoreSelectedNode()
+void GLCanvas::RestoreSelectedNode(const Tree<VizFile>::Node& node)
 {
-   if (!m_controller.GetSelectedNode())
-   {
-      return;
-   }
-
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
    treemap->UpdateVBO(
-      *m_controller.GetSelectedNode(),
-      Asset::UpdateAction::DESELECT,
-      m_controller.GetVisualizationParameters());
+      node,
+      m_controller.IsNodeHighlighted(node) ? Asset::Event::HIGHLIGHT : Asset::Event::RESTORE,
+      m_mainWindow.GetSettingsManager());
 }
 
 void GLCanvas::HighlightNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
 {
+   auto* const treemap = GetAsset<Asset::Tag::Treemap>();
+
    for (const auto* const node : nodes)
    {
-      SelectNode(node);
+      treemap->UpdateVBO(
+         *node,
+         Asset::Event::HIGHLIGHT,
+         m_mainWindow.GetSettingsManager());
    }
 }
 
@@ -374,57 +439,136 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& 
    {
       treemap->UpdateVBO(
          *node,
-         Asset::UpdateAction::DESELECT,
-         m_controller.GetVisualizationParameters());
+         Asset::Event::RESTORE,
+         m_mainWindow.GetSettingsManager());
    }
 }
 
-void GLCanvas::ShowContextMenu(const QPoint& point)
+void GLCanvas::ShowGamepadContextMenu()
 {
+   const auto thereExistHighlightedNodes = m_controller.GetHighlightedNodes().size() > 0;
    const auto* const selectedNode = m_controller.GetSelectedNode();
-   if (!selectedNode)
+
+   if (!thereExistHighlightedNodes && !selectedNode)
    {
       return;
    }
 
-   const auto deselectionCallback = [&] (auto& nodes) { RestoreHighlightedNodes(nodes); };
-   const auto selectionCallback = [&] (auto& nodes) { HighlightNodes(nodes); };
+   const auto unhighlightCallback = [&] (auto& nodes) { RestoreHighlightedNodes(nodes); };
+   const auto highlightCallback = [&] (auto& nodes) { HighlightNodes(nodes); };
+   const auto selectionCallback = [&] (auto& node) { SelectNode(node); };
 
-   CanvasContextMenu menu{ m_keyboardManager };
+   m_gamepadContextMenu = new GamepadContextMenu{ m_mainWindow.GetGamepad(), this };
 
-   menu.addAction("Highlight Ancestors", [&]
+   if (thereExistHighlightedNodes)
    {
-      constexpr auto clearSelected{ true };
-      m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
-      m_controller.HighlightAncestors(*selectedNode, selectionCallback);
-   });
-
-   menu.addAction("Highlight Descendants", [&]
-   {
-      constexpr auto clearSelected{ true };
-      m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
-      m_controller.HighlightDescendants(*selectedNode, selectionCallback);
-   });
-
-   if (selectedNode->GetData().file.type == FileType::REGULAR)
-   {
-      fmt::WMemoryWriter writer;
-      writer << L"Highlight All " << selectedNode->GetData().file.extension << L" Files";
-
-      menu.addAction(QString::fromStdWString(writer.c_str()), [&]
+      m_gamepadContextMenu->AddEntry("Clear Highlights", [=]
       {
-         constexpr auto clearSelected{ true };
-         m_controller.ClearHighlightedNodes(deselectionCallback, clearSelected);
-         m_controller.HighlightAllMatchingExtensions(*selectedNode, selectionCallback);
+         m_controller.ClearHighlightedNodes(unhighlightCallback);
       });
    }
 
-   menu.addSeparator();
-
-   menu.addAction("Show in Explorer", [&]
+   if (selectedNode)
    {
-      OperatingSystemSpecific::LaunchFileExplorer(*selectedNode);
-   });
+      m_gamepadContextMenu->AddEntry("Highlight Ancestors", [=]
+      {
+         m_controller.ClearHighlightedNodes(unhighlightCallback);
+         m_controller.HighlightAncestors(*selectedNode, highlightCallback);
+      });
+
+      m_gamepadContextMenu->AddEntry("Highlight Descendants", [=]
+      {
+         m_controller.ClearHighlightedNodes(unhighlightCallback);
+         m_controller.HighlightDescendants(*selectedNode, highlightCallback);
+      });
+
+      if (selectedNode->GetData().file.type == FileType::REGULAR)
+      {
+         fmt::WMemoryWriter writer;
+         writer << L"Highlight All \"" << selectedNode->GetData().file.extension << L"\" Files";
+
+         m_gamepadContextMenu->AddEntry(QString::fromStdWString(writer.c_str()), [=]
+         {
+            m_controller.ClearHighlightedNodes(unhighlightCallback);
+            m_controller.HighlightAllMatchingExtensions(*selectedNode, highlightCallback);
+            m_controller.SelectNode(*selectedNode, selectionCallback);
+         });
+      }
+
+      m_gamepadContextMenu->AddEntry("Show in Explorer", [=]
+      {
+         OperatingSystemSpecific::LaunchFileExplorer(*selectedNode);
+      });
+   }
+
+   m_gamepadContextMenu->move(mapToGlobal(QPoint{ 0, 0 }));
+   m_gamepadContextMenu->resize(width(), height());
+
+   m_gamepadContextMenu->ComputeLayout();
+   m_gamepadContextMenu->show();
+   m_gamepadContextMenu->raise();
+}
+
+void GLCanvas::ShowContextMenu(const QPoint& point)
+{
+   const auto thereExistHighlightedNodes = m_controller.GetHighlightedNodes().size() > 0;
+   const auto* const selectedNode = m_controller.GetSelectedNode();
+
+   if (!thereExistHighlightedNodes && !selectedNode)
+   {
+      return;
+   }
+
+   const auto unhighlightCallback = [&] (auto& nodes) { RestoreHighlightedNodes(nodes); };
+   const auto highlightCallback = [&] (auto& nodes) { HighlightNodes(nodes); };
+   const auto selectionCallback = [&] (auto& node) { SelectNode(node); };
+
+   MouseContextMenu menu{ m_keyboardManager };
+
+   if (thereExistHighlightedNodes)
+   {
+      menu.addAction("Clear Highlights", [&]
+      {
+         m_controller.ClearHighlightedNodes(unhighlightCallback);
+      });
+
+      menu.addSeparator();
+   }
+
+   if (selectedNode)
+   {
+      menu.addAction("Highlight Ancestors", [&]
+      {
+         m_controller.ClearHighlightedNodes(unhighlightCallback);
+         m_controller.HighlightAncestors(*selectedNode, highlightCallback);
+      });
+
+      menu.addAction("Highlight Descendants", [&]
+      {
+         m_controller.ClearHighlightedNodes(unhighlightCallback);
+         m_controller.HighlightDescendants(*selectedNode, highlightCallback);
+      });
+
+      if (selectedNode->GetData().file.type == FileType::REGULAR)
+      {
+         fmt::WMemoryWriter writer;
+         writer << L"Highlight All \"" << selectedNode->GetData().file.extension << L"\" Files";
+
+         menu.addAction(QString::fromStdWString(writer.c_str()), [&]
+         {
+            m_controller.ClearHighlightedNodes(unhighlightCallback);
+            m_controller.HighlightAllMatchingExtensions(*selectedNode, highlightCallback);
+            m_controller.SelectNode(*selectedNode, selectionCallback);
+         });
+      }
+
+      menu.addSeparator();
+
+      menu.addAction("Show in Explorer", [&]
+      {
+         OperatingSystemSpecific::LaunchFileExplorer(*selectedNode);
+      });
+   }
 
    const QPoint globalPoint = mapToGlobal(point);
    menu.exec(globalPoint);
@@ -432,8 +576,6 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
 void GLCanvas::HandleUserInput()
 {
-   assert(m_optionsManager);
-
    const auto now = std::chrono::system_clock::now();
    ON_SCOPE_EXIT noexcept { m_lastCameraPositionUpdatelTime = now; };
 
@@ -457,7 +599,7 @@ void GLCanvas::HandleKeyboardInput(const std::chrono::milliseconds& elapsedTime)
    }
 
    const auto millisecondsElapsed = elapsedTime.count();
-   const auto cameraSpeed = m_optionsManager->m_cameraMovementSpeed;
+   const auto cameraSpeed = m_mainWindow.GetSettingsManager().GetCameraSpeed();
 
    if (isWKeyDown)
    {
@@ -489,18 +631,18 @@ void GLCanvas::HandleGamepadInput(const std::chrono::milliseconds& elapsedTime)
 
    const auto& gamepad = m_mainWindow.GetGamepad();
 
-   HandleGamepadKeyInput(gamepad, elapsedTime);
+   HandleGamepadButtonInput(gamepad, elapsedTime);
    HandleGamepadThumbstickInput(gamepad);
    HandleGamepadTriggerInput(gamepad);
 }
 
-void GLCanvas::HandleGamepadKeyInput(
+void GLCanvas::HandleGamepadButtonInput(
    const Gamepad& gamepad,
    const std::chrono::milliseconds& elapsedTime)
 {
    const auto millisecondsElapsed = elapsedTime.count();
    const auto cameraSpeed =
-      m_optionsManager->m_cameraMovementSpeed / Constants::Input::MOVEMENT_AMPLIFICATION;
+      m_mainWindow.GetSettingsManager().GetCameraSpeed() / Constants::Input::MOVEMENT_AMPLIFICATION;
 
    if (gamepad.buttonUp())
    {
@@ -531,20 +673,37 @@ void GLCanvas::HandleGamepadKeyInput(
    {
       m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Up());
    }
+
+   if (!m_gamepadContextMenu && gamepad.buttonA())
+   {
+      ShowGamepadContextMenu();
+   }
+   else if (m_gamepadContextMenu && !gamepad.buttonA())
+   {
+      m_gamepadContextMenu->ExecuteSelection();
+
+      m_gamepadContextMenu->close();
+      m_gamepadContextMenu = nullptr;
+   }
 }
 
 void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
 {
+   if (m_gamepadContextMenu)
+   {
+      return;
+   }
+
    if (gamepad.axisRightX() || gamepad.axisRightY())
    {
       const auto pitch =
          Constants::Input::MOVEMENT_AMPLIFICATION
-         * m_optionsManager->m_mouseSensitivity
+         * m_mainWindow.GetSettingsManager().GetMouseSensitivity()
          * gamepad.axisRightY();
 
       const auto yaw =
          Constants::Input::MOVEMENT_AMPLIFICATION
-         * m_optionsManager->m_mouseSensitivity
+         * m_mainWindow.GetSettingsManager().GetMouseSensitivity()
          * gamepad.axisRightX();
 
       m_camera.OffsetOrientation(pitch, yaw);
@@ -554,7 +713,7 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
    {
       m_camera.OffsetPosition(
          Constants::Input::MOVEMENT_AMPLIFICATION
-         * m_optionsManager->m_cameraMovementSpeed
+         * m_mainWindow.GetSettingsManager().GetCameraSpeed()
          * -gamepad.axisLeftY()
          * m_camera.Forward());
    }
@@ -563,7 +722,7 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
    {
       m_camera.OffsetPosition(
          Constants::Input::MOVEMENT_AMPLIFICATION
-         * m_optionsManager->m_cameraMovementSpeed
+         * m_mainWindow.GetSettingsManager().GetCameraSpeed()
          * gamepad.axisLeftX()
          * m_camera.Right());
    }
@@ -577,6 +736,7 @@ void GLCanvas::HandleGamepadTriggerInput(const Gamepad& gamepad)
 
       auto* const crosshair = GetAsset<Asset::Tag::Crosshair>();
       crosshair->SetCrosshairLocation(m_camera.GetViewport().center());
+      crosshair->Show();
    }
    else if (m_isLeftTriggerDown && !gamepad.IsLeftTriggerDown())
    {
@@ -600,13 +760,9 @@ void GLCanvas::HandleGamepadTriggerInput(const Gamepad& gamepad)
 
 void GLCanvas::SelectNodeViaRay(const QPoint& rayOrigin)
 {
-   const auto deselectionCallback = [&] (std::vector<const Tree<VizFile>::Node*>& nodes)
-   {
-      RestoreHighlightedNodes(nodes);
-      RestoreSelectedNode();
-   };
+   const auto selectionCallback = [&] (auto& node) { SelectNode(node); };
+   const auto deselectionCallback = [&] (auto& node) { RestoreSelectedNode(node); };
 
-   const auto selectionCallback = [&] (auto* node) { SelectNode(node); };
    const auto ray = m_camera.ShootRayIntoScene(rayOrigin);
    m_controller.SelectNodeViaRay(m_camera, ray, deselectionCallback, selectionCallback );
 }
@@ -622,7 +778,7 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
 
    m_frameTimeDeque.emplace_back(static_cast<int>(elapsedTime.count()));
 
-   const int total = std::accumulate(std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0,
+   const auto total = std::accumulate(std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0,
       [] (const int runningTotal, const int frameTime) noexcept
    {
       return runningTotal + frameTime;
@@ -649,8 +805,7 @@ void GLCanvas::paintGL()
    {
       m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      assert(m_optionsManager);
-      if (m_optionsManager->m_isLightAttachedToCamera)
+      if (m_mainWindow.GetSettingsManager().IsPrimaryLightAttachedToCamera())
       {
          assert(m_lights.size() > 0);
          m_lights.front().position = m_camera.GetPosition();
@@ -658,7 +813,7 @@ void GLCanvas::paintGL()
 
       for (const auto& tagAndAsset : m_sceneAssets)
       {
-         tagAndAsset.asset->Render(m_camera, m_lights, *m_optionsManager);
+         tagAndAsset.asset->Render(m_camera, m_lights, m_mainWindow.GetSettingsManager());
       }
    }).GetElapsedTime();
 
@@ -667,3 +822,8 @@ void GLCanvas::paintGL()
       UpdateFrameTime(elapsedTime);
    }
 }
+
+template void GLCanvas::ToggleAssetVisibility<Asset::Tag::Grid>(bool) const noexcept;
+template void GLCanvas::ToggleAssetVisibility<Asset::Tag::LightMarker>(bool) const noexcept;
+template void GLCanvas::ToggleAssetVisibility<Asset::Tag::OriginMarker>(bool) const noexcept;
+template void GLCanvas::ToggleAssetVisibility<Asset::Tag::Frusta>(bool) const noexcept;

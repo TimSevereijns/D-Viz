@@ -75,7 +75,7 @@ public:
 
       if (m_queue.empty())
       {
-         return{};
+         return{ };
       }
 
       const auto result = std::make_shared<Type>(std::move(m_queue.front()));

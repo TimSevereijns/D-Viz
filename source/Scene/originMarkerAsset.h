@@ -5,16 +5,28 @@
 
 namespace Asset
 {
+   /**
+    * @brief The Origin Marker class is meant to highlight the origin of the coordinate system
+    * in the scene.
+    */
    class OriginMarker final : public Line
    {
       public:
 
-         explicit OriginMarker(QOpenGLExtraFunctions& openGL);
+         /**
+          * @see Asset::Base::Base(...)
+          */
+         OriginMarker(
+            QOpenGLExtraFunctions& openGL,
+            bool isInitiallyVisible);
 
+         /**
+          * @see Asset::Base::Render(...)
+          */
          bool Render(
             const Camera& camera,
             const std::vector<Light>& lights,
-            const OptionsManager& settings) override;
+            const Settings::Manager& settings) override;
    };
 }
 

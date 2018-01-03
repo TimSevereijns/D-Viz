@@ -1,8 +1,9 @@
-#ifndef SCANBREAKDOWNENTRY_H
-#define SCANBREAKDOWNENTRY_H
+#ifndef SCANBREAKDOWNMODEL_H
+#define SCANBREAKDOWNMODEL_H
 
 #include <QAbstractTableModel>
 
+#include "../constants.h"
 #include "../controller.h"
 #include "../DataStructs/vizFile.h"
 #include "../Utilities/utilities.hpp"
@@ -15,26 +16,32 @@
 #include <unordered_map>
 #include <vector>
 
-struct FileExtensionAndTotalSize
+namespace Settings
 {
-    std::wstring fileExtension;
-    std::wstring formattedSize;
-    std::uintmax_t totalSize;
+   class Manager;
+}
 
-    FileExtensionAndTotalSize() = default;
+struct RowModel
+{
+   std::wstring fileExtension;
+   std::wstring formattedSize;
+   std::uintmax_t totalSize;
 
-    FileExtensionAndTotalSize(
-       const std::pair<const std::wstring, std::uintmax_t>& extensionAndSize)
-       :
-       fileExtension{ extensionAndSize.first },
-       totalSize{ extensionAndSize.second }
-    {
-        const auto [size, units] = Controller::ConvertFileSizeToAppropriateUnits(totalSize);
-        formattedSize = Utilities::StringifyWithDigitSeparators(size) + L" " + units;
-    }
+   RowModel() = default;
+
+   RowModel(
+      std::wstring extension,
+      std::wstring formattedSize,
+      std::uintmax_t size)
+      :
+      fileExtension{ std::move(extension) },
+      formattedSize{ std::move(formattedSize) },
+      totalSize{ std::move(size) }
+   {
+   }
 };
 
-Q_DECLARE_METATYPE( FileExtensionAndTotalSize );
+Q_DECLARE_METATYPE( RowModel );
 
 class ScanBreakdownModel final : public QAbstractTableModel
 {
@@ -59,11 +66,11 @@ class ScanBreakdownModel final : public QAbstractTableModel
 
    private:
 
-      void FinalizeInsertion();
+      void FinalizeInsertion(const Settings::Manager& settingsManager);
 
-      std::vector<FileExtensionAndTotalSize> m_fileTypeVector;
+      std::vector<RowModel> m_fileTypeVector;
 
       std::unordered_map<std::wstring, std::uintmax_t> m_fileTypeMap;
 };
 
-#endif // SCANBREAKDOWNENTRY_H
+#endif // SCANBREAKDOWNMODEL_H

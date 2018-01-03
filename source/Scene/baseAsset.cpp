@@ -1,12 +1,20 @@
 #include "baseAsset.h"
 
+#include "constants.h"
+
+#include <spdlog/spdlog.h>
+
 #include <iostream>
 #include <utility>
 
 namespace Asset
 {
-   Base::Base(QOpenGLExtraFunctions& openGL) :
-      m_openGL{ openGL }
+   Base::Base(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      m_openGL{ openGL },
+      m_shouldRender{ isInitiallyVisible }
    {
    }
 
@@ -25,16 +33,31 @@ namespace Asset
       if (!m_mainShader.addShaderFromSourceFile(QOpenGLShader::Vertex,
          ":/Shaders/" + vertexShaderName + ".vert"))
       {
-         std::cout << "Error loading vertex shader!" << std::endl;
+         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+         log->error("Failed to load vertex shader: " + vertexShaderName.toStdString() + ".vert");
+
+         return false;
       }
 
       if (!m_mainShader.addShaderFromSourceFile(QOpenGLShader::Fragment,
          ":/Shaders/" + fragmentShaderName + ".frag"))
       {
-         std::cout << "Error loading fragment shader!" << std::endl;
+         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+         log->error("Failed to load fragment shader: " + fragmentShaderName.toStdString() + ".frag");
+
+         return false;
       }
 
-      return m_mainShader.link();
+      const auto linkedSuccessfully = m_mainShader.link();
+      if (!linkedSuccessfully)
+      {
+         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+         log->error("Failed to link the shader program!");
+
+         return false;
+      }
+
+      return true;
    }
 
    bool Base::IsAssetLoaded() const
@@ -86,8 +109,8 @@ namespace Asset
 
    void Base::UpdateVBO(
       const Tree<VizFile>::Node&,
-      UpdateAction,
-      const VisualizationParameters&)
+      Asset::Event,
+      const Settings::Manager&)
    {
    }
 }

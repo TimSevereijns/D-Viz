@@ -1,6 +1,8 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
+#include "constants.h"
+
 #include "DataStructs/light.h"
 #include "DataStructs/vizFile.h"
 #include "DriveScanner/driveScanner.h"
@@ -34,7 +36,7 @@ class Controller
       /**
        * @brief Generates a new visualization.
        */
-      void GenerateNewVisualization();
+      void ResetVisualization();
 
       /**
        * @returns A pointer to the selected node.
@@ -52,20 +54,19 @@ class Controller
       const Tree<VizFile>& GetTree() const;
 
       /**
-       * @returns A reference to the current visualization parameters.
-       */
-      const VisualizationParameters& GetVisualizationParameters() const;
-
-      /**
-       * @brief Updates the visualization parameters.
-       */
-      void SetVisualizationParameters(const VisualizationParameters& parameters);
-
-      /**
        * @returns A reference to the currently highlighted nodes. Highlighted nodes are distinct
        * from the selected node (of which there can be only one).
        */
       const std::vector<const Tree<VizFile>::Node*>& GetHighlightedNodes() const;
+
+      /**
+       * @brief Determines whether the node is currently highlighted.
+       *
+       * @param[in] node            The node whose extension is to be highlighted.
+       *
+       * @returns True if the given node is currently highlighted; false otherwise.
+       */
+      bool IsNodeHighlighted(const Tree<VizFile>::Node& node) const;
 
       /**
        * @brief Parses the drive scan results.
@@ -136,11 +137,9 @@ class Controller
        * to its unhighlighted color.
        *
        * @param[in] callback        UI callback to highlight matching nodes on the canvas.
-       * @param[in] clearSelected   Pass in true if the primary selection target is to be cleared.
        */
       void ClearHighlightedNodes(
-         const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback,
-         bool clearSelected);
+         const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback);
 
       /**
        * @brief Selects the passed in node.
@@ -148,9 +147,20 @@ class Controller
        * @param[in] node               A pointer to the node to be selected.
        * @param[in] selectorCallback   UI callback to highlight matching node on the canvas.
        */
+      void SelectNode(
+         const Tree<VizFile>::Node& node,
+         const std::function<void (const Tree<VizFile>::Node&)>& selectorCallback);
+
+      /**
+       * @brief Selects the passed in node, and updates the status bar with information about the
+       * node.
+       *
+       * @param[in] node               A pointer to the node to be selected.
+       * @param[in] selectorCallback   UI callback to highlight matching node on the canvas.
+       */
       void SelectNodeAndUpdateStatusBar(
-         const Tree<VizFile>::Node* const node,
-         const std::function<void (const Tree<VizFile>::Node* const)>& selectorCallback);
+         const Tree<VizFile>::Node& node,
+         const std::function<void (const Tree<VizFile>::Node&)>& selectorCallback);
 
       /**
        * @brief Uses the passed in ray to select the nearest node from the perspective of the
@@ -160,14 +170,14 @@ class Controller
        *
        * @param[in] camera              The camera from which the ray was shot.
        * @param[in] ray                 The picking ray.
-       * @param[in] deselectionCallback UI callback to clear the canvas of selection highlights.
-       * @param[in] selectionCallback   UI callback to highlight matching nodes on the canvas.
+       * @param[in] deselectionCallback UI callback to clear the previous selection.
+       * @param[in] selectionCallback   UI callback to select the matching nodes on the canvas.
        */
       void SelectNodeViaRay(
          const Camera& camera,
          const Qt3DRender::RayCasting::QRay3D& ray,
-         const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& deselectionCallback,
-         const std::function<void (const Tree<VizFile>::Node* const)>& selectionCallback);
+         const std::function<void (const Tree<VizFile>::Node&)>& deselectionCallback,
+         const std::function<void (const Tree<VizFile>::Node&)>& selectionCallback);
 
       /**
        * @brief Helper function to print visualization metadata to the bottom status bar.
@@ -178,13 +188,15 @@ class Controller
        * @brief Converts the given size of the file from bytes to the most human readable units.
        *
        * @param[in] sizeInBytes     The size (in bytes) to be converted to a more appropriate
-       * unit.
+       *                            unit.
+       * @param[in] prefix          The desired prefix.
        *
        * @returns A std::pair encapsulating the converted file size, and corresponding unit readout
        * string.
        */
-      static std::pair<double, std::wstring> ConvertFileSizeToAppropriateUnits(
-         std::uintmax_t sizeInBytes);
+      static std::pair<double, std::wstring> ConvertFileSizeToNumericPrefix(
+         std::uintmax_t sizeInBytes,
+         Constants::FileSize::Prefix prefix);
 
       /**
        * @brief Computes the absolute file path of the selected node by traveling up tree.
@@ -235,8 +247,6 @@ class Controller
       std::unique_ptr<VisualizationModel> m_treeMap{ nullptr };
 
       std::vector<const Tree<VizFile>::Node*> m_highlightedNodes;
-
-      VisualizationParameters m_visualizationParameters;
 
       // @todo Move these onto the VizualizationModel class:
       std::uintmax_t m_filesInCurrentVisualization{ 0 };

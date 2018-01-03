@@ -3,6 +3,20 @@
 
 #include <QVector3D>
 
+#include "literals.h"
+
+#ifdef Q_OS_WIN
+   #undef RGB
+#endif
+
+namespace
+{
+   constexpr QVector3D RGB(int red, int green, int blue) noexcept
+   {
+      return { red / 255.0f, green / 255.0f, blue / 255.0f };
+   }
+}
+
 namespace Constants
 {
    namespace FileSize
@@ -15,15 +29,20 @@ namespace Constants
    }
 
    namespace Colors
-   {                                         // Red,                     Green,              Blue
-      const static QVector3D RED             { 1.0f,                      0.0f,              0.0f };
-      const static QVector3D GREEN           { 0.0f,                      1.0f,              0.0f };
-      const static QVector3D BLUE            { 0.0f,                      0.0f,              1.0f };
-      const static QVector3D CANARY_YELLOW   { 1.0f,           239.0f / 255.0f,             0.0f  };
-      const static QVector3D HOT_PINK        { 1.0f,           105.0f / 255.0f,  180.0f / 255.0f  };
-      const static QVector3D FILE_GREEN      { 0.5f,                      1.0f,             0.5f  };
-      const static QVector3D WHITE           { 1.0f,                      1.0f,             1.0f  };
-      const static QVector3D CORAL           { 1.0f,           127.0f / 255.0f,    80.0f / 255.0f };
+   {
+      constexpr static auto RED           = RGB(255,    0,    0);
+      constexpr static auto GREEN         = RGB(  0,  255,    0);
+      constexpr static auto BLUE          = RGB(  0,    0,  255);
+      constexpr static auto CANARY_YELLOW = RGB(255,  239,    0);
+      constexpr static auto HOT_PINK      = RGB(255,  105,  180);
+      constexpr static auto FILE_GREEN    = RGB(128,  255,  128);
+      constexpr static auto SLATE_GRAY    = RGB(112,  128,  144);
+      constexpr static auto WHITE         = RGB(255,  255,  255);
+   }
+
+   namespace ColorScheme
+   {
+      constexpr static auto& DEFAULT{ L"Default" };
    }
 
    namespace Graphics
@@ -45,6 +64,11 @@ namespace Constants
    namespace Logging
    {
       constexpr static auto& DEFAULT_LOG{ "D-Viz" };
+   }
+
+   namespace Math
+   {
+      constexpr static auto Pi = 3.14159265358979323846;
    }
 }
 

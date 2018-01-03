@@ -10,8 +10,6 @@ class SquarifiedTreeMap final : public VisualizationModel
 {
    public:
 
-      SquarifiedTreeMap(const VisualizationParameters& parameters);
-
       void Parse(const std::shared_ptr<Tree<VizFile>>& theTree) override;
 
    private:
@@ -37,7 +35,8 @@ class SquarifiedTreeMap final : public VisualizationModel
        * @brief Calculates the worst aspect ratio of all items accepted into the row along with one
        * optional candidate item.
        *
-       * @param[in] row                   The nodes that have been placed in the current real estate.
+       * @param[in] row                   The nodes that have been placed in the current real
+       *                                  estate.
        * @param[in] candidateSize         The size of the candidate node that is to be considered
        *                                  for inclusion in the current row. Zero is no candidate
        *                                  necessary.

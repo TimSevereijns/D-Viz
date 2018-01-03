@@ -14,9 +14,9 @@ namespace
       QVector<QVector3D> vertices;
       vertices.reserve(6);
       vertices
-         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(axisLength, 0.0f, 0.0f)   // X-axis
-         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 100.0f, 0.0f)       // Y-axis
-         << QVector3D(0.0f, 0.0f, 0.0f) << QVector3D(0.0f, 0.0f, -axisLength); // Z-axis
+         << QVector3D{ 0.0f, 0.0f, 0.0f } << QVector3D{ axisLength, 0.0f, 0.0f }   // X-axis
+         << QVector3D{ 0.0f, 0.0f, 0.0f } << QVector3D{ 0.0f, 100.0f, 0.0f }       // Y-axis
+         << QVector3D{ 0.0f, 0.0f, 0.0f } << QVector3D{ 0.0f, 0.0f, -axisLength }; // Z-axis
 
       return vertices;
    }
@@ -31,9 +31,9 @@ namespace
       QVector<QVector3D> colors;
       colors.reserve(6);
       colors
-         << QVector3D(1.0f, 0.0f, 0.0f) << QVector3D(1.0f, 0.0f, 0.0f)  // X-axis (red)
-         << QVector3D(0.0f, 1.0f, 0.0f) << QVector3D(0.0f, 1.0f, 0.0f)  // Y-axis (green)
-         << QVector3D(0.0f, 0.0f, 1.0f) << QVector3D(0.0f, 0.0f, 1.0f); // Z-axis (blue)
+         << QVector3D{ 1.0f, 0.0f, 0.0f } << QVector3D{ 1.0f, 0.0f, 0.0f }  // X-axis (red)
+         << QVector3D{ 0.0f, 1.0f, 0.0f } << QVector3D{ 0.0f, 1.0f, 0.0f }  // Y-axis (green)
+         << QVector3D{ 0.0f, 0.0f, 1.0f } << QVector3D{ 0.0f, 0.0f, 1.0f }; // Z-axis (blue)
 
       return colors;
    }
@@ -41,8 +41,11 @@ namespace
 
 namespace Asset
 {
-   OriginMarker::OriginMarker(QOpenGLExtraFunctions& openGL) :
-      Line{ openGL }
+   OriginMarker::OriginMarker(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      Line{ openGL, isInitiallyVisible }
    {
       m_rawVertices = CreateMarkerVertices();
       m_rawColors = CreateMarkerColors();
@@ -51,7 +54,7 @@ namespace Asset
    bool OriginMarker::Render(
       const Camera& camera,
       const std::vector<Light>&,
-      const OptionsManager&)
+      const Settings::Manager&)
    {
       if (!m_shouldRender)
       {

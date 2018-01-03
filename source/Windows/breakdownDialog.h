@@ -26,7 +26,8 @@ class ScanBreakdownFilterProxyModel final : public QSortFilterProxyModel
 
          return lhsExtension < rhsExtension;
       }
-      else if (lhs.column() == 1)
+
+      if (lhs.column() == 1)
       {
          const auto lhsSize = lhsData.value<std::uintmax_t>();
          const auto rhsSize = rhsData.value<std::uintmax_t>();
@@ -57,6 +58,8 @@ class BreakdownDialog final : public QDialog
    private:
 
       void AdjustColumnWidthsToFitViewport();
+
+      MainWindow& m_mainWindow;
 
       Ui::breakdownDialog m_ui;
 

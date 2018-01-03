@@ -12,19 +12,27 @@ namespace Asset
    {
       public:
 
-         Crosshair(QOpenGLExtraFunctions& openGL);
+         /**
+          * @see Asset::Base::Base(...)
+          */
+         Crosshair(
+            QOpenGLExtraFunctions& openGL,
+            bool isInitiallyVisible);
 
+         /**
+          * @see Asset::Base::Render(...)
+          */
          bool Render(
             const Camera& camera,
             const std::vector<Light>& lights,
-            const OptionsManager& settings) override;
+            const Settings::Manager& settings) override;
 
          /**
           * @brief Loads the necessary vertex and color data into the graphics buffers so as to show
           * the crosshair.
           *
-          * @param[in] canvasCenter    The center of the canvas, which is where the crosshair is to be
-          *                            overlaid.
+          * @param[in] canvasCenter    The center of the canvas, which is where the crosshair is to
+          *                            be overlaid.
           */
          void SetCrosshairLocation(const QPoint& canvasCenter);
    };

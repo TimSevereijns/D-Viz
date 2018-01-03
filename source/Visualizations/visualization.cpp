@@ -19,14 +19,12 @@
 
 namespace
 {
-   constexpr double EPSILON = 0.0001;
-
-   const QVector3D POSITIVE_X_NORMAL{  1,  0,  0 };
-   const QVector3D POSITIVE_Y_NORMAL{  0,  1,  0 };
-   const QVector3D POSITIVE_Z_NORMAL{  0,  0,  1 };
-   const QVector3D NEGATIVE_X_NORMAL{ -1,  0,  0 };
-   const QVector3D NEGATIVE_Y_NORMAL{  0, -1,  0 };
-   const QVector3D NEGATIVE_Z_NORMAL{  0,  0, -1 };
+   constexpr QVector3D POSITIVE_X_NORMAL{  1.0f,  0.0f,  0.0f };
+   constexpr QVector3D POSITIVE_Y_NORMAL{  0.0f,  1.0f,  0.0f };
+   constexpr QVector3D POSITIVE_Z_NORMAL{  0.0f,  0.0f,  1.0f };
+   constexpr QVector3D NEGATIVE_X_NORMAL{ -1.0f,  0.0f,  0.0f };
+   constexpr QVector3D NEGATIVE_Y_NORMAL{  0.0f, -1.0f,  0.0f };
+   constexpr QVector3D NEGATIVE_Z_NORMAL{  0.0f,  0.0f, -1.0f };
 
    /**
     * @brief Calculates whether the specified ray hits the specified plane, given a margin of error,
@@ -44,8 +42,10 @@ namespace
       const QVector3D& pointOnPlane,
       const QVector3D& planeNormal)
    {
+      constexpr auto epsilon{ 0.0001 };
+
       const double denominator = QVector3D::dotProduct(ray.direction(), planeNormal);
-      if (std::abs(denominator) < EPSILON)
+      if (std::abs(denominator) < epsilon)
       {
          return boost::none;
       }
@@ -53,7 +53,7 @@ namespace
       const double numerator = QVector3D::dotProduct(pointOnPlane - ray.origin(), planeNormal);
 
       const double scalar = numerator / denominator;
-      const bool doesRayHitPlane = std::abs(scalar) > EPSILON;
+      const bool doesRayHitPlane = std::abs(scalar) > epsilon;
 
       if (!doesRayHitPlane)
       {
@@ -264,7 +264,7 @@ namespace
    std::vector<IntersectionPointAndNode> FindAllIntersections(
       const Qt3DRender::RayCasting::QRay3D& ray,
       const Camera& camera,
-      const VisualizationParameters& parameters,
+      const Settings::VisualizationParameters& parameters,
       Tree<VizFile>::Node* node)
    {
       std::vector<IntersectionPointAndNode> allIntersections;
@@ -315,11 +315,6 @@ const float VisualizationModel::BLOCK_HEIGHT = 2.0f;
 const float VisualizationModel::ROOT_BLOCK_WIDTH = 1000.0f;
 const float VisualizationModel::ROOT_BLOCK_DEPTH = 1000.0f;
 
-VisualizationModel::VisualizationModel(const VisualizationParameters& parameters) :
-   m_vizParameters{ parameters }
-{
-}
-
 void VisualizationModel::UpdateBoundingBoxes()
 {
    assert(m_hasDataBeenParsed);
@@ -365,7 +360,7 @@ void VisualizationModel::UpdateBoundingBoxes()
 Tree<VizFile>::Node* VisualizationModel::FindNearestIntersection(
    const Camera& camera,
    const Qt3DRender::RayCasting::QRay3D& ray,
-   const VisualizationParameters& parameters) const
+   const Settings::VisualizationParameters& parameters) const
 {
    if (!m_hasDataBeenParsed)
    {
