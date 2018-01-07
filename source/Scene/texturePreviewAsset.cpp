@@ -8,8 +8,11 @@ namespace
 
 namespace Asset
 {
-   TexturePreview::TexturePreview(QOpenGLExtraFunctions& openGL) :
-      Base{ openGL }
+   TexturePreview::TexturePreview(
+      QOpenGLExtraFunctions& openGL,
+      bool isInitiallyVisible)
+      :
+      Base{ openGL, isInitiallyVisible }
    {
    }
 

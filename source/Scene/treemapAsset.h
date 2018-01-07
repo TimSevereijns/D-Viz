@@ -8,7 +8,7 @@
 
 #include "../Utilities/colorGradient.hpp"
 
-#include <QOpenGLFrameBufferObject>
+#include <QOpenGLFramebufferObject>
 #include <QOpenGLTexture>
 
 struct VizFile;

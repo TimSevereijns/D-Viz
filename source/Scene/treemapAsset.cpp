@@ -11,6 +11,7 @@
 
 #include <Tree/Tree.hpp>
 
+#include <cmath>
 #include <iostream>
 #include <vector>
 

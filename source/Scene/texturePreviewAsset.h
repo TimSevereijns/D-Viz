@@ -14,7 +14,9 @@ namespace Asset
    {
    public:
 
-      explicit TexturePreview(QOpenGLExtraFunctions& openGL);
+      explicit TexturePreview(
+         QOpenGLExtraFunctions& openGL,
+         bool isInitiallyVisible);
 
       bool Initialize() override;
 
