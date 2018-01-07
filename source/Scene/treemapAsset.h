@@ -5,6 +5,9 @@
 
 #include "../Utilities/colorGradient.hpp"
 
+#include <QOpenGLFramebufferObject>
+#include <QOpenGLTexture>
+
 struct VizFile;
 
 template<typename DataType>
@@ -100,6 +103,8 @@ namespace Asset
 
       private:
 
+         void RenderBlurPass();
+
          QVector3D ComputeGradientColor(const Tree<VizFile>::Node& node);
 
          void ComputeAppropriateBlockColor(
@@ -125,6 +130,34 @@ namespace Asset
          QVector<QVector3D> m_referenceBlockVertices;
          QVector<QMatrix4x4> m_blockTransformations;
          QVector<QVector3D> m_blockColors;
+
+         /**
+          * @brief Wraps the two frame buffers needed to implement blurring using a ping-pong
+          * buffer switching approach.
+          */
+         struct BlurBuffers
+         {
+            QOpenGLFramebufferObject Ping
+            {
+               WIDTH,
+               HEIGHT,
+               QOpenGLFramebufferObject::NoAttachment,
+               GL_TEXTURE_2D,
+               GL_RGB16F
+            };
+
+            QOpenGLFramebufferObject Pong
+            {
+               WIDTH,
+               HEIGHT,
+               QOpenGLFramebufferObject::NoAttachment,
+               GL_TEXTURE_2D,
+               GL_RGB16F
+            };
+
+            constexpr static auto HEIGHT{ 1024 };
+            constexpr static auto WIDTH{ 1024 };
+         } m_blurBuffers;
    };
 }
 

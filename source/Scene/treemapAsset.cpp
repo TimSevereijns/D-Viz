@@ -449,6 +449,50 @@ namespace Asset
       return !(m_blockTransformations.empty() && m_blockColors.empty());
    }
 
+   void Treemap::RenderBlurPass()
+   {
+//      auto isHorizontalPass{ true };
+//      auto isFirstPass{ true };
+
+//      const auto numberOfPasses{ 10u };
+
+//      m_blurShader.bind();
+
+//      for (auto i = 0u; i < numberOfPasses; ++i)
+//      {
+//         m_openGL.glBindFramebuffer(GL_FRAMEBUFFER,
+//            isHorizontalPass ? m_blurBuffers.Ping.handle() : m_blurBuffers.Pong.handle());
+
+//         m_blurShader.setUniformValue("isHorizontalPass", isHorizontalPass);
+
+//         const auto targetBuffer = isHorizontalPass
+//            ? m_blurBuffers.Pong.handle()
+//            : m_blurBuffers.Ping.handle();
+
+//         // @todo Set this to the default framebuffer that the QtOpenGLWidget generates; you'll
+//         // need to pass this in somehow:
+//         const auto defaultFrameBuffer = 0;
+
+//         // @todo Bind to either the main framebuffer, or to one of the framebuffers used for
+//         // the blur effect:
+//         glBindTexture(GL_TEXTURE_2D, isFirstPass ? defaultFrameBuffer : targetBuffer);
+
+//         // @todo Implement rendering of texture to screen:
+//         RenderQuad();
+
+//         isHorizontalPass = !isHorizontalPass;
+
+//         if (isFirstPass)
+//         {
+//            isFirstPass = false;
+//         }
+//      }
+
+//      m_blurShader.release();
+//      m_blurBuffers.Ping.release();
+//      m_blurBuffers.Pong.release();
+   }
+
    bool Treemap::Render(
       const Camera& camera,
       const std::vector<Light>& lights,
