@@ -17,6 +17,13 @@ BreakdownDialog::BreakdownDialog(QWidget* parent) :
 {
    m_ui.setupUi(this);
 
+   ReloadData();
+}
+
+void BreakdownDialog::ReloadData()
+{
+   m_model.ClearData();
+
    const auto& controller = m_mainWindow.GetController();
    const auto& tree = controller.GetTree();
 
@@ -25,10 +32,18 @@ BreakdownDialog::BreakdownDialog(QWidget* parent) :
       return;
    }
 
+   const auto& parameters = m_mainWindow.GetSettingsManager().GetVisualizationParameters();
+
    Stopwatch<std::chrono::milliseconds>([&]
    {
       for (const auto& node : tree)
       {
+         const auto fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
+         if (fileIsTooSmall)
+         {
+            continue;
+         }
+
          if (node->file.type != FileType::DIRECTORY)
          {
             m_model.insert(node);

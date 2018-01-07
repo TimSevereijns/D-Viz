@@ -1,5 +1,6 @@
 #include "scanBreakdownModel.h"
 
+#include "../Foreign/Spdlog/include/spdlog/fmt/fmt.h"
 #include "../controller.h"
 #include "../Settings/settingsManager.h"
 
@@ -90,6 +91,12 @@ void ScanBreakdownModel::insert(const Tree<VizFile>::Node& node)
    }
 }
 
+void ScanBreakdownModel::ClearData()
+{
+   m_fileTypeMap.clear();
+   m_fileTypeVector.clear();
+}
+
 void ScanBreakdownModel::FinalizeInsertion(const Settings::Manager& settingsManager)
 {
    assert(!m_fileTypeMap.empty() && m_fileTypeVector.empty());
@@ -107,13 +114,10 @@ void ScanBreakdownModel::FinalizeInsertion(const Settings::Manager& settingsMana
       const auto [prefixedSize, prefixUnits] =
          Controller::ConvertFileSizeToNumericPrefix(totalSize, prefix);
 
-      auto sizeLabel =
-         Utilities::StringifyWithDigitSeparators(prefixedSize) + L" " + prefixUnits;
-
       return RowModel
       {
          fileExtension,
-         std::move(sizeLabel),
+         fmt::format(L"{:03.2f} {}", prefixedSize, prefixUnits).c_str(),
          static_cast<std::uintmax_t>(totalSize)
       };
    });

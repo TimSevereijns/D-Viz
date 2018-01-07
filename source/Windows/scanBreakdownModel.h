@@ -68,6 +68,8 @@ class ScanBreakdownModel final : public QAbstractTableModel
 
       void FinalizeInsertion(const Settings::Manager& settingsManager);
 
+      void ClearData();
+
       std::vector<RowModel> m_fileTypeVector;
 
       std::unordered_map<std::wstring, std::uintmax_t> m_fileTypeMap;
