@@ -70,6 +70,7 @@ namespace Constants
    namespace Math
    {
       constexpr static auto Pi = 3.14159265358979323846;
+      constexpr static auto RadiansToDegrees = 180.0 / Pi;
    }
 }
 

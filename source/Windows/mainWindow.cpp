@@ -687,6 +687,11 @@ void MainWindow::PruneTree()
    {
       m_glCanvas->ReloadVisualization();
    }
+
+   if (m_breakdownDialog && m_breakdownDialog->isVisible())
+   {
+      m_breakdownDialog->ReloadData();
+   }
 }
 
 void MainWindow::ApplyColorScheme()

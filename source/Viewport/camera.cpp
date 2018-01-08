@@ -1,5 +1,7 @@
 #include "camera.h"
 
+#include "../constants.h"
+
 #include <assert.h>
 #include <iostream>
 #include <math.h>
@@ -77,8 +79,8 @@ void Camera::LookAt(const QVector3D& point)
    QVector3D direction = point - m_position;
    direction.normalize();
 
-   m_verticalAngle = std::asin(-direction.y());
-   m_horizontalAngle = std::atan2(-direction.x(), -direction.z());
+   m_verticalAngle = std::asin(-direction.y()) * Constants::Math::RadiansToDegrees;
+   m_horizontalAngle = std::atan2(direction.x(), -direction.z()) * Constants::Math::RadiansToDegrees;
 
    NormalizeAngles(m_horizontalAngle, m_verticalAngle);
 }

@@ -68,8 +68,6 @@ class Camera
        * @brief Will orient the camera so that the specified point is within view.
        *
        * @param[in] point           The point to be brought into view.
-       *
-       * @todo Fix this function; it currently doesn't bring the point into view.
        */
       void LookAt(const QVector3D& point);
 
