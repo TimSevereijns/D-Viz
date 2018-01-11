@@ -272,13 +272,19 @@ namespace
     *
     * @returns
     */
-   QMatrix4x4 ComputeLightTransformationMatrix(const Camera& camera)
+   QMatrix4x4 ComputeLightTransformationMatrix()
    {
-      Camera shadowCamera = camera;
-      shadowCamera.SetPosition(QVector3D{ -200.0f, 500.0f, 200.0f });
-      shadowCamera.SetOrientation(25.0f, 45.0f);
-      shadowCamera.SetNearPlane(250.0f);
-      return shadowCamera.GetProjectionViewMatrix();
+      QMatrix4x4 projection;
+      projection.ortho(-600, 600, -600, 600, 10, 1500);
+
+      const auto lightPosition = QVector3D{ 0.f, 200.f, 0.f };
+      const auto lightTarget = QVector3D{ 500.f, 0.f, -500.f };
+
+      QMatrix4x4 model;
+      QMatrix4x4 view;
+      view.lookAt(lightPosition, lightTarget, QVector3D{ 0.0f, 1.0f, 0.0f });
+
+      return projection * view * model;
    }
 
     constexpr auto TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE{ 0 };
@@ -535,7 +541,7 @@ namespace Asset
          const auto& block = node->block;
          const auto& blockOrigin = block.GetOrigin();
 
-         QMatrix4x4 instanceMatrix{ };
+         QMatrix4x4 instanceMatrix;
          instanceMatrix.translate(blockOrigin.x(), blockOrigin.y(), blockOrigin.z());
          instanceMatrix.scale(block.GetWidth(), block.GetHeight(), block.GetDepth());
          m_blockTransformations << instanceMatrix;
@@ -653,7 +659,8 @@ namespace Asset
 
    void Treemap::RenderShadowPass(const Camera& camera)
    {
-      // In order to fix Peter-panning artifacts, we'll temporarily cull front faces:
+      // @note In order to fix Peter-panning artifacts, we'll temporarily cull front faces.
+      // This will make the shadow map look rather weird; almost like an outline.
       m_openGL.glCullFace(GL_FRONT);
 
       m_openGL.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
@@ -661,22 +668,11 @@ namespace Asset
       m_shadowMapFrameBuffer.bind();
       m_shadowMapShader.bind();
 
-      // @todo Move to Constants namespace for easier debugging...
-      Camera shadowCamera = camera;
-      shadowCamera.SetPosition(QVector3D{ -1000.0f, 500.0f, 1000.0f });
-      shadowCamera.SetOrientation(5.0f, 45.0f);
-      shadowCamera.SetNearPlane(400.0f);
-
-   //   const BoundingBox frustumSplitBoundingBox = ComputeFrustumSplitBoundingBoxes(camera, shadowCamera)[2];
-   //   // @todo Compute projection-view matrix for frustum split...
-   //   QMatrix4x4 projectionViewMatrix;
-   //   projectionViewMatrix.perspective();
-
       m_shadowMapShader.setUniformValue(
          "lightProjectionViewMatrix",
-         ComputeLightTransformationMatrix(camera));
+         ComputeLightTransformationMatrix());
 
-      m_openGL.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      m_openGL.glClear(GL_DEPTH_BUFFER_BIT);
 
       static constexpr float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
       m_openGL.glClearBufferfv(GL_COLOR, 0, white);
@@ -710,13 +706,12 @@ namespace Asset
 
       m_mainShader.bind();
 
+      m_mainShader.setUniformValue("cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());
       m_mainShader.setUniformValue("cameraPosition", camera.GetPosition());
       m_mainShader.setUniformValue("materialShininess", settings.GetMaterialShininess());
 
-      const QMatrix4x4 lightProjectionViewMatrix = ComputeLightTransformationMatrix(camera);
-
+      const auto lightProjectionViewMatrix = ComputeLightTransformationMatrix();
       m_mainShader.setUniformValue("lightProjectionViewMatrix", lightProjectionViewMatrix );
-      m_mainShader.setUniformValue("cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());
 
       SetUniformLights(lights, settings, m_mainShader);
 
@@ -749,7 +744,7 @@ namespace Asset
 
       RenderShadowPass(camera);
       RenderMainPass(camera, lights, settings);
-      //RenderDepthMapPreview(); ///< Be sure to linearize the depth output in `shadowMapping.frag`
+      //RenderDepthMapPreview(); //< @note Enable this to render the shadow map to the screen.
 
       return true;
    }

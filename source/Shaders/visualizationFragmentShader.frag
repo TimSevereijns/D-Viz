@@ -61,50 +61,29 @@ vec3 ComputeLightContribution(
    return linearColor;
 }
 
-float nearPlane = 1.0f;
-float farPlane = 2000.0f;
-
-float LinearizeDepth(float depth)
-{
-    float z = depth * 2.0 - 1.0; // Back to Normalized Device Coordinates (NDC)
-    return (2.0 * nearPlane) / (farPlane + nearPlane - z * (farPlane - nearPlane));
-}
-
 float ComputeShadowAttenuation()
 {
-   // Perform perspective divide, and transform result to [0, 1] range:
    vec3 projectionCoordinates = shadowCoordinate.xyz / shadowCoordinate.w;
-   projectionCoordinates = projectionCoordinates * 0.5 + 0.5;
 
-   float distanceToOccluder = texture(shadowMap, projectionCoordinates.xy).r;
-   float distanceToFragment = projectionCoordinates.z;
+   vec2 UVCoordinates;
+   UVCoordinates.x = 0.5 * projectionCoordinates.x + 0.5;
+   UVCoordinates.y = 0.5 * projectionCoordinates.y + 0.5;
 
-   vec3 fragmentToLight = normalize(allLights[1].position - vertexPosition.xyz);
-   float cosTheta = dot(vertexNormal, fragmentToLight);
+   float z = 0.5 * projectionCoordinates.z + 0.5;
 
-   float bias = 0.00000001;
-   float shadow = distanceToFragment - bias < distanceToOccluder  ? 1.0 : 0.3;
+   float Depth = texture(shadowMap, UVCoordinates).x;
 
-   // Percent Closer Filtering:
-//   float shadow = 0.0;
-//   vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-//   for (int x = -1; x <= 1; ++x)
-//   {
-//       for (int y = -1; y <= 1; ++y)
-//       {
-//           float depth = texture(shadowMap, projectionCoordinates.xy + vec2(x, y) * texelSize).r;
-//           shadow += distanceToFragment - bias < depth  ? 1.0 : 0.0;
-//       }
-//   }
-//   shadow /= 9.0;
-
-   // Keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
-   if (projectionCoordinates.z > 1.0)
+   // @note The bias that we subtracting from the distance between the fragment and the light source
+   // is to compensate for shadow acne; however, this bias will introduce another artifact: Peter-
+   // panning. This can be compensated for with front-face culling.
+   if (Depth < z - 0.00005)
    {
-      return 0.0;
+      return 0.5;
    }
-
-   return shadow;
+   else
+   {
+      return 1.0;
+   }
 }
 
 void main(void)
@@ -122,18 +101,6 @@ void main(void)
          vertexPosition.xyz,
          fragmentToCamera,
          /* includeAmbient = */ false);
-
-   // Calculate the contribution of the non-shadow casting lights:
-//   for (int i = 2; i < 5; ++i)
-//   {
-//      linearColor += ComputeLightContribution(
-//         allLights[i],
-//         vertexColor,
-//         vertexNormal,
-//         vertexPosition.xyz,
-//         fragmentToCamera,
-//         /* includeAmbient = */ true);
-//   }
 
    // Gamma correction:
    vec3 gamma = vec3(1.0f / 2.2f);

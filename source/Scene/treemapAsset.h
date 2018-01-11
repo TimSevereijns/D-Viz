@@ -150,16 +150,16 @@ namespace Asset
 
          Camera m_shadowCamera;
 
-         static constexpr auto SHADOW_MAP_WIDTH{ 8192 };
-         static constexpr auto SHADOW_MAP_HEIGHT{ 8192 };
+         static constexpr auto SHADOW_MAP_WIDTH{ 4096 * 2 };
+         static constexpr auto SHADOW_MAP_HEIGHT{ 4096 * 2 };
 
          QOpenGLFramebufferObject m_shadowMapFrameBuffer
          {
             SHADOW_MAP_WIDTH,
             SHADOW_MAP_HEIGHT,
-            QOpenGLFramebufferObject::Depth,
+            QOpenGLFramebufferObject::Attachment::Depth,
             GL_TEXTURE_2D,
-            GL_R32F
+            GL_RGBA32F
          };
 
          QMatrix4x4 m_lightSpaceTransformationMatrix;

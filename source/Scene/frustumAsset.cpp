@@ -318,9 +318,10 @@ namespace Asset
       renderCamera.SetFarPlane(2000.0f);
 
       Camera shadowCamera = camera;
-      shadowCamera.SetPosition(QVector3D{ -200.0f, 500.0f, 200.0f });
-      shadowCamera.SetOrientation(25.0f, 45.0f);
-      shadowCamera.SetNearPlane(250.0f);
+      shadowCamera.SetPosition(QVector3D{ -1000.0f, 500.0f, 1000.0f });
+      shadowCamera.SetOrientation(5.0f, 45.0f);
+      shadowCamera.SetNearPlane(400.0f);
+      shadowCamera.SetFarPlane(1400.0f);
 
       RenderCascadeBoundingBoxes(*this, renderCamera, shadowCamera);
 
