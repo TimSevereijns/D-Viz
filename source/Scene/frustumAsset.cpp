@@ -10,11 +10,11 @@
 namespace
 {
    /**
-    * @brief Generates all of the frustum vertices for the specified camera.
+    * @brief ComputeFrustumCorners
     *
-    * @param[in] camera             Main scene camera.
+    * @param worldToView
     */
-   auto ComputeFrustumCorners(const Camera& camera)
+   auto ComputeFrustumCorners(const QMatrix4x4& worldToView)
    {
       std::vector<QVector3D> unitCube
       {
@@ -24,7 +24,6 @@ namespace
          { +1, +1, +1 }, { -1, +1, +1 }
       };
 
-      const auto worldToView = camera.GetProjectionViewMatrix().inverted();
       for (auto& corner : unitCube)
       {
          corner = worldToView.map(corner);
@@ -34,16 +33,28 @@ namespace
    }
 
    /**
+    * @brief Generates all of the frustum vertices for the specified camera.
+    *
+    * @param[in] camera             Main scene camera.
+    */
+   auto ComputeFrustumCorners(const Camera& camera)
+   {
+      const auto worldToView = camera.GetProjectionViewMatrix().inverted();
+      return ComputeFrustumCorners(worldToView);
+   }
+
+   /**
     * @brief Generates a frustum outline.
     *
     * @param[in] camera             Main scene camera.
     * @param[in, out] frustumAsset  The main frustum scene asset.
     */
-   auto GenerateFrustum(const Camera& camera)
+   template<typename T>
+   auto GenerateFrustum(const T& view)
    {
-      const auto frustum = ComputeFrustumCorners(camera);
+      const auto frustum = ComputeFrustumCorners(view);
 
-      std::vector<QVector3D> vertices
+      const std::vector<QVector3D> vertices
       {
          // Near plane outline:
          frustum[0], frustum[1],
@@ -71,7 +82,7 @@ namespace
     * @param[in] cascadeCount       The desired number of shadow mapping cascades.
     * @param[in] camera             The main scene camera.
     */
-   auto GenerateShadowMapCascades(
+   auto ComputeCascadeBounds(
       int cascadeCount,
       const Camera& camera)
    {
@@ -110,7 +121,7 @@ namespace
       mutableCamera.SetFarPlane(2000.0f);
 
       constexpr auto cascadeCount{ 3 };
-      const auto cascades = GenerateShadowMapCascades(cascadeCount, mutableCamera);
+      const auto cascades = ComputeCascadeBounds(cascadeCount, mutableCamera);
 
       std::vector<std::vector<QVector3D>> frusta;
       frusta.reserve(cascadeCount);
@@ -147,11 +158,11 @@ namespace
     * @param[in] camera             The main camera used to render the scene. Mainly use is to get
     *                               the aspect ratio of the outline correct.
     */
-   void GenerateShadowCasterFrustum(
+   void GenerateShadowViewFrustum(
       Asset::Frustum& frustumAsset,
-      const Camera& camera)
+      const QMatrix4x4& lightView)
    {
-      const auto& frustum = GenerateFrustum(camera);
+      const auto& frustum = GenerateFrustum(lightView);
       auto vertices = QVector<QVector3D>::fromStdVector(frustum);
 
       QVector<QVector3D> colors;
@@ -177,13 +188,13 @@ namespace
     * @param[in] shadowCamera       The camera that is to render the scene from the light caster's
     *                               perspective.
     */
-   void RenderCascadeBoundingBoxes(
+   void GenerateCascadeBoundingBoxes(
       Asset::Frustum& frustumAsset,
       const Camera& renderCamera,
-      const Camera& shadowCamera)
+      const QMatrix4x4& worldToLight)
    {
       constexpr auto cascadeCount{ 3 };
-      const auto cascades = GenerateShadowMapCascades(cascadeCount, renderCamera);
+      const auto cascades = ComputeCascadeBounds(cascadeCount, renderCamera);
 
       std::vector<std::vector<QVector3D>> frusta;
       frusta.reserve(cascadeCount);
@@ -196,8 +207,6 @@ namespace
 
          frusta.emplace_back(ComputeFrustumCorners(mutableCamera));
       }
-
-      const auto worldToLight = shadowCamera.GetProjectionViewMatrix();
 
       QVector<QVector3D> vertices;
       vertices.reserve(24 * cascadeCount);
@@ -265,6 +274,28 @@ namespace
       frustumAsset.AddVertexCoordinates(std::move(vertices));
       frustumAsset.AddVertexColors(std::move(colors));
    }
+
+   /**
+    * @brief ComputeLightTransformationMatrix
+    *
+    * @param camera
+    *
+    * @returns
+    */
+   QMatrix4x4 ComputeLightProjectionViewMatrix()
+   {
+      const auto lightPosition = QVector3D{ 0.f, 200.f, 0.f };
+      const auto lightTarget = QVector3D{ 500.f, 0.f, -500.f };
+
+      QMatrix4x4 projection;
+      projection.ortho(-600, 600, -600, 600, 10, 1500);
+
+      QMatrix4x4 model;
+      QMatrix4x4 view;
+      view.lookAt(lightPosition, lightTarget, QVector3D{ 0.0f, 1.0f, 0.0f });
+
+      return projection * view * model;
+   }
 }
 
 namespace Asset
@@ -317,16 +348,12 @@ namespace Asset
       renderCamera.SetNearPlane(1.0f);
       renderCamera.SetFarPlane(2000.0f);
 
-      Camera shadowCamera = camera;
-      shadowCamera.SetPosition(QVector3D{ -1000.0f, 500.0f, 1000.0f });
-      shadowCamera.SetOrientation(5.0f, 45.0f);
-      shadowCamera.SetNearPlane(400.0f);
-      shadowCamera.SetFarPlane(1400.0f);
-
-      RenderCascadeBoundingBoxes(*this, renderCamera, shadowCamera);
+      const auto lightMatrix = ComputeLightProjectionViewMatrix();
 
       GenerateCameraFrusta(*this, renderCamera);
-      GenerateShadowCasterFrustum(*this, shadowCamera);
+      GenerateCascadeBoundingBoxes(*this, renderCamera, lightMatrix);
+
+      //GenerateShadowViewFrustum(*this, lightMatrix);
 
       Refresh();
    }

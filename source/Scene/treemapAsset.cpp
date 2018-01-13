@@ -17,6 +17,14 @@
 
 namespace
 {
+   constexpr auto CASCADE_COUNT{ 3 };
+
+   constexpr auto NEAR_SHADOW_PLANE{ 10.0f };
+   constexpr auto FAR_SHADOW_PLANE{ 1500.0f };
+
+   constexpr auto TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE{ 0 };
+   constexpr auto TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE{ 1 };
+
    /**
     * @brief Generates all of the frustum vertices for the specified camera.
     *
@@ -47,25 +55,21 @@ namespace
     * @param[in] cascadeCount       The desired number of shadow mapping cascades.
     * @param[in] camera             The main scene camera.
     */
-   auto GenerateShadowMapCascades(
-      int cascadeCount,
-      const Camera& camera)
+   auto ComputeCascadeBounds()
    {
-      const double nearPlane = camera.GetNearPlane();
-      const double farPlane = camera.GetFarPlane();
-      const double planeRatio = farPlane / nearPlane;
+      constexpr auto planeRatio = FAR_SHADOW_PLANE / NEAR_SHADOW_PLANE;
 
-      auto previousCascadeStart{ nearPlane };
+      auto previousCascadeStart{ NEAR_SHADOW_PLANE };
 
-      std::vector<std::pair<double, double>> cascadeDistances;
-      for (auto index{ 1.0 }; index < cascadeCount; ++index)
+      std::vector<std::pair<float, float>> cascadeDistances;
+      for (auto index{ 1.0 }; index < CASCADE_COUNT; ++index)
       {
-         const auto cascade = nearPlane * std::pow(planeRatio, index / cascadeCount);
+         const float cascade = NEAR_SHADOW_PLANE * std::pow(planeRatio, index / CASCADE_COUNT);
          cascadeDistances.emplace_back(std::make_pair(previousCascadeStart, cascade));
          previousCascadeStart = cascade;
       }
 
-      cascadeDistances.emplace_back(std::make_pair(previousCascadeStart, farPlane));
+      cascadeDistances.emplace_back(std::make_pair(previousCascadeStart, FAR_SHADOW_PLANE));
 
       return cascadeDistances;
    }
@@ -90,13 +94,12 @@ namespace
     */
    auto ComputeFrustumSplitBoundingBoxes(
       const Camera& renderCamera,
-      const Camera& shadowCamera)
+      const QMatrix4x4& shadowViewMatrix)
    {
-      constexpr auto cascadeCount{ 3 };
-      const auto cascades = GenerateShadowMapCascades(cascadeCount, renderCamera);
+      const auto cascades = ComputeCascadeBounds();
 
       std::vector<std::vector<QVector3D>> frusta;
-      frusta.reserve(cascadeCount);
+      frusta.reserve(CASCADE_COUNT);
 
       auto mutableCamera = renderCamera;
       for (const auto& nearAndFarPlanes : cascades)
@@ -108,9 +111,9 @@ namespace
       }
 
       std::vector<BoundingBox> boundingBoxes;
-      boundingBoxes.reserve(cascadeCount);
+      boundingBoxes.reserve(CASCADE_COUNT);
 
-      const auto worldToLight = shadowCamera.GetProjectionViewMatrix();
+      const auto worldToLight = shadowViewMatrix;
 
       for (const auto& frustum : frusta)
       {
@@ -170,7 +173,7 @@ namespace
       const Settings::Manager& settings,
       QOpenGLShaderProgram& shader)
    {
-      for (std::size_t i = 0; i < lights.size(); i++)
+      for (auto i = 0u; i < lights.size(); ++i)
       {
          const auto indexString = std::to_string(i);
 
@@ -272,7 +275,7 @@ namespace
     *
     * @returns
     */
-   QMatrix4x4 ComputeLightTransformationMatrix()
+   QMatrix4x4 ComputeLightProjectionViewMatrix()
    {
       QMatrix4x4 projection;
       projection.ortho(-600, 600, -600, 600, 10, 1500);
@@ -286,9 +289,6 @@ namespace
 
       return projection * view * model;
    }
-
-    constexpr auto TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE{ 0 };
-    constexpr auto TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE{ 1 };
 }
 
 namespace Asset
@@ -507,6 +507,13 @@ namespace Asset
          /* tupleSize = */ 3,
          /* stride = */ 2 * sizeof(QVector3D));
 
+      const auto cascadeBounds = ComputeCascadeBounds();
+      for (auto index{ 0u }; index < cascadeBounds.size(); ++index)
+      {
+         const auto variable = "cascadeBounds[" + std::to_string(index) + "]";
+         m_shadowMapShader.setUniformValue(variable.data(), cascadeBounds[index].second);
+      }
+
       m_shadowMapShader.release();
       m_referenceBlockBuffer.release();
       m_VAO.release();
@@ -567,8 +574,8 @@ namespace Asset
 
       for (const auto& node : tree)
       {
-         const bool fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
-         const bool notTheRightFileType =
+         const auto fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
+         const auto notTheRightFileType =
             parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY;
 
          if (notTheRightFileType || fileIsTooSmall)
@@ -670,7 +677,7 @@ namespace Asset
 
       m_shadowMapShader.setUniformValue(
          "lightProjectionViewMatrix",
-         ComputeLightTransformationMatrix());
+         ComputeLightProjectionViewMatrix());
 
       m_openGL.glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -710,8 +717,8 @@ namespace Asset
       m_mainShader.setUniformValue("cameraPosition", camera.GetPosition());
       m_mainShader.setUniformValue("materialShininess", settings.GetMaterialShininess());
 
-      const auto lightProjectionViewMatrix = ComputeLightTransformationMatrix();
-      m_mainShader.setUniformValue("lightProjectionViewMatrix", lightProjectionViewMatrix );
+      const auto lightProjectionViewMatrix = ComputeLightProjectionViewMatrix();
+      m_mainShader.setUniformValue("lightProjectionViewMatrix", lightProjectionViewMatrix);
 
       SetUniformLights(lights, settings, m_mainShader);
 
