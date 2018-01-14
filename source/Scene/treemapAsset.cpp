@@ -17,11 +17,6 @@
 
 namespace
 {
-   constexpr auto CASCADE_COUNT{ 3 };
-
-   constexpr auto NEAR_SHADOW_PLANE{ 10.0f };
-   constexpr auto FAR_SHADOW_PLANE{ 1500.0f };
-
    constexpr auto TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE{ 0 };
    constexpr auto TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE{ 1 };
 
@@ -57,19 +52,23 @@ namespace
     */
    auto ComputeCascadeBounds()
    {
-      constexpr auto planeRatio = FAR_SHADOW_PLANE / NEAR_SHADOW_PLANE;
+      constexpr auto planeRatio
+         = Asset::Treemap::FAR_SHADOW_PLANE / Asset::Treemap::NEAR_SHADOW_PLANE;
 
-      auto previousCascadeStart{ NEAR_SHADOW_PLANE };
+      auto previousCascadeStart{ Asset::Treemap::NEAR_SHADOW_PLANE };
 
       std::vector<std::pair<float, float>> cascadeDistances;
-      for (auto index{ 1.0 }; index < CASCADE_COUNT; ++index)
+      for (auto index{ 1.0 }; index < Asset::Treemap::CASCADE_COUNT; ++index)
       {
-         const float cascade = NEAR_SHADOW_PLANE * std::pow(planeRatio, index / CASCADE_COUNT);
+         const float cascade = Asset::Treemap::NEAR_SHADOW_PLANE
+            * std::pow(planeRatio, index / Asset::Treemap::CASCADE_COUNT);
+
          cascadeDistances.emplace_back(std::make_pair(previousCascadeStart, cascade));
          previousCascadeStart = cascade;
       }
 
-      cascadeDistances.emplace_back(std::make_pair(previousCascadeStart, FAR_SHADOW_PLANE));
+      cascadeDistances.emplace_back(
+         std::make_pair(previousCascadeStart, Asset::Treemap::FAR_SHADOW_PLANE));
 
       return cascadeDistances;
    }
@@ -99,7 +98,7 @@ namespace
       const auto cascades = ComputeCascadeBounds();
 
       std::vector<std::vector<QVector3D>> frusta;
-      frusta.reserve(CASCADE_COUNT);
+      frusta.reserve(Asset::Treemap::CASCADE_COUNT);
 
       auto mutableCamera = renderCamera;
       for (const auto& nearAndFarPlanes : cascades)
@@ -111,7 +110,7 @@ namespace
       }
 
       std::vector<BoundingBox> boundingBoxes;
-      boundingBoxes.reserve(CASCADE_COUNT);
+      boundingBoxes.reserve(Asset::Treemap::CASCADE_COUNT);
 
       const auto worldToLight = shadowViewMatrix;
 
@@ -299,6 +298,23 @@ namespace Asset
       :
       Base{ openGL, isInitiallyVisible }
    {
+      m_shadowMaps.reserve(CASCADE_COUNT);
+      m_shadowMapProjectionViewMatrices.reserve(CASCADE_COUNT);
+
+      for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
+      {
+         auto frameBuffer = std::make_unique<QOpenGLFramebufferObject>
+         (
+            SHADOW_MAP_WIDTH,
+            SHADOW_MAP_HEIGHT,
+            QOpenGLFramebufferObject::Attachment::Depth,
+            GL_TEXTURE_2D,
+            GL_RGBA32F
+         );
+
+         m_shadowMaps.emplace_back(std::move(frameBuffer));
+         m_shadowMapProjectionViewMatrices.emplace_back(QMatrix4x4{ });
+      }
    }
 
    bool Treemap::LoadShaders()
@@ -510,8 +526,8 @@ namespace Asset
       const auto cascadeBounds = ComputeCascadeBounds();
       for (auto index{ 0u }; index < cascadeBounds.size(); ++index)
       {
-         const auto variable = "cascadeBounds[" + std::to_string(index) + "]";
-         m_shadowMapShader.setUniformValue(variable.data(), cascadeBounds[index].second);
+         const auto variableName = "cascadeBounds[" + std::to_string(index) + "]";
+         m_shadowMapShader.setUniformValue(variableName.data(), cascadeBounds[index].second);
       }
 
       m_shadowMapShader.release();
@@ -664,44 +680,78 @@ namespace Asset
       return !(m_blockTransformations.empty() && m_blockColors.empty());
    }
 
+   void Treemap::ComputeShadowMapProjectionViewMatrices(const Camera& camera)
+   {
+//      const std::vector<BoundingBox> cascadeBoundingBoxes
+//         = ComputeFrustumSplitBoundingBoxes(camera, ComputeLightProjectionViewMatrix());
+
+      for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
+      {
+//         const auto& boundingBox = cascadeBoundingBoxes[index];
+//         QMatrix4x4 projection;
+//         projection.ortho(
+//            boundingBox.left,
+//            boundingBox.right,
+//            boundingBox.bottom,
+//            boundingBox.top,
+//            boundingBox.front,
+//            boundingBox.back);
+
+         QMatrix4x4 projection;
+         projection.ortho(-600, 600, -600, 600, 10, 1500);
+
+         const auto lightPosition = QVector3D{ 0.f, 200.f, 0.f };
+         const auto lightTarget = QVector3D{ 500.f, 0.f, -500.f };
+
+         QMatrix4x4 model;
+         QMatrix4x4 view;
+         view.lookAt(lightPosition, lightTarget, QVector3D{ 0.0f, 1.0f, 0.0f });
+
+         auto projectionViewMatrix = projection * view * model;
+         m_shadowMapProjectionViewMatrices[index] = std::move(projectionViewMatrix);
+      }
+   }
+
    void Treemap::RenderShadowPass(const Camera& camera)
    {
       // @note In order to fix Peter-panning artifacts, we'll temporarily cull front faces.
       // This will make the shadow map look rather weird; almost like an outline.
-      m_openGL.glCullFace(GL_FRONT);
+      //m_openGL.glCullFace(GL_FRONT);
 
       m_openGL.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
 
-      m_shadowMapFrameBuffer.bind();
       m_shadowMapShader.bind();
-
-      m_shadowMapShader.setUniformValue(
-         "lightProjectionViewMatrix",
-         ComputeLightProjectionViewMatrix());
-
-      m_openGL.glClear(GL_DEPTH_BUFFER_BIT);
-
-      static constexpr float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-      m_openGL.glClearBufferfv(GL_COLOR, 0, white);
-
       m_VAO.bind();
 
-      m_openGL.glDrawArraysInstanced(
-         /* mode = */ GL_TRIANGLES,
-         /* first = */ 0,
-         /* count = */ m_referenceBlockVertices.size(),
-         /* instanceCount = */ m_blockColors.size()
-      );
+      for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
+      {
+         m_shadowMaps[index]->bind();
+
+         const auto& projectionViewMatrix = m_shadowMapProjectionViewMatrices[index];
+         m_shadowMapShader.setUniformValue("lightProjectionViewMatrices", projectionViewMatrix);
+
+         m_openGL.glClear(GL_DEPTH_BUFFER_BIT);
+
+         static constexpr float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+         m_openGL.glClearBufferfv(GL_COLOR, 0, white);
+
+         m_openGL.glDrawArraysInstanced(
+            /* mode = */ GL_TRIANGLES,
+            /* first = */ 0,
+            /* count = */ m_referenceBlockVertices.size(),
+            /* instanceCount = */ m_blockColors.size()
+         );
+
+         m_shadowMaps[index]->release();
+      }
 
       m_VAO.release();
-
       m_shadowMapShader.release();
-      m_shadowMapFrameBuffer.release();
 
       const auto& viewport = camera.GetViewport();
       m_openGL.glViewport(0, 0, viewport.width(), viewport.height());
 
-      m_openGL.glCullFace(GL_BACK);
+      //m_openGL.glCullFace(GL_BACK);
    }
 
    void Treemap::RenderMainPass(
@@ -717,13 +767,19 @@ namespace Asset
       m_mainShader.setUniformValue("cameraPosition", camera.GetPosition());
       m_mainShader.setUniformValue("materialShininess", settings.GetMaterialShininess());
 
-      const auto lightProjectionViewMatrix = ComputeLightProjectionViewMatrix();
-      m_mainShader.setUniformValue("lightProjectionViewMatrix", lightProjectionViewMatrix);
-
       SetUniformLights(lights, settings, m_mainShader);
 
-      m_openGL.glActiveTexture(GL_TEXTURE0);
-      m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMapFrameBuffer.texture());
+      assert(m_shadowMaps.size() == CASCADE_COUNT);
+      assert(m_shadowMapProjectionViewMatrices.size() == CASCADE_COUNT);
+
+      for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
+      {
+         const auto variableName = "lightProjectionViewMatrices[" + std::to_string(index) + "]";
+         m_mainShader.setUniformValue(variableName.data(), m_shadowMapProjectionViewMatrices[index]);
+
+         m_openGL.glActiveTexture(GL_TEXTURE0 + index);
+         m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[index]->texture());
+      }
 
       m_VAO.bind();
 
@@ -749,9 +805,11 @@ namespace Asset
          return true;
       }
 
+      ComputeShadowMapProjectionViewMatrices(camera);
+
       RenderShadowPass(camera);
       RenderMainPass(camera, lights, settings);
-      //RenderDepthMapPreview(); //< @note Enable this to render the shadow map to the screen.
+      RenderDepthMapPreview(); //< @note Enable this to render the shadow map to the screen.
 
       return true;
    }
@@ -890,7 +948,7 @@ namespace Asset
          /* stride = */    5 * sizeof(GLfloat));
 
       m_openGL.glActiveTexture(GL_TEXTURE0);
-      m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMapFrameBuffer.texture());
+      m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[0]->texture());
 
       m_openGL.glDrawArrays(
          /* mode = */ GL_TRIANGLE_FAN,

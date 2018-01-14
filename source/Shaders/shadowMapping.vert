@@ -18,5 +18,6 @@ void main(void)
    vertexColor = color;
    vertexNormal = normal;
 
+   //@todo use vertexPosition instead:
    gl_Position = lightProjectionViewMatrix * instanceMatrix * vec4(vertex, 1.0f);
 }

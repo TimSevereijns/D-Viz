@@ -4,7 +4,8 @@ uniform vec3 cameraPosition;
 
 uniform float materialShininess;
 
-uniform sampler2D shadowMap;
+const int CASCADE_COUNT = 1;
+uniform sampler2D shadowMaps[CASCADE_COUNT];
 
 uniform struct Light
 {
@@ -14,14 +15,13 @@ uniform struct Light
    float attenuation;
 } allLights[5];
 
-const int CASCADE_COUNT = 3;
 uniform float cascadeBounds[CASCADE_COUNT];
 
 in vec3 vertexPosition;
 in vec3 vertexColor;
 in vec3 vertexNormal;
 
-in vec4 shadowCoordinate;
+in vec4 shadowCoordinates[CASCADE_COUNT];
 
 out vec4 finalPixelColor;
 
@@ -64,7 +64,9 @@ vec3 ComputeLightContribution(
    return linearColor;
 }
 
-float ComputeShadowAttenuation()
+float ComputeShadowAttenuation(
+   int cascadeIndex,
+   vec4 shadowCoordinate)
 {
    // @note Perspective division is automatically applied to `gl_position`. Coordinates passed along
    // manually, however, will need the division applied:
@@ -76,7 +78,7 @@ float ComputeShadowAttenuation()
 
    float z = 0.5 * projectionCoordinates.z + 0.5;
 
-   float depth = texture(shadowMap, uvCoordinates).x;
+   float depth = texture(shadowMaps[cascadeIndex], uvCoordinates).x;
 
    // @note The bias being subtracted from the distance between the fragment and the light source
    // is to compensate for an artifact known as shadow acne; however, this bias will introduce yet
@@ -95,45 +97,42 @@ float ComputeShadowAttenuation()
 void main(void)
 {
    vec3 fragmentToCamera = normalize(cameraPosition - vec3(vertexPosition));
-
-   vec3 fragmentColor = vec3(0.0f);
-
    vec3 cascadeIndicator = vec3(0.0, 0.01, 0.0);
 
-//   for (int i = 0 ; i < CASCADE_COUNT ; ++i)
-//   {
-//      if (gl_FragDepth <= cascadeBounds[i])
-//      {
-//         ShadowFactor = ComputeShadowAttenuation(i, LightSpacePos[i]);
+   float shadowFactor = 1.0;
 
-//         if (i == 0)
-//         {
-//            cascadeIndicator = vec4(0.01, 0.0, 0.0, 0.0);
-//         }
-//         else if (i == 1)
-//         {
-//            cascadeIndicator = vec4(0.0, 0.01, 0.0, 0.0);
-//         }
-//         else if (i == 2)
-//         {
-//            cascadeIndicator = vec4(0.0, 0.0, 0.01, 0.0);
-//         }
-//            break;
-//         }
-//      }
-//  }
+   for (int index = 0; index < CASCADE_COUNT; ++index)
+   {
+      if (gl_FragDepth <= cascadeBounds[index])
+      {
+         shadowFactor = ComputeShadowAttenuation(index, shadowCoordinates[index]);
 
-   // Calculate the contribution of the shadow casting light:
-   fragmentColor +=
-      ComputeShadowAttenuation()
-      * ComputeLightContribution(
-         allLights[1],
-         vertexColor,
-         vertexNormal,
-         vertexPosition.xyz,
-         fragmentToCamera,
-         /* includeAmbient = */ false)
-      + cascadeIndicator;
+         if (index == 0)
+         {
+            cascadeIndicator = vec3(0.1, 0.0, 0.0);
+         }
+         else if (index == 1)
+         {
+            cascadeIndicator = vec3(0.0, 0.1, 0.0);
+         }
+         else if (index == 2)
+         {
+            cascadeIndicator = vec3(0.0, 0.0, 0.1);
+         }
+
+         break;
+      }
+   }
+
+   vec3 lightFactor = ComputeLightContribution(
+      allLights[1],
+      vertexColor,
+      vertexNormal,
+      vertexPosition.xyz,
+      fragmentToCamera,
+      /* includeAmbient = */ false);
+
+   vec3 fragmentColor = lightFactor * shadowFactor + cascadeIndicator;
 
    vec3 gammaCorrection = vec3(1.0f / 2.2f);
    finalPixelColor = vec4(pow(fragmentColor, gammaCorrection), 1);

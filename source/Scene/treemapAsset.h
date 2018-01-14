@@ -26,6 +26,12 @@ namespace Asset
    {
       public:
 
+         constexpr static auto CASCADE_COUNT{ 1 };
+         constexpr static auto NEAR_SHADOW_PLANE{ 10.0f };
+         constexpr static auto FAR_SHADOW_PLANE{ 1500.0f };
+         constexpr static auto SHADOW_MAP_WIDTH{ 1024 * 4 };
+         constexpr static auto SHADOW_MAP_HEIGHT{ 1024 * 4 };
+
          /**
           * @see Asset::Base::Base(...)
           */
@@ -106,6 +112,8 @@ namespace Asset
 
       private:
 
+         void ComputeShadowMapProjectionViewMatrices(const Camera& camera);
+
          void RenderDepthMapPreview();
 
          void RenderShadowPass(const Camera& camera);
@@ -133,8 +141,8 @@ namespace Asset
 
          ColorGradient m_directoryColorGradient;
 
-            std::uint32_t m_blockCount{ 0 };
-            std::uintmax_t m_largestDirectorySize{ 0 };
+         std::uint32_t m_blockCount{ 0 };
+         std::uintmax_t m_largestDirectorySize{ 0 };
 
          QOpenGLBuffer m_referenceBlockBuffer;
          QOpenGLBuffer m_blockTransformationBuffer;
@@ -150,19 +158,8 @@ namespace Asset
 
          Camera m_shadowCamera;
 
-         static constexpr auto SHADOW_MAP_WIDTH{ 4096 * 2 };
-         static constexpr auto SHADOW_MAP_HEIGHT{ 4096 * 2 };
-
-         QOpenGLFramebufferObject m_shadowMapFrameBuffer
-         {
-            SHADOW_MAP_WIDTH,
-            SHADOW_MAP_HEIGHT,
-            QOpenGLFramebufferObject::Attachment::Depth,
-            GL_TEXTURE_2D,
-            GL_RGBA32F
-         };
-
-         QMatrix4x4 m_lightSpaceTransformationMatrix;
+         std::vector<std::unique_ptr<QOpenGLFramebufferObject>> m_shadowMaps;
+         std::vector<QMatrix4x4> m_shadowMapProjectionViewMatrices;
    };
 }
 
