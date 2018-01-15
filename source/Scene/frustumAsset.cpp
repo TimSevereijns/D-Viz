@@ -82,7 +82,7 @@ namespace
     * @param[in] cascadeCount       The desired number of shadow mapping cascades.
     * @param[in] camera             The main scene camera.
     */
-   auto ComputeCascadeBounds(
+   auto ComputeCascadeDistances(
       int cascadeCount,
       const Camera& camera)
    {
@@ -120,8 +120,8 @@ namespace
       mutableCamera.SetNearPlane(1.0f);
       mutableCamera.SetFarPlane(2000.0f);
 
-      constexpr auto cascadeCount{ 3 };
-      const auto cascades = ComputeCascadeBounds(cascadeCount, mutableCamera);
+      constexpr auto cascadeCount{ 1 };
+      const auto cascades = ComputeCascadeDistances(cascadeCount, mutableCamera);
 
       std::vector<std::vector<QVector3D>> frusta;
       frusta.reserve(cascadeCount);
@@ -193,8 +193,8 @@ namespace
       const Camera& renderCamera,
       const QMatrix4x4& worldToLight)
    {
-      constexpr auto cascadeCount{ 3 };
-      const auto cascades = ComputeCascadeBounds(cascadeCount, renderCamera);
+      constexpr auto cascadeCount{ 1 };
+      const auto cascades = ComputeCascadeDistances(cascadeCount, renderCamera);
 
       std::vector<std::vector<QVector3D>> frusta;
       frusta.reserve(cascadeCount);
@@ -239,15 +239,15 @@ namespace
 
          vertices
             // Near plane:
-            << QVector3D{ minX, maxY, maxZ } << QVector3D{ maxX, maxY, maxZ }
-            << QVector3D{ maxX, maxY, maxZ } << QVector3D{ maxX, minY, maxZ }
-            << QVector3D{ maxX, minY, maxZ } << QVector3D{ minX, minY, maxZ }
-            << QVector3D{ minX, minY, maxZ } << QVector3D{ minX, maxY, maxZ }
-            // Far plane:
             << QVector3D{ minX, maxY, minZ } << QVector3D{ maxX, maxY, minZ }
             << QVector3D{ maxX, maxY, minZ } << QVector3D{ maxX, minY, minZ }
             << QVector3D{ maxX, minY, minZ } << QVector3D{ minX, minY, minZ }
             << QVector3D{ minX, minY, minZ } << QVector3D{ minX, maxY, minZ }
+            // Far plane:
+            << QVector3D{ minX, maxY, maxZ } << QVector3D{ maxX, maxY, maxZ }
+            << QVector3D{ maxX, maxY, maxZ } << QVector3D{ maxX, minY, maxZ }
+            << QVector3D{ maxX, minY, maxZ } << QVector3D{ minX, minY, maxZ }
+            << QVector3D{ minX, minY, maxZ } << QVector3D{ minX, maxY, maxZ }
             // Connect the planes:
             << QVector3D{ minX, maxY, minZ } << QVector3D{ minX, maxY, maxZ }
             << QVector3D{ maxX, maxY, minZ } << QVector3D{ maxX, maxY, maxZ }

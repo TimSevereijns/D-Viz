@@ -105,7 +105,7 @@ void main(void)
 
    for (int index = 0; index < CASCADE_COUNT; ++index)
    {
-      if (clipSpaceZ <= 200) //cascadeBounds[index])
+      if (clipSpaceZ <= 1000) //cascadeBounds[index])
       {
          shadowFactor = ComputeShadowAttenuation(index, shadowCoordinates[index]);
 
