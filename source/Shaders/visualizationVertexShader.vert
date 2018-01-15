@@ -18,6 +18,8 @@ out vec3 vertexNormal;
 
 out vec4 shadowCoordinates[CASCADE_COUNT];
 
+out float clipSpaceZ;
+
 void main(void)
 {
    vertexPosition = vec3(instanceMatrix * vec4(vertex, 1.0f));
@@ -30,4 +32,5 @@ void main(void)
    }
 
    gl_Position = cameraProjectionViewMatrix * instanceMatrix * vec4(vertex, 1.0f);
+   clipSpaceZ = gl_Position.z;
 }

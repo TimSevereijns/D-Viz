@@ -112,6 +112,8 @@ namespace Asset
 
       private:
 
+         void SetCascadeBounds();
+
          void ComputeShadowMapProjectionViewMatrices(const Camera& camera);
 
          void RenderDepthMapPreview();

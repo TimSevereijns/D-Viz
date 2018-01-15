@@ -23,6 +23,8 @@ in vec3 vertexNormal;
 
 in vec4 shadowCoordinates[CASCADE_COUNT];
 
+in float clipSpaceZ;
+
 out vec4 finalPixelColor;
 
 vec3 ComputeLightContribution(
@@ -103,7 +105,7 @@ void main(void)
 
    for (int index = 0; index < CASCADE_COUNT; ++index)
    {
-      if (gl_FragDepth <= cascadeBounds[index])
+      if (clipSpaceZ <= 200) //cascadeBounds[index])
       {
          shadowFactor = ComputeShadowAttenuation(index, shadowCoordinates[index]);
 
@@ -132,7 +134,7 @@ void main(void)
       fragmentToCamera,
       /* includeAmbient = */ false);
 
-   vec3 fragmentColor = lightFactor * shadowFactor + cascadeIndicator;
+   vec3 fragmentColor = lightFactor * shadowFactor; // + cascadeIndicator;
 
    vec3 gammaCorrection = vec3(1.0f / 2.2f);
    finalPixelColor = vec4(pow(fragmentColor, gammaCorrection), 1);

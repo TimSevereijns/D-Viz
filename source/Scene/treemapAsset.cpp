@@ -155,10 +155,7 @@ namespace
 
       return boundingBoxes;
    }
-}
 
-namespace
-{
    /**
     * @brief SetUniformLights is a helper function to easily set all values of the GLSL defined
     * struct.
@@ -523,18 +520,23 @@ namespace Asset
          /* tupleSize = */ 3,
          /* stride = */ 2 * sizeof(QVector3D));
 
-      const auto cascadeBounds = ComputeCascadeBounds();
-      for (auto index{ 0u }; index < cascadeBounds.size(); ++index)
-      {
-         const auto variableName = "cascadeBounds[" + std::to_string(index) + "]";
-         m_shadowMapShader.setUniformValue(variableName.data(), cascadeBounds[index].second);
-      }
+      SetCascadeBounds();
 
       m_shadowMapShader.release();
       m_referenceBlockBuffer.release();
       m_VAO.release();
 
       return true;
+   }
+
+   void Treemap::SetCascadeBounds()
+   {
+      const auto cascadeBounds = ComputeCascadeBounds();
+      for (auto index{ 0u }; index < cascadeBounds.size(); ++index)
+      {
+         const auto variableName = "cascadeBounds[" + std::to_string(index) + "]";
+         m_shadowMapShader.setUniformValue(variableName.data(), cascadeBounds[index].second);
+      }
    }
 
    std::uint32_t Treemap::LoadBufferData(
@@ -716,7 +718,7 @@ namespace Asset
    {
       // @note In order to fix Peter-panning artifacts, we'll temporarily cull front faces.
       // This will make the shadow map look rather weird; almost like an outline.
-      //m_openGL.glCullFace(GL_FRONT);
+      m_openGL.glCullFace(GL_FRONT);
 
       m_openGL.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
 
@@ -728,7 +730,7 @@ namespace Asset
          m_shadowMaps[index]->bind();
 
          const auto& projectionViewMatrix = m_shadowMapProjectionViewMatrices[index];
-         m_shadowMapShader.setUniformValue("lightProjectionViewMatrices", projectionViewMatrix);
+         m_shadowMapShader.setUniformValue("lightProjectionViewMatrix", projectionViewMatrix);
 
          m_openGL.glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -751,7 +753,7 @@ namespace Asset
       const auto& viewport = camera.GetViewport();
       m_openGL.glViewport(0, 0, viewport.width(), viewport.height());
 
-      //m_openGL.glCullFace(GL_BACK);
+      m_openGL.glCullFace(GL_BACK);
    }
 
    void Treemap::RenderMainPass(
@@ -809,7 +811,7 @@ namespace Asset
 
       RenderShadowPass(camera);
       RenderMainPass(camera, lights, settings);
-      RenderDepthMapPreview(); //< @note Enable this to render the shadow map to the screen.
+      //RenderDepthMapPreview(); //< @note Enable this to render the shadow map to the screen.
 
       return true;
    }
