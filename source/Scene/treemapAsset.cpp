@@ -60,28 +60,11 @@ namespace
       };
 
       return cascadeDistances;
-
-//      constexpr auto planeRatio
-//         = Asset::Treemap::FAR_SHADOW_PLANE / Asset::Treemap::NEAR_SHADOW_PLANE;
-
-//      auto previousCascadeStart{ Asset::Treemap::NEAR_SHADOW_PLANE };
-
-//      std::vector<std::pair<float, float>> cascadeDistances;
-//      for (auto index{ 1.0 }; index < Asset::Treemap::CASCADE_COUNT; ++index)
-//      {
-//         const float cascade = Asset::Treemap::NEAR_SHADOW_PLANE
-//            * std::pow(planeRatio, index / Asset::Treemap::CASCADE_COUNT);
-
-//         cascadeDistances.emplace_back(std::make_pair(previousCascadeStart, cascade));
-//         previousCascadeStart = cascade;
-//      }
-
-//      cascadeDistances.emplace_back(
-//         std::make_pair(previousCascadeStart, Asset::Treemap::FAR_SHADOW_PLANE));
-
-//      return cascadeDistances;
    }
 
+   /**
+    * @brief The BoundingBox struct
+    */
    struct BoundingBox
    {
       float left;
@@ -166,8 +149,7 @@ namespace
    }
 
    /**
-    * @brief SetUniformLights is a helper function to easily set all values of the GLSL defined
-    * struct.
+    * @brief A helper function to set many of the shader variables needed for lighting.
     *
     * @param[in] lights             Vector of lights to be loaded into the shader program.
     * @param[in] settings           Additional scene rendering settings.
@@ -274,23 +256,16 @@ namespace
    }
 
    /**
-    * @brief ComputeLightTransformationMatrix
-    *
-    * @param camera
-    *
-    * @returns
+    * @returns The view matrix for the shadow casting light source.
     */
    QMatrix4x4 ComputeLightViewMatrix()
    {
-//      QMatrix4x4 projection;
-//      projection.ortho(-600, 600, -600, 600, 10, 1500);
+      constexpr auto lightPosition = QVector3D{ 0.f, 200.f, 0.f };
+      constexpr auto lightTarget = QVector3D{ 500.f, 0.f, -500.f };
+      constexpr auto upVector = QVector3D{ 0.0f, 1.0f, 0.0f };
 
-      const auto lightPosition = QVector3D{ 0.f, 200.f, 0.f };
-      const auto lightTarget = QVector3D{ 500.f, 0.f, -500.f };
-
-//      QMatrix4x4 model;
       QMatrix4x4 view;
-      view.lookAt(lightPosition, lightTarget, QVector3D{ 0.0f, 1.0f, 0.0f });
+      view.lookAt(lightPosition, lightTarget, upVector);
 
       return view;
    }
@@ -697,11 +672,8 @@ namespace Asset
 
    void Treemap::ComputeShadowMapProjectionViewMatrices(const Camera& camera)
    {
-      const auto lightViewMatrix = ComputeLightViewMatrix();
-
-      // @todo Making this static is a total hack!
-      const auto cascadeBoundingBoxes
-         = ComputeFrustumSplitBoundingBoxes(camera, lightViewMatrix);
+      const auto view = ComputeLightViewMatrix();
+      const auto cascadeBoundingBoxes = ComputeFrustumSplitBoundingBoxes(camera, view);
 
       for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
       {
@@ -715,19 +687,7 @@ namespace Asset
             10,
             1500);
 
-//         std::cout
-//            << "Left: "     << boundingBox[0].x()
-//            << ", Right: "  << boundingBox[1].x()
-//            << ", Bottom: " << boundingBox[3].y()
-//            << ", Top: "    << boundingBox[2].y() << std::endl;
-
-         const auto lightPosition = QVector3D{ 0.f, 200.f, 0.f };
-         const auto lightTarget = QVector3D{ 500.f, 0.f, -500.f };
-
-         QMatrix4x4 model;
-         QMatrix4x4 view;
-         view.lookAt(lightPosition, lightTarget, QVector3D{ 0.0f, 1.0f, 0.0f });
-
+         const QMatrix4x4 model;
          auto projectionViewMatrix = projection * view * model;
          m_shadowMapProjectionViewMatrices[index] = std::move(projectionViewMatrix);
       }
