@@ -26,7 +26,7 @@ namespace Asset
    {
       public:
 
-         constexpr static auto CASCADE_COUNT{ 1 };
+         constexpr static auto CASCADE_COUNT{ 3 };
          constexpr static auto NEAR_SHADOW_PLANE{ 10.0f };
          constexpr static auto FAR_SHADOW_PLANE{ 1500.0f };
          constexpr static auto SHADOW_MAP_WIDTH{ 1024 * 4 };

@@ -4,7 +4,7 @@ uniform vec3 cameraPosition;
 
 uniform float materialShininess;
 
-const int CASCADE_COUNT = 1;
+const int CASCADE_COUNT = 3;
 uniform sampler2D shadowMaps[CASCADE_COUNT];
 
 uniform struct Light
@@ -99,27 +99,27 @@ float ComputeShadowAttenuation(
 void main(void)
 {
    vec3 fragmentToCamera = normalize(cameraPosition - vec3(vertexPosition));
-   vec3 cascadeIndicator = vec3(0.0, 0.01, 0.0);
+   vec3 cascadeIndicator = vec3(0.0, 0.00, 0.0);
 
    float shadowFactor = 1.0;
 
    for (int index = 0; index < CASCADE_COUNT; ++index)
    {
-      if (clipSpaceZ <= 1000) //cascadeBounds[index])
+      if (clipSpaceZ <= cascadeBounds[index])
       {
          shadowFactor = ComputeShadowAttenuation(index, shadowCoordinates[index]);
 
          if (index == 0)
          {
-            cascadeIndicator = vec3(0.1, 0.0, 0.0);
+            cascadeIndicator = vec3(0.01, 0.0, 0.0);
          }
          else if (index == 1)
          {
-            cascadeIndicator = vec3(0.0, 0.1, 0.0);
+            cascadeIndicator = vec3(0.0, 0.01, 0.0);
          }
          else if (index == 2)
          {
-            cascadeIndicator = vec3(0.0, 0.0, 0.1);
+            cascadeIndicator = vec3(0.0, 0.0, 0.01);
          }
 
          break;
@@ -134,7 +134,7 @@ void main(void)
       fragmentToCamera,
       /* includeAmbient = */ false);
 
-   vec3 fragmentColor = lightFactor * shadowFactor; // + cascadeIndicator;
+   vec3 fragmentColor = lightFactor * shadowFactor + cascadeIndicator;
 
    vec3 gammaCorrection = vec3(1.0f / 2.2f);
    finalPixelColor = vec4(pow(fragmentColor, gammaCorrection), 1);

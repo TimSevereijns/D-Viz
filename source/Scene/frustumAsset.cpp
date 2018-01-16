@@ -282,7 +282,7 @@ namespace
     *
     * @returns
     */
-   QMatrix4x4 ComputeLightProjectionViewMatrix()
+   QMatrix4x4 ComputeLightViewMatrix()
    {
       const auto lightPosition = QVector3D{ 0.f, 200.f, 0.f };
       const auto lightTarget = QVector3D{ 500.f, 0.f, -500.f };
@@ -348,7 +348,7 @@ namespace Asset
       renderCamera.SetNearPlane(1.0f);
       renderCamera.SetFarPlane(2000.0f);
 
-      const auto lightMatrix = ComputeLightProjectionViewMatrix();
+      const auto lightMatrix = ComputeLightViewMatrix();
 
       GenerateCameraFrusta(*this, renderCamera);
       GenerateCascadeBoundingBoxes(*this, renderCamera, lightMatrix);

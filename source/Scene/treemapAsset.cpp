@@ -52,25 +52,34 @@ namespace
     */
    auto ComputeCascadeDistances()
    {
-      constexpr auto planeRatio
-         = Asset::Treemap::FAR_SHADOW_PLANE / Asset::Treemap::NEAR_SHADOW_PLANE;
-
-      auto previousCascadeStart{ Asset::Treemap::NEAR_SHADOW_PLANE };
-
-      std::vector<std::pair<float, float>> cascadeDistances;
-      for (auto index{ 1.0 }; index < Asset::Treemap::CASCADE_COUNT; ++index)
+      const std::vector<std::pair<float, float>> cascadeDistances
       {
-         const float cascade = Asset::Treemap::NEAR_SHADOW_PLANE
-            * std::pow(planeRatio, index / Asset::Treemap::CASCADE_COUNT);
-
-         cascadeDistances.emplace_back(std::make_pair(previousCascadeStart, cascade));
-         previousCascadeStart = cascade;
-      }
-
-      cascadeDistances.emplace_back(
-         std::make_pair(previousCascadeStart, Asset::Treemap::FAR_SHADOW_PLANE));
+         std::make_pair(1, 100),
+         std::make_pair(100, 500),
+         std::make_pair(500, 2000)
+      };
 
       return cascadeDistances;
+
+//      constexpr auto planeRatio
+//         = Asset::Treemap::FAR_SHADOW_PLANE / Asset::Treemap::NEAR_SHADOW_PLANE;
+
+//      auto previousCascadeStart{ Asset::Treemap::NEAR_SHADOW_PLANE };
+
+//      std::vector<std::pair<float, float>> cascadeDistances;
+//      for (auto index{ 1.0 }; index < Asset::Treemap::CASCADE_COUNT; ++index)
+//      {
+//         const float cascade = Asset::Treemap::NEAR_SHADOW_PLANE
+//            * std::pow(planeRatio, index / Asset::Treemap::CASCADE_COUNT);
+
+//         cascadeDistances.emplace_back(std::make_pair(previousCascadeStart, cascade));
+//         previousCascadeStart = cascade;
+//      }
+
+//      cascadeDistances.emplace_back(
+//         std::make_pair(previousCascadeStart, Asset::Treemap::FAR_SHADOW_PLANE));
+
+//      return cascadeDistances;
    }
 
    struct BoundingBox
@@ -95,7 +104,7 @@ namespace
       const Camera& renderCamera,
       const QMatrix4x4& shadowViewMatrix)
    {
-      const auto cascadeDistances = ComputeCascadeDistances();
+      static const auto cascadeDistances = ComputeCascadeDistances();
 
       std::vector<std::vector<QVector3D>> frusta;
       frusta.reserve(Asset::Treemap::CASCADE_COUNT);
@@ -109,7 +118,7 @@ namespace
          frusta.emplace_back(ComputeFrustumCorners(mutableCamera));
       }
 
-      std::vector<std::vector<QVector3D>> boundingBoxes;
+      std::vector<BoundingBox> boundingBoxes;
       boundingBoxes.reserve(Asset::Treemap::CASCADE_COUNT);
 
       const auto worldToLight = shadowViewMatrix;
@@ -140,30 +149,15 @@ namespace
             maxZ = std::max(maxZ, mappedVertex.z());
          }
 
-         std::vector<QVector3D> boundingBox
+         auto boundingBox = BoundingBox
          {
-            // Near plane:
-            QVector3D{ minX, maxY, minZ }, QVector3D{ maxX, maxY, minZ },
-            QVector3D{ maxX, maxY, minZ }, QVector3D{ maxX, minY, minZ },
-            QVector3D{ maxX, minY, minZ }, QVector3D{ minX, minY, minZ },
-            QVector3D{ minX, minY, minZ }, QVector3D{ minX, maxY, minZ },
-            // Far plane:
-            QVector3D{ minX, maxY, maxZ }, QVector3D{ maxX, maxY, maxZ },
-            QVector3D{ maxX, maxY, maxZ }, QVector3D{ maxX, minY, maxZ },
-            QVector3D{ maxX, minY, maxZ }, QVector3D{ minX, minY, maxZ },
-            QVector3D{ minX, minY, maxZ }, QVector3D{ minX, maxY, maxZ },
-            // Connect the planes:
-            QVector3D{ minX, maxY, minZ }, QVector3D{ minX, maxY, maxZ },
-            QVector3D{ maxX, maxY, minZ }, QVector3D{ maxX, maxY, maxZ },
-            QVector3D{ maxX, minY, minZ }, QVector3D{ maxX, minY, maxZ },
-            QVector3D{ minX, minY, minZ }, QVector3D{ minX, minY, maxZ }
+            /* left   = */ minX,
+            /* right  = */ maxX,
+            /* bottom = */ minY,
+            /* top    = */ maxY,
+            /* back   = */ maxZ,
+            /* front  = */ minZ
          };
-
-         const auto lightToWorld = worldToLight.inverted();
-         for (auto& vertex : boundingBox)
-         {
-            vertex = lightToWorld.map(vertex);
-         }
 
          boundingBoxes.emplace_back(std::move(boundingBox));
       }
@@ -286,19 +280,19 @@ namespace
     *
     * @returns
     */
-   QMatrix4x4 ComputeLightProjectionViewMatrix()
+   QMatrix4x4 ComputeLightViewMatrix()
    {
-      QMatrix4x4 projection;
-      projection.ortho(-600, 600, -600, 600, 10, 1500);
+//      QMatrix4x4 projection;
+//      projection.ortho(-600, 600, -600, 600, 10, 1500);
 
       const auto lightPosition = QVector3D{ 0.f, 200.f, 0.f };
       const auto lightTarget = QVector3D{ 500.f, 0.f, -500.f };
 
-      QMatrix4x4 model;
+//      QMatrix4x4 model;
       QMatrix4x4 view;
       view.lookAt(lightPosition, lightTarget, QVector3D{ 0.0f, 1.0f, 0.0f });
 
-      return projection * view * model;
+      return view;
    }
 }
 
@@ -535,23 +529,27 @@ namespace Asset
          /* tupleSize = */ 3,
          /* stride = */ 2 * sizeof(QVector3D));
 
-      SetCascadeBounds();
-
       m_shadowMapShader.release();
       m_referenceBlockBuffer.release();
       m_VAO.release();
+
+      SetCascadeBounds();
 
       return true;
    }
 
    void Treemap::SetCascadeBounds()
    {
+      m_mainShader.bind();
+
       const auto cascadeBounds = ComputeCascadeDistances();
       for (auto index{ 0u }; index < cascadeBounds.size(); ++index)
       {
          const auto variableName = "cascadeBounds[" + std::to_string(index) + "]";
-         m_shadowMapShader.setUniformValue(variableName.data(), cascadeBounds[index].second);
+         m_mainShader.setUniformValue(variableName.data(), cascadeBounds[index].second);
       }
+
+      m_mainShader.release();
    }
 
    std::uint32_t Treemap::LoadBufferData(
@@ -699,23 +697,23 @@ namespace Asset
 
    void Treemap::ComputeShadowMapProjectionViewMatrices(const Camera& camera)
    {
-      const auto lightViewMatrix = ComputeLightProjectionViewMatrix();
+      const auto lightViewMatrix = ComputeLightViewMatrix();
 
       // @todo Making this static is a total hack!
-      static const std::vector<std::vector<QVector3D>> cascadeBoundingBoxes
+      const auto cascadeBoundingBoxes
          = ComputeFrustumSplitBoundingBoxes(camera, lightViewMatrix);
 
       for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
       {
          const auto& boundingBox = cascadeBoundingBoxes[index];
          QMatrix4x4 projection;
-         projection.ortho(-600, 600, -600, 600, 10, 1500);
-//            boundingBox[0].x(),
-//            boundingBox[1].x(),
-//            boundingBox[3].y(),
-//            boundingBox[2].y(),
-//            10,
-//            1500);
+         projection.ortho(
+            boundingBox.left,
+            boundingBox.right,
+            boundingBox.bottom,
+            boundingBox.top,
+            10,
+            1500);
 
 //         std::cout
 //            << "Left: "     << boundingBox[0].x()
@@ -832,6 +830,7 @@ namespace Asset
 
       RenderShadowPass(camera);
       RenderMainPass(camera, lights, settings);
+
       //RenderDepthMapPreview(); //< @note Enable this to render the shadow map to the screen.
 
       return true;
@@ -971,7 +970,7 @@ namespace Asset
          /* stride = */    5 * sizeof(GLfloat));
 
       m_openGL.glActiveTexture(GL_TEXTURE0);
-      m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[0]->texture());
+      m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[1]->texture());
 
       m_openGL.glDrawArrays(
          /* mode = */ GL_TRIANGLE_FAN,
