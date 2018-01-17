@@ -27,8 +27,6 @@ namespace Asset
       public:
 
          constexpr static auto CASCADE_COUNT{ 3 };
-         constexpr static auto NEAR_SHADOW_PLANE{ 10.0f };
-         constexpr static auto FAR_SHADOW_PLANE{ 1500.0f };
          constexpr static auto SHADOW_MAP_WIDTH{ 1024 * 4 };
          constexpr static auto SHADOW_MAP_HEIGHT{ 1024 * 4 };
 
@@ -112,11 +110,12 @@ namespace Asset
 
       private:
 
-         void SetCascadeBounds();
+         void InitializeShadowMachineryOnMainShader();
+         void InitializeShadowMachineryOnShadowShader();
 
          void ComputeShadowMapProjectionViewMatrices(const Camera& camera);
 
-         void RenderDepthMapPreview();
+         void RenderDepthMapPreview(int index);
 
          void RenderShadowPass(const Camera& camera);
 
@@ -158,11 +157,25 @@ namespace Asset
          QOpenGLShaderProgram m_shadowMapShader;
          QOpenGLShaderProgram m_texturePreviewShader;
 
-         Camera m_shadowCamera;
+         struct ShadowMapMetadata
+         {
+            ShadowMapMetadata(
+               std::unique_ptr<QOpenGLFramebufferObject> buffer,
+               QMatrix4x4 matrix,
+               int location)
+               :
+               framebuffer{ std::move(buffer) },
+               projectionViewMatrix{ std::move(matrix) },
+               textureLocation{ location }
+            {
+            }
 
-         std::vector<std::unique_ptr<QOpenGLFramebufferObject>> m_shadowMaps;
-         std::vector<QMatrix4x4> m_shadowMapProjectionViewMatrices;
-         std::vector<int> m_shadowMapTextureLocations;
+            std::unique_ptr<QOpenGLFramebufferObject> framebuffer;
+            QMatrix4x4 projectionViewMatrix;
+            int textureLocation;
+         };
+
+         std::vector<ShadowMapMetadata> m_shadowMaps;
    };
 }
 

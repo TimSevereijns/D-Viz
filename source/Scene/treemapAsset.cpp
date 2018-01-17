@@ -59,9 +59,9 @@ namespace
    {
       const std::vector<std::pair<float, float>> cascadeDistances
       {
-         std::make_pair(1, 100),
-         std::make_pair(100, 500),
-         std::make_pair(500, 2000)
+         std::make_pair(1.0f, 100.0f),
+         std::make_pair(100.0f, 500.0f),
+         std::make_pair(500.0f, 2000.0f)
       };
 
       return cascadeDistances;
@@ -285,8 +285,6 @@ namespace Asset
       Base{ openGL, isInitiallyVisible }
    {
       m_shadowMaps.reserve(CASCADE_COUNT);
-      m_shadowMapProjectionViewMatrices.reserve(CASCADE_COUNT);
-      m_shadowMapTextureLocations.reserve(CASCADE_COUNT);
 
       for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
       {
@@ -299,17 +297,22 @@ namespace Asset
             GL_RGBA32F
          );
 
-         m_shadowMaps.emplace_back(std::move(frameBuffer));
-         m_shadowMapProjectionViewMatrices.emplace_back(QMatrix4x4{ });
-         m_shadowMapTextureLocations.emplace_back(0);
+         constexpr auto placeholder{ 0 };
+         m_shadowMaps.emplace_back(std::move(frameBuffer), QMatrix4x4{ }, placeholder);
       }
    }
 
    bool Treemap::LoadShaders()
    {
-      m_shadowMapShader.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/Shaders/shadowMapping.vert");
-      m_shadowMapShader.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/Shaders/shadowMapping.frag");
-      bool success = m_shadowMapShader.link();
+      m_shadowMapShader.addShaderFromSourceFile(
+         QOpenGLShader::Vertex,
+         ":/Shaders/shadowMapping.vert");
+
+      m_shadowMapShader.addShaderFromSourceFile(
+         QOpenGLShader::Fragment,
+         ":/Shaders/shadowMapping.frag");
+
+      auto success = m_shadowMapShader.link();
 
       success &= Base::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
       success &= LoadTexturePreviewShaders();
@@ -491,6 +494,37 @@ namespace Asset
 
    bool Treemap::InitializeShadowMachinery()
    {
+      InitializeShadowMachineryOnMainShader();
+      InitializeShadowMachineryOnShadowShader();
+
+      return true;
+   }
+
+   void Treemap::InitializeShadowMachineryOnMainShader()
+   {
+      m_mainShader.bind();
+
+      const auto shaderID = m_mainShader.programId();
+
+      const auto cascadeBounds = ComputeCascadeDistances();
+      for (auto index{ 0u }; index < cascadeBounds.size(); ++index)
+      {
+         const auto indexAsString = std::to_string(index);
+
+         auto variableName = "cascadeBounds[" + indexAsString + "]";
+         m_mainShader.setUniformValue(variableName.data(), cascadeBounds[index].second);
+
+         variableName = "shadowMaps[" + indexAsString + "]";
+         const auto location = m_openGL.glGetUniformLocation(shaderID, variableName.data());
+
+         m_shadowMaps[index].textureLocation = location;
+      }
+
+      m_mainShader.release();
+   }
+
+   void Treemap::InitializeShadowMachineryOnShadowShader()
+   {
       m_VAO.bind();
       m_referenceBlockBuffer.bind();
       m_shadowMapShader.bind();
@@ -514,31 +548,6 @@ namespace Asset
       m_shadowMapShader.release();
       m_referenceBlockBuffer.release();
       m_VAO.release();
-
-      SetCascadeBounds();
-
-      return true;
-   }
-
-   void Treemap::SetCascadeBounds()
-   {
-      m_mainShader.bind();
-
-      const auto cascadeBounds = ComputeCascadeDistances();
-      for (auto index{ 0u }; index < cascadeBounds.size(); ++index)
-      {
-         const auto indexAsString = std::to_string(index);
-
-         auto variable = "cascadeBounds[" + indexAsString + "]";
-         m_mainShader.setUniformValue(variable.data(), cascadeBounds[index].second);
-
-         variable = "shadowMaps[" + indexAsString + "]";
-         const auto location = m_openGL.glGetUniformLocation(m_mainShader.programId(), variable.data());
-
-         m_shadowMapTextureLocations[index] = location;
-      }
-
-      m_mainShader.release();
    }
 
    std::uint32_t Treemap::LoadBufferData(
@@ -554,9 +563,9 @@ namespace Asset
 
       for (auto& node : tree)
       {
-         const bool fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
-         const bool notTheRightFileType =
-            parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY;
+         const auto fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
+         const auto notTheRightFileType = parameters.onlyShowDirectories
+            && node->file.type != FileType::DIRECTORY;
 
          if (notTheRightFileType || fileIsTooSmall)
          {
@@ -595,8 +604,8 @@ namespace Asset
       for (const auto& node : tree)
       {
          const auto fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
-         const auto notTheRightFileType =
-            parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY;
+         const auto notTheRightFileType = parameters.onlyShowDirectories
+            && node->file.type != FileType::DIRECTORY;
 
          if (notTheRightFileType || fileIsTooSmall)
          {
@@ -632,9 +641,8 @@ namespace Asset
 
    QVector3D Treemap::ComputeGradientColor(const Tree<VizFile>::Node& node)
    {
-      const auto blockSize = node.GetData().file.size;
-      const auto ratio =
-         static_cast<long double>(blockSize) / static_cast<long double>(m_largestDirectorySize);
+      const auto blockSize = static_cast<long double>(node.GetData().file.size);
+      const auto ratio = blockSize / static_cast<long double>(m_largestDirectorySize);
 
       const auto finalColor = m_directoryColorGradient.GetColorAtValue(static_cast<float>(ratio));
       return finalColor;
@@ -689,6 +697,9 @@ namespace Asset
       const auto view = ComputeLightViewMatrix();
       const auto cascadeBoundingBoxes = ComputeFrustumSplitBoundingBoxes(camera, view);
 
+      constexpr auto nearPlane{ 10 };
+      constexpr auto farPlane{ 1500 };
+
       for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
       {
          const auto& boundingBox = cascadeBoundingBoxes[index];
@@ -698,12 +709,12 @@ namespace Asset
             boundingBox.right,
             boundingBox.bottom,
             boundingBox.top,
-            10, //std::abs(boundingBox.near),
-            1500); //std::abs(boundingBox.far));
+            nearPlane,
+            farPlane);
 
          const QMatrix4x4 model;
          auto projectionViewMatrix = projection * view * model;
-         m_shadowMapProjectionViewMatrices[index] = std::move(projectionViewMatrix);
+         m_shadowMaps[index].projectionViewMatrix = std::move(projectionViewMatrix);
       }
    }
 
@@ -720,9 +731,9 @@ namespace Asset
 
       for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
       {
-         m_shadowMaps[index]->bind();
+         m_shadowMaps[index].framebuffer->bind();
 
-         const auto& projectionViewMatrix = m_shadowMapProjectionViewMatrices[index];
+         const auto& projectionViewMatrix = m_shadowMaps[index].projectionViewMatrix;
          m_shadowMapShader.setUniformValue("lightProjectionViewMatrix", projectionViewMatrix);
 
          m_openGL.glClear(GL_DEPTH_BUFFER_BIT);
@@ -737,7 +748,7 @@ namespace Asset
             /* instanceCount = */ m_blockColors.size()
          );
 
-         m_shadowMaps[index]->release();
+         m_shadowMaps[index].framebuffer->release();
       }
 
       m_VAO.release();
@@ -765,17 +776,16 @@ namespace Asset
       SetUniformLights(lights, settings, m_mainShader);
 
       assert(m_shadowMaps.size() == CASCADE_COUNT);
-      assert(m_shadowMapProjectionViewMatrices.size() == CASCADE_COUNT);
 
       for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
       {
          const auto variableName = "lightProjectionViewMatrices[" + std::to_string(index) + "]";
-         m_mainShader.setUniformValue(variableName.data(), m_shadowMapProjectionViewMatrices[index]);
+         m_mainShader.setUniformValue(variableName.data(), m_shadowMaps[index].projectionViewMatrix);
 
          m_openGL.glActiveTexture(GL_TEXTURE0 + index);
-         m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[index]->texture());
+         m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[index].framebuffer->texture());
 
-         m_openGL.glUniform1i(m_shadowMapTextureLocations[index], index);
+         m_openGL.glUniform1i(m_shadowMaps[index].textureLocation, index);
       }
 
       m_VAO.bind();
@@ -807,7 +817,7 @@ namespace Asset
       RenderShadowPass(camera);
       RenderMainPass(camera, lights, settings);
 
-      //RenderDepthMapPreview(); //< @note Enable this to render the shadow map to the screen.
+      //RenderDepthMapPreview(0); //< @note Enable this to render the shadow map to the screen.
 
       return true;
    }
@@ -893,8 +903,13 @@ namespace Asset
          { +1, +1, -1 }
       };
 
-      m_texturePreviewShader.bindAttributeLocation("vertex", TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE);
-      m_texturePreviewShader.bindAttributeLocation("texCoord", TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE);
+      m_texturePreviewShader.bindAttributeLocation(
+         "vertex",
+         TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE);
+
+      m_texturePreviewShader.bindAttributeLocation(
+         "texCoord",
+         TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE);
 
       QVector<GLfloat> vertexData;
       for (int i = 0; i < 4; ++i)
@@ -921,17 +936,17 @@ namespace Asset
       return true;
    }
 
-   void Treemap::RenderDepthMapPreview()
+   void Treemap::RenderDepthMapPreview(int index)
    {
       // Simply using Normalized Device Coordinates (NDC), and an arbitrary choice of view planes.
-      QMatrix4x4 orthoMatrix;
-      orthoMatrix.ortho(-1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1000.0f);
-      orthoMatrix.translate(0.0f, 0.0f, -1.0f);
+      QMatrix4x4 viewMatrix;
+      viewMatrix.ortho(-1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1000.0f);
+      viewMatrix.translate(0.0f, 0.0f, -1.0f);
 
       m_texturePreviewVertexBuffer.bind();
 
       m_texturePreviewShader.bind();
-      m_texturePreviewShader.setUniformValue("matrix", orthoMatrix);
+      m_texturePreviewShader.setUniformValue("matrix", viewMatrix);
       m_texturePreviewShader.enableAttributeArray(TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE);
       m_texturePreviewShader.enableAttributeArray(TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE);
 
@@ -946,7 +961,7 @@ namespace Asset
          /* stride = */    5 * sizeof(GLfloat));
 
       m_openGL.glActiveTexture(GL_TEXTURE0);
-      m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[0]->texture());
+      m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[index].framebuffer->texture());
 
       m_openGL.glDrawArrays(
          /* mode = */ GL_TRIANGLE_FAN,
