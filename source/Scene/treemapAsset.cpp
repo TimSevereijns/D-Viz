@@ -165,26 +165,21 @@ namespace
       const Settings::Manager& settings,
       QOpenGLShaderProgram& shader)
    {
-      for (auto i = 0u; i < lights.size(); ++i)
+      for (auto index{ 0u }; index < lights.size(); ++index)
       {
-         const auto indexString = std::to_string(i);
+         const auto indexAsString = std::to_string(index);
 
-         std::string position{ "allLights[" };
-         position.append(indexString).append("].position");
+         const auto position = "allLights[" + indexAsString + "].position";
+         shader.setUniformValue(position.data(), lights[index].position);
 
-         std::string intensity{ "allLights[" };
-         intensity.append(indexString).append("].intensity");
+         const auto intensity = "allLights[" + indexAsString + "].intensity";
+         shader.setUniformValue(intensity.data(), lights[index].intensity);
 
-         std::string attenuation{ "allLights[" };
-         attenuation.append(indexString).append("].attenuation");
+         const auto attenuation = "allLights[" + indexAsString + "].attenuation";
+         shader.setUniformValue(attenuation.data(), settings.GetLightAttentuationFactor());
 
-         std::string ambientCoefficient{ "allLights[" };
-         ambientCoefficient.append(indexString).append("].ambientCoefficient");
-
-         shader.setUniformValue(position.c_str(), lights[i].position);
-         shader.setUniformValue(intensity.c_str(), lights[i].intensity);
-         shader.setUniformValue(attenuation.c_str(), settings.GetLightAttentuationFactor());
-         shader.setUniformValue(ambientCoefficient.c_str(), settings.GetAmbientLightCoefficient());
+         const auto ambientCoefficient = "allLights[" + indexAsString + "].ambientCoefficient";
+         shader.setUniformValue(ambientCoefficient.data(), settings.GetAmbientLightCoefficient());
       }
    }
 
@@ -256,8 +251,7 @@ namespace
          static_cast<float>(node->file.size) / static_cast<float>((*rootNode)->file.size);
 
       ColorGradient gradient;
-      const auto nodeColor = gradient.GetColorAtValue(ratio);
-      return nodeColor;
+      return gradient.GetColorAtValue(ratio);
    }
 
    /**
@@ -817,7 +811,7 @@ namespace Asset
       RenderShadowPass(camera);
       RenderMainPass(camera, lights, settings);
 
-      //RenderDepthMapPreview(0); //< @note Enable this to render the shadow map to the screen.
+      //RenderDepthMapPreview(1); //< @note Enable this to render the shadow map to the screen.
 
       return true;
    }

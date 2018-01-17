@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "baseAsset.h"
-#include "texturePreviewAsset.h"
 
 #include "../Utilities/colorGradient.hpp"
 

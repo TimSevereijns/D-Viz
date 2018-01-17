@@ -43,7 +43,6 @@ SOURCES += \
    Scene/lightMarkerAsset.cpp \
    Scene/lineAsset.cpp \
    Scene/originMarkerAsset.cpp \
-   Scene/texturePreviewAsset.cpp \
    Scene/treemapAsset.cpp \
    Settings/settings.cpp \
    Settings/settingsManager.cpp \
@@ -81,7 +80,6 @@ HEADERS += \
    Scene/lightMarkerAsset.h \
    Scene/lineAsset.h \
    Scene/originMarkerAsset.h \
-   Scene/texturePreviewAsset.h \
    Scene/treemapAsset.h \
    Settings/preferencesMap.hpp \
    Settings/settings.h \
