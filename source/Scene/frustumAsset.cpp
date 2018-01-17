@@ -120,7 +120,7 @@ namespace
       mutableCamera.SetNearPlane(1.0f);
       mutableCamera.SetFarPlane(2000.0f);
 
-      constexpr auto cascadeCount{ 1 };
+      constexpr auto cascadeCount{ 3 };
       const auto cascades = ComputeCascadeDistances(cascadeCount, mutableCamera);
 
       std::vector<std::vector<QVector3D>> frusta;
@@ -193,7 +193,7 @@ namespace
       const Camera& renderCamera,
       const QMatrix4x4& worldToLight)
    {
-      constexpr auto cascadeCount{ 1 };
+      constexpr auto cascadeCount{ 3 };
       const auto cascades = ComputeCascadeDistances(cascadeCount, renderCamera);
 
       std::vector<std::vector<QVector3D>> frusta;

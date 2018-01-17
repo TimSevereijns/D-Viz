@@ -15,6 +15,11 @@
 #include <iostream>
 #include <vector>
 
+#ifdef Q_OS_WIN
+   #undef near
+   #undef far
+#endif
+
 namespace
 {
    constexpr auto TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE{ 0 };
@@ -71,8 +76,8 @@ namespace
       float right;
       float bottom;
       float top;
-      float back;
-      float front;
+      float near;
+      float far;
    };
 
    /**
@@ -138,8 +143,8 @@ namespace
             /* right  = */ maxX,
             /* bottom = */ minY,
             /* top    = */ maxY,
-            /* back   = */ maxZ,
-            /* front  = */ minZ
+            /* near   = */ maxZ,
+            /* far    = */ minZ
          };
 
          boundingBoxes.emplace_back(std::move(boundingBox));
@@ -281,6 +286,7 @@ namespace Asset
    {
       m_shadowMaps.reserve(CASCADE_COUNT);
       m_shadowMapProjectionViewMatrices.reserve(CASCADE_COUNT);
+      m_shadowMapTextureLocations.reserve(CASCADE_COUNT);
 
       for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
       {
@@ -295,6 +301,7 @@ namespace Asset
 
          m_shadowMaps.emplace_back(std::move(frameBuffer));
          m_shadowMapProjectionViewMatrices.emplace_back(QMatrix4x4{ });
+         m_shadowMapTextureLocations.emplace_back(0);
       }
    }
 
@@ -520,8 +527,15 @@ namespace Asset
       const auto cascadeBounds = ComputeCascadeDistances();
       for (auto index{ 0u }; index < cascadeBounds.size(); ++index)
       {
-         const auto variableName = "cascadeBounds[" + std::to_string(index) + "]";
-         m_mainShader.setUniformValue(variableName.data(), cascadeBounds[index].second);
+         const auto indexAsString = std::to_string(index);
+
+         auto variable = "cascadeBounds[" + indexAsString + "]";
+         m_mainShader.setUniformValue(variable.data(), cascadeBounds[index].second);
+
+         variable = "shadowMaps[" + indexAsString + "]";
+         const auto location = m_openGL.glGetUniformLocation(m_mainShader.programId(), variable.data());
+
+         m_shadowMapTextureLocations[index] = location;
       }
 
       m_mainShader.release();
@@ -684,8 +698,8 @@ namespace Asset
             boundingBox.right,
             boundingBox.bottom,
             boundingBox.top,
-            10,
-            1500);
+            10, //std::abs(boundingBox.near),
+            1500); //std::abs(boundingBox.far));
 
          const QMatrix4x4 model;
          auto projectionViewMatrix = projection * view * model;
@@ -760,6 +774,8 @@ namespace Asset
 
          m_openGL.glActiveTexture(GL_TEXTURE0 + index);
          m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[index]->texture());
+
+         m_openGL.glUniform1i(m_shadowMapTextureLocations[index], index);
       }
 
       m_VAO.bind();
@@ -930,7 +946,7 @@ namespace Asset
          /* stride = */    5 * sizeof(GLfloat));
 
       m_openGL.glActiveTexture(GL_TEXTURE0);
-      m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[1]->texture());
+      m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[0]->texture());
 
       m_openGL.glDrawArrays(
          /* mode = */ GL_TRIANGLE_FAN,

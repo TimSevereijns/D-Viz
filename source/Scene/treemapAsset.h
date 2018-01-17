@@ -162,6 +162,7 @@ namespace Asset
 
          std::vector<std::unique_ptr<QOpenGLFramebufferObject>> m_shadowMaps;
          std::vector<QMatrix4x4> m_shadowMapProjectionViewMatrices;
+         std::vector<int> m_shadowMapTextureLocations;
    };
 }
 

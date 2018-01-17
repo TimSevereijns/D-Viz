@@ -85,6 +85,8 @@ namespace Asset
       {
          using AssetType = Asset::Frustum;
          int GetID() const noexcept override { return 6; }
+
+         static constexpr wchar_t Name[] = L"Frusta";
       };
    }
 }

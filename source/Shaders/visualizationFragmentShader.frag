@@ -134,7 +134,7 @@ void main(void)
       fragmentToCamera,
       /* includeAmbient = */ false);
 
-   vec3 fragmentColor = lightFactor * shadowFactor + cascadeIndicator;
+   vec3 fragmentColor = lightFactor * shadowFactor;// + cascadeIndicator;
 
    vec3 gammaCorrection = vec3(1.0f / 2.2f);
    finalPixelColor = vec4(pow(fragmentColor, gammaCorrection), 1);
