@@ -21,6 +21,7 @@ class GLCanvas;
 class Controller
 {
    public:
+
       /**
        * @brief Sets the MainWindow as the "view" for the controller.
        *

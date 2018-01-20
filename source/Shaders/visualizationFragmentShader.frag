@@ -7,6 +7,10 @@ uniform float materialShininess;
 uniform bool shouldShowCascadeSplits;
 uniform bool shouldShowShadows;
 
+const vec3 sunPosition = vec3(0.0, 200.0, 0.0);
+
+const int pcfLevel = 2;
+
 const int CASCADE_COUNT = 4;
 uniform sampler2D shadowMaps[CASCADE_COUNT];
 
@@ -21,7 +25,10 @@ uniform struct Light
 
 uniform float cascadeBounds[CASCADE_COUNT];
 
-const float shadowBias[CASCADE_COUNT] = float[CASCADE_COUNT](0.00001, 0.00004, 0.00016, 0.00064);
+const float shadowBias[CASCADE_COUNT] = float[CASCADE_COUNT](0.00002, 0.00004, 0.00016, 0.00064);
+
+// @note Use this one when PCF is enabled:
+//const float shadowBias[CASCADE_COUNT] = float[CASCADE_COUNT](0.0001, 0.0002, 0.0008, 0.0024);
 
 in vec3 vertexPosition;
 in vec3 vertexColor;
@@ -76,6 +83,17 @@ float ComputeShadowAttenuation(
    int cascadeIndex,
    vec4 shadowCoordinate)
 {
+   // The bias used to prevent shadow acne, causes a slight separation of the shadow from the back
+   // face of a block. A common fix this this problem is to cull front faces when rendering the
+   // shadow map. This approach, however, doesn't tend to do well with thing geometries, so instead,
+   // we'll simply consider all fragments that make up a back face of a block to be in shadow if
+   // its normal points away from the "sun."
+   vec3 surfaceToLight = normalize(sunPosition - vec3(vertexPosition));
+   if (dot(surfaceToLight, vertexNormal) < 0)
+   {
+      return 0.5;
+   }
+
    // @note Perspective division is automatically applied to `gl_position`. Coordinates passed along
    // manually, however, will need the division applied:
    vec3 projectionCoordinates = shadowCoordinate.xyz / shadowCoordinate.w;
@@ -90,16 +108,24 @@ float ComputeShadowAttenuation(
 
    // @note The bias being subtracted from the distance between the fragment and the light source
    // is to compensate for an artifact known as shadow acne; however, this bias will introduce yet
-   // another artifact: Peter-panning. This new artifact can be compensated for with front-face
-   // culling, which is implemented in the C++ code.
-   if (depth < z - shadowBias[cascadeIndex])
-   {
-      return 0.5;
-   }
-   else
-   {
-      return 1.0;
-   }
+   // another artifact: Peter-panning.
+   return depth < z - shadowBias[cascadeIndex] ? 0.5 : 1.0;
+
+
+   // Percent Closer Filtering:
+//   float shadow = 0.0;
+//   vec2 texelSize = 1.0 / textureSize(shadowMaps[cascadeIndex], 0);
+//   for (int x = -pcfLevel; x <= pcfLevel; ++x)
+//   {
+//       for (int y = -pcfLevel; y <= pcfLevel; ++y)
+//       {
+//           float depth = texture(shadowMaps[cascadeIndex], uvCoordinates.xy + vec2(x, y) * texelSize).x;
+//           shadow += depth < z - shadowBias[cascadeIndex] ? 0.5 : 1.0;
+//       }
+//   }
+
+//   shadow /= ((pcfLevel * 2) + 1) * ((pcfLevel * 2) + 1);
+//   return shadow;
 }
 
 void main(void)

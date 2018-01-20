@@ -57,12 +57,13 @@ namespace
     */
    auto ComputeCascadeDistances()
    {
+      // @todo Compute splits using the Practical Split approach (as seen in GPU Gems).
       const std::vector<std::pair<float, float>> cascadeDistances
       {
          std::make_pair(1.0f, 25.0f),
          std::make_pair(25.0f, 100.0f),
          std::make_pair(100.0f, 500.0f),
-         std::make_pair(500.0f, 2000.0f)
+         std::make_pair(500.0f, 1500.0f)
       };
 
       return cascadeDistances;
@@ -690,7 +691,7 @@ namespace Asset
       const auto view = ComputeLightViewMatrix();
       const auto cascadeBoundingBoxes = ComputeFrustumSplitBoundingBoxes(camera, view);
 
-      constexpr auto nearPlane{ 10 };
+      constexpr auto nearPlane{ 1 };
       constexpr auto farPlane{ 1500 };
 
       for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
@@ -713,10 +714,6 @@ namespace Asset
 
    void Treemap::RenderShadowPass(const Camera& camera)
    {
-      // @note In order to fix Peter-panning artifacts, we'll temporarily cull front faces.
-      // This will make the shadow map look rather weird; almost like an outline.
-      //m_openGL.glCullFace(GL_FRONT);
-
       m_openGL.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
 
       m_shadowMapShader.bind();
@@ -749,8 +746,6 @@ namespace Asset
 
       const auto& viewport = camera.GetViewport();
       m_openGL.glViewport(0, 0, viewport.width(), viewport.height());
-
-      //m_openGL.glCullFace(GL_BACK);
    }
 
    void Treemap::RenderMainPass(
