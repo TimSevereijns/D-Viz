@@ -6,7 +6,7 @@ layout (location = 1) in mat4 instanceMatrix;
 uniform mat4 cameraProjectionViewMatrix;
 uniform mat4 lightProjectionViewMatrix;
 
-const int CASCADE_COUNT = 3;
+const int CASCADE_COUNT = 4;
 uniform mat4 lightProjectionViewMatrices[CASCADE_COUNT];
 
 in vec3 vertex;

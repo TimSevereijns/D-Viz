@@ -235,6 +235,14 @@ class MainWindow final : public QMainWindow
             QAction lightMarkers{ nullptr };
             QAction frustum{ nullptr };
          } renderMenuWrapper;
+
+         QMenu lightingMenu{ nullptr };
+
+         struct LightingMenuWrapper
+         {
+            QAction showCascadeSplits{ nullptr };
+            QAction showShadows{ nullptr };
+         } lightingMenuWrapper;
       } m_debuggingMenuWrapper;
 
       QMenu m_helpMenu{ nullptr };

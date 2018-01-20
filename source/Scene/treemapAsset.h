@@ -25,7 +25,7 @@ namespace Asset
    {
       public:
 
-         constexpr static auto CASCADE_COUNT{ 3 };
+         constexpr static auto CASCADE_COUNT{ 4 };
          constexpr static auto SHADOW_MAP_WIDTH{ 1024 * 4 };
          constexpr static auto SHADOW_MAP_HEIGHT{ 1024 * 4 };
 
@@ -158,20 +158,13 @@ namespace Asset
 
          struct ShadowMapMetadata
          {
-            ShadowMapMetadata(
-               std::unique_ptr<QOpenGLFramebufferObject> buffer,
-               QMatrix4x4 matrix,
-               int location)
-               :
-               framebuffer{ std::move(buffer) },
-               projectionViewMatrix{ std::move(matrix) },
-               textureLocation{ location }
+            ShadowMapMetadata(std::unique_ptr<QOpenGLFramebufferObject> buffer) :
+               framebuffer{ std::move(buffer) }
             {
             }
 
             std::unique_ptr<QOpenGLFramebufferObject> framebuffer;
             QMatrix4x4 projectionViewMatrix;
-            int textureLocation;
          };
 
          std::vector<ShadowMapMetadata> m_shadowMaps;

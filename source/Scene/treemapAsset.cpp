@@ -59,7 +59,8 @@ namespace
    {
       const std::vector<std::pair<float, float>> cascadeDistances
       {
-         std::make_pair(1.0f, 100.0f),
+         std::make_pair(1.0f, 25.0f),
+         std::make_pair(25.0f, 100.0f),
          std::make_pair(100.0f, 500.0f),
          std::make_pair(500.0f, 2000.0f)
       };
@@ -288,11 +289,10 @@ namespace Asset
             SHADOW_MAP_HEIGHT,
             QOpenGLFramebufferObject::Attachment::Depth,
             GL_TEXTURE_2D,
-            GL_RGBA32F
+            GL_RGB32F
          );
 
-         constexpr auto placeholder{ 0 };
-         m_shadowMaps.emplace_back(std::move(frameBuffer), QMatrix4x4{ }, placeholder);
+         m_shadowMaps.emplace_back(std::move(frameBuffer));
       }
    }
 
@@ -510,8 +510,7 @@ namespace Asset
 
          variableName = "shadowMaps[" + indexAsString + "]";
          const auto location = m_openGL.glGetUniformLocation(shaderID, variableName.data());
-
-         m_shadowMaps[index].textureLocation = location;
+         m_openGL.glUniform1i(location, index);
       }
 
       m_mainShader.release();
@@ -716,7 +715,7 @@ namespace Asset
    {
       // @note In order to fix Peter-panning artifacts, we'll temporarily cull front faces.
       // This will make the shadow map look rather weird; almost like an outline.
-      m_openGL.glCullFace(GL_FRONT);
+      //m_openGL.glCullFace(GL_FRONT);
 
       m_openGL.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
 
@@ -751,7 +750,7 @@ namespace Asset
       const auto& viewport = camera.GetViewport();
       m_openGL.glViewport(0, 0, viewport.width(), viewport.height());
 
-      m_openGL.glCullFace(GL_BACK);
+      //m_openGL.glCullFace(GL_BACK);
    }
 
    void Treemap::RenderMainPass(
@@ -763,23 +762,30 @@ namespace Asset
 
       m_mainShader.bind();
 
+      const auto shouldShowShadows = settings.ShouldShowShadows();
+
       m_mainShader.setUniformValue("cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());
       m_mainShader.setUniformValue("cameraPosition", camera.GetPosition());
+
+      // @todo The following variables don't need to be set with every pass...
       m_mainShader.setUniformValue("materialShininess", settings.GetMaterialShininess());
+      m_mainShader.setUniformValue("shouldShowCascadeSplits", settings.ShouldShowCascadeSplits());
+      m_mainShader.setUniformValue("shouldShowShadows", shouldShowShadows);
 
       SetUniformLights(lights, settings, m_mainShader);
 
-      assert(m_shadowMaps.size() == CASCADE_COUNT);
-
-      for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
+      if (shouldShowShadows)
       {
-         const auto variableName = "lightProjectionViewMatrices[" + std::to_string(index) + "]";
-         m_mainShader.setUniformValue(variableName.data(), m_shadowMaps[index].projectionViewMatrix);
+         assert(m_shadowMaps.size() == CASCADE_COUNT);
 
-         m_openGL.glActiveTexture(GL_TEXTURE0 + index);
-         m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[index].framebuffer->texture());
+         for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
+         {
+            const auto matrix = "lightProjectionViewMatrices[" + std::to_string(index) + "]";
+            m_mainShader.setUniformValue(matrix.data(), m_shadowMaps[index].projectionViewMatrix);
 
-         m_openGL.glUniform1i(m_shadowMaps[index].textureLocation, index);
+            m_openGL.glActiveTexture(GL_TEXTURE0 + index);
+            m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[index].framebuffer->texture());
+         }
       }
 
       m_VAO.bind();
@@ -806,9 +812,12 @@ namespace Asset
          return true;
       }
 
-      ComputeShadowMapProjectionViewMatrices(camera);
+      if (settings.ShouldShowShadows())
+      {
+         ComputeShadowMapProjectionViewMatrices(camera);
+         RenderShadowPass(camera);
+      }
 
-      RenderShadowPass(camera);
       RenderMainPass(camera, lights, settings);
 
       //RenderDepthMapPreview(1); //< @note Enable this to render the shadow map to the screen.
@@ -872,13 +881,15 @@ namespace Asset
 
    bool Treemap::LoadTexturePreviewShaders()
    {
-      if (!m_texturePreviewShader.addShaderFromSourceFile(QOpenGLShader::Vertex,
+      if (!m_texturePreviewShader.addShaderFromSourceFile(
+         QOpenGLShader::Vertex,
          ":/Shaders/texturePreview.vert"))
       {
          std::cout << "Error loading vertex shader!" << std::endl;
       }
 
-      if (!m_texturePreviewShader.addShaderFromSourceFile(QOpenGLShader::Fragment,
+      if (!m_texturePreviewShader.addShaderFromSourceFile(
+         QOpenGLShader::Fragment,
          ":/Shaders/texturePreview.frag"))
       {
          std::cout << "Error loading fragment shader!" << std::endl;
@@ -944,12 +955,16 @@ namespace Asset
       m_texturePreviewShader.enableAttributeArray(TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE);
       m_texturePreviewShader.enableAttributeArray(TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE);
 
-      m_texturePreviewShader.setAttributeBuffer(TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE, GL_FLOAT,
+      m_texturePreviewShader.setAttributeBuffer(
+         TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE,
+         GL_FLOAT,
          /* offset = */    0,
          /* tupleSize = */ 3,
          /* stride = */    5 * sizeof(GLfloat));
 
-      m_texturePreviewShader.setAttributeBuffer(TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE, GL_FLOAT,
+      m_texturePreviewShader.setAttributeBuffer(
+         TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE,
+         GL_FLOAT,
          /* offset = */    3 * sizeof(GLfloat),
          /* tupleSize = */ 2,
          /* stride = */    5 * sizeof(GLfloat));
@@ -963,7 +978,6 @@ namespace Asset
          /* count = */ 4);
 
       m_texturePreviewShader.release();
-
       m_texturePreviewVertexBuffer.release();
    }
 }

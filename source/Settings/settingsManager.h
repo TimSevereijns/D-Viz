@@ -30,6 +30,122 @@ namespace Settings
             const std::experimental::filesystem::path& colorFile,
             const std::experimental::filesystem::path& preferencesFile);
 
+         /**
+          * @brief GetCameraSpeed
+          * @return
+          */
+         double GetCameraSpeed() const;
+
+         /**
+          * @brief SetCameraSpeed
+          * @param speed
+          */
+         void SetCameraSpeed(double speed);
+
+         /**
+          * @brief GetMouseSensitivity
+          * @return
+          */
+         double GetMouseSensitivity() const;
+
+         /**
+          * @brief GetLightAttentuationFactor
+          * @return
+          */
+         float GetLightAttentuationFactor() const;
+
+         /**
+          * @brief GetAmbientLightCoefficient
+          * @return
+          */
+         float GetAmbientLightCoefficient() const;
+
+         /**
+          * @brief GetMaterialShininess
+          * @return
+          */
+         float GetMaterialShininess() const;
+
+         /**
+          * @brief GetSpecularColor
+          * @return
+          */
+         QVector3D GetSpecularColor() const;
+
+         /**
+          * @brief IsPrimaryLightAttachedToCamera
+          * @return
+          */
+         bool IsPrimaryLightAttachedToCamera() const;
+
+         /**
+          * @brief GetFileColorMap
+          * @return
+          */
+         const ColorMap& GetFileColorMap() const;
+
+         /**
+          * @brief GetPreferenceMap
+          * @return
+          */
+         const PreferencesMap& GetPreferenceMap() const;
+
+         /**
+          * @brief GetActiveColorScheme
+          * @return
+          */
+         const std::wstring& GetActiveColorScheme() const;
+
+         /**
+          * @brief SetColorScheme
+          * @param scheme
+          */
+         void SetColorScheme(const std::wstring& scheme);
+
+         /**
+          * @brief GetVisualizationParameters
+          * @return
+          */
+         const VisualizationParameters& GetVisualizationParameters() const;
+
+         /**
+          * @brief GetVisualizationParameters
+          * @return
+          */
+         VisualizationParameters& GetVisualizationParameters();
+
+         /**
+          * @brief SetVisualizationParameters
+          * @param parameters
+          * @return
+          */
+         VisualizationParameters& SetVisualizationParameters(
+            const VisualizationParameters& parameters);
+
+         /**
+          * @brief SetActiveNumericPrefix
+          * @param prefix
+          */
+         void SetActiveNumericPrefix(Constants::FileSize::Prefix prefix);
+
+         /**
+          * @brief GetActiveNumericPrefix
+          * @return
+          */
+         Constants::FileSize::Prefix GetActiveNumericPrefix() const;
+
+         /**
+          * @brief ShouldShowCascadeSplitOverlay
+          * @return
+          */
+         bool ShouldShowCascadeSplits() const;
+
+         /**
+          * @brief ShouldShowShadows
+          * @return
+          */
+         bool ShouldShowShadows() const;
+
       public slots:
 
          /**
@@ -89,42 +205,17 @@ namespace Settings
           */
          void OnShouldSearchDirectoriesChanged(bool state);
 
-      public:
+         /**
+          * @brief OnShowCascadeSplitsToggled
+          * @param isEnabled
+          */
+         void OnShowCascadeSplitsToggled(bool isEnabled);
 
-         double GetCameraSpeed() const;
-
-         void SetCameraSpeed(double speed);
-
-         double GetMouseSensitivity() const;
-
-         float GetLightAttentuationFactor() const;
-
-         float GetAmbientLightCoefficient() const;
-
-         float GetMaterialShininess() const;
-
-         QVector3D GetSpecularColor() const;
-
-         bool IsPrimaryLightAttachedToCamera() const;
-
-         const ColorMap& GetFileColorMap() const;
-
-         const PreferencesMap& GetPreferenceMap() const;
-
-         const std::wstring& GetActiveColorScheme() const;
-
-         void SetColorScheme(const std::wstring& scheme);
-
-         const VisualizationParameters& GetVisualizationParameters() const;
-
-         VisualizationParameters& GetVisualizationParameters();
-
-         VisualizationParameters& SetVisualizationParameters(
-            const VisualizationParameters& parameters);
-
-         void SetActiveNumericPrefix(Constants::FileSize::Prefix prefix);
-
-         Constants::FileSize::Prefix GetActiveNumericPrefix() const;
+         /**
+          * @brief OnShowShadowsToggled
+          * @param isEnabled
+          */
+         void OnShowShadowsToggled(bool isEnabled);
 
       private:
 
@@ -140,6 +231,8 @@ namespace Settings
          bool m_isLightAttachedToCamera{ true };
          bool m_shouldSearchDirectories{ false };
          bool m_shouldSearchFiles{ true };
+         bool m_shouldShowCascadeSplitOverlay{ false };
+         bool m_shouldShowShadows{ true };
 
          // @todo There's no real need to keep these around, I think...
          JsonDocument m_fileColorJsonDocument;

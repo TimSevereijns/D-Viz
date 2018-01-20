@@ -379,15 +379,40 @@ void MainWindow::SetupDebuggingMenu()
    connect(&renderMenuWrapper.frustum, &QAction::toggled,
       this, &MainWindow::OnRenderFrustumToggled);
 
-   renderMenu.setTitle("Render");
-   renderMenu.setStatusTip("Toggle visual debugging aides.");
+   renderMenu.setTitle("Render Asset");
+   renderMenu.setStatusTip("Toggle scene assets on or off");
    renderMenu.addAction(&renderMenuWrapper.origin);
    renderMenu.addAction(&renderMenuWrapper.grid);
    renderMenu.addAction(&renderMenuWrapper.lightMarkers);
    renderMenu.addAction(&renderMenuWrapper.frustum);
 
+   auto& lightingMenuWrapper = m_debuggingMenuWrapper.lightingMenuWrapper;
+   auto& lightingMenu = m_debuggingMenuWrapper.lightingMenu;
+
+   lightingMenuWrapper.showCascadeSplits.setText("Show Cascade Splits");
+   lightingMenuWrapper.showCascadeSplits.setCheckable(true);
+   lightingMenuWrapper.showCascadeSplits.setChecked(
+      m_settingsManager.ShouldShowCascadeSplits());
+
+   connect(&lightingMenuWrapper.showCascadeSplits, &QAction::toggled,
+      &m_settingsManager, &Settings::Manager::OnShowCascadeSplitsToggled);
+
+   lightingMenuWrapper.showShadows.setText("Show Shadows");
+   lightingMenuWrapper.showShadows.setCheckable(true);
+   lightingMenuWrapper.showShadows.setChecked(
+      m_settingsManager.ShouldShowShadows());
+
+   connect(&lightingMenuWrapper.showShadows, &QAction::toggled,
+      &m_settingsManager, &Settings::Manager::OnShowShadowsToggled);
+
+   lightingMenu.setTitle("Lighting");
+   lightingMenu.setStatusTip("Toggle visualization aids");
+   lightingMenu.addAction(&lightingMenuWrapper.showCascadeSplits);
+   lightingMenu.addAction(&lightingMenuWrapper.showShadows);
+
    m_debuggingMenu.setTitle("Debugging");
    m_debuggingMenu.addMenu(&renderMenu);
+   m_debuggingMenu.addMenu(&lightingMenu);
 
    menuBar()->addMenu(&m_debuggingMenu);
 }

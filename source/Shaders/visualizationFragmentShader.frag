@@ -4,18 +4,24 @@ uniform vec3 cameraPosition;
 
 uniform float materialShininess;
 
-const int CASCADE_COUNT = 3;
+uniform bool shouldShowCascadeSplits;
+uniform bool shouldShowShadows;
+
+const int CASCADE_COUNT = 4;
 uniform sampler2D shadowMaps[CASCADE_COUNT];
 
+const int LIGHT_COUNT = 5;
 uniform struct Light
 {
    vec3 position;
    vec3 intensity;
    float ambientCoefficient;
    float attenuation;
-} allLights[5];
+} allLights[LIGHT_COUNT];
 
 uniform float cascadeBounds[CASCADE_COUNT];
+
+const float shadowBias[CASCADE_COUNT] = float[CASCADE_COUNT](0.00001, 0.00004, 0.00016, 0.00064);
 
 in vec3 vertexPosition;
 in vec3 vertexColor;
@@ -86,7 +92,7 @@ float ComputeShadowAttenuation(
    // is to compensate for an artifact known as shadow acne; however, this bias will introduce yet
    // another artifact: Peter-panning. This new artifact can be compensated for with front-face
    // culling, which is implemented in the C++ code.
-   if (depth < z - 0.00005)
+   if (depth < z - shadowBias[cascadeIndex])
    {
       return 0.5;
    }
@@ -103,38 +109,53 @@ void main(void)
 
    float shadowFactor = 1.0;
 
-   for (int index = 0; index < CASCADE_COUNT; ++index)
+   if (shouldShowShadows)
    {
-      if (clipSpaceZ <= cascadeBounds[index])
+      for (int index = 0; index < CASCADE_COUNT; ++index)
       {
-         shadowFactor = ComputeShadowAttenuation(index, shadowCoordinates[index]);
+         if (clipSpaceZ <= cascadeBounds[index])
+         {
+            shadowFactor = ComputeShadowAttenuation(index, shadowCoordinates[index]);
 
-         if (index == 0)
-         {
-            cascadeIndicator = vec3(0.01, 0.0, 0.0);
-         }
-         else if (index == 1)
-         {
-            cascadeIndicator = vec3(0.0, 0.01, 0.0);
-         }
-         else if (index == 2)
-         {
-            cascadeIndicator = vec3(0.0, 0.0, 0.01);
-         }
+            if (index == 0)
+            {
+               cascadeIndicator = vec3(0.1, 0.0, 0.0);
+            }
+            else if (index == 1)
+            {
+               cascadeIndicator = vec3(0.0, 0.1, 0.0);
+            }
+            else if (index == 2)
+            {
+               cascadeIndicator = vec3(0.0, 0.0, 0.1);
+            }
+            else if (index == 3)
+            {
+               cascadeIndicator = vec3(0.1, 0.1, 0.1);
+            }
 
-         break;
+            break;
+         }
       }
    }
 
-   vec3 lightFactor = ComputeLightContribution(
-      allLights[1],
-      vertexColor,
-      vertexNormal,
-      vertexPosition.xyz,
-      fragmentToCamera,
-      /* includeAmbient = */ false);
+   vec3 lightFactor = vec3(0.0, 0.0, 0.0);
+   for (int index = 0; index < LIGHT_COUNT; ++index)
+   {
+      lightFactor += ComputeLightContribution(
+         allLights[index],
+         vertexColor,
+         vertexNormal,
+         vertexPosition.xyz,
+         fragmentToCamera,
+         /* includeAmbient = */ false);
+   }
 
-   vec3 fragmentColor = lightFactor * shadowFactor;// + cascadeIndicator;
+   vec3 fragmentColor = lightFactor * shadowFactor;
+   if (shouldShowCascadeSplits)
+   {
+      fragmentColor += cascadeIndicator;
+   }
 
    vec3 gammaCorrection = vec3(1.0f / 2.2f);
    finalPixelColor = vec4(pow(fragmentColor, gammaCorrection), 1);

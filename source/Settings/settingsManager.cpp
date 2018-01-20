@@ -184,6 +184,16 @@ namespace Settings
       m_shouldSearchDirectories = state;
    }
 
+   void Manager::OnShowCascadeSplitsToggled(bool isEnabled)
+   {
+      m_shouldShowCascadeSplitOverlay = isEnabled;
+   }
+
+   void Manager::OnShowShadowsToggled(bool isEnabled)
+   {
+      m_shouldShowShadows = isEnabled;
+   }
+
    double Manager::GetCameraSpeed() const
    {
       return m_cameraSpeed;
@@ -269,5 +279,15 @@ namespace Settings
    Constants::FileSize::Prefix Manager::GetActiveNumericPrefix() const
    {
       return m_activeNumericPrefix;
+   }
+
+   bool Manager::ShouldShowCascadeSplits() const
+   {
+      return m_shouldShowCascadeSplitOverlay;
+   }
+
+   bool Manager::ShouldShowShadows() const
+   {
+      return m_shouldShowShadows;
    }
 }
