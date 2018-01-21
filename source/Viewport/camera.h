@@ -38,6 +38,16 @@ class Camera
       void OffsetPosition(const QVector3D& offset) noexcept;
 
       /**
+       * @brief Sets the current camera orientation in terms of pitch and yaw.
+       *
+       * There is currently no roll support.
+       *
+       * @param[in] pitch           In degrees.
+       * @param[in] yaw             In degrees.
+       */
+      void SetOrientation(float pitch, float yaw);
+
+      /**
        * @brief Retrieves the camera's current orientation matrix.
        *
        * @returns The current orientation of the camera; that is, pitch, roll, and yaw.
@@ -45,7 +55,7 @@ class Camera
       QMatrix4x4 GetOrientation() const;
 
       /**
-       * @brief Sets the current camera orientation in terms of pitch and yaw.
+       * @brief Offset the current camera orientation in terms of pitch and yaw.
        *
        * There is currently no roll support.
        *
@@ -186,7 +196,7 @@ class Camera
        *
        * @returns The current field of view in degrees.
        */
-      float GetFieldOfView() const noexcept;
+      float GetVerticalFieldOfView() const noexcept;
 
       /**
        * @brief Increases the field of view by five degrees.
@@ -220,11 +230,28 @@ class Camera
       bool IsPointInFrontOfCamera(const QVector3D& point) const;
 
       /**
+       * @brief Sets the near plane distance.
+       *
+       * @note Avoiding setting this too close, because that will kill your precision at distance,
+       * which, in turn, will likely cause very obvious Z-fighting.
+       *
+       * @param[in] nearPlane         The new plane distance.
+       */
+      void SetNearPlane(float nearPlane);
+
+      /**
        * @brief Retrieves the distance from the camera's focal plane to the near viewing plane.
        *
        * @returns Distance to near plane.
        */
       float GetNearPlane() const noexcept;
+
+      /**
+       * @brief Sets the far plane distance.
+       *
+       * @param[in] farPlane        The new plane distance.
+       */
+      void SetFarPlane(float farPlane);
 
       /**
        * @brief Retrieves the distance from the camera's focal plane to the far viewing plane.
@@ -233,7 +260,12 @@ class Camera
        */
       float GetFarPlane() const noexcept;
 
-   private:
+      /**
+       * @returns The current aspect ratio.
+       */
+      float GetAspectRatio() const noexcept;
+
+private:
 
       QVector3D m_position;
 

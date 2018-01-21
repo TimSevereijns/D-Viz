@@ -10,6 +10,7 @@
 #include "Scene/baseAsset.h"
 #include "Scene/crosshairAsset.h"
 #include "Scene/debuggingRayAsset.h"
+#include "Scene/frustumAsset.h"
 #include "Scene/gridAsset.h"
 #include "Scene/lightMarkerAsset.h"
 #include "Scene/originMarkerAsset.h"
@@ -78,6 +79,14 @@ namespace Asset
          int GetID() const noexcept override { return 5; }
 
          static constexpr wchar_t Name[] = L"LightMarker";
+      };
+
+      struct Frusta final : Base
+      {
+         using AssetType = Asset::Frustum;
+         int GetID() const noexcept override { return 6; }
+
+         static constexpr wchar_t Name[] = L"Frusta";
       };
    }
 }
@@ -331,7 +340,7 @@ class GLCanvas final : public QOpenGLWidget
       std::vector<Light> m_lights
       {
          Light{ },
-         Light{ QVector3D{ 0.0f, 80.0f, 0.0f } },
+         Light{ QVector3D{ -200.0f, 250.0f, 200.0f } },
          Light{ QVector3D{ 0.0f, 80.0f, -VisualizationModel::ROOT_BLOCK_DEPTH } },
          Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
          Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f,

@@ -30,7 +30,7 @@ namespace Asset
       const QString& vertexShaderName,
       const QString& fragmentShaderName)
    {
-      if (!m_shader.addShaderFromSourceFile(QOpenGLShader::Vertex,
+      if (!m_mainShader.addShaderFromSourceFile(QOpenGLShader::Vertex,
          ":/Shaders/" + vertexShaderName + ".vert"))
       {
          const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
@@ -39,7 +39,7 @@ namespace Asset
          return false;
       }
 
-      if (!m_shader.addShaderFromSourceFile(QOpenGLShader::Fragment,
+      if (!m_mainShader.addShaderFromSourceFile(QOpenGLShader::Fragment,
          ":/Shaders/" + fragmentShaderName + ".frag"))
       {
          const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
@@ -48,7 +48,7 @@ namespace Asset
          return false;
       }
 
-      const auto linkedSuccessfully = m_shader.link();
+      const auto linkedSuccessfully = m_mainShader.link();
       if (!linkedSuccessfully)
       {
          const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
@@ -65,16 +65,26 @@ namespace Asset
       return !(m_rawVertices.empty() && m_rawColors.empty());
    }
 
-   void Base::SetVertexData(QVector<QVector3D>&& data)
+   void Base::SetVertexCoordinates(QVector<QVector3D>&& data)
    {
       m_rawVertices.clear();
       m_rawVertices.append(std::move(data));
    }
 
-   void Base::SetColorData(QVector<QVector3D>&& data)
+   void Base::SetVertexColors(QVector<QVector3D>&& data)
    {
       m_rawColors.clear();
       m_rawColors.append(std::move(data));
+   }
+
+   void Base::AddVertexCoordinates(QVector<QVector3D>&& positionData)
+   {
+      m_rawVertices.append(std::move(positionData));
+   }
+
+   void Base::AddVertexColors(QVector<QVector3D>&& colorData)
+   {
+      m_rawColors.append(std::move(colorData));
    }
 
    unsigned int Base::GetVertexCount() const

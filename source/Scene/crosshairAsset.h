@@ -1,5 +1,5 @@
-#ifndef NODESELECTIONCROSSHAIR_H
-#define NODESELECTIONCROSSHAIR_H
+#ifndef CROSSHAIRASSET_H
+#define CROSSHAIRASSET_H
 
 #include "lineAsset.h"
 
@@ -38,4 +38,4 @@ namespace Asset
    };
 }
 
-#endif // NODESELECTIONCROSSHAIR_H
+#endif // CROSSHAIRASSET_H

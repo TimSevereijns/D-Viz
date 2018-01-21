@@ -42,18 +42,18 @@ namespace Asset
          /* data = */ m_rawVertices.constData(),
          /* count = */ m_rawVertices.size() * 3 * sizeof(GLfloat));
 
-      m_shader.bind();
+      m_mainShader.bind();
       m_vertexBuffer.bind();
 
-      m_shader.enableAttributeArray("vertex");
-      m_shader.setAttributeBuffer(
+      m_mainShader.enableAttributeArray("vertex");
+      m_mainShader.setAttributeBuffer(
          /* name = */ "vertex",
          /* type = */ GL_FLOAT,
          /* offset = */ 0,
          /* tupleSize = */ 3);
 
       m_vertexBuffer.release();
-      m_shader.release();
+      m_mainShader.release();
       m_VAO.release();
 
       return true;
@@ -76,8 +76,8 @@ namespace Asset
          /* count = */ m_rawColors.size() * 3 * sizeof(GLfloat));
 
       m_colorBuffer.bind();
-      m_shader.enableAttributeArray("color");
-      m_shader.setAttributeBuffer(
+      m_mainShader.enableAttributeArray("color");
+      m_mainShader.setAttributeBuffer(
          /* name = */ "color",
          /* type = */ GL_FLOAT,
          /* offset = */ 0,
@@ -99,8 +99,8 @@ namespace Asset
          return false;
       }
 
-      m_shader.bind();
-      m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
+      m_mainShader.bind();
+      m_mainShader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 
       m_VAO.bind();
 
@@ -109,7 +109,7 @@ namespace Asset
          /* first = */ 0,
          /* count = */ m_rawVertices.size());
 
-      m_shader.release();
+      m_mainShader.release();
       m_VAO.release();
 
       return true;

@@ -1,9 +1,14 @@
 #ifndef VISUALIZATIONASSET_H
 #define VISUALIZATIONASSET_H
 
+#include <memory>
+
 #include "baseAsset.h"
 
 #include "../Utilities/colorGradient.hpp"
+
+#include <QOpenGLFramebufferObject>
+#include <QOpenGLTexture>
 
 struct VizFile;
 
@@ -19,6 +24,10 @@ namespace Asset
    class Treemap final : public Base
    {
       public:
+
+         constexpr static auto CASCADE_COUNT{ 4 };
+         constexpr static auto SHADOW_MAP_WIDTH{ 1024 * 4 };
+         constexpr static auto SHADOW_MAP_HEIGHT{ 1024 * 4 };
 
          /**
           * @see Asset::Base::Base(...)
@@ -100,6 +109,20 @@ namespace Asset
 
       private:
 
+         void InitializeShadowMachineryOnMainShader();
+         void InitializeShadowMachineryOnShadowShader();
+
+         void ComputeShadowMapProjectionViewMatrices(const Camera& camera);
+
+         void RenderDepthMapPreview(int index);
+
+         void RenderShadowPass(const Camera& camera);
+
+         void RenderMainPass(
+            const Camera& camera,
+            const std::vector<Light>& lights,
+            const Settings::Manager& settings);
+
          QVector3D ComputeGradientColor(const Tree<VizFile>::Node& node);
 
          void ComputeAppropriateBlockColor(
@@ -113,6 +136,9 @@ namespace Asset
          bool InitializeBlockTransformations();
          bool InitializeShadowMachinery();
 
+         bool LoadTexturePreviewShaders();
+         bool InitializeTexturePreviewer();
+
          ColorGradient m_directoryColorGradient;
 
          std::uint32_t m_blockCount{ 0 };
@@ -121,10 +147,27 @@ namespace Asset
          QOpenGLBuffer m_referenceBlockBuffer;
          QOpenGLBuffer m_blockTransformationBuffer;
          QOpenGLBuffer m_blockColorBuffer;
+         QOpenGLBuffer m_texturePreviewVertexBuffer;
 
          QVector<QVector3D> m_referenceBlockVertices;
-         QVector<QMatrix4x4> m_blockTransformations;
          QVector<QVector3D> m_blockColors;
+         QVector<QMatrix4x4> m_blockTransformations;
+
+         QOpenGLShaderProgram m_shadowMapShader;
+         QOpenGLShaderProgram m_texturePreviewShader;
+
+         struct ShadowMapMetadata
+         {
+            ShadowMapMetadata(std::unique_ptr<QOpenGLFramebufferObject> buffer) :
+               framebuffer{ std::move(buffer) }
+            {
+            }
+
+            std::unique_ptr<QOpenGLFramebufferObject> framebuffer;
+            QMatrix4x4 projectionViewMatrix;
+         };
+
+         std::vector<ShadowMapMetadata> m_shadowMaps;
    };
 }
 

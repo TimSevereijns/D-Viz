@@ -22,7 +22,7 @@ namespace
     * @brief Computes and sets the vertex and color data for the light markers.
     *
     * @param[in] lights                   The lights in the scene to be marked.
-    * @param[in, out] lightMarkerAsset    The scene asset to be updated
+    * @param[out] lightMarkerAsset        The scene asset to be updated
     */
    void InitializeLightMarkers(
       const std::vector<Light>& lights,
@@ -48,8 +48,8 @@ namespace
          colors << Constants::Colors::WHITE;
       }
 
-      lightMarkerAsset.SetVertexData(std::move(vertices));
-      lightMarkerAsset.SetColorData(std::move(colors));
+      lightMarkerAsset.SetVertexCoordinates(std::move(vertices));
+      lightMarkerAsset.SetVertexColors(std::move(colors));
    }
 }
 
@@ -62,6 +62,7 @@ GLCanvas::GLCanvas(
    m_mainWindow{ *(reinterpret_cast<MainWindow*>(parent)) }
 {
    m_camera.SetPosition(QVector3D{ 500, 100, 0 });
+   m_camera.SetFarPlane(10'000.0f);
 
    setFocusPolicy(Qt::StrongFocus);
 
@@ -95,6 +96,7 @@ void GLCanvas::initializeGL()
    RegisterAsset<Asset::Tag::Treemap>();
    RegisterAsset<Asset::Tag::Crosshair>();
    RegisterAsset<Asset::Tag::LightMarker>();
+   RegisterAsset<Asset::Tag::Frusta>();
 
    auto* lightMarkers = GetAsset<Asset::Tag::LightMarker>();
    InitializeLightMarkers(m_lights, *lightMarkers);
@@ -161,8 +163,10 @@ void GLCanvas::resizeGL(int width, int height)
    }
 
    m_graphicsDevice.glViewport(0, 0, width, height);
-
    m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
+
+   auto* const frusta = GetAsset<Asset::Tag::Frusta>();
+   frusta->GenerateFrusta(m_camera);
 }
 
 void GLCanvas::ReloadVisualization()
@@ -390,7 +394,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
          m_camera.DecreaseFieldOfView();
       }
 
-      m_mainWindow.SetFieldOfViewSlider(m_camera.GetFieldOfView());
+      m_mainWindow.SetFieldOfViewSlider(static_cast<float>(m_camera.GetVerticalFieldOfView()));
    }
 }
 
@@ -822,3 +826,4 @@ void GLCanvas::paintGL()
 template void GLCanvas::ToggleAssetVisibility<Asset::Tag::Grid>(bool) const noexcept;
 template void GLCanvas::ToggleAssetVisibility<Asset::Tag::LightMarker>(bool) const noexcept;
 template void GLCanvas::ToggleAssetVisibility<Asset::Tag::OriginMarker>(bool) const noexcept;
+template void GLCanvas::ToggleAssetVisibility<Asset::Tag::Frusta>(bool) const noexcept;

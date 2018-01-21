@@ -87,8 +87,8 @@ namespace Asset
 
       const auto mvpMatrix = orthoMatrix * identityMatrix;
 
-      m_shader.bind();
-      m_shader.setUniformValue("mvpMatrix", mvpMatrix);
+      m_mainShader.bind();
+      m_mainShader.setUniformValue("mvpMatrix", mvpMatrix);
 
       m_VAO.bind();
 
@@ -99,7 +99,7 @@ namespace Asset
          /* count = */ m_rawVertices.size());
 
       m_VAO.release();
-      m_shader.release();
+      m_mainShader.release();
 
       return true;
    }

@@ -11,12 +11,152 @@
 
 #include <Tree/Tree.hpp>
 
+#include <cmath>
 #include <iostream>
+#include <vector>
+
+#ifdef Q_OS_WIN
+   #undef near
+   #undef far
+#endif
 
 namespace
 {
+   constexpr auto TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE{ 0 };
+   constexpr auto TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE{ 1 };
+
    /**
-    * @brief Helper function to set all values of the GLSL defined light struct.
+    * @brief Generates all of the frustum vertices for the specified camera.
+    *
+    * @param[in] camera             Main scene camera.
+    */
+   auto ComputeFrustumCorners(const Camera& camera)
+   {
+      std::vector<QVector3D> unitCube
+      {
+         { -1, -1, -1 }, { +1, -1, -1 },
+         { +1, +1, -1 }, { -1, +1, -1 },
+         { -1, -1, +1 }, { +1, -1, +1 },
+         { +1, +1, +1 }, { -1, +1, +1 }
+      };
+
+      const auto worldToView = camera.GetProjectionViewMatrix().inverted();
+      for (auto& corner : unitCube)
+      {
+         corner = worldToView.map(corner);
+      }
+
+      return unitCube;
+   }
+
+   /**
+    * @brief Computes the ideal split locations for each frustum cascade.
+    *
+    * @param[in] cascadeCount       The desired number of shadow mapping cascades.
+    * @param[in] camera             The main scene camera.
+    */
+   auto ComputeCascadeDistances()
+   {
+      // @todo Compute splits using the Practical Split approach (as seen in GPU Gems).
+      const std::vector<std::pair<float, float>> cascadeDistances
+      {
+         std::make_pair(1.0f, 25.0f),
+         std::make_pair(25.0f, 100.0f),
+         std::make_pair(100.0f, 500.0f),
+         std::make_pair(500.0f, 1500.0f)
+      };
+
+      return cascadeDistances;
+   }
+
+   /**
+    * @brief The BoundingBox struct
+    */
+   struct BoundingBox
+   {
+      float left;
+      float right;
+      float bottom;
+      float top;
+      float near;
+      float far;
+   };
+
+   /**
+    * @brief Calculates an Axis Aligned Bounding Box (AABB) for each of the frustum splits.
+    *
+    * @param[in] renderCamera       The main camera used to render the scene. Mainly use is to get
+    *                               the aspect ratio of the outline correct.
+    * @param[in] shadowViewMatrix   The projection-view matrix that represents the view of the
+    *                               shadow casting light source.
+    */
+   auto ComputeFrustumSplitBoundingBoxes(
+      const Camera& renderCamera,
+      const QMatrix4x4& shadowViewMatrix)
+   {
+      static const auto cascadeDistances = ComputeCascadeDistances();
+
+      std::vector<std::vector<QVector3D>> frusta;
+      frusta.reserve(Asset::Treemap::CASCADE_COUNT);
+
+      auto mutableCamera = renderCamera;
+      for (const auto& nearAndFarPlanes : cascadeDistances)
+      {
+         mutableCamera.SetNearPlane(nearAndFarPlanes.first);
+         mutableCamera.SetFarPlane(nearAndFarPlanes.second);
+
+         frusta.emplace_back(ComputeFrustumCorners(mutableCamera));
+      }
+
+      std::vector<BoundingBox> boundingBoxes;
+      boundingBoxes.reserve(Asset::Treemap::CASCADE_COUNT);
+
+      const auto worldToLight = shadowViewMatrix;
+
+      for (const auto& frustum : frusta)
+      {
+         auto minX = std::numeric_limits<float>::max();
+         auto maxX = std::numeric_limits<float>::lowest();
+
+         auto minY = std::numeric_limits<float>::max();
+         auto maxY = std::numeric_limits<float>::lowest();
+
+         auto minZ = std::numeric_limits<float>::max();
+         auto maxZ = std::numeric_limits<float>::lowest();
+
+         // Compute bounding box in light space:
+         for (const auto& vertex : frustum)
+         {
+            const auto mappedVertex = worldToLight.map(vertex);
+
+            minX = std::min(minX, mappedVertex.x());
+            maxX = std::max(maxX, mappedVertex.x());
+
+            minY = std::min(minY, mappedVertex.y());
+            maxY = std::max(maxY, mappedVertex.y());
+
+            minZ = std::min(minZ, mappedVertex.z());
+            maxZ = std::max(maxZ, mappedVertex.z());
+         }
+
+         auto boundingBox = BoundingBox
+         {
+            /* left   = */ minX,
+            /* right  = */ maxX,
+            /* bottom = */ minY,
+            /* top    = */ maxY,
+            /* near   = */ maxZ,
+            /* far    = */ minZ
+         };
+
+         boundingBoxes.emplace_back(std::move(boundingBox));
+      }
+
+      return boundingBoxes;
+   }
+
+   /**
+    * @brief A helper function to set many of the shader variables needed for lighting.
     *
     * @param[in] lights             Vector of lights to be loaded into the shader program.
     * @param[in] settings           Additional scene rendering settings.
@@ -27,26 +167,21 @@ namespace
       const Settings::Manager& settings,
       QOpenGLShaderProgram& shader)
    {
-      for (std::size_t i = 0; i < lights.size(); i++)
+      for (auto index{ 0u }; index < lights.size(); ++index)
       {
-         const auto indexString = std::to_string(i);
+         const auto indexAsString = std::to_string(index);
 
-         std::string position{ "allLights[" };
-         position.append(indexString).append("].position");
+         const auto position = "allLights[" + indexAsString + "].position";
+         shader.setUniformValue(position.data(), lights[index].position);
 
-         std::string intensity{ "allLights[" };
-         intensity.append(indexString).append("].intensity");
+         const auto intensity = "allLights[" + indexAsString + "].intensity";
+         shader.setUniformValue(intensity.data(), lights[index].intensity);
 
-         std::string attenuation{ "allLights[" };
-         attenuation.append(indexString).append("].attenuation");
+         const auto attenuation = "allLights[" + indexAsString + "].attenuation";
+         shader.setUniformValue(attenuation.data(), settings.GetLightAttentuationFactor());
 
-         std::string ambientCoefficient{ "allLights[" };
-         ambientCoefficient.append(indexString).append("].ambientCoefficient");
-
-         shader.setUniformValue(position.c_str(), lights[i].position);
-         shader.setUniformValue(intensity.c_str(), lights[i].intensity);
-         shader.setUniformValue(attenuation.c_str(), settings.GetLightAttentuationFactor());
-         shader.setUniformValue(ambientCoefficient.c_str(), settings.GetAmbientLightCoefficient());
+         const auto ambientCoefficient = "allLights[" + indexAsString + "].ambientCoefficient";
+         shader.setUniformValue(ambientCoefficient.data(), settings.GetAmbientLightCoefficient());
       }
    }
 
@@ -118,8 +253,22 @@ namespace
          static_cast<float>(node->file.size) / static_cast<float>((*rootNode)->file.size);
 
       ColorGradient gradient;
-      const auto nodeColor = gradient.GetColorAtValue(ratio);
-      return nodeColor;
+      return gradient.GetColorAtValue(ratio);
+   }
+
+   /**
+    * @returns The view matrix for the shadow casting light source.
+    */
+   QMatrix4x4 ComputeLightViewMatrix()
+   {
+      constexpr auto lightPosition = QVector3D{ 0.f, 200.f, 0.f };
+      constexpr auto lightTarget = QVector3D{ 500.f, 0.f, -500.f };
+      constexpr auto upVector = QVector3D{ 0.0f, 1.0f, 0.0f };
+
+      QMatrix4x4 view;
+      view.lookAt(lightPosition, lightTarget, upVector);
+
+      return view;
    }
 }
 
@@ -131,23 +280,55 @@ namespace Asset
       :
       Base{ openGL, isInitiallyVisible }
    {
+      m_shadowMaps.reserve(CASCADE_COUNT);
+
+      for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
+      {
+         auto frameBuffer = std::make_unique<QOpenGLFramebufferObject>
+         (
+            SHADOW_MAP_WIDTH,
+            SHADOW_MAP_HEIGHT,
+            QOpenGLFramebufferObject::Attachment::Depth,
+            GL_TEXTURE_2D,
+            GL_RGB32F
+         );
+
+         m_shadowMaps.emplace_back(std::move(frameBuffer));
+      }
    }
 
    bool Treemap::LoadShaders()
    {
-      return Base::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
+      m_shadowMapShader.addShaderFromSourceFile(
+         QOpenGLShader::Vertex,
+         ":/Shaders/shadowMapping.vert");
+
+      m_shadowMapShader.addShaderFromSourceFile(
+         QOpenGLShader::Fragment,
+         ":/Shaders/shadowMapping.frag");
+
+      auto success = m_shadowMapShader.link();
+
+      success &= Base::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
+      success &= LoadTexturePreviewShaders();
+
+      return success;
    }
 
    bool Treemap::Initialize()
    {
       const bool unitBlockInitialized = InitializeReferenceBlock();
-      const bool colorsInitialized = InitializeColors();
       const bool transformationsInitialized = InitializeBlockTransformations();
+      const bool colorsInitialized = InitializeColors();
+      const bool shadowMachineryInitialized = InitializeShadowMachinery();
+      const bool texturePreviewerInitialized = InitializeTexturePreviewer();
 
       const bool overallSuccess =
          unitBlockInitialized
+         && transformationsInitialized
          && colorsInitialized
-         && transformationsInitialized;
+         && shadowMachineryInitialized
+         && texturePreviewerInitialized;
 
       assert(overallSuccess);
       return overallSuccess;
@@ -183,16 +364,16 @@ namespace Asset
 
       m_referenceBlockBuffer.bind();
 
-      m_shader.enableAttributeArray("vertex");
-      m_shader.setAttributeBuffer(
+      m_mainShader.enableAttributeArray("vertex");
+      m_mainShader.setAttributeBuffer(
          /* location = */ "vertex",
          /* type = */ GL_FLOAT,
          /* offset = */ 0,
          /* tupleSize = */ 3,
          /* stride = */ 2 * sizeof(QVector3D));
 
-      m_shader.enableAttributeArray("normal");
-      m_shader.setAttributeBuffer(
+      m_mainShader.enableAttributeArray("normal");
+      m_mainShader.setAttributeBuffer(
          /* location = */ "normal",
          /* type = */ GL_FLOAT,
          /* offset = */ sizeof(QVector3D),
@@ -306,6 +487,63 @@ namespace Asset
       return true;
    }
 
+   bool Treemap::InitializeShadowMachinery()
+   {
+      InitializeShadowMachineryOnMainShader();
+      InitializeShadowMachineryOnShadowShader();
+
+      return true;
+   }
+
+   void Treemap::InitializeShadowMachineryOnMainShader()
+   {
+      m_mainShader.bind();
+
+      const auto shaderID = m_mainShader.programId();
+
+      const auto cascadeBounds = ComputeCascadeDistances();
+      for (auto index{ 0u }; index < cascadeBounds.size(); ++index)
+      {
+         const auto indexAsString = std::to_string(index);
+
+         auto variableName = "cascadeBounds[" + indexAsString + "]";
+         m_mainShader.setUniformValue(variableName.data(), cascadeBounds[index].second);
+
+         variableName = "shadowMaps[" + indexAsString + "]";
+         const auto location = m_openGL.glGetUniformLocation(shaderID, variableName.data());
+         m_openGL.glUniform1i(location, index);
+      }
+
+      m_mainShader.release();
+   }
+
+   void Treemap::InitializeShadowMachineryOnShadowShader()
+   {
+      m_VAO.bind();
+      m_referenceBlockBuffer.bind();
+      m_shadowMapShader.bind();
+
+      m_shadowMapShader.enableAttributeArray("vertex");
+      m_shadowMapShader.setAttributeBuffer(
+         /* location = */ "vertex",
+         /* type = */ GL_FLOAT,
+         /* offset = */ 0,
+         /* tupleSize = */ 3,
+         /* stride = */ 2 * sizeof(QVector3D));
+
+      m_shadowMapShader.enableAttributeArray("normal");
+      m_shadowMapShader.setAttributeBuffer(
+         /* location = */ "normal",
+         /* type = */ GL_FLOAT,
+         /* offset = */ sizeof(QVector3D),
+         /* tupleSize = */ 3,
+         /* stride = */ 2 * sizeof(QVector3D));
+
+      m_shadowMapShader.release();
+      m_referenceBlockBuffer.release();
+      m_VAO.release();
+   }
+
    std::uint32_t Treemap::LoadBufferData(
       const Tree<VizFile>& tree,
       const Settings::Manager& settings)
@@ -319,9 +557,9 @@ namespace Asset
 
       for (auto& node : tree)
       {
-         const bool fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
-         const bool notTheRightFileType =
-            parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY;
+         const auto fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
+         const auto notTheRightFileType = parameters.onlyShowDirectories
+            && node->file.type != FileType::DIRECTORY;
 
          if (notTheRightFileType || fileIsTooSmall)
          {
@@ -333,7 +571,7 @@ namespace Asset
          const auto& block = node->block;
          const auto& blockOrigin = block.GetOrigin();
 
-         QMatrix4x4 instanceMatrix{ };
+         QMatrix4x4 instanceMatrix;
          instanceMatrix.translate(blockOrigin.x(), blockOrigin.y(), blockOrigin.z());
          instanceMatrix.scale(block.GetWidth(), block.GetHeight(), block.GetDepth());
          m_blockTransformations << instanceMatrix;
@@ -359,9 +597,9 @@ namespace Asset
 
       for (const auto& node : tree)
       {
-         const bool fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
-         const bool notTheRightFileType =
-            parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY;
+         const auto fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
+         const auto notTheRightFileType = parameters.onlyShowDirectories
+            && node->file.type != FileType::DIRECTORY;
 
          if (notTheRightFileType || fileIsTooSmall)
          {
@@ -397,9 +635,8 @@ namespace Asset
 
    QVector3D Treemap::ComputeGradientColor(const Tree<VizFile>::Node& node)
    {
-      const auto blockSize = node.GetData().file.size;
-      const auto ratio =
-         static_cast<long double>(blockSize) / static_cast<long double>(m_largestDirectorySize);
+      const auto blockSize = static_cast<long double>(node.GetData().file.size);
+      const auto ratio = blockSize / static_cast<long double>(m_largestDirectorySize);
 
       const auto finalColor = m_directoryColorGradient.GetColorAtValue(static_cast<float>(ratio));
       return finalColor;
@@ -449,27 +686,102 @@ namespace Asset
       return !(m_blockTransformations.empty() && m_blockColors.empty());
    }
 
-   bool Treemap::Render(
+   void Treemap::ComputeShadowMapProjectionViewMatrices(const Camera& camera)
+   {
+      const auto view = ComputeLightViewMatrix();
+      const auto cascadeBoundingBoxes = ComputeFrustumSplitBoundingBoxes(camera, view);
+
+      constexpr auto nearPlane{ 1 };
+      constexpr auto farPlane{ 1500 };
+
+      for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
+      {
+         const auto& boundingBox = cascadeBoundingBoxes[index];
+         QMatrix4x4 projection;
+         projection.ortho(
+            boundingBox.left,
+            boundingBox.right,
+            boundingBox.bottom,
+            boundingBox.top,
+            nearPlane,
+            farPlane);
+
+         const QMatrix4x4 model;
+         auto projectionViewMatrix = projection * view * model;
+         m_shadowMaps[index].projectionViewMatrix = std::move(projectionViewMatrix);
+      }
+   }
+
+   void Treemap::RenderShadowPass(const Camera& camera)
+   {
+      m_openGL.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
+
+      m_shadowMapShader.bind();
+      m_VAO.bind();
+
+      for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
+      {
+         m_shadowMaps[index].framebuffer->bind();
+
+         const auto& projectionViewMatrix = m_shadowMaps[index].projectionViewMatrix;
+         m_shadowMapShader.setUniformValue("lightProjectionViewMatrix", projectionViewMatrix);
+
+         m_openGL.glClear(GL_DEPTH_BUFFER_BIT);
+
+         static constexpr float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+         m_openGL.glClearBufferfv(GL_COLOR, 0, white);
+
+         m_openGL.glDrawArraysInstanced(
+            /* mode = */ GL_TRIANGLES,
+            /* first = */ 0,
+            /* count = */ m_referenceBlockVertices.size(),
+            /* instanceCount = */ m_blockColors.size()
+         );
+
+         m_shadowMaps[index].framebuffer->release();
+      }
+
+      m_VAO.release();
+      m_shadowMapShader.release();
+
+      const auto& viewport = camera.GetViewport();
+      m_openGL.glViewport(0, 0, viewport.width(), viewport.height());
+   }
+
+   void Treemap::RenderMainPass(
       const Camera& camera,
       const std::vector<Light>& lights,
       const Settings::Manager& settings)
    {
-      if (!IsAssetLoaded())
+      m_openGL.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      m_mainShader.bind();
+
+      const auto shouldShowShadows = settings.ShouldShowShadows();
+
+      m_mainShader.setUniformValue("cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());
+      m_mainShader.setUniformValue("cameraPosition", camera.GetPosition());
+
+      // @todo The following variables don't need to be set with every pass...
+      m_mainShader.setUniformValue("materialShininess", settings.GetMaterialShininess());
+      m_mainShader.setUniformValue("shouldShowCascadeSplits", settings.ShouldShowCascadeSplits());
+      m_mainShader.setUniformValue("shouldShowShadows", shouldShowShadows);
+
+      SetUniformLights(lights, settings, m_mainShader);
+
+      if (shouldShowShadows)
       {
-         return true;
+         assert(m_shadowMaps.size() == CASCADE_COUNT);
+
+         for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
+         {
+            const auto matrix = "lightProjectionViewMatrices[" + std::to_string(index) + "]";
+            m_mainShader.setUniformValue(matrix.data(), m_shadowMaps[index].projectionViewMatrix);
+
+            m_openGL.glActiveTexture(GL_TEXTURE0 + index);
+            m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[index].framebuffer->texture());
+         }
       }
-
-      m_shader.bind();
-
-      m_shader.setUniformValue("projectionMatrix", camera.GetProjectionMatrix());
-      m_shader.setUniformValue("viewMatrix", camera.GetViewMatrix());
-      m_shader.setUniformValue("cameraPosition", camera.GetPosition());
-
-      // @todo Both of these features should be set once per instance of the Treemap:
-      m_shader.setUniformValue("materialShininess", settings.GetMaterialShininess());
-      m_shader.setUniformValue("materialSpecularColor", settings.GetSpecularColor());
-
-      SetUniformLights(lights, settings, m_shader);
 
       m_VAO.bind();
 
@@ -480,8 +792,30 @@ namespace Asset
          /* instanceCount = */ m_blockColors.size()
       );
 
-      m_shader.release();
       m_VAO.release();
+
+      m_mainShader.release();
+   }
+
+   bool Treemap::Render(
+      const Camera& camera,
+      const std::vector<Light>& lights,
+      const Settings::Manager& settings)
+   {
+      if (!IsAssetLoaded())
+      {
+         return true;
+      }
+
+      if (settings.ShouldShowShadows())
+      {
+         ComputeShadowMapProjectionViewMatrices(camera);
+         RenderShadowPass(camera);
+      }
+
+      RenderMainPass(camera, lights, settings);
+
+      //RenderDepthMapPreview(1); //< @note Enable this to render the shadow map to the screen.
 
       return true;
    }
@@ -538,5 +872,107 @@ namespace Asset
 
       m_blockColorBuffer.release();
       m_VAO.release();
+   }
+
+   bool Treemap::LoadTexturePreviewShaders()
+   {
+      if (!m_texturePreviewShader.addShaderFromSourceFile(
+         QOpenGLShader::Vertex,
+         ":/Shaders/texturePreview.vert"))
+      {
+         std::cout << "Error loading vertex shader!" << std::endl;
+      }
+
+      if (!m_texturePreviewShader.addShaderFromSourceFile(
+         QOpenGLShader::Fragment,
+         ":/Shaders/texturePreview.frag"))
+      {
+         std::cout << "Error loading fragment shader!" << std::endl;
+      }
+
+      return m_texturePreviewShader.link();
+   }
+
+   bool Treemap::InitializeTexturePreviewer()
+   {
+      static constexpr int coordinates[4][3] =
+      {
+         { +1, -1, -1 },
+         { -1, -1, -1 },
+         { -1, +1, -1 },
+         { +1, +1, -1 }
+      };
+
+      m_texturePreviewShader.bindAttributeLocation(
+         "vertex",
+         TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE);
+
+      m_texturePreviewShader.bindAttributeLocation(
+         "texCoord",
+         TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE);
+
+      QVector<GLfloat> vertexData;
+      for (int i = 0; i < 4; ++i)
+      {
+         // Vertex position:
+         vertexData.append(coordinates[i][0]);
+         vertexData.append(coordinates[i][1]);
+         vertexData.append(coordinates[i][2]);
+
+         // Texture coordinate:
+         vertexData.append(i == 0 || i == 3);
+         vertexData.append(i == 0 || i == 1);
+      }
+
+      m_texturePreviewVertexBuffer.create();
+      m_texturePreviewVertexBuffer.bind();
+
+      m_texturePreviewVertexBuffer.allocate(
+         vertexData.constData(),
+         vertexData.count() * sizeof(GLfloat));
+
+      m_texturePreviewVertexBuffer.release();
+
+      return true;
+   }
+
+   void Treemap::RenderDepthMapPreview(int index)
+   {
+      // Simply using Normalized Device Coordinates (NDC), and an arbitrary choice of view planes.
+      QMatrix4x4 viewMatrix;
+      viewMatrix.ortho(-1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1000.0f);
+      viewMatrix.translate(0.0f, 0.0f, -1.0f);
+
+      m_texturePreviewVertexBuffer.bind();
+
+      m_texturePreviewShader.bind();
+      m_texturePreviewShader.setUniformValue("matrix", viewMatrix);
+      m_texturePreviewShader.enableAttributeArray(TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE);
+      m_texturePreviewShader.enableAttributeArray(TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE);
+
+      m_texturePreviewShader.setAttributeBuffer(
+         TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE,
+         GL_FLOAT,
+         /* offset = */    0,
+         /* tupleSize = */ 3,
+         /* stride = */    5 * sizeof(GLfloat));
+
+      m_texturePreviewShader.setAttributeBuffer(
+         TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE,
+         GL_FLOAT,
+         /* offset = */    3 * sizeof(GLfloat),
+         /* tupleSize = */ 2,
+         /* stride = */    5 * sizeof(GLfloat));
+
+      m_openGL.glActiveTexture(GL_TEXTURE0);
+      m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[index].framebuffer->texture());
+
+      m_openGL.glDrawArrays(
+         /* mode = */ GL_TRIANGLE_FAN,
+         /* first = */ 0,
+         /* count = */ 4);
+
+      m_texturePreviewShader.release();
+      m_texturePreviewVertexBuffer.release();
    }
 }

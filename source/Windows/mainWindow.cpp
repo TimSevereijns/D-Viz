@@ -353,33 +353,66 @@ void MainWindow::SetupDebuggingMenu()
 
    renderMenuWrapper.origin.setText("Origin");
    renderMenuWrapper.origin.setCheckable(true);
-   renderMenuWrapper.origin.setChecked(true);
+   renderMenuWrapper.origin.setChecked(false);
 
    connect(&renderMenuWrapper.origin, &QAction::toggled,
       this, &MainWindow::OnRenderOriginToggled);
 
    renderMenuWrapper.grid.setText("Grid");
    renderMenuWrapper.grid.setCheckable(true);
-   renderMenuWrapper.grid.setChecked(true);
+   renderMenuWrapper.grid.setChecked(false);
 
    connect(&renderMenuWrapper.grid, &QAction::toggled,
       this, &MainWindow::OnRenderGridToggled);
 
    renderMenuWrapper.lightMarkers.setText("Light Markers");
    renderMenuWrapper.lightMarkers.setCheckable(true);
-   renderMenuWrapper.lightMarkers.setChecked(true);
+   renderMenuWrapper.lightMarkers.setChecked(false);
 
    connect(&renderMenuWrapper.lightMarkers, &QAction::toggled,
       this, &MainWindow::OnRenderLightMarkersToggled);
 
-   renderMenu.setTitle("Render");
-   renderMenu.setStatusTip("Toggle visual debugging aides.");
+   renderMenuWrapper.frustum.setText("Frustum");
+   renderMenuWrapper.frustum.setCheckable(true);
+   renderMenuWrapper.frustum.setChecked(true);
+
+   connect(&renderMenuWrapper.frustum, &QAction::toggled,
+      this, &MainWindow::OnRenderFrustumToggled);
+
+   renderMenu.setTitle("Render Asset");
+   renderMenu.setStatusTip("Toggle scene assets on or off");
    renderMenu.addAction(&renderMenuWrapper.origin);
    renderMenu.addAction(&renderMenuWrapper.grid);
    renderMenu.addAction(&renderMenuWrapper.lightMarkers);
+   renderMenu.addAction(&renderMenuWrapper.frustum);
+
+   auto& lightingMenuWrapper = m_debuggingMenuWrapper.lightingMenuWrapper;
+   auto& lightingMenu = m_debuggingMenuWrapper.lightingMenu;
+
+   lightingMenuWrapper.showCascadeSplits.setText("Show Cascade Splits");
+   lightingMenuWrapper.showCascadeSplits.setCheckable(true);
+   lightingMenuWrapper.showCascadeSplits.setChecked(
+      m_settingsManager.ShouldShowCascadeSplits());
+
+   connect(&lightingMenuWrapper.showCascadeSplits, &QAction::toggled,
+      &m_settingsManager, &Settings::Manager::OnShowCascadeSplitsToggled);
+
+   lightingMenuWrapper.showShadows.setText("Show Shadows");
+   lightingMenuWrapper.showShadows.setCheckable(true);
+   lightingMenuWrapper.showShadows.setChecked(
+      m_settingsManager.ShouldShowShadows());
+
+   connect(&lightingMenuWrapper.showShadows, &QAction::toggled,
+      &m_settingsManager, &Settings::Manager::OnShowShadowsToggled);
+
+   lightingMenu.setTitle("Lighting");
+   lightingMenu.setStatusTip("Toggle visualization aids");
+   lightingMenu.addAction(&lightingMenuWrapper.showCascadeSplits);
+   lightingMenu.addAction(&lightingMenuWrapper.showShadows);
 
    m_debuggingMenu.setTitle("Debugging");
    m_debuggingMenu.addMenu(&renderMenu);
+   m_debuggingMenu.addMenu(&lightingMenu);
 
    menuBar()->addMenu(&m_debuggingMenu);
 }
@@ -732,6 +765,11 @@ void MainWindow::OnRenderGridToggled(bool isEnabled)
 void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
 {
    m_glCanvas->ToggleAssetVisibility<Asset::Tag::LightMarker>(isEnabled);
+}
+
+void MainWindow::OnRenderFrustumToggled(bool isEnabled)
+{
+   m_glCanvas->ToggleAssetVisibility<Asset::Tag::Frusta>(isEnabled);
 }
 
 bool MainWindow::ShouldShowFrameTime() const

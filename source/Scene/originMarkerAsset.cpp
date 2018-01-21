@@ -61,8 +61,8 @@ namespace Asset
          return false;
       }
 
-      m_shader.bind();
-      m_shader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
+      m_mainShader.bind();
+      m_mainShader.setUniformValue("mvpMatrix", camera.GetProjectionViewMatrix());
 
       m_VAO.bind();
 
@@ -72,7 +72,7 @@ namespace Asset
          /* first = */ 0,
          /* count = */ m_rawVertices.size());
 
-      m_shader.release();
+      m_mainShader.release();
       m_VAO.release();
 
       return true;

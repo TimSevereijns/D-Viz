@@ -6,5 +6,7 @@
         <file>Shaders/visualizationVertexShader.vert</file>
         <file>Shaders/shadowMapping.frag</file>
         <file>Shaders/shadowMapping.vert</file>
+        <file>Shaders/texturePreview.frag</file>
+        <file>Shaders/texturePreview.vert</file>
     </qresource>
 </RCC>

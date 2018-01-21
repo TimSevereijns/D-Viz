@@ -49,6 +49,14 @@ void Camera::OffsetPosition(const QVector3D& offset) noexcept
    m_position += offset;
 }
 
+void Camera::SetOrientation(float pitch, float yaw)
+{
+   m_horizontalAngle = yaw;
+   m_verticalAngle = pitch;
+
+   NormalizeAngles(m_horizontalAngle, m_verticalAngle);
+}
+
 QMatrix4x4 Camera::GetOrientation() const
 {
    QMatrix4x4 orientation;
@@ -169,12 +177,12 @@ Qt3DRender::RayCasting::QRay3D Camera::ShootRayIntoScene(const QPoint& widgetCoo
    const QVector3D nearPlanePoint = Unproject(glCoordinates, 0.0f, QMatrix4x4{ });
    const QVector3D farPlanePoint = Unproject(glCoordinates, 1.0f, QMatrix4x4{ });
 
-   const auto direction = QVector3D{ nearPlanePoint - farPlanePoint }.normalized();
+   const auto direction = QVector3D(farPlanePoint - nearPlanePoint).normalized();
 
    const Qt3DRender::RayCasting::QRay3D ray
    {
       nearPlanePoint,
-      -direction
+      direction
    };
 
    return ray;
@@ -196,14 +204,29 @@ void Camera::SetViewport(const QRect& size) noexcept
    m_aspectRatio = static_cast<float>(size.width()) / static_cast<float>(size.height());
 }
 
+void Camera::SetNearPlane(float nearPlane)
+{
+   m_nearPlane = nearPlane;
+}
+
 float Camera::GetNearPlane() const noexcept
 {
    return m_nearPlane;
 }
 
+void Camera::SetFarPlane(float farPlane)
+{
+   m_farPlane = farPlane;
+}
+
 float Camera::GetFarPlane() const noexcept
 {
    return m_farPlane;
+}
+
+float Camera::GetAspectRatio() const noexcept
+{
+   return m_aspectRatio;
 }
 
 QRect Camera::GetViewport() const noexcept
@@ -227,7 +250,7 @@ void Camera::SetFieldOfView(const float angle) noexcept
    }
 }
 
-float Camera::GetFieldOfView() const noexcept
+float Camera::GetVerticalFieldOfView() const noexcept
 {
    return m_fieldOfView;
 }

@@ -1,10 +1,9 @@
-#version 410 core
+#version 330 core
 
 layout (location = 0) in vec3 color;
 layout (location = 1) in mat4 instanceMatrix;
 
-uniform mat4 projectionMatrix;
-uniform mat4 viewMatrix;
+uniform mat4 lightProjectionViewMatrix;
 
 in vec3 vertex;
 in vec3 normal;
@@ -19,5 +18,6 @@ void main(void)
    vertexColor = color;
    vertexNormal = normal;
 
-   gl_Position = projectionMatrix * viewMatrix * instanceMatrix * vec4(vertex, 1.0f);
+   //@todo use vertexPosition instead:
+   gl_Position = lightProjectionViewMatrix * instanceMatrix * vec4(vertex, 1.0f);
 }
