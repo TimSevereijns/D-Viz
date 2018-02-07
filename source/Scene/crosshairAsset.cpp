@@ -62,14 +62,14 @@ namespace Asset
       Refresh();
    }
 
-   bool Crosshair::Render(
+   void Crosshair::Render(
       const Camera& camera,
       const std::vector<Light>&,
       const Settings::Manager&)
    {
       if (!m_shouldRender)
       {
-         return false;
+         return;
       }
 
       const auto& viewport = camera.GetViewport();
@@ -100,7 +100,5 @@ namespace Asset
 
       m_VAO.release();
       m_mainShader.release();
-
-      return true;
    }
 }

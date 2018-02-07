@@ -51,14 +51,14 @@ namespace Asset
       m_rawColors = CreateMarkerColors();
    }
 
-   bool OriginMarker::Render(
+   void OriginMarker::Render(
       const Camera& camera,
       const std::vector<Light>&,
       const Settings::Manager&)
    {
       if (!m_shouldRender)
       {
-         return false;
+         return;
       }
 
       m_mainShader.bind();
@@ -74,7 +74,5 @@ namespace Asset
 
       m_mainShader.release();
       m_VAO.release();
-
-      return true;
    }
 }

@@ -28,12 +28,12 @@ namespace Asset
          /**
           * @see Asset::Base::Initialize(...)
           */
-         bool Initialize() override;
+         void Initialize() override;
 
          /**
           * @see Asset::Base::Render(...)
           */
-         bool Render(
+         void Render(
             const Camera& camera,
             const std::vector<Light>& light,
             const Settings::Manager& settings) override;
@@ -41,13 +41,13 @@ namespace Asset
          /**
           * @see Asset::Base::Reload(...)
           */
-         bool Refresh() override;
+         void Refresh() override;
 
       private:
 
-         bool InitializeVertexBuffers();
+         void InitializeVertexBuffers();
 
-         bool InitializeColorBuffers();
+         void InitializeColorBuffers();
    };
 }
 

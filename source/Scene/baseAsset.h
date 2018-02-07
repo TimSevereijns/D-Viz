@@ -51,10 +51,8 @@ namespace Asset
           * calling this function.
           *
           * @param[in] camera          The camera associated with the OpenGL context.
-          *
-          * @returns True if the operation succeeded.
           */
-         virtual bool Initialize() = 0;
+         virtual void Initialize() = 0;
 
          /**
           * @brief Clears the OpenGL buffer objects that contain the vertex and color data.
@@ -77,10 +75,8 @@ namespace Asset
           * @param[in] camera          The camera associated with the OpenGL context.
           * @param[in] light           The light source for the scene.
           * @param[in] settings        Any additional settings relevant to rendering.
-          *
-          * @returns True if the operation succeeded.
           */
-         virtual bool Render(
+         virtual void Render(
             const Camera& camera,
             const std::vector<Light>& light,
             const Settings::Manager& settings) = 0;
@@ -98,10 +94,8 @@ namespace Asset
           * and color buffers ever changes.
           *
           * @param[in] camera          The camera associated with the OpenGL context.
-          *
-          * @returns True if the operation succeeded.
           */
-         virtual bool Refresh() = 0;
+         virtual void Refresh() = 0;
 
          /**
           * @brief Sets the vertex data associated with the asset in question.

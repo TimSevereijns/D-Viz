@@ -15,18 +15,13 @@ namespace Asset
       return Base::LoadShaders("simpleLineVertexShader", "simpleLineFragmentShader");
    }
 
-   bool Line::Initialize()
+   void Line::Initialize()
    {
-      const bool vertexBuffersLoadedSuccessfully = InitializeVertexBuffers();
-      const bool colorBuffersLoadedSuccessfully = InitializeColorBuffers();
-
-      const bool overallSuccess = vertexBuffersLoadedSuccessfully && colorBuffersLoadedSuccessfully;
-      assert(overallSuccess);
-
-      return overallSuccess;
+      InitializeVertexBuffers();
+      InitializeColorBuffers();
    }
 
-   bool Line::InitializeVertexBuffers()
+   void Line::InitializeVertexBuffers()
    {
       if (!m_VAO.isCreated())
       {
@@ -55,11 +50,9 @@ namespace Asset
       m_vertexBuffer.release();
       m_mainShader.release();
       m_VAO.release();
-
-      return true;
    }
 
-   bool Line::InitializeColorBuffers()
+   void Line::InitializeColorBuffers()
    {
       if (!m_VAO.isCreated())
       {
@@ -85,18 +78,16 @@ namespace Asset
 
       m_colorBuffer.release();
       m_VAO.release();
-
-      return true;
    }
 
-   bool Line::Render(
+   void Line::Render(
       const Camera& camera,
       const std::vector<Light>&,
       const Settings::Manager&)
    {
       if (!m_shouldRender)
       {
-         return false;
+         return;
       }
 
       m_mainShader.bind();
@@ -111,15 +102,11 @@ namespace Asset
 
       m_mainShader.release();
       m_VAO.release();
-
-      return true;
    }
 
-   bool Line::Refresh()
+   void Line::Refresh()
    {
       InitializeVertexBuffers();
       InitializeColorBuffers();
-
-      return true;
    }
 }

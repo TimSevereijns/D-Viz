@@ -315,26 +315,16 @@ namespace Asset
       return success;
    }
 
-   bool Treemap::Initialize()
+   void Treemap::Initialize()
    {
-      const bool unitBlockInitialized = InitializeReferenceBlock();
-      const bool transformationsInitialized = InitializeBlockTransformations();
-      const bool colorsInitialized = InitializeColors();
-      const bool shadowMachineryInitialized = InitializeShadowMachinery();
-      const bool texturePreviewerInitialized = InitializeTexturePreviewer();
-
-      const bool overallSuccess =
-         unitBlockInitialized
-         && transformationsInitialized
-         && colorsInitialized
-         && shadowMachineryInitialized
-         && texturePreviewerInitialized;
-
-      assert(overallSuccess);
-      return overallSuccess;
+      InitializeReferenceBlock();
+      InitializeBlockTransformations();
+      InitializeColors();
+      InitializeShadowMachinery();
+      InitializeTexturePreviewer();
    }
 
-   bool Treemap::InitializeReferenceBlock()
+   void Treemap::InitializeReferenceBlock()
    {
       if (!m_VAO.isCreated())
       {
@@ -382,11 +372,9 @@ namespace Asset
 
       m_referenceBlockBuffer.release();
       m_VAO.release();
-
-      return true;
    }
 
-   bool Treemap::InitializeColors()
+   void Treemap::InitializeColors()
    {
       if (!m_VAO.isCreated())
       {
@@ -414,11 +402,9 @@ namespace Asset
 
       m_blockColorBuffer.release();
       m_VAO.release();
-
-      return true;
    }
 
-   bool Treemap::InitializeBlockTransformations()
+   void Treemap::InitializeBlockTransformations()
    {
       if (!m_VAO.isCreated())
       {
@@ -483,16 +469,12 @@ namespace Asset
 
       m_blockTransformationBuffer.release();
       m_VAO.release();
-
-      return true;
    }
 
-   bool Treemap::InitializeShadowMachinery()
+   void Treemap::InitializeShadowMachinery()
    {
       InitializeShadowMachineryOnMainShader();
       InitializeShadowMachineryOnShadowShader();
-
-      return true;
    }
 
    void Treemap::InitializeShadowMachineryOnMainShader()
@@ -714,6 +696,8 @@ namespace Asset
 
    void Treemap::RenderShadowPass(const Camera& camera)
    {
+      ComputeShadowMapProjectionViewMatrices(camera);
+
       m_openGL.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
 
       m_shadowMapShader.bind();
@@ -797,36 +781,31 @@ namespace Asset
       m_mainShader.release();
    }
 
-   bool Treemap::Render(
+   void Treemap::Render(
       const Camera& camera,
       const std::vector<Light>& lights,
       const Settings::Manager& settings)
    {
       if (!IsAssetLoaded())
       {
-         return true;
+         return;
       }
 
       if (settings.ShouldShowShadows())
       {
-         ComputeShadowMapProjectionViewMatrices(camera);
          RenderShadowPass(camera);
       }
 
       RenderMainPass(camera, lights, settings);
 
       //RenderDepthMapPreview(1); //< @note Enable this to render the shadow map to the screen.
-
-      return true;
    }
 
-   bool Treemap::Refresh()
+   void Treemap::Refresh()
    {
       InitializeReferenceBlock();
       InitializeColors();
       InitializeBlockTransformations();
-
-      return true;
    }
 
    void Treemap::UpdateVBO(

@@ -16,7 +16,7 @@ namespace Asset
             QOpenGLExtraFunctions& openGL,
             bool isInitiallyVisible);
 
-         bool Render(
+         void Render(
             const Camera& camera,
             const std::vector<Light>& lights,
             const Settings::Manager& settings) override;

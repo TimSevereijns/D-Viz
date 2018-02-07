@@ -25,7 +25,7 @@ uniform struct Light
 
 uniform float cascadeBounds[CASCADE_COUNT];
 
-const float shadowBias[CASCADE_COUNT] = float[CASCADE_COUNT](0.00002, 0.00004, 0.00016, 0.00064);
+const float shadowBias[CASCADE_COUNT] = float[CASCADE_COUNT](0.00002, 0.00004, 0.0002, 0.00064);
 
 // @note Use this one when PCF is enabled:
 //const float shadowBias[CASCADE_COUNT] = float[CASCADE_COUNT](0.0001, 0.0002, 0.0008, 0.0024);
@@ -84,8 +84,8 @@ float ComputeShadowAttenuation(
    vec4 shadowCoordinate)
 {
    // The bias used to prevent shadow acne, causes a slight separation of the shadow from the back
-   // face of a block. A common fix this this problem is to cull front faces when rendering the
-   // shadow map. This approach, however, doesn't tend to do well with thing geometries, so instead,
+   // face of a block. A common fix to this problem is to cull front faces when rendering the
+   // shadow map. This approach, however, doesn't tend to do well with thin geometries; so instead,
    // we'll simply consider all fragments that make up a back face of a block to be in shadow if
    // its normal points away from the "sun."
    vec3 surfaceToLight = normalize(sunPosition - vec3(vertexPosition));
@@ -95,7 +95,7 @@ float ComputeShadowAttenuation(
    }
 
    // @note Perspective division is automatically applied to `gl_position`. Coordinates passed along
-   // manually, however, will need the division applied:
+   // manually, however, will need to have perspective division applied:
    vec3 projectionCoordinates = shadowCoordinate.xyz / shadowCoordinate.w;
 
    vec2 uvCoordinates;

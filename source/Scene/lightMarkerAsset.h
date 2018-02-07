@@ -21,7 +21,7 @@ namespace Asset
          /**
           * @see Asset::Base::Render(...)
           */
-         bool Render(
+         void Render(
             const Camera& camera,
             const std::vector<Light>& lights,
             const Settings::Manager& settings) override;

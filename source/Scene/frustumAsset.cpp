@@ -308,14 +308,14 @@ namespace Asset
    {
    }
 
-   bool Frustum::Render(
+   void Frustum::Render(
       const Camera& camera,
       const std::vector<Light>& /*lights*/,
       const Settings::Manager& /*settings*/)
    {
       if (!m_shouldRender)
       {
-         return false;
+         return;
       }
 
       m_mainShader.bind();
@@ -334,8 +334,6 @@ namespace Asset
 
       m_mainShader.release();
       m_VAO.release();
-
-      return true;
    }
 
    void Frustum::GenerateFrusta(const Camera& camera)

@@ -44,12 +44,12 @@ namespace Asset
          /**
           * @see Asset::Base::Initialize(...)
           */
-         bool Initialize() override;
+         void Initialize() override;
 
          /**
           * @see Asset::Base::Render(...)
           */
-         bool Render(
+         void Render(
             const Camera& camera,
             const std::vector<Light>& lights,
             const Settings::Manager& settings) override;
@@ -57,7 +57,7 @@ namespace Asset
          /**
           * @see Asset::Base::Reload(...)
           */
-         bool Refresh() override;
+         void Refresh() override;
 
          /**
           * @see Asset::Base::UpdateVBO(...)
@@ -131,10 +131,10 @@ namespace Asset
 
          void FindLargestDirectory(const Tree<VizFile>& tree);
 
-         bool InitializeReferenceBlock();
-         bool InitializeColors();
-         bool InitializeBlockTransformations();
-         bool InitializeShadowMachinery();
+         void InitializeReferenceBlock();
+         void InitializeColors();
+         void InitializeBlockTransformations();
+         void InitializeShadowMachinery();
 
          bool LoadTexturePreviewShaders();
          bool InitializeTexturePreviewer();
