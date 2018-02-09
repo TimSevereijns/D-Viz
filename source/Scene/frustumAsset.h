@@ -13,13 +13,13 @@ namespace Asset
       public:
 
          explicit Frustum(
+            const Settings::Manager& settings,
             QOpenGLExtraFunctions& openGL,
             bool isInitiallyVisible);
 
          void Render(
             const Camera& camera,
-            const std::vector<Light>& lights,
-            const Settings::Manager& settings) override;
+            const std::vector<Light>& lights) override;
 
          void GenerateFrusta(const Camera& camera);
    };

@@ -374,7 +374,7 @@ void MainWindow::SetupDebuggingMenu()
 
    renderMenuWrapper.frustum.setText("Frustum");
    renderMenuWrapper.frustum.setCheckable(true);
-   renderMenuWrapper.frustum.setChecked(true);
+   renderMenuWrapper.frustum.setChecked(false);
 
    connect(&renderMenuWrapper.frustum, &QAction::toggled,
       this, &MainWindow::OnRenderFrustumToggled);
@@ -452,6 +452,11 @@ void MainWindow::SetDebuggingMenuState()
    renderMenuWrapper.lightMarkers.blockSignals(true);
    renderMenuWrapper.lightMarkers.setChecked(shouldShowLightMarkers);
    renderMenuWrapper.lightMarkers.blockSignals(false);
+
+   const auto shouldShowFrustum = preferences.GetValueOrDefault(L"showFrustum", true);
+   renderMenuWrapper.frustum.blockSignals(true);
+   renderMenuWrapper.frustum.setChecked(shouldShowFrustum);
+   renderMenuWrapper.frustum.blockSignals(false);
 }
 
 void MainWindow::OnFileMenuNewScan()
@@ -464,7 +469,6 @@ void MainWindow::OnFileMenuNewScan()
 
    if (selectedDirectory.isEmpty())
    {
-      assert(false);
       return;
    }
 
@@ -769,7 +773,7 @@ void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
 
 void MainWindow::OnRenderFrustumToggled(bool isEnabled)
 {
-   m_glCanvas->ToggleAssetVisibility<Asset::Tag::Frusta>(isEnabled);
+   m_glCanvas->ToggleAssetVisibility<Asset::Tag::Frustum>(isEnabled);
 }
 
 bool MainWindow::ShouldShowFrameTime() const

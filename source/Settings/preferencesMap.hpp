@@ -93,7 +93,7 @@ namespace Settings
          IsSupportedType<DataType>::value,
          "The preferences map doesn't support the insertion of the given type.");
 
-      m_map.emplace(std::move(name), std::forward<DataType>(data));
+      m_map.emplace(std::move(name), std::forward<decltype(data)>(data));
    }
 
    template<typename RequestedType>
@@ -108,11 +108,14 @@ namespace Settings
       const auto itr = m_map.find(query.data());
       if (itr == std::end(m_map))
       {
-         return std::forward<RequestedType>(defaultValue);
+         return std::forward<decltype(defaultValue)>(defaultValue);
       }
 
       const auto* encapsulatedValue = std::get_if<RequestedType>(&itr->second);
-      return encapsulatedValue ? *encapsulatedValue : std::forward<RequestedType>(defaultValue);
+
+      return encapsulatedValue
+         ? *encapsulatedValue
+         : std::forward<decltype(defaultValue)>(defaultValue);
    }
 }
 

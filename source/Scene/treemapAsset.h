@@ -33,6 +33,7 @@ namespace Asset
           * @see Asset::Base::Base(...)
           */
          Treemap(
+            const Settings::Manager& settings,
             QOpenGLExtraFunctions& openGL,
             bool isInitiallyVisible);
 
@@ -51,8 +52,7 @@ namespace Asset
           */
          void Render(
             const Camera& camera,
-            const std::vector<Light>& lights,
-            const Settings::Manager& settings) override;
+            const std::vector<Light>& lights) override;
 
          /**
           * @see Asset::Base::Reload(...)
@@ -64,8 +64,7 @@ namespace Asset
           */
          void UpdateVBO(
             const Tree<VizFile>::Node& node,
-            Asset::Event action,
-            const Settings::Manager& settings) override;
+            Asset::Event action) override;
 
          /**
           * @see Asset::Base::IsAssetLoaded(...)
@@ -79,14 +78,10 @@ namespace Asset
           * still be (and are) modifiable. Consider fixing this.
           *
           * @param[in] tree            The tree to pull the visualized TreeMap information from.
-          * @param[in] settings        A reference to the settings manager so that the visualization
-          *                            can take into account the current settings.
           *
           * @returns The number of blocks that have been loaded into the buffer.
           */
-         std::uint32_t LoadBufferData(
-            const Tree<VizFile>& tree,
-            const Settings::Manager& settings);
+         std::uint32_t LoadBufferData(const Tree<VizFile>& tree);
 
          /**
           * @brief Reloads the color buffer without touching the other buffers.
@@ -95,12 +90,8 @@ namespace Asset
           * and reference block buffers is likely to have unintended consequences.
           *
           * @param[in] tree            The tree to pull the visualized TreeMap information from.
-          * @param[in] settings        A reference to the settings manager so that the visualization
-          *                            can take into account the current settings.
           */
-         void ReloadColorBufferData(
-            const Tree<VizFile>& tree,
-            const Settings::Manager& settings);
+         void ReloadColorBufferData(const Tree<VizFile>& tree);
 
          /**
           * @returns The number of blocks that are currently loaded into the visualization asset.
@@ -120,14 +111,11 @@ namespace Asset
 
          void RenderMainPass(
             const Camera& camera,
-            const std::vector<Light>& lights,
-            const Settings::Manager& settings);
+            const std::vector<Light>& lights);
 
          QVector3D ComputeGradientColor(const Tree<VizFile>::Node& node);
 
-         void ComputeAppropriateBlockColor(
-            const Tree<VizFile>::Node& node,
-            const Settings::Manager& settings);
+         void ComputeAppropriateBlockColor(const Tree<VizFile>::Node& node);
 
          void FindLargestDirectory(const Tree<VizFile>& tree);
 

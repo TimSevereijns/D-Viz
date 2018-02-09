@@ -17,6 +17,7 @@ namespace Asset
           * @see Asset::Base::Base(...)
           */
          Line(
+            const Settings::Manager& settings,
             QOpenGLExtraFunctions& openGL,
             bool isInitiallyVisible);
 
@@ -35,8 +36,7 @@ namespace Asset
           */
          void Render(
             const Camera& camera,
-            const std::vector<Light>& light,
-            const Settings::Manager& settings) override;
+            const std::vector<Light>& light) override;
 
          /**
           * @see Asset::Base::Reload(...)

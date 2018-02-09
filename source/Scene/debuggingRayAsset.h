@@ -13,6 +13,7 @@ namespace Asset
           * @see Asset::Base::Base(...)
           */
          DebuggingRay(
+            const Settings::Manager& settings,
             QOpenGLExtraFunctions& openGL,
             bool isInitiallyVisible);
 
@@ -21,8 +22,7 @@ namespace Asset
           */
          void Render(
             const Camera& camera,
-            const std::vector<Light>& lights,
-            const Settings::Manager& settings) override;
+            const std::vector<Light>& lights) override;
    };
 }
 

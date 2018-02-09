@@ -96,7 +96,7 @@ void GLCanvas::initializeGL()
    RegisterAsset<Asset::Tag::Treemap>();
    RegisterAsset<Asset::Tag::Crosshair>();
    RegisterAsset<Asset::Tag::LightMarker>();
-   RegisterAsset<Asset::Tag::Frusta>();
+   RegisterAsset<Asset::Tag::Frustum>();
 
    auto* lightMarkers = GetAsset<Asset::Tag::LightMarker>();
    InitializeLightMarkers(m_lights, *lightMarkers);
@@ -111,14 +111,16 @@ void GLCanvas::initializeGL()
 template<typename AssetTag>
 void GLCanvas::RegisterAsset()
 {
-   const auto assetName = std::wstring{ L"show" } + AssetTag::Name;
+   // @todo Remove this in favor of passing in the settings manager:
+   const auto preferenceName = std::wstring{ L"show" } + AssetTag::Name;
    const auto& preferences = m_mainWindow.GetSettingsManager().GetPreferenceMap();
-   const auto isInitiallyVisible = preferences.GetValueOrDefault(assetName, true);
+   const auto isInitiallyVisible = preferences.GetValueOrDefault(preferenceName, true);
 
    m_sceneAssets.emplace_back(TagAndAsset
    {
       std::make_unique<AssetTag>(),
-      std::make_unique<typename AssetTag::AssetType>(m_graphicsDevice, isInitiallyVisible)
+      std::make_unique<typename AssetTag::AssetType>(
+         m_mainWindow.GetSettingsManager(), m_graphicsDevice, isInitiallyVisible)
    });
 }
 
@@ -165,7 +167,7 @@ void GLCanvas::resizeGL(int width, int height)
    m_graphicsDevice.glViewport(0, 0, width, height);
    m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
 
-   auto* const frusta = GetAsset<Asset::Tag::Frusta>();
+   auto* const frusta = GetAsset<Asset::Tag::Frustum>();
    frusta->GenerateFrusta(m_camera);
 }
 
@@ -177,24 +179,20 @@ void GLCanvas::ReloadVisualization()
    m_isPaintingSuspended = true;
 
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
+   const auto blockCount = treemap->LoadBufferData(m_controller.GetTree());
 
-   const auto& settings = m_mainWindow.GetSettingsManager();
-   const auto blockCount = treemap->LoadBufferData(m_controller.GetTree(), settings);
+   assert(blockCount == treemap->GetBlockCount());
 
    for (const auto& tagAndAsset : m_sceneAssets)
    {
       tagAndAsset.asset->Refresh();
    }
 
-   assert(blockCount == treemap->GetBlockCount());
-
    m_controller.PrintMetadataToStatusBar();
 }
 
 void GLCanvas::ApplyColorScheme()
 {
-   auto* const treemap = GetAsset<Asset::Tag::Treemap>();
-
    const auto deselectionCallback = [&] (auto& nodes)
    {
       RestoreHighlightedNodes(nodes);
@@ -202,7 +200,8 @@ void GLCanvas::ApplyColorScheme()
 
    m_controller.ClearHighlightedNodes(deselectionCallback);
 
-   treemap->ReloadColorBufferData(m_controller.GetTree(), m_mainWindow.GetSettingsManager());
+   auto* const treemap = GetAsset<Asset::Tag::Treemap>();
+   treemap->ReloadColorBufferData(m_controller.GetTree());
    treemap->Refresh();
 
    const auto* selectedNode = m_controller.GetSelectedNode();
@@ -401,11 +400,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 void GLCanvas::SelectNode(const Tree<VizFile>::Node& node)
 {
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
-
-   treemap->UpdateVBO(
-      node,
-      Asset::Event::SELECT,
-      m_mainWindow.GetSettingsManager());
+   treemap->UpdateVBO(node, Asset::Event::SELECT);
 }
 
 void GLCanvas::RestoreSelectedNode(const Tree<VizFile>::Node& node)
@@ -414,8 +409,7 @@ void GLCanvas::RestoreSelectedNode(const Tree<VizFile>::Node& node)
 
    treemap->UpdateVBO(
       node,
-      m_controller.IsNodeHighlighted(node) ? Asset::Event::HIGHLIGHT : Asset::Event::RESTORE,
-      m_mainWindow.GetSettingsManager());
+      m_controller.IsNodeHighlighted(node) ? Asset::Event::HIGHLIGHT : Asset::Event::RESTORE);
 }
 
 void GLCanvas::HighlightNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
@@ -424,10 +418,7 @@ void GLCanvas::HighlightNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
 
    for (const auto* const node : nodes)
    {
-      treemap->UpdateVBO(
-         *node,
-         Asset::Event::HIGHLIGHT,
-         m_mainWindow.GetSettingsManager());
+      treemap->UpdateVBO(*node, Asset::Event::HIGHLIGHT);
    }
 }
 
@@ -437,10 +428,7 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& 
 
    for (const auto* const node : nodes)
    {
-      treemap->UpdateVBO(
-         *node,
-         Asset::Event::RESTORE,
-         m_mainWindow.GetSettingsManager());
+      treemap->UpdateVBO(*node, Asset::Event::RESTORE);
    }
 }
 
@@ -458,6 +446,7 @@ void GLCanvas::ShowGamepadContextMenu()
    const auto highlightCallback = [&] (auto& nodes) { HighlightNodes(nodes); };
    const auto selectionCallback = [&] (auto& node) { SelectNode(node); };
 
+   // @note Qt will manage the lifetime of this object:
    m_gamepadContextMenu = new GamepadContextMenu{ m_mainWindow.GetGamepad(), this };
 
    if (thereExistHighlightedNodes)
@@ -779,7 +768,7 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
    m_frameTimeDeque.emplace_back(static_cast<int>(elapsedTime.count()));
 
    const auto total = std::accumulate(std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0,
-      [] (const int runningTotal, const int frameTime) noexcept
+      [] (const auto runningTotal, const auto frameTime) noexcept
    {
       return runningTotal + frameTime;
    });
@@ -813,7 +802,7 @@ void GLCanvas::paintGL()
 
       for (const auto& tagAndAsset : m_sceneAssets)
       {
-         tagAndAsset.asset->Render(m_camera, m_lights, m_mainWindow.GetSettingsManager());
+         tagAndAsset.asset->Render(m_camera, m_lights);
       }
    }).GetElapsedTime();
 
@@ -826,4 +815,4 @@ void GLCanvas::paintGL()
 template void GLCanvas::ToggleAssetVisibility<Asset::Tag::Grid>(bool) const noexcept;
 template void GLCanvas::ToggleAssetVisibility<Asset::Tag::LightMarker>(bool) const noexcept;
 template void GLCanvas::ToggleAssetVisibility<Asset::Tag::OriginMarker>(bool) const noexcept;
-template void GLCanvas::ToggleAssetVisibility<Asset::Tag::Frusta>(bool) const noexcept;
+template void GLCanvas::ToggleAssetVisibility<Asset::Tag::Frustum>(bool) const noexcept;

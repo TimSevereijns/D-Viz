@@ -42,10 +42,11 @@ namespace
 namespace Asset
 {
    OriginMarker::OriginMarker(
+      const Settings::Manager& settings,
       QOpenGLExtraFunctions& openGL,
       bool isInitiallyVisible)
       :
-      Line{ openGL, isInitiallyVisible }
+      Line{ settings, openGL, isInitiallyVisible }
    {
       m_rawVertices = CreateMarkerVertices();
       m_rawColors = CreateMarkerColors();
@@ -53,8 +54,7 @@ namespace Asset
 
    void OriginMarker::Render(
       const Camera& camera,
-      const std::vector<Light>&,
-      const Settings::Manager&)
+      const std::vector<Light>&)
    {
       if (!m_shouldRender)
       {

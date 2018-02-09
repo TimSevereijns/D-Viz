@@ -301,17 +301,17 @@ namespace
 namespace Asset
 {
    Frustum::Frustum(
+      const Settings::Manager& settings,
       QOpenGLExtraFunctions& openGL,
       bool isInitiallyVisible)
       :
-      Line{ openGL, isInitiallyVisible }
+      Line{ settings, openGL, isInitiallyVisible }
    {
    }
 
    void Frustum::Render(
       const Camera& camera,
-      const std::vector<Light>& /*lights*/,
-      const Settings::Manager& /*settings*/)
+      const std::vector<Light>& /*lights*/)
    {
       if (!m_shouldRender)
       {

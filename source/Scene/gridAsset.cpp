@@ -88,10 +88,11 @@ namespace
 namespace Asset
 {
    Grid::Grid(
+      const Settings::Manager& settings,
       QOpenGLExtraFunctions& openGL,
       bool isInitiallyVisible)
       :
-      Line{ openGL, isInitiallyVisible }
+      Line{ settings, openGL, isInitiallyVisible }
    {
       m_rawVertices = CreateGridVertices();
       m_rawColors = CreateGridColors();
@@ -99,8 +100,7 @@ namespace Asset
 
    void Grid::Render(
       const Camera& camera,
-      const std::vector<Light>&,
-      const Settings::Manager&)
+      const std::vector<Light>&)
    {
       if (!m_shouldRender)
       {

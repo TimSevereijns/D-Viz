@@ -10,20 +10,20 @@
 namespace Asset
 {
    Base::Base(
+      const Settings::Manager& settings,
       QOpenGLExtraFunctions& openGL,
       bool isInitiallyVisible)
       :
       m_openGL{ openGL },
-      m_shouldRender{ isInitiallyVisible }
+      m_shouldRender{ isInitiallyVisible },
+      m_settingsManager{ settings }
    {
    }
 
-   bool Base::ClearBuffers()
+   void Base::ClearBuffers()
    {
       m_rawVertices.clear();
       m_rawColors.clear();
-
-      return true;
    }
 
    bool Base::LoadShaders(
@@ -109,8 +109,7 @@ namespace Asset
 
    void Base::UpdateVBO(
       const Tree<VizFile>::Node&,
-      Asset::Event,
-      const Settings::Manager&)
+      Asset::Event)
    {
    }
 }

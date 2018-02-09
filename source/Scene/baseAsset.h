@@ -40,6 +40,7 @@ namespace Asset
           * @param[in] isInitiallyVisible    Whether the asset should be visible.
           */
          Base(
+            const Settings::Manager& settings,
             QOpenGLExtraFunctions& openGL,
             bool isInitiallyVisible);
 
@@ -56,10 +57,8 @@ namespace Asset
 
          /**
           * @brief Clears the OpenGL buffer objects that contain the vertex and color data.
-          *
-          * @returns True if the operation succeeded.
           */
-         bool ClearBuffers();
+         void ClearBuffers();
 
          /**
           * @brief Loads the vertex and fragment shaders.
@@ -74,12 +73,10 @@ namespace Asset
           *
           * @param[in] camera          The camera associated with the OpenGL context.
           * @param[in] light           The light source for the scene.
-          * @param[in] settings        Any additional settings relevant to rendering.
           */
          virtual void Render(
             const Camera& camera,
-            const std::vector<Light>& light,
-            const Settings::Manager& settings) = 0;
+            const std::vector<Light>& light) = 0;
 
          /**
           * @brief Determines whether the scene asset has been loaded.
@@ -161,12 +158,10 @@ namespace Asset
           *
           * @param[in] node            The TreeNode whose visualization should be updated.
           * @param[in] action          The type of update to perform on the target VBO segment.
-          * @param[in] settings        Any additional settings relevant to rendering.
           */
          virtual void UpdateVBO(
             const Tree<VizFile>::Node& node,
-            Event action,
-            const Settings::Manager& settings);
+            Event action);
 
       protected:
 
@@ -193,6 +188,8 @@ namespace Asset
          QVector<QVector3D> m_rawColors;
 
          QOpenGLExtraFunctions& m_openGL;
+
+         const Settings::Manager& m_settingsManager;
 
          bool m_shouldRender{ true };
    };

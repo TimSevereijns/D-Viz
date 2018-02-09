@@ -81,12 +81,12 @@ namespace Asset
          static constexpr wchar_t Name[] = L"LightMarker";
       };
 
-      struct Frusta final : Base
+      struct Frustum final : Base
       {
          using AssetType = Asset::Frustum;
          int GetID() const noexcept override { return 6; }
 
-         static constexpr wchar_t Name[] = L"Frusta";
+         static constexpr wchar_t Name[] = L"Frustum";
       };
    }
 }
@@ -279,11 +279,6 @@ class GLCanvas final : public QOpenGLWidget
        *                            ray will be projected into the scene.
        */
       void SelectNodeViaRay(const QPoint& rayOrigin);
-
-      /**
-       * @brief Draws the various read-out on the viewport.
-       */
-      void RenderText();
 
       /**
        * @brief Helper function that turns scene asset retrieval into a simple one-liner.

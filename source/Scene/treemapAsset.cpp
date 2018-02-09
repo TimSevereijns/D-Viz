@@ -275,10 +275,11 @@ namespace
 namespace Asset
 {
    Treemap::Treemap(
+      const Settings::Manager& settings,
       QOpenGLExtraFunctions& openGL,
       bool isInitiallyVisible)
       :
-      Base{ openGL, isInitiallyVisible }
+      Base{ settings, openGL, isInitiallyVisible }
    {
       m_shadowMaps.reserve(CASCADE_COUNT);
 
@@ -526,16 +527,14 @@ namespace Asset
       m_VAO.release();
    }
 
-   std::uint32_t Treemap::LoadBufferData(
-      const Tree<VizFile>& tree,
-      const Settings::Manager& settings)
+   std::uint32_t Treemap::LoadBufferData(const Tree<VizFile>& tree)
    {
       m_blockTransformations.clear();
       m_blockColors.clear();
 
       m_blockCount = 0;
 
-      const auto& parameters = settings.GetVisualizationParameters();
+      const auto& parameters = m_settingsManager.GetVisualizationParameters();
 
       for (auto& node : tree)
       {
@@ -558,7 +557,7 @@ namespace Asset
          instanceMatrix.scale(block.GetWidth(), block.GetHeight(), block.GetDepth());
          m_blockTransformations << instanceMatrix;
 
-         ComputeAppropriateBlockColor(node, settings);
+         ComputeAppropriateBlockColor(node);
       }
 
       FindLargestDirectory(tree);
@@ -569,13 +568,11 @@ namespace Asset
       return m_blockCount;
    }
 
-   void Treemap::ReloadColorBufferData(
-      const Tree<VizFile>& tree,
-      const Settings::Manager& settings)
+   void Treemap::ReloadColorBufferData(const Tree<VizFile>& tree)
    {
       m_blockColors.clear();
 
-      const auto& parameters = settings.GetVisualizationParameters();
+      const auto& parameters = m_settingsManager.GetVisualizationParameters();
 
       for (const auto& node : tree)
       {
@@ -588,7 +585,7 @@ namespace Asset
             continue;
          }
 
-         ComputeAppropriateBlockColor(node, settings);
+         ComputeAppropriateBlockColor(node);
       }
    }
 
@@ -624,16 +621,14 @@ namespace Asset
       return finalColor;
    }
 
-   void Treemap::ComputeAppropriateBlockColor(
-      const Tree<VizFile>::Node& node,
-      const Settings::Manager& settings)
+   void Treemap::ComputeAppropriateBlockColor(const Tree<VizFile>::Node& node)
    {
       // @todo Need to also take into consideration whether the node is highlighted or selected,
       // since we don't want to get out of sync with the controller's view of the world.
 
-      if (settings.GetActiveColorScheme() != Constants::ColorScheme::DEFAULT)
+      if (m_settingsManager.GetActiveColorScheme() != Constants::ColorScheme::DEFAULT)
       {
-         const auto fileColor = DetermineColorFromExtension(node, settings);
+         const auto fileColor = DetermineColorFromExtension(node, m_settingsManager);
          if (fileColor)
          {
             m_blockColors << *fileColor;
@@ -643,7 +638,7 @@ namespace Asset
 
       if (node->file.type == FileType::DIRECTORY)
       {
-         if (settings.GetVisualizationParameters().useDirectoryGradient)
+         if (m_settingsManager.GetVisualizationParameters().useDirectoryGradient)
          {
             m_blockColors << ComputeGradientColor(node);
          }
@@ -734,24 +729,23 @@ namespace Asset
 
    void Treemap::RenderMainPass(
       const Camera& camera,
-      const std::vector<Light>& lights,
-      const Settings::Manager& settings)
+      const std::vector<Light>& lights)
    {
       m_openGL.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       m_mainShader.bind();
 
-      const auto shouldShowShadows = settings.ShouldShowShadows();
+      const auto shouldShowShadows = m_settingsManager.ShouldShowShadows();
 
       m_mainShader.setUniformValue("cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());
       m_mainShader.setUniformValue("cameraPosition", camera.GetPosition());
 
       // @todo The following variables don't need to be set with every pass...
-      m_mainShader.setUniformValue("materialShininess", settings.GetMaterialShininess());
-      m_mainShader.setUniformValue("shouldShowCascadeSplits", settings.ShouldShowCascadeSplits());
+      m_mainShader.setUniformValue("materialShininess", m_settingsManager.GetMaterialShininess());
+      m_mainShader.setUniformValue("shouldShowCascadeSplits", m_settingsManager.ShouldShowCascadeSplits());
       m_mainShader.setUniformValue("shouldShowShadows", shouldShowShadows);
 
-      SetUniformLights(lights, settings, m_mainShader);
+      SetUniformLights(lights, m_settingsManager, m_mainShader);
 
       if (shouldShowShadows)
       {
@@ -783,20 +777,19 @@ namespace Asset
 
    void Treemap::Render(
       const Camera& camera,
-      const std::vector<Light>& lights,
-      const Settings::Manager& settings)
+      const std::vector<Light>& lights)
    {
       if (!IsAssetLoaded())
       {
          return;
       }
 
-      if (settings.ShouldShowShadows())
+      if (m_settingsManager.ShouldShowShadows())
       {
          RenderShadowPass(camera);
       }
 
-      RenderMainPass(camera, lights, settings);
+      RenderMainPass(camera, lights);
 
       //RenderDepthMapPreview(1); //< @note Enable this to render the shadow map to the screen.
    }
@@ -810,8 +803,7 @@ namespace Asset
 
    void Treemap::UpdateVBO(
       const Tree<VizFile>::Node& node,
-      Asset::Event action,
-      const Settings::Manager& settings)
+      Asset::Event action)
    {
       assert(m_VAO.isCreated());
       assert(m_blockColorBuffer.isCreated());
@@ -836,7 +828,7 @@ namespace Asset
          }
          default:
          {
-            newColor = RestoreColor(node, settings);
+            newColor = RestoreColor(node, m_settingsManager);
          }
       }
 

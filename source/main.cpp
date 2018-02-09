@@ -36,6 +36,6 @@ int main(int argc, char* argv[])
 
    const auto exitCode = application.exec();
 
-   spdlog::get("D-Viz")->info("Exiting...");
+   spdlog::get(Constants::Logging::DEFAULT_LOG)->info("Exiting...");
    return exitCode;
 }
