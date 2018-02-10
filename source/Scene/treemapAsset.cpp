@@ -731,8 +731,6 @@ namespace Asset
       const Camera& camera,
       const std::vector<Light>& lights)
    {
-      m_openGL.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
       m_mainShader.bind();
 
       const auto shouldShowShadows = m_settingsManager.ShouldShowShadows();
