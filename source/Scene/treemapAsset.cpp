@@ -89,15 +89,17 @@ namespace
     *                               the aspect ratio of the outline correct.
     * @param[in] shadowViewMatrix   The projection-view matrix that represents the view of the
     *                               shadow casting light source.
+    * @param[in] cascadeCount       The number of cascades.
     */
    auto ComputeFrustumSplitBoundingBoxes(
       const Camera& renderCamera,
-      const QMatrix4x4& shadowViewMatrix)
+      const QMatrix4x4& shadowViewMatrix,
+      int cascadeCount)
    {
       static const auto cascadeDistances = ComputeCascadeDistances();
 
       std::vector<std::vector<QVector3D>> frusta;
-      frusta.reserve(Asset::Treemap::CASCADE_COUNT);
+      frusta.reserve(cascadeCount);
 
       auto mutableCamera = renderCamera;
       for (const auto& nearAndFarPlanes : cascadeDistances)
@@ -109,7 +111,7 @@ namespace
       }
 
       std::vector<BoundingBox> boundingBoxes;
-      boundingBoxes.reserve(Asset::Treemap::CASCADE_COUNT);
+      boundingBoxes.reserve(cascadeCount);
 
       const auto worldToLight = shadowViewMatrix;
 
@@ -276,19 +278,24 @@ namespace Asset
 {
    Treemap::Treemap(
       const Settings::Manager& settings,
-      QOpenGLExtraFunctions& openGL,
-      bool isInitiallyVisible)
+      QOpenGLExtraFunctions& openGL)
       :
-      Base{ settings, openGL, isInitiallyVisible }
+      Base{ settings, openGL }
    {
-      m_shadowMaps.reserve(CASCADE_COUNT);
+      m_shouldRender = DetermineVisibilityFromPreferences(AssetName);
 
-      for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
+      const auto& preferences = m_settingsManager.GetPreferenceMap();
+      m_cascadeCount = preferences.GetValueOrDefault(L"shadowMapCascadeCount", 4);
+      m_shadowMapQuality = preferences.GetValueOrDefault(L"shadowMapQuality", 4) * 1024u;
+
+      m_shadowMaps.reserve(m_cascadeCount);
+
+      for (auto index{ 0u }; index < m_cascadeCount; ++index)
       {
          auto frameBuffer = std::make_unique<QOpenGLFramebufferObject>
          (
-            SHADOW_MAP_WIDTH,
-            SHADOW_MAP_HEIGHT,
+            m_shadowMapQuality,
+            m_shadowMapQuality,
             QOpenGLFramebufferObject::Attachment::Depth,
             GL_TEXTURE_2D,
             GL_RGB32F
@@ -666,12 +673,13 @@ namespace Asset
    void Treemap::ComputeShadowMapProjectionViewMatrices(const Camera& camera)
    {
       const auto view = ComputeLightViewMatrix();
-      const auto cascadeBoundingBoxes = ComputeFrustumSplitBoundingBoxes(camera, view);
+      const auto cascadeBoundingBoxes
+         = ComputeFrustumSplitBoundingBoxes(camera, view, m_cascadeCount);
 
       constexpr auto nearPlane{ 1 };
       constexpr auto farPlane{ 1500 };
 
-      for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
+      for (auto index{ 0u }; index < m_cascadeCount; ++index)
       {
          const auto& boundingBox = cascadeBoundingBoxes[index];
          QMatrix4x4 projection;
@@ -693,12 +701,12 @@ namespace Asset
    {
       ComputeShadowMapProjectionViewMatrices(camera);
 
-      m_openGL.glViewport(0, 0, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT);
+      m_openGL.glViewport(0, 0, m_shadowMapQuality, m_shadowMapQuality);
 
       m_shadowMapShader.bind();
       m_VAO.bind();
 
-      for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
+      for (auto index{ 0u }; index < m_cascadeCount; ++index)
       {
          m_shadowMaps[index].framebuffer->bind();
 
@@ -734,22 +742,23 @@ namespace Asset
       m_mainShader.bind();
 
       const auto shouldShowShadows = m_settingsManager.ShouldShowShadows();
+      const auto shouldShowCascadeSplits = m_settingsManager.ShouldShowCascadeSplits();
 
       m_mainShader.setUniformValue("cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());
       m_mainShader.setUniformValue("cameraPosition", camera.GetPosition());
 
       // @todo The following variables don't need to be set with every pass...
       m_mainShader.setUniformValue("materialShininess", m_settingsManager.GetMaterialShininess());
-      m_mainShader.setUniformValue("shouldShowCascadeSplits", m_settingsManager.ShouldShowCascadeSplits());
+      m_mainShader.setUniformValue("shouldShowCascadeSplits", shouldShowCascadeSplits);
       m_mainShader.setUniformValue("shouldShowShadows", shouldShowShadows);
 
       SetUniformLights(lights, m_settingsManager, m_mainShader);
 
       if (shouldShowShadows)
       {
-         assert(m_shadowMaps.size() == CASCADE_COUNT);
+         assert(m_shadowMaps.size() == m_cascadeCount);
 
-         for (auto index{ 0u }; index < CASCADE_COUNT; ++index)
+         for (auto index{ 0u }; index < m_cascadeCount; ++index)
          {
             const auto matrix = "lightProjectionViewMatrices[" + std::to_string(index) + "]";
             m_mainShader.setUniformValue(matrix.data(), m_shadowMaps[index].projectionViewMatrix);

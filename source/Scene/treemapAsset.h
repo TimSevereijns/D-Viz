@@ -25,17 +25,12 @@ namespace Asset
    {
       public:
 
-         constexpr static auto CASCADE_COUNT{ 4 };
-         constexpr static auto SHADOW_MAP_WIDTH{ 1024 * 4 };
-         constexpr static auto SHADOW_MAP_HEIGHT{ 1024 * 4 };
-
          /**
           * @see Asset::Base::Base(...)
           */
          Treemap(
             const Settings::Manager& settings,
-            QOpenGLExtraFunctions& openGL,
-            bool isInitiallyVisible);
+            QOpenGLExtraFunctions& openGL);
 
          /**
           * @see Asset::Base::LoadShaders(...)
@@ -127,6 +122,10 @@ namespace Asset
          bool LoadTexturePreviewShaders();
          bool InitializeTexturePreviewer();
 
+         std::uint32_t m_cascadeCount{ 4 };
+
+         std::uint32_t m_shadowMapQuality{ 4 * 1024 };
+
          ColorGradient m_directoryColorGradient;
 
          std::uint32_t m_blockCount{ 0 };
@@ -156,6 +155,8 @@ namespace Asset
          };
 
          std::vector<ShadowMapMetadata> m_shadowMaps;
+
+         static constexpr wchar_t AssetName[] = L"Treemap";
    };
 }
 

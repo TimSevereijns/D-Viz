@@ -17,14 +17,17 @@ namespace Asset
           */
          LightMarker(
             const Settings::Manager& settings,
-            QOpenGLExtraFunctions& openGL,
-            bool isInitiallyVisible);
+            QOpenGLExtraFunctions& openGL);
          /**
           * @see Asset::Base::Render(...)
           */
          void Render(
             const Camera& camera,
             const std::vector<Light>& lights) override;
+
+      private:
+
+         static constexpr wchar_t AssetName[] = L"LightMarker";
    };
 }
 

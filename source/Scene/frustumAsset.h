@@ -14,14 +14,17 @@ namespace Asset
 
          explicit Frustum(
             const Settings::Manager& settings,
-            QOpenGLExtraFunctions& openGL,
-            bool isInitiallyVisible);
+            QOpenGLExtraFunctions& openGL);
 
          void Render(
             const Camera& camera,
             const std::vector<Light>& lights) override;
 
          void GenerateFrusta(const Camera& camera);
+
+      private:
+
+         static constexpr wchar_t AssetName[] = L"Frustum";
    };
 }
 

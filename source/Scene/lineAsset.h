@@ -18,8 +18,7 @@ namespace Asset
           */
          Line(
             const Settings::Manager& settings,
-            QOpenGLExtraFunctions& openGL,
-            bool isInitiallyVisible);
+            QOpenGLExtraFunctions& openGL);
 
          /**
           * @see Asset::Base::LoadShaders(...)

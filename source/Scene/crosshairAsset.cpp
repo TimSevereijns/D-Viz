@@ -48,11 +48,11 @@ namespace Asset
 {
    Crosshair::Crosshair(
       const Settings::Manager& settings,
-      QOpenGLExtraFunctions& openGL,
-      bool isInitiallyVisible)
+      QOpenGLExtraFunctions& openGL)
       :
-      Line{ settings, openGL, isInitiallyVisible }
+      Line{ settings, openGL }
    {
+      m_shouldRender = DetermineVisibilityFromPreferences(AssetName);
       m_rawColors = CreateCrosshairColors();
    }
 

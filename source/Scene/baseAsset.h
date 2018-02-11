@@ -36,13 +36,12 @@ namespace Asset
          /**
           * @brief Constructs a new instance of the Asset::Base class.
           *
+          * @param[in] settings              Reference to the settings manager.
           * @param[in] openGL                The OpenGL function bindings.
-          * @param[in] isInitiallyVisible    Whether the asset should be visible.
           */
          Base(
             const Settings::Manager& settings,
-            QOpenGLExtraFunctions& openGL,
-            bool isInitiallyVisible);
+            QOpenGLExtraFunctions& openGL);
 
          virtual ~Base() = default;
 
@@ -176,6 +175,8 @@ namespace Asset
          bool LoadShaders(
             const QString& vertexShaderName,
             const QString& fragmentShaderName);
+
+         bool DetermineVisibilityFromPreferences(std::wstring_view assetName);
 
          QOpenGLBuffer m_vertexBuffer;
          QOpenGLBuffer m_colorBuffer;

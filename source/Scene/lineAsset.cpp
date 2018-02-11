@@ -2,12 +2,10 @@
 
 namespace Asset
 {
-   Line::Line(
-      const Settings::Manager& settings,
-      QOpenGLExtraFunctions& openGL,
-      bool isInitiallyVisible)
+   Line::Line(const Settings::Manager& settings,
+      QOpenGLExtraFunctions& openGL)
       :
-      Base{ settings, openGL, isInitiallyVisible }
+      Base{ settings, openGL }
    {
    }
 

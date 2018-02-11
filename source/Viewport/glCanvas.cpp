@@ -84,12 +84,12 @@ void GLCanvas::RunMainLoop()
 
 void GLCanvas::initializeGL()
 {
-   m_graphicsDevice.initializeOpenGLFunctions();
+   m_openGLContext.initializeOpenGLFunctions();
 
-   m_graphicsDevice.glEnable(GL_DEPTH_TEST);
-   m_graphicsDevice.glEnable(GL_CULL_FACE);
-   m_graphicsDevice.glEnable(GL_MULTISAMPLE);
-   m_graphicsDevice.glEnable(GL_LINE_SMOOTH);
+   m_openGLContext.glEnable(GL_DEPTH_TEST);
+   m_openGLContext.glEnable(GL_CULL_FACE);
+   m_openGLContext.glEnable(GL_MULTISAMPLE);
+   m_openGLContext.glEnable(GL_LINE_SMOOTH);
 
    RegisterAsset<Asset::Tag::Grid>();
    RegisterAsset<Asset::Tag::OriginMarker>();
@@ -111,16 +111,11 @@ void GLCanvas::initializeGL()
 template<typename AssetTag>
 void GLCanvas::RegisterAsset()
 {
-   // @todo Remove this in favor of passing in the settings manager:
-   const auto preferenceName = std::wstring{ L"show" } + AssetTag::Name;
-   const auto& preferences = m_mainWindow.GetSettingsManager().GetPreferenceMap();
-   const auto isInitiallyVisible = preferences.GetValueOrDefault(preferenceName, true);
-
    m_sceneAssets.emplace_back(TagAndAsset
    {
       std::make_unique<AssetTag>(),
       std::make_unique<typename AssetTag::AssetType>(
-         m_mainWindow.GetSettingsManager(), m_graphicsDevice, isInitiallyVisible)
+         m_mainWindow.GetSettingsManager(), m_openGLContext)
    });
 }
 
@@ -164,7 +159,7 @@ void GLCanvas::resizeGL(int width, int height)
       height = 1;
    }
 
-   m_graphicsDevice.glViewport(0, 0, width, height);
+   m_openGLContext.glViewport(0, 0, width, height);
    m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
 
    auto* const frusta = GetAsset<Asset::Tag::Frustum>();
@@ -792,7 +787,7 @@ void GLCanvas::paintGL()
    const auto elapsedTime = Stopwatch<std::chrono::microseconds>(
       [&] () noexcept
    {
-      m_graphicsDevice.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      m_openGLContext.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       if (m_mainWindow.GetSettingsManager().IsPrimaryLightAttachedToCamera())
       {

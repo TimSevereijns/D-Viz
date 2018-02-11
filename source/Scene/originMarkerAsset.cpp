@@ -43,11 +43,12 @@ namespace Asset
 {
    OriginMarker::OriginMarker(
       const Settings::Manager& settings,
-      QOpenGLExtraFunctions& openGL,
-      bool isInitiallyVisible)
+      QOpenGLExtraFunctions& openGL)
       :
-      Line{ settings, openGL, isInitiallyVisible }
+      Line{ settings, openGL }
    {
+      m_shouldRender = DetermineVisibilityFromPreferences(AssetName);
+
       m_rawVertices = CreateMarkerVertices();
       m_rawColors = CreateMarkerColors();
    }

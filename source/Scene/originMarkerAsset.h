@@ -18,8 +18,7 @@ namespace Asset
           */
          OriginMarker(
             const Settings::Manager& settings,
-            QOpenGLExtraFunctions& openGL,
-            bool isInitiallyVisible);
+            QOpenGLExtraFunctions& openGL);
 
          /**
           * @see Asset::Base::Render(...)
@@ -27,6 +26,10 @@ namespace Asset
          void Render(
             const Camera& camera,
             const std::vector<Light>& lights) override;
+
+      private:
+
+         static constexpr wchar_t AssetName[] = L"OriginMarker";
    };
 }
 

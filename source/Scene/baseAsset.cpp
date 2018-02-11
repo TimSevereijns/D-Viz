@@ -9,13 +9,10 @@
 
 namespace Asset
 {
-   Base::Base(
-      const Settings::Manager& settings,
-      QOpenGLExtraFunctions& openGL,
-      bool isInitiallyVisible)
+   Base::Base(const Settings::Manager& settings,
+      QOpenGLExtraFunctions& openGL)
       :
       m_openGL{ openGL },
-      m_shouldRender{ isInitiallyVisible },
       m_settingsManager{ settings }
    {
    }
@@ -58,6 +55,15 @@ namespace Asset
       }
 
       return true;
+   }
+
+   bool Base::DetermineVisibilityFromPreferences(std::wstring_view assetName)
+   {
+      const auto preferenceName = std::wstring{ L"show" } + assetName.data();
+      const auto& preferences = m_settingsManager.GetPreferenceMap();
+      const auto shouldRender = preferences.GetValueOrDefault(preferenceName, true);
+
+      return shouldRender;
    }
 
    bool Base::IsAssetLoaded() const

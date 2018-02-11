@@ -4,11 +4,11 @@ namespace Asset
 {
    DebuggingRay::DebuggingRay(
       const Settings::Manager& settings,
-      QOpenGLExtraFunctions& openGL,
-      bool isInitiallyVisible)
+      QOpenGLExtraFunctions& openGL)
       :
-      Line{ settings, openGL, isInitiallyVisible }
+      Line{ settings, openGL }
    {
+      m_shouldRender = DetermineVisibilityFromPreferences(L"DebuggingRay");
    }
 
    void DebuggingRay::Render(

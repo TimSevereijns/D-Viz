@@ -37,56 +37,42 @@ namespace Asset
       {
          using AssetType = void;
          virtual int GetID() const noexcept { return 0; }
-
-         static constexpr wchar_t Name[] = L"Base";
       };
 
       struct OriginMarker final : Base
       {
          using AssetType = Asset::OriginMarker;
          int GetID() const noexcept override { return 1; }
-
-         static constexpr wchar_t Name[] = L"OriginMarker";
       };
 
       struct Grid final : Base
       {
          using AssetType = Asset::Grid;
          int GetID() const noexcept override { return 2; }
-
-         static constexpr wchar_t Name[] = L"Grid";
       };
 
       struct Crosshair final : Base
       {
           using AssetType = Asset::Crosshair;
           int GetID() const noexcept override { return 3; }
-
-          static constexpr wchar_t Name[] = L"Crosshair";
       };
 
       struct Treemap final : Base
       {
          using AssetType = Asset::Treemap;
          int GetID() const noexcept override { return 4; }
-
-         static constexpr wchar_t Name[] = L"Treemap";
       };
 
       struct LightMarker final : Base
       {
          using AssetType = Asset::LightMarker;
          int GetID() const noexcept override { return 5; }
-
-         static constexpr wchar_t Name[] = L"LightMarker";
       };
 
       struct Frustum final : Base
       {
          using AssetType = Asset::Frustum;
          int GetID() const noexcept override { return 6; }
-
-         static constexpr wchar_t Name[] = L"Frustum";
       };
    }
 }
@@ -313,7 +299,7 @@ class GLCanvas final : public QOpenGLWidget
 
       MainWindow& m_mainWindow;
 
-      QOpenGLExtraFunctions m_graphicsDevice;
+      QOpenGLExtraFunctions m_openGLContext;
 
       QTimer m_frameRedrawTimer{ nullptr };
 

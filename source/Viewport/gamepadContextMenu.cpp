@@ -27,8 +27,8 @@ namespace
       std::vector<GamepadContextMenu::Entry>& entries)
    {
       const auto entryCount = static_cast<int>(entries.size());
-      const auto slice = 2 * Constants::Math::Pi / entryCount;
-      const auto startingAngle = (entryCount % 2) ? (Constants::Math::Pi / 2) : 0;
+      const auto slice = 2 * Constants::Math::PI / entryCount;
+      const auto startingAngle = (entryCount % 2) ? (Constants::Math::PI / 2) : 0;
 
       const auto x = origin.x();
       const auto y = origin.y();

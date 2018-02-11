@@ -17,8 +17,7 @@ namespace Asset
           */
          Crosshair(
             const Settings::Manager& settings,
-            QOpenGLExtraFunctions& openGL,
-            bool isInitiallyVisible);
+            QOpenGLExtraFunctions& openGL);
 
          /**
           * @see Asset::Base::Render(...)
@@ -35,6 +34,10 @@ namespace Asset
           *                            be overlaid.
           */
          void SetCrosshairLocation(const QPoint& canvasCenter);
+
+      private:
+
+         static constexpr wchar_t AssetName[] = L"Crosshair";
    };
 }
 
