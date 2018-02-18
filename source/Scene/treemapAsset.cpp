@@ -272,6 +272,32 @@ namespace
 
       return view;
    }
+
+   /**
+    * @brief Rounds the input value to the nearest multiple.
+    *
+    * @param value                  The raw input value.
+    * @param multiple               World units per texel unit.
+    *
+    * @returns The rounded value.
+    */
+   auto SnapToNearestTexel(
+      double value,
+      double multiple)
+   {
+      return std::round(value / multiple) * multiple;
+   }
+
+   /**
+    * @returns The length of the diagonal of the provided bounding box.
+    */
+   auto ComputeDiagonal(const BoundingBox& box)
+   {
+      const auto cornerA = QVector3D{ box.left, box.top, box.near };
+      const auto cornerB = QVector3D{ box.right, box.bottom, box.far };
+
+      return static_cast<double>(cornerA.distanceToPoint(cornerB));
+   }
 }
 
 namespace Asset
@@ -298,7 +324,7 @@ namespace Asset
             m_shadowMapQuality,
             QOpenGLFramebufferObject::Attachment::Depth,
             GL_TEXTURE_2D,
-            GL_RGB32F
+            GL_R32F
          );
 
          m_shadowMaps.emplace_back(std::move(frameBuffer));
@@ -676,18 +702,25 @@ namespace Asset
       const auto cascadeBoundingBoxes
          = ComputeFrustumSplitBoundingBoxes(camera, view, m_cascadeCount);
 
-      constexpr auto nearPlane{ 1 };
+      constexpr auto nearPlane{ 100 };
       constexpr auto farPlane{ 1500 };
 
       for (auto index{ 0u }; index < m_cascadeCount; ++index)
       {
          const auto& boundingBox = cascadeBoundingBoxes[index];
+
+         // In order to reduce shadow shimmering, we'll attempt to snap the orthogonal projection
+         // matrix for the shadow cascades to the nearest texel.
+         const auto diagonal = ComputeDiagonal(boundingBox);
+         m_maxBoundingBoxDiagonal = std::max(diagonal, m_maxBoundingBoxDiagonal);
+         const auto worldUnitsPerTexel = m_maxBoundingBoxDiagonal / m_shadowMapQuality;
+
          QMatrix4x4 projection;
          projection.ortho(
-            boundingBox.left,
-            boundingBox.right,
-            boundingBox.bottom,
-            boundingBox.top,
+            SnapToNearestTexel(boundingBox.left, worldUnitsPerTexel),
+            SnapToNearestTexel(boundingBox.right, worldUnitsPerTexel),
+            SnapToNearestTexel(boundingBox.bottom, worldUnitsPerTexel),
+            SnapToNearestTexel(boundingBox.top, worldUnitsPerTexel),
             nearPlane,
             farPlane);
 

@@ -117,7 +117,7 @@ namespace
       const Camera& camera)
    {
       Camera mutableCamera = camera;
-      mutableCamera.SetNearPlane(1.0f);
+      mutableCamera.SetNearPlane(100.0f);
       mutableCamera.SetFarPlane(2000.0f);
 
       constexpr auto cascadeCount{ 3 };
