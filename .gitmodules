@@ -1,9 +1,11 @@
 [submodule "Foreign/Stopwatch"]
    path = Foreign/Stopwatch
-   url = git@github.com:TimSevereijns/Stopwatch.git
+   url = https://github.com/TimSevereijns/Stopwatch.git
+   branch = master
 [submodule "Foreign/Tree"]
    path = Foreign/Tree
-   url = git@github.com:TimSevereijns/Tree.git
+   url = https://github.com/TimSevereijns/Tree.git
+   branch = master
 [submodule "Foreign/Spdlog"]
    path = Foreign/Spdlog
    url = https://github.com/gabime/spdlog.git
