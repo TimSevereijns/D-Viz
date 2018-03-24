@@ -144,7 +144,7 @@ namespace Settings
           * @brief ShouldShowShadows
           * @return
           */
-         bool ShouldShowShadows() const;
+         bool ShouldRenderShadows() const;
 
       public slots:
 
@@ -222,8 +222,8 @@ namespace Settings
          double m_cameraSpeed{ 0.25 };
          double m_mouseSensitivity{ 0.20 };
 
-         float m_ambientLightCoefficient{ 0.1f };
-         float m_lightAttenuationFactor{ 0.005f };
+         float m_ambientLightCoefficient{ 0.2f };
+         float m_lightAttenuationFactor{ 0.002f };
          float m_materialShininess{ 80.0f };
 
          int m_fieldOfView{ 45 };
@@ -232,7 +232,7 @@ namespace Settings
          bool m_shouldSearchDirectories{ false };
          bool m_shouldSearchFiles{ true };
          bool m_shouldShowCascadeSplitOverlay{ false };
-         bool m_shouldShowShadows{ true };
+         bool m_shouldRenderShadows{ true };
 
          // @todo There's no real need to keep these around, I think...
          JsonDocument m_fileColorJsonDocument;

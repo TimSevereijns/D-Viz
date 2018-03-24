@@ -15,6 +15,11 @@ struct VizFile;
 template<typename DataType>
 class TreeNode;
 
+/**
+ * @brief The Bounding Box struct
+ */
+struct BoundingBox;
+
 namespace Asset
 {
    /**
@@ -95,6 +100,8 @@ namespace Asset
 
       private:
 
+         double ComputeWorldUnitsPerTexel(const BoundingBox& boundingBox);
+
          void InitializeShadowMachineryOnMainShader();
          void InitializeShadowMachineryOnShadowShader();
 
@@ -124,7 +131,7 @@ namespace Asset
 
          std::uint32_t m_cascadeCount{ 4 };
 
-         std::uint32_t m_shadowMapQuality{ 4 * 1024 };
+         std::uint32_t m_shadowMapResolution{ 4 * 1024 };
 
          ColorGradient m_directoryColorGradient;
 

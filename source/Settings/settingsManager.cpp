@@ -191,7 +191,7 @@ namespace Settings
 
    void Manager::OnShowShadowsToggled(bool isEnabled)
    {
-      m_shouldShowShadows = isEnabled;
+      m_shouldRenderShadows = isEnabled;
    }
 
    double Manager::GetCameraSpeed() const
@@ -286,8 +286,8 @@ namespace Settings
       return m_shouldShowCascadeSplitOverlay;
    }
 
-   bool Manager::ShouldShowShadows() const
+   bool Manager::ShouldRenderShadows() const
    {
-      return m_shouldShowShadows;
+      return m_shouldRenderShadows;
    }
 }

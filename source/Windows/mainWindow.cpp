@@ -400,7 +400,7 @@ void MainWindow::SetupDebuggingMenu()
    lightingMenuWrapper.showShadows.setText("Show Shadows");
    lightingMenuWrapper.showShadows.setCheckable(true);
    lightingMenuWrapper.showShadows.setChecked(
-      m_settingsManager.ShouldShowShadows());
+      m_settingsManager.ShouldRenderShadows());
 
    connect(&lightingMenuWrapper.showShadows, &QAction::toggled,
       &m_settingsManager, &Settings::Manager::OnShowShadowsToggled);

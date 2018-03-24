@@ -71,6 +71,7 @@ namespace Constants
    {
       constexpr static auto PI = 3.14159265358979323846;
       constexpr static auto RADIANS_TO_DEGREES = 180.0 / PI;
+      constexpr static auto DEGREES_TO_RADIANS = PI / 180.0;
    }
 }
 

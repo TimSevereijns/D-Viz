@@ -48,7 +48,15 @@ namespace Settings
          template<typename RequestedType>
          RequestedType GetValueOrDefault(
             std::wstring_view query,
-            RequestedType&& defaultValue) const;
+            const RequestedType& defaultValue) const;
+
+         /**
+          * @overload
+          */
+         template<typename RequestedType>
+         RequestedType GetValueOrDefault(
+            std::wstring_view query,
+            RequestedType&& defaultValue) &&;
 
       private:
 
@@ -99,7 +107,26 @@ namespace Settings
    template<typename RequestedType>
    RequestedType PreferencesMap::GetValueOrDefault(
       std::wstring_view query,
-      RequestedType&& defaultValue) const
+      const RequestedType& defaultValue) const
+   {
+      static_assert(
+         IsSupportedType<RequestedType>::value,
+         "The preferences map doesn't support the retrieval of the given type.");
+
+      const auto itr = m_map.find(query.data());
+      if (itr == std::end(m_map))
+      {
+         return defaultValue;
+      }
+
+      const auto* encapsulatedValue = std::get_if<RequestedType>(&itr->second);
+      return encapsulatedValue ? *encapsulatedValue : defaultValue;
+   }
+
+   template<typename RequestedType>
+   RequestedType PreferencesMap::GetValueOrDefault(
+      std::wstring_view query,
+      RequestedType&& defaultValue) &&
    {
       static_assert(
          IsSupportedType<RequestedType>::value,

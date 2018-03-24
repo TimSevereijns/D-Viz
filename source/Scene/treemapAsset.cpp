@@ -8,7 +8,7 @@
 #include "../Visualizations/visualization.h"
 
 #include <boost/optional.hpp>
-
+#include <spdlog/spdlog.h>
 #include <Tree/Tree.hpp>
 
 #include <cmath>
@@ -19,6 +19,17 @@
    #undef near
    #undef far
 #endif
+
+// @todo Consider hoisting this out to another file.
+struct BoundingBox
+{
+   float left;
+   float right;
+   float bottom;
+   float top;
+   float near;
+   float far;
+};
 
 namespace
 {
@@ -68,19 +79,6 @@ namespace
 
       return cascadeDistances;
    }
-
-   /**
-    * @brief The BoundingBox struct
-    */
-   struct BoundingBox
-   {
-      float left;
-      float right;
-      float bottom;
-      float top;
-      float near;
-      float far;
-   };
 
    /**
     * @brief Calculates an Axis Aligned Bounding Box (AABB) for each of the frustum splits.
@@ -263,7 +261,7 @@ namespace
     */
    QMatrix4x4 ComputeLightViewMatrix()
    {
-      constexpr auto lightPosition = QVector3D{ 0.f, 200.f, 0.f };
+      constexpr auto lightPosition = QVector3D{ 0.f, 500.f, 0.f };
       constexpr auto lightTarget = QVector3D{ 500.f, 0.f, -500.f };
       constexpr auto upVector = QVector3D{ 0.0f, 1.0f, 0.0f };
 
@@ -312,7 +310,10 @@ namespace Asset
 
       const auto& preferences = m_settingsManager.GetPreferenceMap();
       m_cascadeCount = preferences.GetValueOrDefault(L"shadowMapCascadeCount", 4);
-      m_shadowMapQuality = preferences.GetValueOrDefault(L"shadowMapQuality", 4) * 1024u;
+      m_shadowMapResolution = preferences.GetValueOrDefault(L"shadowMapQuality", 4) * 1024u;
+
+      const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+      log->info("Shadow map width & height is set at {} pixels.", m_shadowMapResolution);
 
       m_shadowMaps.reserve(m_cascadeCount);
 
@@ -320,8 +321,8 @@ namespace Asset
       {
          auto frameBuffer = std::make_unique<QOpenGLFramebufferObject>
          (
-            m_shadowMapQuality,
-            m_shadowMapQuality,
+            m_shadowMapResolution,
+            m_shadowMapResolution,
             QOpenGLFramebufferObject::Attachment::Depth,
             GL_TEXTURE_2D,
             GL_R32F
@@ -696,24 +697,31 @@ namespace Asset
       return !(m_blockTransformations.empty() && m_blockColors.empty());
    }
 
+   double Treemap::ComputeWorldUnitsPerTexel(const BoundingBox& boundingBox)
+   {
+      // In order to reduce shadow shimmering, we'll attempt to snap the orthogonal projection
+      // matrix for the shadow cascades to the nearest texel. This appears to significantly reduce
+      // the shimmering effect, while not fully eliminating it entirely.
+
+      const auto diagonal = ComputeDiagonal(boundingBox);
+      m_maxBoundingBoxDiagonal = std::max(diagonal, m_maxBoundingBoxDiagonal);
+      const auto worldUnitsPerTexel = m_maxBoundingBoxDiagonal / m_shadowMapResolution;
+
+      return worldUnitsPerTexel;
+   }
+
    void Treemap::ComputeShadowMapProjectionViewMatrices(const Camera& camera)
    {
       const auto view = ComputeLightViewMatrix();
-      const auto cascadeBoundingBoxes
-         = ComputeFrustumSplitBoundingBoxes(camera, view, m_cascadeCount);
+      const auto boundingBoxes = ComputeFrustumSplitBoundingBoxes(camera, view, m_cascadeCount);
 
-      constexpr auto nearPlane{ 100 };
+      constexpr auto nearPlane{ 500 };
       constexpr auto farPlane{ 1500 };
 
       for (auto index{ 0u }; index < m_cascadeCount; ++index)
       {
-         const auto& boundingBox = cascadeBoundingBoxes[index];
-
-         // In order to reduce shadow shimmering, we'll attempt to snap the orthogonal projection
-         // matrix for the shadow cascades to the nearest texel.
-         const auto diagonal = ComputeDiagonal(boundingBox);
-         m_maxBoundingBoxDiagonal = std::max(diagonal, m_maxBoundingBoxDiagonal);
-         const auto worldUnitsPerTexel = m_maxBoundingBoxDiagonal / m_shadowMapQuality;
+         const auto& boundingBox = boundingBoxes[index];
+         const auto worldUnitsPerTexel = ComputeWorldUnitsPerTexel(boundingBox);
 
          QMatrix4x4 projection;
          projection.ortho(
@@ -734,7 +742,7 @@ namespace Asset
    {
       ComputeShadowMapProjectionViewMatrices(camera);
 
-      m_openGL.glViewport(0, 0, m_shadowMapQuality, m_shadowMapQuality);
+      m_openGL.glViewport(0, 0, m_shadowMapResolution, m_shadowMapResolution);
 
       m_shadowMapShader.bind();
       m_VAO.bind();
@@ -774,7 +782,7 @@ namespace Asset
    {
       m_mainShader.bind();
 
-      const auto shouldShowShadows = m_settingsManager.ShouldShowShadows();
+      const auto shouldShowShadows = m_settingsManager.ShouldRenderShadows();
       const auto shouldShowCascadeSplits = m_settingsManager.ShouldShowCascadeSplits();
 
       m_mainShader.setUniformValue("cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());
@@ -824,7 +832,7 @@ namespace Asset
          return;
       }
 
-      if (m_settingsManager.ShouldShowShadows())
+      if (m_settingsManager.ShouldRenderShadows())
       {
          RenderShadowPass(camera);
       }
