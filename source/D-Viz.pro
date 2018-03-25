@@ -90,6 +90,7 @@ HEADERS += \
    Utilities/scopeExit.hpp \
    Utilities/threadSafeQueue.hpp \
    Utilities/utilities.hpp \
+   Utilities/viewfrustum.hpp \
    Viewport/camera.h \
    Viewport/gamepadContextMenu.h \
    Viewport/glCanvas.h \

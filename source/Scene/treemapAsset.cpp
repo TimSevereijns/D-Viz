@@ -5,6 +5,7 @@
 #include "../Settings/settings.h"
 #include "../Utilities/colorGradient.hpp"
 #include "../Utilities/scopeExit.hpp"
+#include "../Utilities/viewfrustum.hpp"
 #include "../Visualizations/visualization.h"
 
 #include <boost/optional.hpp>
@@ -37,50 +38,6 @@ namespace
    constexpr auto TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE{ 1 };
 
    /**
-    * @brief Generates all of the frustum vertices for the specified camera.
-    *
-    * @param[in] camera             Main scene camera.
-    */
-   auto ComputeFrustumCorners(const Camera& camera)
-   {
-      std::vector<QVector3D> unitCube
-      {
-         { -1, -1, -1 }, { +1, -1, -1 },
-         { +1, +1, -1 }, { -1, +1, -1 },
-         { -1, -1, +1 }, { +1, -1, +1 },
-         { +1, +1, +1 }, { -1, +1, +1 }
-      };
-
-      const auto worldToView = camera.GetProjectionViewMatrix().inverted();
-      for (auto& corner : unitCube)
-      {
-         corner = worldToView.map(corner);
-      }
-
-      return unitCube;
-   }
-
-   /**
-    * @brief Computes the ideal split locations for each frustum cascade.
-    *
-    * @param[in] cascadeCount       The desired number of shadow mapping cascades.
-    * @param[in] camera             The main scene camera.
-    */
-   auto ComputeCascadeDistances()
-   {
-      // @todo Compute splits using the Practical Split approach (as seen in GPU Gems).
-      const std::vector<std::pair<float, float>> cascadeDistances
-      {
-         std::make_pair(1.0f, 25.0f),
-         std::make_pair(25.0f, 100.0f),
-         std::make_pair(100.0f, 500.0f),
-         std::make_pair(500.0f, 1500.0f)
-      };
-
-      return cascadeDistances;
-   }
-
-   /**
     * @brief Calculates an Axis Aligned Bounding Box (AABB) for each of the frustum splits.
     *
     * @param[in] renderCamera       The main camera used to render the scene. Mainly use is to get
@@ -94,7 +51,7 @@ namespace
       const QMatrix4x4& shadowViewMatrix,
       int cascadeCount)
    {
-      static const auto cascadeDistances = ComputeCascadeDistances();
+      static const auto cascadeDistances = FrustumUtilities::GetCascadeDistances();
 
       std::vector<std::vector<QVector3D>> frusta;
       frusta.reserve(cascadeCount);
@@ -105,7 +62,7 @@ namespace
          mutableCamera.SetNearPlane(nearAndFarPlanes.first);
          mutableCamera.SetFarPlane(nearAndFarPlanes.second);
 
-         frusta.emplace_back(ComputeFrustumCorners(mutableCamera));
+         frusta.emplace_back(FrustumUtilities::ComputeFrustumCorners(mutableCamera));
       }
 
       std::vector<BoundingBox> boundingBoxes;
@@ -518,7 +475,7 @@ namespace Asset
 
       const auto shaderID = m_mainShader.programId();
 
-      const auto cascadeBounds = ComputeCascadeDistances();
+      const auto cascadeBounds = FrustumUtilities::GetCascadeDistances();
       for (auto index{ 0u }; index < cascadeBounds.size(); ++index)
       {
          const auto indexAsString = std::to_string(index);

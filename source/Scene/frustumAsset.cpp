@@ -1,6 +1,7 @@
 #include "frustumAsset.h"
 
 #include "../constants.h"
+#include "../Utilities/viewfrustum.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -10,172 +11,25 @@
 namespace
 {
    /**
-    * @brief ComputeFrustumCorners
+    * @brief ComputeLightTransformationMatrix
     *
-    * @param worldToView
-    */
-   auto ComputeFrustumCorners(const QMatrix4x4& worldToView)
-   {
-      std::vector<QVector3D> unitCube
-      {
-         { -1, -1, -1 }, { +1, -1, -1 },
-         { +1, +1, -1 }, { -1, +1, -1 },
-         { -1, -1, +1 }, { +1, -1, +1 },
-         { +1, +1, +1 }, { -1, +1, +1 }
-      };
-
-      for (auto& corner : unitCube)
-      {
-         corner = worldToView.map(corner);
-      }
-
-      return unitCube;
-   }
-
-   /**
-    * @brief Generates all of the frustum vertices for the specified camera.
+    * @param camera
     *
-    * @param[in] camera             Main scene camera.
+    * @returns
     */
-   auto ComputeFrustumCorners(const Camera& camera)
+   QMatrix4x4 ComputeLightViewMatrix()
    {
-      const auto worldToView = camera.GetProjectionViewMatrix().inverted();
-      return ComputeFrustumCorners(worldToView);
-   }
+      const auto lightPosition = QVector3D{ 0.f, 200.f, 0.f };
+      const auto lightTarget = QVector3D{ 500.f, 0.f, -500.f };
 
-   /**
-    * @brief Generates a frustum outline.
-    *
-    * @param[in] camera             Main scene camera.
-    * @param[in, out] frustumAsset  The main frustum scene asset.
-    */
-   template<typename T>
-   auto GenerateFrustum(const T& view)
-   {
-      const auto frustum = ComputeFrustumCorners(view);
+      QMatrix4x4 projection;
+      projection.ortho(-600, 600, -600, 600, 10, 1500);
 
-      const std::vector<QVector3D> vertices
-      {
-         // Near plane outline:
-         frustum[0], frustum[1],
-         frustum[1], frustum[2],
-         frustum[2], frustum[3],
-         frustum[3], frustum[0],
-         // Far plane outline:
-         frustum[4], frustum[5],
-         frustum[5], frustum[6],
-         frustum[6], frustum[7],
-         frustum[7], frustum[4],
-         // Side plane outline:
-         frustum[0], frustum[4],
-         frustum[1], frustum[5],
-         frustum[2], frustum[6],
-         frustum[3], frustum[7]
-      };
+      QMatrix4x4 model;
+      QMatrix4x4 view;
+      view.lookAt(lightPosition, lightTarget, QVector3D{ 0.0f, 1.0f, 0.0f });
 
-      return vertices;
-   }
-
-   /**
-    * @brief Computes the ideal split locations for each frustum cascade.
-    *
-    * @param[in] cascadeCount       The desired number of shadow mapping cascades.
-    * @param[in] camera             The main scene camera.
-    */
-   auto ComputeCascadeDistances(
-      int cascadeCount,
-      const Camera& camera)
-   {
-      const double nearPlane = camera.GetNearPlane();
-      const double farPlane = camera.GetFarPlane();
-      const double planeRatio = farPlane / nearPlane;
-
-      auto previousCascadeStart{ nearPlane };
-
-      std::vector<std::pair<double, double>> cascadeDistances;
-      for (auto index{ 1.0 }; index < cascadeCount; ++index)
-      {
-         const auto cascade = nearPlane * std::pow(planeRatio, index / cascadeCount);
-         cascadeDistances.emplace_back(std::make_pair(previousCascadeStart, cascade));
-         previousCascadeStart = cascade;
-      }
-
-      cascadeDistances.emplace_back(std::make_pair(previousCascadeStart, farPlane));
-
-      return cascadeDistances;
-   }
-
-   /**
-    * @brief Helper function to draw the frustum belonging to single stationary scene camera.
-    *
-    * @param[in, out] frustumAsset  The main frustum scene asset.
-    * @param[in] camera             The main camera used to render the scene. Mainly use is to get
-    *                               the aspect ratio of the outline correct.
-    */
-   void GenerateCameraFrusta(
-      Asset::Frustum& frustumAsset,
-      const Camera& camera)
-   {
-      Camera mutableCamera = camera;
-      mutableCamera.SetNearPlane(100.0f);
-      mutableCamera.SetFarPlane(2000.0f);
-
-      constexpr auto cascadeCount{ 3 };
-      const auto cascades = ComputeCascadeDistances(cascadeCount, mutableCamera);
-
-      std::vector<std::vector<QVector3D>> frusta;
-      frusta.reserve(cascadeCount);
-
-      for (const auto& nearAndFarPlanes : cascades)
-      {
-         mutableCamera.SetNearPlane(nearAndFarPlanes.first);
-         mutableCamera.SetFarPlane(nearAndFarPlanes.second);
-
-         frusta.emplace_back(GenerateFrustum(mutableCamera));
-      }
-
-      for (auto& frustum : frusta)
-      {
-         auto vertices = QVector<QVector3D>::fromStdVector(frustum);
-
-         QVector<QVector3D> colors;
-         colors.reserve(vertices.size());
-
-         for (auto index{ 0 }; index < vertices.size(); ++index)
-         {
-            colors << Constants::Colors::HOT_PINK;
-         }
-
-         frustumAsset.AddVertexCoordinates(std::move(vertices));
-         frustumAsset.AddVertexColors(std::move(colors));
-      }
-   }
-
-   /**
-    * @brief Helper function to draw a single shadow caster's perspective.
-    *
-    * @param[in, out] frustumAsset  The main frustum scene asset.
-    * @param[in] camera             The main camera used to render the scene. Mainly use is to get
-    *                               the aspect ratio of the outline correct.
-    */
-   void GenerateShadowViewFrustum(
-      Asset::Frustum& frustumAsset,
-      const QMatrix4x4& lightView)
-   {
-      const auto& frustum = GenerateFrustum(lightView);
-      auto vertices = QVector<QVector3D>::fromStdVector(frustum);
-
-      QVector<QVector3D> colors;
-      colors.reserve(vertices.size());
-
-      for (auto index{ 0 }; index < vertices.size(); ++index)
-      {
-
-         colors << Constants::Colors::CORAL;
-      }
-
-      frustumAsset.AddVertexCoordinates(std::move(vertices));
-      frustumAsset.AddVertexColors(std::move(colors));
+      return projection * view * model;
    }
 
    /**
@@ -194,7 +48,7 @@ namespace
       const QMatrix4x4& worldToLight)
    {
       constexpr auto cascadeCount{ 3 };
-      const auto cascades = ComputeCascadeDistances(cascadeCount, renderCamera);
+      const auto cascades = FrustumUtilities::ComputeCascadeDistances(cascadeCount, renderCamera);
 
       std::vector<std::vector<QVector3D>> frusta;
       frusta.reserve(cascadeCount);
@@ -205,7 +59,7 @@ namespace
          mutableCamera.SetNearPlane(nearAndFarPlanes.first);
          mutableCamera.SetFarPlane(nearAndFarPlanes.second);
 
-         frusta.emplace_back(ComputeFrustumCorners(mutableCamera));
+         frusta.emplace_back(FrustumUtilities::ComputeFrustumCorners(mutableCamera));
       }
 
       QVector<QVector3D> vertices;
@@ -276,25 +130,76 @@ namespace
    }
 
    /**
-    * @brief ComputeLightTransformationMatrix
+    * @brief Helper function to draw the frustum belonging to single stationary scene camera.
     *
-    * @param camera
-    *
-    * @returns
+    * @param[in, out] frustumAsset  The main frustum scene asset.
+    * @param[in] camera             The main camera used to render the scene. Mainly use is to get
+    *                               the aspect ratio of the outline correct.
     */
-   QMatrix4x4 ComputeLightViewMatrix()
+   void GenerateCameraFrusta(
+      Asset::Frustum& frustumAsset,
+      const Camera& camera)
    {
-      const auto lightPosition = QVector3D{ 0.f, 200.f, 0.f };
-      const auto lightTarget = QVector3D{ 500.f, 0.f, -500.f };
+      Camera mutableCamera = camera;
+      mutableCamera.SetNearPlane(1.0f);
+      mutableCamera.SetFarPlane(2000.0f);
 
-      QMatrix4x4 projection;
-      projection.ortho(-600, 600, -600, 600, 10, 1500);
+      constexpr auto cascadeCount{ 3 };
+      const auto cascades = FrustumUtilities::ComputeCascadeDistances(cascadeCount, mutableCamera);
 
-      QMatrix4x4 model;
-      QMatrix4x4 view;
-      view.lookAt(lightPosition, lightTarget, QVector3D{ 0.0f, 1.0f, 0.0f });
+      std::vector<std::vector<QVector3D>> frusta;
+      frusta.reserve(cascadeCount);
 
-      return projection * view * model;
+      for (const auto& nearAndFarPlanes : cascades)
+      {
+         mutableCamera.SetNearPlane(nearAndFarPlanes.first);
+         mutableCamera.SetFarPlane(nearAndFarPlanes.second);
+
+         frusta.emplace_back(FrustumUtilities::GenerateFrustumPoints(mutableCamera));
+      }
+
+      for (auto& frustum : frusta)
+      {
+         auto vertices = QVector<QVector3D>::fromStdVector(frustum);
+
+         QVector<QVector3D> colors;
+         colors.reserve(vertices.size());
+
+         for (auto index{ 0 }; index < vertices.size(); ++index)
+         {
+            colors << Constants::Colors::HOT_PINK;
+         }
+
+         frustumAsset.AddVertexCoordinates(std::move(vertices));
+         frustumAsset.AddVertexColors(std::move(colors));
+      }
+   }
+
+   /**
+    * @brief Helper function to draw a single shadow caster's perspective.
+    *
+    * @param[in, out] frustumAsset  The main frustum scene asset.
+    * @param[in] camera             The main camera used to render the scene. Mainly use is to get
+    *                               the aspect ratio of the outline correct.
+    */
+   void GenerateShadowViewFrustum(
+      Asset::Frustum& frustumAsset,
+      const QMatrix4x4& lightView)
+   {
+      const auto& frustum = FrustumUtilities::GenerateFrustumPoints(lightView);
+      auto vertices = QVector<QVector3D>::fromStdVector(frustum);
+
+      QVector<QVector3D> colors;
+      colors.reserve(vertices.size());
+
+      for (auto index{ 0 }; index < vertices.size(); ++index)
+      {
+
+         colors << Constants::Colors::CORAL;
+      }
+
+      frustumAsset.AddVertexCoordinates(std::move(vertices));
+      frustumAsset.AddVertexColors(std::move(colors));
    }
 }
 
