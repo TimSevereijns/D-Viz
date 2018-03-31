@@ -43,6 +43,9 @@ namespace Asset
             const Settings::Manager& settings,
             QOpenGLExtraFunctions& openGL);
 
+         Base(Base&& other) = default;
+         Base& operator=(const Base& other) = default;
+
          virtual ~Base() = default;
 
          /**

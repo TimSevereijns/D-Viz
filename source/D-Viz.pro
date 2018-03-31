@@ -32,6 +32,7 @@ SOURCES += \
    DataStructs/vizFile.cpp \
    DriveScanner/driveScanner.cpp \
    DriveScanner/scanningWorker.cpp \
+   DriveScanner/scopedHandle.cpp \
    HID/gamepad.cpp \
    HID/keyboardManager.cpp \
    main.cpp \
@@ -69,6 +70,8 @@ HEADERS += \
    DataStructs/vizFile.cpp \
    DriveScanner/driveScanner.h \
    DriveScanner/scanningWorker.h \
+   DriveScanner/scopedHandle.h \
+   DriveScanner/winHack.hpp \
    HID/gamepad.h \
    HID/keyboardManager.h \
    literals.h \
@@ -88,9 +91,8 @@ HEADERS += \
    Utilities/ignoreUnused.hpp \
    Utilities/operatingSystemSpecific.hpp \
    Utilities/scopeExit.hpp \
-   Utilities/threadSafeQueue.hpp \
    Utilities/utilities.hpp \
-   Utilities/viewfrustum.hpp \
+   Utilities/viewFrustum.hpp \
    Viewport/camera.h \
    Viewport/gamepadContextMenu.h \
    Viewport/glCanvas.h \
@@ -108,11 +110,13 @@ FORMS += \
    Windows/mainWindow.ui
 
 INCLUDEPATH += \
-   ../../boost \
+   ../../boost_1_66_0/ \
    ../Foreign/RapidJson/include \
    ../Foreign/Spdlog/include \
    ../Foreign/Stopwatch/source \
    ../Foreign/Tree/source
+
+DEPENDPATH += ../../boost_1_66_0/stage/lib
 
 DISTFILES += \
    Shaders/visualizationFragmentShader.frag \
@@ -127,11 +131,32 @@ DISTFILES += \
 RESOURCES += \
    resources.qrc
 
-INCLUDEPATH += $$PWD/../../boost/stage
-DEPENDPATH += $$PWD/../../boost/stage
+DEFINES += \
+   BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE
 
-win32:LIBS += -lXInput9_1_0 -lShell32 -lOle32
-unix:LIBS += -lstdc++fs
+win32:CONFIG(release, debug|release) {
+   DEFINES += _WIN32_WINNT=0x0501
+   LIBS += \
+      -lXInput9_1_0 \
+      -lShell32 \
+      -lOle32 \
+      -L$$PWD/../../boost_1_66_0/stage/lib \
+      -llibboost_system-vc141-mt-x64-1_66
+}
+
+win32:CONFIG(debug, debug|release) {
+   DEFINES += _WIN32_WINNT=0x0501
+   LIBS += \
+      -lXInput9_1_0 \
+      -lShell32 \
+      -lOle32 \
+      -L$$PWD/../../boost_1_66_0/stage/lib \
+      -llibboost_system-vc141-mt-gd-x64-1_66
+}
+
+unix {
+   LIBS += -lstdc++fs
+}
 
 CONFIG(release, debug|release) {
    library_files.path += $$OUT_PWD/release

@@ -1,26 +1,27 @@
 #include "driveScanner.h"
 
+#ifdef Q_OS_WIN
+   #include <FileApi.h>
+   #include <Windows.h>
+   #include <WinIoCtl.h>
+#endif
+
 #include "scanningWorker.h"
+#include "scopedHandle.h"
+#include "winHack.hpp"
+
+#pragma warning(push)
+#pragma warning(disable: 4996)
+   #include <boost/asio/post.hpp>
+#pragma warning(pop)
 
 #include <spdlog/spdlog.h>
 #include <Stopwatch/Stopwatch.hpp>
 
 #include "../constants.h"
 #include "../Utilities/ignoreUnused.hpp"
-#include "../Utilities/threadSafeQueue.hpp"
 
-#include <algorithm>
 #include <iostream>
-#include <memory>
-#include <mutex>
-#include <system_error>
-#include <thread>
-#include <vector>
-
-#ifdef Q_OS_WIN
-#include <windows.h>
-#include <fileapi.h>
-#endif
 
 namespace
 {
@@ -57,45 +58,6 @@ namespace
 #endif
 
       return fileSize;
-   }
-
-   /**
-    * @brief Detects reparse points.
-    *
-    * @note This function exists to work around limitations imposed by the Windows implementation of
-    * std::experimental::filesystem. This issue causes the API to report junctions as regular old
-    * directories instead of as some type of link, or reparse point. This issue makes it impossible
-    * to know if a given path should be explored or skipped.
-    *
-    * @note This function assumes that the path exists, and that it points to a directory!
-    *
-    * @todo Distinguishing junctions from symlinks isn't as simple as just detecting reparse points.
-    * We have to delve deeper!
-    *
-    * @param[in] path               The path to the directory that is to be tested.
-    *
-    * @returns True if the path points to a symbolic link, or some other reparse point.
-    */
-   bool IsReparsePoint(const std::experimental::filesystem::path& path)
-   {
-#ifdef Q_OS_WIN
-     const auto attributes = GetFileAttributesW(path.c_str());
-     const auto isReparsePoint = (attributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
-
-     if (isReparsePoint)
-     {
-        std::lock_guard<std::mutex> lock{ streamMutex };
-        IgnoreUnused(lock);
-
-        std::wcout << "Skipping reparse point: \"" << path.wstring() << "\"\n";
-     }
-
-     return isReparsePoint;
-#endif
-
-#ifdef Q_OS_LINUX
-      return std::experimental::filesystem::is_symlink(path);
-#endif
    }
 
    /**
@@ -183,102 +145,165 @@ namespace
    }
 
    /**
-    * @brief Creates two vectors full of tasks in need of processing.
-    *
-    * @param[in] path               The initial enty path at which to start the scan.
-    *
-    * @returns A pair of vectors containing scannable files. The first element in the
-    * pair contains the directories, and the second element contains the regular files.
-    */
-   std::pair<std::vector<NodeAndPath>, std::vector<NodeAndPath>>
-      CreateTaskItems(const std::experimental::filesystem::path& path)
+   * @brief Contructs the root node for the file tree.
+   *
+   * @param[in] path                The path to the directory that should constitute the root node.
+   */
+   std::shared_ptr<Tree<VizFile>> CreateTreeAndRootNode(
+      const std::experimental::filesystem::path& path)
    {
-      std::error_code errorCode;
-      auto itr = std::experimental::filesystem::directory_iterator{ path, errorCode };
-      if (errorCode)
+      if (!std::experimental::filesystem::is_directory(path))
       {
-         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
-         log->error("Could not create directory iterator!");
-         log->flush();
-
-         return { };
+         return nullptr;
       }
 
-      std::vector<NodeAndPath> directoriesToProcess;
-      std::vector<NodeAndPath> filesToProcess;
-
-      const auto end = std::experimental::filesystem::directory_iterator{ };
-      while (itr != end)
+      FileInfo fileInfo
       {
-         const auto path = itr->path();
+         path.wstring(),
+         /* extension = */ L"",
+         ScanningWorker::SIZE_UNDEFINED,
+         FileType::DIRECTORY
+      };
 
-         if (IsReparsePoint(path))
-         {
-            ++itr;
-            continue;
-         }
-
-         const auto fileType = std::experimental::filesystem::is_directory(path)
-            ? FileType::DIRECTORY
-            : FileType::REGULAR;
-
-         constexpr std::uintmax_t fileSizeToBeComputedLater{ 0 };
-
-         const VizFile node
-         {
-            FileInfo
-            {
-               path.filename().wstring(),
-               path.extension().wstring(),
-               fileSizeToBeComputedLater,
-               fileType
-            }
-         };
-
-         NodeAndPath nodeAndPath
-         {
-            std::make_unique<Tree<VizFile>::Node>(std::move(node)),
-            std::move(path)
-         };
-
-         if (fileType == FileType::DIRECTORY)
-         {
-            directoriesToProcess.emplace_back(std::move(nodeAndPath));
-         }
-         else if (fileType == FileType::REGULAR)
-         {
-            filesToProcess.emplace_back(std::move(nodeAndPath));
-         }
-
-         ++itr;
-      }
-
-      return std::make_pair(std::move(directoriesToProcess), std::move(filesToProcess));
+      return std::make_shared<Tree<VizFile>>(VizFile{ std::move(fileInfo) });
    }
 
    /**
-    * @brief Puts all the scanning result pieces back together again...
-    *
-    * @param[in] queue              A queue containing the results of the scanning tasks.
-    * @param[out] fileTree          The tree into which the scan results should be inserted.
-    */
-   void BuildFinalTree(
-      ThreadSafeQueue<NodeAndPath>& queue,
-      Tree<VizFile>& fileTree)
+   * @returns A handle representing the repartse point found at the given path. If
+   * the path is not a reparse point, then an invalid handle will be returned instead.
+   */
+   auto OpenReparsePoint(const std::experimental::filesystem::path& path)
    {
-      while (!queue.IsEmpty())
-      {
-         NodeAndPath nodeAndPath{ };
-         const auto successfullyPopped = queue.TryPop(nodeAndPath);
-         if (!successfullyPopped)
-         {
-            assert(false);
-            break;
-         }
+      const auto handle = CreateFile(
+         /* fileName = */ path.wstring().c_str(),
+         /* desiredAccess = */ GENERIC_READ,
+         /* shareMode = */ 0,
+         /* securityAttributes = */ 0,
+         /* creationDisposition = */ OPEN_EXISTING,
+         /* flagsAndAttributes = */ FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
+         /* templateFile = */ 0);
 
-         fileTree.GetRoot()->AppendChild(*nodeAndPath.node);
-         nodeAndPath.node.release();
+      return ScopedHandle{ handle };
+   }
+
+   /**
+   * @brief Reads the reparse point found at the given path into the output buffer.
+   *
+   * @returns True if the path could be read as a reparse point, and false otherwise.
+   */
+   auto ReadReparsePoint(
+      const std::wstring& path,
+      std::vector<std::byte>& reparseBuffer)
+   {
+      const auto handle = OpenReparsePoint(path);
+      if (!handle.IsValid())
+      {
+         return false;
       }
+
+      DWORD bytesReturned{ 0 };
+
+      const auto successfullyRetrieved = DeviceIoControl(
+         /* device = */ handle,
+         /* controlCode = */ FSCTL_GET_REPARSE_POINT,
+         /* inBuffer = */ NULL,
+         /* inBufferSize = */ 0,
+         /* outBuffer = */ reinterpret_cast<LPVOID>(reparseBuffer.data()),
+         /* outBufferSize = */ static_cast<DWORD>(reparseBuffer.size()),
+         /* bytesReturned = */ &bytesReturned,
+         /* overlapped = */ 0) == TRUE;
+
+      return successfullyRetrieved && bytesReturned;
+   }
+
+   /**
+   * @returns True if the given file path matches the given reparse tag, and false otherwise.
+   */
+   auto IsReparseTag(
+      const std::experimental::filesystem::path& path,
+      DWORD targetTag)
+   {
+      static std::vector<std::byte> buffer{ MAXIMUM_REPARSE_DATA_BUFFER_SIZE };
+
+      const auto successfullyRead = ReadReparsePoint(path, buffer);
+
+      return successfullyRead
+         ? reinterpret_cast<REPARSE_DATA_BUFFER*>(buffer.data())->ReparseTag == targetTag
+         : false;
+   }
+
+   /**
+   * @returns True if the given file path represents a mount point, and false otherwise.
+   *
+   * @note Junctions in Windows are considered mount points.
+   */
+   auto IsMountPoint(const std::experimental::filesystem::path& path)
+   {
+      const auto isMountPoint = IsReparseTag(path, IO_REPARSE_TAG_MOUNT_POINT);
+
+      if (isMountPoint)
+      {
+         const std::lock_guard<decltype(streamMutex)> lock{ streamMutex };
+         IgnoreUnused(lock);
+
+         std::wcout << L"Found Mount Point: " << path.wstring() << std::endl;
+      }
+
+      return isMountPoint;
+   }
+
+   /**
+   * @returns True if the given file path represents a symlink, and false otherwise.
+   */
+   auto IsSymlink(const std::experimental::filesystem::path& path)
+   {
+      const auto isSymlink = IsReparseTag(path, IO_REPARSE_TAG_SYMLINK);
+
+      if (isSymlink)
+      {
+         const std::lock_guard<decltype(streamMutex)> lock{ streamMutex };
+         IgnoreUnused(lock);
+
+         std::wcout << L"Found Symlink: " << path.wstring() << std::endl;
+      }
+
+      return isSymlink;
+   }
+
+   /**
+   * @returns True if the given path represents a reparse point, and false otherwise.
+   */
+   bool IsReparsePoint(const std::experimental::filesystem::path& path)
+   {
+      const ScopedHandle handle = OpenReparsePoint(path);
+      if (!handle.IsValid())
+      {
+         return false;
+      }
+
+      BY_HANDLE_FILE_INFORMATION fileInfo = { 0 };
+
+      const auto successfullyRetrieved = GetFileInformationByHandle(handle, &fileInfo);
+      if (!successfullyRetrieved)
+      {
+         return false;
+      }
+
+      return fileInfo.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT;
+   }
+
+   /**
+    * @returns True if the directory should be processed.
+    */
+   auto ShouldProcess(const std::experimental::filesystem::path& path)
+   {
+#ifdef Q_OS_WIN
+      return !IsReparsePoint(path); //!IsSymlink(path) && !IsMountPoint(path);
+#endif
+
+#ifdef Q_OS_LINUX
+      return std::experimental::filesystem::is_symlink(path);
+#endif
    }
 }
 
@@ -288,58 +313,23 @@ ScanningWorker::ScanningWorker(
    :
    QObject{ },
    m_parameters{ parameters },
-   m_progress{ progress }
+   m_progress{ progress },
+   m_fileTree{ CreateTreeAndRootNode(parameters.path) }
 {
-}
-
-std::shared_ptr<Tree<VizFile> > ScanningWorker::CreateTreeAndRootNode()
-{
-   assert(std::experimental::filesystem::is_directory(m_parameters.path));
-   if (!std::experimental::filesystem::is_directory(m_parameters.path))
-   {
-      emit ShowMessageBox("Please select a directory.");
-      return nullptr;
-   }
-
-   const Block rootBlock
-   {
-      PrecisePoint{ },
-      VisualizationModel::ROOT_BLOCK_WIDTH,
-      VisualizationModel::BLOCK_HEIGHT,
-      VisualizationModel::ROOT_BLOCK_DEPTH
-   };
-
-   std::experimental::filesystem::path path{ m_parameters.path };
-
-   const FileInfo fileInfo
-   {
-      path.wstring(),
-      /* extension = */ L"",
-      ScanningWorker::SIZE_UNDEFINED,
-      FileType::DIRECTORY
-   };
-
-   VizFile rootNode
-   {
-      fileInfo,
-      rootBlock
-   };
-
-   return std::make_shared<Tree<VizFile>>(std::move(rootNode));
 }
 
 void ScanningWorker::ProcessFile(
    const std::experimental::filesystem::path& path,
    Tree<VizFile>::Node& treeNode) noexcept
 {
-   std::uintmax_t fileSize = ComputeFileSize(path);
-
-   if (fileSize == 0)
+   const auto fileSize = ComputeFileSize(path);
+   if (fileSize == 0u)
    {
       return;
    }
 
    m_progress.bytesProcessed.fetch_add(fileSize);
+   m_progress.filesScanned.fetch_add(1);
 
    const FileInfo fileInfo
    {
@@ -349,14 +339,13 @@ void ScanningWorker::ProcessFile(
       FileType::REGULAR
    };
 
-   treeNode.AppendChild(VizFile{ fileInfo });
-
-   m_progress.filesScanned.fetch_add(1);
+   std::unique_lock<decltype(m_mutex)> lock{ m_mutex };
+   treeNode.AppendChild(VizFile{ std::move(fileInfo) });
 }
 
 void ScanningWorker::ProcessDirectory(
    const std::experimental::filesystem::path& path,
-   Tree<VizFile>::Node& treeNode)
+   Tree<VizFile>::Node& node)
 {
    bool isRegularFile = false;
    try
@@ -372,22 +361,16 @@ void ScanningWorker::ProcessDirectory(
 
    if (isRegularFile)
    {
-      ProcessFile(path, treeNode);
+      ProcessFile(path, node);
    }
-   else if (std::experimental::filesystem::is_directory(path) && !IsReparsePoint(path))
+   else if (std::experimental::filesystem::is_directory(path) && ShouldProcess(path))
    {
       try
       {
          // In some edge-cases, the Windows operating system doesn't allow anyone to access certain
          // directories, and attempts to do so will result in exceptional behaviour---pun intended.
          // In order to deal with these rare cases, we'll need to rely on a try-catch to keep going.
-         // Example of such problematic directory in Windows 7 include:
-         //
-         // * "C:\System Volume Information"
-         // * "C:\hiberfil.sys"
-         // * "C:\pagefile.sys"
-         // * "C:\swapfile.sys"
-
+         // One example of a problematic directory in Windows 7 is: "C:\System Volume Information".
          if (std::experimental::filesystem::is_empty(path))
          {
             return;
@@ -406,117 +389,54 @@ void ScanningWorker::ProcessDirectory(
          FileType::DIRECTORY
       };
 
-      treeNode.AppendChild(VizFile{ directoryInfo });
+      std::unique_lock<decltype(m_mutex)> lock{ m_mutex };
+      auto* const lastChild = node.AppendChild(VizFile{ std::move(directoryInfo) });
+      lock.unlock();
 
       m_progress.directoriesScanned.fetch_add(1);
 
       auto itr = std::experimental::filesystem::directory_iterator{ path };
-      IterateOverDirectoryAndScan(itr, *treeNode.GetLastChild());
+      AddDirectoriesToQueue(itr, *lastChild);
    }
 }
 
-void ScanningWorker::IterateOverDirectoryAndScan(
+void ScanningWorker::AddDirectoriesToQueue(
    std::experimental::filesystem::directory_iterator& itr,
-   Tree<VizFile>::Node& treeNode) noexcept
+   Tree<VizFile>::Node& node) noexcept
 {
    const auto end = std::experimental::filesystem::directory_iterator{ };
    while (itr != end)
    {
-      ProcessDirectory(itr->path(), treeNode);
+      boost::asio::post(m_threadPool, [&, path = itr->path()] () noexcept
+      {
+         ProcessDirectory(path, node);
+      });
 
       ++itr;
    }
 }
 
-void ScanningWorker::ProcessQueue(
-   ThreadSafeQueue<NodeAndPath>& taskQueue,
-   ThreadSafeQueue<NodeAndPath>& resultsQueue) noexcept
-{
-   while (!taskQueue.IsEmpty())
-   {
-      NodeAndPath nodeAndPath{ };
-      const auto successfullyPopped = taskQueue.TryPop(nodeAndPath);
-      if (!successfullyPopped)
-      {
-         assert(false);
-         break;
-      }
-
-      auto startingDirectory =
-         std::experimental::filesystem::directory_iterator{ nodeAndPath.path };
-
-      IterateOverDirectoryAndScan(
-         startingDirectory,
-         *nodeAndPath.node);
-
-      {
-         std::lock_guard<std::mutex> lock{ streamMutex };
-         IgnoreUnused(lock);
-
-         std::wcout << "Finished scanning: \"" << nodeAndPath.path.wstring() << "\"" << std::endl;
-      }
-
-      resultsQueue.Emplace(std::move(nodeAndPath));
-   }
-
-   std::lock_guard<std::mutex> lock{ streamMutex };
-   IgnoreUnused(lock);
-
-   std::cout << "Thread " << std::this_thread::get_id() << " has finished..." << std::endl;
-}
-
 void ScanningWorker::Start()
 {
-   auto theTree = CreateTreeAndRootNode();
-   if (!theTree)
-   {
-      return;
-   }
-
    emit ProgressUpdate();
 
    Stopwatch<std::chrono::seconds>([&] () noexcept
    {
-      auto [directories, files] = CreateTaskItems(m_parameters.path);
-
-      ThreadSafeQueue<NodeAndPath> resultQueue;
-      ThreadSafeQueue<NodeAndPath> taskQueue;
-
-      for (auto&& directory : directories)
+      boost::asio::post(m_threadPool, [&] () noexcept
       {
-         taskQueue.Emplace(std::move(directory));
-      }
+        auto itr = std::experimental::filesystem::directory_iterator{ m_parameters.path };
+        AddDirectoriesToQueue(itr, *m_fileTree->GetRoot());
+      });
 
-      std::vector<std::thread> scanningThreads;
-
-      const auto numberOfThreads = std::min(
-         std::thread::hardware_concurrency(),
-         Constants::Concurrency::THREAD_LIMIT);
-
-      for (auto i{ 0u }; i < numberOfThreads; ++i)
-      {
-         scanningThreads.emplace_back([&] () noexcept { ProcessQueue(taskQueue, resultQueue); });
-      }
-
-      for (auto&& file : files)
-      {
-         ProcessFile(file.path, *theTree->GetRoot());
-      }
-
-      for (auto&& thread : scanningThreads)
-      {
-         thread.join();
-      }
-
-      BuildFinalTree(resultQueue, *theTree);
+      m_threadPool.join();
    }, [] (const auto& elapsed, const auto& units) noexcept
    {
       spdlog::get(Constants::Logging::DEFAULT_LOG)->info(
          fmt::format("Scanned Drive in: {} {}", elapsed.count(), units));
    });
 
-   ComputeDirectorySizes(*theTree);
-   PruneEmptyFilesAndDirectories(*theTree);
+   ComputeDirectorySizes(*m_fileTree);
+   PruneEmptyFilesAndDirectories(*m_fileTree);
 
-   emit Finished(theTree);
+   emit Finished(m_fileTree);
 }

@@ -5,7 +5,7 @@
 #include "../Settings/settings.h"
 #include "../Utilities/colorGradient.hpp"
 #include "../Utilities/scopeExit.hpp"
-#include "../Utilities/viewfrustum.hpp"
+#include "../Utilities/viewFrustum.hpp"
 #include "../Visualizations/visualization.h"
 
 #include <boost/optional.hpp>

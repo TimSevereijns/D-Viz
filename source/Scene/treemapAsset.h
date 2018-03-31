@@ -129,13 +129,12 @@ namespace Asset
          bool LoadTexturePreviewShaders();
          bool InitializeTexturePreviewer();
 
-         std::uint32_t m_cascadeCount{ 4 };
-
-         std::uint32_t m_shadowMapResolution{ 4 * 1024 };
-
          ColorGradient m_directoryColorGradient;
 
+         std::uint32_t m_cascadeCount{ 4 };
+         std::uint32_t m_shadowMapResolution{ 4 * 1024 };
          std::uint32_t m_blockCount{ 0 };
+
          std::uintmax_t m_largestDirectorySize{ 0 };
 
          double m_maxBoundingBoxDiagonal{ 0.0 };

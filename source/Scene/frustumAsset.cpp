@@ -1,7 +1,7 @@
 #include "frustumAsset.h"
 
 #include "../constants.h"
-#include "../Utilities/viewfrustum.hpp"
+#include "../Utilities/viewFrustum.hpp"
 
 #include <algorithm>
 #include <iostream>

@@ -286,7 +286,7 @@ namespace
             const auto& blockIntersection = DoesRayIntersectBlock(ray, node->GetData().block);
             if (blockIntersection && camera.IsPointInFrontOfCamera(*blockIntersection))
             {
-               allIntersections.emplace_back(std::make_pair(*blockIntersection, node));
+               allIntersections.emplace_back(*blockIntersection, node);
             }
 
             if (node->HasChildren())
@@ -308,12 +308,12 @@ namespace
    }
 }
 
-const double VisualizationModel::PADDING_RATIO = 0.9;
-const double VisualizationModel::MAX_PADDING = 0.75;
+const double VisualizationModel::PADDING_RATIO{ 0.9 };
+const double VisualizationModel::MAX_PADDING{ 0.75 };
 
-const float VisualizationModel::BLOCK_HEIGHT = 2.0f;
-const float VisualizationModel::ROOT_BLOCK_WIDTH = 1000.0f;
-const float VisualizationModel::ROOT_BLOCK_DEPTH = 1000.0f;
+const float VisualizationModel::BLOCK_HEIGHT{ 2.0f };
+const float VisualizationModel::ROOT_BLOCK_WIDTH{ 1000.0f };
+const float VisualizationModel::ROOT_BLOCK_DEPTH{ 1000.0f };
 
 void VisualizationModel::UpdateBoundingBoxes()
 {
@@ -326,7 +326,7 @@ void VisualizationModel::UpdateBoundingBoxes()
    }
 
    std::for_each(std::begin(*m_theTree), std::end(*m_theTree),
-      [] (auto& node)
+      [] (auto& node) noexcept
    {
       if (!node.HasChildren())
       {
@@ -369,7 +369,7 @@ Tree<VizFile>::Node* VisualizationModel::FindNearestIntersection(
 
    Tree<VizFile>::Node* nearestIntersection = nullptr;
 
-   Stopwatch<std::chrono::microseconds>([&]
+   Stopwatch<std::chrono::microseconds>([&] () noexcept
    {
       const auto headNode = m_theTree->GetRoot();
       const auto allIntersections = FindAllIntersections(ray, camera, parameters, headNode);

@@ -189,7 +189,7 @@ class Camera
        *
        * @param[in] angle           In degrees.
        */
-      void SetFieldOfView(const float angle) noexcept;
+      void SetFieldOfView(float angle) noexcept;
 
       /**
        * @brief Retrives the camera's current field of view.

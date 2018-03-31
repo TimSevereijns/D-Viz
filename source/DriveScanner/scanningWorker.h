@@ -9,9 +9,15 @@
 #include <chrono>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include <experimental/filesystem>
+
+#pragma warning(push)
+#pragma warning(disable: 4996)
+   #include <boost/asio/thread_pool.hpp>
+#pragma warning(pop)
 
 #include "../DataStructs/block.h"
 #include "../DataStructs/driveScanningParameters.h"
@@ -41,9 +47,6 @@ struct NodeAndPath
 
    NodeAndPath() = default;
 };
-
-template<typename Type>
-class ThreadSafeQueue;
 
 /**
  * @brief The ScanningWorker class
@@ -96,17 +99,6 @@ class ScanningWorker final : public QObject
    private:
 
       /**
-       * @brief Allows a single thread to pull a task from the task queue for processing, placing
-       * the eventual result on the results queue.
-       *
-       * @param[in] taskQueue       A queue full of directories in need of processing.
-       * @param[out] resultsQueue   A empty queue where scanned directories results will end up.
-       */
-      void ProcessQueue(
-         ThreadSafeQueue<NodeAndPath>& taskQueue,
-         ThreadSafeQueue<NodeAndPath>& resultsQueue) noexcept;
-
-      /**
        * @brief Helper function to process a single file.
        *
        * @note This function assumes the path is valid and accessible.
@@ -116,7 +108,7 @@ class ScanningWorker final : public QObject
        */
       void ProcessFile(
          const std::experimental::filesystem::path& path,
-         Tree<VizFile>::Node& treeNode) noexcept;
+         Tree<VizFile>::Node& node) noexcept;
 
       /**
        * @brief Performs a recursive depth-first exploration of the file system.
@@ -126,7 +118,7 @@ class ScanningWorker final : public QObject
        */
       void ProcessDirectory(
          const std::experimental::filesystem::path& path,
-         Tree<VizFile>::Node& fileNode);
+         Tree<VizFile>::Node& node);
 
       /**
        * @brief Helper function to facilitate exception-free iteration over a directory.
@@ -134,20 +126,21 @@ class ScanningWorker final : public QObject
        * @param[in] itr             Reference to the iterator to iterate over.
        * @param[in] treeNode        The TreeNode to append the contents of the directory to.
        */
-      inline void IterateOverDirectoryAndScan(
+      void AddDirectoriesToQueue(
          std::experimental::filesystem::directory_iterator& itr,
-         Tree<VizFile>::Node& treeNode) noexcept;
-
-      /**
-       * @return An initial root node.
-       */
-      std::shared_ptr<Tree<VizFile>> CreateTreeAndRootNode();
+         Tree<VizFile>::Node& node) noexcept;
 
       static constexpr std::uintmax_t SIZE_UNDEFINED{ 0 };
 
       DriveScanningParameters m_parameters;
 
       ScanningProgress& m_progress;
+
+      std::shared_ptr<Tree<VizFile>> m_fileTree{ nullptr };
+
+      mutable std::mutex m_mutex;
+
+      boost::asio::thread_pool m_threadPool{ 4 };
 };
 
 #endif // SCANNINGWORKER_H

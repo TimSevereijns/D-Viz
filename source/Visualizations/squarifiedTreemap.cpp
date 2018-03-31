@@ -25,7 +25,7 @@ namespace
       const std::uintmax_t candidateSize)
    {
       auto sumOfFileSizes = std::accumulate(std::begin(row), std::end(row),
-         std::uintmax_t{ 0 }, [] (const auto result, const auto* node)
+         std::uintmax_t{ 0 }, [] (const auto result, const auto* node) noexcept
       {
          return result + (*node)->file.size;
       });

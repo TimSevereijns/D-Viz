@@ -234,7 +234,7 @@ QRect Camera::GetViewport() const noexcept
    return m_viewport;
 }
 
-void Camera::SetFieldOfView(const float angle) noexcept
+void Camera::SetFieldOfView(float angle) noexcept
 {
    if (angle > 85.0f)
    {
