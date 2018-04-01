@@ -12,7 +12,7 @@
  */
 struct VizFile
 {
-   static std::uint32_t INVALID_OFFSET;
+   constexpr static auto INVALID_OFFSET = std::numeric_limits<std::uint32_t>::max();
 
    FileInfo file{ };          ///< The file that the block represents.
    Block block{ };            ///< The actual block as rendered to the OpenGL canvas.

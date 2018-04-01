@@ -4,16 +4,21 @@
    #include <FileApi.h>
    #include <Windows.h>
    #include <WinIoCtl.h>
+
+   #include "scopedHandle.h"
+   #include "winHack.hpp"
 #endif
 
 #include "scanningWorker.h"
-#include "scopedHandle.h"
-#include "winHack.hpp"
 
-#pragma warning(push)
-#pragma warning(disable: 4996)
+#ifdef Q_OS_WIN
+   #pragma warning(push)
+   #pragma warning(disable: 4996)
+#endif
    #include <boost/asio/post.hpp>
-#pragma warning(pop)
+#ifdef Q_OS_WIN
+   #pragma warning(pop)
+#endif
 
 #include <spdlog/spdlog.h>
 #include <Stopwatch/Stopwatch.hpp>
@@ -128,15 +133,15 @@ namespace
    {
       for (auto&& node : tree)
       {
-         const FileInfo fileInfo = node->file;
+         const auto& fileInfo = node->file;
 
-         Tree<VizFile>::Node* parent = node.GetParent();
+         auto* parent = node.GetParent();
          if (!parent)
          {
             return;
          }
 
-         FileInfo& parentInfo = parent->GetData().file;
+         auto& parentInfo = parent->GetData().file;
          if (parentInfo.type == FileType::DIRECTORY)
          {
             parentInfo.size += fileInfo.size;
@@ -157,7 +162,7 @@ namespace
          return nullptr;
       }
 
-      FileInfo fileInfo
+      const FileInfo fileInfo
       {
          path.wstring(),
          /* extension = */ L"",
@@ -168,6 +173,7 @@ namespace
       return std::make_shared<Tree<VizFile>>(VizFile{ std::move(fileInfo) });
    }
 
+#ifdef Q_OS_WIN
    /**
    * @returns A handle representing the repartse point found at the given path. If
    * the path is not a reparse point, then an invalid handle will be returned instead.
@@ -291,6 +297,7 @@ namespace
 
       return fileInfo.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT;
    }
+#endif
 
    /**
     * @returns True if the directory should be processed.
@@ -299,9 +306,7 @@ namespace
    {
 #ifdef Q_OS_WIN
       return !IsReparsePoint(path); //!IsSymlink(path) && !IsMountPoint(path);
-#endif
-
-#ifdef Q_OS_LINUX
+#elif defined(Q_OS_LINUX)
       return std::experimental::filesystem::is_symlink(path);
 #endif
    }
@@ -311,7 +316,6 @@ ScanningWorker::ScanningWorker(
    const DriveScanningParameters& parameters,
    ScanningProgress& progress)
    :
-   QObject{ },
    m_parameters{ parameters },
    m_progress{ progress },
    m_fileTree{ CreateTreeAndRootNode(parameters.path) }
@@ -347,7 +351,7 @@ void ScanningWorker::ProcessDirectory(
    const std::experimental::filesystem::path& path,
    Tree<VizFile>::Node& node)
 {
-   bool isRegularFile = false;
+   auto isRegularFile{ false };
    try
    {
       // In certain cases, this function can, apparently, raise exceptions, although it

@@ -14,10 +14,14 @@
 
 #include <experimental/filesystem>
 
-#pragma warning(push)
-#pragma warning(disable: 4996)
+#ifdef Q_OS_WIN
+   #pragma warning(push)
+   #pragma warning(disable: 4996)
+#endif
    #include <boost/asio/thread_pool.hpp>
-#pragma warning(pop)
+#ifdef Q_OS_WIN
+   #pragma warning(pop)
+#endif
 
 #include "../DataStructs/block.h"
 #include "../DataStructs/driveScanningParameters.h"
@@ -57,7 +61,9 @@ class ScanningWorker final : public QObject
 
    public:
 
-      explicit ScanningWorker(
+      static constexpr std::uintmax_t SIZE_UNDEFINED{ 0 };
+
+      ScanningWorker(
          const DriveScanningParameters& parameters,
          ScanningProgress& progress);
 
@@ -129,8 +135,6 @@ class ScanningWorker final : public QObject
       void AddDirectoriesToQueue(
          std::experimental::filesystem::directory_iterator& itr,
          Tree<VizFile>::Node& node) noexcept;
-
-      static constexpr std::uintmax_t SIZE_UNDEFINED{ 0 };
 
       DriveScanningParameters m_parameters;
 

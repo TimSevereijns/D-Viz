@@ -154,8 +154,18 @@ win32:CONFIG(debug, debug|release) {
       -llibboost_system-vc141-mt-gd-x64-1_66
 }
 
-unix {
-   LIBS += -lstdc++fs
+unix:CONFIG(release, debug|release) {
+   LIBS += \
+      -lstdc++fs \
+      -L$$PWD/../../boost_1_66_0/stage/lib \
+      -lboost_system
+}
+
+unix:CONFIG(debug, debug|release) {
+   LIBS += \
+      -lstdc++fs \
+      -L$$PWD/../../boost_1_66_0/stage/lib \
+      -lboost_system
 }
 
 CONFIG(release, debug|release) {
