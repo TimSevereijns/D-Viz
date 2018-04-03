@@ -15,7 +15,9 @@
    #pragma warning(push)
    #pragma warning(disable: 4996)
 #endif
-   #include <boost/asio/post.hpp>
+
+#include <boost/asio/post.hpp>
+
 #ifdef Q_OS_WIN
    #pragma warning(pop)
 #endif
@@ -44,13 +46,14 @@ namespace
     *
     * @returns The size of the file if it's accessible, and zero otherwise.
     */
-   std::uintmax_t GetFileSizeUsingWinAPI(const std::experimental::filesystem::path& path)
+   std::uintmax_t GetFileSizeUsingWinAPI(const std::experimental::filesystem::path& path) noexcept
    {
       std::uintmax_t fileSize{ 0 };
 
       IgnoreUnused(path);
 
 #ifdef Q_OS_WIN
+
       WIN32_FIND_DATA fileData;
       const HANDLE fileHandle = FindFirstFileW(path.wstring().data(), &fileData);
       if (fileHandle == INVALID_HANDLE_VALUE)
@@ -60,6 +63,7 @@ namespace
 
       const auto highWord = static_cast<std::uintmax_t>(fileData.nFileSizeHigh);
       fileSize = (highWord << sizeof(fileData.nFileSizeLow) * 8) | fileData.nFileSizeLow;
+
 #endif
 
       return fileSize;
@@ -99,7 +103,7 @@ namespace
     *
     * @param[in, out] tree           The tree to be pruned.
     */
-   void PruneEmptyFilesAndDirectories(Tree<VizFile>& tree)
+   void PruneEmptyFilesAndDirectories(Tree<VizFile>& tree) noexcept
    {
       std::vector<Tree<VizFile>::Node*> toBeDeleted;
 
@@ -129,7 +133,7 @@ namespace
     *
     * @param[in, out] tree          The tree whose nodes need their directory sizes computed.
     */
-   void ComputeDirectorySizes(Tree<VizFile>& tree)
+   void ComputeDirectorySizes(Tree<VizFile>& tree) noexcept
    {
       for (auto&& node : tree)
       {
@@ -155,7 +159,7 @@ namespace
    * @param[in] path                The path to the directory that should constitute the root node.
    */
    std::shared_ptr<Tree<VizFile>> CreateTreeAndRootNode(
-      const std::experimental::filesystem::path& path)
+      const std::experimental::filesystem::path& path) noexcept
    {
       if (!std::experimental::filesystem::is_directory(path))
       {
@@ -174,11 +178,12 @@ namespace
    }
 
 #ifdef Q_OS_WIN
+
    /**
    * @returns A handle representing the repartse point found at the given path. If
    * the path is not a reparse point, then an invalid handle will be returned instead.
    */
-   auto OpenReparsePoint(const std::experimental::filesystem::path& path)
+   auto OpenReparsePoint(const std::experimental::filesystem::path& path) noexcept
    {
       const auto handle = CreateFile(
          /* fileName = */ path.wstring().c_str(),
@@ -199,7 +204,7 @@ namespace
    */
    auto ReadReparsePoint(
       const std::wstring& path,
-      std::vector<std::byte>& reparseBuffer)
+      std::vector<std::byte>& reparseBuffer) noexcept
    {
       const auto handle = OpenReparsePoint(path);
       if (!handle.IsValid())
@@ -210,7 +215,7 @@ namespace
       DWORD bytesReturned{ 0 };
 
       const auto successfullyRetrieved = DeviceIoControl(
-         /* device = */ handle,
+         /* device = */ static_cast<HANDLE>(handle),
          /* controlCode = */ FSCTL_GET_REPARSE_POINT,
          /* inBuffer = */ NULL,
          /* inBufferSize = */ 0,
@@ -227,7 +232,7 @@ namespace
    */
    auto IsReparseTag(
       const std::experimental::filesystem::path& path,
-      DWORD targetTag)
+      DWORD targetTag) noexcept
    {
       static std::vector<std::byte> buffer{ MAXIMUM_REPARSE_DATA_BUFFER_SIZE };
 
@@ -243,10 +248,9 @@ namespace
    *
    * @note Junctions in Windows are considered mount points.
    */
-   auto IsMountPoint(const std::experimental::filesystem::path& path)
+   auto IsMountPoint(const std::experimental::filesystem::path& path) noexcept
    {
       const auto isMountPoint = IsReparseTag(path, IO_REPARSE_TAG_MOUNT_POINT);
-
       if (isMountPoint)
       {
          const std::lock_guard<decltype(streamMutex)> lock{ streamMutex };
@@ -261,10 +265,9 @@ namespace
    /**
    * @returns True if the given file path represents a symlink, and false otherwise.
    */
-   auto IsSymlink(const std::experimental::filesystem::path& path)
+   auto IsSymlink(const std::experimental::filesystem::path& path) noexcept
    {
       const auto isSymlink = IsReparseTag(path, IO_REPARSE_TAG_SYMLINK);
-
       if (isSymlink)
       {
          const std::lock_guard<decltype(streamMutex)> lock{ streamMutex };
@@ -279,9 +282,9 @@ namespace
    /**
    * @returns True if the given path represents a reparse point, and false otherwise.
    */
-   bool IsReparsePoint(const std::experimental::filesystem::path& path)
+   bool IsReparsePoint(const std::experimental::filesystem::path& path) noexcept
    {
-      const ScopedHandle handle = OpenReparsePoint(path);
+      const auto handle = OpenReparsePoint(path);
       if (!handle.IsValid())
       {
          return false;
@@ -289,7 +292,9 @@ namespace
 
       BY_HANDLE_FILE_INFORMATION fileInfo = { 0 };
 
-      const auto successfullyRetrieved = GetFileInformationByHandle(handle, &fileInfo);
+      const auto successfullyRetrieved
+         = GetFileInformationByHandle(static_cast<HANDLE>(handle), &fileInfo);
+
       if (!successfullyRetrieved)
       {
          return false;
@@ -297,17 +302,19 @@ namespace
 
       return fileInfo.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT;
    }
+
 #endif
 
    /**
     * @returns True if the directory should be processed.
     */
-   auto ShouldProcess(const std::experimental::filesystem::path& path)
+   auto ShouldProcess(const std::experimental::filesystem::path& path) noexcept
    {
 #ifdef Q_OS_WIN
       return !IsReparsePoint(path); //!IsSymlink(path) && !IsMountPoint(path);
-#elif defined(Q_OS_LINUX)
-      return std::experimental::filesystem::is_symlink(path);
+#endif
+#ifdef Q_OS_LINUX
+      return !std::experimental::filesystem::is_symlink(path);
 #endif
    }
 }
@@ -349,7 +356,7 @@ void ScanningWorker::ProcessFile(
 
 void ScanningWorker::ProcessDirectory(
    const std::experimental::filesystem::path& path,
-   Tree<VizFile>::Node& node)
+   Tree<VizFile>::Node& node) noexcept
 {
    auto isRegularFile{ false };
    try
@@ -399,15 +406,16 @@ void ScanningWorker::ProcessDirectory(
 
       m_progress.directoriesScanned.fetch_add(1);
 
-      auto itr = std::experimental::filesystem::directory_iterator{ path };
-      AddDirectoriesToQueue(itr, *lastChild);
+      AddSubDirectoriesToQueue(path, *lastChild);
    }
 }
 
-void ScanningWorker::AddDirectoriesToQueue(
-   std::experimental::filesystem::directory_iterator& itr,
+void ScanningWorker::AddSubDirectoriesToQueue(
+   const std::experimental::filesystem::path& path,
    Tree<VizFile>::Node& node) noexcept
 {
+   auto itr = std::experimental::filesystem::directory_iterator{ path };
+
    const auto end = std::experimental::filesystem::directory_iterator{ };
    while (itr != end)
    {
@@ -428,8 +436,7 @@ void ScanningWorker::Start()
    {
       boost::asio::post(m_threadPool, [&] () noexcept
       {
-        auto itr = std::experimental::filesystem::directory_iterator{ m_parameters.path };
-        AddDirectoriesToQueue(itr, *m_fileTree->GetRoot());
+        AddSubDirectoriesToQueue(m_parameters.path, *m_fileTree->GetRoot());
       });
 
       m_threadPool.join();

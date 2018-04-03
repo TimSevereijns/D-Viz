@@ -97,7 +97,9 @@ namespace FrustumUtilities
       std::vector<std::pair<float, float>> cascadeDistances;
       for (auto index{ 1.0 }; index < cascadeCount; ++index)
       {
-         const auto cascade = nearPlane * std::pow(planeRatio, index / cascadeCount);
+         const auto cascade = nearPlane
+            * std::pow(static_cast<float>(planeRatio), static_cast<float>(index / cascadeCount));
+
          cascadeDistances.emplace_back(previousCascadeStart, cascade);
          previousCascadeStart = cascade;
       }

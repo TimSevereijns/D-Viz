@@ -18,7 +18,9 @@
    #pragma warning(push)
    #pragma warning(disable: 4996)
 #endif
-   #include <boost/asio/thread_pool.hpp>
+
+#include <boost/asio/thread_pool.hpp>
+
 #ifdef Q_OS_WIN
    #pragma warning(pop)
 #endif
@@ -124,7 +126,7 @@ class ScanningWorker final : public QObject
        */
       void ProcessDirectory(
          const std::experimental::filesystem::path& path,
-         Tree<VizFile>::Node& node);
+         Tree<VizFile>::Node& node) noexcept;
 
       /**
        * @brief Helper function to facilitate exception-free iteration over a directory.
@@ -132,8 +134,8 @@ class ScanningWorker final : public QObject
        * @param[in] itr             Reference to the iterator to iterate over.
        * @param[in] treeNode        The TreeNode to append the contents of the directory to.
        */
-      void AddDirectoriesToQueue(
-         std::experimental::filesystem::directory_iterator& itr,
+      void AddSubDirectoriesToQueue(
+         const std::experimental::filesystem::path& path,
          Tree<VizFile>::Node& node) noexcept;
 
       DriveScanningParameters m_parameters;

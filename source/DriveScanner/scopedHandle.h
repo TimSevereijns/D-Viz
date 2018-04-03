@@ -1,8 +1,6 @@
 #ifndef SCOPEDHANDLE_H
 #define SCOPEDHANDLE_H
 
-#ifdef Q_OS_WIN
-
 using HANDLE = void*;
 
 class ScopedHandle
@@ -24,13 +22,11 @@ class ScopedHandle
 
       bool IsValid() const;
 
-      operator HANDLE() const;
+      explicit operator HANDLE() const;
 
    private:
 
       HANDLE m_handle;
 };
-
-#endif
 
 #endif // SCOPEDHANDLE_H
