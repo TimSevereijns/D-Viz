@@ -114,7 +114,7 @@ namespace Asset
    }
 
    void Base::UpdateVBO(
-      const Tree<VizFile>::Node&,
+      const Tree<VizBlock>::Node&,
       Asset::Event)
    {
    }

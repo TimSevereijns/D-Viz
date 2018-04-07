@@ -1,11 +1,11 @@
-#include "vizFile.h"
+#include "vizBlock.h"
 
-VizFile::VizFile(const FileInfo& file) :
+VizBlock::VizBlock(const FileInfo& file) :
    file{ file }
 {
 }
 
-VizFile::VizFile(
+VizBlock::VizBlock(
    const FileInfo& file,
    const Block& block)
    :

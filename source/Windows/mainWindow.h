@@ -36,11 +36,6 @@ class MainWindow final : public QMainWindow
          QWidget* parent = nullptr);
 
       /**
-       * @returns The base directory of the visualization.
-       */
-      std::wstring GetDirectoryToVisualize() const;
-
-      /**
        * @brief Sets the field of view.
        *
        * @note This function will update both the UI as well as the backing value.
@@ -59,16 +54,6 @@ class MainWindow final : public QMainWindow
       void SetCameraSpeedSpinner(double speed);
 
       /**
-       * @returns The options manager.
-       */
-      Settings::Manager& GetSettingsManager();
-
-      /**
-       * @overload
-       */
-      const Settings::Manager& GetSettingsManager() const;
-
-      /**
        * @brief Sets a temporary message in the status bar.
        *
        * @param[in] message         The message to display.
@@ -77,6 +62,11 @@ class MainWindow final : public QMainWindow
       void SetStatusBarMessage(
          const std::wstring& message,
          int timeout = 0);
+
+      /**
+       * @brief ReloadVisualization
+       */
+      void ReloadVisualization();
 
       /**
        * @returns True if the frame time readout should be shown in the titlebar.
@@ -104,6 +94,10 @@ class MainWindow final : public QMainWindow
       Gamepad& GetGamepad();
 
    private slots:
+
+      void OnScanStarted();
+
+      void OnScanCompleted();
 
       void OnFileMenuNewScan();
 
@@ -137,19 +131,19 @@ class MainWindow final : public QMainWindow
 
    private:
 
-      void ScanDrive(Settings::VisualizationParameters& parameters);
-
       bool AskUserToLimitFileSize(
          std::uintmax_t numberOfFilesScanned,
          Settings::VisualizationParameters& parameters);
+
+      void SetWaitCursor();
+
+      void RestoreDefaultCursor();
 
       void SetFilePruningComboBoxValue(std::uintmax_t minimum);
 
       void PruneTree();
 
       void ApplyColorScheme();
-
-      void ComputeProgress(const ScanningProgress& progress);
 
       void LaunchAboutDialog();
 
@@ -168,14 +162,10 @@ class MainWindow final : public QMainWindow
 
       Controller& m_controller;
 
-      DriveScanner m_scanner;
-
       bool m_showDirectoriesOnly{ false };
       bool m_useDirectoryGradient{ false };
 
       int m_sizePruningComboBoxIndex{ 0 };
-
-      std::uint64_t m_occupiedDiskSpace{ 0u };
 
       std::unique_ptr<Gamepad> m_gamepad{ std::make_unique<Gamepad>(0, this) };
 
@@ -185,11 +175,7 @@ class MainWindow final : public QMainWindow
       std::unique_ptr<AboutDialog> m_aboutDialog{ nullptr };
       std::unique_ptr<BreakdownDialog> m_breakdownDialog{ nullptr };
 
-      Settings::Manager m_settingsManager;
-
       std::wstring m_searchQuery;
-
-      std::experimental::filesystem::path m_rootPath;
 
       const std::vector<std::pair<std::uintmax_t, QString>>* m_fileSizeOptions{ nullptr };
 

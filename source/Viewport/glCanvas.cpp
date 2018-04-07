@@ -115,7 +115,7 @@ void GLCanvas::RegisterAsset()
    {
       std::make_unique<AssetTag>(),
       std::make_unique<typename AssetTag::AssetType>(
-         m_mainWindow.GetSettingsManager(), m_openGLContext)
+         m_controller.GetSettingsManager(), m_openGLContext)
    });
 }
 
@@ -342,8 +342,8 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
       }
 
       m_camera.OffsetOrientation(
-         m_mainWindow.GetSettingsManager().GetMouseSensitivity() * deltaY,
-         m_mainWindow.GetSettingsManager().GetMouseSensitivity() * deltaX);
+         m_controller.GetSettingsManager().GetMouseSensitivity() * deltaY,
+         m_controller.GetSettingsManager().GetMouseSensitivity() * deltaX);
    }
 
    event->accept();
@@ -363,7 +363,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
       return;
    }
 
-   const auto cameraSpeed = m_mainWindow.GetSettingsManager().GetCameraSpeed();
+   const auto cameraSpeed = m_controller.GetSettingsManager().GetCameraSpeed();
    const auto delta = event->delta();
 
    if (m_keyboardManager.IsKeyUp(Qt::Key_Shift))
@@ -392,13 +392,13 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
    }
 }
 
-void GLCanvas::SelectNode(const Tree<VizFile>::Node& node)
+void GLCanvas::SelectNode(const Tree<VizBlock>::Node& node)
 {
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
    treemap->UpdateVBO(node, Asset::Event::SELECT);
 }
 
-void GLCanvas::RestoreSelectedNode(const Tree<VizFile>::Node& node)
+void GLCanvas::RestoreSelectedNode(const Tree<VizBlock>::Node& node)
 {
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
@@ -407,7 +407,7 @@ void GLCanvas::RestoreSelectedNode(const Tree<VizFile>::Node& node)
       m_controller.IsNodeHighlighted(node) ? Asset::Event::HIGHLIGHT : Asset::Event::RESTORE);
 }
 
-void GLCanvas::HighlightNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
+void GLCanvas::HighlightNodes(std::vector<const Tree<VizBlock>::Node*>& nodes)
 {
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
@@ -417,7 +417,7 @@ void GLCanvas::HighlightNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
    }
 }
 
-void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& nodes)
+void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizBlock>::Node*>& nodes)
 {
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
 
@@ -583,7 +583,7 @@ void GLCanvas::HandleKeyboardInput(const std::chrono::milliseconds& elapsedTime)
    }
 
    const auto millisecondsElapsed = elapsedTime.count();
-   const auto cameraSpeed = m_mainWindow.GetSettingsManager().GetCameraSpeed();
+   const auto cameraSpeed = m_controller.GetSettingsManager().GetCameraSpeed();
 
    if (isWKeyDown)
    {
@@ -626,7 +626,7 @@ void GLCanvas::HandleGamepadButtonInput(
 {
    const auto millisecondsElapsed = elapsedTime.count();
    const auto cameraSpeed =
-      m_mainWindow.GetSettingsManager().GetCameraSpeed() / Constants::Input::MOVEMENT_AMPLIFICATION;
+      m_controller.GetSettingsManager().GetCameraSpeed() / Constants::Input::MOVEMENT_AMPLIFICATION;
 
    if (gamepad.buttonUp())
    {
@@ -682,12 +682,12 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
    {
       const auto pitch =
          Constants::Input::MOVEMENT_AMPLIFICATION
-         * m_mainWindow.GetSettingsManager().GetMouseSensitivity()
+         * m_controller.GetSettingsManager().GetMouseSensitivity()
          * gamepad.axisRightY();
 
       const auto yaw =
          Constants::Input::MOVEMENT_AMPLIFICATION
-         * m_mainWindow.GetSettingsManager().GetMouseSensitivity()
+         * m_controller.GetSettingsManager().GetMouseSensitivity()
          * gamepad.axisRightX();
 
       m_camera.OffsetOrientation(pitch, yaw);
@@ -697,7 +697,7 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
    {
       m_camera.OffsetPosition(
          Constants::Input::MOVEMENT_AMPLIFICATION
-         * m_mainWindow.GetSettingsManager().GetCameraSpeed()
+         * m_controller.GetSettingsManager().GetCameraSpeed()
          * -gamepad.axisLeftY()
          * m_camera.Forward());
    }
@@ -706,7 +706,7 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
    {
       m_camera.OffsetPosition(
          Constants::Input::MOVEMENT_AMPLIFICATION
-         * m_mainWindow.GetSettingsManager().GetCameraSpeed()
+         * m_controller.GetSettingsManager().GetCameraSpeed()
          * gamepad.axisLeftX()
          * m_camera.Right());
    }
@@ -789,7 +789,7 @@ void GLCanvas::paintGL()
    {
       m_openGLContext.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      if (m_mainWindow.GetSettingsManager().IsPrimaryLightAttachedToCamera())
+      if (m_controller.GetSettingsManager().IsPrimaryLightAttachedToCamera())
       {
          assert(m_lights.size() > 0);
          m_lights.front().position = m_camera.GetPosition();

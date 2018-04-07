@@ -3,9 +3,11 @@
 
 #include "constants.h"
 
+#include "Settings/settingsManager.h"
 #include "DataStructs/light.h"
-#include "DataStructs/vizFile.h"
+#include "DataStructs/vizBlock.h"
 #include "DriveScanner/driveScanner.h"
+
 #include <Tree/Tree.hpp>
 
 #include <memory>
@@ -22,12 +24,20 @@ class Controller
 {
    public:
 
+      Controller();
+
+      ~Controller();
+
       /**
-       * @brief Sets the MainWindow as the "view" for the controller.
-       *
-       * @param[in] window          The MainWindow to be used as the view.
+       * @brief Start
        */
-      void SetView(MainWindow* window);
+      void Start();
+
+      /**
+       * @brief ScanDrive
+       * @param parameters
+       */
+      void ScanDrive(Settings::VisualizationParameters& parameters);
 
       /**
        * @returns True if the visualization is not null;
@@ -42,23 +52,23 @@ class Controller
       /**
        * @returns A pointer to the selected node.
        */
-      const Tree<VizFile>::Node* GetSelectedNode() const;
+      const Tree<VizBlock>::Node* GetSelectedNode() const;
 
       /**
        * @returns A reference to the tree that represents the most recent drive scan.
        */
-      Tree<VizFile>& GetTree();
+      Tree<VizBlock>& GetTree();
 
       /**
        * @overload
        */
-      const Tree<VizFile>& GetTree() const;
+      const Tree<VizBlock>& GetTree() const;
 
       /**
        * @returns A reference to the currently highlighted nodes. Highlighted nodes are distinct
        * from the selected node (of which there can be only one).
        */
-      const std::vector<const Tree<VizFile>::Node*>& GetHighlightedNodes() const;
+      const std::vector<const Tree<VizBlock>::Node*>& GetHighlightedNodes() const;
 
       /**
        * @brief Determines whether the node is currently highlighted.
@@ -67,14 +77,14 @@ class Controller
        *
        * @returns True if the given node is currently highlighted; false otherwise.
        */
-      bool IsNodeHighlighted(const Tree<VizFile>::Node& node) const;
+      bool IsNodeHighlighted(const Tree<VizBlock>::Node& node) const;
 
       /**
        * @brief Parses the drive scan results.
        *
        * @param[in] results         The scan results to be parsed.
        */
-      void ParseResults(const std::shared_ptr<Tree<VizFile>>& results);
+      void ParseResults(const std::shared_ptr<Tree<VizBlock>>& results);
 
       /**
        * @brief Updates the bounding boxes for the current treemap.
@@ -92,8 +102,8 @@ class Controller
        */
       void SearchTreeMap(
          const std::wstring& searchQuery,
-         const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& deselectionCallback,
-         const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& selectionCallback,
+         const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& deselectionCallback,
+         const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& selectionCallback,
          bool shouldSearchFiles,
          bool shouldSearchDirectories);
 
@@ -104,8 +114,8 @@ class Controller
        * @param[in] callback        UI callback to highlight matching nodes on the canvas.
        */
       void HighlightAllMatchingExtensions(
-         const Tree<VizFile>::Node& sampleNode,
-         const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback);
+         const Tree<VizBlock>::Node& sampleNode,
+         const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& callback);
 
       /**
        * @brief Highlights all nodes that descendant from the passed in node.
@@ -114,8 +124,8 @@ class Controller
        * @param[in] callback        UI callback to highlight matching nodes on the canvas.
        */
       void HighlightDescendants(
-         const Tree<VizFile>::Node& node,
-         const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback);
+         const Tree<VizBlock>::Node& node,
+         const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& callback);
 
       /**
        * @brief Highlights all nodes that are ancestors of the passed in node.
@@ -124,8 +134,8 @@ class Controller
        * @param[in] callback        UI callback to highlight matching nodes on the canvas.
        */
       void HighlightAncestors(
-         const Tree<VizFile>::Node& node,
-         const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback);
+         const Tree<VizBlock>::Node& node,
+         const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& callback);
 
       /**
        * @brief Clears the selected node, and restores the color of that selected node back to its
@@ -140,7 +150,7 @@ class Controller
        * @param[in] callback        UI callback to highlight matching nodes on the canvas.
        */
       void ClearHighlightedNodes(
-         const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback);
+         const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& callback);
 
       /**
        * @brief Selects the passed in node.
@@ -149,8 +159,8 @@ class Controller
        * @param[in] selectorCallback   UI callback to highlight matching node on the canvas.
        */
       void SelectNode(
-         const Tree<VizFile>::Node& node,
-         const std::function<void (const Tree<VizFile>::Node&)>& selectorCallback);
+         const Tree<VizBlock>::Node& node,
+         const std::function<void (const Tree<VizBlock>::Node&)>& selectorCallback);
 
       /**
        * @brief Selects the passed in node, and updates the status bar with information about the
@@ -160,8 +170,8 @@ class Controller
        * @param[in] selectorCallback   UI callback to highlight matching node on the canvas.
        */
       void SelectNodeAndUpdateStatusBar(
-         const Tree<VizFile>::Node& node,
-         const std::function<void (const Tree<VizFile>::Node&)>& selectorCallback);
+         const Tree<VizBlock>::Node& node,
+         const std::function<void (const Tree<VizBlock>::Node&)>& selectorCallback);
 
       /**
        * @brief Uses the passed in ray to select the nearest node from the perspective of the
@@ -177,8 +187,8 @@ class Controller
       void SelectNodeViaRay(
          const Camera& camera,
          const Qt3DRender::RayCasting::QRay3D& ray,
-         const std::function<void (const Tree<VizFile>::Node&)>& deselectionCallback,
-         const std::function<void (const Tree<VizFile>::Node&)>& selectionCallback);
+         const std::function<void (const Tree<VizBlock>::Node&)>& deselectionCallback,
+         const std::function<void (const Tree<VizBlock>::Node&)>& selectionCallback);
 
       /**
        * @brief Helper function to print visualization metadata to the bottom status bar.
@@ -206,12 +216,12 @@ class Controller
        *
        * @returns The absolute file path.
        */
-      static std::wstring ResolveCompleteFilePath(const Tree<VizFile>::Node& node);
+      static std::wstring ResolveCompleteFilePath(const Tree<VizBlock>::Node& node);
 
       /**
        * @brief Prints selection details to the main window's status bar.
        */
-      void PrintSelectionDetailsToStatusBar();
+      void DisplaySelectionDetails();
 
       /**
        * @brief Whether to allow the user to interact with the UI.
@@ -232,27 +242,44 @@ class Controller
        */
       void SaveScanResults(const ScanningProgress& progress);
 
+      /**
+       * @returns The options manager.
+       */
+      Settings::Manager& GetSettingsManager();
+
+      /**
+       * @overload
+       */
+      const Settings::Manager& GetSettingsManager() const;
+
+      /**
+       * @brief GetRootPath
+       * @return
+       */
+      std::experimental::filesystem::path GetRootPath() const;
+
    private:
 
       template<typename NodeSelectorType>
       void ProcessSelection(
          const NodeSelectorType& nodeSelector,
-         const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback);
+         const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& callback);
+
+      void ComputeProgress(const ScanningProgress& progress);
 
       bool m_allowInteractionWithModel{ false };
 
-      MainWindow* m_mainWindow{ nullptr };
+      Settings::Manager m_settingsManager;
 
-      const Tree<VizFile>::Node* m_selectedNode{ nullptr };
+      std::unique_ptr<MainWindow> m_view{ nullptr };
 
-      std::unique_ptr<VisualizationModel> m_treeMap{ nullptr };
+      std::unique_ptr<VisualizationModel> m_model{ nullptr };
 
-      std::vector<const Tree<VizFile>::Node*> m_highlightedNodes;
+      DriveScanner m_scanner;
 
-      // @todo Move these onto the VizualizationModel class:
-      std::uintmax_t m_filesInCurrentVisualization{ 0 };
-      std::uintmax_t m_directoriesInCurrentVisualization{ 0 };
-      std::uintmax_t m_totalBytesInCurrentVisualization{ 0 };
+      // @todo Move onto scanner?
+      std::experimental::filesystem::path m_rootPath;
+      std::uint64_t m_occupiedDiskSpace{ 0u };
 };
 
 #endif // CONTROLLER_H

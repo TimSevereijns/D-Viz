@@ -10,8 +10,6 @@
 #include "Visualizations/squarifiedTreemap.h"
 #include "Windows/mainWindow.h"
 
-#include <boost/algorithm/string/case_conv.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include <spdlog/spdlog.h>
 #include <Stopwatch/Stopwatch.hpp>
 
@@ -92,96 +90,226 @@ namespace
 
       return std::make_pair<double, std::wstring>(sizeInBytes / 1_TB, L" TB");
    }
+
+   /**
+    * @returns The full path to the JSON file that contains the color mapping.
+    */
+   auto GetColorJsonPath()
+   {
+      return std::experimental::filesystem::current_path().append(L"colors.json");
+   }
+
+   /**
+    * @returns The full path to the JSON file that contains the user preferences.
+    */
+   auto GetPreferencesJsonPath()
+   {
+      return std::experimental::filesystem::current_path().append(L"preferences.json");
+   }
+
+   /**
+    * @brief Helper function to be called once scanning completes.
+    *
+    * @param[in] progress           The final results from the scan.
+    */
+   void LogScanCompletion(const ScanningProgress& progress)
+   {
+      const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+
+      log->info(
+         fmt::format("Scanned: {} directories and {} files, representing {} bytes",
+         progress.directoriesScanned.load(),
+         progress.filesScanned.load(),
+         progress.bytesProcessed.load()));
+
+      log->flush();
+   }
+}
+
+Controller::Controller() :
+   m_settingsManager{ GetColorJsonPath(), GetPreferencesJsonPath() },
+   m_view{ std::make_unique<MainWindow>(*this) }
+{
+}
+
+Controller::~Controller()
+{
+   // @note Despite the fact that this DTOR doesn't do anything, it needs to be declared here,
+   // so that its definition appears after the complete definition of the MainWindow class.
+   // Moving the MainWindow header include into the Controller's header isn't possible, since that
+   // would create a cyclic dependency.
+}
+
+void Controller::Start()
+{
+   m_view->show();
+}
+
+void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
+{
+   m_view->OnScanStarted();
+
+   m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(parameters.rootDirectory);
+   assert(m_occupiedDiskSpace > 0);
+
+   const auto progressHandler = [&] (const ScanningProgress& progress)
+   {
+      ComputeProgress(progress);
+   };
+
+   const auto completionHandler = [&, parameters] (
+      const ScanningProgress& progress,
+      const std::shared_ptr<Tree<VizBlock>>& scanningResults) mutable
+   {
+      ComputeProgress(progress);
+      LogScanCompletion(progress);
+
+      m_view->AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
+
+      m_view->SetWaitCursor();
+      ON_SCOPE_EXIT{ m_view->RestoreDefaultCursor(); };
+
+      ParseResults(scanningResults);
+      UpdateBoundingBoxes();
+      SaveScanResults(progress);
+
+      m_view->ReloadVisualization();
+      m_view->OnScanCompleted();
+
+      AllowUserInteractionWithModel(true);
+   };
+
+   ResetVisualization();
+
+   AllowUserInteractionWithModel(false);
+
+   const DriveScanningParameters scanningParameters
+   {
+      parameters.rootDirectory,
+      progressHandler,
+      completionHandler
+   };
+
+   m_scanner.StartScanning(std::move(scanningParameters));
+}
+
+void Controller::ComputeProgress(const ScanningProgress& progress)
+{
+   assert(m_occupiedDiskSpace > 0);
+
+   const auto filesScanned = progress.filesScanned.load();
+   const auto sizeInBytes = progress.bytesProcessed.load();
+
+   const auto doesPathRepresentEntireDrive{ m_rootPath.string() == m_rootPath.root_path() };
+   if (doesPathRepresentEntireDrive)
+   {
+      const auto percentage =
+         100 * (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
+
+      const auto message = fmt::format(L"Files Scanned: {}  |  {:03.2f}% Complete",
+         Utilities::StringifyWithDigitSeparators(filesScanned),
+         percentage);
+
+      m_view->SetStatusBarMessage(message.c_str());
+   }
+   else
+   {
+      const auto prefix = m_settingsManager.GetActiveNumericPrefix();
+      const auto [size, units] = Controller::ConvertFileSizeToNumericPrefix(sizeInBytes, prefix);
+
+      const auto message = fmt::format(L"Files Scanned: {}  |  {:03.2f} {} and counting...",
+         Utilities::StringifyWithDigitSeparators(filesScanned), size, units);
+
+      m_view->SetStatusBarMessage(message.c_str());
+   }
 }
 
 bool Controller::HasVisualizationBeenLoaded() const
 {
-   return m_treeMap != nullptr;
+   return m_model != nullptr;
 }
 
 void Controller::ResetVisualization()
 {
-   m_highlightedNodes.clear();
+   if (!m_model)
+   {
+      return;
+   }
 
-   m_selectedNode = nullptr;
-   m_treeMap = nullptr;
+   m_model->ClearHighlightedNodes();
+   m_model->ClearSelectedNode();
+   m_model = nullptr;
 }
 
-const Tree<VizFile>::Node* Controller::GetSelectedNode() const
+const Tree<VizBlock>::Node* Controller::GetSelectedNode() const
 {
-   return m_selectedNode;
+   return m_model->GetSelectedNode();
 }
 
-Tree<VizFile>& Controller::GetTree()
+Tree<VizBlock>& Controller::GetTree()
 {
-   assert(m_treeMap);
+   assert(m_model);
 
-   return m_treeMap->GetTree();
+   return m_model->GetTree();
 }
 
-const Tree<VizFile>& Controller::GetTree() const
+const Tree<VizBlock>& Controller::GetTree() const
 {
-   assert(m_treeMap);
+   assert(m_model);
 
-   return m_treeMap->GetTree();
+   return m_model->GetTree();
 }
 
-const std::vector<const Tree<VizFile>::Node*>& Controller::GetHighlightedNodes() const
+const std::vector<const Tree<VizBlock>::Node*>& Controller::GetHighlightedNodes() const
 {
-   return m_highlightedNodes;
+   return m_model->GetHighlightedNodes();
 }
 
-bool Controller::IsNodeHighlighted(const Tree<VizFile>::Node& node) const
+bool Controller::IsNodeHighlighted(const Tree<VizBlock>::Node& node) const
 {
-   return std::any_of(std::begin(m_highlightedNodes), std::end(m_highlightedNodes),
+   const auto& highlightedNodes = m_model->GetHighlightedNodes();
+
+   return std::any_of(std::begin(highlightedNodes), std::end(highlightedNodes),
       [target = std::addressof(node)] (auto ptr) noexcept
    {
       return ptr == target;
    });
 }
 
-void Controller::SetView(MainWindow* window)
+void Controller::ParseResults(const std::shared_ptr<Tree<VizBlock>>& results)
 {
-   assert(m_mainWindow == nullptr);
-   assert(window);
+   assert(!m_model);
 
-   m_mainWindow = window;
-}
-
-void Controller::ParseResults(const std::shared_ptr<Tree<VizFile>>& results)
-{
-   assert(!m_treeMap);
-
-   m_treeMap = std::make_unique<SquarifiedTreeMap>();
-   m_treeMap->Parse(results);
+   m_model = std::make_unique<SquarifiedTreeMap>();
+   m_model->Parse(results);
 }
 
 void Controller::UpdateBoundingBoxes()
 {
-   assert(m_treeMap);
+   assert(m_model);
 
-   m_treeMap->UpdateBoundingBoxes();
+   m_model->UpdateBoundingBoxes();
 }
 
 void Controller::SelectNode(
-   const Tree<VizFile>::Node& node,
-   const std::function<void (const Tree<VizFile>::Node&)>& selectorCallback)
+   const Tree<VizBlock>::Node& node,
+   const std::function<void (const Tree<VizBlock>::Node&)>& selectorCallback)
 {
-   m_selectedNode = &node;
+   m_model->SelectNode(node);
 
    selectorCallback(node);
 }
 
 void Controller::SelectNodeAndUpdateStatusBar(
-   const Tree<VizFile>::Node& node,
-   const std::function<void (const Tree<VizFile>::Node&)>& selectorCallback)
+   const Tree<VizBlock>::Node& node,
+   const std::function<void (const Tree<VizBlock>::Node&)>& selectorCallback)
 {
    SelectNode(node, selectorCallback);
 
    const auto fileSize = node->file.size;
    assert(fileSize > 0);
 
-   const auto prefix = m_mainWindow->GetSettingsManager().GetActiveNumericPrefix();
+   const auto prefix = m_settingsManager.GetActiveNumericPrefix();
    const auto [prefixedSize, units] = ConvertFileSizeToNumericPrefix(fileSize, prefix);
    const auto isInBytes = (units == BYTES_READOUT_STRING);
 
@@ -195,28 +323,29 @@ void Controller::SelectNodeAndUpdateStatusBar(
       << prefixedSize
       << units;
 
-   m_mainWindow->SetStatusBarMessage(message.str());
+   m_view->SetStatusBarMessage(message.str());
 }
 
 void Controller::SelectNodeViaRay(
    const Camera& camera,
    const Qt3DRender::RayCasting::QRay3D& ray,
-   const std::function<void (const Tree<VizFile>::Node&)>& deselectionCallback,
-   const std::function<void (const Tree<VizFile>::Node&)>& selectionCallback)
+   const std::function<void (const Tree<VizBlock>::Node&)>& deselectionCallback,
+   const std::function<void (const Tree<VizBlock>::Node&)>& selectionCallback)
 {
    if (!HasVisualizationBeenLoaded() || !IsUserAllowedToInteractWithModel())
    {
       return;
    }
 
-   if (m_selectedNode)
+   const auto* const selectedNode = m_model->GetSelectedNode();
+   if (selectedNode)
    {
-      deselectionCallback(*m_selectedNode);
-      m_selectedNode = nullptr;
+      deselectionCallback(*selectedNode);
+      m_model->ClearSelectedNode();
    }
 
-   const auto& parameters = m_mainWindow->GetSettingsManager().GetVisualizationParameters();
-   const auto* node = m_treeMap->FindNearestIntersection(camera, ray, parameters);
+   const auto& parameters = m_settingsManager.GetVisualizationParameters();
+   const auto* node = m_model->FindNearestIntersection(camera, ray, parameters);
    if (node)
    {
       SelectNodeAndUpdateStatusBar(*node, selectionCallback);
@@ -229,28 +358,32 @@ void Controller::SelectNodeViaRay(
 
 void Controller::PrintMetadataToStatusBar()
 {
+   const auto metadata = m_model->GetTreemapMetadata();
+
    std::wstringstream message;
    message.imbue(std::locale{ "" });
    message
       << std::fixed
       << L"Scanned "
-      << m_filesInCurrentVisualization
+      << metadata.FileCount
       << L" files and "
-      << m_directoriesInCurrentVisualization
+      << metadata.DirectoryCount
       << L" directories.";
 
-   m_mainWindow->SetStatusBarMessage(message.str());
+   m_view->SetStatusBarMessage(message.str());
 }
 
-void Controller::PrintSelectionDetailsToStatusBar()
+void Controller::DisplaySelectionDetails()
 {
+   const auto& highlightedNodes = m_model->GetHighlightedNodes();
+
    std::uintmax_t totalBytes{ 0 };
-   for (const auto* const node : m_highlightedNodes)
+   for (const auto* const node : highlightedNodes)
    {
       totalBytes += node->GetData().file.size;
    }
 
-   const auto prefix = m_mainWindow->GetSettingsManager().GetActiveNumericPrefix();
+   const auto prefix = m_settingsManager.GetActiveNumericPrefix();
    const auto [prefixedSize, units] = ConvertFileSizeToNumericPrefix(totalBytes, prefix);
    const auto isInBytes = (units == BYTES_READOUT_STRING);
 
@@ -259,13 +392,13 @@ void Controller::PrintSelectionDetailsToStatusBar()
    message.precision(isInBytes ? 0 : 2);
    message
       << std::fixed
-      << L"Highlighted " << m_highlightedNodes.size()
-      << (m_highlightedNodes.size() == 1 ? L" node" : L" nodes")
+      << L"Highlighted " << highlightedNodes.size()
+      << (highlightedNodes.size() == 1 ? L" node" : L" nodes")
       << L", representing "
       << prefixedSize
       << units;
 
-   m_mainWindow->SetStatusBarMessage(message.str());
+   m_view->SetStatusBarMessage(message.str());
 }
 
 void Controller::AllowUserInteractionWithModel(bool allowInteraction)
@@ -280,119 +413,76 @@ bool Controller::IsUserAllowedToInteractWithModel() const
 
 void Controller::SaveScanResults(const ScanningProgress& progress)
 {
-   m_filesInCurrentVisualization = progress.filesScanned.load();
-   m_directoriesInCurrentVisualization = progress.directoriesScanned.load();
-   m_totalBytesInCurrentVisualization = progress.bytesProcessed.load();
+   TreemapMetadata data
+   {
+      progress.filesScanned.load(),
+      progress.directoriesScanned.load(),
+      progress.bytesProcessed.load()
+   };
+
+   m_model->SetTreemapMetadata(std::move(data));
 }
 
 void Controller::ClearSelectedNode()
 {
-   m_selectedNode = nullptr;
+   m_model->ClearSelectedNode();
 }
 
 void Controller::ClearHighlightedNodes(
-   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback)
+   const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& callback)
 {
-   if (m_highlightedNodes.size() == 0)
-   {
-      return;
-   }
+   auto& nodes = m_model->GetHighlightedNodes();
+   callback(nodes);
 
-   const auto victim = std::find_if(
-      std::begin(m_highlightedNodes),
-      std::end(m_highlightedNodes),
-      [target = m_selectedNode] (auto ptr) noexcept
-   {
-      return ptr == target;
-   });
-
-   if (victim != std::end(m_highlightedNodes))
-   {
-      m_highlightedNodes.erase(victim);
-   }
-
-   callback(m_highlightedNodes);
-   m_highlightedNodes.clear();
+   m_model->ClearHighlightedNodes();
 }
 
 template<typename NodeSelectorType>
 void Controller::ProcessSelection(
    const NodeSelectorType& nodeSelector,
-   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback)
+   const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& callback)
 {
    nodeSelector();
 
-   callback(m_highlightedNodes);
+   auto& nodes = m_model->GetHighlightedNodes();
+   callback(nodes);
 
-   // @todo Consider making this part of the callback as well:
-   PrintSelectionDetailsToStatusBar();
+   DisplaySelectionDetails();
 }
 
 void Controller::HighlightAncestors(
-   const Tree<VizFile>::Node& node,
-   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback)
+   const Tree<VizBlock>::Node& node,
+   const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& callback)
 {
    const auto selector = [&]
    {
-      auto* currentNode = node.GetParent();
-      while (currentNode)
-      {
-         m_highlightedNodes.emplace_back(currentNode);
-         currentNode = currentNode->GetParent();
-      }
+      m_model->HighlightAncestors(node);
    };
 
    ProcessSelection(selector, callback);
 }
 
 void Controller::HighlightDescendants(
-   const Tree<VizFile>::Node& node,
-   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback)
+   const Tree<VizBlock>::Node& node,
+   const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& callback)
 {
-   const auto& parameters = m_mainWindow->GetSettingsManager().GetVisualizationParameters();
-
    const auto selector = [&]
    {
-      std::for_each(
-         Tree<VizFile>::LeafIterator{ &node },
-         Tree<VizFile>::LeafIterator{ },
-         [&] (const auto& node)
-      {
-         if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
-            || node->file.size < parameters.minimumFileSize)
-         {
-            return;
-         }
-
-         m_highlightedNodes.emplace_back(&node);
-      });
+      m_model->HighlightDescendants(node, m_settingsManager.GetVisualizationParameters());
    };
 
    ProcessSelection(selector, callback);
 }
 
 void Controller::HighlightAllMatchingExtensions(
-   const Tree<VizFile>::Node& sampleNode,
-   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& callback)
+   const Tree<VizBlock>::Node& sampleNode,
+   const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& callback)
 {
-   const auto& parameters = m_mainWindow->GetSettingsManager().GetVisualizationParameters();
+   const auto& parameters = m_settingsManager.GetVisualizationParameters();
 
    const auto selector = [&]
    {
-      std::for_each(
-         Tree<VizFile>::LeafIterator{ GetTree().GetRoot() },
-         Tree<VizFile>::LeafIterator{ },
-         [&] (const auto& node)
-      {
-         if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
-            || node->file.size < parameters.minimumFileSize
-            || node->file.extension != sampleNode->file.extension)
-         {
-            return;
-         }
-
-         m_highlightedNodes.emplace_back(&node);
-      });
+      m_model->HighlightMatchingFileExtension(sampleNode, parameters);
    };
 
    ProcessSelection(selector, callback);
@@ -400,8 +490,8 @@ void Controller::HighlightAllMatchingExtensions(
 
 void Controller::SearchTreeMap(
    const std::wstring& searchQuery,
-   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& deselectionCallback,
-   const std::function<void (std::vector<const Tree<VizFile>::Node*>&)>& selectionCallback,
+   const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& deselectionCallback,
+   const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& selectionCallback,
    bool shouldSearchFiles,
    bool shouldSearchDirectories)
 {
@@ -414,46 +504,17 @@ void Controller::SearchTreeMap(
 
    ClearHighlightedNodes(deselectionCallback);
 
-   const auto& parameters = m_mainWindow->GetSettingsManager().GetVisualizationParameters();
-
    const auto selector = [&]
    {
-      std::wstring fileAndExtension;
-      fileAndExtension.resize(260); ///< Resize to prevent reallocation with append operations.
-
-      const auto lowercaseQuery = boost::algorithm::to_lower_copy(searchQuery);
-
       Stopwatch<std::chrono::milliseconds>([&] () noexcept
       {
-         std::for_each(
-            Tree<VizFile>::PostOrderIterator{ GetTree().GetRoot() },
-            Tree<VizFile>::PostOrderIterator{ },
-            [&] (const auto& node)
-         {
-            const auto& file = node->file;
-
-            if (file.size < parameters.minimumFileSize
-               || (!shouldSearchDirectories && file.type == FileType::DIRECTORY)
-               || (!shouldSearchFiles && file.type == FileType::REGULAR))
-            {
-               return;
-            }
-
-            fileAndExtension = file.name;
-            fileAndExtension.append(file.extension);
-
-            boost::algorithm::to_lower(fileAndExtension);
-
-            // @note We're converting everything to lowercase beforehand
-            // (instead of using `boost::icontains(...)`), since doing so is significantly faster.
-            if (!boost::contains(fileAndExtension, lowercaseQuery))
-            {
-               return;
-            }
-
-            m_highlightedNodes.emplace_back(&node);
-         });
-      }, [] (const auto& elapsed, const auto& units) noexcept
+         m_model->HighlightMatchingFileName(
+            searchQuery,
+            m_settingsManager.GetVisualizationParameters(),
+            shouldSearchFiles,
+            shouldSearchDirectories);
+      },
+      [] (const auto& elapsed, const auto& units) noexcept
       {
          spdlog::get(Constants::Logging::DEFAULT_LOG)->info(
             fmt::format("Search Completed in: {} {}", elapsed.count(), units));
@@ -483,10 +544,10 @@ std::pair<double, std::wstring> Controller::ConvertFileSizeToNumericPrefix(
    return std::make_pair<double, std::wstring>( 0, L"Congrats, you've found a bug!" );
 }
 
-std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node)
+std::wstring Controller::ResolveCompleteFilePath(const Tree<VizBlock>::Node& node)
 {
    std::vector<std::reference_wrapper<const std::wstring>> reversePath;
-   reversePath.reserve(Tree<VizFile>::Depth(node));
+   reversePath.reserve(Tree<VizBlock>::Depth(node));
    reversePath.emplace_back(node->file.name);
 
    const auto* currentNode = &node;
@@ -509,4 +570,19 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizFile>::Node& node
 
    assert(completePath.size() > 0);
    return completePath + node->file.extension;
+}
+
+Settings::Manager& Controller::GetSettingsManager()
+{
+   return m_settingsManager;
+}
+
+const Settings::Manager& Controller::GetSettingsManager() const
+{
+   return m_settingsManager;
+}
+
+std::experimental::filesystem::path Controller::GetRootPath() const
+{
+   return m_rootPath;
 }

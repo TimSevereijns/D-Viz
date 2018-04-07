@@ -26,24 +26,6 @@
 namespace
 {
    /**
-    * @brief Helper function to be called once scanning completes.
-    *
-    * @param[in] progress           The final results from the scan.
-    */
-   void LogScanCompletion(const ScanningProgress& progress)
-   {
-      const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
-
-      log->info(
-         fmt::format("Scanned: {} directories and {} files, representing {} bytes",
-         progress.directoriesScanned.load(),
-         progress.filesScanned.load(),
-         progress.bytesProcessed.load()));
-
-      log->flush();
-   }
-
-   /**
     * @brief Switches to a different set of entries for the file pruning drop-down menu.
     *
     * @param[in] prefix             The desired unit prefix.
@@ -105,22 +87,6 @@ namespace
    }
 
    /**
-    * @returns The full path to the JSON file that contains the color mapping.
-    */
-   auto GetColorJsonPath()
-   {
-      return std::experimental::filesystem::current_path().append(L"colors.json");
-   }
-
-   /**
-    * @returns The full path to the JSON file that contains the user preferences.
-    */
-   auto GetPreferencesJsonPath()
-   {
-      return std::experimental::filesystem::current_path().append(L"preferences.json");
-   }
-
-   /**
     * @brief The Scoped Cursor struct provides an easy wait to set a specific cursor for the
     * duration of the resulting variable.
     */
@@ -143,8 +109,7 @@ MainWindow::MainWindow(
    QWidget* parent /* = nullptr */)
    :
    QMainWindow{ parent },
-   m_controller{ controller },
-   m_settingsManager{ GetColorJsonPath(), GetPreferencesJsonPath() },
+   m_controller{ controller },   
    m_fileSizeOptions{ GeneratePruningMenuEntries(Constants::FileSize::Prefix::BINARY) }
 {
    m_ui.setupUi(this);
@@ -163,6 +128,8 @@ void MainWindow::SetupSidebar()
 {
    SetupColorSchemeDropdown();
    SetupFileSizePruningDropdown();
+
+   auto& settingsManager = m_controller.GetSettingsManager();
 
    connect(m_ui.directoriesOnlyCheckBox, &QCheckBox::stateChanged,
       this, &MainWindow::OnDirectoryPruningChange);
@@ -189,30 +156,30 @@ void MainWindow::SetupSidebar()
       this, &MainWindow::OnShowBreakdownButtonPressed);
 
    connect(m_ui.searchDirectoriesCheckBox, &QCheckBox::stateChanged,
-      &m_settingsManager, &Settings::Manager::OnShouldSearchDirectoriesChanged);
+      &settingsManager, &Settings::Manager::OnShouldSearchDirectoriesChanged);
 
    connect(m_ui.searchFilesCheckBox, &QCheckBox::stateChanged,
-      &m_settingsManager, &Settings::Manager::OnShouldSearchFilesChanged);
+      &settingsManager, &Settings::Manager::OnShouldSearchFilesChanged);
 
    connect(m_ui.cameraSpeedSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-      &m_settingsManager, &Settings::Manager::OnCameraSpeedChanged);
+      &settingsManager, &Settings::Manager::OnCameraSpeedChanged);
 
    connect(m_ui.mouseSensitivitySpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-      &m_settingsManager, &Settings::Manager::OnMouseSensitivityChanged);
+      &settingsManager, &Settings::Manager::OnMouseSensitivityChanged);
 
    connect(m_ui.ambientCoefficientSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-      &m_settingsManager, &Settings::Manager::OnAmbientLightCoefficientChanged);
+      &settingsManager, &Settings::Manager::OnAmbientLightCoefficientChanged);
 
    connect(m_ui.attenuationSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-      &m_settingsManager, &Settings::Manager::OnLightAttenuationChanged);
+      &settingsManager, &Settings::Manager::OnLightAttenuationChanged);
 
    connect(m_ui.attachLightToCameraCheckBox,
       static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
-      &m_settingsManager, &Settings::Manager::OnAttachLightToCameraStateChanged);
+      &settingsManager, &Settings::Manager::OnAttachLightToCameraStateChanged);
 }
 
 void MainWindow::SetupColorSchemeDropdown()
@@ -222,7 +189,7 @@ void MainWindow::SetupColorSchemeDropdown()
    const auto& defaultScheme = QString::fromStdWString(Constants::ColorScheme::DEFAULT);
    m_ui.colorSchemeComboBox->addItem(defaultScheme, defaultScheme);
 
-   const auto& colorMap = m_settingsManager.GetFileColorMap();
+   const auto& colorMap = m_controller.GetSettingsManager().GetFileColorMap();
    for (const auto& extensionMap : colorMap)
    {
       const auto& categoryName = QString::fromStdWString(extensionMap.first);
@@ -259,17 +226,18 @@ void MainWindow::SetupGamepad()
    QGamepadManager::instance()->resetConfiguration(m_gamepad->deviceId());
 }
 
-std::wstring MainWindow::GetDirectoryToVisualize() const
-{
-   return m_rootPath.wstring();
-}
+//std::wstring MainWindow::GetDirectoryToVisualize() const
+//{
+//   return m_rootPath.wstring();
+//}
 
 void MainWindow::SetupMenus()
 {
    SetupFileMenu();
    SetupOptionsMenu();
 
-   if (m_settingsManager.GetPreferenceMap().GetValueOrDefault(L"showDebuggingMenu", false))
+   const auto& preferenceMap = m_controller.GetSettingsManager().GetPreferenceMap();
+   if (preferenceMap.GetValueOrDefault(L"showDebuggingMenu", false))
    {
       SetupDebuggingMenu();
    }
@@ -392,18 +360,18 @@ void MainWindow::SetupDebuggingMenu()
    lightingMenuWrapper.showCascadeSplits.setText("Show Cascade Splits");
    lightingMenuWrapper.showCascadeSplits.setCheckable(true);
    lightingMenuWrapper.showCascadeSplits.setChecked(
-      m_settingsManager.ShouldShowCascadeSplits());
+      m_controller.GetSettingsManager().ShouldShowCascadeSplits());
 
    connect(&lightingMenuWrapper.showCascadeSplits, &QAction::toggled,
-      &m_settingsManager, &Settings::Manager::OnShowCascadeSplitsToggled);
+      &m_controller.GetSettingsManager(), &Settings::Manager::OnShowCascadeSplitsToggled);
 
    lightingMenuWrapper.showShadows.setText("Show Shadows");
    lightingMenuWrapper.showShadows.setCheckable(true);
    lightingMenuWrapper.showShadows.setChecked(
-      m_settingsManager.ShouldRenderShadows());
+      m_controller.GetSettingsManager().ShouldRenderShadows());
 
    connect(&lightingMenuWrapper.showShadows, &QAction::toggled,
-      &m_settingsManager, &Settings::Manager::OnShowShadowsToggled);
+      &m_controller.GetSettingsManager(), &Settings::Manager::OnShowShadowsToggled);
 
    lightingMenu.setTitle("Lighting");
    lightingMenu.setStatusTip("Toggle visualization aids");
@@ -436,7 +404,7 @@ void MainWindow::SetDebuggingMenuState()
 {
    auto& renderMenuWrapper = m_debuggingMenuWrapper.renderMenuWrapper;
 
-   const auto& preferences = m_settingsManager.GetPreferenceMap();
+   const auto& preferences = m_controller.GetSettingsManager().GetPreferenceMap();
 
    const auto shouldShowOrigin = preferences.GetValueOrDefault(L"showOriginMarker", true);
    renderMenuWrapper.origin.blockSignals(true);
@@ -472,69 +440,22 @@ void MainWindow::OnFileMenuNewScan()
       return;
    }
 
-   m_rootPath = selectedDirectory.toStdWString();
 
-   const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
-   log->info(fmt::format("Started a new scan at: \"{}\"", m_rootPath.string()));
+
+   // @todo Move to scanning start code:
+   //const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+   //log->info(fmt::format("Started a new scan at: \"{}\"", m_rootPath.string()));
 
    const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
 
    Settings::VisualizationParameters parameters;
-   parameters.rootDirectory = m_rootPath.wstring();
+   parameters.rootDirectory = selectedDirectory.toStdWString();
    parameters.onlyShowDirectories = m_showDirectoriesOnly;
    parameters.forceNewScan = true;
    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
-   auto& savedParameters = m_settingsManager.SetVisualizationParameters(std::move(parameters));
-   ScanDrive(savedParameters);
-}
-
-void MainWindow::ScanDrive(Settings::VisualizationParameters& parameters)
-{
-   m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(parameters.rootDirectory);
-   assert(m_occupiedDiskSpace > 0);
-
-   const auto progressHandler = [&] (const ScanningProgress& progress)
-   {
-      ComputeProgress(progress);
-   };
-
-   const auto completionHandler = [&, parameters] (
-      const ScanningProgress& progress,
-      const std::shared_ptr<Tree<VizFile>>& scanningResults) mutable
-   {
-      ComputeProgress(progress);
-      LogScanCompletion(progress);
-
-      m_controller.SaveScanResults(progress);
-
-      AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
-
-      const ScopedCursor waitCursor{ Qt::WaitCursor };
-      IgnoreUnused(waitCursor);
-
-      m_controller.ParseResults(scanningResults);
-      m_controller.UpdateBoundingBoxes();
-
-      m_glCanvas->ReloadVisualization();
-
-      m_controller.AllowUserInteractionWithModel(true);
-      m_ui.showBreakdownButton->setEnabled(true);
-   };
-
-   m_controller.ResetVisualization();
-
-   m_controller.AllowUserInteractionWithModel(false);
-   m_ui.showBreakdownButton->setEnabled(false);
-
-   DriveScanningParameters scanningParameters
-   {
-      parameters.rootDirectory,
-      progressHandler,
-      completionHandler
-   };
-
-   m_scanner.StartScanning(std::move(scanningParameters));
+   auto& savedParameters = m_controller.GetSettingsManager().SetVisualizationParameters(std::move(parameters));
+   m_controller.ScanDrive(savedParameters);
 }
 
 bool MainWindow::AskUserToLimitFileSize(
@@ -563,7 +484,7 @@ bool MainWindow::AskUserToLimitFileSize(
       case QMessageBox::Yes:
       {
          parameters.minimumFileSize = 1_MiB;
-         m_settingsManager.SetVisualizationParameters(parameters);
+         m_controller.GetSettingsManager().SetVisualizationParameters(parameters);
          SetFilePruningComboBoxValue(1_MiB);
 
          return true;
@@ -607,7 +528,7 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
    menuWrapper.binaryPrefix.setChecked(true);
    menuWrapper.decimalPrefix.setChecked(false);
 
-   m_settingsManager.SetActiveNumericPrefix(Constants::FileSize::Prefix::BINARY);
+   m_controller.GetSettingsManager().SetActiveNumericPrefix(Constants::FileSize::Prefix::BINARY);
    m_fileSizeOptions = GeneratePruningMenuEntries(Constants::FileSize::Prefix::BINARY);
 
    SetupFileSizePruningDropdown();
@@ -618,7 +539,7 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
       return;
    }
 
-   auto& parameters = m_settingsManager.GetVisualizationParameters();
+   auto& parameters = m_controller.GetSettingsManager().GetVisualizationParameters();
    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
    m_glCanvas->ReloadVisualization();
@@ -642,7 +563,7 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
    menuWrapper.binaryPrefix.setChecked(false);
    menuWrapper.decimalPrefix.setChecked(true);
 
-   m_settingsManager.SetActiveNumericPrefix(Constants::FileSize::Prefix::DECIMAL);
+   m_controller.GetSettingsManager().SetActiveNumericPrefix(Constants::FileSize::Prefix::DECIMAL);
    m_fileSizeOptions = GeneratePruningMenuEntries(Constants::FileSize::Prefix::DECIMAL);
 
    SetupFileSizePruningDropdown();
@@ -653,7 +574,7 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
       return;
    }
 
-   auto& parameters = m_settingsManager.GetVisualizationParameters();
+   auto& parameters = m_controller.GetSettingsManager().GetVisualizationParameters();
    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
    m_glCanvas->ReloadVisualization();
@@ -704,15 +625,15 @@ void MainWindow::PruneTree()
    const auto minimumSize = m_fileSizeOptions->at(pruneSizeIndex).first;
 
    Settings::VisualizationParameters parameters;
-   parameters.rootDirectory = m_rootPath.wstring();
+   parameters.rootDirectory = m_controller.GetRootPath();
    parameters.onlyShowDirectories = m_showDirectoriesOnly;
    parameters.useDirectoryGradient = m_useDirectoryGradient;
    parameters.forceNewScan = false;
    parameters.minimumFileSize = minimumSize;
 
-   m_settingsManager.SetVisualizationParameters(parameters);
+   m_controller.GetSettingsManager().SetVisualizationParameters(parameters);
 
-   if (!m_rootPath.empty())
+   if (!m_controller.GetRootPath().empty())
    {
       m_glCanvas->ReloadVisualization();
    }
@@ -726,7 +647,7 @@ void MainWindow::PruneTree()
 void MainWindow::ApplyColorScheme()
 {
    const auto colorScheme = m_ui.colorSchemeComboBox->currentText().toStdWString();
-   m_settingsManager.SetColorScheme(colorScheme);
+   m_controller.GetSettingsManager().SetColorScheme(colorScheme);
 
    m_glCanvas->ApplyColorScheme();
 }
@@ -800,7 +721,17 @@ GLCanvas& MainWindow::GetCanvas()
 Gamepad& MainWindow::GetGamepad()
 {
    assert(m_gamepad);
-   return *m_gamepad;
+       return *m_gamepad;
+}
+
+void MainWindow::OnScanStarted()
+{
+   m_ui.showBreakdownButton->setEnabled(false);
+}
+
+void MainWindow::OnScanCompleted()
+{
+   m_ui.showBreakdownButton->setEnabled(true);
 }
 
 void MainWindow::LaunchAboutDialog()
@@ -811,37 +742,6 @@ void MainWindow::LaunchAboutDialog()
    }
 
    m_aboutDialog->show();
-}
-
-void MainWindow::ComputeProgress(const ScanningProgress& progress)
-{
-   assert(m_occupiedDiskSpace > 0);
-
-   const auto filesScanned = progress.filesScanned.load();
-   const auto sizeInBytes = progress.bytesProcessed.load();
-
-   const auto doesPathRepresentEntireDrive{ m_rootPath.string() == m_rootPath.root_path() };
-   if (doesPathRepresentEntireDrive)
-   {
-      const auto percentage =
-         100 * (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
-
-      const auto message = fmt::format(L"Files Scanned: {}  |  {:03.2f}% Complete",
-         Utilities::StringifyWithDigitSeparators(filesScanned),
-         percentage);
-
-      SetStatusBarMessage(message.c_str());
-   }
-   else
-   {
-      const auto prefix = m_settingsManager.GetActiveNumericPrefix();
-      const auto [size, units] = Controller::ConvertFileSizeToNumericPrefix(sizeInBytes, prefix);
-
-      const auto message = fmt::format(L"Files Scanned: {}  |  {:03.2f} {} and counting...",
-         Utilities::StringifyWithDigitSeparators(filesScanned), size, units);
-
-      SetStatusBarMessage(message.c_str());
-   }
 }
 
 void MainWindow::SetFieldOfViewSlider(int fieldOfView)
@@ -891,12 +791,17 @@ void MainWindow::SetStatusBarMessage(
    statusBar->showMessage(QString::fromStdWString(message), timeout);
 }
 
-Settings::Manager& MainWindow::GetSettingsManager()
+void MainWindow::ReloadVisualization()
 {
-   return m_settingsManager;
+   m_glCanvas->ReloadVisualization();
 }
 
-const Settings::Manager& MainWindow::GetSettingsManager() const
+void MainWindow::SetWaitCursor()
 {
-   return m_settingsManager;
+   QApplication::setOverrideCursor(Qt::WaitCursor);
+}
+
+void MainWindow::RestoreDefaultCursor()
+{
+   QApplication::restoreOverrideCursor();
 }

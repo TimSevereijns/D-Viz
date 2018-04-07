@@ -42,7 +42,7 @@ class DriveScanner final : public QObject
        * @param[in] fileTree        The final tree representing the scanned drive (or a part
        *                            thereof).
        */
-      void HandleCompletion(const std::shared_ptr<Tree<VizFile>>& fileTree);
+      void HandleCompletion(const std::shared_ptr<Tree<VizBlock>>& fileTree);
 
       /**
        * @brief Handle the ScanningWorker::ProgressUpdate signal.

@@ -1,7 +1,7 @@
 #include "treemapAsset.h"
 
 #include "../constants.h"
-#include "../DataStructs/vizFile.h"
+#include "../DataStructs/vizBlock.h"
 #include "../Settings/settings.h"
 #include "../Utilities/colorGradient.hpp"
 #include "../Utilities/scopeExit.hpp"
@@ -152,7 +152,7 @@ namespace
     * @returns The appropriate color found in the color map.
     */
    boost::optional<QVector3D> DetermineColorFromExtension(
-      const Tree<VizFile>::Node& node,
+      const Tree<VizBlock>::Node& node,
       const Settings::Manager& settings)
    {
       const auto& colorMap = settings.GetFileColorMap();
@@ -181,7 +181,7 @@ namespace
     * @returns The color to restore the node to.
     */
    QVector3D RestoreColor(
-      const Tree<VizFile>::Node& node,
+      const Tree<VizBlock>::Node& node,
       const Settings::Manager& settings)
    {
       const auto fileColor = DetermineColorFromExtension(node, settings);
@@ -518,7 +518,7 @@ namespace Asset
       m_VAO.release();
    }
 
-   std::uint32_t Treemap::LoadBufferData(const Tree<VizFile>& tree)
+   std::uint32_t Treemap::LoadBufferData(const Tree<VizBlock>& tree)
    {
       m_blockTransformations.clear();
       m_blockColors.clear();
@@ -559,7 +559,7 @@ namespace Asset
       return m_blockCount;
    }
 
-   void Treemap::ReloadColorBufferData(const Tree<VizFile>& tree)
+   void Treemap::ReloadColorBufferData(const Tree<VizBlock>& tree)
    {
       m_blockColors.clear();
 
@@ -580,7 +580,7 @@ namespace Asset
       }
    }
 
-   void Treemap::FindLargestDirectory(const Tree<VizFile>& tree)
+   void Treemap::FindLargestDirectory(const Tree<VizBlock>& tree)
    {
       std::uintmax_t largestDirectory = std::numeric_limits<std::uintmax_t>::min();
 
@@ -603,7 +603,7 @@ namespace Asset
       m_largestDirectorySize = largestDirectory;
    }
 
-   QVector3D Treemap::ComputeGradientColor(const Tree<VizFile>::Node& node)
+   QVector3D Treemap::ComputeGradientColor(const Tree<VizBlock>::Node& node)
    {
       const auto blockSize = static_cast<long double>(node.GetData().file.size);
       const auto ratio = blockSize / static_cast<long double>(m_largestDirectorySize);
@@ -612,7 +612,7 @@ namespace Asset
       return finalColor;
    }
 
-   void Treemap::ComputeAppropriateBlockColor(const Tree<VizFile>::Node& node)
+   void Treemap::ComputeAppropriateBlockColor(const Tree<VizBlock>::Node& node)
    {
       // @todo Need to also take into consideration whether the node is highlighted or selected,
       // since we don't want to get out of sync with the controller's view of the world.
@@ -807,7 +807,7 @@ namespace Asset
    }
 
    void Treemap::UpdateVBO(
-      const Tree<VizFile>::Node& node,
+      const Tree<VizBlock>::Node& node,
       Asset::Event action)
    {
       assert(m_VAO.isCreated());

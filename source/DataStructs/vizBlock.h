@@ -10,7 +10,7 @@
  * @brief The VizNode struct represents everything needed to parse, render, and perform hit
  * detection on an individual file as identified during the scanning process.
  */
-struct VizFile
+struct VizBlock
 {
    constexpr static auto INVALID_OFFSET = std::numeric_limits<std::uint32_t>::max();
 
@@ -19,12 +19,12 @@ struct VizFile
    Block boundingBox{ };      ///< Minimum axis-aligned bounding box for node and all descendents.
 
    /** The offset of this node into the VBO once the visualization has been generated */
-   std::uint32_t offsetIntoVBO{ VizFile::INVALID_OFFSET };
+   std::uint32_t offsetIntoVBO{ VizBlock::INVALID_OFFSET };
 
    /**
     *
     */
-   VizFile() = default;
+   VizBlock() = default;
 
    /**
     * @brief Constructs a new VizNode to represent the specified file.
@@ -33,7 +33,7 @@ struct VizFile
     *
     * @param[in] file               The file that the VizNode represents.
     */
-   explicit VizFile(const FileInfo& file);
+   explicit VizBlock(const FileInfo& file);
 
    /**
     * @brief Constructs a new VizNode to represent the specified file using the specified
@@ -44,7 +44,7 @@ struct VizFile
     * @param[in] file               The file that the VizNode represents.
     * @param[in] block              The visual representation of the file in question.
     */
-   VizFile(
+   VizBlock(
       const FileInfo& file,
       const Block& block);
 };

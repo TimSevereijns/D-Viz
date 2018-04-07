@@ -103,9 +103,9 @@ namespace
     *
     * @param[in, out] tree           The tree to be pruned.
     */
-   void PruneEmptyFilesAndDirectories(Tree<VizFile>& tree) noexcept
+   void PruneEmptyFilesAndDirectories(Tree<VizBlock>& tree) noexcept
    {
-      std::vector<Tree<VizFile>::Node*> toBeDeleted;
+      std::vector<Tree<VizBlock>::Node*> toBeDeleted;
 
       for (auto&& node : tree)
       {
@@ -133,7 +133,7 @@ namespace
     *
     * @param[in, out] tree          The tree whose nodes need their directory sizes computed.
     */
-   void ComputeDirectorySizes(Tree<VizFile>& tree) noexcept
+   void ComputeDirectorySizes(Tree<VizBlock>& tree) noexcept
    {
       for (auto&& node : tree)
       {
@@ -158,7 +158,7 @@ namespace
    *
    * @param[in] path                The path to the directory that should constitute the root node.
    */
-   std::shared_ptr<Tree<VizFile>> CreateTreeAndRootNode(
+   std::shared_ptr<Tree<VizBlock>> CreateTreeAndRootNode(
       const std::experimental::filesystem::path& path) noexcept
    {
       if (!std::experimental::filesystem::is_directory(path))
@@ -174,7 +174,7 @@ namespace
          FileType::DIRECTORY
       };
 
-      return std::make_shared<Tree<VizFile>>(VizFile{ std::move(fileInfo) });
+      return std::make_shared<Tree<VizBlock>>(VizBlock{ std::move(fileInfo) });
    }
 
 #ifdef Q_OS_WIN
@@ -331,7 +331,7 @@ ScanningWorker::ScanningWorker(
 
 void ScanningWorker::ProcessFile(
    const std::experimental::filesystem::path& path,
-   Tree<VizFile>::Node& treeNode) noexcept
+   Tree<VizBlock>::Node& treeNode) noexcept
 {
    const auto fileSize = ComputeFileSize(path);
    if (fileSize == 0u)
@@ -351,12 +351,12 @@ void ScanningWorker::ProcessFile(
    };
 
    std::unique_lock<decltype(m_mutex)> lock{ m_mutex };
-   treeNode.AppendChild(VizFile{ std::move(fileInfo) });
+   treeNode.AppendChild(VizBlock{ std::move(fileInfo) });
 }
 
 void ScanningWorker::ProcessDirectory(
    const std::experimental::filesystem::path& path,
-   Tree<VizFile>::Node& node) noexcept
+   Tree<VizBlock>::Node& node) noexcept
 {
    auto isRegularFile{ false };
    try
@@ -401,7 +401,7 @@ void ScanningWorker::ProcessDirectory(
       };
 
       std::unique_lock<decltype(m_mutex)> lock{ m_mutex };
-      auto* const lastChild = node.AppendChild(VizFile{ std::move(directoryInfo) });
+      auto* const lastChild = node.AppendChild(VizBlock{ std::move(directoryInfo) });
       lock.unlock();
 
       m_progress.directoriesScanned.fetch_add(1);
@@ -412,7 +412,7 @@ void ScanningWorker::ProcessDirectory(
 
 void ScanningWorker::AddSubDirectoriesToQueue(
    const std::experimental::filesystem::path& path,
-   Tree<VizFile>::Node& node) noexcept
+   Tree<VizBlock>::Node& node) noexcept
 {
    auto itr = std::experimental::filesystem::directory_iterator{ path };
 

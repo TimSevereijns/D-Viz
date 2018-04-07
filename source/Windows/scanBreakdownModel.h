@@ -5,7 +5,7 @@
 
 #include "../constants.h"
 #include "../controller.h"
-#include "../DataStructs/vizFile.h"
+#include "../DataStructs/vizBlock.h"
 #include "../Utilities/utilities.hpp"
 
 #include <Tree/Tree.hpp>
@@ -62,7 +62,7 @@ class ScanBreakdownModel final : public QAbstractTableModel
          const QModelIndex& index,
          int role) const override;
 
-      void insert(const Tree<VizFile>::Node& node);
+      void insert(const Tree<VizBlock>::Node& node);
 
    private:
 

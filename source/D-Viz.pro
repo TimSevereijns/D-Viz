@@ -29,7 +29,7 @@ SOURCES += \
    DataStructs/light.cpp \
    DataStructs/precisePoint.cpp \
    DataStructs/driveScanningParameters.cpp \
-   DataStructs/vizFile.cpp \
+   DataStructs/vizBlock.cpp \
    DriveScanner/driveScanner.cpp \
    DriveScanner/scanningWorker.cpp \
    DriveScanner/scopedHandle.cpp \
@@ -67,7 +67,7 @@ HEADERS += \
    DataStructs/driveScanningParameters.h \
    DataStructs/precisePoint.h \
    DataStructs/scanningProgress.hpp \
-   DataStructs/vizFile.cpp \
+   DataStructs/vizBlock.h \
    DriveScanner/driveScanner.h \
    DriveScanner/scanningWorker.h \
    DriveScanner/scopedHandle.h \

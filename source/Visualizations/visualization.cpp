@@ -2,7 +2,10 @@
 
 #include "../constants.h"
 
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/optional.hpp>
+
 #include <spdlog/spdlog.h>
 #include <Stopwatch/Stopwatch.hpp>
 
@@ -227,7 +230,7 @@ namespace
     *
     * @param[out] node              The node to advance.
     */
-   void AdvanceToNextNonDescendant(Tree<VizFile>::Node*& node)
+   void AdvanceToNextNonDescendant(Tree<VizBlock>::Node*& node)
    {
       if (node->GetNextSibling())
       {
@@ -251,7 +254,7 @@ namespace
       }
    }
 
-   using IntersectionPointAndNode = std::pair<QVector3D, Tree<VizFile>::Node*>;
+   using IntersectionPointAndNode = std::pair<QVector3D, Tree<VizBlock>::Node*>;
 
    /**
     * @brief Iterates over all nodes in the scene, placing all intersections in a vector.
@@ -265,7 +268,7 @@ namespace
       const Qt3DRender::RayCasting::QRay3D& ray,
       const Camera& camera,
       const Settings::VisualizationParameters& parameters,
-      Tree<VizFile>::Node* node)
+      Tree<VizBlock>::Node* node)
    {
       std::vector<IntersectionPointAndNode> allIntersections;
 
@@ -318,14 +321,14 @@ const float VisualizationModel::ROOT_BLOCK_DEPTH{ 1000.0f };
 void VisualizationModel::UpdateBoundingBoxes()
 {
    assert(m_hasDataBeenParsed);
-   assert(m_theTree);
+   assert(m_fileTree);
 
    if (!m_hasDataBeenParsed)
    {
       return;
    }
 
-   std::for_each(std::begin(*m_theTree), std::end(*m_theTree),
+   std::for_each(std::begin(*m_fileTree), std::end(*m_fileTree),
       [] (auto& node) noexcept
    {
       if (!node.HasChildren())
@@ -357,7 +360,7 @@ void VisualizationModel::UpdateBoundingBoxes()
    });
 }
 
-Tree<VizFile>::Node* VisualizationModel::FindNearestIntersection(
+Tree<VizBlock>::Node* VisualizationModel::FindNearestIntersection(
    const Camera& camera,
    const Qt3DRender::RayCasting::QRay3D& ray,
    const Settings::VisualizationParameters& parameters) const
@@ -367,26 +370,27 @@ Tree<VizFile>::Node* VisualizationModel::FindNearestIntersection(
       return nullptr;
    }
 
-   Tree<VizFile>::Node* nearestIntersection = nullptr;
+   Tree<VizBlock>::Node* nearestIntersection = nullptr;
 
    Stopwatch<std::chrono::microseconds>([&] () noexcept
    {
-      const auto headNode = m_theTree->GetRoot();
-      const auto allIntersections = FindAllIntersections(ray, camera, parameters, headNode);
+      const auto root = m_fileTree->GetRoot();
+      const auto intersections = FindAllIntersections(ray, camera, parameters, root);
 
-      if (allIntersections.empty())
+      if (intersections.empty())
       {
          return;
       }
 
-      const auto& closest = std::min_element(std::begin(allIntersections), std::end(allIntersections),
+      const auto& closest = std::min_element(std::begin(intersections), std::end(intersections),
          [&ray] (const IntersectionPointAndNode& lhs, const IntersectionPointAndNode& rhs) noexcept
       {
          return (ray.origin().distanceToPoint(lhs.first) < ray.origin().distanceToPoint(rhs.first));
       });
 
       nearestIntersection = closest->second;
-   }, [] (const auto& elapsed, const auto& units) noexcept
+   },
+   [] (const auto& elapsed, const auto& units) noexcept
    {
       spdlog::get(Constants::Logging::DEFAULT_LOG)->info(
          fmt::format("Selected node in: {} {}", elapsed.count(), units));
@@ -395,19 +399,154 @@ Tree<VizFile>::Node* VisualizationModel::FindNearestIntersection(
    return nearestIntersection;
 }
 
-Tree<VizFile>& VisualizationModel::GetTree()
+Tree<VizBlock>& VisualizationModel::GetTree()
 {
-   assert(m_theTree);
-   return *m_theTree;
+   assert(m_fileTree);
+   return *m_fileTree;
 }
 
-const Tree<VizFile>& VisualizationModel::GetTree() const
+const Tree<VizBlock>& VisualizationModel::GetTree() const
 {
-   assert(m_theTree);
-   return *m_theTree;
+   assert(m_fileTree);
+   return *m_fileTree;
 }
 
-void VisualizationModel::SortNodes(Tree<VizFile>& tree)
+const std::vector<const Tree<VizBlock>::Node*>& VisualizationModel::GetHighlightedNodes() const
+{
+   return m_highlightedNodes;
+}
+
+std::vector<const Tree<VizBlock>::Node*> &VisualizationModel::GetHighlightedNodes()
+{
+   return m_highlightedNodes;
+}
+
+void VisualizationModel::ClearHighlightedNodes()
+{
+   if (m_highlightedNodes.size() == 0)
+   {
+      return;
+   }
+
+   m_highlightedNodes.clear();
+}
+
+void VisualizationModel::SelectNode(const Tree<VizBlock>::Node& node)
+{
+   m_selectedNode = &node;
+}
+
+const Tree<VizBlock>::Node* VisualizationModel::GetSelectedNode()
+{
+   return m_selectedNode;
+}
+
+void VisualizationModel::ClearSelectedNode()
+{
+   m_selectedNode = nullptr;
+}
+
+TreemapMetadata VisualizationModel::GetTreemapMetadata()
+{
+   return m_metadata;
+}
+
+void VisualizationModel::SetTreemapMetadata(TreemapMetadata&& data)
+{
+   m_metadata = data;
+}
+
+void VisualizationModel::HighlightAncestors(const Tree<VizBlock>::Node& node)
+{
+   auto* currentNode = node.GetParent();
+   while (currentNode)
+   {
+      m_highlightedNodes.emplace_back(currentNode);
+      currentNode = currentNode->GetParent();
+   }
+}
+
+void VisualizationModel::HighlightDescendants(
+   const Tree<VizBlock>::Node& node,
+   Settings::VisualizationParameters parameters)
+{
+   std::for_each(
+      Tree<VizBlock>::LeafIterator{ &node },
+      Tree<VizBlock>::LeafIterator{ },
+      [&] (const auto& node)
+   {
+      if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
+         || node->file.size < parameters.minimumFileSize)
+      {
+         return;
+      }
+
+      m_highlightedNodes.emplace_back(&node);
+   });
+}
+
+void VisualizationModel::HighlightMatchingFileExtension(
+   const Tree<VizBlock>::Node& sampleNode,
+   Settings::VisualizationParameters parameters)
+{
+   std::for_each(
+      Tree<VizBlock>::LeafIterator{ GetTree().GetRoot() },
+      Tree<VizBlock>::LeafIterator{ },
+      [&] (const auto& node)
+   {
+      if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY)
+         || node->file.size < parameters.minimumFileSize
+         || node->file.extension != sampleNode->file.extension)
+      {
+         return;
+      }
+
+      m_highlightedNodes.emplace_back(&node);
+   });
+}
+
+void VisualizationModel::HighlightMatchingFileName(
+   const std::wstring& searchQuery,
+   Settings::VisualizationParameters parameters,
+   bool shouldSearchFiles,
+   bool shouldSearchDirectories)
+{
+   std::wstring fileAndExtension;
+   fileAndExtension.resize(260); ///< Resize to prevent reallocation with append operations.
+
+   const auto lowercaseQuery = boost::algorithm::to_lower_copy(searchQuery);
+
+   std::for_each(
+      Tree<VizBlock>::PostOrderIterator{ GetTree().GetRoot() },
+      Tree<VizBlock>::PostOrderIterator{ },
+      [&] (const auto& node)
+   {
+      const auto& file = node->file;
+
+      if (file.size < parameters.minimumFileSize
+         || (!shouldSearchDirectories && file.type == FileType::DIRECTORY)
+         || (!shouldSearchFiles && file.type == FileType::REGULAR))
+      {
+         return;
+      }
+
+      fileAndExtension = file.name;
+      fileAndExtension.append(file.extension);
+
+      boost::algorithm::to_lower(fileAndExtension);
+
+      // @note We're converting everything to lowercase beforehand
+      // (instead of using `boost::icontains(...)`), since doing so is significantly faster.
+      if (!boost::contains(fileAndExtension, lowercaseQuery))
+      {
+         return;
+      }
+
+      m_highlightedNodes.emplace_back(&node);
+   });
+}
+
+void VisualizationModel::SortNodes(Tree<VizBlock>& tree)
 {
    for (auto& node : tree)
    {

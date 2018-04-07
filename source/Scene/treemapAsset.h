@@ -10,7 +10,7 @@
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLTexture>
 
-struct VizFile;
+struct VizBlock;
 
 template<typename DataType>
 class TreeNode;
@@ -63,7 +63,7 @@ namespace Asset
           * @see Asset::Base::UpdateVBO(...)
           */
          void UpdateVBO(
-            const Tree<VizFile>::Node& node,
+            const Tree<VizBlock>::Node& node,
             Asset::Event action) override;
 
          /**
@@ -81,7 +81,7 @@ namespace Asset
           *
           * @returns The number of blocks that have been loaded into the buffer.
           */
-         std::uint32_t LoadBufferData(const Tree<VizFile>& tree);
+         std::uint32_t LoadBufferData(const Tree<VizBlock>& tree);
 
          /**
           * @brief Reloads the color buffer without touching the other buffers.
@@ -91,7 +91,7 @@ namespace Asset
           *
           * @param[in] tree            The tree to pull the visualized TreeMap information from.
           */
-         void ReloadColorBufferData(const Tree<VizFile>& tree);
+         void ReloadColorBufferData(const Tree<VizBlock>& tree);
 
          /**
           * @returns The number of blocks that are currently loaded into the visualization asset.
@@ -115,11 +115,11 @@ namespace Asset
             const Camera& camera,
             const std::vector<Light>& lights);
 
-         QVector3D ComputeGradientColor(const Tree<VizFile>::Node& node);
+         QVector3D ComputeGradientColor(const Tree<VizBlock>::Node& node);
 
-         void ComputeAppropriateBlockColor(const Tree<VizFile>::Node& node);
+         void ComputeAppropriateBlockColor(const Tree<VizBlock>::Node& node);
 
-         void FindLargestDirectory(const Tree<VizFile>& tree);
+         void FindLargestDirectory(const Tree<VizBlock>& tree);
 
          void InitializeReferenceBlock();
          void InitializeColors();

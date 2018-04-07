@@ -29,7 +29,7 @@ namespace OperatingSystemSpecific
 
    static constexpr auto PREFERRED_SLASH = std::experimental::filesystem::path::preferred_separator;
 
-   inline void LaunchFileExplorer(const Tree<VizFile>::Node& node)
+   inline void LaunchFileExplorer(const Tree<VizBlock>::Node& node)
    {
       CoInitializeEx(NULL, COINIT_MULTITHREADED);
       ON_SCOPE_EXIT noexcept { CoUninitialize(); };
@@ -80,7 +80,7 @@ namespace OperatingSystemSpecific
    static constexpr auto PREFERRED_SLASH =
    static_cast<wchar_t>(std::experimental::filesystem::path::preferred_separator);
 
-   inline void LaunchFileExplorer(const Tree<VizFile>::Node& node)
+   inline void LaunchFileExplorer(const Tree<VizBlock>::Node& node)
    {
       const std::wstring rawPath = Controller::ResolveCompleteFilePath(node);
       const std::experimental::filesystem::path path{ rawPath };

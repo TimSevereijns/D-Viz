@@ -32,7 +32,7 @@ void BreakdownDialog::ReloadData()
       return;
    }
 
-   const auto& parameters = m_mainWindow.GetSettingsManager().GetVisualizationParameters();
+   const auto& parameters = controller.GetSettingsManager().GetVisualizationParameters();
 
    Stopwatch<std::chrono::milliseconds>([&]
    {
@@ -55,7 +55,7 @@ void BreakdownDialog::ReloadData()
          fmt::format("Built break-down model in: {} {}", elapsed.count(), units));
    });
 
-   m_model.FinalizeInsertion(m_mainWindow.GetSettingsManager());
+   m_model.FinalizeInsertion(controller.GetSettingsManager());
 
    m_proxyModel.setSourceModel(&m_model);
    m_ui.tableView->setModel(&m_proxyModel);

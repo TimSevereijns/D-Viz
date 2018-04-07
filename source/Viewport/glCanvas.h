@@ -125,24 +125,24 @@ class GLCanvas final : public QOpenGLWidget
        *
        * @param[in] node            The node whose visual representation is to be repainted.
        */
-      inline void SelectNode(const Tree<VizFile>::Node& node);
+      inline void SelectNode(const Tree<VizBlock>::Node& node);
 
       /**
        * @brief Restores the color of the selected node back to its unselected state.
        *
        * @param[in] node            The node whose visual representation is to be repainted.
        */
-      inline void RestoreSelectedNode(const Tree<VizFile>::Node& node);
+      inline void RestoreSelectedNode(const Tree<VizBlock>::Node& node);
 
       /**
        * @brief HighlightSelectedNodes
        */
-      void HighlightNodes(std::vector<const Tree<VizFile>::Node*>& nodes);
+      void HighlightNodes(std::vector<const Tree<VizBlock>::Node*>& nodes);
 
       /**
        * @brief Returns any highlighted nodes back to their unhighlighted colors.
        */
-      void RestoreHighlightedNodes(std::vector<const Tree<VizFile>::Node*>& nodes);
+      void RestoreHighlightedNodes(std::vector<const Tree<VizBlock>::Node*>& nodes);
 
       /**
        * @brief Toggles an asset's visibility.

@@ -29,7 +29,7 @@
 #include "../DataStructs/driveScanningParameters.h"
 #include "../DataStructs/fileInfo.h"
 #include "../DataStructs/scanningProgress.hpp"
-#include "../DataStructs/vizFile.h"
+#include "../DataStructs/vizBlock.h"
 #include "../Visualizations/visualization.h"
 
 #include <Tree/Tree.hpp>
@@ -39,7 +39,7 @@
  */
 struct NodeAndPath
 {
-   std::unique_ptr<Tree<VizFile>::Node> node;
+   std::unique_ptr<Tree<VizBlock>::Node> node;
    std::experimental::filesystem::path path;
 
    NodeAndPath(
@@ -90,7 +90,7 @@ class ScanningWorker final : public QObject
        *
        * @param[in] fileTree        A pointer to the final tree representing the scanned drive.
        */
-      void Finished(const std::shared_ptr<Tree<VizFile>>& fileTree);
+      void Finished(const std::shared_ptr<Tree<VizBlock>>& fileTree);
 
       /**
        * @brief Signals drive scanning progress updates.
@@ -116,7 +116,7 @@ class ScanningWorker final : public QObject
        */
       void ProcessFile(
          const std::experimental::filesystem::path& path,
-         Tree<VizFile>::Node& node) noexcept;
+         Tree<VizBlock>::Node& node) noexcept;
 
       /**
        * @brief Performs a recursive depth-first exploration of the file system.
@@ -126,7 +126,7 @@ class ScanningWorker final : public QObject
        */
       void ProcessDirectory(
          const std::experimental::filesystem::path& path,
-         Tree<VizFile>::Node& node) noexcept;
+         Tree<VizBlock>::Node& node) noexcept;
 
       /**
        * @brief Helper function to facilitate exception-free iteration over a directory.
@@ -136,13 +136,13 @@ class ScanningWorker final : public QObject
        */
       void AddSubDirectoriesToQueue(
          const std::experimental::filesystem::path& path,
-         Tree<VizFile>::Node& node) noexcept;
+         Tree<VizBlock>::Node& node) noexcept;
 
       DriveScanningParameters m_parameters;
 
       ScanningProgress& m_progress;
 
-      std::shared_ptr<Tree<VizFile>> m_fileTree{ nullptr };
+      std::shared_ptr<Tree<VizBlock>> m_fileTree{ nullptr };
 
       mutable std::mutex m_mutex;
 
