@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
    QApplication application{ argc, argv };
 
    Controller controller{ };
-   controller.Start();
+   controller.LaunchUI();
 
    const auto exitCode = application.exec();
 

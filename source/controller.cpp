@@ -140,7 +140,7 @@ Controller::~Controller()
    // would create a cyclic dependency.
 }
 
-void Controller::Start()
+void Controller::LaunchUI()
 {
    m_view->show();
 }
@@ -189,6 +189,9 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
       progressHandler,
       completionHandler
    };
+
+   const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+   log->info(fmt::format("Started a new scan at: \"{}\"", m_rootPath.string()));
 
    m_scanner.StartScanning(std::move(scanningParameters));
 }

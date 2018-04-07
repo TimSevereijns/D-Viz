@@ -29,13 +29,14 @@ class Controller
       ~Controller();
 
       /**
-       * @brief Start
+       * @brief Start's the UI.
        */
-      void Start();
+      void LaunchUI();
 
       /**
-       * @brief ScanDrive
-       * @param parameters
+       * @brief Scans the drive.
+       *
+       * @param[in] parameters      Drive scanning parameters; where to start, et cetera.
        */
       void ScanDrive(Settings::VisualizationParameters& parameters);
 

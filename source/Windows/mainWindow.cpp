@@ -226,11 +226,6 @@ void MainWindow::SetupGamepad()
    QGamepadManager::instance()->resetConfiguration(m_gamepad->deviceId());
 }
 
-//std::wstring MainWindow::GetDirectoryToVisualize() const
-//{
-//   return m_rootPath.wstring();
-//}
-
 void MainWindow::SetupMenus()
 {
    SetupFileMenu();
@@ -439,12 +434,6 @@ void MainWindow::OnFileMenuNewScan()
    {
       return;
    }
-
-
-
-   // @todo Move to scanning start code:
-   //const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
-   //log->info(fmt::format("Started a new scan at: \"{}\"", m_rootPath.string()));
 
    const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
 
