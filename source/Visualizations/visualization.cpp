@@ -78,7 +78,9 @@ namespace
       const Qt3DRender::RayCasting::QRay3D& ray,
       const std::vector<QVector3D>& allIntersections)
    {
-      const auto& closest = std::min_element(std::begin(allIntersections), std::end(allIntersections),
+      const auto& closest = std::min_element(
+         std::begin(allIntersections),
+         std::end(allIntersections),
          [&ray] (const auto& lhs, const auto& rhs) noexcept
       {
          return (ray.origin().distanceToPoint(lhs) < ray.origin().distanceToPoint(rhs));
@@ -283,7 +285,9 @@ namespace
             continue;
          }
 
-         const auto& boundingBoxIntersection = DoesRayIntersectBlock(ray, node->GetData().boundingBox);
+         const auto& boundingBoxIntersection =
+            DoesRayIntersectBlock(ray, node->GetData().boundingBox);
+
          if (boundingBoxIntersection)
          {
             const auto& blockIntersection = DoesRayIntersectBlock(ray, node->GetData().block);
@@ -383,7 +387,7 @@ Tree<VizBlock>::Node* VisualizationModel::FindNearestIntersection(
       }
 
       const auto& closest = std::min_element(std::begin(intersections), std::end(intersections),
-         [&ray] (const IntersectionPointAndNode& lhs, const IntersectionPointAndNode& rhs) noexcept
+         [&ray] (const auto& lhs, const auto& rhs) noexcept
       {
          return (ray.origin().distanceToPoint(lhs.first) < ray.origin().distanceToPoint(rhs.first));
       });
@@ -544,6 +548,16 @@ void VisualizationModel::HighlightMatchingFileName(
 
       m_highlightedNodes.emplace_back(&node);
    });
+}
+
+void VisualizationModel::StartFileSystemMonitor()
+{
+   //m_fileMonitor = std::thread{ &VisualizationModel::MonitorFileSystem, this };
+}
+
+void VisualizationModel::MonitorFileSystem()
+{
+   // @todo Use WinAPI to monitor filesystem.
 }
 
 void VisualizationModel::SortNodes(Tree<VizBlock>& tree)

@@ -710,7 +710,7 @@ GLCanvas& MainWindow::GetCanvas()
 Gamepad& MainWindow::GetGamepad()
 {
    assert(m_gamepad);
-       return *m_gamepad;
+   return *m_gamepad;
 }
 
 void MainWindow::OnScanStarted()
@@ -720,6 +720,8 @@ void MainWindow::OnScanStarted()
 
 void MainWindow::OnScanCompleted()
 {
+   ReloadVisualization();
+
    m_ui.showBreakdownButton->setEnabled(true);
 }
 

@@ -53,6 +53,7 @@ SOURCES += \
    Viewport/mouseContextMenu.cpp \
    Visualizations/squarifiedTreemap.cpp \
    Visualizations/visualization.cpp \
+   Visualizations/windowsFileMonitor.cpp \
    Windows/aboutDialog.cpp \
    Windows/breakdownDialog.cpp \
    Windows/mainWindow.cpp \
@@ -99,6 +100,7 @@ HEADERS += \
    Viewport/mouseContextMenu.h \
    Visualizations/squarifiedTreemap.h \
    Visualizations/visualization.h \
+   Visualizations/windowsFileMonitor.h \
    Windows/aboutDialog.h \
    Windows/breakdownDialog.h \
    Windows/mainWindow.h \

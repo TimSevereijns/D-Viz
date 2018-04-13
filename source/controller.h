@@ -29,7 +29,7 @@ class Controller
       ~Controller();
 
       /**
-       * @brief Start's the UI.
+       * @brief Starts the UI.
        */
       void LaunchUI();
 
@@ -241,7 +241,7 @@ class Controller
        *
        * @param[in] progress        @see ScanningProgress
        */
-      void SaveScanResults(const ScanningProgress& progress);
+      void SaveScanMetadata(const ScanningProgress& progress);
 
       /**
        * @returns The options manager.

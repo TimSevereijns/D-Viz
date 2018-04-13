@@ -147,9 +147,11 @@ void Controller::LaunchUI()
 
 void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
 {
+   m_rootPath = parameters.rootDirectory;
+
    m_view->OnScanStarted();
 
-   m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(parameters.rootDirectory);
+   m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(m_rootPath);
    assert(m_occupiedDiskSpace > 0);
 
    const auto progressHandler = [&] (const ScanningProgress& progress)
@@ -171,12 +173,13 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
 
       ParseResults(scanningResults);
       UpdateBoundingBoxes();
-      SaveScanResults(progress);
+      SaveScanMetadata(progress);
 
-      m_view->ReloadVisualization();
       m_view->OnScanCompleted();
 
       AllowUserInteractionWithModel(true);
+
+      m_model->StartFileSystemMonitor();
    };
 
    ResetVisualization();
@@ -414,7 +417,7 @@ bool Controller::IsUserAllowedToInteractWithModel() const
    return m_allowInteractionWithModel;
 }
 
-void Controller::SaveScanResults(const ScanningProgress& progress)
+void Controller::SaveScanMetadata(const ScanningProgress& progress)
 {
    TreemapMetadata data
    {

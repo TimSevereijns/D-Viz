@@ -170,7 +170,14 @@ void GamepadContextMenu::AddEntry(
    const QString& label,
    const std::function<void ()>& action)
 {
-   Entry entry{ label, QPoint{ }, QColor{ Qt::green }, action };
+   const Entry entry
+   {
+      label,
+      QPoint{ },
+      QColor{ Qt::green },
+      action
+   };
+
    m_entries.emplace_back(std::move(entry));
 }
 

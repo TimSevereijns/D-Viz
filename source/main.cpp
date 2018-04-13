@@ -2,6 +2,7 @@
 
 #include "controller.h"
 #include "Utilities/ignoreUnused.hpp"
+#include "Visualizations/windowsFileMonitor.h"
 
 #include <QApplication>
 #include <spdlog/spdlog.h>
@@ -16,19 +17,44 @@ struct VizBlock;
 
 namespace
 {
+   /**
+    * @brief Returns a wide string if on Windows, and returns a narrow string on Unix.
+   */
+   spdlog::filename_t ToFilenameString(const std::experimental::filesystem::path& path)
+   {
+      if constexpr (std::is_same_v<spdlog::filename_t, std::wstring>)
+      {
+         return path.wstring();
+      }
+
+      if constexpr (std::is_same_v<spdlog::filename_t, std::string>)
+      {
+         return path.string();
+      }
+
+      assert(false);
+
+      return { };
+   }
+
+   /**
+    * @brief Performs all the steps necessary to initialize and start the log.
+    */
    void InitializeLog()
    {
-#ifdef Q_OS_WIN
-      spdlog::basic_logger_mt(Constants::Logging::DEFAULT_LOG, ".\\log.txt");
-#else
-      spdlog::basic_logger_mt(Constants::Logging::DEFAULT_LOG, "./log.txt");
-#endif
+      const auto logPath = std::experimental::filesystem::current_path().append("log.txt");
 
-      const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+      const auto& log = spdlog::basic_logger_mt(
+         Constants::Logging::DEFAULT_LOG,
+         ToFilenameString(logPath));
+
       log->info("--------------------------------");
       log->info("Starting D-Viz...");
    }
 
+   /**
+    * @brief Registers the types that we'd like pass through the Qt signaling framework.
+    */
    void RegisterMetaTypes()
    {
       qRegisterMetaType<std::uintmax_t>("std::uintmax_t");

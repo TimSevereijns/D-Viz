@@ -489,6 +489,7 @@ void GLCanvas::ShowGamepadContextMenu()
    m_gamepadContextMenu->resize(width(), height());
 
    m_gamepadContextMenu->ComputeLayout();
+
    m_gamepadContextMenu->show();
    m_gamepadContextMenu->raise();
 }

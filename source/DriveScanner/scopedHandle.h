@@ -7,7 +7,7 @@ class ScopedHandle
 {
    public:
 
-      explicit ScopedHandle(HANDLE handle);
+      ScopedHandle(HANDLE handle);
       ~ScopedHandle();
 
       ScopedHandle(const ScopedHandle& other);

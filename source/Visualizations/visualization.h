@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <memory>
 #include <numeric>
+#include <thread>
 
 #include <Tree/Tree.hpp>
 
@@ -175,6 +176,13 @@ class VisualizationModel
          bool shouldSearchDirectories);
 
       /**
+       * @brief Starts monitoring the file system for changes.
+       *
+       * @todo Pass in callback to handle changes.
+       */
+      void StartFileSystemMonitor();
+
+      /**
        * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each
        * node by their respective file sizes.
        *
@@ -183,6 +191,11 @@ class VisualizationModel
       static void SortNodes(Tree<VizBlock>& tree);
 
    protected:
+
+      /**
+       * @brief Performs the actual monitoring of the filesystem.
+       */
+      void MonitorFileSystem();
 
       // @note The tree is stored in a shared pointer so that it can be passed through the Qt
       // signaling framework; any type passed through it needs to be copy-constructible.
@@ -195,6 +208,8 @@ class VisualizationModel
       TreemapMetadata m_metadata{ 0, 0, 0 };
 
       bool m_hasDataBeenParsed{ false };
+
+      //std::thread m_fileMonitor;
 };
 
 #endif // VISUALIZATIONMODEL_H
