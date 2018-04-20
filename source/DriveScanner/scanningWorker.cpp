@@ -166,7 +166,7 @@ namespace
          return nullptr;
       }
 
-      const FileInfo fileInfo
+      FileInfo fileInfo
       {
          path.wstring(),
          /* extension = */ L"",
@@ -342,7 +342,7 @@ void ScanningWorker::ProcessFile(
    m_progress.bytesProcessed.fetch_add(fileSize);
    m_progress.filesScanned.fetch_add(1);
 
-   const FileInfo fileInfo
+   FileInfo fileInfo
    {
       path.filename().stem().wstring(),
       path.filename().extension().wstring(),
@@ -392,7 +392,7 @@ void ScanningWorker::ProcessDirectory(
          return;
       }
 
-      const FileInfo directoryInfo
+      FileInfo directoryInfo
       {
          path.filename().wstring(),
          /* extension = */ L"",

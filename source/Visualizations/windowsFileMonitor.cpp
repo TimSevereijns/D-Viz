@@ -4,145 +4,211 @@
 #include <exception>
 #include <iostream>
 
-#include <Windows.h>
-#include <FileApi.h>
-#include <WinBase.h>
-
 #include "../DriveScanner/scopedHandle.h"
 
 namespace
 {
-   template<typename Source, typename Sink>
-   struct AdoptConstness
+   /**
+    * @brief Advances a non-null pointer by a specified number of bytes.
+    *
+    * @param[in] ptr                The pointer value to advance.
+    * @param[in] offset             The number of bytes by which to advance the pointer.
+    *
+    * @returns An advanced pointer if the input is not null.
+    */
+   template<typename DataType>
+   DataType* AdvancePointer(
+      DataType* ptr,
+      std::ptrdiff_t offset)
    {
-      using type = std::conditional_t<
-         std::is_const_v<Source>,
-         std::add_const_t<Sink>,
-         Sink>;
-   };
-
-   template<typename Source, typename Sink>
-   struct AdoptVolatility
-   {
-      using type = std::conditional_t<
-         std::is_volatile_v<Source>,
-         std::add_volatile_t<Sink>,
-         Sink>;
-   };
-
-   template<typename Source, typename Sink>
-   struct AdoptConstVolatility
-   {
-      using type = typename AdoptConstness<
-         Source,
-         typename AdoptVolatility<Source, Sink>::type>::type;
-   };
-
-   template<typename T>
-   T* AdvancePointer(T* ptr, std::ptrdiff_t offset)
-   {
-      if (!ptr)
+      if (ptr == nullptr)
       {
          return ptr;
       }
 
-      using ByteType = typename AdoptConstVolatility<T, unsigned char>::type;
-
-      return reinterpret_cast<T*>(reinterpret_cast<ByteType*>(ptr) + offset);
+      return reinterpret_cast<DataType*>(reinterpret_cast<std::byte*>(ptr) + offset);
    }
 }
 
-WindowsFileMonitor::WindowsFileMonitor(const std::experimental::filesystem::path& path)
+WindowsFileMonitor::~WindowsFileMonitor()
 {
-   HANDLE fileHandle = CreateFile(
-      path.wstring().data(),
-      FILE_LIST_DIRECTORY | STANDARD_RIGHTS_READ,
-      FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-      NULL,
-      OPEN_EXISTING,
-      FILE_FLAG_BACKUP_SEMANTICS,
-      NULL);
+   Stop();
 
-   if (!fileHandle || fileHandle == INVALID_HANDLE_VALUE)
+   if (m_monitoringThread.joinable())
+   {
+      m_monitoringThread.join();
+   }
+
+   if (m_fileHandle && m_fileHandle != INVALID_HANDLE_VALUE)
+   {
+      CloseHandle(m_fileHandle);
+   }
+}
+
+void WindowsFileMonitor::Monitor()
+{
+   while (m_keepMonitoring)
+   {
+      AwaitNotification();
+   }
+}
+
+void WindowsFileMonitor::Start(const std::experimental::filesystem::path& path)
+{
+   constexpr auto sizeOfNotification = sizeof(FILE_NOTIFY_INFORMATION) + MAX_PATH * sizeof(wchar_t);
+
+   m_notificationBuffer.resize(1024 * sizeOfNotification, std::byte{ 0 });
+
+   m_fileHandle = CreateFileW(
+      /* fileName = */ path.wstring().data(),
+      /* access = */ FILE_LIST_DIRECTORY | STANDARD_RIGHTS_READ,
+      /* shareMode = */ FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+      /* securityAttributes = */ NULL,
+      /* creationDisposition = */ OPEN_EXISTING,
+      /* flagsAndAttributes = */ FILE_FLAG_BACKUP_SEMANTICS,
+      /* templateFile = */ NULL);
+
+   if (!m_fileHandle || m_fileHandle == INVALID_HANDLE_VALUE)
    {
       std::wcout << L"Could not acquire handle to: " << path.wstring() << std::endl;
+
+      assert(false);
 
       return;
    }
 
+   const auto terminationHandle = CreateEventW(
+      /* securityAttributes = */ NULL,
+      /* manualReset = */ true,
+      /* initialState = */ false,
+      /* eventName = */ L"D-VIZ_FILE_MONITOR_TERMINATE_THREAD");
+
+   m_events.SetExitHandle(terminationHandle);
+
+   const auto notificationHandle = CreateEventW(
+      /* securityAttributes = */ NULL,
+      /* manualReset = */ false,
+      /* initialState = */ false,
+      /* eventName = */ L"D-VIZ_FILE_MONITOR_NOTIFICATION");
+
+   m_events.SetNotificationHandle(notificationHandle);
+
+   ::ZeroMemory(&m_ioBuffer, sizeof(OVERLAPPED));
+   m_ioBuffer.hEvent = notificationHandle;
+
+   m_monitoringThread = std::thread{ [&] { Monitor(); } };
+}
+
+void WindowsFileMonitor::Stop()
+{
+   SetEvent(m_events.GetExitHandle());
+}
+
+void WindowsFileMonitor::AwaitNotification()
+{
+   constexpr auto desiredNotifications =
+      FILE_NOTIFY_CHANGE_FILE_NAME |
+      FILE_NOTIFY_CHANGE_DIR_NAME |
+      FILE_NOTIFY_CHANGE_ATTRIBUTES |
+      FILE_NOTIFY_CHANGE_SIZE |
+      FILE_NOTIFY_CHANGE_LAST_WRITE |
+      FILE_NOTIFY_CHANGE_LAST_ACCESS |
+      FILE_NOTIFY_CHANGE_CREATION |
+      FILE_NOTIFY_CHANGE_SECURITY;
+
+   const bool successfullyQueued = ReadDirectoryChangesW(
+      /* directoryHandle = */ m_fileHandle,
+      /* outputBuffer = */ m_notificationBuffer.data(),
+      /* bufferLength = */ static_cast<DWORD>(m_notificationBuffer.size()),
+      /* watchSubtree = */ TRUE,
+      /* filter = */ desiredNotifications,
+      /* bytesReturned = */ NULL,
+      /* overlapped = */ &m_ioBuffer,
+      /* callback = */ NULL);
+
+   assert(successfullyQueued);
+
+   auto waitResult = WaitForMultipleObjects(
+      /* handleCount = */ m_events.Size(),
+      /* handles = */ m_events.Data(),
+      /* awaitAll = */ false,
+      /* timeout = */ INFINITE);
+
+   switch (waitResult)
+   {
+      case WAIT_OBJECT_0:
+      {
+         m_keepMonitoring = false;
+
+         CancelIo(m_fileHandle);
+
+         while (!HasOverlappedIoCompleted(&m_ioBuffer))
+         {
+            SleepEx(100, TRUE);
+         }
+
+         break;
+      }
+      case WAIT_OBJECT_0 + 1:
+      {
+         RetrieveNotification();
+
+         break;
+      }
+      default:
+      {
+         assert(false);
+      }
+   }
+}
+
+void WindowsFileMonitor::RetrieveNotification()
+{
+   DWORD bytesTransferred{ 0 };
+
+   const bool successfullyRead = GetOverlappedResult(
+      m_fileHandle,
+      &m_ioBuffer,
+      &bytesTransferred,
+      false);
+
+   if (successfullyRead && bytesTransferred > 0)
+   {
+      ProcessNotification();
+   }
+   else
+   {
+      assert(false);
+   }
+}
+
+void WindowsFileMonitor::ProcessNotification()
+{
    static auto fileName = std::wstring(MAX_PATH, '\0');
 
-   constexpr auto sizeOfNotification = sizeof(FILE_NOTIFY_INFORMATION) + MAX_PATH * sizeof(wchar_t);
-   std::vector<char> buffer(1024 * sizeOfNotification, '\0');
-
-   while (true)
+   auto* notificationInfo = reinterpret_cast<FILE_NOTIFY_INFORMATION*>(m_notificationBuffer.data());
+   while (notificationInfo != nullptr)
    {
-      constexpr auto desiredNotifications =
-         FILE_NOTIFY_CHANGE_FILE_NAME |
-         FILE_NOTIFY_CHANGE_DIR_NAME |
-         FILE_NOTIFY_CHANGE_ATTRIBUTES |
-         FILE_NOTIFY_CHANGE_SIZE |
-         FILE_NOTIFY_CHANGE_LAST_WRITE |
-         FILE_NOTIFY_CHANGE_LAST_ACCESS |
-         FILE_NOTIFY_CHANGE_CREATION |
-         FILE_NOTIFY_CHANGE_SECURITY;
-
-      DWORD bytesReturned{ 0 };
-
-      const bool successfullyReadNotifications = ReadDirectoryChangesW(
-         fileHandle,
-         buffer.data(),
-         static_cast<DWORD>(buffer.size()),
-         TRUE, /* monitor the entire subtree */
-         desiredNotifications,
-         &bytesReturned,
-         NULL,
-         NULL);
-
-      if (successfullyReadNotifications == false)
+      if (notificationInfo->FileNameLength == 0)
       {
-         if (bytesReturned == 0 && GetLastError() == ERROR_NOTIFY_ENUM_DIR)
-         {
-            std::cout << "Buffer overflow detected!\n";
-         }
-         else if (bytesReturned == 0)
-         {
-            std::cout << "Buffer was either too large to allocate, or too small for the changes.\n";
-         }
-         else
-         {
-            std::cout << "Unknown error occured.\n";
-         }
-
-         std::cout << std::flush;
+         notificationInfo = notificationInfo->NextEntryOffset != 0
+            ? AdvancePointer(notificationInfo, notificationInfo->NextEntryOffset)
+            : nullptr;
 
          continue;
       }
 
-      assert(bytesReturned <= buffer.size());
+      assert(notificationInfo->FileNameLength / sizeof(wchar_t) <= MAX_PATH);
 
-      auto* notificationInfo = reinterpret_cast<FILE_NOTIFY_INFORMATION*>(buffer.data());
-      while (notificationInfo != nullptr)
+      std::memcpy(
+         &fileName[0],
+         notificationInfo->FileName,
+         notificationInfo->FileNameLength);
+
+      fileName.resize(notificationInfo->FileNameLength / sizeof(wchar_t));
+
+      switch (notificationInfo->Action)
       {
-         if (notificationInfo->FileNameLength == 0)
-         {
-            notificationInfo = notificationInfo->NextEntryOffset != 0
-               ? AdvancePointer(notificationInfo, notificationInfo->NextEntryOffset)
-               : nullptr;
-
-            continue;
-         }
-
-         assert(notificationInfo->FileNameLength  / sizeof(wchar_t) <= MAX_PATH);
-
-         std::memcpy(&fileName[0],
-            notificationInfo->FileName,
-            notificationInfo->FileNameLength);
-
-         fileName.resize(notificationInfo->FileNameLength / sizeof(wchar_t));
-
-         switch (notificationInfo->Action)
-         {
          case FILE_ACTION_ADDED:
             std::wcout << L"File Added: " << fileName << std::endl;
             break;
@@ -164,14 +230,11 @@ WindowsFileMonitor::WindowsFileMonitor(const std::experimental::filesystem::path
             break;
 
          default:
-            std::wcout << L"Unkown Action: " << fileName << std::endl;
-         }
-
-         notificationInfo = notificationInfo->NextEntryOffset != 0
-            ? AdvancePointer(notificationInfo, notificationInfo->NextEntryOffset)
-            : nullptr;
+            std::wcout << L"Unknown Action: " << fileName << std::endl;
       }
-   }
 
-   CloseHandle(fileHandle);
+      notificationInfo = notificationInfo->NextEntryOffset != 0
+         ? AdvancePointer(notificationInfo, notificationInfo->NextEntryOffset)
+         : nullptr;
+   }
 }

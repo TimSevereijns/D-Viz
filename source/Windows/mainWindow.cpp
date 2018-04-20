@@ -443,7 +443,9 @@ void MainWindow::OnFileMenuNewScan()
    parameters.forceNewScan = true;
    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
-   auto& savedParameters = m_controller.GetSettingsManager().SetVisualizationParameters(std::move(parameters));
+   auto& savedParameters =
+      m_controller.GetSettingsManager().SetVisualizationParameters(std::move(parameters));
+
    m_controller.ScanDrive(savedParameters);
 }
 

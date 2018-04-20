@@ -550,9 +550,9 @@ void VisualizationModel::HighlightMatchingFileName(
    });
 }
 
-void VisualizationModel::StartFileSystemMonitor()
+void VisualizationModel::StartFileSystemMonitor(const std::experimental::filesystem::path& path)
 {
-   //m_fileMonitor = std::thread{ &VisualizationModel::MonitorFileSystem, this };
+   m_fileMonitor.Start(path);
 }
 
 void VisualizationModel::MonitorFileSystem()

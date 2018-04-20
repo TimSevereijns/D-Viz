@@ -137,7 +137,9 @@ DEFINES += \
    BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE
 
 win32:CONFIG(release, debug|release) {
-   DEFINES += _WIN32_WINNT=0x0501
+   DEFINES += \
+      _WIN32_WINNT=0x0501 \
+      NOMINMAX
    LIBS += \
       -lXInput9_1_0 \
       -lShell32 \
@@ -147,7 +149,9 @@ win32:CONFIG(release, debug|release) {
 }
 
 win32:CONFIG(debug, debug|release) {
-   DEFINES += _WIN32_WINNT=0x0501
+   DEFINES += \
+      _WIN32_WINNT=0x0501 \
+      NOMINMAX
    LIBS += \
       -lXInput9_1_0 \
       -lShell32 \

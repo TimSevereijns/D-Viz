@@ -170,7 +170,7 @@ void GamepadContextMenu::AddEntry(
    const QString& label,
    const std::function<void ()>& action)
 {
-   const Entry entry
+   Entry entry
    {
       label,
       QPoint{ },

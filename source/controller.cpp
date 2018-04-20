@@ -36,25 +36,25 @@ namespace
 
       if (sizeInBytes < 1_KiB)
       {
-         return std::make_pair<double, std::wstring>(std::move(sizeInBytes), BYTES_READOUT_STRING);
+         return std::make_pair(sizeInBytes, BYTES_READOUT_STRING);
       }
 
       if (sizeInBytes < 1_MiB)
       {
-         return std::make_pair<double, std::wstring>(sizeInBytes / 1_KiB, L" KiB");
+         return std::make_pair(sizeInBytes / 1_KiB, L" KiB");
       }
 
       if (sizeInBytes < 1_GiB)
       {
-         return std::make_pair<double, std::wstring>(sizeInBytes / 1_MiB, L" MiB");
+         return std::make_pair(sizeInBytes / 1_MiB, L" MiB");
       }
 
       if (sizeInBytes < 1_TiB)
       {
-         return std::make_pair<double, std::wstring>(sizeInBytes / 1_GiB, L" GiB");
+         return std::make_pair(sizeInBytes / 1_GiB, L" GiB");
       }
 
-      return std::make_pair<double, std::wstring>(sizeInBytes / 1_TiB, L" TiB");
+      return std::make_pair(sizeInBytes / 1_TiB, L" TiB");
    }
 
    /**
@@ -70,25 +70,25 @@ namespace
 
       if (sizeInBytes < 1_KB)
       {
-         return std::make_pair<double, std::wstring>(std::move(sizeInBytes), BYTES_READOUT_STRING);
+         return std::make_pair(sizeInBytes, BYTES_READOUT_STRING);
       }
 
       if (sizeInBytes < 1_MB)
       {
-         return std::make_pair<double, std::wstring>(sizeInBytes / 1_KB, L" KB");
+         return std::make_pair(sizeInBytes / 1_KB, L" KB");
       }
 
       if (sizeInBytes < 1_GB)
       {
-         return std::make_pair<double, std::wstring>(sizeInBytes / 1_MB, L" MB");
+         return std::make_pair(sizeInBytes / 1_MB, L" MB");
       }
 
       if (sizeInBytes < 1_TB)
       {
-         return std::make_pair<double, std::wstring>(sizeInBytes / 1_GB, L" GB");
+         return std::make_pair(sizeInBytes / 1_GB, L" GB");
       }
 
-      return std::make_pair<double, std::wstring>(sizeInBytes / 1_TB, L" TB");
+      return std::make_pair(sizeInBytes / 1_TB, L" TB");
    }
 
    /**
@@ -179,14 +179,14 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
 
       AllowUserInteractionWithModel(true);
 
-      m_model->StartFileSystemMonitor();
+      //m_model->StartFileSystemMonitor();
    };
 
    ResetVisualization();
 
    AllowUserInteractionWithModel(false);
 
-   const DriveScanningParameters scanningParameters
+   DriveScanningParameters scanningParameters
    {
       parameters.rootDirectory,
       progressHandler,

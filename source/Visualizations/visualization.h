@@ -17,6 +17,21 @@
 #include "../Settings/settings.h"
 #include "../Viewport/camera.h"
 
+#if defined(Q_OS_WIN)
+   #include "windowsFileMonitor.h"
+#elif defined(Q_OS_UNIX)
+   //#include "linuxFileMonitor.h"
+#endif
+
+namespace Detail
+{
+#if defined(Q_OS_WIN)
+   using FileMonitor = WindowsFileMonitor;
+#elif defined(Q_OS_UNIX)
+   //using FileMonitor = LinuxFileMonitor;
+#endif
+}
+
 struct TreemapMetadata
 {
    std::uintmax_t FileCount;
@@ -178,9 +193,11 @@ class VisualizationModel
       /**
        * @brief Starts monitoring the file system for changes.
        *
+       * @param[in] path            The root directory that is to be monitored.
+       *
        * @todo Pass in callback to handle changes.
        */
-      void StartFileSystemMonitor();
+      void StartFileSystemMonitor(const std::experimental::filesystem::path& path);
 
       /**
        * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each
@@ -209,7 +226,7 @@ class VisualizationModel
 
       bool m_hasDataBeenParsed{ false };
 
-      //std::thread m_fileMonitor;
+      Detail::FileMonitor m_fileMonitor;
 };
 
 #endif // VISUALIZATIONMODEL_H
