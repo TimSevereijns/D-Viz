@@ -286,6 +286,12 @@ class GLCanvas final : public QOpenGLWidget
       template<typename AssetTag>
       void RegisterAsset();
 
+      /**
+       * @brief Updates the UI to reflect changes that have been made to the file system that we
+       * might want to reflect in the visualization.
+       */
+      void ProcessFileChanges();
+
       bool m_isPaintingSuspended{ false };
       bool m_isVisualizationLoaded{ false };
       bool m_isLeftTriggerDown{ false };

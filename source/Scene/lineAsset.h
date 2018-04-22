@@ -14,31 +14,31 @@ namespace Asset
       public:
 
          /**
-          * @see Asset::Base::Base(...)
+          * @copydoc Asset::Base::Base()
           */
          Line(
             const Settings::Manager& settings,
             QOpenGLExtraFunctions& openGL);
 
          /**
-          * @see Asset::Base::LoadShaders(...)
+          * @copydoc Asset::Base::LoadShaders()
           */
          bool LoadShaders() override;
 
          /**
-          * @see Asset::Base::Initialize(...)
+          * @copydoc Asset::Base::Initialize()
           */
          void Initialize() override;
 
          /**
-          * @see Asset::Base::Render(...)
+          * @copydoc Asset::Base::Render()
           */
          void Render(
             const Camera& camera,
             const std::vector<Light>& light) override;
 
          /**
-          * @see Asset::Base::Reload(...)
+          * @copydoc Asset::Base::Reload()
           */
          void Refresh() override;
 

@@ -31,43 +31,43 @@ namespace Asset
       public:
 
          /**
-          * @see Asset::Base::Base(...)
+          * @copydoc Asset::Base::Base()
           */
          Treemap(
             const Settings::Manager& settings,
             QOpenGLExtraFunctions& openGL);
 
          /**
-          * @see Asset::Base::LoadShaders(...)
+          * @copydoc Asset::Base::LoadShaders()
           */
          bool LoadShaders() override;
 
          /**
-          * @see Asset::Base::Initialize(...)
+          * @copydoc Asset::Base::Initialize()
           */
          void Initialize() override;
 
          /**
-          * @see Asset::Base::Render(...)
+          * @copydoc Asset::Base::Render()
           */
          void Render(
             const Camera& camera,
             const std::vector<Light>& lights) override;
 
          /**
-          * @see Asset::Base::Reload(...)
+          * @copydoc Asset::Base::Reload()
           */
          void Refresh() override;
 
          /**
-          * @see Asset::Base::UpdateVBO(...)
+          * @copydoc Asset::Base::UpdateVBO()
           */
          void UpdateVBO(
             const Tree<VizBlock>::Node& node,
             Asset::Event action) override;
 
          /**
-          * @see Asset::Base::IsAssetLoaded(...)
+          * @copydoc Asset::Base::IsAssetLoaded()
           */
          bool IsAssetLoaded() const override;
 

@@ -45,12 +45,9 @@ WindowsFileMonitor::~WindowsFileMonitor()
    }
 }
 
-void WindowsFileMonitor::Monitor()
+bool WindowsFileMonitor::IsActive() const
 {
-   while (m_keepMonitoring)
-   {
-      AwaitNotification();
-   }
+   return m_isActive;
 }
 
 void WindowsFileMonitor::Start(const std::experimental::filesystem::path& path)
@@ -73,7 +70,6 @@ void WindowsFileMonitor::Start(const std::experimental::filesystem::path& path)
       std::wcout << L"Could not acquire handle to: " << path.wstring() << std::endl;
 
       assert(false);
-
       return;
    }
 
@@ -96,12 +92,22 @@ void WindowsFileMonitor::Start(const std::experimental::filesystem::path& path)
    ::ZeroMemory(&m_ioBuffer, sizeof(OVERLAPPED));
    m_ioBuffer.hEvent = notificationHandle;
 
+   m_isActive = true;
    m_monitoringThread = std::thread{ [&] { Monitor(); } };
 }
 
 void WindowsFileMonitor::Stop()
 {
    SetEvent(m_events.GetExitHandle());
+   m_isActive = false;
+}
+
+void WindowsFileMonitor::Monitor()
+{
+   while (m_keepMonitoring)
+   {
+      AwaitNotification();
+   }
 }
 
 void WindowsFileMonitor::AwaitNotification()
@@ -128,7 +134,7 @@ void WindowsFileMonitor::AwaitNotification()
 
    assert(successfullyQueued);
 
-   auto waitResult = WaitForMultipleObjects(
+   const auto waitResult = WaitForMultipleObjects(
       /* handleCount = */ m_events.Size(),
       /* handles = */ m_events.Data(),
       /* awaitAll = */ false,
@@ -167,10 +173,10 @@ void WindowsFileMonitor::RetrieveNotification()
    DWORD bytesTransferred{ 0 };
 
    const bool successfullyRead = GetOverlappedResult(
-      m_fileHandle,
-      &m_ioBuffer,
-      &bytesTransferred,
-      false);
+      /* handle = */ m_fileHandle,
+      /* overlapped = */ &m_ioBuffer,
+      /* bytesTransfered = */ &bytesTransferred,
+      /* wait = */ false);
 
    if (successfullyRead && bytesTransferred > 0)
    {
@@ -210,31 +216,55 @@ void WindowsFileMonitor::ProcessNotification()
       switch (notificationInfo->Action)
       {
          case FILE_ACTION_ADDED:
-            std::wcout << L"File Added: " << fileName << std::endl;
+         {
+            auto fileNotification = FileAndChangeStatus{ fileName, FileStatusChanged::CREATED };
+            m_pendingChanges.Emplace(std::move(fileNotification));
             break;
-
+         }
          case FILE_ACTION_REMOVED:
-            std::wcout << L"File Removed: " << fileName << std::endl;
+         {
+            auto fileNotification = FileAndChangeStatus{ fileName, FileStatusChanged::DELETED };
+            m_pendingChanges.Emplace(std::move(fileNotification));
             break;
-
+         }
          case FILE_ACTION_MODIFIED:
-            std::wcout << L"File Modified: " << fileName << std::endl;
+         {
+            auto fileNotification = FileAndChangeStatus{ fileName, FileStatusChanged::MODIFIED };
+            m_pendingChanges.Emplace(std::move(fileNotification));
             break;
-
+         }
          case FILE_ACTION_RENAMED_OLD_NAME:
-            std::wcout << L"File Renamed From: " << fileName << std::endl;
+         {
+            // Handling the new name as the cannonical renaming event should be sufficient.
             break;
-
+         }
          case FILE_ACTION_RENAMED_NEW_NAME:
-            std::wcout << L"File Renamed To: " << fileName << std::endl;
+         {
+            auto fileNotification = FileAndChangeStatus{ fileName, FileStatusChanged::RENAMED };
+            m_pendingChanges.Emplace(std::move(fileNotification));
             break;
-
+         }
          default:
+         {
             std::wcout << L"Unknown Action: " << fileName << std::endl;
+         }
       }
 
       notificationInfo = notificationInfo->NextEntryOffset != 0
          ? AdvancePointer(notificationInfo, notificationInfo->NextEntryOffset)
          : nullptr;
    }
+}
+
+boost::optional<FileAndChangeStatus> WindowsFileMonitor::FetchPendingFileChangeNotification() const
+{
+   FileAndChangeStatus notification;
+   const auto retrievedNotification = m_pendingChanges.TryPop(notification);
+
+   if (retrievedNotification)
+   {
+      return notification;
+   }
+
+   return boost::none;
 }

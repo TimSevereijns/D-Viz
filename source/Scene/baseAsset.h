@@ -22,7 +22,10 @@ namespace Asset
    {
       SELECT = 0,
       HIGHLIGHT,
-      RESTORE
+      RESTORE,
+      DELETED,
+      MODIFIED,
+      RENAMED
    };
 
    /**

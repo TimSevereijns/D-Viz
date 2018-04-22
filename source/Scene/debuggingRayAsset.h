@@ -10,14 +10,14 @@ namespace Asset
       public:
 
          /**
-          * @see Asset::Base::Base(...)
+          * @copydoc Asset::Base::Base()
           */
          DebuggingRay(
             const Settings::Manager& settings,
             QOpenGLExtraFunctions& openGL);
 
          /**
-          * @see Asset::Base::Render(...)
+          * @copydoc Asset::Base::Render()
           */
          void Render(
             const Camera& camera,

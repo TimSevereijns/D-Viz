@@ -1,6 +1,7 @@
 #include "visualization.h"
 
 #include "../constants.h"
+#include "fileStatusChange.hpp"
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -550,22 +551,51 @@ void VisualizationModel::HighlightMatchingFileName(
    });
 }
 
-void VisualizationModel::StartFileSystemMonitor(const std::experimental::filesystem::path& path)
+void VisualizationModel::StartMonitoringFileSystem(const std::experimental::filesystem::path& path)
 {
    m_fileMonitor.Start(path);
 }
 
-void VisualizationModel::MonitorFileSystem()
+bool VisualizationModel::IsFileSystemBeingMonitored() const
 {
-   // @todo Use WinAPI to monitor filesystem.
+   return m_fileMonitor.IsActive();
+}
+
+boost::optional<FileStatusAndNode> VisualizationModel::FetchFileSystemChanges() const
+{
+   const auto fileAndStatus = m_fileMonitor.FetchPendingFileChangeNotification();
+   if (!fileAndStatus)
+   {
+      return boost::none;
+   }
+
+   const auto* node = m_fileTree->GetRoot();
+
+   const auto modifiedItemPath = fileAndStatus->path;
+   for (const auto& element : modifiedItemPath)
+   {
+      const auto matchingNodeItr = std::find_if(
+         Tree<VizBlock>::SiblingIterator{ node->GetFirstChild() },
+         Tree<VizBlock>::SiblingIterator{ },
+         [&] (const auto& node)
+      {
+         return node->file.name == element;
+      });
+
+      if (matchingNodeItr != Tree<VizBlock>::SiblingIterator{ })
+      {
+         node = std::addressof(*matchingNodeItr);
+      }
+   }
+
+   return FileStatusAndNode{ fileAndStatus->status, node };
 }
 
 void VisualizationModel::SortNodes(Tree<VizBlock>& tree)
 {
    for (auto& node : tree)
    {
-      node.SortChildren(
-         [] (const auto& lhs, const auto& rhs) noexcept
+      node.SortChildren([] (const auto& lhs, const auto& rhs) noexcept
       {
          return lhs->file.size > rhs->file.size;
       });

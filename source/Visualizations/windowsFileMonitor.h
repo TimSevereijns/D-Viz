@@ -1,8 +1,14 @@
 #ifndef WINDOWSFILEMONITOR_H
 #define WINDOWSFILEMONITOR_H
 
+#include "fileStatusChange.hpp"
+#include "Utilities/threadSafeQueue.hpp"
+
+#include "boost/optional.hpp"
+
 #include <array>
 #include <experimental/filesystem>
+#include <functional>
 #include <thread>
 #include <vector>
 
@@ -13,57 +19,57 @@
 namespace Detail
 {
    /**
-    * @brief The FileMonitorEventHandles class
+    * @brief Wrapper around the two event handles that we care when monitoring the filesystem.
     */
    class FileMonitorEventHandles
    {
-   public:
+      public:
 
-      ~FileMonitorEventHandles()
-      {
-         for (auto& handle : m_handles)
+         ~FileMonitorEventHandles()
          {
-            if (handle != nullptr && handle != INVALID_HANDLE_VALUE)
+            for (auto& handle : m_handles)
             {
-               CloseHandle(handle);
-               handle = nullptr;
+               if (handle != nullptr && handle != INVALID_HANDLE_VALUE)
+               {
+                  CloseHandle(handle);
+                  handle = nullptr;
+               }
             }
          }
-      }
 
-      void SetExitHandle(HANDLE handle) noexcept
-      {
-         m_handles[0] = handle;
-      }
+         void SetExitHandle(HANDLE handle) noexcept
+         {
+            m_handles[0] = handle;
+         }
 
-      void SetNotificationHandle(HANDLE handle) noexcept
-      {
-         m_handles[1] = handle;
-      }
+         void SetNotificationHandle(HANDLE handle) noexcept
+         {
+            m_handles[1] = handle;
+         }
 
-      auto GetExitHandle() const noexcept
-      {
-         return m_handles[0];
-      }
+         auto GetExitHandle() const noexcept
+         {
+            return m_handles[0];
+         }
 
-      auto GetNotificationHandle() const noexcept
-      {
-         return m_handles[1];
-      }
+         auto GetNotificationHandle() const noexcept
+         {
+            return m_handles[1];
+         }
 
-      auto Data() const noexcept
-      {
-         return m_handles.data();
-      }
+         const auto* Data() const noexcept
+         {
+            return m_handles.data();
+         }
 
-      constexpr auto Size() const noexcept
-      {
-         return static_cast<DWORD>(m_handles.size());
-      }
+         constexpr auto Size() const noexcept
+         {
+            return static_cast<DWORD>(m_handles.size());
+         }
 
-   private:
+      private:
 
-      std::array<HANDLE, 2> m_handles;
+         std::array<HANDLE, 2> m_handles;
    };
 }
 
@@ -78,12 +84,36 @@ class WindowsFileMonitor
 
       ~WindowsFileMonitor();
 
+      WindowsFileMonitor(WindowsFileMonitor&& other) = delete;
+      WindowsFileMonitor& operator=(WindowsFileMonitor&& other) = delete;
+
       WindowsFileMonitor(const WindowsFileMonitor& other) = delete;
       WindowsFileMonitor& operator=(const WindowsFileMonitor& other) = delete;
 
+      /**
+       * @brief Starts monitoring the file system for changes.
+       *
+       * @param[in] path            The root directory to watch.
+       */
       void Start(const std::experimental::filesystem::path& path);
 
+      /**
+       * @brief Stops monitoring the file system for changes.
+       */
       void Stop();
+
+      /**
+       * @returns True if the file system monitor is actively monitoring.
+       */
+      bool IsActive() const;
+
+      /**
+       * @brief Fetches the oldest, pending file change notification that hasn't yet been processed
+       * by the UI.
+       *
+       * @return The pending change, if it exists.
+       */
+      boost::optional<FileAndChangeStatus> FetchPendingFileChangeNotification() const;
 
    private:
 
@@ -93,6 +123,7 @@ class WindowsFileMonitor
       void RetrieveNotification();
       void ProcessNotification();
 
+      bool m_isActive{ false };
       bool m_keepMonitoring{ true };
 
       HANDLE m_fileHandle;
@@ -104,6 +135,8 @@ class WindowsFileMonitor
       std::vector<std::byte> m_notificationBuffer;
 
       std::thread m_monitoringThread;
+
+      mutable ThreadSafeQueue<FileAndChangeStatus> m_pendingChanges;
 };
 
 #endif // WINDOWSFILEMONITOR_H

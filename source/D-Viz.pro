@@ -92,12 +92,14 @@ HEADERS += \
    Utilities/ignoreUnused.hpp \
    Utilities/operatingSystemSpecific.hpp \
    Utilities/scopeExit.hpp \
+   Utilities/threadSafeQueue.hpp \
    Utilities/utilities.hpp \
    Utilities/viewFrustum.hpp \
    Viewport/camera.h \
    Viewport/gamepadContextMenu.h \
    Viewport/glCanvas.h \
    Viewport/mouseContextMenu.h \
+   Visualizations/fileStatusChange.hpp \
    Visualizations/squarifiedTreemap.h \
    Visualizations/visualization.h \
    Visualizations/windowsFileMonitor.h \

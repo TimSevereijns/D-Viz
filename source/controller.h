@@ -7,6 +7,7 @@
 #include "DataStructs/light.h"
 #include "DataStructs/vizBlock.h"
 #include "DriveScanner/driveScanner.h"
+#include "Visualizations/fileStatusChange.hpp"
 
 #include <Tree/Tree.hpp>
 
@@ -15,6 +16,7 @@
 
 #include <QVector3D>
 
+struct FileAndChangeStatus;
 struct ScanningProgress;
 
 class MainWindow;
@@ -258,6 +260,23 @@ class Controller
        * @return
        */
       std::experimental::filesystem::path GetRootPath() const;
+
+      /**
+       * @brief Starts monitoring the file system. This is only possible after the first scan.
+       */
+      void StartMonitoringFileSystem();
+
+      /**
+       * @brief IsFileSystemBeingMonitored
+       *
+       * @return
+       */
+      bool IsFileSystemBeingMonitored() const;
+
+      /**
+       * @brief Fetches oldest, unprocessed file system change notification.
+       */
+      boost::optional<FileStatusAndNode> FetchFileSystemChanges();
 
    private:
 

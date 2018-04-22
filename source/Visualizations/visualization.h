@@ -39,6 +39,12 @@ struct TreemapMetadata
    std::uintmax_t TotalBytes;
 };
 
+struct FileStatusAndNode
+{
+   FileStatusChanged status;
+   const Tree<VizBlock>::Node* node;
+};
+
 /**
  * @brief Base class for the visualization model.
  */
@@ -52,6 +58,9 @@ class VisualizationModel
 
       VisualizationModel(const VisualizationModel&) = delete;
       VisualizationModel& operator=(const VisualizationModel&) = delete;
+
+      VisualizationModel(VisualizationModel&&) = delete;
+      VisualizationModel& operator=(VisualizationModel&&) = delete;
 
       static const double PADDING_RATIO;
       static const double MAX_PADDING;
@@ -197,7 +206,19 @@ class VisualizationModel
        *
        * @todo Pass in callback to handle changes.
        */
-      void StartFileSystemMonitor(const std::experimental::filesystem::path& path);
+      void StartMonitoringFileSystem(const std::experimental::filesystem::path& path);
+
+      /**
+       * @returns True if the file system monitor is turned on.
+       */
+      bool IsFileSystemBeingMonitored() const;
+
+      /**
+       * @brief FetchFileSystemChanges
+       *
+       * @return
+       */
+      boost::optional<FileStatusAndNode> FetchFileSystemChanges() const;
 
       /**
        * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each
@@ -208,11 +229,6 @@ class VisualizationModel
       static void SortNodes(Tree<VizBlock>& tree);
 
    protected:
-
-      /**
-       * @brief Performs the actual monitoring of the filesystem.
-       */
-      void MonitorFileSystem();
 
       // @note The tree is stored in a shared pointer so that it can be passed through the Qt
       // signaling framework; any type passed through it needs to be copy-constructible.

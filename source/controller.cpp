@@ -199,6 +199,26 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
    m_scanner.StartScanning(std::move(scanningParameters));
 }
 
+void Controller::StartMonitoringFileSystem()
+{
+   if (m_rootPath.empty())
+   {
+      return;
+   }
+
+   m_model->StartMonitoringFileSystem(m_rootPath);
+}
+
+bool Controller::IsFileSystemBeingMonitored() const
+{
+   return m_model->IsFileSystemBeingMonitored();
+}
+
+boost::optional<FileStatusAndNode> Controller::FetchFileSystemChanges()
+{
+   return m_model->FetchFileSystemChanges();
+}
+
 void Controller::ComputeProgress(const ScanningProgress& progress)
 {
    assert(m_occupiedDiskSpace > 0);
@@ -209,12 +229,13 @@ void Controller::ComputeProgress(const ScanningProgress& progress)
    const auto doesPathRepresentEntireDrive{ m_rootPath.string() == m_rootPath.root_path() };
    if (doesPathRepresentEntireDrive)
    {
-      const auto percentage =
-         100 * (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
+      const auto fractionOfDiskOccupied =
+         (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
 
-      const auto message = fmt::format(L"Files Scanned: {}  |  {:03.2f}% Complete",
+      const auto message = fmt::format(
+         L"Files Scanned: {}  |  {:03.2f}% Complete",
          Utilities::StringifyWithDigitSeparators(filesScanned),
-         percentage);
+         fractionOfDiskOccupied * 100);
 
       m_view->SetStatusBarMessage(message.c_str());
    }
@@ -223,8 +244,11 @@ void Controller::ComputeProgress(const ScanningProgress& progress)
       const auto prefix = m_settingsManager.GetActiveNumericPrefix();
       const auto [size, units] = Controller::ConvertFileSizeToNumericPrefix(sizeInBytes, prefix);
 
-      const auto message = fmt::format(L"Files Scanned: {}  |  {:03.2f} {} and counting...",
-         Utilities::StringifyWithDigitSeparators(filesScanned), size, units);
+      const auto message = fmt::format(
+         L"Files Scanned: {}  |  {:03.2f} {} and counting...",
+         Utilities::StringifyWithDigitSeparators(filesScanned),
+         size,
+         units);
 
       m_view->SetStatusBarMessage(message.c_str());
    }

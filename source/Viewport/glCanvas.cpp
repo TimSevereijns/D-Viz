@@ -778,6 +778,47 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
       + QString::fromStdWString(L" \xB5s / frame"));
 }
 
+void GLCanvas::ProcessFileChanges()
+{
+   if (!m_controller.HasVisualizationBeenLoaded() || m_controller.IsFileSystemBeingMonitored())
+   {
+      return;
+   }
+
+   Asset::Treemap* treemap = nullptr;
+
+   auto fileStatusAndNode = m_controller.FetchFileSystemChanges();
+   if (fileStatusAndNode)
+   {
+      treemap = GetAsset<Asset::Tag::Treemap>();
+   }
+
+   while (fileStatusAndNode)
+   {
+      switch (fileStatusAndNode->status)
+      {
+         case FileStatusChanged::CREATED:
+            // If a file is newly added, then there's nothing to update in the existing
+            // visualization.
+            break;
+         case FileStatusChanged::DELETED:
+            treemap->UpdateVBO(*fileStatusAndNode->node, Asset::Event::DELETED);
+            break;
+         case FileStatusChanged::MODIFIED:
+            treemap->UpdateVBO(*fileStatusAndNode->node, Asset::Event::MODIFIED);
+            break;
+         case FileStatusChanged::RENAMED:
+            treemap->UpdateVBO(*fileStatusAndNode->node, Asset::Event::RENAMED);
+            break;
+         default:
+            assert(false);
+            break;
+      }
+
+      fileStatusAndNode = m_controller.FetchFileSystemChanges();
+   }
+}
+
 void GLCanvas::paintGL()
 {
    if (m_isPaintingSuspended)
@@ -788,6 +829,8 @@ void GLCanvas::paintGL()
    const auto elapsedTime = Stopwatch<std::chrono::microseconds>(
       [&] () noexcept
    {
+      ProcessFileChanges();
+
       m_openGLContext.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       if (m_controller.GetSettingsManager().IsPrimaryLightAttachedToCamera())
