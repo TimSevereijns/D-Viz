@@ -1,5 +1,7 @@
 #include "windowsFileMonitor.h"
 
+#ifdef Q_OS_WIN
+
 #include <cassert>
 #include <exception>
 #include <iostream>
@@ -29,8 +31,6 @@ namespace
       return reinterpret_cast<DataType*>(reinterpret_cast<std::byte*>(ptr) + offset);
    }
 }
-
-#ifdef Q_OS_WIN
 
 WindowsFileMonitor::~WindowsFileMonitor()
 {

@@ -1,6 +1,8 @@
 #ifndef WINDOWSFILEMONITOR_H
 #define WINDOWSFILEMONITOR_H
 
+#ifdef Q_OS_WIN
+
 #include "fileStatusChange.hpp"
 #include "Utilities/threadSafeQueue.hpp"
 
@@ -12,10 +14,9 @@
 #include <thread>
 #include <vector>
 
-#ifdef Q_OS_WIN
-   #include <Windows.h>
-   #include <FileApi.h>
-   #include <WinBase.h>
+#include <Windows.h>
+#include <FileApi.h>
+#include <WinBase.h>
 
 namespace Detail
 {
@@ -125,7 +126,7 @@ class WindowsFileMonitor
       void ProcessNotification();
 
       bool m_isActive{ false };
-      bool m_keepMonitoring{ true };
+      bool m_keepMonitoring{ true }; //< @todo Make atomic
 
       HANDLE m_fileHandle;
 
