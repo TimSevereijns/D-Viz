@@ -4,11 +4,13 @@
 #include <QDialog>
 #include <QSortFilterProxyModel>
 
-#include "scanBreakdownModel.h"
-
 #include <functional>
 
+#include "scanBreakdownModel.h"
+
 #include "ui_breakdownDialog.h"
+
+class MainWindow;
 
 class ScanBreakdownFilterProxyModel final : public QSortFilterProxyModel
 {

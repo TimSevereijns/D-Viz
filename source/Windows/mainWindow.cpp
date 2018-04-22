@@ -616,7 +616,7 @@ void MainWindow::PruneTree()
    const auto minimumSize = m_fileSizeOptions->at(pruneSizeIndex).first;
 
    Settings::VisualizationParameters parameters;
-   parameters.rootDirectory = m_controller.GetRootPath();
+   parameters.rootDirectory = m_controller.GetRootPath().wstring();
    parameters.onlyShowDirectories = m_showDirectoriesOnly;
    parameters.useDirectoryGradient = m_useDirectoryGradient;
    parameters.forceNewScan = false;

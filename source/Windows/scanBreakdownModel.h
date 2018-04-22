@@ -4,7 +4,6 @@
 #include <QAbstractTableModel>
 
 #include "../constants.h"
-#include "../controller.h"
 #include "../DataStructs/vizBlock.h"
 #include "../Utilities/utilities.hpp"
 

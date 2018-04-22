@@ -30,6 +30,8 @@ namespace
    }
 }
 
+#ifdef Q_OS_WIN
+
 WindowsFileMonitor::~WindowsFileMonitor()
 {
    Stop();
@@ -268,3 +270,5 @@ boost::optional<FileAndChangeStatus> WindowsFileMonitor::FetchPendingFileChangeN
 
    return boost::none;
 }
+
+#endif

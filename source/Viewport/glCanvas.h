@@ -2,7 +2,7 @@
 #define GLCANVAS_H
 
 #include "camera.h"
-#include "controller.h"
+//#include "controller.h"
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
 #include "gamepadContextMenu.h"
@@ -27,7 +27,9 @@
 #include <QTimer>
 #include <QVector3D>
 
+class Controller;
 class Gamepad;
+class MainWindow;
 
 namespace Asset
 {

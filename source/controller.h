@@ -8,6 +8,7 @@
 #include "DataStructs/vizBlock.h"
 #include "DriveScanner/driveScanner.h"
 #include "Visualizations/fileStatusChange.hpp"
+#include "Windows/mainWindow.h"
 
 #include <Tree/Tree.hpp>
 
@@ -19,7 +20,6 @@
 struct FileAndChangeStatus;
 struct ScanningProgress;
 
-class MainWindow;
 class GLCanvas;
 
 class Controller

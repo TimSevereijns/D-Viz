@@ -12,9 +12,10 @@
 #include <thread>
 #include <vector>
 
-#include <Windows.h>
-#include <FileApi.h>
-#include <WinBase.h>
+#ifdef Q_OS_WIN
+   #include <Windows.h>
+   #include <FileApi.h>
+   #include <WinBase.h>
 
 namespace Detail
 {
@@ -138,5 +139,7 @@ class WindowsFileMonitor
 
       mutable ThreadSafeQueue<FileAndChangeStatus> m_pendingChanges;
 };
+
+#endif
 
 #endif // WINDOWSFILEMONITOR_H

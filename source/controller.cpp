@@ -151,7 +151,7 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
 
    m_view->OnScanStarted();
 
-   m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(m_rootPath);
+   m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(m_rootPath.wstring());
    assert(m_occupiedDiskSpace > 0);
 
    const auto progressHandler = [&] (const ScanningProgress& progress)

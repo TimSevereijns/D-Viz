@@ -20,7 +20,7 @@ namespace
    /**
     * @brief Returns a wide string if on Windows, and returns a narrow string on Unix.
    */
-   spdlog::filename_t ToFilenameString(const std::experimental::filesystem::path& path)
+   auto ToFilenameString(const std::experimental::filesystem::path& path)
    {
       if constexpr (std::is_same_v<spdlog::filename_t, std::wstring>)
       {
@@ -31,10 +31,6 @@ namespace
       {
          return path.string();
       }
-
-      assert(false);
-
-      return { };
    }
 
    /**
