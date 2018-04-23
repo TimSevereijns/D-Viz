@@ -821,12 +821,12 @@ namespace Asset
 
       switch (action)
       {
-         case Asset::Event::SELECT:
+         case Asset::Event::SELECTED:
          {
             newColor = Constants::Colors::CANARY_YELLOW;
             break;
          }
-         case Asset::Event::HIGHLIGHT:
+         case Asset::Event::HIGHLIGHTED:
          {
             newColor = Constants::Colors::SLATE_GRAY;
             break;

@@ -1,7 +1,8 @@
 #include "scopedHandle.h"
 
 #ifdef Q_OS_WIN
-   #include <Windows.h>
+
+#include <Windows.h>
 
 namespace
 {

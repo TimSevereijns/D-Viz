@@ -1,6 +1,8 @@
 #ifndef WINDOWSFILEMONITOR_H
 #define WINDOWSFILEMONITOR_H
 
+#include <QtGlobal>
+
 #ifdef Q_OS_WIN
 
 #include "fileStatusChange.hpp"
@@ -115,7 +117,7 @@ class WindowsFileMonitor
        *
        * @return The pending change, if it exists.
        */
-      boost::optional<FileAndChangeStatus> FetchPendingFileChangeNotification() const;
+      boost::optional<FileAndStatusChange> FetchPendingNotifications() const;
 
    private:
 
@@ -126,7 +128,8 @@ class WindowsFileMonitor
       void ProcessNotification();
 
       bool m_isActive{ false };
-      bool m_keepMonitoring{ true }; //< @todo Make atomic
+
+      std::atomic_bool m_keepMonitoring{ true };
 
       HANDLE m_fileHandle;
 
@@ -138,9 +141,9 @@ class WindowsFileMonitor
 
       std::thread m_monitoringThread;
 
-      mutable ThreadSafeQueue<FileAndChangeStatus> m_pendingChanges;
+      mutable ThreadSafeQueue<FileAndStatusChange> m_pendingChanges;
 };
 
-#endif
+#endif // Q_OS_WIN
 
 #endif // WINDOWSFILEMONITOR_H

@@ -7,7 +7,7 @@
 
 #ifdef Q_OS_WIN
    #undef RGB
-#endif
+#endif // Q_OS_WIN
 
 namespace
 {

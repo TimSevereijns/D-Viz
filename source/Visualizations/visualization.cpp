@@ -563,7 +563,7 @@ bool VisualizationModel::IsFileSystemBeingMonitored() const
 
 boost::optional<FileStatusAndNode> VisualizationModel::FetchFileSystemChanges() const
 {
-   const auto fileAndStatus = m_fileMonitor.FetchPendingFileChangeNotification();
+   const auto fileAndStatus = m_fileMonitor.FetchPendingNotifications();
    if (!fileAndStatus)
    {
       return boost::none;

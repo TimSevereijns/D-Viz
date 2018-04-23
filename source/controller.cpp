@@ -132,14 +132,6 @@ Controller::Controller() :
 {
 }
 
-Controller::~Controller()
-{
-   // @note Despite the fact that this DTOR doesn't do anything, it needs to be declared here,
-   // so that its definition appears after the complete definition of the MainWindow class.
-   // Moving the MainWindow header include into the Controller's header isn't possible, since that
-   // would create a cyclic dependency.
-}
-
 void Controller::LaunchUI()
 {
    m_view->show();
@@ -179,6 +171,7 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
 
       AllowUserInteractionWithModel(true);
 
+      // @todo Finish incorporating file system monitoring
       //m_model->StartFileSystemMonitor();
    };
 

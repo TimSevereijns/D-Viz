@@ -6,7 +6,7 @@
 
 #ifdef Q_OS_WIN
    #undef GetObject
-#endif
+#endif // Q_OS_WIN
 
 namespace
 {

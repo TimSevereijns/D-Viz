@@ -6,6 +6,9 @@
 #include <exception>
 #include <iostream>
 
+#include <spdlog/spdlog.h>
+
+#include "../constants.h"
 #include "../DriveScanner/scopedHandle.h"
 
 namespace
@@ -69,7 +72,8 @@ void WindowsFileMonitor::Start(const std::experimental::filesystem::path& path)
 
    if (!m_fileHandle || m_fileHandle == INVALID_HANDLE_VALUE)
    {
-      std::wcout << L"Could not acquire handle to: " << path.wstring() << std::endl;
+      const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+      log->error("Could not acquire handle to: {}.", path.string());
 
       assert(false);
       return;
@@ -146,7 +150,7 @@ void WindowsFileMonitor::AwaitNotification()
    {
       case WAIT_OBJECT_0:
       {
-         m_keepMonitoring = false;
+         m_keepMonitoring.store(false);
 
          CancelIo(m_fileHandle);
 
@@ -219,36 +223,41 @@ void WindowsFileMonitor::ProcessNotification()
       {
          case FILE_ACTION_ADDED:
          {
-            auto fileNotification = FileAndChangeStatus{ fileName, FileStatusChanged::CREATED };
-            m_pendingChanges.Emplace(std::move(fileNotification));
+            // @todo New files will have to be added to the tree.
+
+            auto notification = FileAndStatusChange{ fileName, FileSystemChange::CREATED };
+            m_pendingChanges.Emplace(std::move(notification));
             break;
          }
          case FILE_ACTION_REMOVED:
          {
-            auto fileNotification = FileAndChangeStatus{ fileName, FileStatusChanged::DELETED };
-            m_pendingChanges.Emplace(std::move(fileNotification));
+            // @todo Old files will have to be removed from the tree.
+
+            auto notification = FileAndStatusChange{ fileName, FileSystemChange::DELETED };
+            m_pendingChanges.Emplace(std::move(notification));
             break;
          }
          case FILE_ACTION_MODIFIED:
          {
-            auto fileNotification = FileAndChangeStatus{ fileName, FileStatusChanged::MODIFIED };
-            m_pendingChanges.Emplace(std::move(fileNotification));
+            auto notification = FileAndStatusChange{ fileName, FileSystemChange::MODIFIED };
+            m_pendingChanges.Emplace(std::move(notification));
             break;
          }
          case FILE_ACTION_RENAMED_OLD_NAME:
          {
-            // Handling the new name as the cannonical renaming event should be sufficient.
+            // @note Handling the new name as the cannonical renaming event should be sufficient.
             break;
          }
          case FILE_ACTION_RENAMED_NEW_NAME:
          {
-            auto fileNotification = FileAndChangeStatus{ fileName, FileStatusChanged::RENAMED };
-            m_pendingChanges.Emplace(std::move(fileNotification));
+            auto notification = FileAndStatusChange{ fileName, FileSystemChange::RENAMED };
+            m_pendingChanges.Emplace(std::move(notification));
             break;
          }
          default:
          {
-            std::wcout << L"Unknown Action: " << fileName << std::endl;
+            const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+            log->error("Encountered unknown file system event: {}.", notificationInfo->Action);
          }
       }
 
@@ -258,9 +267,9 @@ void WindowsFileMonitor::ProcessNotification()
    }
 }
 
-boost::optional<FileAndChangeStatus> WindowsFileMonitor::FetchPendingFileChangeNotification() const
+boost::optional<FileAndStatusChange> WindowsFileMonitor::FetchPendingNotifications() const
 {
-   FileAndChangeStatus notification;
+   FileAndStatusChange notification;
    const auto retrievedNotification = m_pendingChanges.TryPop(notification);
 
    if (retrievedNotification)
@@ -271,4 +280,4 @@ boost::optional<FileAndChangeStatus> WindowsFileMonitor::FetchPendingFileChangeN
    return boost::none;
 }
 
-#endif
+#endif // Q_OS_WIN

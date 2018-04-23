@@ -395,7 +395,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 void GLCanvas::SelectNode(const Tree<VizBlock>::Node& node)
 {
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
-   treemap->UpdateVBO(node, Asset::Event::SELECT);
+   treemap->UpdateVBO(node, Asset::Event::SELECTED);
 }
 
 void GLCanvas::RestoreSelectedNode(const Tree<VizBlock>::Node& node)
@@ -404,7 +404,7 @@ void GLCanvas::RestoreSelectedNode(const Tree<VizBlock>::Node& node)
 
    treemap->UpdateVBO(
       node,
-      m_controller.IsNodeHighlighted(node) ? Asset::Event::HIGHLIGHT : Asset::Event::RESTORE);
+      m_controller.IsNodeHighlighted(node) ? Asset::Event::HIGHLIGHTED : Asset::Event::UNSELECTED);
 }
 
 void GLCanvas::HighlightNodes(std::vector<const Tree<VizBlock>::Node*>& nodes)
@@ -413,7 +413,7 @@ void GLCanvas::HighlightNodes(std::vector<const Tree<VizBlock>::Node*>& nodes)
 
    for (const auto* const node : nodes)
    {
-      treemap->UpdateVBO(*node, Asset::Event::HIGHLIGHT);
+      treemap->UpdateVBO(*node, Asset::Event::HIGHLIGHTED);
    }
 }
 
@@ -423,7 +423,7 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizBlock>::Node*>&
 
    for (const auto* const node : nodes)
    {
-      treemap->UpdateVBO(*node, Asset::Event::RESTORE);
+      treemap->UpdateVBO(*node, Asset::Event::UNSELECTED);
    }
 }
 
@@ -797,17 +797,17 @@ void GLCanvas::ProcessFileChanges()
    {
       switch (fileStatusAndNode->status)
       {
-         case FileStatusChanged::CREATED:
+         case FileSystemChange::CREATED:
             // If a file is newly added, then there's nothing to update in the existing
             // visualization.
             break;
-         case FileStatusChanged::DELETED:
+         case FileSystemChange::DELETED:
             treemap->UpdateVBO(*fileStatusAndNode->node, Asset::Event::DELETED);
             break;
-         case FileStatusChanged::MODIFIED:
+         case FileSystemChange::MODIFIED:
             treemap->UpdateVBO(*fileStatusAndNode->node, Asset::Event::MODIFIED);
             break;
-         case FileStatusChanged::RENAMED:
+         case FileSystemChange::RENAMED:
             treemap->UpdateVBO(*fileStatusAndNode->node, Asset::Event::RENAMED);
             break;
          default:

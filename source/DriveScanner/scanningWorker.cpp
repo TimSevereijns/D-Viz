@@ -440,7 +440,8 @@ void ScanningWorker::Start()
       });
 
       m_threadPool.join();
-   }, [] (const auto& elapsed, const auto& units) noexcept
+   },
+   [] (const auto& elapsed, const auto& units) noexcept
    {
       spdlog::get(Constants::Logging::DEFAULT_LOG)->info(
          fmt::format("Scanned Drive in: {} {}", elapsed.count(), units));

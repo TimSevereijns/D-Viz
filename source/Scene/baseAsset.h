@@ -20,9 +20,9 @@ namespace Asset
 {
    enum struct Event : short
    {
-      SELECT = 0,
-      HIGHLIGHT,
-      RESTORE,
+      SELECTED = 0,
+      HIGHLIGHTED,
+      UNSELECTED,
       DELETED,
       MODIFIED,
       RENAMED
@@ -46,8 +46,11 @@ namespace Asset
             const Settings::Manager& settings,
             QOpenGLExtraFunctions& openGL);
 
+         Base(const Base& other) = delete;
+         Base& operator=(const Base& other) = delete;
+
          Base(Base&& other) = default;
-         Base& operator=(const Base& other) = default;
+         Base& operator=(Base&& other) = default;
 
          virtual ~Base() = default;
 

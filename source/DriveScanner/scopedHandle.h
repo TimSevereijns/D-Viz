@@ -1,6 +1,10 @@
 #ifndef SCOPEDHANDLE_H
 #define SCOPEDHANDLE_H
 
+#include <QtGlobal>
+
+#ifdef Q_OS_WIN
+
 using HANDLE = void*;
 
 class ScopedHandle
@@ -28,5 +32,7 @@ class ScopedHandle
 
       HANDLE m_handle;
 };
+
+#endif
 
 #endif // SCOPEDHANDLE_H

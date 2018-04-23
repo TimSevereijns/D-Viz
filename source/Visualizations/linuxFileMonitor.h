@@ -1,6 +1,10 @@
 #ifndef LINUXFILEMONITOR_H
 #define LINUXFILEMONITOR_H
 
+#include <QtGlobal>
+
+#ifdef Q_OS_LINUX
+
 #include "fileStatusChange.hpp"
 #include "Utilities/threadSafeQueue.hpp"
 
@@ -51,5 +55,7 @@ class LinuxFileMonitor
 
       mutable ThreadSafeQueue<FileAndChangeStatus> m_pendingChanges;
 };
+
+#endif // Q_OS_UNIX
 
 #endif // LINUXFILEMONITOR_H

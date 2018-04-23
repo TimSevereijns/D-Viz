@@ -17,7 +17,7 @@
 
 #include <QVector3D>
 
-struct FileAndChangeStatus;
+struct FileAndStatusChange;
 struct ScanningProgress;
 
 class GLCanvas;
@@ -27,8 +27,6 @@ class Controller
    public:
 
       Controller();
-
-      ~Controller();
 
       /**
        * @brief Starts the UI.

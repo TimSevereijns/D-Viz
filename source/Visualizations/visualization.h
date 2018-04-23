@@ -19,17 +19,17 @@
 
 #if defined(Q_OS_WIN)
    #include "windowsFileMonitor.h"
-#elif defined(Q_OS_UNIX)
+#elif defined(Q_OS_LINIX)
    #include "linuxFileMonitor.h"
-#endif
+#endif // Q_OS_LINUX
 
 namespace Detail
 {
 #if defined(Q_OS_WIN)
    using FileMonitor = WindowsFileMonitor;
-#elif defined(Q_OS_UNIX)
+#elif defined(Q_OS_LINIX)
    using FileMonitor = LinuxFileMonitor;
-#endif
+#endif // Q_OS_LINUX
 }
 
 struct TreemapMetadata
@@ -41,7 +41,7 @@ struct TreemapMetadata
 
 struct FileStatusAndNode
 {
-   FileStatusChanged status;
+   FileSystemChange status;
    const Tree<VizBlock>::Node* node;
 };
 

@@ -3,7 +3,7 @@
 
 #include <experimental/filesystem>
 
-enum class FileStatusChanged
+enum class FileSystemChange
 {
    CREATED,
    DELETED,
@@ -11,10 +11,10 @@ enum class FileStatusChanged
    RENAMED
 };
 
-struct FileAndChangeStatus
+struct FileAndStatusChange
 {
    std::experimental::filesystem::path path;
-   FileStatusChanged status;
+   FileSystemChange status;
 };
 
 #endif // FILESTATUSCHANGE_HPP
