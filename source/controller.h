@@ -17,7 +17,7 @@
 
 #include <QVector3D>
 
-struct FileAndStatusChange;
+struct FileChangeNotification;
 struct ScanningProgress;
 
 class GLCanvas;
@@ -274,7 +274,7 @@ class Controller
       /**
        * @brief Fetches oldest, unprocessed file system change notification.
        */
-      boost::optional<FileStatusAndNode> FetchFileSystemChanges();
+      boost::optional<NodeChangeNotification> FetchNodeChangeNotification();
 
    private:
 
@@ -295,8 +295,6 @@ class Controller
 
       DriveScanner m_scanner;
 
-      // @todo Move onto scanner?
-      std::experimental::filesystem::path m_rootPath;
       std::uint64_t m_occupiedDiskSpace{ 0u };
 };
 

@@ -99,7 +99,9 @@ class WindowsFileMonitor
        *
        * @param[in] path            The root directory to watch.
        */
-      void Start(const std::experimental::filesystem::path& path);
+      void Start(
+         const std::experimental::filesystem::path& path,
+         const std::function<void (FileChangeNotification&&)>& onNotificationCallback);
 
       /**
        * @brief Stops monitoring the file system for changes.
@@ -110,14 +112,6 @@ class WindowsFileMonitor
        * @returns True if the file system monitor is actively monitoring.
        */
       bool IsActive() const;
-
-      /**
-       * @brief Fetches the oldest, pending file change notification that hasn't yet been processed
-       * by the UI.
-       *
-       * @return The pending change, if it exists.
-       */
-      boost::optional<FileAndStatusChange> FetchPendingNotifications() const;
 
    private:
 
@@ -141,7 +135,7 @@ class WindowsFileMonitor
 
       std::thread m_monitoringThread;
 
-      mutable ThreadSafeQueue<FileAndStatusChange> m_pendingChanges;
+      std::function<void (FileChangeNotification&&)> m_notificationCallback;
 };
 
 #endif // Q_OS_WIN

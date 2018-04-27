@@ -8,22 +8,21 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <experimental/filesystem>
 #include <memory>
 #include <mutex>
 #include <string>
 
-#include <experimental/filesystem>
-
 #ifdef Q_OS_WIN
    #pragma warning(push)
    #pragma warning(disable: 4996)
-#endif
-
+#endif // Q_OS_WIN
 #include <boost/asio/thread_pool.hpp>
-
 #ifdef Q_OS_WIN
    #pragma warning(pop)
-#endif
+#endif // Q_OS_WIN
+
+#include <Tree/Tree.hpp>
 
 #include "../DataStructs/block.h"
 #include "../DataStructs/driveScanningParameters.h"
@@ -31,8 +30,6 @@
 #include "../DataStructs/scanningProgress.hpp"
 #include "../DataStructs/vizBlock.h"
 #include "../Visualizations/visualization.h"
-
-#include <Tree/Tree.hpp>
 
 /**
  * @brief The NodeAndPath struct

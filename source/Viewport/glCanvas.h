@@ -292,7 +292,7 @@ class GLCanvas final : public QOpenGLWidget
        * @brief Updates the UI to reflect changes that have been made to the file system that we
        * might want to reflect in the visualization.
        */
-      void ProcessFileChanges();
+      void ProcessFileTreeChanges();
 
       bool m_isPaintingSuspended{ false };
       bool m_isVisualizationLoaded{ false };

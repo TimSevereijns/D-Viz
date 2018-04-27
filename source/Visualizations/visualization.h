@@ -26,7 +26,7 @@
 namespace Detail
 {
 #if defined(Q_OS_WIN)
-   using FileMonitor = WindowsFileMonitor;
+   using FileSystemMonitor = WindowsFileMonitor;
 #elif defined(Q_OS_LINIX)
    using FileMonitor = LinuxFileMonitor;
 #endif // Q_OS_LINUX
@@ -39,7 +39,7 @@ struct TreemapMetadata
    std::uintmax_t TotalBytes;
 };
 
-struct FileStatusAndNode
+struct NodeChangeNotification
 {
    FileSystemChange status;
    const Tree<VizBlock>::Node* node;
@@ -54,7 +54,7 @@ class VisualizationModel
 
       VisualizationModel() = default;
 
-      virtual ~VisualizationModel() = default;
+      virtual ~VisualizationModel();
 
       VisualizationModel(const VisualizationModel&) = delete;
       VisualizationModel& operator=(const VisualizationModel&) = delete;
@@ -214,11 +214,21 @@ class VisualizationModel
       bool IsFileSystemBeingMonitored() const;
 
       /**
-       * @brief FetchFileSystemChanges
-       *
+       * @returns The latest node to have changed.
+       */
+      boost::optional<NodeChangeNotification> FetchNodeUpdate();
+
+      /**
+       * @brief SetRootPath
+       * @param path
+       */
+      void SetRootPath(const std::experimental::filesystem::path& path);
+
+      /**
+       * @brief GetRootPath
        * @return
        */
-      boost::optional<FileStatusAndNode> FetchFileSystemChanges() const;
+      std::experimental::filesystem::path GetRootPath() const;
 
       /**
        * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each
@@ -230,19 +240,45 @@ class VisualizationModel
 
    protected:
 
-      // @note The tree is stored in a shared pointer so that it can be passed through the Qt
-      // signaling framework; any type passed through it needs to be copy-constructible.
-      std::shared_ptr<Tree<VizBlock>> m_fileTree{ nullptr };
+      void ProcessFileSystemChanges();
 
+      Tree<VizBlock>::Node* FindNodeUsingPath(
+         const std::experimental::filesystem::path& affectedFilePath);
+
+      void UpdateNodeSize(
+         const std::experimental::filesystem::path& path,
+         Tree<VizBlock>::Node* const node);
+
+      std::experimental::filesystem::path m_rootPath;
+
+      // The tree is stored in a shared pointer so that it can be passed through the Qt
+      // signaling framework; any type passed through it needs to be copy-constructible.
+      std::shared_ptr<Tree<VizBlock>> m_fileTree{ nullptr }; //< @todo Does this need a mutex?
+
+      // While only a single node can be "selected" at any given time, multiple nodes can be
+      // "highlighted." This vector tracks those highlighted nodes.
       std::vector<const Tree<VizBlock>::Node*> m_highlightedNodes;
 
+      // The one and only "selected" node, should one exist.
       const Tree<VizBlock>::Node* m_selectedNode{ nullptr };
 
       TreemapMetadata m_metadata{ 0, 0, 0 };
 
       bool m_hasDataBeenParsed{ false };
 
-      Detail::FileMonitor m_fileMonitor;
+      std::atomic_bool m_shouldKeepProcessingNotifications{ true };
+
+      Detail::FileSystemMonitor m_fileSystemMonitor;
+
+      // This queue contains raw notifications of file system changes that still need to be
+      // parsed the turned into tree node change notifications.
+      ThreadSafeQueue<FileChangeNotification> m_fileChangeNotifications;
+
+      // This queue contains pending tree node change notifications. These notifications
+      // still need to be retrieved by the UI for further processing.
+      ThreadSafeQueue<NodeChangeNotification> m_nodeChangeNotifications;
+
+      std::thread m_fileSystemNotificationProcessor;
 };
 
 #endif // VISUALIZATIONMODEL_H

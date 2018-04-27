@@ -831,9 +831,29 @@ namespace Asset
             newColor = Constants::Colors::SLATE_GRAY;
             break;
          }
-         default:
+         case Asset::Event::UNSELECTED:
          {
             newColor = RestoreColor(node, m_settingsManager);
+            break;
+         }
+         case Asset::Event::MODIFIED:
+         {
+            newColor = Constants::Colors::HOT_PINK; //< @todo Pick better color.
+            break;
+         }
+         case Asset::Event::RENAMED:
+         {
+            newColor = Constants::Colors::HOT_PINK; //< @todo Pick better color.
+            break;
+         }
+         case Asset::Event::DELETED:
+         {
+            newColor = Constants::Colors::HOT_PINK; //< @todo Pick better color.
+            break;
+         }
+         default:
+         {
+            assert(false);
          }
       }
 

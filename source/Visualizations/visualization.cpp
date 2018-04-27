@@ -1,6 +1,7 @@
 #include "visualization.h"
 
 #include "../constants.h"
+#include "../DriveScanner/driveScanningUtilities.h"
 #include "fileStatusChange.hpp"
 
 #include <boost/algorithm/string/case_conv.hpp>
@@ -323,6 +324,16 @@ const float VisualizationModel::BLOCK_HEIGHT{ 2.0f };
 const float VisualizationModel::ROOT_BLOCK_WIDTH{ 1000.0f };
 const float VisualizationModel::ROOT_BLOCK_DEPTH{ 1000.0f };
 
+VisualizationModel::~VisualizationModel()
+{
+   m_shouldKeepProcessingNotifications.store(false);
+
+   if (m_fileSystemNotificationProcessor.joinable())
+   {
+      m_fileSystemNotificationProcessor.join();
+   }
+}
+
 void VisualizationModel::UpdateBoundingBoxes()
 {
    assert(m_hasDataBeenParsed);
@@ -553,42 +564,98 @@ void VisualizationModel::HighlightMatchingFileName(
 
 void VisualizationModel::StartMonitoringFileSystem(const std::experimental::filesystem::path& path)
 {
-   m_fileMonitor.Start(path);
-}
-
-bool VisualizationModel::IsFileSystemBeingMonitored() const
-{
-   return m_fileMonitor.IsActive();
-}
-
-boost::optional<FileStatusAndNode> VisualizationModel::FetchFileSystemChanges() const
-{
-   const auto fileAndStatus = m_fileMonitor.FetchPendingNotifications();
-   if (!fileAndStatus)
+   if (path.empty() || !std::experimental::filesystem::exists(path))
    {
-      return boost::none;
+      assert(false);
+      return;
    }
 
-   const auto* node = m_fileTree->GetRoot();
-
-   const auto modifiedItemPath = fileAndStatus->path;
-   for (const auto& element : modifiedItemPath)
+   auto callback = [&] (FileChangeNotification&& notification) noexcept
    {
-      const auto matchingNodeItr = std::find_if(
+      m_fileChangeNotifications.Emplace(std::move(notification));
+   };
+
+   m_fileSystemMonitor.Start(path, std::move(callback));
+
+   m_fileSystemNotificationProcessor = std::thread{ [&] { ProcessFileSystemChanges(); } };
+}
+
+void VisualizationModel::ProcessFileSystemChanges()
+{
+   while (m_shouldKeepProcessingNotifications)
+   {
+      const auto notification = m_fileChangeNotifications.WaitAndPop();
+      assert(notification);
+
+      auto* node = FindNodeUsingPath(notification->path);
+
+      UpdateNodeSize(notification->path, node);
+
+      m_nodeChangeNotifications.Emplace(
+         NodeChangeNotification{ std::move(notification->status), node });
+   }
+}
+
+Tree<VizBlock>::Node* VisualizationModel::FindNodeUsingPath(
+   const std::experimental::filesystem::path& affectedFilePath)
+{
+   auto* node = m_fileTree->GetRoot();
+
+   auto filePathItr = std::begin(affectedFilePath);
+   while (filePathItr != std::end(affectedFilePath))
+   {
+      auto matchingNodeItr = std::find_if(
          Tree<VizBlock>::SiblingIterator{ node->GetFirstChild() },
          Tree<VizBlock>::SiblingIterator{ },
          [&] (const auto& node)
       {
-         return node->file.name == element;
+         return node->file.name == *filePathItr;
       });
 
       if (matchingNodeItr != Tree<VizBlock>::SiblingIterator{ })
       {
          node = std::addressof(*matchingNodeItr);
       }
+
+      ++filePathItr;
    }
 
-   return FileStatusAndNode{ fileAndStatus->status, node };
+   return node;
+}
+
+void VisualizationModel::UpdateNodeSize(
+   const std::experimental::filesystem::path& path,
+   Tree<VizBlock>::Node* const node)
+{
+   const auto fileSize = DriveScanning::Utilities::ComputeFileSize(path);
+   node->GetData().file.size = fileSize;
+}
+
+bool VisualizationModel::IsFileSystemBeingMonitored() const
+{
+   return m_fileSystemMonitor.IsActive();
+}
+
+boost::optional<NodeChangeNotification> VisualizationModel::FetchNodeUpdate()
+{
+   NodeChangeNotification notification;
+   const auto successfullyRetrievedNotification = m_nodeChangeNotifications.TryPop(notification);
+   if (!successfullyRetrievedNotification)
+   {
+      return boost::none;
+   }
+
+   return notification;
+}
+
+void VisualizationModel::SetRootPath(const std::experimental::filesystem::path& path)
+{
+   m_rootPath = path;
+}
+
+std::experimental::filesystem::path VisualizationModel::GetRootPath() const
+{
+   return m_rootPath;
 }
 
 void VisualizationModel::SortNodes(Tree<VizBlock>& tree)

@@ -1,99 +1,26 @@
 #include "driveScanner.h"
-
-#ifdef Q_OS_WIN
-   #include <FileApi.h>
-   #include <Windows.h>
-   #include <WinIoCtl.h>
-
-   #include "scopedHandle.h"
-   #include "winHack.hpp"
-#endif
+#include "driveScanningUtilities.h"
 
 #include "scanningWorker.h"
 
 #ifdef Q_OS_WIN
    #pragma warning(push)
    #pragma warning(disable: 4996)
-#endif
+#endif // Q_OS_WIN
 
 #include <boost/asio/post.hpp>
 
 #ifdef Q_OS_WIN
    #pragma warning(pop)
-#endif
+#endif // Q_OS_WIN
 
 #include <spdlog/spdlog.h>
 #include <Stopwatch/Stopwatch.hpp>
 
 #include "../constants.h"
-#include "../Utilities/ignoreUnused.hpp"
-
-#include <iostream>
 
 namespace
 {
-   std::mutex streamMutex;
-
-   /**
-    * @brief Use the `FindFirstFileW(...)` function to retrieve the file size.
-    *
-    * The `std::experimental::filesystem::file_size(...)` function uses a different native function
-    * to get at the file size for a given file, and this function (while probably faster than
-    * `FindFirstFileW(...)`) has a tendency to throw. If such exceptional behaviour were to occur,
-    * then this function can be used to hopefully still get at the file size.
-    *
-    * @param path[in]               The path to the troublesome file.
-    *
-    * @returns The size of the file if it's accessible, and zero otherwise.
-    */
-   std::uintmax_t GetFileSizeUsingWinAPI(const std::experimental::filesystem::path& path) noexcept
-   {
-      std::uintmax_t fileSize{ 0 };
-
-      IgnoreUnused(path);
-
-#ifdef Q_OS_WIN
-
-      WIN32_FIND_DATA fileData;
-      const HANDLE fileHandle = FindFirstFileW(path.wstring().data(), &fileData);
-      if (fileHandle == INVALID_HANDLE_VALUE)
-      {
-         return 0;
-      }
-
-      const auto highWord = static_cast<std::uintmax_t>(fileData.nFileSizeHigh);
-      fileSize = (highWord << sizeof(fileData.nFileSizeLow) * 8) | fileData.nFileSizeLow;
-
-#endif
-
-      return fileSize;
-   }
-
-   /**
-    * @brief Helper function to safely wrap the retrieval of a file's size.
-    *
-    * @param path[in]               The path to the file.
-    *
-    * @return The size of the file if it's accessible, and zero otherwise.
-    */
-   std::uintmax_t ComputeFileSize(const std::experimental::filesystem::path& path) noexcept
-   {
-      try
-      {
-         assert(!std::experimental::filesystem::is_directory(path));
-
-         return std::experimental::filesystem::file_size(path);
-      }
-      catch (...)
-      {
-         std::lock_guard<std::mutex> lock{ streamMutex };
-         IgnoreUnused(lock);
-
-         std::wcout << "Falling back on the Win API for: \"" << path.wstring() << "\"" << std::endl;
-         return GetFileSizeUsingWinAPI(path);
-      }
-   }
-
    /**
     * @brief Removes nodes whose corresponding file or directory size is zero. This is often
     * necessary because a directory may contain only a single other directory within it that is
@@ -177,145 +104,17 @@ namespace
       return std::make_shared<Tree<VizBlock>>(VizBlock{ std::move(fileInfo) });
    }
 
-#ifdef Q_OS_WIN
-
-   /**
-   * @returns A handle representing the repartse point found at the given path. If
-   * the path is not a reparse point, then an invalid handle will be returned instead.
-   */
-   auto OpenReparsePoint(const std::experimental::filesystem::path& path) noexcept
-   {
-      const auto handle = CreateFile(
-         /* fileName = */ path.wstring().c_str(),
-         /* desiredAccess = */ GENERIC_READ,
-         /* shareMode = */ 0,
-         /* securityAttributes = */ 0,
-         /* creationDisposition = */ OPEN_EXISTING,
-         /* flagsAndAttributes = */ FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
-         /* templateFile = */ 0);
-
-      return ScopedHandle{ handle };
-   }
-
-   /**
-   * @brief Reads the reparse point found at the given path into the output buffer.
-   *
-   * @returns True if the path could be read as a reparse point, and false otherwise.
-   */
-   auto ReadReparsePoint(
-      const std::wstring& path,
-      std::vector<std::byte>& reparseBuffer) noexcept
-   {
-      const auto handle = OpenReparsePoint(path);
-      if (!handle.IsValid())
-      {
-         return false;
-      }
-
-      DWORD bytesReturned{ 0 };
-
-      const auto successfullyRetrieved = DeviceIoControl(
-         /* device = */ static_cast<HANDLE>(handle),
-         /* controlCode = */ FSCTL_GET_REPARSE_POINT,
-         /* inBuffer = */ NULL,
-         /* inBufferSize = */ 0,
-         /* outBuffer = */ reinterpret_cast<LPVOID>(reparseBuffer.data()),
-         /* outBufferSize = */ static_cast<DWORD>(reparseBuffer.size()),
-         /* bytesReturned = */ &bytesReturned,
-         /* overlapped = */ 0) == TRUE;
-
-      return successfullyRetrieved && bytesReturned;
-   }
-
-   /**
-   * @returns True if the given file path matches the given reparse tag, and false otherwise.
-   */
-   auto IsReparseTag(
-      const std::experimental::filesystem::path& path,
-      DWORD targetTag) noexcept
-   {
-      static std::vector<std::byte> buffer{ MAXIMUM_REPARSE_DATA_BUFFER_SIZE };
-
-      const auto successfullyRead = ReadReparsePoint(path, buffer);
-
-      return successfullyRead
-         ? reinterpret_cast<REPARSE_DATA_BUFFER*>(buffer.data())->ReparseTag == targetTag
-         : false;
-   }
-
-   /**
-   * @returns True if the given file path represents a mount point, and false otherwise.
-   *
-   * @note Junctions in Windows are considered mount points.
-   */
-   auto IsMountPoint(const std::experimental::filesystem::path& path) noexcept
-   {
-      const auto isMountPoint = IsReparseTag(path, IO_REPARSE_TAG_MOUNT_POINT);
-      if (isMountPoint)
-      {
-         const std::lock_guard<decltype(streamMutex)> lock{ streamMutex };
-         IgnoreUnused(lock);
-
-         std::wcout << L"Found Mount Point: " << path.wstring() << std::endl;
-      }
-
-      return isMountPoint;
-   }
-
-   /**
-   * @returns True if the given file path represents a symlink, and false otherwise.
-   */
-   auto IsSymlink(const std::experimental::filesystem::path& path) noexcept
-   {
-      const auto isSymlink = IsReparseTag(path, IO_REPARSE_TAG_SYMLINK);
-      if (isSymlink)
-      {
-         const std::lock_guard<decltype(streamMutex)> lock{ streamMutex };
-         IgnoreUnused(lock);
-
-         std::wcout << L"Found Symlink: " << path.wstring() << std::endl;
-      }
-
-      return isSymlink;
-   }
-
-   /**
-   * @returns True if the given path represents a reparse point, and false otherwise.
-   */
-   bool IsReparsePoint(const std::experimental::filesystem::path& path) noexcept
-   {
-      const auto handle = OpenReparsePoint(path);
-      if (!handle.IsValid())
-      {
-         return false;
-      }
-
-      BY_HANDLE_FILE_INFORMATION fileInfo = { 0 };
-
-      const auto successfullyRetrieved
-         = GetFileInformationByHandle(static_cast<HANDLE>(handle), &fileInfo);
-
-      if (!successfullyRetrieved)
-      {
-         return false;
-      }
-
-      return fileInfo.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT;
-   }
-
-#endif
 
    /**
     * @returns True if the directory should be processed.
     */
    auto ShouldProcess(const std::experimental::filesystem::path& path) noexcept
    {
-#ifdef Q_OS_WIN
-      return !IsReparsePoint(path); //!IsSymlink(path) && !IsMountPoint(path);
-#endif
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_WIN)
+      return !DriveScanning::Utilities::IsReparsePoint(path);
+#elif defined(Q_OS_LINUX)
       return !std::experimental::filesystem::is_symlink(path);
-#endif
+#endif // Q_OS_LINUX
    }
 }
 
@@ -333,7 +132,7 @@ void ScanningWorker::ProcessFile(
    const std::experimental::filesystem::path& path,
    Tree<VizBlock>::Node& treeNode) noexcept
 {
-   const auto fileSize = ComputeFileSize(path);
+   const auto fileSize = DriveScanning::Utilities::ComputeFileSize(path);
    if (fileSize == 0u)
    {
       return;

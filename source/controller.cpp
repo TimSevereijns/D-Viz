@@ -139,11 +139,11 @@ void Controller::LaunchUI()
 
 void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
 {
-   m_rootPath = parameters.rootDirectory;
+   m_model->SetRootPath(parameters.rootDirectory);
 
    m_view->OnScanStarted();
 
-   m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(m_rootPath.wstring());
+   m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(parameters.rootDirectory);
    assert(m_occupiedDiskSpace > 0);
 
    const auto progressHandler = [&] (const ScanningProgress& progress)
@@ -187,19 +187,20 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
    };
 
    const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
-   log->info(fmt::format("Started a new scan at: \"{}\"", m_rootPath.string()));
+   log->info(fmt::format("Started a new scan at: \"{}\"", m_model->GetRootPath().string()));
 
    m_scanner.StartScanning(std::move(scanningParameters));
 }
 
 void Controller::StartMonitoringFileSystem()
 {
-   if (m_rootPath.empty())
+   if (std::experimental::filesystem::exists(m_model->GetRootPath()))
    {
       return;
    }
 
-   m_model->StartMonitoringFileSystem(m_rootPath);
+   // @todo Refactor
+   m_model->StartMonitoringFileSystem(m_model->GetRootPath());
 }
 
 bool Controller::IsFileSystemBeingMonitored() const
@@ -207,9 +208,9 @@ bool Controller::IsFileSystemBeingMonitored() const
    return m_model->IsFileSystemBeingMonitored();
 }
 
-boost::optional<FileStatusAndNode> Controller::FetchFileSystemChanges()
+boost::optional<NodeChangeNotification> Controller::FetchNodeChangeNotification()
 {
-   return m_model->FetchFileSystemChanges();
+   return m_model->FetchNodeUpdate();
 }
 
 void Controller::ComputeProgress(const ScanningProgress& progress)
@@ -219,7 +220,8 @@ void Controller::ComputeProgress(const ScanningProgress& progress)
    const auto filesScanned = progress.filesScanned.load();
    const auto sizeInBytes = progress.bytesProcessed.load();
 
-   const auto doesPathRepresentEntireDrive{ m_rootPath.string() == m_rootPath.root_path() };
+   const auto rootPath = m_model->GetRootPath();
+   const auto doesPathRepresentEntireDrive{ rootPath.string() == rootPath.root_path() };
    if (doesPathRepresentEntireDrive)
    {
       const auto fractionOfDiskOccupied =
@@ -607,5 +609,5 @@ const Settings::Manager& Controller::GetSettingsManager() const
 
 std::experimental::filesystem::path Controller::GetRootPath() const
 {
-   return m_rootPath;
+   return m_model->GetRootPath();
 }

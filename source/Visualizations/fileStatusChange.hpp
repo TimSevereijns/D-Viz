@@ -11,7 +11,7 @@ enum class FileSystemChange
    RENAMED
 };
 
-struct FileAndStatusChange
+struct FileChangeNotification
 {
    std::experimental::filesystem::path path;
    FileSystemChange status;

@@ -31,6 +31,7 @@ SOURCES += \
    DataStructs/driveScanningParameters.cpp \
    DataStructs/vizBlock.cpp \
    DriveScanner/driveScanner.cpp \
+   DriveScanner/driveScanningUtilities.cpp \
    DriveScanner/scanningWorker.cpp \
    DriveScanner/scopedHandle.cpp \
    HID/gamepad.cpp \
@@ -71,6 +72,7 @@ HEADERS += \
    DataStructs/scanningProgress.hpp \
    DataStructs/vizBlock.h \
    DriveScanner/driveScanner.h \
+   DriveScanner/driveScanningUtilities.h \
    DriveScanner/scanningWorker.h \
    DriveScanner/scopedHandle.h \
    DriveScanner/winHack.hpp \

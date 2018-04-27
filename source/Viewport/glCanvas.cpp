@@ -778,44 +778,58 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
       + QString::fromStdWString(L" \xB5s / frame"));
 }
 
-void GLCanvas::ProcessFileChanges()
+void GLCanvas::ProcessFileTreeChanges()
 {
    if (!m_controller.HasVisualizationBeenLoaded() || m_controller.IsFileSystemBeingMonitored())
    {
       return;
    }
 
+   const auto startTime = std::chrono::high_resolution_clock::now();
+
    Asset::Treemap* treemap = nullptr;
 
-   auto fileStatusAndNode = m_controller.FetchFileSystemChanges();
-   if (fileStatusAndNode)
+   auto changeNotification = m_controller.FetchNodeChangeNotification();
+   if (changeNotification)
    {
       treemap = GetAsset<Asset::Tag::Treemap>();
    }
 
-   while (fileStatusAndNode)
+   while (changeNotification)
    {
-      switch (fileStatusAndNode->status)
+      switch (changeNotification->status)
       {
          case FileSystemChange::CREATED:
             // If a file is newly added, then there's nothing to update in the existing
             // visualization.
             break;
          case FileSystemChange::DELETED:
-            treemap->UpdateVBO(*fileStatusAndNode->node, Asset::Event::DELETED);
+            treemap->UpdateVBO(*changeNotification->node, Asset::Event::DELETED);
             break;
          case FileSystemChange::MODIFIED:
-            treemap->UpdateVBO(*fileStatusAndNode->node, Asset::Event::MODIFIED);
+            treemap->UpdateVBO(*changeNotification->node, Asset::Event::MODIFIED);
             break;
          case FileSystemChange::RENAMED:
-            treemap->UpdateVBO(*fileStatusAndNode->node, Asset::Event::RENAMED);
+            treemap->UpdateVBO(*changeNotification->node, Asset::Event::RENAMED);
             break;
          default:
             assert(false);
             break;
       }
 
-      fileStatusAndNode = m_controller.FetchFileSystemChanges();
+      const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+         std::chrono::high_resolution_clock::now() - startTime);
+
+      constexpr auto timeLimit = Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES / 2;
+      constexpr auto timeout = std::chrono::milliseconds{ timeLimit };
+      if (elapsedTime >= timeout)
+      {
+         // @note Since this processing is happening on the UI thread, we'll want to make sure
+         // that we don't exceed a reasonable fraction of the total allotted frame time.
+         break;
+      }
+
+      changeNotification = m_controller.FetchNodeChangeNotification();
    }
 }
 
@@ -829,7 +843,7 @@ void GLCanvas::paintGL()
    const auto elapsedTime = Stopwatch<std::chrono::microseconds>(
       [&] () noexcept
    {
-      ProcessFileChanges();
+      ProcessFileTreeChanges();
 
       m_openGLContext.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

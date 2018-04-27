@@ -55,8 +55,12 @@ bool WindowsFileMonitor::IsActive() const
    return m_isActive;
 }
 
-void WindowsFileMonitor::Start(const std::experimental::filesystem::path& path)
+void WindowsFileMonitor::Start(
+   const std::experimental::filesystem::path& path,
+   const std::function<void (FileChangeNotification&&)>& onNotificationCallback)
 {
+   m_notificationCallback = onNotificationCallback;
+
    constexpr auto sizeOfNotification = sizeof(FILE_NOTIFY_INFORMATION) + MAX_PATH * sizeof(wchar_t);
 
    m_notificationBuffer.resize(1024 * sizeOfNotification, std::byte{ 0 });
@@ -223,24 +227,17 @@ void WindowsFileMonitor::ProcessNotification()
       {
          case FILE_ACTION_ADDED:
          {
-            // @todo New files will have to be added to the tree.
-
-            auto notification = FileAndStatusChange{ fileName, FileSystemChange::CREATED };
-            m_pendingChanges.Emplace(std::move(notification));
+            m_notificationCallback(FileChangeNotification{ fileName, FileSystemChange::CREATED });
             break;
          }
          case FILE_ACTION_REMOVED:
          {
-            // @todo Old files will have to be removed from the tree.
-
-            auto notification = FileAndStatusChange{ fileName, FileSystemChange::DELETED };
-            m_pendingChanges.Emplace(std::move(notification));
+            m_notificationCallback(FileChangeNotification{ fileName, FileSystemChange::DELETED });
             break;
          }
          case FILE_ACTION_MODIFIED:
          {
-            auto notification = FileAndStatusChange{ fileName, FileSystemChange::MODIFIED };
-            m_pendingChanges.Emplace(std::move(notification));
+            m_notificationCallback(FileChangeNotification{ fileName, FileSystemChange::MODIFIED });
             break;
          }
          case FILE_ACTION_RENAMED_OLD_NAME:
@@ -250,8 +247,7 @@ void WindowsFileMonitor::ProcessNotification()
          }
          case FILE_ACTION_RENAMED_NEW_NAME:
          {
-            auto notification = FileAndStatusChange{ fileName, FileSystemChange::RENAMED };
-            m_pendingChanges.Emplace(std::move(notification));
+            m_notificationCallback(FileChangeNotification{ fileName, FileSystemChange::RENAMED });
             break;
          }
          default:
@@ -265,19 +261,6 @@ void WindowsFileMonitor::ProcessNotification()
          ? AdvancePointer(notificationInfo, notificationInfo->NextEntryOffset)
          : nullptr;
    }
-}
-
-boost::optional<FileAndStatusChange> WindowsFileMonitor::FetchPendingNotifications() const
-{
-   FileAndStatusChange notification;
-   const auto retrievedNotification = m_pendingChanges.TryPop(notification);
-
-   if (retrievedNotification)
-   {
-      return notification;
-   }
-
-   return boost::none;
 }
 
 #endif // Q_OS_WIN

@@ -120,29 +120,7 @@ namespace Settings
       }
 
       const auto* encapsulatedValue = std::get_if<RequestedType>(&itr->second);
-      return encapsulatedValue ? *encapsulatedValue : defaultValue;
-   }
-
-   template<typename RequestedType>
-   RequestedType PreferencesMap::GetValueOrDefault(
-      std::wstring_view query,
-      RequestedType&& defaultValue) &&
-   {
-      static_assert(
-         IsSupportedType<RequestedType>::value,
-         "The preferences map doesn't support the retrieval of the given type.");
-
-      const auto itr = m_map.find(query.data());
-      if (itr == std::end(m_map))
-      {
-         return std::forward<decltype(defaultValue)>(defaultValue);
-      }
-
-      const auto* encapsulatedValue = std::get_if<RequestedType>(&itr->second);
-
-      return encapsulatedValue
-         ? *encapsulatedValue
-         : std::forward<decltype(defaultValue)>(defaultValue);
+      return encapsulatedValue ? std::move(*encapsulatedValue) : std::move(defaultValue);
    }
 }
 
