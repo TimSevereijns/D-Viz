@@ -324,6 +324,11 @@ const float VisualizationModel::BLOCK_HEIGHT{ 2.0f };
 const float VisualizationModel::ROOT_BLOCK_WIDTH{ 1000.0f };
 const float VisualizationModel::ROOT_BLOCK_DEPTH{ 1000.0f };
 
+VisualizationModel::VisualizationModel(const std::experimental::filesystem::path& path) :
+   m_rootPath{ path }
+{
+}
+
 VisualizationModel::~VisualizationModel()
 {
    m_shouldKeepProcessingNotifications.store(false);
@@ -562,9 +567,9 @@ void VisualizationModel::HighlightMatchingFileName(
    });
 }
 
-void VisualizationModel::StartMonitoringFileSystem(const std::experimental::filesystem::path& path)
+void VisualizationModel::StartMonitoringFileSystem()
 {
-   if (path.empty() || !std::experimental::filesystem::exists(path))
+   if (m_rootPath.empty() || !std::experimental::filesystem::exists(m_rootPath))
    {
       assert(false);
       return;
@@ -575,7 +580,7 @@ void VisualizationModel::StartMonitoringFileSystem(const std::experimental::file
       m_fileChangeNotifications.Emplace(std::move(notification));
    };
 
-   m_fileSystemMonitor.Start(path, std::move(callback));
+   m_fileSystemMonitor.Start(m_rootPath, std::move(callback));
 
    m_fileSystemNotificationProcessor = std::thread{ [&] { ProcessFileSystemChanges(); } };
 }
@@ -587,9 +592,15 @@ void VisualizationModel::ProcessFileSystemChanges()
       const auto notification = m_fileChangeNotifications.WaitAndPop();
       assert(notification);
 
+      if (notification->status == FileSystemChange::CREATED)
+      {
+         // @todo Handle file creation...
+         continue;
+      }
+
       auto* node = FindNodeUsingPath(notification->path);
 
-      UpdateNodeSize(notification->path, node);
+      UpdateAffectedNodes(notification->path, node);
 
       m_nodeChangeNotifications.Emplace(
          NodeChangeNotification{ std::move(notification->status), node });
@@ -607,28 +618,58 @@ Tree<VizBlock>::Node* VisualizationModel::FindNodeUsingPath(
       auto matchingNodeItr = std::find_if(
          Tree<VizBlock>::SiblingIterator{ node->GetFirstChild() },
          Tree<VizBlock>::SiblingIterator{ },
-         [&] (const auto& node)
+         [&] (const auto& childNode)
       {
-         return node->file.name == *filePathItr;
+         const auto& pathElement = filePathItr->c_str();
+         const auto fileName = childNode->file.name + childNode->file.extension;
+
+         return fileName == pathElement;
       });
 
       if (matchingNodeItr != Tree<VizBlock>::SiblingIterator{ })
       {
          node = std::addressof(*matchingNodeItr);
+         ++filePathItr;
       }
-
-      ++filePathItr;
+      else
+      {
+         break;
+      }
    }
 
    return node;
 }
 
-void VisualizationModel::UpdateNodeSize(
-   const std::experimental::filesystem::path& path,
-   Tree<VizBlock>::Node* const node)
+void VisualizationModel::UpdateAffectedNodes(
+   const std::experimental::filesystem::path& relativePath,
+   Tree<VizBlock>::Node* node)
 {
-   const auto fileSize = DriveScanning::Utilities::ComputeFileSize(path);
-   node->GetData().file.size = fileSize;
+   const auto absolutePath = std::experimental::filesystem::absolute(relativePath, m_rootPath);
+   if (!std::experimental::filesystem::is_directory(absolutePath))
+   {
+      const auto fileSize = DriveScanning::Utilities::ComputeFileSize(absolutePath);
+      node->GetData().file.size = fileSize;
+   }
+
+   while (node)
+   {
+      auto* parent = node->GetParent();
+      if (parent)
+      {
+         auto totalSize = std::accumulate(
+            Tree<VizBlock>::PostOrderIterator{ node },
+            Tree<VizBlock>::PostOrderIterator{ },
+            std::uintmax_t{ 0 },
+            [] (const auto runningTotal, const auto& node) noexcept
+         {
+            return runningTotal + node->file.size;
+         });
+
+         parent->GetData().file.size = totalSize;
+      }
+
+      node = parent;
+   }
 }
 
 bool VisualizationModel::IsFileSystemBeingMonitored() const
@@ -646,11 +687,6 @@ boost::optional<NodeChangeNotification> VisualizationModel::FetchNodeUpdate()
    }
 
    return notification;
-}
-
-void VisualizationModel::SetRootPath(const std::experimental::filesystem::path& path)
-{
-   m_rootPath = path;
 }
 
 std::experimental::filesystem::path VisualizationModel::GetRootPath() const

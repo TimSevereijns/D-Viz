@@ -46,11 +46,6 @@ class Controller
       bool HasVisualizationBeenLoaded() const;
 
       /**
-       * @brief Generates a new visualization.
-       */
-      void ResetVisualization();
-
-      /**
        * @returns A pointer to the selected node.
        */
       const Tree<VizBlock>::Node* GetSelectedNode() const;
@@ -79,18 +74,6 @@ class Controller
        * @returns True if the given node is currently highlighted; false otherwise.
        */
       bool IsNodeHighlighted(const Tree<VizBlock>::Node& node) const;
-
-      /**
-       * @brief Parses the drive scan results.
-       *
-       * @param[in] results         The scan results to be parsed.
-       */
-      void ParseResults(const std::shared_ptr<Tree<VizBlock>>& results);
-
-      /**
-       * @brief Updates the bounding boxes for the current treemap.
-       */
-      void UpdateBoundingBoxes();
 
       /**
        * @brief Searches the treemap for the search query contained within the search box.

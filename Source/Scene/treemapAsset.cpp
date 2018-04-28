@@ -833,11 +833,14 @@ namespace Asset
          }
          case Asset::Event::UNSELECTED:
          {
+            // @todo Update restoration logic to account for colors that represent file system
+            // modifications.
+
             newColor = RestoreColor(node, m_settingsManager);
             break;
          }
          case Asset::Event::MODIFIED:
-         {
+         {           
             newColor = Constants::Colors::HOT_PINK; //< @todo Pick better color.
             break;
          }

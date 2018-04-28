@@ -52,7 +52,7 @@ class VisualizationModel
 {
    public:
 
-      VisualizationModel() = default;
+      VisualizationModel(const std::experimental::filesystem::path& path);
 
       virtual ~VisualizationModel();
 
@@ -202,11 +202,9 @@ class VisualizationModel
       /**
        * @brief Starts monitoring the file system for changes.
        *
-       * @param[in] path            The root directory that is to be monitored.
-       *
        * @todo Pass in callback to handle changes.
        */
-      void StartMonitoringFileSystem(const std::experimental::filesystem::path& path);
+      void StartMonitoringFileSystem();
 
       /**
        * @returns True if the file system monitor is turned on.
@@ -217,12 +215,6 @@ class VisualizationModel
        * @returns The latest node to have changed.
        */
       boost::optional<NodeChangeNotification> FetchNodeUpdate();
-
-      /**
-       * @brief SetRootPath
-       * @param path
-       */
-      void SetRootPath(const std::experimental::filesystem::path& path);
 
       /**
        * @brief GetRootPath
@@ -245,9 +237,9 @@ class VisualizationModel
       Tree<VizBlock>::Node* FindNodeUsingPath(
          const std::experimental::filesystem::path& affectedFilePath);
 
-      void UpdateNodeSize(
-         const std::experimental::filesystem::path& path,
-         Tree<VizBlock>::Node* const node);
+      void UpdateAffectedNodes(
+         const std::experimental::filesystem::path& relativePath,
+         Tree<VizBlock>::Node* node);
 
       std::experimental::filesystem::path m_rootPath;
 

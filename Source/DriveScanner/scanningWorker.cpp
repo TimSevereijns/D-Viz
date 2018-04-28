@@ -55,32 +55,6 @@ namespace
    }
 
    /**
-    * @brief Performs a post-processing step that iterates through the tree and computes the size
-    * of all directories.
-    *
-    * @param[in, out] tree          The tree whose nodes need their directory sizes computed.
-    */
-   void ComputeDirectorySizes(Tree<VizBlock>& tree) noexcept
-   {
-      for (auto&& node : tree)
-      {
-         const auto& fileInfo = node->file;
-
-         auto* parent = node.GetParent();
-         if (!parent)
-         {
-            return;
-         }
-
-         auto& parentInfo = parent->GetData().file;
-         if (parentInfo.type == FileType::DIRECTORY)
-         {
-            parentInfo.size += fileInfo.size;
-         }
-      }
-   }
-
-   /**
    * @brief Contructs the root node for the file tree.
    *
    * @param[in] path                The path to the directory that should constitute the root node.
@@ -246,7 +220,7 @@ void ScanningWorker::Start()
          fmt::format("Scanned Drive in: {} {}", elapsed.count(), units));
    });
 
-   ComputeDirectorySizes(*m_fileTree);
+   DriveScanning::Utilities::ComputeDirectorySizes(*m_fileTree);
    PruneEmptyFilesAndDirectories(*m_fileTree);
 
    emit Finished(m_fileTree);

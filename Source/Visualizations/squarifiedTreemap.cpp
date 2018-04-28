@@ -20,14 +20,14 @@ namespace
     *
     * @returns A total row size in bytes of disk space occupied.
     */
-   auto ComputeBytesInRow(
+   std::uintmax_t ComputeBytesInRow(
       const std::vector<Tree<VizBlock>::Node*>& row,
       const std::uintmax_t candidateSize)
    {
       auto sumOfFileSizes = std::accumulate(std::begin(row), std::end(row),
-         std::uintmax_t{ 0 }, [] (const auto result, const auto* node) noexcept
+         std::uintmax_t{ 0 }, [] (const auto runningTotal, const auto* node) noexcept
       {
-         return result + (*node)->file.size;
+         return runningTotal + (*node)->file.size;
       });
 
       sumOfFileSizes += candidateSize;
@@ -435,7 +435,9 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
 
    const std::uintmax_t bytesInRow = ComputeBytesInRow(row, /*candidateSize =*/ 0);
 
-   Block land = CalculateRowBounds(bytesInRow, row.front()->GetParent()->GetData(),
+   Block land = CalculateRowBounds(
+      bytesInRow,
+      row.front()->GetParent()->GetData(),
       /*updateOffset =*/ true);
 
    assert(land.HasVolume());
@@ -467,6 +469,11 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
 
       land.IncreaseCoverageBy(additionalCoverage);
    }
+}
+
+SquarifiedTreeMap::SquarifiedTreeMap(const std::experimental::filesystem::path& path)
+   : VisualizationModel{ path }
+{
 }
 
 void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)

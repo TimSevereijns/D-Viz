@@ -139,7 +139,9 @@ void Controller::LaunchUI()
 
 void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
 {
-   m_model->SetRootPath(parameters.rootDirectory);
+   AllowUserInteractionWithModel(false);
+
+   m_model = std::make_unique<SquarifiedTreeMap>(parameters.rootDirectory);
 
    m_view->OnScanStarted();
 
@@ -163,21 +165,17 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
       m_view->SetWaitCursor();
       ON_SCOPE_EXIT{ m_view->RestoreDefaultCursor(); };
 
-      ParseResults(scanningResults);
-      UpdateBoundingBoxes();
+      m_model->Parse(scanningResults);
+      m_model->UpdateBoundingBoxes();
+
       SaveScanMetadata(progress);
 
       m_view->OnScanCompleted();
 
       AllowUserInteractionWithModel(true);
 
-      // @todo Finish incorporating file system monitoring
-      //m_model->StartFileSystemMonitor();
+      m_model->StartMonitoringFileSystem();
    };
-
-   ResetVisualization();
-
-   AllowUserInteractionWithModel(false);
 
    DriveScanningParameters scanningParameters
    {
@@ -190,17 +188,6 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
    log->info(fmt::format("Started a new scan at: \"{}\"", m_model->GetRootPath().string()));
 
    m_scanner.StartScanning(std::move(scanningParameters));
-}
-
-void Controller::StartMonitoringFileSystem()
-{
-   if (std::experimental::filesystem::exists(m_model->GetRootPath()))
-   {
-      return;
-   }
-
-   // @todo Refactor
-   m_model->StartMonitoringFileSystem(m_model->GetRootPath());
 }
 
 bool Controller::IsFileSystemBeingMonitored() const
@@ -254,44 +241,33 @@ bool Controller::HasVisualizationBeenLoaded() const
    return m_model != nullptr;
 }
 
-void Controller::ResetVisualization()
-{
-   if (!m_model)
-   {
-      return;
-   }
-
-   m_model->ClearHighlightedNodes();
-   m_model->ClearSelectedNode();
-   m_model = nullptr;
-}
-
 const Tree<VizBlock>::Node* Controller::GetSelectedNode() const
 {
+   assert(m_model);
    return m_model->GetSelectedNode();
 }
 
 Tree<VizBlock>& Controller::GetTree()
 {
    assert(m_model);
-
    return m_model->GetTree();
 }
 
 const Tree<VizBlock>& Controller::GetTree() const
 {
    assert(m_model);
-
    return m_model->GetTree();
 }
 
 const std::vector<const Tree<VizBlock>::Node*>& Controller::GetHighlightedNodes() const
 {
+   assert(m_model);
    return m_model->GetHighlightedNodes();
 }
 
 bool Controller::IsNodeHighlighted(const Tree<VizBlock>::Node& node) const
 {
+   assert(m_model);
    const auto& highlightedNodes = m_model->GetHighlightedNodes();
 
    return std::any_of(std::begin(highlightedNodes), std::end(highlightedNodes),
@@ -301,25 +277,11 @@ bool Controller::IsNodeHighlighted(const Tree<VizBlock>::Node& node) const
    });
 }
 
-void Controller::ParseResults(const std::shared_ptr<Tree<VizBlock>>& results)
-{
-   assert(!m_model);
-
-   m_model = std::make_unique<SquarifiedTreeMap>();
-   m_model->Parse(results);
-}
-
-void Controller::UpdateBoundingBoxes()
-{
-   assert(m_model);
-
-   m_model->UpdateBoundingBoxes();
-}
-
 void Controller::SelectNode(
    const Tree<VizBlock>::Node& node,
    const std::function<void (const Tree<VizBlock>::Node&)>& selectorCallback)
 {
+   assert(m_model);
    m_model->SelectNode(node);
 
    selectorCallback(node);
@@ -357,6 +319,8 @@ void Controller::SelectNodeViaRay(
    const std::function<void (const Tree<VizBlock>::Node&)>& deselectionCallback,
    const std::function<void (const Tree<VizBlock>::Node&)>& selectionCallback)
 {
+   assert(m_model);
+
    if (!HasVisualizationBeenLoaded() || !IsUserAllowedToInteractWithModel())
    {
       return;
@@ -445,17 +409,21 @@ void Controller::SaveScanMetadata(const ScanningProgress& progress)
       progress.bytesProcessed.load()
    };
 
+   assert(m_model);
    m_model->SetTreemapMetadata(std::move(data));
 }
 
 void Controller::ClearSelectedNode()
 {
+   assert(m_model);
    m_model->ClearSelectedNode();
 }
 
 void Controller::ClearHighlightedNodes(
    const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& callback)
 {
+   assert(m_model);
+
    auto& nodes = m_model->GetHighlightedNodes();
    callback(nodes);
 
@@ -469,6 +437,8 @@ void Controller::ProcessSelection(
 {
    nodeSelector();
 
+   assert(m_model);
+
    auto& nodes = m_model->GetHighlightedNodes();
    callback(nodes);
 
@@ -481,6 +451,7 @@ void Controller::HighlightAncestors(
 {
    const auto selector = [&]
    {
+      assert(m_model);
       m_model->HighlightAncestors(node);
    };
 

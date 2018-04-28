@@ -12,6 +12,11 @@
 
 #include <experimental/filesystem>
 
+template<typename T>
+class Tree;
+
+struct VizBlock;
+
 namespace DriveScanning
 {
    namespace Detail
@@ -55,7 +60,7 @@ namespace DriveScanning
    namespace Utilities
    {
       /**
-       * @brief Helper function to safely wrap the retrieval of a file's size.
+       * @brief Helper function to safely wrap the computation of a file's size.
        *
        * @param path[in]               The path to the file.
        *
@@ -63,6 +68,13 @@ namespace DriveScanning
        */
       auto ComputeFileSize(
          const std::experimental::filesystem::path& path) noexcept -> std::uintmax_t;
+
+      /**
+       * @brief ComputeDirectorySizes
+       *
+       * @param tree
+       */
+      void ComputeDirectorySizes(Tree<VizBlock>& tree) noexcept;
 
 #ifdef Q_OS_WIN
 

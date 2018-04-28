@@ -4,12 +4,24 @@
 #include "visualization.h"
 
 /**
- * @brief Represents the squarified treemap visualization.
+ * @brief Represents the Squarified tree map visualization.
  */
 class SquarifiedTreeMap final : public VisualizationModel
 {
    public:
 
+      /**
+       * @brief Constructs a new tree map laid out using the Squarified algorithm.
+       *
+       * @param[in] path            The path representing the root directory of the tree map.
+       */
+      SquarifiedTreeMap(const std::experimental::filesystem::path& path);
+
+      /**
+       * @brief Parse
+       *
+       * @param theTree
+       */
       void Parse(const std::shared_ptr<Tree<VizBlock>>& theTree) override;
 
    private:

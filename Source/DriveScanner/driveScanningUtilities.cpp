@@ -9,6 +9,7 @@
    #include "winHack.hpp"
 #endif // Q_OS_WIN
 
+#include "../DataStructs/vizBlock.h"
 #include "../Utilities/ignoreUnused.hpp"
 
 #include <cassert>
@@ -16,14 +17,16 @@
 #include <memory>
 #include <mutex>
 
+#include <Tree/Tree.hpp>
+
 namespace DriveScanning
 {
    namespace Detail
    {
       std::mutex streamMutex;
 
-      auto OpenReparsePoint(
-         const std::experimental::filesystem::path& path) noexcept -> ScopedHandle
+      ScopedHandle OpenReparsePoint(
+         const std::experimental::filesystem::path& path) noexcept
       {
          const auto handle = CreateFile(
             /* fileName = */ path.wstring().c_str(),
@@ -62,8 +65,8 @@ namespace DriveScanning
          return successfullyRetrieved && bytesReturned;
       }
 
-      auto GetFileSizeUsingWinAPI(
-         const std::experimental::filesystem::path& path) noexcept -> std::uintmax_t
+      std::uintmax_t GetFileSizeUsingWinAPI(
+         const std::experimental::filesystem::path& path) noexcept
       {
          std::uintmax_t fileSize{ 0 };
 
@@ -89,8 +92,8 @@ namespace DriveScanning
 
    namespace Utilities
    {
-      auto ComputeFileSize(
-         const std::experimental::filesystem::path& path) noexcept -> std::uintmax_t
+      std::uintmax_t ComputeFileSize(
+         const std::experimental::filesystem::path& path) noexcept
       {
          try
          {
@@ -111,11 +114,37 @@ namespace DriveScanning
          }
       }
 
+      /**
+       * @brief Performs a post-processing step that iterates through the tree and computes the size
+       * of all directories.
+       *
+       * @param[in, out] tree          The tree whose nodes need their directory sizes computed.
+       */
+      void ComputeDirectorySizes(Tree<VizBlock>& tree) noexcept
+      {
+         for (auto&& node : tree)
+         {
+            const auto& fileInfo = node->file;
+
+            auto* parent = node.GetParent();
+            if (!parent)
+            {
+               return;
+            }
+
+            auto& parentInfo = parent->GetData().file;
+            if (parentInfo.type == FileType::DIRECTORY)
+            {
+               parentInfo.size += fileInfo.size;
+            }
+         }
+      }
+
 #ifdef Q_OS_WIN
 
-      auto IsReparseTag(
+      bool IsReparseTag(
          const std::experimental::filesystem::path& path,
-         DWORD targetTag) noexcept -> bool
+         DWORD targetTag) noexcept
       {
          static std::vector<std::byte> buffer{ MAXIMUM_REPARSE_DATA_BUFFER_SIZE };
 
@@ -126,7 +155,7 @@ namespace DriveScanning
             : false;
       }
 
-      auto IsMountPoint(const std::experimental::filesystem::path& path) noexcept -> bool
+      bool IsMountPoint(const std::experimental::filesystem::path& path) noexcept
       {
          const auto isMountPoint = IsReparseTag(path, IO_REPARSE_TAG_MOUNT_POINT);
          if (isMountPoint)
@@ -140,7 +169,7 @@ namespace DriveScanning
          return isMountPoint;
       }
 
-      auto IsSymlink(const std::experimental::filesystem::path& path) noexcept -> bool
+      bool IsSymlink(const std::experimental::filesystem::path& path) noexcept
       {
          const auto isSymlink = IsReparseTag(path, IO_REPARSE_TAG_SYMLINK);
          if (isSymlink)
@@ -154,7 +183,7 @@ namespace DriveScanning
          return isSymlink;
       }
 
-      auto IsReparsePoint(const std::experimental::filesystem::path& path) noexcept -> bool
+      bool IsReparsePoint(const std::experimental::filesystem::path& path) noexcept
       {
          const auto handle = Detail::OpenReparsePoint(path);
          if (!handle.IsValid())
