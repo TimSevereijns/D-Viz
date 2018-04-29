@@ -50,14 +50,6 @@ namespace Settings
             std::wstring_view query,
             const RequestedType& defaultValue) const;
 
-         /**
-          * @overload
-          */
-         template<typename RequestedType>
-         RequestedType GetValueOrDefault(
-            std::wstring_view query,
-            RequestedType&& defaultValue) &&;
-
       private:
 
          std::unordered_map<std::wstring, Entry> m_map;

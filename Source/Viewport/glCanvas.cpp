@@ -749,7 +749,7 @@ void GLCanvas::SelectNodeViaRay(const QPoint& rayOrigin)
    const auto deselectionCallback = [&] (auto& node) { RestoreSelectedNode(node); };
 
    const auto ray = m_camera.ShootRayIntoScene(rayOrigin);
-   m_controller.SelectNodeViaRay(m_camera, ray, deselectionCallback, selectionCallback );
+   m_controller.SelectNodeViaRay(m_camera, ray, deselectionCallback, selectionCallback);
 }
 
 void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
@@ -820,9 +820,9 @@ void GLCanvas::ProcessFileTreeChanges()
       const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
          std::chrono::high_resolution_clock::now() - startTime);
 
-      constexpr auto timeLimit = Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES / 2;
-      constexpr auto timeout = std::chrono::milliseconds{ timeLimit };
-      if (elapsedTime >= timeout)
+      constexpr auto timeoutValue = Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES / 2;
+      constexpr auto timeLimit = std::chrono::milliseconds{ timeoutValue };
+      if (elapsedTime >= timeLimit)
       {
          // @note Since this processing is happening on the UI thread, we'll want to make sure
          // that we don't exceed a reasonable fraction of the total allotted frame time.
