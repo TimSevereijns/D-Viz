@@ -19,7 +19,7 @@
 
 #if defined(Q_OS_WIN)
    #include "windowsFileMonitor.h"
-#elif defined(Q_OS_LINIX)
+#elif defined(Q_OS_LINUX)
    #include "linuxFileMonitor.h"
 #endif // Q_OS_LINUX
 
@@ -27,8 +27,8 @@ namespace Detail
 {
 #if defined(Q_OS_WIN)
    using FileSystemMonitor = WindowsFileMonitor;
-#elif defined(Q_OS_LINIX)
-   using FileMonitor = LinuxFileMonitor;
+#elif defined(Q_OS_LINUX)
+   using FileSystemMonitor = LinuxFileMonitor;
 #endif // Q_OS_LINUX
 }
 

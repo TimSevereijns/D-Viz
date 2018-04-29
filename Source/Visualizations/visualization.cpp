@@ -620,7 +620,7 @@ Tree<VizBlock>::Node* VisualizationModel::FindNodeUsingPath(
          Tree<VizBlock>::SiblingIterator{ },
          [&] (const auto& childNode)
       {
-         const auto& pathElement = filePathItr->c_str();
+         const auto pathElement = filePathItr->wstring();
          const auto fileName = childNode->file.name + childNode->file.extension;
 
          return fileName == pathElement;

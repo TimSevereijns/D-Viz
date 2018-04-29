@@ -25,6 +25,7 @@ namespace DriveScanning
    {
       std::mutex streamMutex;
 
+#ifdef Q_OS_WIN
       ScopedHandle OpenReparsePoint(
          const std::experimental::filesystem::path& path) noexcept
       {
@@ -64,6 +65,8 @@ namespace DriveScanning
 
          return successfullyRetrieved && bytesReturned;
       }
+
+#endif // Q_OS_WIN
 
       std::uintmax_t GetFileSizeUsingWinAPI(
          const std::experimental::filesystem::path& path) noexcept

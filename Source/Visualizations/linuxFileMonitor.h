@@ -10,6 +10,8 @@
 
 #include "boost/optional.hpp"
 
+#include <functional>
+
 class LinuxFileMonitor
 {
    public:
@@ -29,7 +31,9 @@ class LinuxFileMonitor
        *
        * @param[in] path            The root directory to watch.
        */
-      void Start(const std::experimental::filesystem::path& path);
+      void Start(
+         const std::experimental::filesystem::path& path,
+         const std::function<void (FileChangeNotification&&)>& onNotificationCallback);
 
       /**
        * @brief Stops monitoring the file system for changes.
@@ -41,19 +45,10 @@ class LinuxFileMonitor
        */
       bool IsActive() const;
 
-      /**
-       * @brief Fetches the oldest, pending file change notification that hasn't yet been processed
-       * by the UI.
-       *
-       * @return The pending change, if it exists.
-       */
-      boost::optional<FileAndChangeStatus> FetchPendingFileChangeNotification() const;
 
    private:
 
       bool m_isActive{ false };
-
-      mutable ThreadSafeQueue<FileAndChangeStatus> m_pendingChanges;
 };
 
 #endif // Q_OS_UNIX

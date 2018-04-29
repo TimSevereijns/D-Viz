@@ -7,7 +7,9 @@ LinuxFileMonitor::~LinuxFileMonitor()
 
 }
 
-void LinuxFileMonitor::Start(const std::experimental::filesystem::path& path)
+void LinuxFileMonitor::Start(
+   const std::experimental::filesystem::path& path,
+   const std::function<void (FileChangeNotification&&)>& onNotificationCallback)
 {
 
 }
@@ -20,11 +22,6 @@ void LinuxFileMonitor::Stop()
 bool LinuxFileMonitor::IsActive() const
 {
    return false;
-}
-
-boost::optional<FileAndChangeStatus> LinuxFileMonitor::FetchPendingFileChangeNotification() const
-{
-   return boost::none;
 }
 
 #endif // Q_OS_LINUX
