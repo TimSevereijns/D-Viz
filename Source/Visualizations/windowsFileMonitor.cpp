@@ -200,8 +200,6 @@ void WindowsFileMonitor::RetrieveNotification()
 
 void WindowsFileMonitor::ProcessNotification()
 {
-   static auto fileName = std::wstring(MAX_PATH, '\0');
-
    auto* notificationInfo = reinterpret_cast<FILE_NOTIFY_INFORMATION*>(m_notificationBuffer.data());
    while (notificationInfo != nullptr)
    {
@@ -214,30 +212,37 @@ void WindowsFileMonitor::ProcessNotification()
          continue;
       }
 
-      assert(notificationInfo->FileNameLength / sizeof(wchar_t) <= MAX_PATH);
+      const auto fileNameLength = notificationInfo->FileNameLength / sizeof(wchar_t);
+      assert(fileNameLength);
+
+      std::wstring fileName(fileNameLength, '\0');
 
       std::memcpy(
          &fileName[0],
          notificationInfo->FileName,
-         notificationInfo->FileNameLength);
-
-      fileName.resize(notificationInfo->FileNameLength / sizeof(wchar_t));
+         notificationInfo->FileNameLength); //< Note that this length is measured in bytes!
 
       switch (notificationInfo->Action)
       {
          case FILE_ACTION_ADDED:
          {
-            m_notificationCallback(FileChangeNotification{ fileName, FileSystemChange::CREATED });
+            m_notificationCallback(
+               FileChangeNotification{ std::move(fileName), FileSystemChange::CREATED });
+
             break;
          }
          case FILE_ACTION_REMOVED:
          {
-            m_notificationCallback(FileChangeNotification{ fileName, FileSystemChange::DELETED });
+            m_notificationCallback(
+               FileChangeNotification{ std::move(fileName), FileSystemChange::DELETED });
+
             break;
          }
          case FILE_ACTION_MODIFIED:
          {
-            m_notificationCallback(FileChangeNotification{ fileName, FileSystemChange::MODIFIED });
+            m_notificationCallback(
+               FileChangeNotification{ std::move(fileName), FileSystemChange::MODIFIED });
+
             break;
          }
          case FILE_ACTION_RENAMED_OLD_NAME:
@@ -247,7 +252,9 @@ void WindowsFileMonitor::ProcessNotification()
          }
          case FILE_ACTION_RENAMED_NEW_NAME:
          {
-            m_notificationCallback(FileChangeNotification{ fileName, FileSystemChange::RENAMED });
+            m_notificationCallback(
+               FileChangeNotification{ std::move(fileName), FileSystemChange::RENAMED });
+
             break;
          }
          default:

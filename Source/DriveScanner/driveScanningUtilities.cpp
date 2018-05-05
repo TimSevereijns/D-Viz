@@ -26,6 +26,7 @@ namespace DriveScanning
       std::mutex streamMutex;
 
 #ifdef Q_OS_WIN
+
       ScopedHandle OpenReparsePoint(
          const std::experimental::filesystem::path& path) noexcept
       {
@@ -41,9 +42,9 @@ namespace DriveScanning
          return ScopedHandle{ handle };
       }
 
-      auto ReadReparsePoint(
+      bool ReadReparsePoint(
          const std::wstring& path,
-         std::vector<std::byte>& reparseBuffer) noexcept -> bool
+         std::vector<std::byte>& reparseBuffer) noexcept
       {
          const auto handle = OpenReparsePoint(path);
          if (!handle.IsValid())
@@ -117,12 +118,6 @@ namespace DriveScanning
          }
       }
 
-      /**
-       * @brief Performs a post-processing step that iterates through the tree and computes the size
-       * of all directories.
-       *
-       * @param[in, out] tree          The tree whose nodes need their directory sizes computed.
-       */
       void ComputeDirectorySizes(Tree<VizBlock>& tree) noexcept
       {
          for (auto&& node : tree)
@@ -208,6 +203,7 @@ namespace DriveScanning
       }
 
 #endif // Q_OS_WIN
+
    }
 }
 

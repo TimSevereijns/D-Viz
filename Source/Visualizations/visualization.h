@@ -235,11 +235,11 @@ class VisualizationModel
       void ProcessFileSystemChanges();
 
       Tree<VizBlock>::Node* FindNodeUsingPath(
-         const std::experimental::filesystem::path& affectedFilePath);
+         const std::experimental::filesystem::path& relativePath);
 
-      void UpdateAffectedNodes(
-         const std::experimental::filesystem::path& relativePath,
-         Tree<VizBlock>::Node* node);
+      Tree<VizBlock>::Node* UpdateAffectedNodes(const FileChangeNotification& notification);
+
+      void UpdateAncestorSizes(Tree<VizBlock>::Node* node);
 
       std::experimental::filesystem::path m_rootPath;
 

@@ -812,7 +812,12 @@ namespace Asset
    {
       assert(m_VAO.isCreated());
       assert(m_blockColorBuffer.isCreated());
-      assert(node->offsetIntoVBO < m_blockCount);
+
+      if (node->offsetIntoVBO > m_blockCount)
+      {
+         assert(false);
+         return;
+      }
 
       constexpr auto colorTupleSize{ sizeof(QVector3D) };
       const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorTupleSize;
@@ -841,7 +846,7 @@ namespace Asset
          }
          case Asset::Event::MODIFIED:
          {           
-            newColor = Constants::Colors::HOT_PINK; //< @todo Pick better color.
+            newColor = Constants::Colors::BABY_BLUE; //< @todo Pick better color.
             break;
          }
          case Asset::Event::RENAMED:
@@ -851,7 +856,7 @@ namespace Asset
          }
          case Asset::Event::DELETED:
          {
-            newColor = Constants::Colors::HOT_PINK; //< @todo Pick better color.
+            newColor = Constants::Colors::CORAL; //< @todo Pick better color.
             break;
          }
          default:

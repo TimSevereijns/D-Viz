@@ -333,6 +333,8 @@ VisualizationModel::~VisualizationModel()
 {
    m_shouldKeepProcessingNotifications.store(false);
 
+   // @todo Need to handle exiting ThreadSafeQueue<T>::WaitAndPop()...
+
    if (m_fileSystemNotificationProcessor.joinable())
    {
       m_fileSystemNotificationProcessor.join();
@@ -592,28 +594,98 @@ void VisualizationModel::ProcessFileSystemChanges()
       const auto notification = m_fileChangeNotifications.WaitAndPop();
       assert(notification);
 
-      if (notification->status == FileSystemChange::CREATED)
+      spdlog::get(Constants::Logging::FILESYSTEM_LOG)->info(
+         fmt::format("{}", notification->path.string()));
+
+      auto* node = UpdateAffectedNodes(*notification);
+      if (node)
       {
-         // @todo Handle file creation...
-         continue;
+         m_nodeChangeNotifications.Emplace(
+            NodeChangeNotification{ std::move(notification->status), node });
+      }
+   }
+}
+
+Tree<VizBlock>::Node* VisualizationModel::UpdateAffectedNodes(
+   const FileChangeNotification& notification)
+{
+   auto* node = FindNodeUsingPath(notification.path);
+   if (!node)
+   {
+      return nullptr;
+   }
+
+   const auto absolutePath =
+      std::experimental::filesystem::absolute(notification.path, m_rootPath);
+
+   if (notification.status == FileSystemChange::DELETED)
+   {
+      // @todo Figure out the best way to handle deleted files.
+      return nullptr;
+   }
+   else
+   {
+      std::error_code errorCode;
+      if (!std::experimental::filesystem::exists(absolutePath) && !errorCode)
+      {
+         // @note The absence of a file may not necessarily indicate a bug, since there tend to be
+         // a lot of transient files that may only exist for a fraction of a second. For example,
+         // some applications tend to create temporary files when saving changes made to a file.
+
+         spdlog::get(Constants::Logging::DEFAULT_LOG)->error(
+            fmt::format("File no longer exists: {}", absolutePath.string()));
+
+         return nullptr;
+      }
+   }
+
+   if (std::experimental::filesystem::is_directory(absolutePath))
+   {
+      // @todo Handle rename, and deletion events.
+   }
+   else
+   {
+      const auto fileSize = DriveScanning::Utilities::ComputeFileSize(absolutePath);
+      node->GetData().file.size = fileSize;
+
+      UpdateAncestorSizes(node);
+   }
+
+   return node;
+}
+
+void VisualizationModel::UpdateAncestorSizes(Tree<VizBlock>::Node* node)
+{
+   while (node)
+   {
+      auto* parent = node->GetParent();
+      if (parent)
+      {
+         const auto totalSize = std::accumulate(
+            Tree<VizBlock>::SiblingIterator{ parent->GetFirstChild() },
+            Tree<VizBlock>::SiblingIterator{ },
+            std::uintmax_t{ 0 },
+            [] (const auto runningTotal, const auto& node) noexcept
+         {
+            assert(node->file.size);
+            return runningTotal + node->file.size;
+         });
+
+         assert(totalSize);
+         parent->GetData().file.size = totalSize;
       }
 
-      auto* node = FindNodeUsingPath(notification->path);
-
-      UpdateAffectedNodes(notification->path, node);
-
-      m_nodeChangeNotifications.Emplace(
-         NodeChangeNotification{ std::move(notification->status), node });
+      node = parent;
    }
 }
 
 Tree<VizBlock>::Node* VisualizationModel::FindNodeUsingPath(
-   const std::experimental::filesystem::path& affectedFilePath)
+   const std::experimental::filesystem::path& relativePath)
 {
    auto* node = m_fileTree->GetRoot();
 
-   auto filePathItr = std::begin(affectedFilePath);
-   while (filePathItr != std::end(affectedFilePath))
+   auto filePathItr = std::begin(relativePath);
+   while (filePathItr != std::end(relativePath))
    {
       auto matchingNodeItr = std::find_if(
          Tree<VizBlock>::SiblingIterator{ node->GetFirstChild() },
@@ -637,39 +709,12 @@ Tree<VizBlock>::Node* VisualizationModel::FindNodeUsingPath(
       }
    }
 
+   if (filePathItr != std::end(relativePath))
+   {
+      return nullptr;
+   }
+
    return node;
-}
-
-void VisualizationModel::UpdateAffectedNodes(
-   const std::experimental::filesystem::path& relativePath,
-   Tree<VizBlock>::Node* node)
-{
-   const auto absolutePath = std::experimental::filesystem::absolute(relativePath, m_rootPath);
-   if (!std::experimental::filesystem::is_directory(absolutePath))
-   {
-      const auto fileSize = DriveScanning::Utilities::ComputeFileSize(absolutePath);
-      node->GetData().file.size = fileSize;
-   }
-
-   while (node)
-   {
-      auto* parent = node->GetParent();
-      if (parent)
-      {
-         auto totalSize = std::accumulate(
-            Tree<VizBlock>::PostOrderIterator{ node },
-            Tree<VizBlock>::PostOrderIterator{ },
-            std::uintmax_t{ 0 },
-            [] (const auto runningTotal, const auto& node) noexcept
-         {
-            return runningTotal + node->file.size;
-         });
-
-         parent->GetData().file.size = totalSize;
-      }
-
-      node = parent;
-   }
 }
 
 bool VisualizationModel::IsFileSystemBeingMonitored() const

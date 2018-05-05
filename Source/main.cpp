@@ -38,14 +38,23 @@ namespace
     */
    void InitializeLog()
    {
-      const auto logPath = std::experimental::filesystem::current_path().append("log.txt");
+      const auto defaultLogPath = std::experimental::filesystem::current_path().append("log.txt");
 
-      const auto& log = spdlog::basic_logger_mt(
+      const auto& defaultLog = spdlog::basic_logger_mt(
          Constants::Logging::DEFAULT_LOG,
-         ToFilenameString(logPath));
+         ToFilenameString(defaultLogPath));
 
-      log->info("--------------------------------");
-      log->info("Starting D-Viz...");
+      const auto fileLogPath = std::experimental::filesystem::current_path().append("fileSytem.txt");
+
+      const auto& filesystemLog = spdlog::basic_logger_mt(
+         Constants::Logging::FILESYSTEM_LOG,
+         ToFilenameString(fileLogPath));
+
+      defaultLog->info("--------------------------------");
+      defaultLog->info("Starting D-Viz...");
+
+      filesystemLog->info("--------------------------------");
+      filesystemLog->info("Starting D-Viz...");
    }
 
    /**
