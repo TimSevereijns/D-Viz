@@ -535,6 +535,7 @@ namespace Asset
 
          if (notTheRightFileType || fileIsTooSmall)
          {
+            node->offsetIntoVBO = VizBlock::INVALID_OFFSET;
             continue;
          }
 

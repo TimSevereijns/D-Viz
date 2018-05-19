@@ -2,7 +2,7 @@
 
 #include "../constants.h"
 #include "../DriveScanner/driveScanningUtilities.h"
-#include "fileStatusChange.hpp"
+#include "fileChangeNotification.hpp"
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -315,6 +315,40 @@ namespace
 
       return allIntersections;
    }
+
+   /**
+    * @brief LogFileSystemEvent
+    *
+    * @param notification
+    */
+   void LogFileSystemEvent(const FileChangeNotification& notification)
+   {
+      switch (notification.status)
+      {
+         case FileSystemChange::CREATED:
+            spdlog::get(Constants::Logging::FILESYSTEM_LOG)->info(
+               fmt::format("Create: {}", notification.relativePath.string()));
+            break;
+
+         case FileSystemChange::DELETED:
+            spdlog::get(Constants::Logging::FILESYSTEM_LOG)->info(
+               fmt::format("Deleted: {}", notification.relativePath.string()));
+            break;
+
+         case FileSystemChange::MODIFIED:
+            spdlog::get(Constants::Logging::FILESYSTEM_LOG)->info(
+               fmt::format("Modified: {}", notification.relativePath.string()));
+            break;
+
+         case FileSystemChange::RENAMED:
+            spdlog::get(Constants::Logging::FILESYSTEM_LOG)->info(
+               fmt::format("Renamed: {}", notification.relativePath.string()));
+            break;
+
+         default:
+            assert(false);
+      }
+   }
 }
 
 const double VisualizationModel::PADDING_RATIO{ 0.9 };
@@ -331,9 +365,7 @@ VisualizationModel::VisualizationModel(const std::experimental::filesystem::path
 
 VisualizationModel::~VisualizationModel()
 {
-   m_shouldKeepProcessingNotifications.store(false);
-
-   // @todo Need to handle exiting ThreadSafeQueue<T>::WaitAndPop()...
+   StopMonitoringFileSystem();
 
    if (m_fileSystemNotificationProcessor.joinable())
    {
@@ -583,8 +615,19 @@ void VisualizationModel::StartMonitoringFileSystem()
    };
 
    m_fileSystemMonitor.Start(m_rootPath, std::move(callback));
-
    m_fileSystemNotificationProcessor = std::thread{ [&] { ProcessFileSystemChanges(); } };
+}
+
+void VisualizationModel::StopMonitoringFileSystem()
+{
+   if (!IsFileSystemBeingMonitored())
+   {
+      return;
+   }
+
+   m_fileSystemMonitor.Stop();
+   m_shouldKeepProcessingNotifications.store(false);
+   m_fileChangeNotifications.AbandonWait();
 }
 
 void VisualizationModel::ProcessFileSystemChanges()
@@ -592,66 +635,160 @@ void VisualizationModel::ProcessFileSystemChanges()
    while (m_shouldKeepProcessingNotifications)
    {
       const auto notification = m_fileChangeNotifications.WaitAndPop();
-      assert(notification);
-
-      spdlog::get(Constants::Logging::FILESYSTEM_LOG)->info(
-         fmt::format("{}", notification->path.string()));
-
-      auto* node = UpdateAffectedNodes(*notification);
-      if (node)
+      if (!notification)
       {
-         m_nodeChangeNotifications.Emplace(
-            NodeChangeNotification{ std::move(notification->status), node });
+         // If we got here, it may indicates that the wait operation has probably been abandoned
+         // due to DTOR invocation.
+         continue;
+      }
+
+      LogFileSystemEvent(*notification);
+
+      const auto successfullyResolved = ResolveNotification(*notification);
+      if (successfullyResolved)
+      {
+         m_pendingGraphicalUpdates.Emplace(*notification);
+         m_pendingModelChanges.emplace(*notification);
       }
    }
 }
 
-Tree<VizBlock>::Node* VisualizationModel::UpdateAffectedNodes(
-   const FileChangeNotification& notification)
+bool VisualizationModel::ResolveNotification(FileChangeNotification& notification)
 {
-   auto* node = FindNodeUsingPath(notification.path);
-   if (!node)
+   auto* node = FindNodeUsingRelativePath(notification.relativePath);
+   notification.node = node;
+
+   return node != nullptr;
+}
+
+void VisualizationModel::UpdateTreemap()
+{
+   for (const auto& change : m_pendingModelChanges)
    {
-      return nullptr;
+      UpdateAffectedNodes(change);
    }
 
+   // @todo Sort the tree.
+   // @todo Update all sizes.
+}
+
+void VisualizationModel::UpdateAffectedNodes(const FileChangeNotification& notification)
+{
    const auto absolutePath =
-      std::experimental::filesystem::absolute(notification.path, m_rootPath);
+      std::experimental::filesystem::absolute(notification.relativePath, m_rootPath);
 
-   if (notification.status == FileSystemChange::DELETED)
+   std::error_code errorCode;
+
+   if (notification.status != FileSystemChange::DELETED
+      && !std::experimental::filesystem::exists(absolutePath)
+      && !errorCode)
    {
-      // @todo Figure out the best way to handle deleted files.
-      return nullptr;
+      // @note The absence of a file may not necessarily indicate a bug, since there tend to be
+      // a lot of transient files that may only exist for a fraction of a second. For example,
+      // some applications tend to create temporary files when saving changes made to a file.
+
+      spdlog::get(Constants::Logging::DEFAULT_LOG)->error(
+         fmt::format("File no longer exists: {}", absolutePath.string()));
+
+      return;
    }
-   else
+
+   switch (notification.status)
    {
-      std::error_code errorCode;
-      if (!std::experimental::filesystem::exists(absolutePath) && !errorCode)
+      case FileSystemChange::CREATED:
+         OnFileCreation(notification);
+         break;
+
+      case FileSystemChange::DELETED:
+         OnFileDeletion(notification);
+         break;
+
+      case FileSystemChange::MODIFIED:
+         OnFileModification(notification);
+         break;
+
+      case FileSystemChange::RENAMED:
+         OnFileNameChange(notification);
+         break;
+
+      default:
+         assert(false);
+   }
+}
+
+void VisualizationModel::OnFileCreation(const FileChangeNotification& notification)
+{
+   const auto absolutePath =
+      std::experimental::filesystem::absolute(notification.relativePath, m_rootPath);
+
+   // @todo Find parent node from path:
+   auto* parentNode = FindNodeUsingRelativePath(notification.relativePath.stem());
+
+   if (std::experimental::filesystem::is_directory(absolutePath)) // @todo Check symlink status...
+   {
+      FileInfo directoryInfo
       {
-         // @note The absence of a file may not necessarily indicate a bug, since there tend to be
-         // a lot of transient files that may only exist for a fraction of a second. For example,
-         // some applications tend to create temporary files when saving changes made to a file.
+         notification.relativePath.filename().wstring(),
+         /* extension = */ L"",
+         /* size = */ 0,
+         FileType::DIRECTORY
+      };
 
-         spdlog::get(Constants::Logging::DEFAULT_LOG)->error(
-            fmt::format("File no longer exists: {}", absolutePath.string()));
-
-         return nullptr;
-      }
-   }
-
-   if (std::experimental::filesystem::is_directory(absolutePath))
-   {
-      // @todo Handle rename, and deletion events.
+      parentNode->AppendChild(VizBlock{ std::move(directoryInfo) });
    }
    else
    {
       const auto fileSize = DriveScanning::Utilities::ComputeFileSize(absolutePath);
-      node->GetData().file.size = fileSize;
 
-      UpdateAncestorSizes(node);
+      FileInfo fileInfo
+      {
+         notification.relativePath.filename().stem().wstring(),
+         notification.relativePath.filename().extension().wstring(),
+         fileSize,
+         FileType::REGULAR
+      };
+
+      parentNode->AppendChild(VizBlock{ std::move(fileInfo) });
+   }
+}
+
+void VisualizationModel::OnFileDeletion(const FileChangeNotification& notification)
+{
+   auto* node = FindNodeUsingRelativePath(notification.relativePath);
+   if (!node)
+   {
+      return;
    }
 
-   return node;
+   node->DeleteFromTree();
+}
+
+void VisualizationModel::OnFileModification(const FileChangeNotification& notification)
+{
+   const auto absolutePath =
+      std::experimental::filesystem::absolute(notification.relativePath, m_rootPath);
+
+   if (std::experimental::filesystem::is_directory(absolutePath))
+   {
+      // @todo What does it mean for a directory to be modified?
+   }
+   else
+   {
+      const auto fileSize = DriveScanning::Utilities::ComputeFileSize(absolutePath);
+
+      auto* node = FindNodeUsingRelativePath(notification.relativePath);
+      if (!node)
+      {
+         return;
+      }
+
+      node->GetData().file.size = fileSize;
+   }
+}
+
+void VisualizationModel::OnFileNameChange(const FileChangeNotification& /*notification*/)
+{
+   // @todo Need to associate new file names with old file names in order to resolve rename events.
 }
 
 void VisualizationModel::UpdateAncestorSizes(Tree<VizBlock>::Node* node)
@@ -679,13 +816,13 @@ void VisualizationModel::UpdateAncestorSizes(Tree<VizBlock>::Node* node)
    }
 }
 
-Tree<VizBlock>::Node* VisualizationModel::FindNodeUsingPath(
-   const std::experimental::filesystem::path& relativePath)
+Tree<VizBlock>::Node* VisualizationModel::FindNodeUsingRelativePath(
+   const std::experimental::filesystem::path& path)
 {
    auto* node = m_fileTree->GetRoot();
 
-   auto filePathItr = std::begin(relativePath);
-   while (filePathItr != std::end(relativePath))
+   auto filePathItr = std::begin(path);
+   while (filePathItr != std::end(path))
    {
       auto matchingNodeItr = std::find_if(
          Tree<VizBlock>::SiblingIterator{ node->GetFirstChild() },
@@ -709,7 +846,7 @@ Tree<VizBlock>::Node* VisualizationModel::FindNodeUsingPath(
       }
    }
 
-   if (filePathItr != std::end(relativePath))
+   if (filePathItr != std::end(path))
    {
       return nullptr;
    }
@@ -722,11 +859,12 @@ bool VisualizationModel::IsFileSystemBeingMonitored() const
    return m_fileSystemMonitor.IsActive();
 }
 
-boost::optional<NodeChangeNotification> VisualizationModel::FetchNodeUpdate()
+boost::optional<FileChangeNotification> VisualizationModel::FetchNodeUpdate()
 {
-   NodeChangeNotification notification;
-   const auto successfullyRetrievedNotification = m_nodeChangeNotifications.TryPop(notification);
-   if (!successfullyRetrievedNotification)
+   FileChangeNotification notification;
+
+   const auto retrievedNotification = m_pendingGraphicalUpdates.TryPop(notification);
+   if (!retrievedNotification)
    {
       return boost::none;
    }

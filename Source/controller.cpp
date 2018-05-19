@@ -145,6 +145,7 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
 
    m_view->OnScanStarted();
 
+   // @todo Look into using std::fileystem::space instead.
    m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(parameters.rootDirectory);
    assert(m_occupiedDiskSpace > 0);
 
@@ -195,7 +196,7 @@ bool Controller::IsFileSystemBeingMonitored() const
    return m_model->IsFileSystemBeingMonitored();
 }
 
-boost::optional<NodeChangeNotification> Controller::FetchNodeChangeNotification()
+boost::optional<FileChangeNotification> Controller::FetchNodeChangeNotification()
 {
    return m_model->FetchNodeUpdate();
 }

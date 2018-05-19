@@ -3,6 +3,7 @@
 #include <spdlog/spdlog.h>
 
 #include <constants.h>
+#include <DataStructs/vizBlock.h>
 
 #ifdef Q_OS_WIN
    #undef GetObject
@@ -192,6 +193,21 @@ namespace Settings
    void Manager::OnShowShadowsToggled(bool isEnabled)
    {
       m_shouldRenderShadows = isEnabled;
+   }
+
+   bool Manager::ShouldBlockBeProcessed(const VizBlock& block)
+   {
+      if (block.file.size < m_visualizationParameters.minimumFileSize)
+      {
+         return false;
+      }
+
+      if (block.file.type != FileType::DIRECTORY && m_visualizationParameters.onlyShowDirectories)
+      {
+         return false;
+      }
+
+      return true;
    }
 
    double Manager::GetCameraSpeed() const

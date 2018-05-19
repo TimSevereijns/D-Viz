@@ -7,7 +7,7 @@
 #include "DataStructs/light.h"
 #include "DataStructs/vizBlock.h"
 #include "DriveScanner/driveScanner.h"
-#include "Visualizations/fileStatusChange.hpp"
+#include "Visualizations/fileChangeNotification.hpp"
 #include "Windows/mainWindow.h"
 
 #include <Tree/Tree.hpp>
@@ -257,7 +257,7 @@ class Controller
       /**
        * @brief Fetches oldest, unprocessed file system change notification.
        */
-      boost::optional<NodeChangeNotification> FetchNodeChangeNotification();
+      boost::optional<FileChangeNotification> FetchNodeChangeNotification();
 
    private:
 

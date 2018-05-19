@@ -102,8 +102,8 @@ HEADERS += \
    Viewport/gamepadContextMenu.h \
    Viewport/glCanvas.h \
    Viewport/mouseContextMenu.h \
-   Visualizations/fileStatusChange.hpp \
    Visualizations/linuxFileMonitor.h \
+   Visualizations/fileChangeNotification.hpp \
    Visualizations/squarifiedTreemap.h \
    Visualizations/visualization.h \
    Visualizations/windowsFileMonitor.h \

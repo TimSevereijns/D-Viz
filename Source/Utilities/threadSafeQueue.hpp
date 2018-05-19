@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <condition_variable>
 #include <memory>
 #include <mutex>
@@ -36,22 +37,42 @@ public:
    void WaitAndPop(Type& data)
    {
       std::unique_lock<decltype(m_mutex)> lock{ m_mutex };
-      m_conditionVariable.wait(lock, [this] { return !m_queue.empty(); });
+      m_conditionVariable.wait(lock, [this] { return !m_queue.empty() || m_shouldAbandonWait; });
+
+      if (m_shouldAbandonWait)
+      {
+         return;
+      }
 
       data = m_queue.front();
-
       m_queue.pop();
    }
 
    std::shared_ptr<Type> WaitAndPop()
    {
       std::unique_lock<decltype(m_mutex)> lock{ m_mutex };
-      m_conditionVariable.wait(lock, [this] { return !m_queue.empty(); });
+      m_conditionVariable.wait(lock, [this] { return !m_queue.empty() || m_shouldAbandonWait; });
+
+      if (m_shouldAbandonWait)
+      {
+         return { };
+      }
 
       const auto result = std::make_shared<Type>(m_queue.front());
       m_queue.pop();
 
       return result;
+   }
+
+   void AbandonWait()
+   {
+      m_shouldAbandonWait = true;
+      m_conditionVariable.notify_all();
+   }
+
+   void ResetWaitingPrivileges()
+   {
+      m_shouldAbandonWait = false;
    }
 
    bool TryPop(Type& data)
@@ -75,7 +96,7 @@ public:
 
       if (m_queue.empty())
       {
-         return{ };
+         return { };
       }
 
       const auto result = std::make_shared<Type>(m_queue.front());
@@ -93,6 +114,8 @@ public:
 private:
 
    mutable std::mutex m_mutex;
+
+   std::atomic_bool m_shouldAbandonWait{ false };
 
    std::queue<Type> m_queue;
    std::condition_variable m_conditionVariable;

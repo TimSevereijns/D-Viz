@@ -37,7 +37,10 @@ namespace
 
 WindowsFileMonitor::~WindowsFileMonitor()
 {
-   Stop();
+   if (m_isActive)
+   {
+      Stop();
+   }
 
    if (m_monitoringThread.joinable())
    {
@@ -71,7 +74,7 @@ void WindowsFileMonitor::Start(
       /* shareMode = */ FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
       /* securityAttributes = */ NULL,
       /* creationDisposition = */ OPEN_EXISTING,
-      /* flagsAndAttributes = */ FILE_FLAG_BACKUP_SEMANTICS,
+      /* flagsAndAttributes = */ FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
       /* templateFile = */ NULL);
 
    if (!m_fileHandle || m_fileHandle == INVALID_HANDLE_VALUE)
@@ -108,8 +111,7 @@ void WindowsFileMonitor::Start(
 
 void WindowsFileMonitor::Stop()
 {
-   SetEvent(m_events.GetExitHandle());
-   m_isActive = false;
+   SetEvent(m_events.GetExitHandle());   
 }
 
 void WindowsFileMonitor::Monitor()
@@ -118,6 +120,8 @@ void WindowsFileMonitor::Monitor()
    {
       AwaitNotification();
    }
+
+   m_isActive = false;
 }
 
 void WindowsFileMonitor::AwaitNotification()
@@ -219,41 +223,46 @@ void WindowsFileMonitor::ProcessNotification()
 
       std::memcpy(
          &fileName[0],
-         notificationInfo->FileName,
-         notificationInfo->FileNameLength); //< Note that this length is measured in bytes!
+         notificationInfo->FileName,         //< @todo Handle short filenames correctly.
+         notificationInfo->FileNameLength);  //< Note that this length is measured in bytes!
+
+      const auto timestamp = std::chrono::high_resolution_clock::now();
 
       switch (notificationInfo->Action)
       {
          case FILE_ACTION_ADDED:
          {
             m_notificationCallback(
-               FileChangeNotification{ std::move(fileName), FileSystemChange::CREATED });
+               FileChangeNotification{ std::move(fileName), FileSystemChange::CREATED, timestamp });
 
             break;
          }
          case FILE_ACTION_REMOVED:
          {
             m_notificationCallback(
-               FileChangeNotification{ std::move(fileName), FileSystemChange::DELETED });
+               FileChangeNotification{ std::move(fileName), FileSystemChange::DELETED, timestamp });
 
             break;
          }
          case FILE_ACTION_MODIFIED:
          {
             m_notificationCallback(
-               FileChangeNotification{ std::move(fileName), FileSystemChange::MODIFIED });
+               FileChangeNotification{ std::move(fileName), FileSystemChange::MODIFIED, timestamp });
 
             break;
          }
          case FILE_ACTION_RENAMED_OLD_NAME:
          {
-            // @note Handling the new name as the cannonical renaming event should be sufficient.
+            m_pendingRenameEvent = std::move(fileName);
+
             break;
          }
          case FILE_ACTION_RENAMED_NEW_NAME:
          {
+            assert(m_pendingRenameEvent);
+
             m_notificationCallback(
-               FileChangeNotification{ std::move(fileName), FileSystemChange::RENAMED });
+               FileChangeNotification{ std::move(fileName), FileSystemChange::RENAMED, timestamp });
 
             break;
          }

@@ -13,6 +13,8 @@
 #include <QObject>
 #include <QVector3D>
 
+struct VizBlock;
+
 namespace Settings
 {
    using ColorMap = std::unordered_map<std::wstring, std::unordered_map<std::wstring, QVector3D>>;
@@ -216,6 +218,12 @@ namespace Settings
           * @param isEnabled
           */
          void OnShowShadowsToggled(bool isEnabled);
+
+         /**
+          * @brief ShouldNodeBeIgnored
+          * @return
+          */
+         bool ShouldBlockBeProcessed(const VizBlock& block);
 
       private:
 

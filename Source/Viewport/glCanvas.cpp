@@ -797,24 +797,29 @@ void GLCanvas::ProcessFileTreeChanges()
 
    while (changeNotification)
    {
-      switch (changeNotification->status)
+      const auto& node = changeNotification->node;
+      if (m_controller.GetSettingsManager().ShouldBlockBeProcessed(node->GetData()))
       {
-         case FileSystemChange::CREATED:
-            // If a file is newly added, then there's nothing to update in the existing
-            // visualization.
-            break;
-         case FileSystemChange::DELETED:
-            treemap->UpdateVBO(*changeNotification->node, Asset::Event::DELETED);
-            break;
-         case FileSystemChange::MODIFIED:
-            treemap->UpdateVBO(*changeNotification->node, Asset::Event::MODIFIED);
-            break;
-         case FileSystemChange::RENAMED:
-            treemap->UpdateVBO(*changeNotification->node, Asset::Event::RENAMED);
-            break;
-         default:
-            assert(false);
-            break;
+          switch (changeNotification->status)
+          {
+             case FileSystemChange::CREATED:
+                // If a file is newly added, then there's nothing to update in the existing
+                // visualization.
+                break;
+             case FileSystemChange::DELETED:
+                treemap->UpdateVBO(*changeNotification->node, Asset::Event::DELETED);
+                break;
+             case FileSystemChange::MODIFIED:
+                treemap->UpdateVBO(*changeNotification->node, Asset::Event::MODIFIED);
+                break;
+             case FileSystemChange::RENAMED:
+                // @todo I'll need to be notified of the old name to pick up rename events.
+                treemap->UpdateVBO(*changeNotification->node, Asset::Event::RENAMED);
+                break;
+             default:
+                assert(false);
+                break;
+          }
       }
 
       const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(

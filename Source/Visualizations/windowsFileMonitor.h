@@ -5,7 +5,7 @@
 
 #ifdef Q_OS_WIN
 
-#include "fileStatusChange.hpp"
+#include "fileChangeNotification.hpp"
 #include "Utilities/threadSafeQueue.hpp"
 
 #include "boost/optional.hpp"
@@ -51,17 +51,17 @@ namespace Detail
             m_handles[1] = handle;
          }
 
-         auto GetExitHandle() const noexcept
+         HANDLE GetExitHandle() const noexcept
          {
             return m_handles[0];
          }
 
-         auto GetNotificationHandle() const noexcept
+         HANDLE GetNotificationHandle() const noexcept
          {
             return m_handles[1];
          }
 
-         const auto* Data() const noexcept
+         const HANDLE* Data() const noexcept
          {
             return m_handles.data();
          }
@@ -136,6 +136,8 @@ class WindowsFileMonitor
       std::thread m_monitoringThread;
 
       std::function<void (FileChangeNotification&&)> m_notificationCallback;
+
+      boost::optional<std::wstring> m_pendingRenameEvent;
 };
 
 #endif // Q_OS_WIN

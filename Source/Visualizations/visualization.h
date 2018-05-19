@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <memory>
 #include <numeric>
+#include <set>
 #include <thread>
 
 #include <Tree/Tree.hpp>
@@ -16,6 +17,8 @@
 #include "../DataStructs/vizBlock.h"
 #include "../Settings/settings.h"
 #include "../Viewport/camera.h"
+
+#include "fileChangeNotification.hpp"
 
 #if defined(Q_OS_WIN)
    #include "windowsFileMonitor.h"
@@ -37,12 +40,6 @@ struct TreemapMetadata
    std::uintmax_t FileCount;
    std::uintmax_t DirectoryCount;
    std::uintmax_t TotalBytes;
-};
-
-struct NodeChangeNotification
-{
-   FileSystemChange status;
-   const Tree<VizBlock>::Node* node;
 };
 
 /**
@@ -207,6 +204,11 @@ class VisualizationModel
       void StartMonitoringFileSystem();
 
       /**
+       * @brief StopMonitoringFileSystem
+       */
+      void StopMonitoringFileSystem();
+
+      /**
        * @returns True if the file system monitor is turned on.
        */
       bool IsFileSystemBeingMonitored() const;
@@ -214,7 +216,7 @@ class VisualizationModel
       /**
        * @returns The latest node to have changed.
        */
-      boost::optional<NodeChangeNotification> FetchNodeUpdate();
+      boost::optional<FileChangeNotification> FetchNodeUpdate();
 
       /**
        * @brief GetRootPath
@@ -234,12 +236,24 @@ class VisualizationModel
 
       void ProcessFileSystemChanges();
 
-      Tree<VizBlock>::Node* FindNodeUsingPath(
+      Tree<VizBlock>::Node* FindNodeUsingRelativePath(
          const std::experimental::filesystem::path& relativePath);
 
-      Tree<VizBlock>::Node* UpdateAffectedNodes(const FileChangeNotification& notification);
+      void UpdateTreemap();
+
+      void UpdateAffectedNodes(const FileChangeNotification& notification);
 
       void UpdateAncestorSizes(Tree<VizBlock>::Node* node);
+
+      void OnFileCreation(const FileChangeNotification& notification);
+
+      void OnFileDeletion(const FileChangeNotification& notification);
+
+      void OnFileModification(const FileChangeNotification& notification);
+
+      void OnFileNameChange(const FileChangeNotification& notification);
+
+      bool ResolveNotification(FileChangeNotification& notification);
 
       std::experimental::filesystem::path m_rootPath;
 
@@ -267,8 +281,13 @@ class VisualizationModel
       ThreadSafeQueue<FileChangeNotification> m_fileChangeNotifications;
 
       // This queue contains pending tree node change notifications. These notifications
-      // still need to be retrieved by the UI for further processing.
-      ThreadSafeQueue<NodeChangeNotification> m_nodeChangeNotifications;
+      // still need to be retrieved by the view so that the UI can be updated to reflect filesystem
+      // activity.
+      ThreadSafeQueue<FileChangeNotification> m_pendingGraphicalUpdates;
+
+      // This ordered set tracks changes will need to be applied to the treemap once the user
+      // refreshes the visualization to reflect filesystem changes:
+      std::set<FileChangeNotification> m_pendingModelChanges;
 
       std::thread m_fileSystemNotificationProcessor;
 };
