@@ -718,13 +718,13 @@ void VisualizationModel::UpdateAffectedNodes(const FileChangeNotification& notif
 
 void VisualizationModel::OnFileCreation(const FileChangeNotification& notification)
 {
-   const auto absolutePath =
-      std::experimental::filesystem::absolute(notification.relativePath, m_rootPath);
-
    // @todo Find parent node from path:
    auto* parentNode = FindNodeUsingRelativePath(notification.relativePath.stem());
 
-   if (std::experimental::filesystem::is_directory(absolutePath)) // @todo Check symlink status...
+   const auto absolutePath =
+      std::experimental::filesystem::absolute(notification.relativePath, m_rootPath);
+
+   if (std::experimental::filesystem::is_directory(absolutePath)) //< @todo Check symlink status...
    {
       FileInfo directoryInfo
       {
@@ -736,7 +736,7 @@ void VisualizationModel::OnFileCreation(const FileChangeNotification& notificati
 
       parentNode->AppendChild(VizBlock{ std::move(directoryInfo) });
    }
-   else
+   else // if (is_regular(...))
    {
       const auto fileSize = DriveScanning::Utilities::ComputeFileSize(absolutePath);
 
@@ -755,12 +755,10 @@ void VisualizationModel::OnFileCreation(const FileChangeNotification& notificati
 void VisualizationModel::OnFileDeletion(const FileChangeNotification& notification)
 {
    auto* node = FindNodeUsingRelativePath(notification.relativePath);
-   if (!node)
+   if (node)
    {
-      return;
+      node->DeleteFromTree();;
    }
-
-   node->DeleteFromTree();
 }
 
 void VisualizationModel::OnFileModification(const FileChangeNotification& notification)
@@ -772,17 +770,15 @@ void VisualizationModel::OnFileModification(const FileChangeNotification& notifi
    {
       // @todo What does it mean for a directory to be modified?
    }
-   else
+   else // if (is_regular(...))
    {
       const auto fileSize = DriveScanning::Utilities::ComputeFileSize(absolutePath);
 
       auto* node = FindNodeUsingRelativePath(notification.relativePath);
-      if (!node)
+      if (node)
       {
-         return;
-      }
-
-      node->GetData().file.size = fileSize;
+         node->GetData().file.size = fileSize;;
+      }      
    }
 }
 
