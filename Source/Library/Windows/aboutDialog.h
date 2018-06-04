@@ -3,19 +3,26 @@
 
 #include <QDialog>
 
-#include "ui_aboutDialog.h"
+#include <memory>
+
+namespace Ui
+{
+   class AboutDialog;
+}
 
 class AboutDialog final : public QDialog
 {
-      Q_OBJECT
+   Q_OBJECT
 
    public:
 
       explicit AboutDialog(QWidget* parent = nullptr);
 
+      ~AboutDialog();
+
    private:
 
-      Ui::AboutDialog m_ui;
+      std::unique_ptr<Ui::AboutDialog> m_ui;
 };
 
 #endif // ABOUTDIALOG_H

@@ -8,9 +8,12 @@
 
 #include "scanBreakdownModel.h"
 
-#include "ui_breakdownDialog.h"
-
 class MainWindow;
+
+namespace Ui
+{
+   class breakdownDialog;
+}
 
 class ScanBreakdownFilterProxyModel final : public QSortFilterProxyModel
 {
@@ -47,11 +50,13 @@ class ScanBreakdownFilterProxyModel final : public QSortFilterProxyModel
  */
 class BreakdownDialog final : public QDialog
 {
-      Q_OBJECT
+   Q_OBJECT
 
    public:
 
       BreakdownDialog(QWidget* parent = nullptr);
+
+      ~BreakdownDialog();
 
       void ReloadData();
 
@@ -65,7 +70,7 @@ class BreakdownDialog final : public QDialog
 
       MainWindow& m_mainWindow;
 
-      Ui::breakdownDialog m_ui;
+      std::unique_ptr<Ui::breakdownDialog> m_ui;
 
       ScanBreakdownModel m_model;
       ScanBreakdownFilterProxyModel m_proxyModel;

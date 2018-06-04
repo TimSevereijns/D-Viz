@@ -13,7 +13,10 @@
 #include "HID/gamepad.h"
 #include "Viewport/glCanvas.h"
 
-#include "ui_mainWindow.h"
+namespace Ui
+{
+   class MainWindow;
+}
 
 struct ScanningProgress;
 
@@ -34,6 +37,8 @@ class MainWindow final : public QMainWindow
       MainWindow(
          Controller& controller,
          QWidget* parent = nullptr);
+
+      ~MainWindow();
 
       /**
        * @brief Sets the field of view.
@@ -169,8 +174,7 @@ class MainWindow final : public QMainWindow
 
       std::unique_ptr<Gamepad> m_gamepad{ std::make_unique<Gamepad>(0, this) };
 
-      Ui::MainWindow m_ui;
-
+      std::unique_ptr<Ui::MainWindow> m_ui{ nullptr };
       std::unique_ptr<GLCanvas> m_glCanvas{ nullptr };
       std::unique_ptr<AboutDialog> m_aboutDialog{ nullptr };
       std::unique_ptr<BreakdownDialog> m_breakdownDialog{ nullptr };

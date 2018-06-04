@@ -1,6 +1,7 @@
 #include "scanBreakdownModel.h"
 
-#include "../Foreign/Spdlog/include/spdlog/fmt/fmt.h"
+#include <spdlog/fmt/fmt.h>
+
 #include "../controller.h"
 #include "../Settings/settingsManager.h"
 
