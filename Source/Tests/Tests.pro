@@ -6,9 +6,9 @@
 
 include(../defaults.pri)
 
-QT       += testlib
+QT += testlib
 
-QT       -= gui
+QT -= gui
 
 TARGET = UnitTests
 CONFIG   += console
@@ -32,4 +32,4 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 LIBS += -L$$DESTDIR -lD-Viz
 
 HEADERS += \
-    modelTester.hpp
+   modelTester.hpp

@@ -1,4 +1,4 @@
-QT       += 3drender-private opengl gamepad
+QT += 3drender-private opengl gamepad
 
 # Generate PDBs for Release builds:
 win32:QMAKE_CFLAGS_RELEASE += /Zi /GL

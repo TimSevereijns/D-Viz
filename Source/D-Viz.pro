@@ -17,9 +17,9 @@ INSTALLS += plugin_files
 
 CONFIG += ordered
 SUBDIRS += \
-    Library \
-    Tests \
-    App
+   Library \
+   Tests \
+   App
 
 App.depends = Library
 Tests.depends = Library

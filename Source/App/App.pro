@@ -6,7 +6,7 @@
 
 include(../defaults.pri)
 
-QT       += core gui
+QT += core gui
 
 greaterThan(QT_MAJOR_VERSION, 5): QT += widgets
 
@@ -27,6 +27,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-        main.cpp
+   main.cpp
 
 LIBS += -L$$DESTDIR -lD-Viz
