@@ -10,101 +10,101 @@ win32:QMAKE_CXXFLAGS += /std:c++latest
 # @todo Make this more generic, or remove it altogether.
 unix:INCLUDEPATH += /usr/include/c++/7.2.0
 
-INCLUDEPATH += $$PWD/Library
+INCLUDEPATH += $$PWD/Core
 
 SOURCES += \
-   $$PWD/Library/controller.cpp \
-   $$PWD/Library/DataStructs/block.cpp \
-   $$PWD/Library/DataStructs/fileInfo.cpp \
-   $$PWD/Library/DataStructs/light.cpp \
-   $$PWD/Library/DataStructs/precisePoint.cpp \
-   $$PWD/Library/DataStructs/driveScanningParameters.cpp \
-   $$PWD/Library/DataStructs/vizBlock.cpp \
-   $$PWD/Library/DriveScanner/driveScanner.cpp \
-   $$PWD/Library/DriveScanner/driveScanningUtilities.cpp \
-   $$PWD/Library/DriveScanner/scanningWorker.cpp \
-   $$PWD/Library/DriveScanner/scopedHandle.cpp \
-   $$PWD/Library/HID/gamepad.cpp \
-   $$PWD/Library/HID/keyboardManager.cpp \
-   $$PWD/Library/Scene/baseAsset.cpp \
-   $$PWD/Library/Scene/crosshairAsset.cpp \
-   $$PWD/Library/Scene/debuggingRayAsset.cpp \
-   $$PWD/Library/Scene/frustumAsset.cpp \
-   $$PWD/Library/Scene/gridAsset.cpp \
-   $$PWD/Library/Scene/lightMarkerAsset.cpp \
-   $$PWD/Library/Scene/lineAsset.cpp \
-   $$PWD/Library/Scene/originMarkerAsset.cpp \
-   $$PWD/Library/Scene/treemapAsset.cpp \
-   $$PWD/Library/Settings/settings.cpp \
-   $$PWD/Library/Settings/settingsManager.cpp \
-   $$PWD/Library/Viewport/camera.cpp \
-   $$PWD/Library/Viewport/gamepadContextMenu.cpp \
-   $$PWD/Library/Viewport/glCanvas.cpp \
-   $$PWD/Library/Viewport/mouseContextMenu.cpp \
-   $$PWD/Library/Visualizations/linuxFileMonitor.cpp \
-   $$PWD/Library/Visualizations/squarifiedTreemap.cpp \
-   $$PWD/Library/Visualizations/visualization.cpp \
-   $$PWD/Library/Visualizations/windowsFileMonitor.cpp \
-   $$PWD/Library/Windows/aboutDialog.cpp \
-   $$PWD/Library/Windows/breakdownDialog.cpp \
-   $$PWD/Library/Windows/mainWindow.cpp \
-   $$PWD/Library/Windows/scanBreakdownModel.cpp
+   $$PWD/Core/controller.cpp \
+   $$PWD/Core/DataStructs/block.cpp \
+   $$PWD/Core/DataStructs/fileInfo.cpp \
+   $$PWD/Core/DataStructs/light.cpp \
+   $$PWD/Core/DataStructs/precisePoint.cpp \
+   $$PWD/Core/DataStructs/driveScanningParameters.cpp \
+   $$PWD/Core/DataStructs/vizBlock.cpp \
+   $$PWD/Core/DriveScanner/driveScanner.cpp \
+   $$PWD/Core/DriveScanner/driveScanningUtilities.cpp \
+   $$PWD/Core/DriveScanner/scanningWorker.cpp \
+   $$PWD/Core/DriveScanner/scopedHandle.cpp \
+   $$PWD/Core/HID/gamepad.cpp \
+   $$PWD/Core/HID/keyboardManager.cpp \
+   $$PWD/Core/Scene/baseAsset.cpp \
+   $$PWD/Core/Scene/crosshairAsset.cpp \
+   $$PWD/Core/Scene/debuggingRayAsset.cpp \
+   $$PWD/Core/Scene/frustumAsset.cpp \
+   $$PWD/Core/Scene/gridAsset.cpp \
+   $$PWD/Core/Scene/lightMarkerAsset.cpp \
+   $$PWD/Core/Scene/lineAsset.cpp \
+   $$PWD/Core/Scene/originMarkerAsset.cpp \
+   $$PWD/Core/Scene/treemapAsset.cpp \
+   $$PWD/Core/Settings/settings.cpp \
+   $$PWD/Core/Settings/settingsManager.cpp \
+   $$PWD/Core/Viewport/camera.cpp \
+   $$PWD/Core/Viewport/gamepadContextMenu.cpp \
+   $$PWD/Core/Viewport/glCanvas.cpp \
+   $$PWD/Core/Viewport/mouseContextMenu.cpp \
+   $$PWD/Core/Visualizations/linuxFileMonitor.cpp \
+   $$PWD/Core/Visualizations/squarifiedTreemap.cpp \
+   $$PWD/Core/Visualizations/visualization.cpp \
+   $$PWD/Core/Visualizations/windowsFileMonitor.cpp \
+   $$PWD/Core/Windows/aboutDialog.cpp \
+   $$PWD/Core/Windows/breakdownDialog.cpp \
+   $$PWD/Core/Windows/mainWindow.cpp \
+   $$PWD/Core/Windows/scanBreakdownModel.cpp
 
 HEADERS += \
-   $$PWD/Library/constants.h \
-   $$PWD/Library/controller.h \
-   $$PWD/Library/DataStructs/block.h \
-   $$PWD/Library/DataStructs/fileInfo.h \
-   $$PWD/Library/DataStructs/light.h \
-   $$PWD/Library/DataStructs/driveScanningParameters.h \
-   $$PWD/Library/DataStructs/precisePoint.h \
-   $$PWD/Library/DataStructs/scanningProgress.hpp \
-   $$PWD/Library/DataStructs/vizBlock.h \
-   $$PWD/Library/DriveScanner/driveScanner.h \
-   $$PWD/Library/DriveScanner/driveScanningUtilities.h \
-   $$PWD/Library/DriveScanner/scanningWorker.h \
-   $$PWD/Library/DriveScanner/scopedHandle.h \
-   $$PWD/Library/DriveScanner/winHack.hpp \
-   $$PWD/Library/HID/gamepad.h \
-   $$PWD/Library/HID/keyboardManager.h \
-   $$PWD/Library/literals.h \
-   $$PWD/Library/Scene/baseAsset.h \
-   $$PWD/Library/Scene/crosshairAsset.h \
-   $$PWD/Library/Scene/debuggingRayAsset.h \
-   $$PWD/Library/Scene/frustumAsset.h \
-   $$PWD/Library/Scene/gridAsset.h \
-   $$PWD/Library/Scene/lightMarkerAsset.h \
-   $$PWD/Library/Scene/lineAsset.h \
-   $$PWD/Library/Scene/originMarkerAsset.h \
-   $$PWD/Library/Scene/treemapAsset.h \
-   $$PWD/Library/Settings/preferencesMap.hpp \
-   $$PWD/Library/Settings/settings.h \
-   $$PWD/Library/Settings/settingsManager.h \
-   $$PWD/Library/Utilities/colorGradient.hpp \
-   $$PWD/Library/Utilities/ignoreUnused.hpp \
-   $$PWD/Library/Utilities/operatingSystemSpecific.hpp \
-   $$PWD/Library/Utilities/scopeExit.hpp \
-   $$PWD/Library/Utilities/threadSafeQueue.hpp \
-   $$PWD/Library/Utilities/utilities.hpp \
-   $$PWD/Library/Utilities/viewFrustum.hpp \
-   $$PWD/Library/Viewport/camera.h \
-   $$PWD/Library/Viewport/gamepadContextMenu.h \
-   $$PWD/Library/Viewport/glCanvas.h \
-   $$PWD/Library/Viewport/mouseContextMenu.h \
-   $$PWD/Library/Visualizations/linuxFileMonitor.h \
-   $$PWD/Library/Visualizations/fileChangeNotification.hpp \
-   $$PWD/Library/Visualizations/squarifiedTreemap.h \
-   $$PWD/Library/Visualizations/visualization.h \
-   $$PWD/Library/Visualizations/windowsFileMonitor.h \
-   $$PWD/Library/Windows/aboutDialog.h \
-   $$PWD/Library/Windows/breakdownDialog.h \
-   $$PWD/Library/Windows/mainWindow.h \
-   $$PWD/Library/Windows/scanBreakdownModel.h
+   $$PWD/Core/constants.h \
+   $$PWD/Core/controller.h \
+   $$PWD/Core/DataStructs/block.h \
+   $$PWD/Core/DataStructs/fileInfo.h \
+   $$PWD/Core/DataStructs/light.h \
+   $$PWD/Core/DataStructs/driveScanningParameters.h \
+   $$PWD/Core/DataStructs/precisePoint.h \
+   $$PWD/Core/DataStructs/scanningProgress.hpp \
+   $$PWD/Core/DataStructs/vizBlock.h \
+   $$PWD/Core/DriveScanner/driveScanner.h \
+   $$PWD/Core/DriveScanner/driveScanningUtilities.h \
+   $$PWD/Core/DriveScanner/scanningWorker.h \
+   $$PWD/Core/DriveScanner/scopedHandle.h \
+   $$PWD/Core/DriveScanner/winHack.hpp \
+   $$PWD/Core/HID/gamepad.h \
+   $$PWD/Core/HID/keyboardManager.h \
+   $$PWD/Core/literals.h \
+   $$PWD/Core/Scene/baseAsset.h \
+   $$PWD/Core/Scene/crosshairAsset.h \
+   $$PWD/Core/Scene/debuggingRayAsset.h \
+   $$PWD/Core/Scene/frustumAsset.h \
+   $$PWD/Core/Scene/gridAsset.h \
+   $$PWD/Core/Scene/lightMarkerAsset.h \
+   $$PWD/Core/Scene/lineAsset.h \
+   $$PWD/Core/Scene/originMarkerAsset.h \
+   $$PWD/Core/Scene/treemapAsset.h \
+   $$PWD/Core/Settings/preferencesMap.hpp \
+   $$PWD/Core/Settings/settings.h \
+   $$PWD/Core/Settings/settingsManager.h \
+   $$PWD/Core/Utilities/colorGradient.hpp \
+   $$PWD/Core/Utilities/ignoreUnused.hpp \
+   $$PWD/Core/Utilities/operatingSystemSpecific.hpp \
+   $$PWD/Core/Utilities/scopeExit.hpp \
+   $$PWD/Core/Utilities/threadSafeQueue.hpp \
+   $$PWD/Core/Utilities/utilities.hpp \
+   $$PWD/Core/Utilities/viewFrustum.hpp \
+   $$PWD/Core/Viewport/camera.h \
+   $$PWD/Core/Viewport/gamepadContextMenu.h \
+   $$PWD/Core/Viewport/glCanvas.h \
+   $$PWD/Core/Viewport/mouseContextMenu.h \
+   $$PWD/Core/Visualizations/linuxFileMonitor.h \
+   $$PWD/Core/Visualizations/fileChangeNotification.hpp \
+   $$PWD/Core/Visualizations/squarifiedTreemap.h \
+   $$PWD/Core/Visualizations/visualization.h \
+   $$PWD/Core/Visualizations/windowsFileMonitor.h \
+   $$PWD/Core/Windows/aboutDialog.h \
+   $$PWD/Core/Windows/breakdownDialog.h \
+   $$PWD/Core/Windows/mainWindow.h \
+   $$PWD/Core/Windows/scanBreakdownModel.h
 
 FORMS += \
-   $$PWD/Library/Windows/aboutDialog.ui \
-   $$PWD/Library/Windows/breakdownDialog.ui \
-   $$PWD/Library/Windows/mainWindow.ui
+   $$PWD/Core/Windows/aboutDialog.ui \
+   $$PWD/Core/Windows/breakdownDialog.ui \
+   $$PWD/Core/Windows/mainWindow.ui
 
 INCLUDEPATH += \
    $$PWD/../../boost_1_66_0/ \
@@ -116,17 +116,17 @@ INCLUDEPATH += \
 DEPENDPATH += $$PWD/../../boost_1_66_0/stage/lib
 
 DISTFILES += \
-   $$PWD/Library/Shaders/visualizationFragmentShader.frag \
-   $$PWD/Library/Shaders/visualizationVertexShader.vert \
-   $$PWD/Library/Shaders/simpleLineFragmentShader.frag \
-   $$PWD/Library/Shaders/simpleLineVertexShader.vert \
-   $$PWD/Library/Shaders/shadowMapping.frag \
-   $$PWD/Library/Shaders/shadowMapping.vert \
-   $$PWD/Library/Shaders/texturePreview.vert \
-   $$PWD/Library/Shaders/texturePreview.frag
+   $$PWD/Core/Shaders/visualizationFragmentShader.frag \
+   $$PWD/Core/Shaders/visualizationVertexShader.vert \
+   $$PWD/Core/Shaders/simpleLineFragmentShader.frag \
+   $$PWD/Core/Shaders/simpleLineVertexShader.vert \
+   $$PWD/Core/Shaders/shadowMapping.frag \
+   $$PWD/Core/Shaders/shadowMapping.vert \
+   $$PWD/Core/Shaders/texturePreview.vert \
+   $$PWD/Core/Shaders/texturePreview.frag
 
 RESOURCES += \
-   $$PWD/Library/resources.qrc
+   $$PWD/Core/resources.qrc
 
 DEFINES += \
    BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE

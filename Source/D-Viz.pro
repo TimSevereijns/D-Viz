@@ -17,9 +17,9 @@ INSTALLS += plugin_files
 
 CONFIG += ordered
 SUBDIRS += \
-   Library \
+   Core \
    Tests \
    App
 
-App.depends = Library
-Tests.depends = Library
+App.depends = Core
+Tests.depends = Core
