@@ -51,6 +51,7 @@ SOURCES += \
    $$PWD/Core/Windows/scanBreakdownModel.cpp
 
 HEADERS += \
+   $$PWD/Core/bootstrapper.hpp \
    $$PWD/Core/constants.h \
    $$PWD/Core/controller.h \
    $$PWD/Core/DataStructs/block.h \
