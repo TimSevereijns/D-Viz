@@ -73,7 +73,7 @@ namespace Detail
 
       private:
 
-         std::array<HANDLE, 2> m_handles;
+         std::array<HANDLE, 2> m_handles{ INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE };
    };
 }
 
@@ -125,7 +125,7 @@ class WindowsFileMonitor
 
       std::atomic_bool m_keepMonitoring{ true };
 
-      HANDLE m_fileHandle;
+      HANDLE m_fileHandle{ INVALID_HANDLE_VALUE };
 
       Detail::FileMonitorEventHandles m_events;
 
