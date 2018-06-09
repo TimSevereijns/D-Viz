@@ -1,5 +1,4 @@
 #include "bootstrapper.hpp"
-#include "constants.h"
 #include "controller.h"
 
 #include <QApplication>
@@ -8,7 +7,7 @@
 int main(int argc, char* argv[])
 {
    Bootstrapper::RegisterMetaTypes();
-   Bootstrapper::InitializeLog();
+   Bootstrapper::InitializeLogs();
 
    QApplication application{ argc, argv };
 

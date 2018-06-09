@@ -34,7 +34,7 @@ private:
 void ModelTester::initTestCase()
 {
    Bootstrapper::RegisterMetaTypes();
-   Bootstrapper::InitializeLog();
+   Bootstrapper::InitializeLogs();
 
    const auto progressCallback = [&] (const ScanningProgress& /*progress*/)
    {
@@ -48,10 +48,11 @@ void ModelTester::initTestCase()
       m_model->Parse(tree);
    };
 
+   QSignalSpy completionSpy(&m_scanner, &DriveScanner::Finished);
+
    DriveScanningParameters parameters{ m_path, progressCallback, completionCallback };
    m_scanner.StartScanning(parameters);
 
-   QSignalSpy completionSpy(&m_scanner, &DriveScanner::Finished);
    completionSpy.wait(30000);
 }
 

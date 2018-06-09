@@ -23,7 +23,7 @@ namespace Bootstrapper
       /**
        * @brief Returns a wide string if on Windows, and returns a narrow string on Unix.
       */
-      auto ToFilenameString(const std::experimental::filesystem::path& path)
+      inline auto ToFilenameString(const std::experimental::filesystem::path& path)
       {
          if constexpr (std::is_same_v<spdlog::filename_t, std::wstring>)
          {
@@ -40,7 +40,7 @@ namespace Bootstrapper
    /**
     * @brief Performs all the steps necessary to initialize and start the log.
     */
-   void InitializeLog()
+   inline void InitializeLogs()
    {
       const auto defaultLogPath =
          std::experimental::filesystem::current_path().append("test-log.txt");
@@ -66,7 +66,7 @@ namespace Bootstrapper
    /**
     * @brief Registers the types that we'd like pass through the Qt signaling framework.
     */
-   void RegisterMetaTypes()
+   inline void RegisterMetaTypes()
    {
       qRegisterMetaType<std::uintmax_t>("std::uintmax_t");
       qRegisterMetaType<std::shared_ptr<Tree<VizBlock>>>("std::shared_ptr<Tree<VizBlock>>");
