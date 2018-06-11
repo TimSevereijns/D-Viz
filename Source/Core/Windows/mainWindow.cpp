@@ -23,8 +23,6 @@
 #include <QMenuBar>
 #include <QMessageBox>
 
-#include "ui_mainWindow.h"
-
 namespace
 {
    /**
@@ -129,7 +127,6 @@ MainWindow::MainWindow(
 
 MainWindow::~MainWindow()
 {
-
 }
 
 void MainWindow::SetupSidebar()

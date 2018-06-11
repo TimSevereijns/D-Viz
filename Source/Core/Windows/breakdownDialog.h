@@ -5,6 +5,7 @@
 #include <QSortFilterProxyModel>
 
 #include <functional>
+#include <memory>
 
 #include "scanBreakdownModel.h"
 

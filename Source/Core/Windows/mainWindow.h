@@ -12,11 +12,8 @@
 #include "controller.h"
 #include "HID/gamepad.h"
 #include "Viewport/glCanvas.h"
+#include "ui_mainWindow.h"
 
-namespace Ui
-{
-   class MainWindow;
-}
 
 struct ScanningProgress;
 

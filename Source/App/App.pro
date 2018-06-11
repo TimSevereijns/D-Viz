@@ -12,6 +12,7 @@ greaterThan(QT_MAJOR_VERSION, 5): QT += widgets
 
 TARGET = D-Viz
 TEMPLATE = app
+CONFIG += c++1z
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings

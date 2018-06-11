@@ -11,7 +11,7 @@ QT += testlib
 QT -= gui
 
 TARGET = UnitTests
-CONFIG += console
+CONFIG += console c++1z
 CONFIG -= app_bundle
 
 TEMPLATE = app

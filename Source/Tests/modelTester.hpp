@@ -1,12 +1,30 @@
 #include <QString>
 #include <QtTest>
 
+#include <iostream>
+
 #include <bootstrapper.hpp>
 #include <constants.h>
 #include <DataStructs/driveScanningParameters.h>
 #include <DataStructs/scanningProgress.hpp>
 #include <DriveScanner/driveScanner.h>
 #include <Visualizations/squarifiedTreemap.h>
+
+namespace
+{
+   const auto pathToTestData = std::experimental::filesystem::path{ "../../Tests/asio" };
+
+   void VerifyExistenceOfSampleDirectory()
+   {
+      if (std::experimental::filesystem::exists(pathToTestData)
+         && std::experimental::filesystem::is_directory(pathToTestData))
+      {
+         return;
+      }
+
+      std::cout << "Please unzip boost-asio.zip manually, and re-run tests." << std::endl;
+   }
+}
 
 class ModelTester : public QObject
 {
@@ -16,12 +34,13 @@ private slots:
 
    void initTestCase();
 
-   void ProgressCallbackIsInvocaked();
+   void ProgressCallbackIsInvoked();
    void SelectedNodeIsNull();
+   void ModelIsPopulated();
 
 private:
 
-   std::experimental::filesystem::path m_path{ L"C:\\Qt" };
+   std::experimental::filesystem::path m_path{ pathToTestData };
 
    DriveScanner m_scanner;
    ScanningProgress m_scanningProgress;
@@ -35,6 +54,8 @@ void ModelTester::initTestCase()
 {
    Bootstrapper::RegisterMetaTypes();
    Bootstrapper::InitializeLogs();
+
+   VerifyExistenceOfSampleDirectory();
 
    const auto progressCallback = [&] (const ScanningProgress& /*progress*/)
    {
@@ -50,13 +71,13 @@ void ModelTester::initTestCase()
 
    QSignalSpy completionSpy(&m_scanner, &DriveScanner::Finished);
 
-   DriveScanningParameters parameters{ m_path, progressCallback, completionCallback };
+   const DriveScanningParameters parameters{ m_path, progressCallback, completionCallback };
    m_scanner.StartScanning(parameters);
 
-   completionSpy.wait(30000);
+   completionSpy.wait(3'000);
 }
 
-void ModelTester::ProgressCallbackIsInvocaked()
+void ModelTester::ProgressCallbackIsInvoked()
 {
    QVERIFY(m_progressCallbackInvocations > 0);
 }
@@ -64,6 +85,12 @@ void ModelTester::ProgressCallbackIsInvocaked()
 void ModelTester::SelectedNodeIsNull()
 {
    QVERIFY(m_model->GetSelectedNode() == nullptr);
+}
+
+void ModelTester::ModelIsPopulated()
+{
+   const auto tree = m_model->GetTree();
+   QCOMPARE(static_cast<int>(tree.Size()), 490); //< Number of items in "asio" sample directory.
 }
 
 QTEST_MAIN(ModelTester)

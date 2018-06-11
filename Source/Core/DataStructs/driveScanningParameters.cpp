@@ -1,7 +1,7 @@
 #include "driveScanningParameters.h"
 
 DriveScanningParameters::DriveScanningParameters(
-   const std::wstring& startingPath,
+   const std::experimental::filesystem::path& startingPath,
    ProgressCallback progressCallback,
    ScanCompleteCallback completionCallback)
    :

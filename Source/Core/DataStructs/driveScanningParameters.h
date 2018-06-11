@@ -2,6 +2,7 @@
 #define DRIVESCANNINGPARAMETERS_H
 
 #include <cstdint>
+#include <experimental/filesystem>
 #include <functional>
 #include <memory>
 #include <string>
@@ -23,7 +24,7 @@ struct DriveScanningParameters
    using ScanCompleteCallback =
       std::function<void (const ScanningProgress&, std::shared_ptr<Tree<VizBlock>> fileTree)>;
 
-   std::wstring path{ };
+   std::experimental::filesystem::path path{ };
 
    ProgressCallback onProgressUpdateCallback{ };
    ScanCompleteCallback onScanCompletedCallback{ };
@@ -31,7 +32,7 @@ struct DriveScanningParameters
    DriveScanningParameters() = default;
 
    DriveScanningParameters(
-      const std::wstring& startingPath,
+      const std::experimental::filesystem::path& startingPath,
       ProgressCallback progressCallback,
       ScanCompleteCallback completionCallback);
 };
