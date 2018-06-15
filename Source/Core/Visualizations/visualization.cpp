@@ -471,7 +471,7 @@ const std::vector<const Tree<VizBlock>::Node*>& VisualizationModel::GetHighlight
    return m_highlightedNodes;
 }
 
-std::vector<const Tree<VizBlock>::Node*> &VisualizationModel::GetHighlightedNodes()
+std::vector<const Tree<VizBlock>::Node*>& VisualizationModel::GetHighlightedNodes()
 {
    return m_highlightedNodes;
 }

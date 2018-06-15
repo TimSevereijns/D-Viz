@@ -33,10 +33,14 @@ class ModelTester : public QObject
 private slots:
 
    void initTestCase();
+   void init();
 
    void ProgressCallbackIsInvoked();
-   void SelectedNodeIsNull();
    void ModelIsPopulated();
+   void SelectingNodes();
+   void HighlightDescendants();
+   void HighlightAncestors();
+   void HighlightAllMatchingExtensions();
 
 private:
 
@@ -47,6 +51,7 @@ private:
 
    std::uint32_t m_progressCallbackInvocations{ 0 };
 
+   std::shared_ptr<Tree<VizBlock>> m_tree{ nullptr };
    std::unique_ptr<SquarifiedTreeMap> m_model{ nullptr };
 };
 
@@ -65,8 +70,7 @@ void ModelTester::initTestCase()
    const auto completionCallback = [&]
       (const ScanningProgress& /*progress*/, std::shared_ptr<Tree<VizBlock>> tree)
    {
-      m_model = std::make_unique<SquarifiedTreeMap>(m_path);
-      m_model->Parse(tree);
+      m_tree = std::move(tree);
    };
 
    QSignalSpy completionSpy(&m_scanner, &DriveScanner::Finished);
@@ -77,20 +81,102 @@ void ModelTester::initTestCase()
    completionSpy.wait(3'000);
 }
 
+void ModelTester::init()
+{
+   assert(m_tree);
+
+   m_model = std::make_unique<SquarifiedTreeMap>(m_path);
+   m_model->Parse(m_tree);
+}
+
 void ModelTester::ProgressCallbackIsInvoked()
 {
    QVERIFY(m_progressCallbackInvocations > 0);
-}
-
-void ModelTester::SelectedNodeIsNull()
-{
-   QVERIFY(m_model->GetSelectedNode() == nullptr);
 }
 
 void ModelTester::ModelIsPopulated()
 {
    const auto tree = m_model->GetTree();
    QCOMPARE(static_cast<int>(tree.Size()), 490); //< Number of items in "asio" sample directory.
+}
+
+void ModelTester::SelectingNodes()
+{
+   QVERIFY(m_model->GetSelectedNode() == nullptr);
+
+   const Tree<VizBlock>::Node* sampleNode = m_tree->GetRoot();
+   m_model->SelectNode(*sampleNode);
+
+   QVERIFY(m_model->GetSelectedNode() == sampleNode);
+
+   m_model->ClearSelectedNode();
+
+   QVERIFY(m_model->GetSelectedNode() == nullptr);
+}
+
+void ModelTester::HighlightDescendants()
+{
+   QVERIFY(m_model->GetHighlightedNodes().size() == 0);
+
+   auto visualizationParameters = Settings::VisualizationParameters{ };
+   visualizationParameters.rootDirectory = L"";
+   visualizationParameters.minimumFileSize = 0u;
+   visualizationParameters.onlyShowDirectories = false;
+   visualizationParameters.useDirectoryGradient = false;
+
+   const Tree<VizBlock>::Node* rootNode = m_tree->GetRoot();
+   m_model->HighlightDescendants(*rootNode, visualizationParameters);
+
+   const auto leafCount = std::count_if(
+      Tree<VizBlock>::LeafIterator{ rootNode },
+      Tree<VizBlock>::LeafIterator{ },
+      [] (const auto&) { return true; });
+
+   QCOMPARE(static_cast<int>(m_model->GetHighlightedNodes().size()), leafCount);
+}
+
+void ModelTester::HighlightAncestors()
+{
+   QVERIFY(m_model->GetHighlightedNodes().size() == 0);
+
+   const auto target = std::find_if(
+      Tree<VizBlock>::LeafIterator{ m_tree->GetRoot() },
+      Tree<VizBlock>::LeafIterator{ },
+      [] (const auto& node)
+   {
+      return (node->file.name + node->file.extension) == L"endpoint.ipp";
+   });
+
+   m_model->HighlightAncestors(*target);
+
+   QCOMPARE(static_cast<int>(m_model->GetHighlightedNodes().size()), 4);
+}
+
+void ModelTester::HighlightAllMatchingExtensions()
+{
+   QVERIFY(m_model->GetHighlightedNodes().size() == 0);
+
+   auto visualizationParameters = Settings::VisualizationParameters{ };
+   visualizationParameters.rootDirectory = L"";
+   visualizationParameters.minimumFileSize = 0u;
+   visualizationParameters.onlyShowDirectories = false;
+   visualizationParameters.useDirectoryGradient = false;
+
+   constexpr auto shouldSearchFiles{ true };
+   constexpr auto shouldSearchDirectories{ false };
+
+   m_model->HighlightMatchingFileName(
+      L".hpp",
+      visualizationParameters,
+      shouldSearchFiles,
+      shouldSearchDirectories);
+
+   const auto headerCount = std::count_if(
+      Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() },
+      Tree<VizBlock>::PostOrderIterator{ },
+      [] (const auto& node) { return node->file.extension == L".hpp"; });
+
+   QCOMPARE(static_cast<int>(m_model->GetHighlightedNodes().size()), headerCount);
 }
 
 QTEST_MAIN(ModelTester)
