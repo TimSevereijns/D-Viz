@@ -476,10 +476,6 @@ SquarifiedTreeMap::SquarifiedTreeMap(const std::experimental::filesystem::path& 
 {
 }
 
-SquarifiedTreeMap::~SquarifiedTreeMap()
-{
-}
-
 void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
 {
    if (!theTree)

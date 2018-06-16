@@ -164,7 +164,7 @@ void ModelTester::HighlightAncestors()
 
    m_model->HighlightAncestors(*target);
 
-   QCOMPARE(static_cast<int>(m_model->GetHighlightedNodes().size()), 4);
+   QCOMPARE(m_model->GetHighlightedNodes().size(), 4u);
 }
 
 void ModelTester::HighlightAllMatchingExtensions()

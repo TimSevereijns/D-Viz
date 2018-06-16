@@ -17,8 +17,6 @@ class SquarifiedTreeMap final : public VisualizationModel
        */
       SquarifiedTreeMap(const std::experimental::filesystem::path& path);
 
-      ~SquarifiedTreeMap();
-
       /**
        * @brief Parse
        *

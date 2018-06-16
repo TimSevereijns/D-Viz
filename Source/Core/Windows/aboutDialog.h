@@ -5,11 +5,6 @@
 
 #include "ui_aboutDialog.h"
 
-namespace Ui
-{
-   class AboutDialog;
-}
-
 class AboutDialog final : public QDialog
 {
    Q_OBJECT
