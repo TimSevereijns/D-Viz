@@ -63,7 +63,7 @@ namespace
 
             const static auto binary = std::vector<std::pair<std::uintmax_t, QString>>
             {
-               { 0u,     "Show All" },
+               { 0u,      "Show All"  },
                { 1_KiB,   "< 1 KiB"   },
                { 1_MiB,   "< 1 MiB"   },
                { 10_MiB,  "< 10 MiB"  },
@@ -112,21 +112,16 @@ MainWindow::MainWindow(
    m_controller{ controller },   
    m_fileSizeOptions{ GeneratePruningMenuEntries(Constants::FileSize::Prefix::BINARY) }
 {
-   m_ui = std::make_unique<Ui::MainWindow>();
-   m_ui->setupUi(this);
+   m_ui.setupUi(this);
 
    m_glCanvas = std::make_unique<GLCanvas>(controller, this);
-   m_ui->canvasLayout->addWidget(m_glCanvas.get());
+   m_ui.canvasLayout->addWidget(m_glCanvas.get());
 
    SetupMenus();
    SetupGamepad();
    SetupSidebar();
 
    SetDebuggingMenuState();
-}
-
-MainWindow::~MainWindow()
-{
 }
 
 void MainWindow::SetupSidebar()
@@ -136,85 +131,85 @@ void MainWindow::SetupSidebar()
 
    auto& settingsManager = m_controller.GetSettingsManager();
 
-   connect(m_ui->directoriesOnlyCheckBox, &QCheckBox::stateChanged,
+   connect(m_ui.directoriesOnlyCheckBox, &QCheckBox::stateChanged,
       this, &MainWindow::OnDirectoryPruningChange);
 
-   connect(m_ui->directoryGradientCheckBox, &QCheckBox::stateChanged,
+   connect(m_ui.directoryGradientCheckBox, &QCheckBox::stateChanged,
       this, &MainWindow::OnGradientUseChange);
 
-   connect(m_ui->applyButton, &QPushButton::clicked,
+   connect(m_ui.applyButton, &QPushButton::clicked,
       this, &MainWindow::OnApplyButtonPressed);
 
-   connect(m_ui->fieldOfViewSlider, &QSlider::valueChanged,
+   connect(m_ui.fieldOfViewSlider, &QSlider::valueChanged,
       this, &MainWindow::OnFieldOfViewChange);
 
-   connect(m_ui->searchBox, &QLineEdit::returnPressed,
+   connect(m_ui.searchBox, &QLineEdit::returnPressed,
       this, &MainWindow::OnNewSearchQuery);
 
-   connect(m_ui->searchBox, &QLineEdit::textChanged,
+   connect(m_ui.searchBox, &QLineEdit::textChanged,
       this, &MainWindow::OnSearchQueryTextChanged);
 
-   connect(m_ui->searchButton, &QPushButton::clicked,
+   connect(m_ui.searchButton, &QPushButton::clicked,
       this, &MainWindow::OnNewSearchQuery);
 
-   connect(m_ui->showBreakdownButton, &QPushButton::clicked,
+   connect(m_ui.showBreakdownButton, &QPushButton::clicked,
       this, &MainWindow::OnShowBreakdownButtonPressed);
 
-   connect(m_ui->searchDirectoriesCheckBox, &QCheckBox::stateChanged,
+   connect(m_ui.searchDirectoriesCheckBox, &QCheckBox::stateChanged,
       &settingsManager, &Settings::Manager::OnShouldSearchDirectoriesChanged);
 
-   connect(m_ui->searchFilesCheckBox, &QCheckBox::stateChanged,
+   connect(m_ui.searchFilesCheckBox, &QCheckBox::stateChanged,
       &settingsManager, &Settings::Manager::OnShouldSearchFilesChanged);
 
-   connect(m_ui->cameraSpeedSpinner,
+   connect(m_ui.cameraSpeedSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
       &settingsManager, &Settings::Manager::OnCameraSpeedChanged);
 
-   connect(m_ui->mouseSensitivitySpinner,
+   connect(m_ui.mouseSensitivitySpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
       &settingsManager, &Settings::Manager::OnMouseSensitivityChanged);
 
-   connect(m_ui->ambientCoefficientSpinner,
+   connect(m_ui.ambientCoefficientSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
       &settingsManager, &Settings::Manager::OnAmbientLightCoefficientChanged);
 
-   connect(m_ui->attenuationSpinner,
+   connect(m_ui.attenuationSpinner,
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
       &settingsManager, &Settings::Manager::OnLightAttenuationChanged);
 
-   connect(m_ui->attachLightToCameraCheckBox,
+   connect(m_ui.attachLightToCameraCheckBox,
       static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
       &settingsManager, &Settings::Manager::OnAttachLightToCameraStateChanged);
 }
 
 void MainWindow::SetupColorSchemeDropdown()
 {
-   m_ui->colorSchemeComboBox->clear();
+   m_ui.colorSchemeComboBox->clear();
 
    const auto& defaultScheme = QString::fromStdWString(Constants::ColorScheme::DEFAULT);
-   m_ui->colorSchemeComboBox->addItem(defaultScheme, defaultScheme);
+   m_ui.colorSchemeComboBox->addItem(defaultScheme, defaultScheme);
 
    const auto& colorMap = m_controller.GetSettingsManager().GetFileColorMap();
    for (const auto& extensionMap : colorMap)
    {
       const auto& categoryName = QString::fromStdWString(extensionMap.first);
-      m_ui->colorSchemeComboBox->addItem(categoryName, categoryName);
+      m_ui.colorSchemeComboBox->addItem(categoryName, categoryName);
    }
 }
 
 void MainWindow::SetupFileSizePruningDropdown()
 {
-   const auto previousIndex = m_ui->pruneSizeComboBox->currentIndex();
+   const auto previousIndex = m_ui.pruneSizeComboBox->currentIndex();
 
-   m_ui->pruneSizeComboBox->clear();
+   m_ui.pruneSizeComboBox->clear();
 
    for (const auto& fileSizeAndUnits : *m_fileSizeOptions)
    {
-      m_ui->pruneSizeComboBox->addItem(fileSizeAndUnits.second,
+      m_ui.pruneSizeComboBox->addItem(fileSizeAndUnits.second,
          static_cast<qulonglong>(fileSizeAndUnits.first));
    }
 
-   m_ui->pruneSizeComboBox->setCurrentIndex(previousIndex == -1 ? 0 : previousIndex);
+   m_ui.pruneSizeComboBox->setCurrentIndex(previousIndex == -1 ? 0 : previousIndex);
 
    statusBar()->clearMessage();
 }
@@ -440,7 +435,7 @@ void MainWindow::OnFileMenuNewScan()
       return;
    }
 
-   const auto fileSizeIndex = m_ui->pruneSizeComboBox->currentIndex();
+   const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
 
    Settings::VisualizationParameters parameters;
    parameters.rootDirectory = selectedDirectory.toStdWString();
@@ -529,7 +524,7 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
 
    SetupFileSizePruningDropdown();
 
-   const auto fileSizeIndex = m_ui->pruneSizeComboBox->currentIndex();
+   const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
    if (fileSizeIndex < 1)
    {
       return;
@@ -564,7 +559,7 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
 
    SetupFileSizePruningDropdown();
 
-   const auto fileSizeIndex = m_ui->pruneSizeComboBox->currentIndex();
+   const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
    if (fileSizeIndex < 1)
    {
       return;
@@ -578,7 +573,7 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
 
 void MainWindow::OnNewSearchQuery()
 {
-   const auto searchQuery = m_ui->searchBox->text().toStdWString();
+   const auto searchQuery = m_ui.searchBox->text().toStdWString();
 
    const auto deselectionCallback = [&] (auto& nodes)
    {
@@ -590,8 +585,8 @@ void MainWindow::OnNewSearchQuery()
       m_glCanvas->HighlightNodes(nodes);
    };
 
-   const auto shouldSearchFiles = m_ui->searchFilesCheckBox->isChecked();
-   const auto shouldSearchDirectories = m_ui->searchDirectoriesCheckBox->isChecked();
+   const auto shouldSearchFiles = m_ui.searchFilesCheckBox->isChecked();
+   const auto shouldSearchDirectories = m_ui.searchDirectoriesCheckBox->isChecked();
 
    const ScopedCursor waitCursor{ Qt::WaitCursor };
    IgnoreUnused(waitCursor);
@@ -606,7 +601,7 @@ void MainWindow::OnNewSearchQuery()
 
 void MainWindow::OnSearchQueryTextChanged(const QString& text)
 {
-   m_ui->searchButton->setEnabled(text.size());
+   m_ui.searchButton->setEnabled(text.size());
 }
 
 void MainWindow::OnApplyButtonPressed()
@@ -617,7 +612,7 @@ void MainWindow::OnApplyButtonPressed()
 
 void MainWindow::PruneTree()
 {
-   const auto pruneSizeIndex = m_ui->pruneSizeComboBox->currentIndex();
+   const auto pruneSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
    const auto minimumSize = m_fileSizeOptions->at(pruneSizeIndex).first;
 
    Settings::VisualizationParameters parameters;
@@ -642,7 +637,7 @@ void MainWindow::PruneTree()
 
 void MainWindow::ApplyColorScheme()
 {
-   const auto colorScheme = m_ui->colorSchemeComboBox->currentText().toStdWString();
+   const auto colorScheme = m_ui.colorSchemeComboBox->currentText().toStdWString();
    m_controller.GetSettingsManager().SetColorScheme(colorScheme);
 
    m_glCanvas->ApplyColorScheme();
@@ -722,14 +717,14 @@ Gamepad& MainWindow::GetGamepad()
 
 void MainWindow::OnScanStarted()
 {
-   m_ui->showBreakdownButton->setEnabled(false);
+   m_ui.showBreakdownButton->setEnabled(false);
 }
 
 void MainWindow::OnScanCompleted()
 {
    ReloadVisualization();
 
-   m_ui->showBreakdownButton->setEnabled(true);
+   m_ui.showBreakdownButton->setEnabled(true);
 }
 
 void MainWindow::LaunchAboutDialog()
@@ -744,12 +739,12 @@ void MainWindow::LaunchAboutDialog()
 
 void MainWindow::SetFieldOfViewSlider(int fieldOfView)
 {
-   m_ui->fieldOfViewSlider->setValue(fieldOfView);
+   m_ui.fieldOfViewSlider->setValue(fieldOfView);
 }
 
 void MainWindow::SetCameraSpeedSpinner(double speed)
 {
-   m_ui->cameraSpeedSpinner->setValue(speed);
+   m_ui.cameraSpeedSpinner->setValue(speed);
 }
 
 void MainWindow::SetFilePruningComboBoxValue(std::uintmax_t minimum)
@@ -767,12 +762,12 @@ void MainWindow::SetFilePruningComboBoxValue(std::uintmax_t minimum)
       return;
    }
 
-   const int targetIndex = m_ui->pruneSizeComboBox->findData(
+   const int targetIndex = m_ui.pruneSizeComboBox->findData(
       static_cast<qulonglong>(match->first));
 
    if (targetIndex != -1)
    {
-      m_ui->pruneSizeComboBox->setCurrentIndex(targetIndex);
+      m_ui.pruneSizeComboBox->setCurrentIndex(targetIndex);
    }
 }
 

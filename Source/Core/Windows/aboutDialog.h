@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include <memory>
+#include "ui_aboutDialog.h"
 
 namespace Ui
 {
@@ -18,11 +18,9 @@ class AboutDialog final : public QDialog
 
       explicit AboutDialog(QWidget* parent = nullptr);
 
-      ~AboutDialog();
-
    private:
 
-      std::unique_ptr<Ui::AboutDialog> m_ui;
+      Ui::AboutDialog m_ui;
 };
 
 #endif // ABOUTDIALOG_H

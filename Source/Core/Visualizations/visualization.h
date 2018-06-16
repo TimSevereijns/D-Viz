@@ -169,7 +169,7 @@ class VisualizationModel
        */
       void HighlightDescendants(
          const Tree<VizBlock>::Node& node,
-         Settings::VisualizationParameters parameters);
+         const Settings::VisualizationParameters& parameters);
 
       /**
        * @brief Highlights all nodes that match the sample node's extension.
@@ -179,7 +179,7 @@ class VisualizationModel
        */
       void HighlightMatchingFileExtension(
          const Tree<VizBlock>::Node& sampleNode,
-         Settings::VisualizationParameters parameters);
+         const Settings::VisualizationParameters& parameters);
 
       /**
        * @brief Highlights all nodes that match the search query, given the search parameters.
@@ -192,7 +192,7 @@ class VisualizationModel
        */
       void HighlightMatchingFileName(
          const std::wstring& searchQuery,
-         Settings::VisualizationParameters parameters,
+         const Settings::VisualizationParameters& parameters,
          bool shouldSearchFiles,
          bool shouldSearchDirectories);
 
@@ -277,7 +277,7 @@ class VisualizationModel
       Detail::FileSystemMonitor m_fileSystemMonitor;
 
       // This queue contains raw notifications of file system changes that still need to be
-      // parsed the turned into tree node change notifications.
+      // parsed and the turned into tree node change notifications.
       ThreadSafeQueue<FileChangeNotification> m_fileChangeNotifications;
 
       // This queue contains pending tree node change notifications. These notifications

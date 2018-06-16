@@ -37,6 +37,7 @@ private slots:
 
    void ProgressCallbackIsInvoked();
    void ModelIsPopulated();
+   void ScanningProgressDataIsCorrect();
    void SelectingNodes();
    void HighlightDescendants();
    void HighlightAncestors();
@@ -47,7 +48,10 @@ private:
    std::experimental::filesystem::path m_path{ pathToTestData };
 
    DriveScanner m_scanner;
-   ScanningProgress m_scanningProgress;
+
+   std::uintmax_t m_bytesScanned;
+   std::uintmax_t m_filesScanned;
+   std::uintmax_t m_directoriesScanned;
 
    std::uint32_t m_progressCallbackInvocations{ 0 };
 
@@ -68,8 +72,12 @@ void ModelTester::initTestCase()
    };
 
    const auto completionCallback = [&]
-      (const ScanningProgress& /*progress*/, std::shared_ptr<Tree<VizBlock>> tree)
+      (const ScanningProgress& progress, std::shared_ptr<Tree<VizBlock>> tree)
    {
+      m_bytesScanned = progress.bytesProcessed.load();
+      m_filesScanned = progress.filesScanned.load();
+      m_directoriesScanned = progress.directoriesScanned.load();
+
       m_tree = std::move(tree);
    };
 
@@ -91,13 +99,20 @@ void ModelTester::init()
 
 void ModelTester::ProgressCallbackIsInvoked()
 {
-   QVERIFY(m_progressCallbackInvocations > 0);
+   QVERIFY(m_progressCallbackInvocations > 0);  //< Scanning time determines exact count.
 }
 
 void ModelTester::ModelIsPopulated()
 {
    const auto tree = m_model->GetTree();
-   QCOMPARE(static_cast<int>(tree.Size()), 490); //< Number of items in "asio" sample directory.
+   QCOMPARE(tree.Size(), 490u); //< Number of items in "asio" sample directory.
+}
+
+void ModelTester::ScanningProgressDataIsCorrect()
+{
+   QCOMPARE(m_bytesScanned, 3'407'665u);  //< As seen in Windows File Explorer.
+   QCOMPARE(m_filesScanned, 469u);        //< As seen in Windows File Explorer.
+   QCOMPARE(m_directoriesScanned, 20u);   //< As seen in Windows File Explorer.
 }
 
 void ModelTester::SelectingNodes()

@@ -258,7 +258,11 @@ namespace
       }
    }
 
-   using IntersectionPointAndNode = std::pair<QVector3D, Tree<VizBlock>::Node*>;
+   struct IntersectionInfo
+   {
+      QVector3D point;
+      Tree<VizBlock>::Node* node;
+   };
 
    /**
     * @brief Iterates over all nodes in the scene, placing all intersections in a vector.
@@ -268,13 +272,13 @@ namespace
     * @param[in] parameters         Additional visualization parameters.
     * @param[in] node               The current node being hit-tested.
     */
-   std::vector<IntersectionPointAndNode> FindAllIntersections(
+   std::vector<IntersectionInfo> FindAllIntersections(
       const Qt3DRender::RayCasting::QRay3D& ray,
       const Camera& camera,
       const Settings::VisualizationParameters& parameters,
       Tree<VizBlock>::Node* node)
    {
-      std::vector<IntersectionPointAndNode> allIntersections;
+      std::vector<IntersectionInfo> allIntersections;
 
       assert(node);
       while (node)
@@ -295,7 +299,7 @@ namespace
             const auto& blockIntersection = DoesRayIntersectBlock(ray, node->GetData().block);
             if (blockIntersection && camera.IsPointInFrontOfCamera(*blockIntersection))
             {
-               allIntersections.emplace_back(*blockIntersection, node);
+               allIntersections.emplace_back(IntersectionInfo{ *blockIntersection, node });
             }
 
             if (node->HasChildren())
@@ -437,13 +441,13 @@ Tree<VizBlock>::Node* VisualizationModel::FindNearestIntersection(
          return;
       }
 
-      const auto& closest = std::min_element(std::begin(intersections), std::end(intersections),
+      const auto closest = std::min_element(std::begin(intersections), std::end(intersections),
          [&ray] (const auto& lhs, const auto& rhs) noexcept
       {
-         return (ray.origin().distanceToPoint(lhs.first) < ray.origin().distanceToPoint(rhs.first));
+         return (ray.origin().distanceToPoint(lhs.point) < ray.origin().distanceToPoint(rhs.point));
       });
 
-      nearestIntersection = closest->second;
+      nearestIntersection = closest->node;
    },
    [] (const auto& elapsed, const auto& units) noexcept
    {
@@ -523,7 +527,7 @@ void VisualizationModel::HighlightAncestors(const Tree<VizBlock>::Node& node)
 
 void VisualizationModel::HighlightDescendants(
    const Tree<VizBlock>::Node& node,
-   Settings::VisualizationParameters parameters)
+   const Settings::VisualizationParameters& parameters)
 {
    std::for_each(
       Tree<VizBlock>::LeafIterator{ &node },
@@ -542,7 +546,7 @@ void VisualizationModel::HighlightDescendants(
 
 void VisualizationModel::HighlightMatchingFileExtension(
    const Tree<VizBlock>::Node& sampleNode,
-   Settings::VisualizationParameters parameters)
+   const Settings::VisualizationParameters& parameters)
 {
    std::for_each(
       Tree<VizBlock>::LeafIterator{ GetTree().GetRoot() },
@@ -562,7 +566,7 @@ void VisualizationModel::HighlightMatchingFileExtension(
 
 void VisualizationModel::HighlightMatchingFileName(
    const std::wstring& searchQuery,
-   Settings::VisualizationParameters parameters,
+   const Settings::VisualizationParameters& parameters,
    bool shouldSearchFiles,
    bool shouldSearchDirectories)
 {
@@ -638,7 +642,7 @@ void VisualizationModel::ProcessFileSystemChanges()
       if (!notification)
       {
          // If we got here, it may indicates that the wait operation has probably been abandoned
-         // due to DTOR invocation.
+         // due to a DTOR invocation.
          continue;
       }
 
