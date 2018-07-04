@@ -50,8 +50,7 @@ namespace
       }
 
       spdlog::get(Constants::Logging::DEFAULT_LOG)->info(
-         fmt::format("Number of Sizeless Files Removed: {}", nodesRemoved)
-      );
+         fmt::format("Number of Sizeless Files Removed: {}", nodesRemoved));
    }
 
    /**

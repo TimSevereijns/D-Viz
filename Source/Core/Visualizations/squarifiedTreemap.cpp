@@ -471,8 +471,8 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
    }
 }
 
-SquarifiedTreeMap::SquarifiedTreeMap(const std::experimental::filesystem::path& path)
-   : VisualizationModel{ path }
+SquarifiedTreeMap::SquarifiedTreeMap(const std::experimental::filesystem::path& path) :
+   VisualizationModel{ path }
 {
 }
 

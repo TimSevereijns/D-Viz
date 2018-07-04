@@ -7,7 +7,6 @@
 #include <functional>
 
 #include "scanBreakdownModel.h"
-
 #include "ui_breakdownDialog.h"
 
 class MainWindow;
@@ -47,7 +46,7 @@ class ScanBreakdownFilterProxyModel final : public QSortFilterProxyModel
  */
 class BreakdownDialog final : public QDialog
 {
-      Q_OBJECT
+   Q_OBJECT
 
    public:
 

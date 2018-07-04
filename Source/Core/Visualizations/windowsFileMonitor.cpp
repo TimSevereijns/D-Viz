@@ -37,10 +37,12 @@ namespace
 
 WindowsFileMonitor::~WindowsFileMonitor()
 {
-   if (m_isActive)
+   if (!m_isActive)
    {
-      Stop();
+      return;
    }
+
+   Stop();
 
    if (m_monitoringThread.joinable())
    {

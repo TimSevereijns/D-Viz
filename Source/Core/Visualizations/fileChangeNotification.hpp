@@ -18,9 +18,6 @@ enum class FileSystemChange
 
 struct VizBlock;
 
-template<typename DataType>
-class Tree;
-
 namespace Detail
 {
    template<typename DataType>

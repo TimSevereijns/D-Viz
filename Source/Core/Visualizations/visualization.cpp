@@ -258,7 +258,11 @@ namespace
       }
    }
 
-   using IntersectionPointAndNode = std::pair<QVector3D, Tree<VizBlock>::Node*>;
+   struct IntersectionInfo
+   {
+      QVector3D point;
+      Tree<VizBlock>::Node* node;
+   };
 
    /**
     * @brief Iterates over all nodes in the scene, placing all intersections in a vector.
@@ -268,13 +272,13 @@ namespace
     * @param[in] parameters         Additional visualization parameters.
     * @param[in] node               The current node being hit-tested.
     */
-   std::vector<IntersectionPointAndNode> FindAllIntersections(
+   std::vector<IntersectionInfo> FindAllIntersections(
       const Qt3DRender::RayCasting::QRay3D& ray,
       const Camera& camera,
       const Settings::VisualizationParameters& parameters,
       Tree<VizBlock>::Node* node)
    {
-      std::vector<IntersectionPointAndNode> allIntersections;
+      std::vector<IntersectionInfo> allIntersections;
 
       assert(node);
       while (node)
@@ -295,7 +299,7 @@ namespace
             const auto& blockIntersection = DoesRayIntersectBlock(ray, node->GetData().block);
             if (blockIntersection && camera.IsPointInFrontOfCamera(*blockIntersection))
             {
-               allIntersections.emplace_back(*blockIntersection, node);
+               allIntersections.emplace_back(IntersectionInfo{ *blockIntersection, node });
             }
 
             if (node->HasChildren())
@@ -437,13 +441,13 @@ Tree<VizBlock>::Node* VisualizationModel::FindNearestIntersection(
          return;
       }
 
-      const auto& closest = std::min_element(std::begin(intersections), std::end(intersections),
+      const auto closest = std::min_element(std::begin(intersections), std::end(intersections),
          [&ray] (const auto& lhs, const auto& rhs) noexcept
       {
-         return (ray.origin().distanceToPoint(lhs.first) < ray.origin().distanceToPoint(rhs.first));
+         return (ray.origin().distanceToPoint(lhs.point) < ray.origin().distanceToPoint(rhs.point));
       });
 
-      nearestIntersection = closest->second;
+      nearestIntersection = closest->node;
    },
    [] (const auto& elapsed, const auto& units) noexcept
    {
@@ -471,7 +475,7 @@ const std::vector<const Tree<VizBlock>::Node*>& VisualizationModel::GetHighlight
    return m_highlightedNodes;
 }
 
-std::vector<const Tree<VizBlock>::Node*> &VisualizationModel::GetHighlightedNodes()
+std::vector<const Tree<VizBlock>::Node*>& VisualizationModel::GetHighlightedNodes()
 {
    return m_highlightedNodes;
 }
@@ -523,7 +527,7 @@ void VisualizationModel::HighlightAncestors(const Tree<VizBlock>::Node& node)
 
 void VisualizationModel::HighlightDescendants(
    const Tree<VizBlock>::Node& node,
-   Settings::VisualizationParameters parameters)
+   const Settings::VisualizationParameters& parameters)
 {
    std::for_each(
       Tree<VizBlock>::LeafIterator{ &node },
@@ -542,7 +546,7 @@ void VisualizationModel::HighlightDescendants(
 
 void VisualizationModel::HighlightMatchingFileExtension(
    const Tree<VizBlock>::Node& sampleNode,
-   Settings::VisualizationParameters parameters)
+   const Settings::VisualizationParameters& parameters)
 {
    std::for_each(
       Tree<VizBlock>::LeafIterator{ GetTree().GetRoot() },
@@ -562,7 +566,7 @@ void VisualizationModel::HighlightMatchingFileExtension(
 
 void VisualizationModel::HighlightMatchingFileName(
    const std::wstring& searchQuery,
-   Settings::VisualizationParameters parameters,
+   const Settings::VisualizationParameters& parameters,
    bool shouldSearchFiles,
    bool shouldSearchDirectories)
 {
@@ -638,7 +642,7 @@ void VisualizationModel::ProcessFileSystemChanges()
       if (!notification)
       {
          // If we got here, it may indicates that the wait operation has probably been abandoned
-         // due to DTOR invocation.
+         // due to a DTOR invocation.
          continue;
       }
 
@@ -718,13 +722,13 @@ void VisualizationModel::UpdateAffectedNodes(const FileChangeNotification& notif
 
 void VisualizationModel::OnFileCreation(const FileChangeNotification& notification)
 {
-   const auto absolutePath =
-      std::experimental::filesystem::absolute(notification.relativePath, m_rootPath);
-
    // @todo Find parent node from path:
    auto* parentNode = FindNodeUsingRelativePath(notification.relativePath.stem());
 
-   if (std::experimental::filesystem::is_directory(absolutePath)) // @todo Check symlink status...
+   const auto absolutePath =
+      std::experimental::filesystem::absolute(notification.relativePath, m_rootPath);
+
+   if (std::experimental::filesystem::is_directory(absolutePath)) //< @todo Check symlink status...
    {
       FileInfo directoryInfo
       {
@@ -736,7 +740,7 @@ void VisualizationModel::OnFileCreation(const FileChangeNotification& notificati
 
       parentNode->AppendChild(VizBlock{ std::move(directoryInfo) });
    }
-   else
+   else // if (is_regular(...))
    {
       const auto fileSize = DriveScanning::Utilities::ComputeFileSize(absolutePath);
 
@@ -755,12 +759,10 @@ void VisualizationModel::OnFileCreation(const FileChangeNotification& notificati
 void VisualizationModel::OnFileDeletion(const FileChangeNotification& notification)
 {
    auto* node = FindNodeUsingRelativePath(notification.relativePath);
-   if (!node)
+   if (node)
    {
-      return;
+      node->DeleteFromTree();;
    }
-
-   node->DeleteFromTree();
 }
 
 void VisualizationModel::OnFileModification(const FileChangeNotification& notification)
@@ -772,17 +774,15 @@ void VisualizationModel::OnFileModification(const FileChangeNotification& notifi
    {
       // @todo What does it mean for a directory to be modified?
    }
-   else
+   else // if (is_regular(...))
    {
       const auto fileSize = DriveScanning::Utilities::ComputeFileSize(absolutePath);
 
       auto* node = FindNodeUsingRelativePath(notification.relativePath);
-      if (!node)
+      if (node)
       {
-         return;
-      }
-
-      node->GetData().file.size = fileSize;
+         node->GetData().file.size = fileSize;;
+      }      
    }
 }
 

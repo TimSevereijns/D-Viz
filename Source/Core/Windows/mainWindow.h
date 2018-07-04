@@ -12,7 +12,6 @@
 #include "controller.h"
 #include "HID/gamepad.h"
 #include "Viewport/glCanvas.h"
-
 #include "ui_mainWindow.h"
 
 struct ScanningProgress;

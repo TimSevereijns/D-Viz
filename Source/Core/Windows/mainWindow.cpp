@@ -63,7 +63,7 @@ namespace
 
             const static auto binary = std::vector<std::pair<std::uintmax_t, QString>>
             {
-               { 0u,     "Show All" },
+               { 0u,      "Show All"  },
                { 1_KiB,   "< 1 KiB"   },
                { 1_MiB,   "< 1 MiB"   },
                { 10_MiB,  "< 10 MiB"  },

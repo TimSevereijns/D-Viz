@@ -60,6 +60,10 @@ class DriveScanner final : public QObject
        */
       void HandleMessageBox(const QString& message);
 
+   signals:
+
+      void Finished();
+
    private:
 
       DriveScanningParameters m_parameters;

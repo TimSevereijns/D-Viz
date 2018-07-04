@@ -5,7 +5,7 @@
 
 #ifdef Q_OS_LINUX
 
-#include "fileStatusChange.hpp"
+#include "fileChangeNotification.hpp"
 #include "Utilities/threadSafeQueue.hpp"
 
 #include "boost/optional.hpp"

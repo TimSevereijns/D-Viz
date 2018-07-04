@@ -16,6 +16,8 @@ void DriveScanner::HandleCompletion(const std::shared_ptr<Tree<VizBlock>>& fileT
    m_progressUpdateTimer->stop();
 
    m_parameters.onScanCompletedCallback(m_progress, fileTree);
+
+   emit Finished();
 }
 
 void DriveScanner::HandleMessageBox(const QString& message)
