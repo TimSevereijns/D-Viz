@@ -218,7 +218,7 @@ namespace
     */
    QMatrix4x4 ComputeLightViewMatrix()
    {
-      constexpr auto lightPosition = QVector3D{ 0.f, 500.f, 0.f };
+      constexpr auto lightPosition = QVector3D{ -200.f, 500.f, -200.f };
       constexpr auto lightTarget = QVector3D{ 500.f, 0.f, -500.f };
       constexpr auto upVector = QVector3D{ 0.0f, 1.0f, 0.0f };
 
@@ -673,7 +673,7 @@ namespace Asset
       const auto view = ComputeLightViewMatrix();
       const auto boundingBoxes = ComputeFrustumSplitBoundingBoxes(camera, view, m_cascadeCount);
 
-      constexpr auto nearPlane{ 500 };
+      constexpr auto nearPlane{ 200 };
       constexpr auto farPlane{ 1500 };
 
       for (auto index{ 0u }; index < m_cascadeCount; ++index)

@@ -43,14 +43,14 @@ namespace Bootstrapper
    inline void InitializeLogs()
    {
       const auto defaultLogPath =
-         std::experimental::filesystem::current_path().append("test-log.txt");
+         std::experimental::filesystem::current_path().append("log.txt");
 
       const auto& defaultLog = spdlog::basic_logger_mt(
          Constants::Logging::DEFAULT_LOG,
          Detail::ToFilenameString(defaultLogPath));
 
       const auto fileLogPath =
-         std::experimental::filesystem::current_path().append("test-fileSytem.txt");
+         std::experimental::filesystem::current_path().append("fileSytem.txt");
 
       const auto& filesystemLog = spdlog::basic_logger_mt(
          Constants::Logging::FILESYSTEM_LOG,

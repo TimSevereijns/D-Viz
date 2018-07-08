@@ -19,8 +19,8 @@ namespace
     */
    QMatrix4x4 ComputeLightViewMatrix()
    {
-      const auto lightPosition = QVector3D{ 0.f, 200.f, 0.f };
-      const auto lightTarget = QVector3D{ 500.f, 0.f, -500.f };
+      constexpr auto lightPosition = QVector3D{ -200.f, 500.f, -200.f };
+      constexpr auto lightTarget = QVector3D{ 500.f, 0.f, -500.f };
 
       QMatrix4x4 projection;
       projection.ortho(-600, 600, -600, 600, 10, 1500);
@@ -28,7 +28,6 @@ namespace
       QMatrix4x4 model;
       QMatrix4x4 view;
       view.lookAt(lightPosition, lightTarget, QVector3D{ 0.0f, 1.0f, 0.0f });
-
       return projection * view * model;
    }
 
