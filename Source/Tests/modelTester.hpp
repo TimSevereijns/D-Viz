@@ -1,6 +1,8 @@
 #include <QString>
 #include <QtTest>
 
+#include "multiTestHarness.h"
+
 #include <iostream>
 
 #include <bootstrapper.hpp>
@@ -105,14 +107,15 @@ void ModelTester::ProgressCallbackIsInvoked()
 void ModelTester::ModelIsPopulated()
 {
    const auto tree = m_model->GetTree();
-   QCOMPARE(tree.Size(), 490l); //< Number of items in "asio" sample directory.
+
+   QCOMPARE(tree.Size(), 490ll); //< Number of items in "asio" sample directory.
 }
 
 void ModelTester::ScanningProgressDataIsCorrect()
 {
-   QCOMPARE(m_bytesScanned, 3'407'665ul);  //< As seen in Windows File Explorer.
-   QCOMPARE(m_filesScanned, 469ul);        //< As seen in Windows File Explorer.
-   QCOMPARE(m_directoriesScanned, 20ul);   //< As seen in Windows File Explorer.
+   QCOMPARE(m_bytesScanned, 3'407'665ull);  //< As seen in Windows File Explorer.
+   QCOMPARE(m_filesScanned, 469ull);        //< As seen in Windows File Explorer.
+   QCOMPARE(m_directoriesScanned, 20ull);   //< As seen in Windows File Explorer.
 }
 
 void ModelTester::SelectingNodes()
@@ -147,7 +150,9 @@ void ModelTester::HighlightDescendants()
       Tree<VizBlock>::LeafIterator{ },
       [] (const auto&) { return true; });
 
-   QCOMPARE(static_cast<long>(m_model->GetHighlightedNodes().size()), leafCount);
+   QCOMPARE(
+      static_cast<unsigned int>(m_model->GetHighlightedNodes().size()),
+      leafCount);
 }
 
 void ModelTester::HighlightAncestors()
@@ -164,7 +169,7 @@ void ModelTester::HighlightAncestors()
 
    m_model->HighlightAncestors(*target);
 
-   QCOMPARE(m_model->GetHighlightedNodes().size(), 4ul);
+   QCOMPARE(m_model->GetHighlightedNodes().size(), 4u);
 }
 
 void ModelTester::HighlightAllMatchingExtensions()
@@ -191,9 +196,11 @@ void ModelTester::HighlightAllMatchingExtensions()
       Tree<VizBlock>::PostOrderIterator{ },
       [] (const auto& node) { return node->file.extension == L".hpp"; });
 
-   QCOMPARE(static_cast<long>(m_model->GetHighlightedNodes().size()), headerCount);
+   QCOMPARE(
+      static_cast<unsigned>(m_model->GetHighlightedNodes().size()),
+      headerCount);
 }
 
-QTEST_MAIN(ModelTester)
+REGISTER_TEST(ModelTester)
 
 //#include "modelTester.moc"
