@@ -27,17 +27,17 @@ namespace DriveScanning
       * @returns A handle representing the repartse point found at the given path. If
       * the path is not a reparse point, then an invalid handle will be returned instead.
       */
-      auto OpenReparsePoint(
-         const std::experimental::filesystem::path& path) noexcept -> ScopedHandle;
+      ScopedHandle OpenReparsePoint(
+         const std::experimental::filesystem::path& path) noexcept;
 
       /**
       * @brief Reads the reparse point found at the given path into the output buffer.
       *
       * @returns True if the path could be read as a reparse point, and false otherwise.
       */
-      auto ReadReparsePoint(
+      bool ReadReparsePoint(
          const std::wstring& path,
-         std::vector<std::byte>& reparseBuffer) noexcept -> bool;
+         std::vector<std::byte>& reparseBuffer) noexcept;
 
       /**
        * @brief Use the `FindFirstFileW(...)` function to retrieve the file size.
@@ -51,8 +51,8 @@ namespace DriveScanning
        *
        * @returns The size of the file if it's accessible, and zero otherwise.
        */
-      auto GetFileSizeUsingWinAPI(
-         const std::experimental::filesystem::path& path) noexcept -> std::uintmax_t;
+      std::uintmax_t GetFileSizeUsingWinAPI(
+         const std::experimental::filesystem::path& path) noexcept;
 
 #endif // Q_OS_WIN
    }
@@ -66,8 +66,8 @@ namespace DriveScanning
        *
        * @return The size of the file if it's accessible, and zero otherwise.
        */
-      auto ComputeFileSize(
-         const std::experimental::filesystem::path& path) noexcept -> std::uintmax_t;
+      std::uintmax_t ComputeFileSize(
+         const std::experimental::filesystem::path& path) noexcept;
 
       /**
        * @brief ComputeDirectorySizes
@@ -81,26 +81,26 @@ namespace DriveScanning
       /**
       * @returns True if the given file path matches the given reparse tag, and false otherwise.
       */
-      auto IsReparseTag(
+      bool IsReparseTag(
          const std::experimental::filesystem::path& path,
-         DWORD targetTag) noexcept -> bool;
+         DWORD targetTag) noexcept;
 
       /**
       * @note Junctions in Windows are considered mount points.
       *
       * @returns True if the given file path represents a mount point, and false otherwise.
       */
-      auto IsMountPoint(const std::experimental::filesystem::path& path) noexcept -> bool;
+      bool IsMountPoint(const std::experimental::filesystem::path& path) noexcept;
 
       /**
       * @returns True if the given file path represents a symlink, and false otherwise.
       */
-      auto IsSymlink(const std::experimental::filesystem::path& path) noexcept -> bool;
+      bool IsSymlink(const std::experimental::filesystem::path& path) noexcept;
 
       /**
       * @returns True if the given path represents a reparse point, and false otherwise.
       */
-      auto IsReparsePoint(const std::experimental::filesystem::path& path) noexcept -> bool;
+      bool IsReparsePoint(const std::experimental::filesystem::path& path) noexcept;
 
 #endif // Q_OS_WIN
    }

@@ -21,38 +21,38 @@ namespace Settings
     */
    class PreferencesMap
    {
-      public:
+   public:
 
-         using Entry = std::variant<bool, int, float, std::wstring, QVector3D>;
+      using Entry = std::variant<bool, int, float, std::wstring, QVector3D>;
 
-         /**
-          * @brief Inserts a new entry into the preferences map.
-          *
-          * @param[in] name         The name that the preference should be stored under.
-          * @param[in] data         The PreferencesMap::Entry.
-          */
-         template<typename DataType>
-         void Emplace(
-            std::wstring name,
-            DataType&& data);
+      /**
+       * @brief Inserts a new entry into the preferences map.
+       *
+       * @param[in] name         The name that the preference should be stored under.
+       * @param[in] data         The PreferencesMap::Entry.
+       */
+      template<typename DataType>
+      void Emplace(
+         std::wstring name,
+         DataType&& data);
 
-         /**
-          * @brief Extracts the value named by the query string if it exists.
-          *
-          * @param[in] query        The name of the desired preference.
-          * @param[in] defaultValue The value to be returned if the desired entry doesn't exist.
-          *
-          * @returns The value if found, or the default value if no matching entry exists in the
-          * map.
-          */
-         template<typename RequestedType>
-         RequestedType GetValueOrDefault(
-            std::wstring_view query,
-            const RequestedType& defaultValue) const;
+      /**
+       * @brief Extracts the value named by the query string if it exists.
+       *
+       * @param[in] query        The name of the desired preference.
+       * @param[in] defaultValue The value to be returned if the desired entry doesn't exist.
+       *
+       * @returns The value if found, or the default value if no matching entry exists in the
+       * map.
+       */
+      template<typename RequestedType>
+      RequestedType GetValueOrDefault(
+         std::wstring_view query,
+         const RequestedType& defaultValue) const;
 
-      private:
+   private:
 
-         std::unordered_map<std::wstring, Entry> m_map;
+      std::unordered_map<std::wstring, Entry> m_map;
    };
 }
 

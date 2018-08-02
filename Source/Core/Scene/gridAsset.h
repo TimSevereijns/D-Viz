@@ -11,25 +11,25 @@ namespace Asset
     */
    class Grid final : public Line
    {
-      public:
+   public:
 
-         /**
-          * @copydoc Asset::Base::Base()
-          */
-         Grid(
-            const Settings::Manager& settings,
-            QOpenGLExtraFunctions& openGL);
+      /**
+       * @copydoc Asset::Base::Base()
+       */
+      Grid(
+         const Settings::Manager& settings,
+         QOpenGLExtraFunctions& openGL);
 
-         /**
-          * @copydoc Asset::Base::Render()
-          */
-         void Render(
-            const Camera& camera,
-            const std::vector<Light>& lights) override;
+      /**
+       * @copydoc Asset::Base::Render()
+       */
+      void Render(
+         const Camera& camera,
+         const std::vector<Light>& lights) override;
 
-      private:
+   private:
 
-         static constexpr wchar_t AssetName[] = L"Grid";
+      static constexpr wchar_t AssetName[] = L"Grid";
    };
 }
 

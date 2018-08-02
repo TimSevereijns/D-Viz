@@ -35,7 +35,7 @@ namespace
    }
 }
 
-WindowsFileMonitor::~WindowsFileMonitor()
+WindowsFileMonitor::~WindowsFileMonitor() noexcept
 {
    if (!m_isActive)
    {

@@ -46,32 +46,32 @@ class ScanBreakdownModel final : public QAbstractTableModel
 {
    friend class BreakdownDialog;
 
-   public:
+public:
 
-      int rowCount(const QModelIndex& parent) const override;
+   int rowCount(const QModelIndex& parent) const override;
 
-      int columnCount(const QModelIndex& parent) const override;
+   int columnCount(const QModelIndex& parent) const override;
 
-      QVariant headerData(
-         int section,
-         Qt::Orientation orientation,
-         int role) const override;
+   QVariant headerData(
+      int section,
+      Qt::Orientation orientation,
+      int role) const override;
 
-      QVariant data(
-         const QModelIndex& index,
-         int role) const override;
+   QVariant data(
+      const QModelIndex& index,
+      int role) const override;
 
-      void insert(const Tree<VizBlock>::Node& node);
+   void insert(const Tree<VizBlock>::Node& node);
 
-   private:
+private:
 
-      void FinalizeInsertion(const Settings::Manager& settingsManager);
+   void FinalizeInsertion(const Settings::Manager& settingsManager);
 
-      void ClearData();
+   void ClearData();
 
-      std::vector<RowModel> m_fileTypeVector;
+   std::vector<RowModel> m_fileTypeVector;
 
-      std::unordered_map<std::wstring, std::uintmax_t> m_fileTypeMap;
+   std::unordered_map<std::wstring, std::uintmax_t> m_fileTypeMap;
 };
 
 #endif // SCANBREAKDOWNMODEL_H

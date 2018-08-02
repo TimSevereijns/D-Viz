@@ -14,41 +14,41 @@
 
 class LinuxFileMonitor
 {
-   public:
+public:
 
-      LinuxFileMonitor() = default;
+   LinuxFileMonitor() = default;
 
-      ~LinuxFileMonitor();
+   ~LinuxFileMonitor() noexcept;
 
-      LinuxFileMonitor(LinuxFileMonitor&& other) = delete;
-      LinuxFileMonitor& operator=(LinuxFileMonitor&& other) = delete;
+   LinuxFileMonitor(LinuxFileMonitor&& other) = delete;
+   LinuxFileMonitor& operator=(LinuxFileMonitor&& other) = delete;
 
-      LinuxFileMonitor(const LinuxFileMonitor& other) = delete;
-      LinuxFileMonitor& operator=(const LinuxFileMonitor& other) = delete;
+   LinuxFileMonitor(const LinuxFileMonitor& other) = delete;
+   LinuxFileMonitor& operator=(const LinuxFileMonitor& other) = delete;
 
-      /**
-       * @brief Starts monitoring the file system for changes.
-       *
-       * @param[in] path            The root directory to watch.
-       */
-      void Start(
-         const std::experimental::filesystem::path& path,
-         const std::function<void (FileChangeNotification&&)>& onNotificationCallback);
+   /**
+    * @brief Starts monitoring the file system for changes.
+    *
+    * @param[in] path            The root directory to watch.
+    */
+   void Start(
+      const std::experimental::filesystem::path& path,
+      const std::function<void (FileChangeNotification&&)>& onNotificationCallback);
 
-      /**
-       * @brief Stops monitoring the file system for changes.
-       */
-      void Stop();
+   /**
+    * @brief Stops monitoring the file system for changes.
+    */
+   void Stop();
 
-      /**
-       * @returns True if the file system monitor is actively monitoring.
-       */
-      bool IsActive() const;
+   /**
+    * @returns True if the file system monitor is actively monitoring.
+    */
+   bool IsActive() const;
 
 
-   private:
+private:
 
-      bool m_isActive{ false };
+   bool m_isActive{ false };
 };
 
 #endif // Q_OS_UNIX

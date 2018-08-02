@@ -7,21 +7,21 @@ namespace Asset
 {
    class DebuggingRay final : public Line
    {
-      public:
+   public:
 
-         /**
-          * @copydoc Asset::Base::Base()
-          */
-         DebuggingRay(
-            const Settings::Manager& settings,
-            QOpenGLExtraFunctions& openGL);
+      /**
+       * @copydoc Asset::Base::Base()
+       */
+      DebuggingRay(
+         const Settings::Manager& settings,
+         QOpenGLExtraFunctions& openGL);
 
-         /**
-          * @copydoc Asset::Base::Render()
-          */
-         void Render(
-            const Camera& camera,
-            const std::vector<Light>& lights) override;
+      /**
+       * @copydoc Asset::Base::Render()
+       */
+      void Render(
+         const Camera& camera,
+         const std::vector<Light>& lights) override;
    };
 }
 

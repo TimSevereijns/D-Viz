@@ -27,53 +27,53 @@ namespace Detail
     */
    class FileMonitorEventHandles
    {
-      public:
+   public:
 
-         ~FileMonitorEventHandles()
+      ~FileMonitorEventHandles()
+      {
+         for (auto& handle : m_handles)
          {
-            for (auto& handle : m_handles)
+            if (handle != nullptr && handle != INVALID_HANDLE_VALUE)
             {
-               if (handle != nullptr && handle != INVALID_HANDLE_VALUE)
-               {
-                  CloseHandle(handle);
-                  handle = nullptr;
-               }
+               CloseHandle(handle);
+               handle = nullptr;
             }
          }
+      }
 
-         void SetExitHandle(HANDLE handle) noexcept
-         {
-            m_handles[0] = handle;
-         }
+      void SetExitHandle(HANDLE handle) noexcept
+      {
+         m_handles[0] = handle;
+      }
 
-         void SetNotificationHandle(HANDLE handle) noexcept
-         {
-            m_handles[1] = handle;
-         }
+      void SetNotificationHandle(HANDLE handle) noexcept
+      {
+         m_handles[1] = handle;
+      }
 
-         HANDLE GetExitHandle() const noexcept
-         {
-            return m_handles[0];
-         }
+      HANDLE GetExitHandle() const noexcept
+      {
+         return m_handles[0];
+      }
 
-         HANDLE GetNotificationHandle() const noexcept
-         {
-            return m_handles[1];
-         }
+      HANDLE GetNotificationHandle() const noexcept
+      {
+         return m_handles[1];
+      }
 
-         const HANDLE* Data() const noexcept
-         {
-            return m_handles.data();
-         }
+      const HANDLE* Data() const noexcept
+      {
+         return m_handles.data();
+      }
 
-         constexpr auto Size() const noexcept
-         {
-            return static_cast<DWORD>(m_handles.size());
-         }
+      constexpr auto Size() const noexcept
+      {
+         return static_cast<DWORD>(m_handles.size());
+      }
 
-      private:
+   private:
 
-         std::array<HANDLE, 2> m_handles{ INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE };
+      std::array<HANDLE, 2> m_handles{ INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE };
    };
 }
 
@@ -82,62 +82,62 @@ namespace Detail
  */
 class WindowsFileMonitor
 {
-   public:
+public:
 
-      WindowsFileMonitor() = default;
+   WindowsFileMonitor() = default;
 
-      ~WindowsFileMonitor();
+   ~WindowsFileMonitor() noexcept;
 
-      WindowsFileMonitor(WindowsFileMonitor&& other) = delete;
-      WindowsFileMonitor& operator=(WindowsFileMonitor&& other) = delete;
+   WindowsFileMonitor(WindowsFileMonitor&& other) = delete;
+   WindowsFileMonitor& operator=(WindowsFileMonitor&& other) = delete;
 
-      WindowsFileMonitor(const WindowsFileMonitor& other) = delete;
-      WindowsFileMonitor& operator=(const WindowsFileMonitor& other) = delete;
+   WindowsFileMonitor(const WindowsFileMonitor& other) = delete;
+   WindowsFileMonitor& operator=(const WindowsFileMonitor& other) = delete;
 
-      /**
-       * @brief Starts monitoring the file system for changes.
-       *
-       * @param[in] path            The root directory to watch.
-       */
-      void Start(
-         const std::experimental::filesystem::path& path,
-         const std::function<void (FileChangeNotification&&)>& onNotificationCallback);
+   /**
+    * @brief Starts monitoring the file system for changes.
+    *
+    * @param[in] path            The root directory to watch.
+    */
+   void Start(
+      const std::experimental::filesystem::path& path,
+      const std::function<void (FileChangeNotification&&)>& onNotificationCallback);
 
-      /**
-       * @brief Stops monitoring the file system for changes.
-       */
-      void Stop();
+   /**
+    * @brief Stops monitoring the file system for changes.
+    */
+   void Stop();
 
-      /**
-       * @returns True if the file system monitor is actively monitoring.
-       */
-      bool IsActive() const;
+   /**
+    * @returns True if the file system monitor is actively monitoring.
+    */
+   bool IsActive() const;
 
-   private:
+private:
 
-      void Monitor();
+   void Monitor();
 
-      void AwaitNotification();
-      void RetrieveNotification();
-      void ProcessNotification();
+   void AwaitNotification();
+   void RetrieveNotification();
+   void ProcessNotification();
 
-      bool m_isActive{ false };
+   bool m_isActive{ false };
 
-      std::atomic_bool m_keepMonitoring{ true };
+   std::atomic_bool m_keepMonitoring{ true };
 
-      HANDLE m_fileHandle{ INVALID_HANDLE_VALUE };
+   HANDLE m_fileHandle{ INVALID_HANDLE_VALUE };
 
-      Detail::FileMonitorEventHandles m_events;
+   Detail::FileMonitorEventHandles m_events;
 
-      OVERLAPPED m_ioBuffer;
+   OVERLAPPED m_ioBuffer;
 
-      std::vector<std::byte> m_notificationBuffer;
+   std::vector<std::byte> m_notificationBuffer;
 
-      std::thread m_monitoringThread;
+   std::thread m_monitoringThread;
 
-      std::function<void (FileChangeNotification&&)> m_notificationCallback;
+   std::function<void (FileChangeNotification&&)> m_notificationCallback;
 
-      boost::optional<std::wstring> m_pendingRenameEvent;
+   boost::optional<std::wstring> m_pendingRenameEvent;
 };
 
 #endif // Q_OS_WIN

@@ -367,7 +367,7 @@ VisualizationModel::VisualizationModel(const std::experimental::filesystem::path
 {
 }
 
-VisualizationModel::~VisualizationModel()
+VisualizationModel::~VisualizationModel() noexcept
 {
    StopMonitoringFileSystem();
 

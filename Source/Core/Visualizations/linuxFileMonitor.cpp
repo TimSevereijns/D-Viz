@@ -2,7 +2,7 @@
 
 #ifdef Q_OS_LINUX
 
-LinuxFileMonitor::~LinuxFileMonitor()
+LinuxFileMonitor::~LinuxFileMonitor() noexcept
 {
 
 }

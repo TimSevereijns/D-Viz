@@ -7,14 +7,16 @@
  * @brief ScopeExit
  */
 template<typename LambdaType>
-struct ScopeExit
+class ScopeExit
 {
+public:
+
    ScopeExit(LambdaType&& lambda) noexcept :
-      m_lambda(std::move(lambda))
+      m_lambda{ std::move(lambda) }
    {
    }
 
-   ~ScopeExit()
+   ~ScopeExit() noexcept
    {
       m_lambda();
    }

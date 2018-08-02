@@ -9,28 +9,28 @@ using HANDLE = void*;
 
 class ScopedHandle
 {
-   public:
+public:
 
-      ScopedHandle(HANDLE handle);
-      ~ScopedHandle();
+   ScopedHandle(HANDLE handle);
+   ~ScopedHandle() noexcept;
 
-      ScopedHandle(const ScopedHandle& other);
-      ScopedHandle& operator=(const ScopedHandle& other);
+   ScopedHandle(const ScopedHandle& other);
+   ScopedHandle& operator=(const ScopedHandle& other);
 
-      ScopedHandle(ScopedHandle&& other);
-      ScopedHandle& operator=(ScopedHandle&& other);
+   ScopedHandle(ScopedHandle&& other);
+   ScopedHandle& operator=(ScopedHandle&& other);
 
-      void Close();
+   void Close();
 
-      void Reset(HANDLE handle);
+   void Reset(HANDLE handle);
 
-      bool IsValid() const;
+   bool IsValid() const;
 
-      explicit operator HANDLE() const;
+   explicit operator HANDLE() const;
 
-   private:
+private:
 
-      HANDLE m_handle;
+   HANDLE m_handle;
 };
 
 #endif

@@ -97,7 +97,7 @@ namespace
          QApplication::setOverrideCursor(desiredCursor);
       }
 
-      ~ScopedCursor()
+      ~ScopedCursor() noexcept
       {
          QApplication::restoreOverrideCursor();
       }

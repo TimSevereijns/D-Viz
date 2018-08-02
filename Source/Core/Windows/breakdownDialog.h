@@ -48,26 +48,26 @@ class BreakdownDialog final : public QDialog
 {
    Q_OBJECT
 
-   public:
+public:
 
-      BreakdownDialog(QWidget* parent = nullptr);
+   BreakdownDialog(QWidget* parent = nullptr);
 
-      void ReloadData();
+   void ReloadData();
 
-   protected:
+protected:
 
-      void resizeEvent(QResizeEvent* event) override;
+   void resizeEvent(QResizeEvent* event) override;
 
-   private:
+private:
 
-      void AdjustColumnWidthsToFitViewport();
+   void AdjustColumnWidthsToFitViewport();
 
-      MainWindow& m_mainWindow;
+   MainWindow& m_mainWindow;
 
-      Ui::breakdownDialog m_ui;
+   Ui::breakdownDialog m_ui;
 
-      ScanBreakdownModel m_model;
-      ScanBreakdownFilterProxyModel m_proxyModel;
+   ScanBreakdownModel m_model;
+   ScanBreakdownFilterProxyModel m_proxyModel;
 };
 
 #endif // BREAKDOWNDIALOG_H

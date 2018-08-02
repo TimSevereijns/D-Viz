@@ -7,36 +7,36 @@
  */
 class PrecisePoint
 {
-   public:
+public:
 
-      PrecisePoint() = default;
+   PrecisePoint() = default;
 
-      PrecisePoint(
-         double x,
-         double y,
-         double z);
+   PrecisePoint(
+      double x,
+      double y,
+      double z);
 
-      double x() const;
-      double y() const;
-      double z() const;
+   double x() const;
+   double y() const;
+   double z() const;
 
-      friend inline auto operator+(
-         const PrecisePoint& lhs,
-         const PrecisePoint& rhs)
+   friend inline auto operator+(
+      const PrecisePoint& lhs,
+      const PrecisePoint& rhs)
+   {
+      return PrecisePoint
       {
-         return PrecisePoint
-         {
-            lhs.m_x + rhs.m_x,
-            lhs.m_y + rhs.m_y,
-            lhs.m_z + rhs.m_z
-         };
-      }
+         lhs.m_x + rhs.m_x,
+         lhs.m_y + rhs.m_y,
+         lhs.m_z + rhs.m_z
+      };
+   }
 
-   private:
+private:
 
-      double m_x{ 0.0 };
-      double m_y{ 0.0 };
-      double m_z{ 0.0 };
+   double m_x{ 0.0 };
+   double m_y{ 0.0 };
+   double m_z{ 0.0 };
 };
 
 #endif // PRECISEPOINT_H

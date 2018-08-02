@@ -16,53 +16,53 @@ class GamepadContextMenu : public QWidget
 {
    Q_OBJECT
 
-   public:
+public:
 
-      struct Entry
-      {
-         QString Label;
-         QPoint Position;
-         QColor Color;
-         std::function<void ()> Action;
-      };
+   struct Entry
+   {
+      QString Label;
+      QPoint Position;
+      QColor Color;
+      std::function<void ()> Action;
+   };
 
-      GamepadContextMenu(
-         const Gamepad& gamepad,
-         QWidget* parent = nullptr);
+   GamepadContextMenu(
+      const Gamepad& gamepad,
+      QWidget* parent = nullptr);
 
-      void AddEntry(
-         const QString& label,
-         const std::function<void ()>& action);
+   void AddEntry(
+      const QString& label,
+      const std::function<void ()>& action);
 
-      void ComputeLayout();
+   void ComputeLayout();
 
-      void ExecuteSelection();
+   void ExecuteSelection();
 
-      void paintEvent(QPaintEvent* event) override;
+   void paintEvent(QPaintEvent* event) override;
 
-   private slots:
+private slots:
 
-      void ProcessInput();
+   void ProcessInput();
 
-   private:
+private:
 
-      void RenderLabels(const QPoint& center);
-      void RenderGeometry(const QPoint& center);
+   void RenderLabels(const QPoint& center);
+   void RenderGeometry(const QPoint& center);
 
-      const Gamepad& m_gamepad;
+   const Gamepad& m_gamepad;
 
-      std::size_t m_indexOfSelection{ std::numeric_limits<std::size_t>::max() };
+   std::size_t m_indexOfSelection{ std::numeric_limits<std::size_t>::max() };
 
-      std::vector<Entry> m_entries;
+   std::vector<Entry> m_entries;
 
-      QPoint m_selectorDot;
+   QPoint m_selectorDot;
 
-      QTimer m_inputTimer;
+   QTimer m_inputTimer;
 
-      QPainter m_painter;
+   QPainter m_painter;
 
-      QFont m_font;
-      QPen m_pen;
+   QFont m_font;
+   QPen m_pen;
 };
 
 #endif // CANVASGAMEPADCONTEXTMENU_H

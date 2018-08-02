@@ -11,42 +11,42 @@ namespace Asset
     */
    class Line : public Base
    {
-      public:
+   public:
 
-         /**
-          * @copydoc Asset::Base::Base()
-          */
-         Line(
-            const Settings::Manager& settings,
-            QOpenGLExtraFunctions& openGL);
+      /**
+       * @copydoc Asset::Base::Base()
+       */
+      Line(
+         const Settings::Manager& settings,
+         QOpenGLExtraFunctions& openGL);
 
-         /**
-          * @copydoc Asset::Base::LoadShaders()
-          */
-         bool LoadShaders() override;
+      /**
+       * @copydoc Asset::Base::LoadShaders()
+       */
+      bool LoadShaders() override;
 
-         /**
-          * @copydoc Asset::Base::Initialize()
-          */
-         void Initialize() override;
+      /**
+       * @copydoc Asset::Base::Initialize()
+       */
+      void Initialize() override;
 
-         /**
-          * @copydoc Asset::Base::Render()
-          */
-         void Render(
-            const Camera& camera,
-            const std::vector<Light>& light) override;
+      /**
+       * @copydoc Asset::Base::Render()
+       */
+      void Render(
+         const Camera& camera,
+         const std::vector<Light>& light) override;
 
-         /**
-          * @copydoc Asset::Base::Reload()
-          */
-         void Refresh() override;
+      /**
+       * @copydoc Asset::Base::Reload()
+       */
+      void Refresh() override;
 
-      private:
+   private:
 
-         void InitializeVertexBuffers();
+      void InitializeVertexBuffers();
 
-         void InitializeColorBuffers();
+      void InitializeColorBuffers();
    };
 }
 

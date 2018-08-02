@@ -22,55 +22,54 @@ class DriveScanner final : public QObject
 {
    Q_OBJECT
 
-   public:
+public:
 
-      /**
-       * @brief Kicks off the drive scanning process in a separate thread using the specified
-       * parameters.
-       *
-       * @param[in] parameters      @see DriveScanningParameters
-       */
-      void StartScanning(const DriveScanningParameters& parameters);
+   /**
+    * @brief Kicks off the drive scanning process in a separate thread using the specified
+    * parameters.
+    *
+    * @param[in] parameters      @see DriveScanningParameters
+    */
+   void StartScanning(const DriveScanningParameters& parameters);
 
-   public slots:
+public slots:
 
-      /**
-       * @brief Handles the ScanningWorker::Finished signal.
-       *
-       * @see ScanningWorker::Finished
-       *
-       * @param[in] fileTree        The final tree representing the scanned drive (or a part
-       *                            thereof).
-       */
-      void HandleCompletion(const std::shared_ptr<Tree<VizBlock>>& fileTree);
+   /**
+    * @brief Handles the ScanningWorker::Finished signal.
+    *
+    * @see ScanningWorker::Finished
+    *
+    * @param[in] fileTree        The final tree representing the scanned drive (or a part thereof).
+    */
+   void HandleCompletion(const std::shared_ptr<Tree<VizBlock>>& fileTree);
 
-      /**
-       * @brief Handle the ScanningWorker::ProgressUpdate signal.
-       *
-       * @see ScanningWorker::ProgressUpdate
-       */
-      void HandleProgressUpdates();
+   /**
+    * @brief Handle the ScanningWorker::ProgressUpdate signal.
+    *
+    * @see ScanningWorker::ProgressUpdate
+    */
+   void HandleProgressUpdates();
 
-      /**
-       * @brief Handle the ScanningWorker::ShowMessageBox signal.
-       *
-       * @see ScanningWorker::ShowMessageBox
-       *
-       * @param[in] message         The message to be displayed to the user.
-       */
-      void HandleMessageBox(const QString& message);
+   /**
+    * @brief Handle the ScanningWorker::ShowMessageBox signal.
+    *
+    * @see ScanningWorker::ShowMessageBox
+    *
+    * @param[in] message         The message to be displayed to the user.
+    */
+   void HandleMessageBox(const QString& message);
 
-   signals:
+signals:
 
-      void Finished();
+   void Finished();
 
-   private:
+private:
 
-      DriveScanningParameters m_parameters;
+   DriveScanningParameters m_parameters;
 
-      ScanningProgress m_progress;
+   ScanningProgress m_progress;
 
-      std::unique_ptr<QTimer> m_progressUpdateTimer{ nullptr };
+   std::unique_ptr<QTimer> m_progressUpdateTimer{ nullptr };
 };
 
 #endif // DRIVESCANNER_H

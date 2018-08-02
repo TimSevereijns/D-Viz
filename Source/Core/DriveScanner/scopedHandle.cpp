@@ -33,7 +33,7 @@ ScopedHandle::ScopedHandle(HANDLE handle) :
 {
 }
 
-ScopedHandle::~ScopedHandle()
+ScopedHandle::~ScopedHandle() noexcept
 {
    Close();
 }

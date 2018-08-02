@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QTest>
-#include <qtestcase.h>
 
 #include <cassert>
 #include <memory>
