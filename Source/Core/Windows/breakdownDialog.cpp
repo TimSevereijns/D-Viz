@@ -13,7 +13,7 @@
 
 BreakdownDialog::BreakdownDialog(QWidget* parent) :
    QDialog{ parent },
-   m_mainWindow{ *(reinterpret_cast<MainWindow*>(parent)) }
+   m_mainWindow{ *(static_cast<MainWindow*>(parent)) }
 {
    m_ui.setupUi(this);
 
