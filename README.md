@@ -14,7 +14,7 @@ For information on how to set up and build the project, please see the Wiki.
 
 ![Example 3](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/D-Viz-3.png)
 
-![Example 4](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/D-Viz-4.png)
+![Example 4](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/D-Viz-5.png)
 
 ## Technical Notes
 
