@@ -272,8 +272,17 @@ void MainWindow::SetupOptionsMenu()
    connect(&m_optionsMenuWrapper.toggleFrameTime, &QAction::toggled,
       this, &MainWindow::OnFPSReadoutToggled);
 
+   m_optionsMenuWrapper.enableFileSystemMonitoring.setText("Monitor File System");
+   m_optionsMenuWrapper.enableFileSystemMonitoring.setStatusTip("Monitors the file system for any "
+      "changes");
+   m_optionsMenuWrapper.enableFileSystemMonitoring.setCheckable(true);
+
+   connect(&m_optionsMenuWrapper.enableFileSystemMonitoring, &QAction::toggled,
+      &m_controller.GetSettingsManager(), &Settings::Manager::OnMonitoringOptionToggled);
+
    m_optionsMenu.setTitle("Options");
    m_optionsMenu.addAction(&m_optionsMenuWrapper.toggleFrameTime);
+   m_optionsMenu.addAction(&m_optionsMenuWrapper.enableFileSystemMonitoring);
 
    SetupFileSizeSubMenu();
 

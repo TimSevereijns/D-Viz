@@ -220,6 +220,12 @@ namespace Settings
       void OnShowShadowsToggled(bool isEnabled);
 
       /**
+       * @brief OnMonitoringOptionToggled
+       * @param isEnabled
+       */
+      void OnMonitoringOptionToggled(bool isEnabled);
+
+      /**
        * @brief ShouldNodeBeIgnored
        * @return
        */
@@ -241,6 +247,7 @@ namespace Settings
       bool m_shouldSearchFiles{ true };
       bool m_shouldShowCascadeSplitOverlay{ false };
       bool m_shouldRenderShadows{ true };
+      bool m_shouldMonitorFileSystem{ true };
 
       // @todo There's no real need to keep these around, I think...
       JsonDocument m_fileColorJsonDocument;

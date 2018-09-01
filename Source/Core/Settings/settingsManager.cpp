@@ -195,6 +195,11 @@ namespace Settings
       m_shouldRenderShadows = isEnabled;
    }
 
+   void Manager::OnMonitoringOptionToggled(bool isEnabled)
+   {
+      m_shouldMonitorFileSystem = isEnabled;
+   }
+
    bool Manager::ShouldBlockBeProcessed(const VizBlock& block)
    {
       if (block.file.size < m_visualizationParameters.minimumFileSize)

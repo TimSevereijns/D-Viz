@@ -196,6 +196,8 @@ private:
 
    struct OptionsMenu
    {
+      QAction enableFileSystemMonitoring{ nullptr };
+
       QAction toggleFrameTime{ nullptr };
 
       QMenu fileSizeMenu{ nullptr };
