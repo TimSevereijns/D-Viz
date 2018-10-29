@@ -75,6 +75,14 @@ namespace Constants
       constexpr static auto RADIANS_TO_DEGREES = 180.0 / PI;
       constexpr static auto DEGREES_TO_RADIANS = PI / 180.0;
    }
+
+   namespace Preferences
+   {
+      constexpr static auto& SHOW_ORIGIN{ L"showOrigin" };
+      constexpr static auto& SHOW_GRID{ L"showGrid" };
+      constexpr static auto& SHOW_LIGHT_MARKERS{ L"showLightMarkers" };
+      constexpr static auto& SHOW_FRUSTUM { L"showFrustum" };
+   }
 }
 
 #endif // CONSTANTS

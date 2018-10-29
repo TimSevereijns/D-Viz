@@ -410,22 +410,30 @@ void MainWindow::SetDebuggingMenuState()
 
    const auto& preferences = m_controller.GetSettingsManager().GetPreferenceMap();
 
-   const auto shouldShowOrigin = preferences.GetValueOrDefault(L"showOriginMarker", true);
+   const auto shouldShowOrigin = preferences.GetValueOrDefault(
+      Constants::Preferences::SHOW_ORIGIN, true);
+
    renderMenuWrapper.origin.blockSignals(true);
    renderMenuWrapper.origin.setChecked(shouldShowOrigin);
    renderMenuWrapper.origin.blockSignals(false);
 
-   const auto shouldShowGrid = preferences.GetValueOrDefault(L"showGrid", true);
+   const auto shouldShowGrid = preferences.GetValueOrDefault(
+      Constants::Preferences::SHOW_GRID, true);
+
    renderMenuWrapper.grid.blockSignals(true);
    renderMenuWrapper.grid.setChecked(shouldShowGrid);
    renderMenuWrapper.grid.blockSignals(false);
 
-   const auto shouldShowLightMarkers = preferences.GetValueOrDefault(L"showLightMarker", true);
+   const auto shouldShowLightMarkers = preferences.GetValueOrDefault(
+      Constants::Preferences::SHOW_LIGHT_MARKERS, true);
+
    renderMenuWrapper.lightMarkers.blockSignals(true);
    renderMenuWrapper.lightMarkers.setChecked(shouldShowLightMarkers);
    renderMenuWrapper.lightMarkers.blockSignals(false);
 
-   const auto shouldShowFrustum = preferences.GetValueOrDefault(L"showFrustum", true);
+   const auto shouldShowFrustum = preferences.GetValueOrDefault(
+      Constants::Preferences::SHOW_FRUSTUM, true);
+
    renderMenuWrapper.frustum.blockSignals(true);
    renderMenuWrapper.frustum.setChecked(shouldShowFrustum);
    renderMenuWrapper.frustum.blockSignals(false);
@@ -680,21 +688,33 @@ void MainWindow::OnShowBreakdownButtonPressed()
 void MainWindow::OnRenderOriginToggled(bool isEnabled)
 {
    m_glCanvas->ToggleAssetVisibility<Asset::Tag::OriginMarker>(isEnabled);
+
+   m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
+      Constants::Preferences::SHOW_ORIGIN, isEnabled);
 }
 
 void MainWindow::OnRenderGridToggled(bool isEnabled)
 {
    m_glCanvas->ToggleAssetVisibility<Asset::Tag::Grid>(isEnabled);
+
+   m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
+      Constants::Preferences::SHOW_GRID, isEnabled);
 }
 
 void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
 {
    m_glCanvas->ToggleAssetVisibility<Asset::Tag::LightMarker>(isEnabled);
+
+   m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
+      Constants::Preferences::SHOW_LIGHT_MARKERS, isEnabled);
 }
 
 void MainWindow::OnRenderFrustumToggled(bool isEnabled)
 {
    m_glCanvas->ToggleAssetVisibility<Asset::Tag::Frustum>(isEnabled);
+
+   m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
+      Constants::Preferences::SHOW_FRUSTUM, isEnabled);
 }
 
 bool MainWindow::ShouldShowFrameTime() const

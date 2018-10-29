@@ -18,7 +18,19 @@ namespace Settings
     *
     * @returns A parsed JSON document.
     */
-   JsonDocument ParseJsonDocument(const std::experimental::filesystem::path& path);
+   JsonDocument LoadFromDisk(const std::experimental::filesystem::path& path);
+
+   /**
+    * @brief Helper function to save a JSON file to disk.
+    *
+    * @param[in] document           The JSON document to save.
+    * @param[in] path               The path on disk to which to save the document.
+    *
+    * @returns True if the save succeeded.
+    */
+   bool SaveToDisk(
+      const JsonDocument& document,
+      const std::experimental::filesystem::path& path);
 
    /**
     * @brief The VisualizationParameters struct represents the gamut of visualization parameters

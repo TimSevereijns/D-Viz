@@ -148,6 +148,36 @@ namespace Settings
        */
       bool ShouldRenderShadows() const;
 
+      /**
+       * @brief SaveChangeToDisk
+       *
+       * @todo Make private (will have to move some other functionality around as well).
+       *
+       * @param property
+       * @param value
+       *
+       * @return
+       */
+      template<typename PropertyValueType>
+      bool SavePreferenceChangeToDisk(
+         std::wstring_view property,
+         const PropertyValueType& value)
+      {
+         if (m_preferencesDocument.HasMember(property.data()))
+         {
+            m_preferencesDocument[property.data()] = value;
+         }
+         else
+         {
+            auto& allocator = m_preferencesDocument.GetAllocator();
+
+            rapidjson::GenericValue<rapidjson::UTF16<wchar_t>> key{ property.data(), allocator };
+            m_preferencesDocument.AddMember(key.Move(), value, allocator);
+         }
+
+         return Settings::SaveToDisk(m_preferencesDocument, m_preferencesPath);
+      }
+
    public slots:
 
       /**
@@ -249,9 +279,11 @@ namespace Settings
       bool m_shouldRenderShadows{ true };
       bool m_shouldMonitorFileSystem{ true };
 
-      // @todo There's no real need to keep these around, I think...
-      JsonDocument m_fileColorJsonDocument;
-      JsonDocument m_generalSettingsJsonDocument;
+      JsonDocument m_fileColorMapDocument;
+      JsonDocument m_preferencesDocument;
+
+      std::experimental::filesystem::path m_preferencesPath;
+      std::experimental::filesystem::path m_fileColorMapPath;
 
       ColorMap m_colorMap;
       PreferencesMap m_preferencesMap;

@@ -108,14 +108,14 @@ void ModelTester::ModelIsPopulated()
 {
    const auto tree = m_model->GetTree();
 
-   QCOMPARE(tree.Size(), 490ll); //< Number of items in "asio" sample directory.
+   QCOMPARE(tree.Size(), 490l); //< Number of items in "asio" sample directory.
 }
 
 void ModelTester::ScanningProgressDataIsCorrect()
 {
-   QCOMPARE(m_bytesScanned, 3'407'665ull);  //< As seen in Windows File Explorer.
-   QCOMPARE(m_filesScanned, 469ull);        //< As seen in Windows File Explorer.
-   QCOMPARE(m_directoriesScanned, 20ull);   //< As seen in Windows File Explorer.
+   QCOMPARE(m_bytesScanned, 3'407'665ul);  //< As seen in Windows File Explorer.
+   QCOMPARE(m_filesScanned, 469ul);        //< As seen in Windows File Explorer.
+   QCOMPARE(m_directoriesScanned, 20ul);   //< As seen in Windows File Explorer.
 }
 
 void ModelTester::SelectingNodes()
@@ -145,14 +145,12 @@ void ModelTester::HighlightDescendants()
    const Tree<VizBlock>::Node* rootNode = m_tree->GetRoot();
    m_model->HighlightDescendants(*rootNode, visualizationParameters);
 
-   const auto leafCount = std::count_if(
+   const std::size_t leafCount = std::count_if(
       Tree<VizBlock>::LeafIterator{ rootNode },
       Tree<VizBlock>::LeafIterator{ },
       [] (const auto&) { return true; });
 
-   QCOMPARE(
-      static_cast<unsigned int>(m_model->GetHighlightedNodes().size()),
-      leafCount);
+   QCOMPARE(m_model->GetHighlightedNodes().size(), leafCount);
 }
 
 void ModelTester::HighlightAncestors()
@@ -169,7 +167,7 @@ void ModelTester::HighlightAncestors()
 
    m_model->HighlightAncestors(*target);
 
-   QCOMPARE(m_model->GetHighlightedNodes().size(), 4u);
+   QCOMPARE(m_model->GetHighlightedNodes().size(), std::size_t{ 4u });
 }
 
 void ModelTester::HighlightAllMatchingExtensions()
@@ -191,14 +189,12 @@ void ModelTester::HighlightAllMatchingExtensions()
       shouldSearchFiles,
       shouldSearchDirectories);
 
-   const auto headerCount = std::count_if(
+   const std::size_t headerCount = std::count_if(
       Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() },
       Tree<VizBlock>::PostOrderIterator{ },
       [] (const auto& node) { return node->file.extension == L".hpp"; });
 
-   QCOMPARE(
-      static_cast<unsigned>(m_model->GetHighlightedNodes().size()),
-      headerCount);
+   QCOMPARE(m_model->GetHighlightedNodes().size(), headerCount);
 }
 
 REGISTER_TEST(ModelTester)

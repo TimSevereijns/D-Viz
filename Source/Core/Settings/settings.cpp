@@ -4,8 +4,12 @@
 
 #include <cassert>
 #include <fstream>
+#include <ostream>
 
 #include <rapidjson/istreamwrapper.h>
+#include <rapidjson/ostreamwrapper.h>
+#include <rapidjson/prettywriter.h>
+
 #include <spdlog/spdlog.h>
 
 namespace
@@ -112,7 +116,7 @@ namespace
 
 namespace Settings
 {
-   JsonDocument ParseJsonDocument(const std::experimental::filesystem::path& path)
+   JsonDocument LoadFromDisk(const std::experimental::filesystem::path& path)
    {
       std::ifstream fileStream{ path.string() };
       rapidjson::IStreamWrapper streamWrapper{ fileStream };
@@ -126,5 +130,28 @@ namespace Settings
       }
 
       return document;
+   }
+
+   bool SaveToDisk(
+      const JsonDocument& document,
+      const std::experimental::filesystem::path& path)
+   {
+      std::ofstream fileStream{ path.string() };
+      rapidjson::OStreamWrapper streamWrapper{ fileStream };
+
+      rapidjson::PrettyWriter<decltype(streamWrapper), rapidjson::UTF16<wchar_t>> writer
+      {
+         streamWrapper
+      };
+
+      const auto success = document.Accept(writer);
+
+      if (!success)
+      {
+         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+         log->error("Encountered error writing JSON document to \"{}\".", path.string());
+      }
+
+      return success;
    }
 }
