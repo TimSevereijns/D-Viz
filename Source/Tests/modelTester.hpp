@@ -108,14 +108,16 @@ void ModelTester::ModelIsPopulated()
 {
    const auto tree = m_model->GetTree();
 
-   QCOMPARE(tree.Size(), 490l); //< Number of items in "asio" sample directory.
+   // Number of items in sample directory:
+   QCOMPARE(static_cast<unsigned long>(tree.Size()), 490ul);
 }
 
 void ModelTester::ScanningProgressDataIsCorrect()
 {
-   QCOMPARE(m_bytesScanned, 3'407'665ul);  //< As seen in Windows File Explorer.
-   QCOMPARE(m_filesScanned, 469ul);        //< As seen in Windows File Explorer.
-   QCOMPARE(m_directoriesScanned, 20ul);   //< As seen in Windows File Explorer.
+   // Counts as seen in Windows File Explorer:
+   QCOMPARE(static_cast<unsigned long>(m_bytesScanned), 3'407'665ul);
+   QCOMPARE(static_cast<unsigned long>(m_filesScanned), 469ul);
+   QCOMPARE(static_cast<unsigned long>(m_directoriesScanned), 20ul);
 }
 
 void ModelTester::SelectingNodes()
@@ -167,7 +169,9 @@ void ModelTester::HighlightAncestors()
 
    m_model->HighlightAncestors(*target);
 
-   QCOMPARE(m_model->GetHighlightedNodes().size(), std::size_t{ 4u });
+   QCOMPARE(
+      static_cast<std::uint64_t>(m_model->GetHighlightedNodes().size()),
+      static_cast<std::uint64_t>(std::size_t{ 4u }));
 }
 
 void ModelTester::HighlightAllMatchingExtensions()
@@ -194,7 +198,9 @@ void ModelTester::HighlightAllMatchingExtensions()
       Tree<VizBlock>::PostOrderIterator{ },
       [] (const auto& node) { return node->file.extension == L".hpp"; });
 
-   QCOMPARE(m_model->GetHighlightedNodes().size(), headerCount);
+   QCOMPARE(
+      static_cast<std::uint64_t>(m_model->GetHighlightedNodes().size()),
+      static_cast<std::uint64_t>(headerCount));
 }
 
 REGISTER_TEST(ModelTester)
