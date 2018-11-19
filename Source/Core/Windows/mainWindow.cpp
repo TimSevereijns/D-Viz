@@ -95,6 +95,12 @@ namespace
          QApplication::setOverrideCursor(desiredCursor);
       }
 
+      ScopedCursor(const ScopedCursor& other) = default;
+      ScopedCursor(ScopedCursor&& other) = default;
+
+      ScopedCursor& operator=(const ScopedCursor&) = default;
+      ScopedCursor& operator=(ScopedCursor&&) = default;
+
       ~ScopedCursor() noexcept
       {
          QApplication::restoreOverrideCursor();
@@ -107,7 +113,8 @@ MainWindow::MainWindow(
    QWidget* parent /* = nullptr */)
    :
    QMainWindow{ parent },
-   m_controller{ controller },   
+   m_controller{ controller },
+   m_ui{ },
    m_fileSizeOptions{ GeneratePruningMenuEntries(Constants::FileSize::Prefix::BINARY) }
 {
    m_ui.setupUi(this);
@@ -450,7 +457,7 @@ void MainWindow::OnFileMenuNewScan()
       return;
    }
 
-   const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
+   const auto fileSizeIndex = static_cast<std::size_t>(m_ui.pruneSizeComboBox->currentIndex());
 
    Settings::VisualizationParameters parameters;
    parameters.rootDirectory = selectedDirectory.toStdWString();
@@ -459,7 +466,7 @@ void MainWindow::OnFileMenuNewScan()
    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
    auto& savedParameters =
-      m_controller.GetSettingsManager().SetVisualizationParameters(std::move(parameters));
+      m_controller.GetSettingsManager().SetVisualizationParameters(parameters);
 
    m_controller.ScanDrive(savedParameters);
 }

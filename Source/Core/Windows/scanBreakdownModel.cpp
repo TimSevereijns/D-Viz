@@ -66,7 +66,8 @@ QVariant ScanBreakdownModel::data(
       {
          return QString::fromStdWString(data.fileExtension);
       }
-      else if (index.column() == 1)
+
+      if (index.column() == 1)
       {
          return static_cast<qulonglong>(data.totalSize);
       }

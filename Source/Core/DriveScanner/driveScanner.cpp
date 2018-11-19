@@ -38,8 +38,8 @@ void DriveScanner::StartScanning(const DriveScanningParameters& parameters)
 
    m_parameters = parameters;
 
-   QThread* thread = new QThread;
-   ScanningWorker* worker = new ScanningWorker{ m_parameters, m_progress };
+   auto* thread = new QThread;
+   auto* worker = new ScanningWorker{ m_parameters, m_progress };
    worker->moveToThread(thread);
 
    m_progressUpdateTimer->start(250);

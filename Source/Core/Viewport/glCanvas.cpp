@@ -61,7 +61,7 @@ GLCanvas::GLCanvas(
    :
    QOpenGLWidget{ parent },
    m_controller{ controller },
-   m_mainWindow{ *(static_cast<MainWindow*>(parent)) }
+   m_mainWindow{ *(dynamic_cast<MainWindow*>(parent)) }
 {
    m_camera.SetPosition(QVector3D{ 500, 100, 0 });
    m_camera.SetFarPlane(10'000.0f);
@@ -139,11 +139,11 @@ typename RequestedAsset::AssetType* GLCanvas::GetAsset() const noexcept
 }
 
 template<typename TagType>
-void GLCanvas::ToggleAssetVisibility(bool desiredState) const noexcept
+void GLCanvas::ToggleAssetVisibility(bool shouldEnable) const noexcept
 {
    auto* const asset = GetAsset<TagType>();
 
-   if (desiredState == true)
+   if (shouldEnable)
    {
       asset->Show();
    }
@@ -296,7 +296,7 @@ void GLCanvas::mouseReleaseEvent(QMouseEvent* const event)
       if (m_isCursorHidden)
       {
          const auto globalCursorPosition = mapToGlobal(m_camera.GetViewport().center());
-         cursor().setPos(globalCursorPosition.x(), globalCursorPosition.y());
+         QCursor::setPos(globalCursorPosition.x(), globalCursorPosition.y());
       }
 
       setCursor(Qt::ArrowCursor);
@@ -337,7 +337,7 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 
          const auto cursorPositionOnCanvas = m_camera.GetViewport().center();
          const auto cursorPositionOnMonitor = mapToGlobal(cursorPositionOnCanvas);
-         cursor().setPos(cursorPositionOnMonitor.x(), cursorPositionOnMonitor.y());
+         QCursor::setPos(cursorPositionOnMonitor.x(), cursorPositionOnMonitor.y());
 
          m_lastMousePosition = cursorPositionOnCanvas;
       }
@@ -430,7 +430,7 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizBlock>::Node*>&
 
 void GLCanvas::ShowGamepadContextMenu()
 {
-   const auto thereExistHighlightedNodes = m_controller.GetHighlightedNodes().size() > 0;
+   const auto thereExistHighlightedNodes = !m_controller.GetHighlightedNodes().empty();
    const auto* const selectedNode = m_controller.GetSelectedNode();
 
    if (!thereExistHighlightedNodes && !selectedNode)
@@ -469,10 +469,10 @@ void GLCanvas::ShowGamepadContextMenu()
 
       if (selectedNode->GetData().file.type == FileType::REGULAR)
       {
-         fmt::WMemoryWriter writer;
-         writer << L"Highlight All \"" << selectedNode->GetData().file.extension << L"\" Files";
+        const std::wstring message =
+            L"Highlight All \"" + selectedNode->GetData().file.extension + L"\" Files";
 
-         m_gamepadContextMenu->AddEntry(QString::fromStdWString(writer.c_str()), [=]
+         m_gamepadContextMenu->AddEntry(QString::fromStdWString(message), [=]
          {
             m_controller.ClearHighlightedNodes(unhighlightCallback);
             m_controller.HighlightAllMatchingExtensions(*selectedNode, highlightCallback);
@@ -497,7 +497,7 @@ void GLCanvas::ShowGamepadContextMenu()
 
 void GLCanvas::ShowContextMenu(const QPoint& point)
 {
-   const auto thereExistHighlightedNodes = m_controller.GetHighlightedNodes().size() > 0;
+   const auto thereExistHighlightedNodes = !m_controller.GetHighlightedNodes().empty();
    const auto* const selectedNode = m_controller.GetSelectedNode();
 
    if (!thereExistHighlightedNodes && !selectedNode)
@@ -537,10 +537,10 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
       if (selectedNode->GetData().file.type == FileType::REGULAR)
       {
-         fmt::WMemoryWriter writer;
-         writer << L"Highlight All \"" << selectedNode->GetData().file.extension << L"\" Files";
+         const std::wstring message =
+            L"Highlight All \"" + selectedNode->GetData().file.extension + L"\" Files";
 
-         menu.addAction(QString::fromStdWString(writer.c_str()), [&]
+         menu.addAction(QString::fromStdWString(message), [&]
          {
             m_controller.ClearHighlightedNodes(unhighlightCallback);
             m_controller.HighlightAllMatchingExtensions(*selectedNode, highlightCallback);
@@ -769,7 +769,7 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
    {
       m_frameTimeDeque.pop_front();
    }
-   assert(m_frameTimeDeque.size() <= movingAverageWindowSize);
+   Expects(m_frameTimeDeque.size() <= movingAverageWindowSize);
 
    m_frameTimeDeque.emplace_back(static_cast<int>(elapsedTime.count()));
 
@@ -779,7 +779,7 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
       return runningTotal + frameTime;
    });
 
-   assert(m_frameTimeDeque.size() > 0);
+   Expects(m_frameTimeDeque.empty() == false);
    const auto averageFrameTime = total / m_frameTimeDeque.size();
 
    m_mainWindow.setWindowTitle(
@@ -827,7 +827,7 @@ void GLCanvas::ProcessFileTreeChanges()
                 treemap->UpdateVBO(*changeNotification->node, Asset::Event::RENAMED);
                 break;
              default:
-                assert(false);
+                Expects(false);
                 break;
           }
       }
@@ -864,7 +864,7 @@ void GLCanvas::paintGL()
 
       if (m_controller.GetSettingsManager().IsPrimaryLightAttachedToCamera())
       {
-         assert(m_lights.size() > 0u);
+         Expects(m_lights.empty() == false);
          m_lights.front().position = m_camera.GetPosition();
       }
 

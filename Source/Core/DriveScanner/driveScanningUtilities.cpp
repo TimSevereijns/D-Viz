@@ -189,7 +189,7 @@ namespace DriveScanning
             return false;
          }
 
-         BY_HANDLE_FILE_INFORMATION fileInfo = { 0 }; // NOLINT
+         BY_HANDLE_FILE_INFORMATION fileInfo;
 
          const auto successfullyRetrieved
             = GetFileInformationByHandle(static_cast<HANDLE>(handle), &fileInfo);

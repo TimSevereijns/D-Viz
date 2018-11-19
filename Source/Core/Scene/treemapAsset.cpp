@@ -9,7 +9,7 @@
 #include "../Visualizations/visualization.h"
 
 #include <boost/optional.hpp>
-#include <gsl/gsl_assert>
+#include <gsl/gsl>
 #include <spdlog/spdlog.h>
 #include <Tree/Tree.hpp>
 
@@ -242,10 +242,10 @@ namespace
     * @returns The rounded value.
     */
    float SnapToNearestTexel(
-      double value,
-      double multiple)
+      float value,
+      float multiple)
    {
-      return static_cast<float>(std::round(value / multiple) * multiple);
+      return std::round(value / multiple) * multiple;
    }
 
    /**
@@ -504,7 +504,7 @@ namespace Asset
 
       m_shadowMapShader.enableAttributeArray("vertex");
       m_shadowMapShader.setAttributeBuffer(
-         /* location = */ "vertex",
+         /* name = */ "vertex",
          /* type = */ GL_FLOAT,
          /* offset = */ 0,
          /* tupleSize = */ 3,
@@ -512,7 +512,7 @@ namespace Asset
 
       m_shadowMapShader.enableAttributeArray("normal");
       m_shadowMapShader.setAttributeBuffer(
-         /* location = */ "normal",
+         /* name = */ "normal",
          /* type = */ GL_FLOAT,
          /* offset = */ sizeof(QVector3D),
          /* tupleSize = */ 3,
@@ -550,8 +550,16 @@ namespace Asset
          const auto& blockOrigin = block.GetOrigin();
 
          QMatrix4x4 instanceMatrix;
-         instanceMatrix.translate(blockOrigin.x(), blockOrigin.y(), blockOrigin.z()); // NOLINT
-         instanceMatrix.scale(block.GetWidth(), block.GetHeight(), block.GetDepth()); // NOLINT
+         instanceMatrix.translate(
+            static_cast<float>(blockOrigin.x()),
+            static_cast<float>(blockOrigin.y()),
+            static_cast<float>(blockOrigin.z()));
+
+         instanceMatrix.scale(
+            static_cast<float>(block.GetWidth()),
+            static_cast<float>(block.GetHeight()),
+            static_cast<float>(block.GetDepth()));
+
          m_blockTransformations << instanceMatrix;
 
          ComputeAppropriateBlockColor(node);

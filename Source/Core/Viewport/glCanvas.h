@@ -150,10 +150,10 @@ public:
    /**
     * @brief Toggles an asset's visibility.
     *
-    * @param[in] desiredState    Pass in true if the asset should be visible.
+    * @param[in] shouldEnable    Pass in true if the asset should be visible.
     */
    template<typename TagType>
-   void ToggleAssetVisibility(bool desiredState) const noexcept;
+   void ToggleAssetVisibility(bool shouldEnable) const noexcept;
 
 protected:
 

@@ -155,12 +155,12 @@ QVector3D Camera::Unproject(
 
    if (!wasMatrixInvertible)
    {
-      Expects(!"Matrix was not invertible!");
+      Expects(false);
       return { };
    }
 
-   const float x = 2.0f * point.x() - m_viewport.x() / static_cast<float>(m_viewport.width()) - 1;
-   const float y = 2.0f * point.y() - m_viewport.y() / static_cast<float>(m_viewport.height()) - 1;
+   const float x = 2.0f * (point.x() - m_viewport.x()) / static_cast<float>(m_viewport.width()) - 1;
+   const float y = 2.0f * (point.y() - m_viewport.y()) / static_cast<float>(m_viewport.height()) - 1;
    const float z = 2.0f * viewDepth - 1.0f;
 
    const QVector3D viewportPoint{ x, y, z };

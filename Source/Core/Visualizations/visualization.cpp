@@ -22,7 +22,7 @@
 // @todo Replace the use of this class with something more stable.
 #include <Qt3DRender/private/qray3d_p.h>
 
-#include <GSL/gsl_assert>
+#include <gsl/gsl_assert>
 
 namespace
 {

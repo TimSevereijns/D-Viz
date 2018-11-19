@@ -22,7 +22,7 @@
 
 namespace
 {
-   constexpr const wchar_t BYTES_READOUT_STRING[] = L" bytes";
+   constexpr const std::wstring_view BYTES_READOUT_STRING = L" bytes";
 
    /**
     * @brief Converts bytes to binary prefix size and notation.
@@ -37,7 +37,7 @@ namespace
 
       if (sizeInBytes < 1_KiB)
       {
-         return std::make_pair(sizeInBytes, BYTES_READOUT_STRING);
+         return std::make_pair(sizeInBytes, std::wstring{ BYTES_READOUT_STRING });
       }
 
       if (sizeInBytes < 1_MiB)
@@ -71,7 +71,7 @@ namespace
 
       if (sizeInBytes < 1_KB)
       {
-         return std::make_pair(sizeInBytes, BYTES_READOUT_STRING);
+         return std::make_pair(sizeInBytes, std::wstring{ BYTES_READOUT_STRING });
       }
 
       if (sizeInBytes < 1_MB)
@@ -189,7 +189,7 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
    const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
    log->info(fmt::format("Started a new scan at: \"{}\"", m_model->GetRootPath().string()));
 
-   m_scanner.StartScanning(std::move(scanningParameters));
+   m_scanner.StartScanning(scanningParameters);
 }
 
 bool Controller::IsFileSystemBeingMonitored() const
@@ -221,7 +221,7 @@ void Controller::ComputeProgress(const ScanningProgress& progress)
          Utilities::StringifyWithDigitSeparators(filesScanned),
          fractionOfDiskOccupied * 100);
 
-      m_view->SetStatusBarMessage(message.c_str());
+      m_view->SetStatusBarMessage(message.c_str()); // NOLINT
    }
    else
    {
@@ -234,7 +234,7 @@ void Controller::ComputeProgress(const ScanningProgress& progress)
          size,
          units);
 
-      m_view->SetStatusBarMessage(message.c_str());
+      m_view->SetStatusBarMessage(message);
    }
 }
 
@@ -565,7 +565,7 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizBlock>::Node& nod
       return path + file;
    });
 
-   Expects(completePath.size() > 0);
+   Expects(completePath.empty() == false);
    return completePath + node->file.extension;
 }
 

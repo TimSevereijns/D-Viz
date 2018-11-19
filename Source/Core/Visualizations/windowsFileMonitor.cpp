@@ -31,7 +31,7 @@ namespace
          return ptr;
       }
 
-      return reinterpret_cast<DataType*>(reinterpret_cast<std::byte*>(ptr) + offset);
+      return reinterpret_cast<DataType*>(reinterpret_cast<std::byte*>(ptr) + offset); // NOLINT
    }
 }
 
@@ -70,7 +70,7 @@ void WindowsFileMonitor::Start(
 
    m_fileHandle = CreateFileW(
       /* lpFileName = */ path.wstring().data(),
-      /* access = */ FILE_LIST_DIRECTORY | STANDARD_RIGHTS_READ,
+      /* dwDesiredAccess = */ FILE_LIST_DIRECTORY | STANDARD_RIGHTS_READ,
       /* dwShareMode = */ FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
       /* lpSecurityAttributes = */ nullptr,
       /* dwCreationDisposition = */ OPEN_EXISTING,
@@ -86,18 +86,18 @@ void WindowsFileMonitor::Start(
    }
 
    const auto terminationHandle = CreateEventW(
-      /* securityAttributes = */ nullptr,
+      /* lpEventAttributes = */ nullptr,
       /* bManualReset = */ true,
       /* bInitialState = */ false,
-      /* eventName = */ L"D-VIZ_FILE_MONITOR_TERMINATE_THREAD");
+      /* lpName = */ L"D-VIZ_FILE_MONITOR_TERMINATE_THREAD");
 
    m_events.SetExitHandle(terminationHandle);
 
    const auto notificationHandle = CreateEventW(
-      /* securityAttributes = */ nullptr,
+      /* lpEventAttributes = */ nullptr,
       /* bManualReset = */ false,
       /* bInitialState = */ false,
-      /* eventName = */ L"D-VIZ_FILE_MONITOR_NOTIFICATION");
+      /* lpName = */ L"D-VIZ_FILE_MONITOR_NOTIFICATION");
 
    m_events.SetNotificationHandle(notificationHandle);
 
@@ -136,22 +136,22 @@ void WindowsFileMonitor::AwaitNotification()
       FILE_NOTIFY_CHANGE_SECURITY;
 
    const bool successfullyQueued = ReadDirectoryChangesW(
-      /* directoryHandle = */ m_fileHandle,
-      /* outputBuffer = */ m_notificationBuffer.data(),
+      /* hDirectory = */ m_fileHandle,
+      /* lpBuffer = */ m_notificationBuffer.data(),
       /* nBufferLength = */ static_cast<DWORD>(m_notificationBuffer.size()),
       /* bWatchSubtree = */ TRUE,
-      /* filter = */ desiredNotifications,
+      /* dwNotifyFilter = */ desiredNotifications,
       /* lpBytesReturned = */ nullptr,
       /* lpOverlapped = */ &m_ioBuffer,
-      /* callback = */ nullptr);
+      /* lpCompletionRoutine = */ nullptr);
 
    Expects(successfullyQueued);
 
    const auto waitResult = WaitForMultipleObjects(
-      /* handleCount = */ m_events.Size(),
+      /* nCount = */ m_events.Size(),
       /* lpHandles = */ m_events.Data(),
       /* bWaitAll = */ false,
-      /* timeout = */ INFINITE);
+      /* dwMilliseconds = */ INFINITE);
 
    switch (waitResult)
    {
@@ -203,7 +203,9 @@ void WindowsFileMonitor::RetrieveNotification()
 
 void WindowsFileMonitor::ProcessNotification()
 {
-   auto* notificationInfo = reinterpret_cast<FILE_NOTIFY_INFORMATION*>(m_notificationBuffer.data());
+   auto* notificationInfo =
+      reinterpret_cast<FILE_NOTIFY_INFORMATION*>(m_notificationBuffer.data()); // NOLINT
+
    while (notificationInfo != nullptr)
    {
       if (notificationInfo->FileNameLength == 0)
@@ -220,9 +222,10 @@ void WindowsFileMonitor::ProcessNotification()
 
       std::wstring fileName(fileNameLength, '\0');
 
+      // @todo Handle short filenames correctly.
       std::memcpy(
          &fileName[0],
-         notificationInfo->FileName,         //< @todo Handle short filenames correctly.
+         static_cast<void*>(notificationInfo->FileName),
          notificationInfo->FileNameLength);  //< Note that this length is measured in bytes!
 
       const auto timestamp = std::chrono::high_resolution_clock::now();
