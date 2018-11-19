@@ -2,7 +2,6 @@
 
 #include "constants.h"
 
-#include <cassert>
 #include <fstream>
 #include <ostream>
 
@@ -107,10 +106,10 @@ namespace
             message += "Unspecific syntax error.";
             break;
          }
-
-         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
-         log->error(message);
       }
+
+      const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+      log->error(message);
    }
 }
 

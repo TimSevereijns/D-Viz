@@ -74,23 +74,23 @@ namespace Asset
    void Base::SetVertexCoordinates(QVector<QVector3D>&& data)
    {
       m_rawVertices.clear();
-      m_rawVertices.append(std::move(data));
+      m_rawVertices.append(data);
    }
 
    void Base::SetVertexColors(QVector<QVector3D>&& data)
    {
       m_rawColors.clear();
-      m_rawColors.append(std::move(data));
+      m_rawColors.append(data);
    }
 
    void Base::AddVertexCoordinates(QVector<QVector3D>&& positionData)
    {
-      m_rawVertices.append(std::move(positionData));
+      m_rawVertices.append(positionData);
    }
 
    void Base::AddVertexColors(QVector<QVector3D>&& colorData)
    {
-      m_rawColors.append(std::move(colorData));
+      m_rawColors.append(colorData);
    }
 
    unsigned int Base::GetVertexCount() const

@@ -2,9 +2,10 @@
 
 #include "../constants.h"
 
-#include <assert.h>
 #include <iostream>
-#include <math.h>
+#include <cmath>
+
+#include <gsl/gsl_assert>
 
 namespace
 {
@@ -13,12 +14,12 @@ namespace
       double& verticalAngle) noexcept
    {
       // Calculate floating point remainder:
-      horizontalAngle = std::fmod(horizontalAngle, 360.0f);
+      horizontalAngle = std::fmod(horizontalAngle, 360.0);
 
       // Ensure all values are positive:
-      if (horizontalAngle < 0.0f)
+      if (horizontalAngle < 0.0)
       {
-         horizontalAngle += 360.0f;
+         horizontalAngle += 360.0;
       }
 
       const double maxVertical{ 90.0 };
@@ -49,7 +50,7 @@ void Camera::OffsetPosition(const QVector3D& offset) noexcept
    m_position += offset;
 }
 
-void Camera::SetOrientation(float pitch, float yaw)
+void Camera::SetOrientation(double pitch, double yaw)
 {
    m_horizontalAngle = yaw;
    m_verticalAngle = pitch;
@@ -60,12 +61,12 @@ void Camera::SetOrientation(float pitch, float yaw)
 QMatrix4x4 Camera::GetOrientation() const
 {
    QMatrix4x4 orientation;
-   orientation.rotate(m_verticalAngle, 1, 0, 0);
-   orientation.rotate(m_horizontalAngle, 0, 1, 0);
+   orientation.rotate(static_cast<float>(m_verticalAngle), 1, 0, 0);
+   orientation.rotate(static_cast<float>(m_horizontalAngle), 0, 1, 0);
    return orientation;
 }
 
-void Camera::OffsetOrientation(float pitch, float yaw) noexcept
+void Camera::OffsetOrientation(double pitch, double yaw) noexcept
 {
    m_horizontalAngle += yaw;
    m_verticalAngle += pitch;
@@ -75,12 +76,16 @@ void Camera::OffsetOrientation(float pitch, float yaw) noexcept
 
 void Camera::LookAt(const QVector3D& point)
 {
-   assert(point != m_position);
+   Expects(point != m_position);
+
    QVector3D direction = point - m_position;
    direction.normalize();
 
-   m_verticalAngle = std::asin(-direction.y()) * Constants::Math::RADIANS_TO_DEGREES;
-   m_horizontalAngle = std::atan2(direction.x(), -direction.z()) * Constants::Math::RADIANS_TO_DEGREES;
+   m_verticalAngle = static_cast<double>(std::asin(-direction.y())) *
+      Constants::Math::RADIANS_TO_DEGREES;
+
+   m_horizontalAngle = static_cast<double>(std::atan2(direction.x(), -direction.z())) *
+      Constants::Math::RADIANS_TO_DEGREES;
 
    NormalizeAngles(m_horizontalAngle, m_verticalAngle);
 }
@@ -150,12 +155,12 @@ QVector3D Camera::Unproject(
 
    if (!wasMatrixInvertible)
    {
-      assert(!"Matrix was not invertible!");
+      Expects(!"Matrix was not invertible!");
       return { };
    }
 
-   const float x = 2.0f * (float)(point.x() - m_viewport.x()) / (float)m_viewport.width() - 1.0f;
-   const float y = 2.0f * (float)(point.y() - m_viewport.y()) / (float)m_viewport.height() - 1.0f;
+   const float x = 2.0f * point.x() - m_viewport.x() / static_cast<float>(m_viewport.width()) - 1;
+   const float y = 2.0f * point.y() - m_viewport.y() / static_cast<float>(m_viewport.height()) - 1;
    const float z = 2.0f * viewDepth - 1.0f;
 
    const QVector3D viewportPoint{ x, y, z };
@@ -234,15 +239,15 @@ QRect Camera::GetViewport() const noexcept
    return m_viewport;
 }
 
-void Camera::SetFieldOfView(float angle) noexcept
+void Camera::SetFieldOfView(int angle) noexcept
 {
-   if (angle > 85.0f)
+   if (angle > 85)
    {
-      m_fieldOfView = 85.0f;
+      m_fieldOfView = 85;
    }
-   else if (angle < 5.0f)
+   else if (angle < 5)
    {
-      m_fieldOfView = 5.0f;
+      m_fieldOfView = 5;
    }
    else
    {
@@ -250,27 +255,27 @@ void Camera::SetFieldOfView(float angle) noexcept
    }
 }
 
-float Camera::GetVerticalFieldOfView() const noexcept
+int Camera::GetVerticalFieldOfView() const noexcept
 {
    return m_fieldOfView;
 }
 
 void Camera::IncreaseFieldOfView() noexcept
 {
-   m_fieldOfView += 5.0f;
+   m_fieldOfView += 5;
 
-   if (m_fieldOfView > 85.0f)
+   if (m_fieldOfView > 85)
    {
-      m_fieldOfView = 85.0f;
+      m_fieldOfView = 85;
    }
 }
 
 void Camera::DecreaseFieldOfView() noexcept
 {
-   m_fieldOfView -= 5.0f;
+   m_fieldOfView -= 5;
 
-   if (m_fieldOfView < 5.0f)
+   if (m_fieldOfView < 5)
    {
-      m_fieldOfView = 5.0f;
+      m_fieldOfView = 5;
    }
 }

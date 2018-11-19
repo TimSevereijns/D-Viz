@@ -20,6 +20,10 @@ public:
    double y() const;
    double z() const;
 
+   float xAsFloat() const;
+   float yAsFloat() const;
+   float zAsFloat() const;
+
    friend inline auto operator+(
       const PrecisePoint& lhs,
       const PrecisePoint& rhs)

@@ -22,6 +22,8 @@
 // @todo Replace the use of this class with something more stable.
 #include <Qt3DRender/private/qray3d_p.h>
 
+#include <GSL/gsl_assert>
+
 namespace
 {
    constexpr QVector3D POSITIVE_X_NORMAL{  1.0f,  0.0f,  0.0f };
@@ -47,17 +49,17 @@ namespace
       const QVector3D& pointOnPlane,
       const QVector3D& planeNormal)
    {
-      constexpr auto epsilon{ 0.0001 };
+      constexpr auto epsilon{ 0.0001f };
 
-      const double denominator = QVector3D::dotProduct(ray.direction(), planeNormal);
+      const auto denominator = QVector3D::dotProduct(ray.direction(), planeNormal);
       if (std::abs(denominator) < epsilon)
       {
          return boost::none;
       }
 
-      const double numerator = QVector3D::dotProduct(pointOnPlane - ray.origin(), planeNormal);
+      const auto numerator = QVector3D::dotProduct(pointOnPlane - ray.origin(), planeNormal);
 
-      const double scalar = numerator / denominator;
+      const auto scalar = numerator / denominator;
       const bool doesRayHitPlane = std::abs(scalar) > epsilon;
 
       if (!doesRayHitPlane)
@@ -128,10 +130,10 @@ namespace
             DoesRayIntersectPlane(ray, pointOnPlane, POSITIVE_Y_NORMAL);
 
          if (intersectionPoint &&
-             blockOrigin.x()                 < intersectionPoint->x() &&
-             blockOrigin.x() + blockWidth    > intersectionPoint->x() &&
-             blockOrigin.z()                 > intersectionPoint->z() &&
-             blockOrigin.z() - blockDepth    < intersectionPoint->z())
+             blockOrigin.xAsFloat()                                     < intersectionPoint->x() &&
+             blockOrigin.xAsFloat() + static_cast<float>(blockWidth)    > intersectionPoint->x() &&
+             blockOrigin.zAsFloat()                                     > intersectionPoint->z() &&
+             blockOrigin.zAsFloat() - static_cast<float>(blockDepth)    < intersectionPoint->z())
          {
             allIntersections.emplace_back(*intersectionPoint);
          }
@@ -150,10 +152,10 @@ namespace
             DoesRayIntersectPlane(ray, pointOnPlane, POSITIVE_Z_NORMAL);
 
          if (intersectionPoint &&
-             blockOrigin.x()                 < intersectionPoint->x() &&
-             blockOrigin.x() + blockWidth    > intersectionPoint->x() &&
-             blockOrigin.y()                 < intersectionPoint->y() &&
-             blockOrigin.y() + blockHeight   > intersectionPoint->y())
+             blockOrigin.xAsFloat()                                     < intersectionPoint->x() &&
+             blockOrigin.xAsFloat() + static_cast<float>(blockWidth)    > intersectionPoint->x() &&
+             blockOrigin.yAsFloat()                                     < intersectionPoint->y() &&
+             blockOrigin.yAsFloat() + static_cast<float>(blockHeight)   > intersectionPoint->y())
          {
             allIntersections.emplace_back(*intersectionPoint);
          }
@@ -172,10 +174,10 @@ namespace
             DoesRayIntersectPlane(ray, pointOnPlane, NEGATIVE_Z_NORMAL);
 
          if (intersectionPoint &&
-             blockOrigin.x()                 < intersectionPoint->x() &&
-             blockOrigin.x() + blockWidth    > intersectionPoint->x() &&
-             blockOrigin.y()                 < intersectionPoint->y() &&
-             blockOrigin.y() + blockHeight   > intersectionPoint->y())
+             blockOrigin.xAsFloat()                                     < intersectionPoint->x() &&
+             blockOrigin.xAsFloat() + static_cast<float>(blockWidth)    > intersectionPoint->x() &&
+             blockOrigin.yAsFloat()                                     < intersectionPoint->y() &&
+             blockOrigin.yAsFloat() + static_cast<float>(blockHeight)   > intersectionPoint->y())
          {
             allIntersections.emplace_back(*intersectionPoint);
          }
@@ -194,10 +196,10 @@ namespace
             DoesRayIntersectPlane(ray, pointOnPlane, NEGATIVE_X_NORMAL);
 
          if (intersectionPoint &&
-             blockOrigin.z()                 > intersectionPoint->z() &&
-             blockOrigin.z() - blockDepth    < intersectionPoint->z() &&
-             blockOrigin.y()                 < intersectionPoint->y() &&
-             blockOrigin.y() + blockHeight   > intersectionPoint->y())
+             blockOrigin.zAsFloat()                                     > intersectionPoint->z() &&
+             blockOrigin.zAsFloat() - static_cast<float>(blockDepth)    < intersectionPoint->z() &&
+             blockOrigin.yAsFloat()                                     < intersectionPoint->y() &&
+             blockOrigin.yAsFloat() + static_cast<float>(blockHeight)   > intersectionPoint->y())
          {
             allIntersections.emplace_back(*intersectionPoint);
          }
@@ -216,10 +218,10 @@ namespace
             DoesRayIntersectPlane(ray, pointOnPlane, POSITIVE_X_NORMAL);
 
          if (intersectionPoint &&
-             blockOrigin.z()                 > intersectionPoint->z() &&
-             blockOrigin.z() - blockDepth    < intersectionPoint->z() &&
-             blockOrigin.y()                 < intersectionPoint->y() &&
-             blockOrigin.y() + blockHeight   > intersectionPoint->y())
+             blockOrigin.zAsFloat()                                     > intersectionPoint->z() &&
+             blockOrigin.zAsFloat() - static_cast<float>(blockDepth)    < intersectionPoint->z() &&
+             blockOrigin.yAsFloat()                                     < intersectionPoint->y() &&
+             blockOrigin.yAsFloat() + static_cast<float>(blockHeight)   > intersectionPoint->y())
          {
             allIntersections.emplace_back(*intersectionPoint);
          }
@@ -280,7 +282,8 @@ namespace
    {
       std::vector<IntersectionInfo> allIntersections;
 
-      assert(node);
+     Expects(node != nullptr);
+
       while (node)
       {
          if (node->GetData().file.size < parameters.minimumFileSize ||
@@ -350,7 +353,7 @@ namespace
             break;
 
          default:
-            assert(false);
+            std::abort();
       }
    }
 }
@@ -379,8 +382,8 @@ VisualizationModel::~VisualizationModel() noexcept
 
 void VisualizationModel::UpdateBoundingBoxes()
 {
-   assert(m_hasDataBeenParsed);
-   assert(m_fileTree);
+   Expects(m_hasDataBeenParsed == true);
+   Expects(m_fileTree != nullptr);
 
    if (!m_hasDataBeenParsed)
    {
@@ -460,13 +463,15 @@ Tree<VizBlock>::Node* VisualizationModel::FindNearestIntersection(
 
 Tree<VizBlock>& VisualizationModel::GetTree()
 {
-   assert(m_fileTree);
+   Expects(m_fileTree != nullptr);
+
    return *m_fileTree;
 }
 
 const Tree<VizBlock>& VisualizationModel::GetTree() const
 {
-   assert(m_fileTree);
+   Expects(m_fileTree != nullptr);
+
    return *m_fileTree;
 }
 
@@ -609,7 +614,6 @@ void VisualizationModel::StartMonitoringFileSystem()
 {
    if (m_rootPath.empty() || !std::experimental::filesystem::exists(m_rootPath))
    {
-      assert(false);
       return;
    }
 
@@ -716,7 +720,7 @@ void VisualizationModel::UpdateAffectedNodes(const FileChangeNotification& notif
          break;
 
       default:
-         assert(false);
+         std::abort();
    }
 }
 
@@ -804,11 +808,11 @@ void VisualizationModel::UpdateAncestorSizes(Tree<VizBlock>::Node* node)
             std::uintmax_t{ 0 },
             [] (const auto runningTotal, const auto& node) noexcept
          {
-            assert(node->file.size);
+            Expects(node->file.size > 0);
             return runningTotal + node->file.size;
          });
 
-         assert(totalSize);
+         Expects(totalSize > 0);
          parent->GetData().file.size = totalSize;
       }
 

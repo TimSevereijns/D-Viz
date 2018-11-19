@@ -65,8 +65,8 @@ namespace Constants
 
    namespace Logging
    {
-      constexpr static auto& DEFAULT_LOG{ "D-Viz" };
-      constexpr static auto& FILESYSTEM_LOG{ "Filesystem" };
+      static std::string DEFAULT_LOG{ "D-Viz" };
+      static std::string FILESYSTEM_LOG{ "Filesystem" };
    }
 
    namespace Math

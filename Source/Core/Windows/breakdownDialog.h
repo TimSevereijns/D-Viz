@@ -9,6 +9,8 @@
 #include "scanBreakdownModel.h"
 #include "ui_breakdownDialog.h"
 
+#include <gsl/gsl_assert>
+
 class MainWindow;
 
 class ScanBreakdownFilterProxyModel final : public QSortFilterProxyModel
@@ -36,7 +38,7 @@ class ScanBreakdownFilterProxyModel final : public QSortFilterProxyModel
          return lhsSize < rhsSize;
       }
 
-      assert(false);
+      Expects(false);
       return false;
    }
 };

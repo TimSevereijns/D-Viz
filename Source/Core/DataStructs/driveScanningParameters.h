@@ -32,7 +32,7 @@ struct DriveScanningParameters
    DriveScanningParameters() = default;
 
    DriveScanningParameters(
-      const std::experimental::filesystem::path& startingPath,
+      std::experimental::filesystem::path startingPath,
       ProgressCallback progressCallback,
       ScanCompleteCallback completionCallback);
 };

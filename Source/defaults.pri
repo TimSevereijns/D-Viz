@@ -112,7 +112,8 @@ INCLUDEPATH += \
    $$PWD/../Foreign/RapidJson/include \
    $$PWD/../Foreign/Spdlog/include \
    $$PWD/../Foreign/Stopwatch/source \
-   $$PWD/../Foreign/Tree/source
+   $$PWD/../Foreign/Tree/source \
+   $$PWD/../Foreign/GSL/include
 
 DEPENDPATH += $$PWD/../../boost_1_66_0/stage/lib
 

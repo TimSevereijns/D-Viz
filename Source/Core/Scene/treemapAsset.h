@@ -100,14 +100,14 @@ namespace Asset
 
    private:
 
-      double ComputeWorldUnitsPerTexel(const BoundingBox& boundingBox);
+      float ComputeWorldUnitsPerTexel(const BoundingBox& boundingBox);
 
       void InitializeShadowMachineryOnMainShader();
       void InitializeShadowMachineryOnShadowShader();
 
       void ComputeShadowMapProjectionViewMatrices(const Camera& camera);
 
-      void RenderDepthMapPreview(int index);
+      void RenderDepthMapPreview(std::size_t index);
 
       void RenderShadowPass(const Camera& camera);
 
@@ -131,8 +131,9 @@ namespace Asset
 
       ColorGradient m_directoryColorGradient;
 
-      std::uint32_t m_cascadeCount{ 4 };
-      std::uint32_t m_shadowMapResolution{ 4 * 1024 };
+      int m_cascadeCount{ 4 };
+      int m_shadowMapResolution{ 4 * 1024 };
+
       std::uint32_t m_blockCount{ 0 };
 
       std::uintmax_t m_largestDirectorySize{ 0 };
@@ -164,7 +165,7 @@ namespace Asset
 
       std::vector<ShadowMapMetadata> m_shadowMaps;
 
-      static constexpr wchar_t AssetName[] = L"Treemap";
+      static constexpr std::wstring_view AssetName{ L"Treemap" };
    };
 }
 

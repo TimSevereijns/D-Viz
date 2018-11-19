@@ -3,10 +3,10 @@
 #include "constants.h"
 
 #include <algorithm>
-#include <assert.h>
 #include <limits>
 #include <numeric>
 
+#include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
 #include <Stopwatch/Stopwatch.hpp>
 
@@ -87,7 +87,7 @@ namespace
       };
 
       const auto additionalCoverage = blockWidthPlusPadding / land.GetWidth();
-      assert(additionalCoverage);
+      Expects(additionalCoverage);
 
       return additionalCoverage;
    }
@@ -144,7 +144,7 @@ namespace
       };
 
       const auto additionalCoverage = blockDepthPlusPadding / land.GetDepth();
-      assert(additionalCoverage);
+      Expects(additionalCoverage);
 
       return additionalCoverage;
    }
@@ -178,7 +178,7 @@ Block SquarifiedTreeMap::ComputeRemainingArea(const Block& block)
       /* depth = */ farCorner.z() - nearCorner.z()
    };
 
-   assert(remainingArea.HasVolume());
+   Expects(remainingArea.HasVolume());
    return remainingArea;
 }
 
@@ -219,7 +219,7 @@ double SquarifiedTreeMap::ComputeWorstAspectRatio(
       largestNodeInBytes = row.front()->GetData().file.size;
    }
 
-   assert(largestNodeInBytes > 0);
+   Expects(largestNodeInBytes > 0);
 
    const auto updateOffset{ false };
    const std::uintmax_t bytesInRow = ComputeBytesInRow(row, candidateSize);
@@ -247,8 +247,8 @@ double SquarifiedTreeMap::ComputeWorstAspectRatio(
       smallestNodeInBytes = row.back()->GetData().file.size;
    }
 
-   assert(smallestNodeInBytes > 0);
-   assert(totalRowArea > 0);
+   Expects(smallestNodeInBytes > 0);
+   Expects(totalRowArea > 0);
 
    const double smallestArea =
       (static_cast<double>(smallestNodeInBytes) / static_cast<double>(bytesInRow)) *
@@ -262,7 +262,7 @@ double SquarifiedTreeMap::ComputeWorstAspectRatio(
    const auto worstRatio = std::max((lengthSquared * largestArea) / (areaSquared),
       (areaSquared) / (lengthSquared * smallestArea));
 
-   assert(worstRatio > 0);
+   Expects(worstRatio > 0);
    return worstRatio;
 }
 
@@ -274,16 +274,16 @@ void SquarifiedTreeMap::SquarifyAndLayoutRows(const std::vector<Tree<VizBlock>::
    }
 
    Tree<VizBlock>::Node* parentNode = nodes.front()->GetParent();
-   assert(parentNode);
+   Expects(parentNode);
 
    VizBlock& parentVizNode = parentNode->GetData();
-   assert(parentVizNode.block.HasVolume());
+   Expects(parentVizNode.block.HasVolume());
 
    std::vector<Tree<VizBlock>::Node*> row;
    row.reserve(nodes.size());
 
    double shortestEdgeOfBounds = ComputeShortestEdgeOfRemainingBounds(parentVizNode);
-   assert(shortestEdgeOfBounds > 0.0);
+   Expects(shortestEdgeOfBounds > 0.0);
 
    for (Tree<VizBlock>::Node* const node : nodes)
    {
@@ -294,8 +294,8 @@ void SquarifiedTreeMap::SquarifyAndLayoutRows(const std::vector<Tree<VizBlock>::
       const double worstRatioWithoutNodeAddedToCurrentRow =
          ComputeWorstAspectRatio(row, 0, parentVizNode, shortestEdgeOfBounds);
 
-      assert(worstRatioWithNodeAddedToCurrentRow > 0.0);
-      assert(worstRatioWithoutNodeAddedToCurrentRow > 0.0);
+      Expects(worstRatioWithNodeAddedToCurrentRow > 0.0);
+      Expects(worstRatioWithoutNodeAddedToCurrentRow > 0.0);
 
       if (worstRatioWithNodeAddedToCurrentRow <= worstRatioWithoutNodeAddedToCurrentRow)
       {
@@ -309,7 +309,7 @@ void SquarifiedTreeMap::SquarifyAndLayoutRows(const std::vector<Tree<VizBlock>::
          row.emplace_back(node);
 
          shortestEdgeOfBounds = ComputeShortestEdgeOfRemainingBounds(parentVizNode);
-         assert(shortestEdgeOfBounds > 0.0);
+         Expects(shortestEdgeOfBounds > 0.0);
       }
    }
 
@@ -355,7 +355,7 @@ Block SquarifiedTreeMap::CalculateRowBounds(
    const bool updateOffset)
 {
    const Block& parentBlock = parentNode.block;
-   assert(parentBlock.HasVolume());
+   Expects(parentBlock.HasVolume());
 
    Block remainingLand = ComputeRemainingArea(parentBlock);
 
@@ -420,7 +420,7 @@ Block SquarifiedTreeMap::CalculateRowBounds(
       }
    }
 
-   assert(rowRealEstate.HasVolume());
+   Expects(rowRealEstate.HasVolume());
 
    return rowRealEstate;
 }
@@ -429,7 +429,7 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
 {
    if (row.empty())
    {
-      assert(!"Cannot layout an empty row.");
+      Expects(!"Cannot layout an empty row.");
       return;
    }
 
@@ -440,7 +440,7 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
       row.front()->GetParent()->GetData(),
       /*updateOffset =*/ true);
 
-   assert(land.HasVolume());
+   Expects(land.HasVolume());
 
    const auto nodeCount = row.size();
 
@@ -453,7 +453,7 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
       const std::uintmax_t nodeFileSize = data.file.size;
       if (nodeFileSize == 0)
       {
-         assert(!"Found a node without a file size!");
+         Expects(!"Found a node without a file size!");
          return;
       }
 
@@ -464,8 +464,8 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
          ? SlicePerpendicularToWidth(land, percentageOfParent, data, nodeCount)
          : SlicePerpendicularToDepth(land, percentageOfParent, data, nodeCount);
 
-      assert(additionalCoverage > 0);
-      assert(data.block.HasVolume());
+      Expects(additionalCoverage > 0);
+      Expects(data.block.HasVolume());
 
       land.IncreaseCoverageBy(additionalCoverage);
    }
@@ -480,7 +480,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
 {
    if (!theTree)
    {
-      assert(!"Whoops, no tree in sight!");
+      Expects(!"Whoops, no tree in sight!");
       return;
    }
 

@@ -14,3 +14,6 @@
    path = Foreign/RapidJson
    url = https://github.com/Tencent/rapidjson.git
    branch = v1.1.0
+[submodule "Foreign/GSL"]
+	path = Foreign/GSL
+	url = https://github.com/Microsoft/GSL.git

@@ -1,7 +1,7 @@
 #ifndef LITERALS_H
 #define LITERALS_H
 
-#include <cassert>
+#include <cstddef>
 
 namespace Literals::Numeric
 {

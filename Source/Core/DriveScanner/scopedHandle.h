@@ -17,8 +17,8 @@ public:
    ScopedHandle(const ScopedHandle& other);
    ScopedHandle& operator=(const ScopedHandle& other);
 
-   ScopedHandle(ScopedHandle&& other);
-   ScopedHandle& operator=(ScopedHandle&& other);
+   ScopedHandle(ScopedHandle&& other) noexcept;
+   ScopedHandle& operator=(ScopedHandle&& other) noexcept;
 
    void Close();
 

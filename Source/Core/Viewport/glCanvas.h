@@ -2,7 +2,6 @@
 #define GLCANVAS_H
 
 #include "camera.h"
-//#include "controller.h"
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
 #include "gamepadContextMenu.h"
@@ -39,6 +38,8 @@ namespace Asset
       {
          using AssetType = void;
          virtual int GetID() const noexcept { return 0; }
+
+         virtual ~Base() = default;
       };
 
       struct OriginMarker final : Base
@@ -120,7 +121,7 @@ public:
     *
     * @param[in] fieldOfView     The new field of view.
     */
-   void SetFieldOfView(const float fieldOfView);
+   void SetFieldOfView(int fieldOfView);
 
    /**
     * @brief Paints the selected node.

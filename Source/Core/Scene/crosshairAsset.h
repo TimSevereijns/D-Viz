@@ -37,7 +37,7 @@ namespace Asset
 
    private:
 
-      static constexpr wchar_t AssetName[] = L"Crosshair";
+      static constexpr std::wstring_view AssetName{ L"Crosshair" };
    };
 }
 

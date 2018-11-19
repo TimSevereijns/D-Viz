@@ -16,6 +16,8 @@
 
 #include <iostream>
 
+#include <gsl/gsl_assert>
+
 namespace
 {
    /**
@@ -130,7 +132,6 @@ typename RequestedAsset::AssetType* GLCanvas::GetAsset() const noexcept
 
    if (itr == std::end(m_sceneAssets))
    {
-      assert(false);
       return nullptr;
    }
 
@@ -176,7 +177,7 @@ void GLCanvas::ReloadVisualization()
    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
    const auto blockCount = treemap->LoadBufferData(m_controller.GetTree());
 
-   assert(blockCount == treemap->GetBlockCount());
+   Expects(blockCount == treemap->GetBlockCount());
 
    for (const auto& tagAndAsset : m_sceneAssets)
    {
@@ -206,7 +207,7 @@ void GLCanvas::ApplyColorScheme()
    }
 }
 
-void GLCanvas::SetFieldOfView(float fieldOfView)
+void GLCanvas::SetFieldOfView(int fieldOfView)
 {
    m_camera.SetFieldOfView(fieldOfView);
 }
@@ -310,8 +311,8 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
       return;
    }
 
-   const float deltaX = event->x() - m_lastMousePosition.x();
-   const float deltaY = event->y() - m_lastMousePosition.y();
+   const auto deltaX = event->x() - m_lastMousePosition.x();
+   const auto deltaY = event->y() - m_lastMousePosition.y();
 
    if (!m_isCursorHidden)
    {
@@ -388,7 +389,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
          m_camera.DecreaseFieldOfView();
       }
 
-      m_mainWindow.SetFieldOfViewSlider(static_cast<float>(m_camera.GetVerticalFieldOfView()));
+      m_mainWindow.SetFieldOfViewSlider(m_camera.GetVerticalFieldOfView());
    }
 }
 
@@ -588,22 +589,26 @@ void GLCanvas::HandleKeyboardInput(const std::chrono::milliseconds& elapsedTime)
 
    if (isWKeyDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Forward());
+      m_camera.OffsetPosition(
+         static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Forward());
    }
 
    if (isAKeyDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Left());
+      m_camera.OffsetPosition(
+         static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Left());
    }
 
    if (isSKeyDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Backward());
+      m_camera.OffsetPosition(
+         static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Backward());
    }
 
    if (isDKeyDown)
    {
-      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Right());
+      m_camera.OffsetPosition(
+         static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Right());
    }
 }
 
@@ -631,32 +636,37 @@ void GLCanvas::HandleGamepadButtonInput(
 
    if (gamepad.buttonUp())
    {
-      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Forward());
+      m_camera.OffsetPosition(
+         static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Forward());
    }
 
    if (gamepad.buttonLeft())
    {
-      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Left());
+      m_camera.OffsetPosition(
+         static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Left());
    }
 
    if (gamepad.buttonDown())
    {
-      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Backward());
+      m_camera.OffsetPosition(
+         static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Backward());
    }
 
    if (gamepad.buttonRight())
    {
-      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Right());
+      m_camera.OffsetPosition(
+         static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Right());
    }
 
    if (gamepad.buttonL1())
    {
-      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Down());
+      m_camera.OffsetPosition(
+         static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Down());
    }
 
    if (gamepad.buttonR1())
    {
-      m_camera.OffsetPosition(millisecondsElapsed * cameraSpeed * m_camera.Up());
+      m_camera.OffsetPosition(static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Up());
    }
 
    if (!m_gamepadContextMenu && gamepad.buttonA())
@@ -679,7 +689,7 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
       return;
    }
 
-   if (gamepad.axisRightX() || gamepad.axisRightY())
+   if (gamepad.axisRightX() > 0.0 || gamepad.axisRightY() > 0.0)
    {
       const auto pitch =
          Constants::Input::MOVEMENT_AMPLIFICATION
@@ -694,21 +704,21 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
       m_camera.OffsetOrientation(pitch, yaw);
    }
 
-   if (gamepad.axisLeftY())
+   if (gamepad.axisLeftY() > 0.0)
    {
       m_camera.OffsetPosition(
-         Constants::Input::MOVEMENT_AMPLIFICATION
-         * m_controller.GetSettingsManager().GetCameraSpeed()
-         * -gamepad.axisLeftY()
+         static_cast<float>(Constants::Input::MOVEMENT_AMPLIFICATION)
+         * static_cast<float>(m_controller.GetSettingsManager().GetCameraSpeed())
+         * static_cast<float>(-gamepad.axisLeftY())
          * m_camera.Forward());
    }
 
-   if (gamepad.axisLeftX())
+   if (gamepad.axisLeftX() > 0.0)
    {
       m_camera.OffsetPosition(
-         Constants::Input::MOVEMENT_AMPLIFICATION
-         * m_controller.GetSettingsManager().GetCameraSpeed()
-         * gamepad.axisLeftX()
+         static_cast<float>(Constants::Input::MOVEMENT_AMPLIFICATION)
+         * static_cast<float>(m_controller.GetSettingsManager().GetCameraSpeed())
+         * static_cast<float>(gamepad.axisLeftX())
          * m_camera.Right());
    }
 }
@@ -763,7 +773,7 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
 
    m_frameTimeDeque.emplace_back(static_cast<int>(elapsedTime.count()));
 
-   const auto total = std::accumulate(std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0,
+   const auto total = std::accumulate(std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0ull,
       [] (const auto runningTotal, const auto frameTime) noexcept
    {
       return runningTotal + frameTime;
@@ -854,7 +864,7 @@ void GLCanvas::paintGL()
 
       if (m_controller.GetSettingsManager().IsPrimaryLightAttachedToCamera())
       {
-         assert(m_lights.size() > 0);
+         assert(m_lights.size() > 0u);
          m_lights.front().position = m_camera.GetPosition();
       }
 

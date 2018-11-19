@@ -1,5 +1,7 @@
 #include "originMarkerAsset.h"
 
+#include <gsl/string_span>
+
 namespace
 {
    /**

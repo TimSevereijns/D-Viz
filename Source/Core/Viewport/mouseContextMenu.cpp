@@ -1,7 +1,5 @@
 #include "mouseContextMenu.h"
 
-#include <assert.h>
-
 MouseContextMenu::MouseContextMenu(KeyboardManager& keyboardManager) :
    m_keyboardManager{ keyboardManager }
 {

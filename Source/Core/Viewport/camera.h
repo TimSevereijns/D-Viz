@@ -45,7 +45,7 @@ public:
     * @param[in] pitch           In degrees.
     * @param[in] yaw             In degrees.
     */
-   void SetOrientation(float pitch, float yaw);
+   void SetOrientation(double pitch, double yaw);
 
    /**
     * @brief Retrieves the camera's current orientation matrix.
@@ -62,7 +62,7 @@ public:
     * @param[in] pitch           In degrees.
     * @param[in] yaw             In degrees.
     */
-   void OffsetOrientation(float pitch, float yaw) noexcept;
+   void OffsetOrientation(double pitch, double yaw) noexcept;
 
    /**
     * @brief Will orient the camera so that the specified point is within view.
@@ -189,14 +189,14 @@ public:
     *
     * @param[in] angle           In degrees.
     */
-   void SetFieldOfView(float angle) noexcept;
+   void SetFieldOfView(int angle) noexcept;
 
    /**
     * @brief Retrives the camera's current field of view.
     *
     * @returns The current field of view in degrees.
     */
-   float GetVerticalFieldOfView() const noexcept;
+   int GetVerticalFieldOfView() const noexcept;
 
    /**
     * @brief Increases the field of view by five degrees.
@@ -274,7 +274,8 @@ private:
    double m_horizontalAngle{ 0.0 };
    double m_verticalAngle{ 0.0 };
 
-   float m_fieldOfView{ 45.0f };
+   int m_fieldOfView{ 45 };
+
    float m_aspectRatio{ 1.0f };
    float m_nearPlane{ 1.0f };
    float m_farPlane{ 2000.0f };

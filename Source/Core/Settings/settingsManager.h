@@ -24,7 +24,7 @@ namespace Settings
     */
    class Manager final : public QObject
    {
-      Q_OBJECT;
+      Q_OBJECT
 
    public:
 
@@ -54,19 +54,19 @@ namespace Settings
        * @brief GetLightAttentuationFactor
        * @return
        */
-      float GetLightAttentuationFactor() const;
+      double GetLightAttentuationFactor() const;
 
       /**
        * @brief GetAmbientLightCoefficient
        * @return
        */
-      float GetAmbientLightCoefficient() const;
+      double GetAmbientLightCoefficient() const;
 
       /**
        * @brief GetMaterialShininess
        * @return
        */
-      float GetMaterialShininess() const;
+      double GetMaterialShininess() const;
 
       /**
        * @brief GetSpecularColor
@@ -266,9 +266,9 @@ namespace Settings
       double m_cameraSpeed{ 0.25 };
       double m_mouseSensitivity{ 0.20 };
 
-      float m_ambientLightCoefficient{ 0.2f };
-      float m_lightAttenuationFactor{ 0.002f };
-      float m_materialShininess{ 80.0f };
+      double m_ambientLightCoefficient{ 0.2 };
+      double m_lightAttenuationFactor{ 0.002 };
+      double m_materialShininess{ 80.0 };
 
       int m_fieldOfView{ 45 };
 

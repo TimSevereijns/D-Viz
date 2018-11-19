@@ -33,7 +33,7 @@ namespace Detail
       {
          for (auto& handle : m_handles)
          {
-            if (handle != nullptr && handle != INVALID_HANDLE_VALUE)
+            if (handle != nullptr && handle != INVALID_HANDLE_VALUE)  // NOLINT
             {
                CloseHandle(handle);
                handle = nullptr;
@@ -73,7 +73,7 @@ namespace Detail
 
    private:
 
-      std::array<HANDLE, 2> m_handles{ INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE };
+      std::array<HANDLE, 2> m_handles{ INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE };  // NOLINT
    };
 }
 
@@ -125,7 +125,7 @@ private:
 
    std::atomic_bool m_keepMonitoring{ true };
 
-   HANDLE m_fileHandle{ INVALID_HANDLE_VALUE };
+   HANDLE m_fileHandle{ INVALID_HANDLE_VALUE }; // NOLINT
 
    Detail::FileMonitorEventHandles m_events;
 

@@ -12,6 +12,8 @@
 #include <DriveScanner/driveScanner.h>
 #include <Visualizations/squarifiedTreemap.h>
 
+#include <gsl/gsl_assert>
+
 namespace
 {
    const auto pathToTestData = std::experimental::filesystem::path{ "../../Tests/asio" };
@@ -93,7 +95,7 @@ void ModelTester::initTestCase()
 
 void ModelTester::init()
 {
-   assert(m_tree);
+   Expects(m_tree);
 
    m_model = std::make_unique<SquarifiedTreeMap>(m_path);
    m_model->Parse(m_tree);

@@ -3,6 +3,8 @@
 
 #include "lineAsset.h"
 
+#include <string_view>
+
 namespace Asset
 {
    /**
@@ -35,7 +37,7 @@ namespace Asset
 
    private:
 
-      static constexpr wchar_t AssetName[] = L"Frustum";
+      static constexpr std::wstring_view AssetName{ L"Frustum" };
    };
 }
 

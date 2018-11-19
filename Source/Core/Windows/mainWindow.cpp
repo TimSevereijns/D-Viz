@@ -11,9 +11,9 @@
 #include "Utilities/utilities.hpp"
 #include "Viewport/glCanvas.h"
 
+#include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
 
-#include <cassert>
 #include <iostream>
 #include <limits>
 #include <memory>
@@ -77,13 +77,11 @@ namespace
 
             return &binary;
          }
-         default:
-         {
-            assert(!"Type not supported.");
-         }
 
          return nullptr;
       }
+
+      GSL_ASSUME(false);
    }
 
    /**
@@ -734,13 +732,13 @@ Controller& MainWindow::GetController()
 
 GLCanvas& MainWindow::GetCanvas()
 {
-   assert(m_glCanvas);
+   Expects(m_glCanvas);
    return *m_glCanvas;
 }
 
 Gamepad& MainWindow::GetGamepad()
 {
-   assert(m_gamepad);
+   Expects(m_gamepad);
    return *m_gamepad;
 }
 

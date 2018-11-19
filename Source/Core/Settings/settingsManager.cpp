@@ -54,7 +54,7 @@ namespace
                colorArray[2].GetFloat() / 255.0f
             };
 
-            extensionMap.emplace(extension.name.GetString(), std::move(colorVector));
+            extensionMap.emplace(extension.name.GetString(), colorVector);
          }
 
          map.emplace(category.name.GetString(), std::move(extensionMap));
@@ -120,7 +120,7 @@ namespace
                colorArray[2].GetFloat() / 255.0f
             };
 
-            map.Emplace(setting.name.GetString(), std::move(colorVector));
+            map.Emplace(setting.name.GetString(), colorVector);
          }
       }
 
@@ -159,12 +159,12 @@ namespace Settings
 
    void Manager::OnAmbientLightCoefficientChanged(double coefficient)
    {
-      m_ambientLightCoefficient = static_cast<float>(coefficient);
+      m_ambientLightCoefficient = coefficient;
    }
 
    void Manager::OnLightAttenuationChanged(double attenuation)
    {
-      m_lightAttenuationFactor = static_cast<float>(attenuation);
+      m_lightAttenuationFactor = attenuation;
    }
 
    void Manager::OnAttachLightToCameraStateChanged(bool attached)
@@ -232,17 +232,17 @@ namespace Settings
       return m_mouseSensitivity;
    }
 
-   float Manager::GetLightAttentuationFactor() const
+   double Manager::GetLightAttentuationFactor() const
    {
       return m_lightAttenuationFactor;
    }
 
-   float Manager::GetAmbientLightCoefficient() const
+   double Manager::GetAmbientLightCoefficient() const
    {
       return m_ambientLightCoefficient;
    }
 
-   float Manager::GetMaterialShininess() const
+   double Manager::GetMaterialShininess() const
    {
       return m_materialShininess;
    }

@@ -7,6 +7,8 @@
 
 #include <QVector3D>
 
+#include <gsl/gsl_assert>
+
 // Inspired by: http://www.andrewnoske.com/wiki/Code_-_heatmaps_and_color_gradients
 
 /**
@@ -78,7 +80,7 @@ public:
     */
    QVector3D GetColorAtValue(const float value)
    {
-      assert(m_colorPoints.size());
+      Expects(m_colorPoints.size());
       if (m_colorPoints.size() == 0)
       {
          return { 1.0f, 1.0f, 1.0f };

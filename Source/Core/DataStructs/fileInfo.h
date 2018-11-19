@@ -30,8 +30,8 @@ struct FileInfo
    FileInfo() = default;
 
    FileInfo(
-      const std::wstring& name,
-      const std::wstring& extension,
+      std::wstring name,
+      std::wstring extension,
       std::uintmax_t size,
       FileType type);
 };

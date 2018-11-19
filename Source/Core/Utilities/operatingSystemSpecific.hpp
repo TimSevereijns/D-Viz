@@ -7,6 +7,7 @@
 #include <string>
 #include <experimental/filesystem>
 
+#include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
 
 #ifdef Q_OS_WIN
@@ -36,7 +37,7 @@ namespace OperatingSystemSpecific
 
       const std::wstring filePath = Controller::ResolveCompleteFilePath(node);
 
-      assert(std::none_of(std::begin(filePath), std::end(filePath),
+      Expects(std::none_of(std::begin(filePath), std::end(filePath),
          [] (const auto character)
       {
          return character == L'/';

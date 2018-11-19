@@ -1,5 +1,6 @@
 #include "scanBreakdownModel.h"
 
+#include <gsl/gsl_assert>
 #include <spdlog/fmt/fmt.h>
 
 #include "../controller.h"
@@ -100,7 +101,7 @@ void ScanBreakdownModel::ClearData()
 
 void ScanBreakdownModel::FinalizeInsertion(const Settings::Manager& settingsManager)
 {
-   assert(!m_fileTypeMap.empty() && m_fileTypeVector.empty());
+   Expects(!m_fileTypeMap.empty() && m_fileTypeVector.empty());
 
    const auto prefix = settingsManager.GetActiveNumericPrefix();
 

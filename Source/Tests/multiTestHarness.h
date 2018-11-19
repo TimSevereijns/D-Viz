@@ -4,9 +4,10 @@
 #include <QObject>
 #include <QTest>
 
-#include <cassert>
 #include <memory>
 #include <unordered_map>
+
+#include <gsl/gsl_assert>
 
 namespace MultiTest
 {
@@ -33,7 +34,7 @@ namespace MultiTest
          const auto itr = testMap.find(testName);
          if (itr != std::end(testMap))
          {
-            assert(!"Test already registered under that name.");
+            Expects(!"Test already registered under that name.");
          }
 
          testMap.emplace(

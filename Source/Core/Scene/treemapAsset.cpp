@@ -9,6 +9,7 @@
 #include "../Visualizations/visualization.h"
 
 #include <boost/optional.hpp>
+#include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
 #include <Tree/Tree.hpp>
 
@@ -51,10 +52,12 @@ namespace
       const QMatrix4x4& shadowViewMatrix,
       int cascadeCount)
    {
+      Expects(cascadeCount >= 0);
+
       static const auto cascadeDistances = FrustumUtilities::GetCascadeDistances();
 
       std::vector<std::vector<QVector3D>> frusta;
-      frusta.reserve(cascadeCount);
+      frusta.reserve(static_cast<std::size_t>(cascadeCount));
 
       auto mutableCamera = renderCamera;
       for (const auto& nearAndFarPlanes : cascadeDistances)
@@ -66,7 +69,7 @@ namespace
       }
 
       std::vector<BoundingBox> boundingBoxes;
-      boundingBoxes.reserve(cascadeCount);
+      boundingBoxes.reserve(static_cast<std::size_t>(cascadeCount));
 
       const auto worldToLight = shadowViewMatrix;
 
@@ -106,7 +109,7 @@ namespace
             /* far    = */ minZ
          };
 
-         boundingBoxes.emplace_back(std::move(boundingBox));
+         boundingBoxes.emplace_back(boundingBox);
       }
 
       return boundingBoxes;
@@ -135,10 +138,12 @@ namespace
          shader.setUniformValue(intensity.data(), lights[index].intensity);
 
          const auto attenuation = "allLights[" + indexAsString + "].attenuation";
-         shader.setUniformValue(attenuation.data(), settings.GetLightAttentuationFactor());
+         shader.setUniformValue(attenuation.data(),
+            static_cast<float>(settings.GetLightAttentuationFactor()));
 
          const auto ambientCoefficient = "allLights[" + indexAsString + "].ambientCoefficient";
-         shader.setUniformValue(ambientCoefficient.data(), settings.GetAmbientLightCoefficient());
+         shader.setUniformValue(ambientCoefficient.data(),
+            static_cast<float>(settings.GetAmbientLightCoefficient()));
       }
    }
 
@@ -236,11 +241,11 @@ namespace
     *
     * @returns The rounded value.
     */
-   auto SnapToNearestTexel(
+   float SnapToNearestTexel(
       double value,
       double multiple)
    {
-      return std::round(value / multiple) * multiple;
+      return static_cast<float>(std::round(value / multiple) * multiple);
    }
 
    /**
@@ -267,14 +272,14 @@ namespace Asset
 
       const auto& preferences = m_settingsManager.GetPreferenceMap();
       m_cascadeCount = preferences.GetValueOrDefault(L"shadowMapCascadeCount", 4);
-      m_shadowMapResolution = preferences.GetValueOrDefault(L"shadowMapQuality", 4) * 1024u;
+      m_shadowMapResolution = preferences.GetValueOrDefault(L"shadowMapQuality", 4) * 1024;
 
       const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
       log->info("Shadow map width & height is set at {} pixels.", m_shadowMapResolution);
 
-      m_shadowMaps.reserve(m_cascadeCount);
+      m_shadowMaps.reserve(static_cast<std::size_t>(m_cascadeCount));
 
-      for (auto index{ 0u }; index < m_cascadeCount; ++index)
+      for (auto index{ 0u }; index < static_cast<std::size_t>(m_cascadeCount); ++index)
       {
          auto frameBuffer = std::make_unique<QOpenGLFramebufferObject>
          (
@@ -342,13 +347,13 @@ namespace Asset
       m_referenceBlockBuffer.bind();
       m_referenceBlockBuffer.allocate(
          /* data = */ m_referenceBlockVertices.constData(),
-         /* count = */ m_referenceBlockVertices.size() * sizeof(QVector3D));
+         /* count = */ m_referenceBlockVertices.size() * static_cast<int>(sizeof(QVector3D)));
 
       m_referenceBlockBuffer.bind();
 
       m_mainShader.enableAttributeArray("vertex");
       m_mainShader.setAttributeBuffer(
-         /* location = */ "vertex",
+         /* name = */ "vertex",
          /* type = */ GL_FLOAT,
          /* offset = */ 0,
          /* tupleSize = */ 3,
@@ -356,7 +361,7 @@ namespace Asset
 
       m_mainShader.enableAttributeArray("normal");
       m_mainShader.setAttributeBuffer(
-         /* location = */ "normal",
+         /* name = */ "normal",
          /* type = */ GL_FLOAT,
          /* offset = */ sizeof(QVector3D),
          /* tupleSize = */ 3,
@@ -380,7 +385,7 @@ namespace Asset
       m_blockColorBuffer.bind();
       m_blockColorBuffer.allocate(
          /* data = */ m_blockColors.constData(),
-         /* count = */ m_blockColors.size() * 3 * sizeof(GLfloat));
+         /* count = */ m_blockColors.size() * 3 * static_cast<int>(sizeof(GLfloat)));
 
       m_openGL.glEnableVertexAttribArray(0);
       m_openGL.glVertexAttribDivisor(0, 1);
@@ -390,7 +395,7 @@ namespace Asset
          /* type = */ GL_FLOAT,
          /* normalized = */ GL_FALSE,
          /* stride = */ sizeof(QVector3D),
-         /* ptr = */ static_cast<GLvoid*>(0));
+         /* ptr = */ static_cast<GLvoid*>(nullptr));
 
       m_blockColorBuffer.release();
       m_VAO.release();
@@ -405,8 +410,8 @@ namespace Asset
 
       m_VAO.bind();
 
-      constexpr auto sizeOfVector = sizeof(QVector4D);
-      constexpr auto sizeOfMatrix = sizeof(QMatrix4x4);
+      constexpr auto sizeOfVector = static_cast<int>(sizeof(QVector4D));
+      constexpr auto sizeOfMatrix = static_cast<int>(sizeof(QMatrix4x4));
 
       m_blockTransformationBuffer.create();
       m_blockTransformationBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -424,7 +429,7 @@ namespace Asset
          /* type = */ GL_FLOAT,
          /* normalized = */ GL_FALSE,
          /* stride = */ sizeOfMatrix,
-         /* ptr = */ reinterpret_cast<GLvoid*>(0 * sizeOfVector));
+         /* ptr = */ nullptr);
 
       // Row 2 of the matrix:
       m_openGL.glEnableVertexAttribArray(2);
@@ -435,7 +440,7 @@ namespace Asset
          /* type = */ GL_FLOAT,
          /* normalized = */ GL_FALSE,
          /* stride = */ sizeOfMatrix,
-         /* ptr = */ reinterpret_cast<GLvoid*>(1 * sizeOfVector));
+         /* ptr = */ reinterpret_cast<GLvoid*>(1 * sizeOfVector)); // NOLINT
 
       // Row 3 of the matrix:
       m_openGL.glEnableVertexAttribArray(3);
@@ -446,7 +451,7 @@ namespace Asset
          /* type = */ GL_FLOAT,
          /* normalized = */ GL_FALSE,
          /* stride = */ sizeOfMatrix,
-         /* ptr = */ reinterpret_cast<GLvoid*>(2 * sizeOfVector));
+         /* ptr = */ reinterpret_cast<GLvoid*>(2 * sizeOfVector)); // NOLINT
 
       // Row 4 of the matrix:
       m_openGL.glEnableVertexAttribArray(4);
@@ -457,7 +462,7 @@ namespace Asset
          /* type = */ GL_FLOAT,
          /* normalized = */ GL_FALSE,
          /* stride = */ sizeOfMatrix,
-         /* ptr = */ reinterpret_cast<GLvoid*>(3 * sizeOfVector));
+         /* ptr = */ reinterpret_cast<GLvoid*>(3 * sizeOfVector)); // NOLINT
 
       m_blockTransformationBuffer.release();
       m_VAO.release();
@@ -485,7 +490,7 @@ namespace Asset
 
          variableName = "shadowMaps[" + indexAsString + "]";
          const auto location = m_openGL.glGetUniformLocation(shaderID, variableName.data());
-         m_openGL.glUniform1i(location, index);
+         m_openGL.glUniform1i(location, static_cast<int>(index));
       }
 
       m_mainShader.release();
@@ -545,8 +550,8 @@ namespace Asset
          const auto& blockOrigin = block.GetOrigin();
 
          QMatrix4x4 instanceMatrix;
-         instanceMatrix.translate(blockOrigin.x(), blockOrigin.y(), blockOrigin.z());
-         instanceMatrix.scale(block.GetWidth(), block.GetHeight(), block.GetDepth());
+         instanceMatrix.translate(blockOrigin.x(), blockOrigin.y(), blockOrigin.z()); // NOLINT
+         instanceMatrix.scale(block.GetWidth(), block.GetHeight(), block.GetDepth()); // NOLINT
          m_blockTransformations << instanceMatrix;
 
          ComputeAppropriateBlockColor(node);
@@ -554,8 +559,8 @@ namespace Asset
 
       FindLargestDirectory(tree);
 
-      assert(m_blockColors.size() == m_blockTransformations.size());
-      assert(m_blockColors.size() == static_cast<int>(m_blockCount));
+      Expects(m_blockColors.size() == m_blockTransformations.size());
+      Expects(m_blockColors.size() == static_cast<int>(m_blockCount));
 
       return m_blockCount;
    }
@@ -599,7 +604,7 @@ namespace Asset
          }
       }
 
-      assert(largestDirectory > std::numeric_limits<std::uintmax_t>::min());
+      Expects(largestDirectory > std::numeric_limits<std::uintmax_t>::min());
 
       m_largestDirectorySize = largestDirectory;
    }
@@ -655,7 +660,7 @@ namespace Asset
       return !(m_blockTransformations.empty() && m_blockColors.empty());
    }
 
-   double Treemap::ComputeWorldUnitsPerTexel(const BoundingBox& boundingBox)
+   float Treemap::ComputeWorldUnitsPerTexel(const BoundingBox& boundingBox)
    {
       // In order to reduce shadow shimmering, we'll attempt to snap the orthogonal projection
       // matrix for the shadow cascades to the nearest texel. This appears to significantly reduce
@@ -665,7 +670,7 @@ namespace Asset
       m_maxBoundingBoxDiagonal = std::max(diagonal, m_maxBoundingBoxDiagonal);
       const auto worldUnitsPerTexel = m_maxBoundingBoxDiagonal / m_shadowMapResolution;
 
-      return worldUnitsPerTexel;
+      return static_cast<float>(worldUnitsPerTexel);
    }
 
    void Treemap::ComputeShadowMapProjectionViewMatrices(const Camera& camera)
@@ -676,7 +681,7 @@ namespace Asset
       constexpr auto nearPlane{ 200 };
       constexpr auto farPlane{ 1500 };
 
-      for (auto index{ 0u }; index < m_cascadeCount; ++index)
+      for (auto index{ 0u }; index < static_cast<std::size_t>(m_cascadeCount); ++index)
       {
          const auto& boundingBox = boundingBoxes[index];
          const auto worldUnitsPerTexel = ComputeWorldUnitsPerTexel(boundingBox);
@@ -692,7 +697,7 @@ namespace Asset
 
          const QMatrix4x4 model;
          auto projectionViewMatrix = projection * view * model;
-         m_shadowMaps[index].projectionViewMatrix = std::move(projectionViewMatrix);
+         m_shadowMaps[index].projectionViewMatrix = projectionViewMatrix;
       }
    }
 
@@ -700,12 +705,16 @@ namespace Asset
    {
       ComputeShadowMapProjectionViewMatrices(camera);
 
-      m_openGL.glViewport(0, 0, m_shadowMapResolution, m_shadowMapResolution);
+      m_openGL.glViewport(
+         /* x = */ 0,
+         /* y = */ 0,
+         /* width = */ static_cast<std::int32_t>(m_shadowMapResolution),
+         /* height = */ static_cast<std::int32_t>(m_shadowMapResolution));
 
       m_shadowMapShader.bind();
       m_VAO.bind();
 
-      for (auto index{ 0u }; index < m_cascadeCount; ++index)
+      for (auto index{ 0u }; index < static_cast<std::size_t>(m_cascadeCount); ++index)
       {
          m_shadowMaps[index].framebuffer->bind();
 
@@ -747,7 +756,8 @@ namespace Asset
       m_mainShader.setUniformValue("cameraPosition", camera.GetPosition());
 
       // @todo The following variables don't need to be set with every pass...
-      m_mainShader.setUniformValue("materialShininess", m_settingsManager.GetMaterialShininess());
+      m_mainShader.setUniformValue("materialShininess",
+         static_cast<float>(m_settingsManager.GetMaterialShininess()));
       m_mainShader.setUniformValue("shouldShowCascadeSplits", shouldShowCascadeSplits);
       m_mainShader.setUniformValue("shouldShowShadows", shouldShowShadows);
 
@@ -755,9 +765,9 @@ namespace Asset
 
       if (shouldShowShadows)
       {
-         assert(m_shadowMaps.size() == m_cascadeCount);
+         Expects(m_shadowMaps.size() == static_cast<std::size_t>(m_cascadeCount));
 
-         for (auto index{ 0u }; index < m_cascadeCount; ++index)
+         for (auto index{ 0u }; index < static_cast<std::size_t>(m_cascadeCount); ++index)
          {
             const auto matrix = "lightProjectionViewMatrices[" + std::to_string(index) + "]";
             m_mainShader.setUniformValue(matrix.data(), m_shadowMaps[index].projectionViewMatrix);
@@ -811,16 +821,15 @@ namespace Asset
       const Tree<VizBlock>::Node& node,
       Asset::Event action)
    {
-      assert(m_VAO.isCreated());
-      assert(m_blockColorBuffer.isCreated());
+      Expects(m_VAO.isCreated());
+      Expects(m_blockColorBuffer.isCreated());
 
       if (node->offsetIntoVBO > m_blockCount)
       {
-         assert(false);
          return;
       }
 
-      constexpr auto colorTupleSize{ sizeof(QVector3D) };
+      constexpr auto colorTupleSize = static_cast<int>(sizeof(QVector3D));
       const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorTupleSize;
 
       QVector3D newColor;
@@ -859,10 +868,6 @@ namespace Asset
          {
             newColor = Constants::Colors::CORAL; //< @todo Pick better color.
             break;
-         }
-         default:
-         {
-            assert(false);
          }
       }
 
@@ -934,14 +939,14 @@ namespace Asset
 
       m_texturePreviewVertexBuffer.allocate(
          vertexData.constData(),
-         vertexData.count() * sizeof(GLfloat));
+         vertexData.count() * static_cast<int>(sizeof(GLfloat)));
 
       m_texturePreviewVertexBuffer.release();
 
       return true;
    }
 
-   void Treemap::RenderDepthMapPreview(int index)
+   void Treemap::RenderDepthMapPreview(std::size_t index)
    {
       // Simply using Normalized Device Coordinates (NDC), and an arbitrary choice of view planes.
       QMatrix4x4 viewMatrix;

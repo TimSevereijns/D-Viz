@@ -34,7 +34,7 @@ namespace Asset
       m_vertexBuffer.bind();
       m_vertexBuffer.allocate(
          /* data = */ m_rawVertices.constData(),
-         /* count = */ m_rawVertices.size() * 3 * sizeof(GLfloat));
+         /* count = */ m_rawVertices.size() * 3 * static_cast<int>(sizeof(GLfloat)));
 
       m_mainShader.bind();
       m_vertexBuffer.bind();
@@ -65,7 +65,7 @@ namespace Asset
       m_colorBuffer.bind();
       m_colorBuffer.allocate(
          /* data = */ m_rawColors.constData(),
-         /* count = */ m_rawColors.size() * 3 * sizeof(GLfloat));
+         /* count = */ m_rawColors.size() * 3 * static_cast<int>(sizeof(GLfloat)));
 
       m_colorBuffer.bind();
       m_mainShader.enableAttributeArray("color");

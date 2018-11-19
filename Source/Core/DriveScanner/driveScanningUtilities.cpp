@@ -3,27 +3,27 @@
 #include <QtGlobal>
 
 #ifdef Q_OS_WIN
-   #include <FileApi.h>
-   #include <WinIoCtl.h>
+   #include <fileapi.h>
+   #include <winioctl.h>
 
-   #include "winHack.hpp"
+   #include "winhack.hpp"
 #endif // Q_OS_WIN
 
 #include "../DataStructs/vizBlock.h"
 #include "../Utilities/ignoreUnused.hpp"
 
-#include <cassert>
 #include <iostream>
 #include <memory>
 #include <mutex>
 
+#include <gsl/gsl_assert>
 #include <Tree/Tree.hpp>
 
 namespace DriveScanning
 {
    namespace Detail
    {
-      std::mutex streamMutex;
+      static std::mutex streamMutex;
 
 #ifdef Q_OS_WIN
 
@@ -31,13 +31,13 @@ namespace DriveScanning
          const std::experimental::filesystem::path& path) noexcept
       {
          const auto handle = CreateFile(
-            /* fileName = */ path.wstring().c_str(),
-            /* desiredAccess = */ GENERIC_READ,
-            /* shareMode = */ 0,
-            /* securityAttributes = */ 0,
-            /* creationDisposition = */ OPEN_EXISTING,
-            /* flagsAndAttributes = */ FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
-            /* templateFile = */ 0);
+            /* lpFileName = */ path.wstring().c_str(),
+            /* dwDesiredAccess = */ GENERIC_READ,
+            /* dwShareMode = */ 0,
+            /* lpSecurityAttributes = */ nullptr,
+            /* dwCreationDisposition = */ OPEN_EXISTING,
+            /* dwFlagsAndAttributes = */ FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
+            /* hTemplateFile = */ nullptr);
 
          return ScopedHandle{ handle };
       }
@@ -55,14 +55,14 @@ namespace DriveScanning
          DWORD bytesReturned{ 0 };
 
          const auto successfullyRetrieved = DeviceIoControl(
-            /* device = */ static_cast<HANDLE>(handle),
-            /* controlCode = */ FSCTL_GET_REPARSE_POINT,
-            /* inBuffer = */ NULL,
-            /* inBufferSize = */ 0,
-            /* outBuffer = */ reinterpret_cast<LPVOID>(reparseBuffer.data()),
-            /* outBufferSize = */ static_cast<DWORD>(reparseBuffer.size()),
-            /* bytesReturned = */ &bytesReturned,
-            /* overlapped = */ 0) == TRUE;
+            /* hDevice = */ static_cast<HANDLE>(handle),
+            /* dwIoControlCode = */ FSCTL_GET_REPARSE_POINT,
+            /* lpInBuffer = */ nullptr,
+            /* nInBufferSize = */ 0,
+            /* lpOutBuffer = */ static_cast<LPVOID>(reparseBuffer.data()),
+            /* nOutBufferSize = */ static_cast<DWORD>(reparseBuffer.size()),
+            /* lpBytesReturned = */ &bytesReturned,
+            /* lpOverlapped = */ nullptr) == TRUE;
 
          return successfullyRetrieved && bytesReturned;
       }
@@ -80,7 +80,7 @@ namespace DriveScanning
 
          WIN32_FIND_DATA fileData;
          const HANDLE fileHandle = FindFirstFileW(path.wstring().data(), &fileData);
-         if (fileHandle == INVALID_HANDLE_VALUE)
+         if (fileHandle == INVALID_HANDLE_VALUE) // NOLINT
          {
             return 0;
          }
@@ -101,7 +101,7 @@ namespace DriveScanning
       {
          try
          {
-            assert(!std::experimental::filesystem::is_directory(path));
+            Expects(std::experimental::filesystem::is_directory(path) == false);
 
             return std::experimental::filesystem::file_size(path);
          }
@@ -149,7 +149,7 @@ namespace DriveScanning
          const auto successfullyRead = Detail::ReadReparsePoint(path, buffer);
 
          return successfullyRead
-            ? reinterpret_cast<REPARSE_DATA_BUFFER*>(buffer.data())->ReparseTag == targetTag
+            ? reinterpret_cast<REPARSE_DATA_BUFFER*>(buffer.data())->ReparseTag == targetTag // NOLINT
             : false;
       }
 
@@ -189,7 +189,7 @@ namespace DriveScanning
             return false;
          }
 
-         BY_HANDLE_FILE_INFORMATION fileInfo = { 0 };
+         BY_HANDLE_FILE_INFORMATION fileInfo = { 0 }; // NOLINT
 
          const auto successfullyRetrieved
             = GetFileInformationByHandle(static_cast<HANDLE>(handle), &fileInfo);

@@ -10,6 +10,7 @@
 #include "Visualizations/squarifiedTreemap.h"
 #include "Windows/mainWindow.h"
 
+#include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
 #include <Stopwatch/Stopwatch.hpp>
 
@@ -147,7 +148,7 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
 
    // @todo Look into using std::fileystem::space instead.
    m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(parameters.rootDirectory);
-   assert(m_occupiedDiskSpace > 0);
+   Expects(m_occupiedDiskSpace > 0u);
 
    const auto progressHandler = [&] (const ScanningProgress& progress)
    {
@@ -203,7 +204,7 @@ boost::optional<FileChangeNotification> Controller::FetchNodeChangeNotification(
 
 void Controller::ComputeProgress(const ScanningProgress& progress)
 {
-   assert(m_occupiedDiskSpace > 0);
+   Expects(m_occupiedDiskSpace > 0u);
 
    const auto filesScanned = progress.filesScanned.load();
    const auto sizeInBytes = progress.bytesProcessed.load();
@@ -244,31 +245,31 @@ bool Controller::HasVisualizationBeenLoaded() const
 
 const Tree<VizBlock>::Node* Controller::GetSelectedNode() const
 {
-   assert(m_model);
+   Expects(m_model);
    return m_model->GetSelectedNode();
 }
 
 Tree<VizBlock>& Controller::GetTree()
 {
-   assert(m_model);
+   Expects(m_model);
    return m_model->GetTree();
 }
 
 const Tree<VizBlock>& Controller::GetTree() const
 {
-   assert(m_model);
+   Expects(m_model);
    return m_model->GetTree();
 }
 
 const std::vector<const Tree<VizBlock>::Node*>& Controller::GetHighlightedNodes() const
 {
-   assert(m_model);
+   Expects(m_model);
    return m_model->GetHighlightedNodes();
 }
 
 bool Controller::IsNodeHighlighted(const Tree<VizBlock>::Node& node) const
 {
-   assert(m_model);
+   Expects(m_model);
    const auto& highlightedNodes = m_model->GetHighlightedNodes();
 
    return std::any_of(std::begin(highlightedNodes), std::end(highlightedNodes),
@@ -282,7 +283,7 @@ void Controller::SelectNode(
    const Tree<VizBlock>::Node& node,
    const std::function<void (const Tree<VizBlock>::Node&)>& selectorCallback)
 {
-   assert(m_model);
+   Expects(m_model);
    m_model->SelectNode(node);
 
    selectorCallback(node);
@@ -295,7 +296,7 @@ void Controller::SelectNodeAndUpdateStatusBar(
    SelectNode(node, selectorCallback);
 
    const auto fileSize = node->file.size;
-   assert(fileSize > 0);
+   Expects(fileSize > 0);
 
    const auto prefix = m_settingsManager.GetActiveNumericPrefix();
    const auto [prefixedSize, units] = ConvertFileSizeToNumericPrefix(fileSize, prefix);
@@ -320,7 +321,7 @@ void Controller::SelectNodeViaRay(
    const std::function<void (const Tree<VizBlock>::Node&)>& deselectionCallback,
    const std::function<void (const Tree<VizBlock>::Node&)>& selectionCallback)
 {
-   assert(m_model);
+   Expects(m_model);
 
    if (!HasVisualizationBeenLoaded() || !IsUserAllowedToInteractWithModel())
    {
@@ -410,20 +411,20 @@ void Controller::SaveScanMetadata(const ScanningProgress& progress)
       progress.bytesProcessed.load()
    };
 
-   assert(m_model);
+   Expects(m_model);
    m_model->SetTreemapMetadata(std::move(data));
 }
 
 void Controller::ClearSelectedNode()
 {
-   assert(m_model);
+   Expects(m_model);
    m_model->ClearSelectedNode();
 }
 
 void Controller::ClearHighlightedNodes(
    const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& callback)
 {
-   assert(m_model);
+   Expects(m_model);
 
    auto& nodes = m_model->GetHighlightedNodes();
    callback(nodes);
@@ -438,7 +439,7 @@ void Controller::ProcessSelection(
 {
    nodeSelector();
 
-   assert(m_model);
+   Expects(m_model);
 
    auto& nodes = m_model->GetHighlightedNodes();
    callback(nodes);
@@ -452,7 +453,7 @@ void Controller::HighlightAncestors(
 {
    const auto selector = [&]
    {
-      assert(m_model);
+      Expects(m_model);
       m_model->HighlightAncestors(node);
    };
 
@@ -537,8 +538,7 @@ std::pair<double, std::wstring> Controller::ConvertFileSizeToNumericPrefix(
       }
    }
 
-   assert(false);
-   return std::make_pair<double, std::wstring>( 0, L"Congrats, you've found a bug!" );
+   GSL_ASSUME(false);
 }
 
 std::wstring Controller::ResolveCompleteFilePath(const Tree<VizBlock>::Node& node)
@@ -565,7 +565,7 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizBlock>::Node& nod
       return path + file;
    });
 
-   assert(completePath.size() > 0);
+   Expects(completePath.size() > 0);
    return completePath + node->file.extension;
 }
 

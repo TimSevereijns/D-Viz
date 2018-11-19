@@ -33,7 +33,7 @@ struct VizBlock
     *
     * @param[in] file               The file that the VizNode represents.
     */
-   explicit VizBlock(const FileInfo& file);
+   explicit VizBlock(FileInfo file);
 
    /**
     * @brief Constructs a new VizNode to represent the specified file using the specified
@@ -45,7 +45,7 @@ struct VizBlock
     * @param[in] block              The visual representation of the file in question.
     */
    VizBlock(
-      const FileInfo& file,
+      FileInfo file,
       const Block& block);
 };
 

@@ -2,10 +2,10 @@
 
 #ifdef Q_OS_WIN
 
-#include <cassert>
 #include <exception>
 #include <iostream>
 
+#include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
 
 #include "../constants.h"
@@ -47,7 +47,7 @@ WindowsFileMonitor::~WindowsFileMonitor() noexcept
       m_monitoringThread.join();
    }
 
-   if (m_fileHandle && m_fileHandle != INVALID_HANDLE_VALUE)
+   if (m_fileHandle && m_fileHandle != INVALID_HANDLE_VALUE) // NOLINT
    {
       CloseHandle(m_fileHandle);
    }
@@ -69,35 +69,34 @@ void WindowsFileMonitor::Start(
    m_notificationBuffer.resize(1024 * sizeOfNotification, std::byte{ 0 });
 
    m_fileHandle = CreateFileW(
-      /* fileName = */ path.wstring().data(),
+      /* lpFileName = */ path.wstring().data(),
       /* access = */ FILE_LIST_DIRECTORY | STANDARD_RIGHTS_READ,
-      /* shareMode = */ FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-      /* securityAttributes = */ NULL,
-      /* creationDisposition = */ OPEN_EXISTING,
-      /* flagsAndAttributes = */ FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
-      /* templateFile = */ NULL);
+      /* dwShareMode = */ FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+      /* lpSecurityAttributes = */ nullptr,
+      /* dwCreationDisposition = */ OPEN_EXISTING,
+      /* dwFlagsAndAttributes = */ FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
+      /* hTemplateFile = */ nullptr);
 
-   if (!m_fileHandle || m_fileHandle == INVALID_HANDLE_VALUE)
+   if (!m_fileHandle || m_fileHandle == INVALID_HANDLE_VALUE) // NOLINT
    {
       const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
       log->error("Could not acquire handle to: {}.", path.string());
 
-      assert(false);
       return;
    }
 
    const auto terminationHandle = CreateEventW(
-      /* securityAttributes = */ NULL,
-      /* manualReset = */ true,
-      /* initialState = */ false,
+      /* securityAttributes = */ nullptr,
+      /* bManualReset = */ true,
+      /* bInitialState = */ false,
       /* eventName = */ L"D-VIZ_FILE_MONITOR_TERMINATE_THREAD");
 
    m_events.SetExitHandle(terminationHandle);
 
    const auto notificationHandle = CreateEventW(
-      /* securityAttributes = */ NULL,
-      /* manualReset = */ false,
-      /* initialState = */ false,
+      /* securityAttributes = */ nullptr,
+      /* bManualReset = */ false,
+      /* bInitialState = */ false,
       /* eventName = */ L"D-VIZ_FILE_MONITOR_NOTIFICATION");
 
    m_events.SetNotificationHandle(notificationHandle);
@@ -139,37 +138,37 @@ void WindowsFileMonitor::AwaitNotification()
    const bool successfullyQueued = ReadDirectoryChangesW(
       /* directoryHandle = */ m_fileHandle,
       /* outputBuffer = */ m_notificationBuffer.data(),
-      /* bufferLength = */ static_cast<DWORD>(m_notificationBuffer.size()),
-      /* watchSubtree = */ TRUE,
+      /* nBufferLength = */ static_cast<DWORD>(m_notificationBuffer.size()),
+      /* bWatchSubtree = */ TRUE,
       /* filter = */ desiredNotifications,
-      /* bytesReturned = */ NULL,
-      /* overlapped = */ &m_ioBuffer,
-      /* callback = */ NULL);
+      /* lpBytesReturned = */ nullptr,
+      /* lpOverlapped = */ &m_ioBuffer,
+      /* callback = */ nullptr);
 
-   assert(successfullyQueued);
+   Expects(successfullyQueued);
 
    const auto waitResult = WaitForMultipleObjects(
       /* handleCount = */ m_events.Size(),
-      /* handles = */ m_events.Data(),
-      /* awaitAll = */ false,
+      /* lpHandles = */ m_events.Data(),
+      /* bWaitAll = */ false,
       /* timeout = */ INFINITE);
 
    switch (waitResult)
    {
-      case WAIT_OBJECT_0:
+      case WAIT_OBJECT_0: // NOLINT
       {
          m_keepMonitoring.store(false);
 
          CancelIo(m_fileHandle);
 
-         while (!HasOverlappedIoCompleted(&m_ioBuffer))
+         while (!HasOverlappedIoCompleted(&m_ioBuffer)) // NOLINT
          {
             SleepEx(100, TRUE);
          }
 
          break;
       }
-      case WAIT_OBJECT_0 + 1:
+      case WAIT_OBJECT_0 + 1: // NOLINT
       {
          RetrieveNotification();
 
@@ -177,7 +176,7 @@ void WindowsFileMonitor::AwaitNotification()
       }
       default:
       {
-         assert(false);
+         Expects(false);
       }
    }
 }
@@ -187,10 +186,10 @@ void WindowsFileMonitor::RetrieveNotification()
    DWORD bytesTransferred{ 0 };
 
    const bool successfullyRead = GetOverlappedResult(
-      /* handle = */ m_fileHandle,
-      /* overlapped = */ &m_ioBuffer,
-      /* bytesTransfered = */ &bytesTransferred,
-      /* wait = */ false);
+      /* hFile = */ m_fileHandle,
+      /* lpOverlapped = */ &m_ioBuffer,
+      /* lpNumberOfBytesTransferred = */ &bytesTransferred,
+      /* bWait = */ false);
 
    if (successfullyRead && bytesTransferred > 0)
    {
@@ -198,7 +197,7 @@ void WindowsFileMonitor::RetrieveNotification()
    }
    else
    {
-      assert(false);
+      Expects(false);
    }
 }
 
@@ -217,7 +216,7 @@ void WindowsFileMonitor::ProcessNotification()
       }
 
       const auto fileNameLength = notificationInfo->FileNameLength / sizeof(wchar_t);
-      assert(fileNameLength);
+      Expects(fileNameLength);
 
       std::wstring fileName(fileNameLength, '\0');
 
@@ -233,21 +232,21 @@ void WindowsFileMonitor::ProcessNotification()
          case FILE_ACTION_ADDED:
          {
             m_notificationCallback(
-               FileChangeNotification{ std::move(fileName), FileSystemChange::CREATED, timestamp });
+               FileChangeNotification{ fileName, FileSystemChange::CREATED, timestamp });
 
             break;
          }
          case FILE_ACTION_REMOVED:
          {
             m_notificationCallback(
-               FileChangeNotification{ std::move(fileName), FileSystemChange::DELETED, timestamp });
+               FileChangeNotification{ fileName, FileSystemChange::DELETED, timestamp });
 
             break;
          }
          case FILE_ACTION_MODIFIED:
          {
             m_notificationCallback(
-               FileChangeNotification{ std::move(fileName), FileSystemChange::MODIFIED, timestamp });
+               FileChangeNotification{ fileName, FileSystemChange::MODIFIED, timestamp });
 
             break;
          }
@@ -259,10 +258,10 @@ void WindowsFileMonitor::ProcessNotification()
          }
          case FILE_ACTION_RENAMED_NEW_NAME:
          {
-            assert(m_pendingRenameEvent);
+            Expects(m_pendingRenameEvent);
 
             m_notificationCallback(
-               FileChangeNotification{ std::move(fileName), FileSystemChange::RENAMED, timestamp });
+               FileChangeNotification{ fileName, FileSystemChange::RENAMED, timestamp });
 
             break;
          }

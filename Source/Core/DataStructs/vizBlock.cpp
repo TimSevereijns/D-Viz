@@ -1,15 +1,15 @@
 #include "vizBlock.h"
 
-VizBlock::VizBlock(const FileInfo& file) :
-   file{ file }
+VizBlock::VizBlock(FileInfo file) :
+   file{ std::move(file) }
 {
 }
 
 VizBlock::VizBlock(
-   const FileInfo& file,
+   FileInfo file,
    const Block& block)
    :
-   file{ file },
+   file{ std::move(file) },
    block{ block },
    boundingBox{ block }
 {

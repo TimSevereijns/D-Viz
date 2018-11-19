@@ -27,7 +27,7 @@ namespace Asset
 
    private:
 
-      static constexpr wchar_t AssetName[] = L"LightMarker";
+      static constexpr std::wstring_view AssetName{ L"LightMarker" };
    };
 }
 

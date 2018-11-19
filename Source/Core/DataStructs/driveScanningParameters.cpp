@@ -1,12 +1,14 @@
 #include "driveScanningParameters.h"
 
+#include <utility>
+
 DriveScanningParameters::DriveScanningParameters(
-   const std::experimental::filesystem::path& startingPath,
+   std::experimental::filesystem::path startingPath,
    ProgressCallback progressCallback,
    ScanCompleteCallback completionCallback)
    :
-   path{ startingPath },
-   onProgressUpdateCallback{ progressCallback },
-   onScanCompletedCallback{ completionCallback }
+   path{ std::move(startingPath)},
+   onProgressUpdateCallback{ std::move(progressCallback) },
+   onScanCompletedCallback{ std::move(completionCallback) }
 {
 }
