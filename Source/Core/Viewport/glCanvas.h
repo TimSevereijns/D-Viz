@@ -1,6 +1,7 @@
 #ifndef GLCANVAS_H
 #define GLCANVAS_H
 
+#include "../constants.h"
 #include "camera.h"
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
@@ -331,10 +332,10 @@ private:
    {
       Light{ },
       Light{ QVector3D{ -200.0f, 250.0f, 200.0f } },
-      Light{ QVector3D{ 0.0f, 80.0f, -VisualizationModel::ROOT_BLOCK_DEPTH } },
-      Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
-      Light{ QVector3D{ VisualizationModel::ROOT_BLOCK_WIDTH, 80.0f,
-         -VisualizationModel::ROOT_BLOCK_DEPTH } }
+      Light{ QVector3D{ 0.0f, 80.0f, -Constants::Visualization::ROOT_BLOCK_DEPTH } },
+      Light{ QVector3D{ Constants::Visualization::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
+      Light{ QVector3D{ Constants::Visualization::ROOT_BLOCK_WIDTH, 80.0f,
+         -Constants::Visualization::ROOT_BLOCK_DEPTH } }
    };
 
    Camera m_camera;

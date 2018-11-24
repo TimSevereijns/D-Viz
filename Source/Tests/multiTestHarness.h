@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QTest>
 
+#include "Utilities/ignoreUnused.hpp"
+
 #include <memory>
 #include <unordered_map>
 
@@ -34,7 +36,7 @@ namespace MultiTest
          const auto itr = testMap.find(testName);
          if (itr != std::end(testMap))
          {
-            Expects(!"Test already registered under that name.");
+            Expects(!"Test already registered under that name."); // NOLINT
          }
 
          testMap.emplace(
@@ -49,6 +51,7 @@ namespace MultiTest
 
       for (const auto& [name, test] : Detail::GetTestMap())
       {
+         IgnoreUnused(name);
          result += QTest::qExec(test.get());
       }
 

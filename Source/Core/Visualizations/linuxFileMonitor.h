@@ -6,25 +6,15 @@
 #ifdef Q_OS_LINUX
 
 #include "fileChangeNotification.hpp"
-#include "Utilities/threadSafeQueue.hpp"
-
-#include "boost/optional.hpp"
+#include "fileMonitorBase.h"
 
 #include <functional>
 
-class LinuxFileMonitor
+class LinuxFileMonitor : public FileMonitorBase
 {
 public:
 
-   LinuxFileMonitor() = default;
-
-   ~LinuxFileMonitor() noexcept;
-
-   LinuxFileMonitor(LinuxFileMonitor&& other) = delete;
-   LinuxFileMonitor& operator=(LinuxFileMonitor&& other) = delete;
-
-   LinuxFileMonitor(const LinuxFileMonitor& other) = delete;
-   LinuxFileMonitor& operator=(const LinuxFileMonitor& other) = delete;
+   ~LinuxFileMonitor() noexcept override;
 
    /**
     * @brief Starts monitoring the file system for changes.
@@ -33,18 +23,17 @@ public:
     */
    void Start(
       const std::experimental::filesystem::path& path,
-      const std::function<void (FileChangeNotification&&)>& onNotificationCallback);
+      const std::function<void (FileChangeNotification&&)>& onNotificationCallback) override;
 
    /**
     * @brief Stops monitoring the file system for changes.
     */
-   void Stop();
+   void Stop() override;
 
    /**
     * @returns True if the file system monitor is actively monitoring.
     */
-   bool IsActive() const;
-
+   bool IsActive() const override;
 
 private:
 

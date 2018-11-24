@@ -83,6 +83,16 @@ namespace Constants
       constexpr static auto& SHOW_LIGHT_MARKERS{ L"showLightMarkers" };
       constexpr static auto& SHOW_FRUSTUM { L"showFrustum" };
    }
+
+   namespace Visualization
+   {
+      constexpr static const double PADDING_RATIO{ 0.9 };
+      constexpr static const double MAX_PADDING{ 0.75 };
+
+      constexpr static const float BLOCK_HEIGHT{ 2.0f };
+      constexpr static const float ROOT_BLOCK_WIDTH{ 1000.0f };
+      constexpr static const float ROOT_BLOCK_DEPTH{ 1000.0f };
+   }
 }
 
 #endif // CONSTANTS

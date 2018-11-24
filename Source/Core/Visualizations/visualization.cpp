@@ -358,15 +358,12 @@ namespace
    }
 }
 
-const double VisualizationModel::PADDING_RATIO{ 0.9 };
-const double VisualizationModel::MAX_PADDING{ 0.75 };
-
-const float VisualizationModel::BLOCK_HEIGHT{ 2.0f };
-const float VisualizationModel::ROOT_BLOCK_WIDTH{ 1000.0f };
-const float VisualizationModel::ROOT_BLOCK_DEPTH{ 1000.0f };
-
-VisualizationModel::VisualizationModel(const std::experimental::filesystem::path& path) :
-   m_rootPath{ path }
+VisualizationModel::VisualizationModel(
+   std::unique_ptr<FileMonitorBase> fileMonitor,
+   const std::experimental::filesystem::path& path)
+   :
+   m_rootPath{ path },
+   m_fileSystemMonitor{ std::move(fileMonitor) }
 {
 }
 
@@ -622,7 +619,7 @@ void VisualizationModel::StartMonitoringFileSystem()
       m_fileChangeNotifications.Emplace(std::move(notification));
    };
 
-   m_fileSystemMonitor.Start(m_rootPath, std::move(callback));
+   m_fileSystemMonitor->Start(m_rootPath, std::move(callback));
    m_fileSystemNotificationProcessor = std::thread{ [&] { ProcessFileSystemChanges(); } };
 }
 
@@ -633,7 +630,7 @@ void VisualizationModel::StopMonitoringFileSystem()
       return;
    }
 
-   m_fileSystemMonitor.Stop();
+   m_fileSystemMonitor->Stop();
    m_shouldKeepProcessingNotifications.store(false);
    m_fileChangeNotifications.AbandonWait();
 }
@@ -860,7 +857,7 @@ Tree<VizBlock>::Node* VisualizationModel::FindNodeUsingRelativePath(
 
 bool VisualizationModel::IsFileSystemBeingMonitored() const
 {
-   return m_fileSystemMonitor.IsActive();
+   return m_fileSystemMonitor->IsActive();
 }
 
 boost::optional<FileChangeNotification> VisualizationModel::FetchNodeUpdate()

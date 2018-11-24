@@ -13,14 +13,17 @@ public:
    /**
     * @brief Constructs a new tree map laid out using the Squarified algorithm.
     *
+    * @param[in] fileMonitor     The file monitoring implementation to use.
     * @param[in] path            The path representing the root directory of the tree map.
     */
-   SquarifiedTreeMap(const std::experimental::filesystem::path& path);
+   SquarifiedTreeMap(
+      std::unique_ptr<FileMonitorBase> fileMonitor,
+      const std::experimental::filesystem::path& path);
 
    /**
-    * @brief Parse
+    * @brief Parses the file system tree into the model.
     *
-    * @param theTree
+    * @param[in] theTree         The filesystem tree to be parsed.
     */
    void Parse(const std::shared_ptr<Tree<VizBlock>>& theTree) override;
 

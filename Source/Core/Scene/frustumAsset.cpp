@@ -246,7 +246,7 @@ namespace Asset
 
       Camera renderCamera = camera;
       renderCamera.SetPosition(QVector3D{ 500, 100, 0 });
-      renderCamera.SetOrientation(0.0f, 0.0f);
+      renderCamera.SetOrientation(0.0, 0.0);
       renderCamera.SetNearPlane(1.0f);
       renderCamera.SetFarPlane(2000.0f);
 

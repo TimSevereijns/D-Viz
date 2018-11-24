@@ -20,9 +20,21 @@
 
 #include <QCursor>
 
+#if defined(Q_OS_WIN)
+   #include "Visualizations/windowsFileMonitor.h"
+#elif defined(Q_OS_LINUX)
+   #include "Visualizations/linuxFileMonitor.h"
+#endif // Q_OS_LINUX
+
 namespace
 {
-   constexpr const std::wstring_view BYTES_READOUT_STRING = L" bytes";
+#if defined(Q_OS_WIN)
+   using FileSystemMonitor = WindowsFileMonitor;
+#elif defined(Q_OS_LINUX)
+   using FileSystemMonitor = LinuxFileMonitor;
+#endif // Q_OS_LINUX
+
+   constexpr const std::wstring_view BYTES_READOUT_STRING{ L" bytes" };
 
    /**
     * @brief Converts bytes to binary prefix size and notation.
@@ -142,7 +154,9 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
 {
    AllowUserInteractionWithModel(false);
 
-   m_model = std::make_unique<SquarifiedTreeMap>(parameters.rootDirectory);
+   m_model = std::make_unique<SquarifiedTreeMap>(
+      std::make_unique<FileSystemMonitor>(),
+      parameters.rootDirectory);
 
    m_view->OnScanStarted();
 

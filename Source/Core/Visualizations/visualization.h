@@ -16,24 +16,11 @@
 
 #include "../DataStructs/vizBlock.h"
 #include "../Settings/settings.h"
+#include "../Utilities/threadSafeQueue.hpp"
 #include "../Viewport/camera.h"
 
 #include "fileChangeNotification.hpp"
-
-#if defined(Q_OS_WIN)
-   #include "windowsFileMonitor.h"
-#elif defined(Q_OS_LINUX)
-   #include "linuxFileMonitor.h"
-#endif // Q_OS_LINUX
-
-namespace Detail
-{
-#if defined(Q_OS_WIN)
-   using FileSystemMonitor = WindowsFileMonitor;
-#elif defined(Q_OS_LINUX)
-   using FileSystemMonitor = LinuxFileMonitor;
-#endif // Q_OS_LINUX
-}
+#include "fileMonitorBase.h"
 
 struct TreemapMetadata
 {
@@ -49,7 +36,9 @@ class VisualizationModel
 {
 public:
 
-   VisualizationModel(const std::experimental::filesystem::path& path);
+   VisualizationModel(
+      std::unique_ptr<FileMonitorBase> fileMonitor,
+      const std::experimental::filesystem::path& path);
 
    virtual ~VisualizationModel() noexcept;
 
@@ -58,13 +47,6 @@ public:
 
    VisualizationModel(VisualizationModel&&) = delete;
    VisualizationModel& operator=(VisualizationModel&&) = delete;
-
-   static const double PADDING_RATIO;
-   static const double MAX_PADDING;
-
-   static const float BLOCK_HEIGHT;
-   static const float ROOT_BLOCK_WIDTH;
-   static const float ROOT_BLOCK_DEPTH;
 
    /**
     * @brief Parses the specified directory scan into vertex and color data.
@@ -274,7 +256,7 @@ protected:
 
    std::atomic_bool m_shouldKeepProcessingNotifications{ true };
 
-   Detail::FileSystemMonitor m_fileSystemMonitor;
+   std::unique_ptr<FileMonitorBase> m_fileSystemMonitor;
 
    // This queue contains raw notifications of file system changes that still need to be
    // parsed and the turned into tree node change notifications.

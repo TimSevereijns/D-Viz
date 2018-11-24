@@ -52,23 +52,25 @@ namespace
       VizBlock& node,
       const size_t nodeCount)
    {
+      using namespace Constants;
+
       const auto blockWidthPlusPadding = land.GetWidth() * percentageOfParent;
       const auto ratioBasedPadding = ((land.GetWidth() * 0.1) / nodeCount) / 2.0;
 
-      auto widthPaddingPerSide = std::min(ratioBasedPadding, VisualizationModel::MAX_PADDING);
+      auto widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
       auto finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPaddingPerSide);
       if (finalBlockWidth < 0.0)
       {
-         finalBlockWidth = blockWidthPlusPadding * VisualizationModel::PADDING_RATIO;
-         widthPaddingPerSide = (blockWidthPlusPadding * (1.0 - VisualizationModel::PADDING_RATIO)) / 2.0;
+         finalBlockWidth = blockWidthPlusPadding * Visualization::PADDING_RATIO;
+         widthPaddingPerSide = (blockWidthPlusPadding * (1.0 - Visualization::PADDING_RATIO)) / 2.0;
       }
 
-      const auto ratioBasedBlockDepth = std::abs(land.GetDepth() * VisualizationModel::PADDING_RATIO);
+      const auto ratioBasedBlockDepth = std::abs(land.GetDepth() * Visualization::PADDING_RATIO);
       const auto depthPaddingPerSide = std::min((land.GetDepth() - ratioBasedBlockDepth) / 2.0,
-         VisualizationModel::MAX_PADDING);
+         Visualization::MAX_PADDING);
 
-      const auto finalBlockDepth = (depthPaddingPerSide == VisualizationModel::MAX_PADDING)
-         ? std::abs(land.GetDepth()) - (2.0 * VisualizationModel::MAX_PADDING)
+      const auto finalBlockDepth = (depthPaddingPerSide == Visualization::MAX_PADDING)
+         ? std::abs(land.GetDepth()) - (2.0 * Visualization::MAX_PADDING)
          : ratioBasedBlockDepth;
 
       const PrecisePoint offset
@@ -82,12 +84,12 @@ namespace
       {
          land.GetOrigin() + offset,
          finalBlockWidth,
-         VisualizationModel::BLOCK_HEIGHT,
+         Visualization::BLOCK_HEIGHT,
          finalBlockDepth
       };
 
       const auto additionalCoverage = blockWidthPlusPadding / land.GetWidth();
-      Expects(additionalCoverage);
+      Expects(additionalCoverage > 0.0);
 
       return additionalCoverage;
    }
@@ -109,23 +111,25 @@ namespace
       VizBlock& node,
       const size_t nodeCount)
    {
+      using namespace Constants;
+
       const auto blockDepthPlusPadding = std::abs(land.GetDepth() * percentageOfParent);
       const auto ratioBasedPadding = (land.GetDepth() * 0.1) / nodeCount / 2.0;
 
-      auto depthPaddingPerSide = std::min(ratioBasedPadding, VisualizationModel::MAX_PADDING);
+      auto depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
       auto finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPaddingPerSide);
       if (finalBlockDepth < 0)
       {
-         finalBlockDepth = blockDepthPlusPadding * VisualizationModel::PADDING_RATIO;
-         depthPaddingPerSide = (blockDepthPlusPadding * (1.0 - VisualizationModel::PADDING_RATIO)) / 2.0;
+         finalBlockDepth = blockDepthPlusPadding * Visualization::PADDING_RATIO;
+         depthPaddingPerSide = (blockDepthPlusPadding * (1.0 - Visualization::PADDING_RATIO)) / 2.0;
       }
 
-      const auto ratioBasedWidth = land.GetWidth() * VisualizationModel::PADDING_RATIO;
+      const auto ratioBasedWidth = land.GetWidth() * Visualization::PADDING_RATIO;
       const auto widthPaddingPerSide = std::min((land.GetWidth() - ratioBasedWidth) / 2.0,
-         VisualizationModel::MAX_PADDING);
+         Visualization::MAX_PADDING);
 
-      const auto finalBlockWidth = (widthPaddingPerSide == VisualizationModel::MAX_PADDING)
-         ? land.GetWidth() - (2.0 * VisualizationModel::MAX_PADDING)
+      const auto finalBlockWidth = (widthPaddingPerSide == Visualization::MAX_PADDING)
+         ? land.GetWidth() - (2.0 * Visualization::MAX_PADDING)
          : ratioBasedWidth;
 
       const PrecisePoint offset
@@ -139,7 +143,7 @@ namespace
       {
          land.GetOrigin() + offset,
          finalBlockWidth,
-         VisualizationModel::BLOCK_HEIGHT,
+         Visualization::BLOCK_HEIGHT,
          std::abs(finalBlockDepth)
       };
 
@@ -174,7 +178,7 @@ Block SquarifiedTreeMap::ComputeRemainingArea(const Block& block)
    {
       /* origin = */ nearCorner,
       /* width = */ farCorner.x() - nearCorner.x(),
-      /* height = */ VisualizationModel::BLOCK_HEIGHT,
+      /* height = */ Constants::Visualization::BLOCK_HEIGHT,
       /* depth = */ farCorner.z() - nearCorner.z()
    };
 
@@ -471,8 +475,11 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
    }
 }
 
-SquarifiedTreeMap::SquarifiedTreeMap(const std::experimental::filesystem::path& path) :
-   VisualizationModel{ path }
+SquarifiedTreeMap::SquarifiedTreeMap(
+   std::unique_ptr<FileMonitorBase> fileMonitor,
+   const std::experimental::filesystem::path& path)
+   :
+   VisualizationModel{ std::move(fileMonitor), path }
 {
 }
 
@@ -499,9 +506,9 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
    const Block rootBlock
    {
       PrecisePoint{ },
-      VisualizationModel::ROOT_BLOCK_WIDTH,
-      VisualizationModel::BLOCK_HEIGHT,
-      VisualizationModel::ROOT_BLOCK_DEPTH
+      static_cast<double>(Constants::Visualization::ROOT_BLOCK_WIDTH),
+      static_cast<double>(Constants::Visualization::BLOCK_HEIGHT),
+      static_cast<double>(Constants::Visualization::ROOT_BLOCK_DEPTH)
    };
 
    m_fileTree->GetRoot()->GetData().block = rootBlock;

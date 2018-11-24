@@ -6,6 +6,7 @@
 #ifdef Q_OS_WIN
 
 #include "fileChangeNotification.hpp"
+#include "fileMonitorBase.h"
 #include "Utilities/threadSafeQueue.hpp"
 
 #include "boost/optional.hpp"
@@ -80,19 +81,19 @@ namespace Detail
 /**
  * @brief The WindowsFileMonitor class
  */
-class WindowsFileMonitor
+class WindowsFileMonitor : public FileMonitorBase
 {
 public:
 
    WindowsFileMonitor() = default;
 
-   ~WindowsFileMonitor() noexcept;
-
-   WindowsFileMonitor(WindowsFileMonitor&& other) = delete;
-   WindowsFileMonitor& operator=(WindowsFileMonitor&& other) = delete;
+   ~WindowsFileMonitor() noexcept override;
 
    WindowsFileMonitor(const WindowsFileMonitor& other) = delete;
    WindowsFileMonitor& operator=(const WindowsFileMonitor& other) = delete;
+
+   WindowsFileMonitor(WindowsFileMonitor&& other) = default;
+   WindowsFileMonitor& operator=(WindowsFileMonitor&& other) = default;
 
    /**
     * @brief Starts monitoring the file system for changes.
@@ -101,17 +102,17 @@ public:
     */
    void Start(
       const std::experimental::filesystem::path& path,
-      const std::function<void (FileChangeNotification&&)>& onNotificationCallback);
+      const std::function<void (FileChangeNotification&&)>& onNotificationCallback) override;
 
    /**
     * @brief Stops monitoring the file system for changes.
     */
-   void Stop();
+   void Stop() override;
 
    /**
     * @returns True if the file system monitor is actively monitoring.
     */
-   bool IsActive() const;
+   bool IsActive() const override;
 
 private:
 

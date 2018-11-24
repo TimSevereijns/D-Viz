@@ -14,8 +14,20 @@
 
 #include <gsl/gsl_assert>
 
-namespace
+#if defined(Q_OS_WIN)
+   #include "Visualizations/windowsFileMonitor.h"
+#elif defined(Q_OS_LINUX)
+   #include "Visualizations/linuxFileMonitor.h"
+#endif // Q_OS_LINUX
+
+namespace Detail
 {
+#if defined(Q_OS_WIN)
+   using FileSystemMonitor = WindowsFileMonitor;
+#elif defined(Q_OS_LINUX)
+   using FileSystemMonitor = LinuxFileMonitor;
+#endif // Q_OS_LINUX
+
    const auto pathToTestData = std::experimental::filesystem::path{ "../../Tests/asio" };
 
    void VerifyExistenceOfSampleDirectory()
@@ -28,6 +40,26 @@ namespace
 
       std::cout << "Please unzip boost-asio.zip manually, and re-run tests." << std::endl;
    }
+
+   class MockFileMonitor : public FileMonitorBase
+   {
+   public:
+
+      void Start(
+         const std::experimental::filesystem::path& /*path*/,
+         const std::function<void (FileChangeNotification&&)>& /*onNotificationCallback*/) override
+      {
+      }
+
+      void Stop() override
+      {
+      }
+
+      bool IsActive() const override
+      {
+         return false;
+      }
+   };
 }
 
 class ModelTester : public QObject
@@ -49,7 +81,7 @@ private slots:
 
 private:
 
-   std::experimental::filesystem::path m_path{ pathToTestData };
+   std::experimental::filesystem::path m_path{ Detail::pathToTestData };
 
    DriveScanner m_scanner;
 
@@ -68,7 +100,7 @@ void ModelTester::initTestCase()
    Bootstrapper::RegisterMetaTypes();
    Bootstrapper::InitializeLogs();
 
-   VerifyExistenceOfSampleDirectory();
+   Detail::VerifyExistenceOfSampleDirectory();
 
    const auto progressCallback = [&] (const ScanningProgress& /*progress*/)
    {
@@ -97,7 +129,10 @@ void ModelTester::init()
 {
    Expects(m_tree);
 
-   m_model = std::make_unique<SquarifiedTreeMap>(m_path);
+   m_model = std::make_unique<SquarifiedTreeMap>(
+      std::make_unique<Detail::MockFileMonitor>(),
+      m_path);
+
    m_model->Parse(m_tree);
 }
 
@@ -149,12 +184,14 @@ void ModelTester::HighlightDescendants()
    const Tree<VizBlock>::Node* rootNode = m_tree->GetRoot();
    m_model->HighlightDescendants(*rootNode, visualizationParameters);
 
-   const std::size_t leafCount = std::count_if(
+   const auto leafCount = std::count_if(
       Tree<VizBlock>::LeafIterator{ rootNode },
       Tree<VizBlock>::LeafIterator{ },
       [] (const auto&) { return true; });
 
-   QCOMPARE(m_model->GetHighlightedNodes().size(), leafCount);
+   QCOMPARE(
+      static_cast<std::int32_t>(m_model->GetHighlightedNodes().size()),
+      static_cast<std::int32_t>(leafCount));
 }
 
 void ModelTester::HighlightAncestors()
@@ -172,8 +209,8 @@ void ModelTester::HighlightAncestors()
    m_model->HighlightAncestors(*target);
 
    QCOMPARE(
-      static_cast<std::uint64_t>(m_model->GetHighlightedNodes().size()),
-      static_cast<std::uint64_t>(std::size_t{ 4u }));
+      static_cast<std::int32_t>(m_model->GetHighlightedNodes().size()),
+      static_cast<std::int32_t>(4));
 }
 
 void ModelTester::HighlightAllMatchingExtensions()
@@ -195,16 +232,16 @@ void ModelTester::HighlightAllMatchingExtensions()
       shouldSearchFiles,
       shouldSearchDirectories);
 
-   const std::size_t headerCount = std::count_if(
+   const auto headerCount = std::count_if(
       Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() },
       Tree<VizBlock>::PostOrderIterator{ },
       [] (const auto& node) { return node->file.extension == L".hpp"; });
 
    QCOMPARE(
-      static_cast<std::uint64_t>(m_model->GetHighlightedNodes().size()),
-      static_cast<std::uint64_t>(headerCount));
+      static_cast<std::int32_t>(m_model->GetHighlightedNodes().size()),
+      static_cast<std::int32_t>(headerCount));
 }
 
-REGISTER_TEST(ModelTester)
+REGISTER_TEST(ModelTester) // NOLINT
 
 //#include "modelTester.moc"

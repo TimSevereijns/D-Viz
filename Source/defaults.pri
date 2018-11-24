@@ -94,6 +94,7 @@ HEADERS += \
    $$PWD/Core/Viewport/mouseContextMenu.h \
    $$PWD/Core/Visualizations/linuxFileMonitor.h \
    $$PWD/Core/Visualizations/fileChangeNotification.hpp \
+   $$PWD/Core/Visualizations/fileMonitorBase.h \
    $$PWD/Core/Visualizations/squarifiedTreemap.h \
    $$PWD/Core/Visualizations/visualization.h \
    $$PWD/Core/Visualizations/windowsFileMonitor.h \
