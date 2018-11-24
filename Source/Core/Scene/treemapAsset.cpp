@@ -9,7 +9,7 @@
 #include "../Visualizations/visualization.h"
 
 #include <boost/optional.hpp>
-#include <gsl/gsl>
+#include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
 #include <Tree/Tree.hpp>
 

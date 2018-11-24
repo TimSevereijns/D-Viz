@@ -10,8 +10,10 @@
 #include <DataStructs/driveScanningParameters.h>
 #include <DataStructs/scanningProgress.hpp>
 #include <DriveScanner/driveScanner.h>
+#include "Visualizations/fileChangeNotification.hpp"
 #include <Visualizations/squarifiedTreemap.h>
 
+#include <boost/optional.hpp>
 #include <gsl/gsl_assert>
 
 #if defined(Q_OS_WIN)
@@ -28,12 +30,12 @@ namespace Detail
    using FileSystemMonitor = LinuxFileMonitor;
 #endif // Q_OS_LINUX
 
-   const auto pathToTestData = std::experimental::filesystem::path{ "../../Tests/asio" };
+   const auto sampleDirectory = std::experimental::filesystem::path{ "../../Tests/asio" };
 
    void VerifyExistenceOfSampleDirectory()
    {
-      if (std::experimental::filesystem::exists(pathToTestData)
-         && std::experimental::filesystem::is_directory(pathToTestData))
+      if (std::experimental::filesystem::exists(sampleDirectory)
+         && std::experimental::filesystem::is_directory(sampleDirectory))
       {
          return;
       }
@@ -41,24 +43,59 @@ namespace Detail
       std::cout << "Please unzip boost-asio.zip manually, and re-run tests." << std::endl;
    }
 
+   /**
+    * @brief The MockFileMonitor class
+    */
    class MockFileMonitor : public FileMonitorBase
    {
    public:
 
+      ~MockFileMonitor() noexcept override
+      {
+         if (m_workerThread.joinable())
+         {
+            m_workerThread.join();
+         }
+      }
+
       void Start(
          const std::experimental::filesystem::path& /*path*/,
-         const std::function<void (FileChangeNotification&&)>& /*onNotificationCallback*/) override
+         const std::function<void (FileChangeNotification&&)>& callback) override
       {
+         m_callback = callback;
+         m_workerThread = std::thread{ [&]{ SendFakeNotification(); } };
+         m_isActive = true;
       }
 
       void Stop() override
       {
+         m_isActive = false;
       }
 
       bool IsActive() const override
       {
-         return false;
+         return m_isActive;
       }
+
+   private:
+
+      void SendFakeNotification() const noexcept
+      {
+         FileChangeNotification notification
+         {
+            "spawn.hpp", //< @note This has to be an actual file in the sample directory.
+            FileSystemChange::MODIFIED,
+            std::chrono::high_resolution_clock::now()
+         };
+
+         m_callback(std::move(notification));
+      }
+
+      std::function<void (FileChangeNotification&&)> m_callback;
+
+      std::thread m_workerThread;
+
+      bool m_isActive{ false };
    };
 }
 
@@ -78,10 +115,11 @@ private slots:
    void HighlightDescendants();
    void HighlightAncestors();
    void HighlightAllMatchingExtensions();
+   void TrackingFileChange();
 
 private:
 
-   std::experimental::filesystem::path m_path{ Detail::pathToTestData };
+   std::experimental::filesystem::path m_path{ Detail::sampleDirectory };
 
    DriveScanner m_scanner;
 
@@ -95,6 +133,9 @@ private:
    std::unique_ptr<SquarifiedTreeMap> m_model{ nullptr };
 };
 
+/**
+ * @brief This preamble is run only once.
+ */
 void ModelTester::initTestCase()
 {
    Bootstrapper::RegisterMetaTypes();
@@ -110,6 +151,8 @@ void ModelTester::initTestCase()
    const auto completionCallback = [&]
       (const ScanningProgress& progress, std::shared_ptr<Tree<VizBlock>> tree)
    {
+      QVERIFY(tree != nullptr);
+
       m_bytesScanned = progress.bytesProcessed.load();
       m_filesScanned = progress.filesScanned.load();
       m_directoriesScanned = progress.directoriesScanned.load();
@@ -125,9 +168,12 @@ void ModelTester::initTestCase()
    completionSpy.wait(10'000);
 }
 
+/**
+ * @brief This preamble is run before each test.
+ */
 void ModelTester::init()
 {
-   Expects(m_tree);
+   QVERIFY(m_tree != nullptr);
 
    m_model = std::make_unique<SquarifiedTreeMap>(
       std::make_unique<Detail::MockFileMonitor>(),
@@ -163,11 +209,9 @@ void ModelTester::SelectingNodes()
 
    const Tree<VizBlock>::Node* sampleNode = m_tree->GetRoot();
    m_model->SelectNode(*sampleNode);
-
    QVERIFY(m_model->GetSelectedNode() == sampleNode);
 
    m_model->ClearSelectedNode();
-
    QVERIFY(m_model->GetSelectedNode() == nullptr);
 }
 
@@ -241,6 +285,26 @@ void ModelTester::HighlightAllMatchingExtensions()
       static_cast<std::int32_t>(m_model->GetHighlightedNodes().size()),
       static_cast<std::int32_t>(headerCount));
 }
+
+void ModelTester::TrackingFileChange()
+{
+   m_model->StartMonitoringFileSystem();
+
+   boost::optional<FileChangeNotification> notification;
+   while (!notification)
+   {
+      notification = m_model->FetchNodeUpdate();
+   }
+
+   QCOMPARE(notification->status, FileSystemChange::MODIFIED);
+
+   m_model->StopMonitoringFileSystem();
+}
+
+//void ModelTester::TrackingFileDeletion()
+//{
+//   QVERIFY(true);
+//}
 
 REGISTER_TEST(ModelTester) // NOLINT
 

@@ -6,7 +6,7 @@
 
 include(../defaults.pri)
 
-QT += testlib
+QT += testlib widgets
 
 QT -= gui
 
