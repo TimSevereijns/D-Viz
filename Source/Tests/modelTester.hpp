@@ -303,7 +303,7 @@ void ModelTester::HighlightAllMatchingExtensions()
 void ModelTester::TogglingFileMonitoring()
 {
    QCOMPARE(m_model->IsFileSystemBeingMonitored(), false);
-F   m_model->StartMonitoringFileSystem();
+   m_model->StartMonitoringFileSystem();
    QCOMPARE(m_model->IsFileSystemBeingMonitored(), true);
    m_model->StopMonitoringFileSystem();
    QCOMPARE(m_model->IsFileSystemBeingMonitored(), false);
