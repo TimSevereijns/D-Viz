@@ -211,7 +211,7 @@ bool Controller::IsFileSystemBeingMonitored() const
    return m_model->IsFileSystemBeingMonitored();
 }
 
-boost::optional<FileChangeNotification> Controller::FetchNodeChangeNotification()
+boost::optional<FileChangeNotification> Controller::FetchFileModification()
 {
    return m_model->FetchNodeUpdate();
 }

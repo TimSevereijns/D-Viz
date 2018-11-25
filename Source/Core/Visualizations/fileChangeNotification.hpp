@@ -7,12 +7,12 @@
 
 #include <Tree/Tree.hpp>
 
-enum class FileSystemChange
+enum class FileModification
 {
    NONE,
    CREATED,
    DELETED,
-   MODIFIED,
+   TOUCHED,
    RENAMED
 };
 
@@ -36,7 +36,7 @@ struct FileChangeNotification
 
    FileChangeNotification(
       std::experimental::filesystem::path path,
-      FileSystemChange status,
+      FileModification status,
       const std::chrono::high_resolution_clock::time_point& timestamp)
       :
       relativePath{ std::move(path) },
@@ -49,7 +49,7 @@ struct FileChangeNotification
    std::experimental::filesystem::path relativePath;
 
    // The type of change that occurred.
-   FileSystemChange status{ FileSystemChange::NONE };
+   FileModification status{ FileModification::NONE };
 
    // A pointer to the corresponding node in the tree, should it exist.
    const typename Tree<VizBlock>::Node* node{ nullptr };

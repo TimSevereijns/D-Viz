@@ -706,19 +706,19 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
 
    if (gamepad.axisLeftY() > 0.0)
    {
-      m_camera.OffsetPosition(
-         static_cast<float>(Constants::Input::MOVEMENT_AMPLIFICATION)
-         * static_cast<float>(m_controller.GetSettingsManager().GetCameraSpeed())
-         * static_cast<float>(-gamepad.axisLeftY())
+      m_camera.OffsetPosition(static_cast<float>(
+         Constants::Input::MOVEMENT_AMPLIFICATION
+         * m_controller.GetSettingsManager().GetCameraSpeed()
+         * -gamepad.axisLeftY())
          * m_camera.Forward());
    }
 
    if (gamepad.axisLeftX() > 0.0)
    {
-      m_camera.OffsetPosition(
-         static_cast<float>(Constants::Input::MOVEMENT_AMPLIFICATION)
-         * static_cast<float>(m_controller.GetSettingsManager().GetCameraSpeed())
-         * static_cast<float>(gamepad.axisLeftX())
+      m_camera.OffsetPosition(static_cast<float>(
+         Constants::Input::MOVEMENT_AMPLIFICATION
+         * m_controller.GetSettingsManager().GetCameraSpeed()
+         * gamepad.axisLeftX())
          * m_camera.Right());
    }
 }
@@ -799,32 +799,32 @@ void GLCanvas::ProcessFileTreeChanges()
 
    Asset::Treemap* treemap = nullptr;
 
-   auto changeNotification = m_controller.FetchNodeChangeNotification();
-   if (changeNotification)
+   auto notification = m_controller.FetchFileModification();
+   if (notification)
    {
       treemap = GetAsset<Asset::Tag::Treemap>();
    }
 
-   while (changeNotification)
+   while (notification)
    {
-      const auto& node = changeNotification->node;
+      const auto& node = notification->node;
       if (m_controller.GetSettingsManager().ShouldBlockBeProcessed(node->GetData()))
       {
-          switch (changeNotification->status)
+          switch (notification->status)
           {
-             case FileSystemChange::CREATED:
+             case FileModification::CREATED:
                 // If a file is newly added, then there's nothing to update in the existing
                 // visualization.
                 break;
-             case FileSystemChange::DELETED:
-                treemap->UpdateVBO(*changeNotification->node, Asset::Event::DELETED);
+             case FileModification::DELETED:
+                treemap->UpdateVBO(*notification->node, Asset::Event::DELETED);
                 break;
-             case FileSystemChange::MODIFIED:
-                treemap->UpdateVBO(*changeNotification->node, Asset::Event::MODIFIED);
+             case FileModification::TOUCHED:
+                treemap->UpdateVBO(*notification->node, Asset::Event::TOUCHED);
                 break;
-             case FileSystemChange::RENAMED:
+             case FileModification::RENAMED:
                 // @todo I'll need to be notified of the old name to pick up rename events.
-                treemap->UpdateVBO(*changeNotification->node, Asset::Event::RENAMED);
+                treemap->UpdateVBO(*notification->node, Asset::Event::RENAMED);
                 break;
              default:
                 Expects(false);
@@ -844,7 +844,7 @@ void GLCanvas::ProcessFileTreeChanges()
          break;
       }
 
-      changeNotification = m_controller.FetchNodeChangeNotification();
+      notification = m_controller.FetchFileModification();
    }
 }
 

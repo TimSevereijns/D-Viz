@@ -50,6 +50,11 @@ namespace Detail
    {
    public:
 
+      MockFileMonitor(std::function<FileChangeNotification ()> notificationGenerator)
+         : m_notificationGenerator{ std::move(notificationGenerator) }
+      {
+      }
+
       ~MockFileMonitor() noexcept override
       {
          if (m_workerThread.joinable())
@@ -59,9 +64,10 @@ namespace Detail
       }
 
       void Start(
-         const std::experimental::filesystem::path& /*path*/,
+         const std::experimental::filesystem::path& path,
          const std::function<void (FileChangeNotification&&)>& callback) override
       {
+         m_pathToMonitor = path;
          m_callback = callback;
          m_workerThread = std::thread{ [&]{ SendFakeNotification(); } };
          m_isActive = true;
@@ -77,23 +83,26 @@ namespace Detail
          return m_isActive;
       }
 
+      std::experimental::filesystem::path GetPathToMonitor() const noexcept
+      {
+         return m_pathToMonitor;
+      }
+
    private:
 
       void SendFakeNotification() const noexcept
       {
-         FileChangeNotification notification
-         {
-            "spawn.hpp", //< @note This has to be an actual file in the sample directory.
-            FileSystemChange::MODIFIED,
-            std::chrono::high_resolution_clock::now()
-         };
-
+         auto notification = m_notificationGenerator();
          m_callback(std::move(notification));
       }
+
+      std::function<FileChangeNotification ()> m_notificationGenerator;
 
       std::function<void (FileChangeNotification&&)> m_callback;
 
       std::thread m_workerThread;
+
+      std::experimental::filesystem::path m_pathToMonitor;
 
       bool m_isActive{ false };
    };
@@ -115,9 +124,12 @@ private slots:
    void HighlightDescendants();
    void HighlightAncestors();
    void HighlightAllMatchingExtensions();
-   void TrackingFileChange();
+   void TogglingFileMonitoring();
+   void TrackingFileModification();
 
 private:
+
+   FileChangeNotification m_sampleNotification;
 
    std::experimental::filesystem::path m_path{ Detail::sampleDirectory };
 
@@ -175,8 +187,10 @@ void ModelTester::init()
 {
    QVERIFY(m_tree != nullptr);
 
+   auto notificationGenerator = [&] { return m_sampleNotification; };
+
    m_model = std::make_unique<SquarifiedTreeMap>(
-      std::make_unique<Detail::MockFileMonitor>(),
+      std::make_unique<Detail::MockFileMonitor>(std::move(notificationGenerator)),
       m_path);
 
    m_model->Parse(m_tree);
@@ -286,8 +300,27 @@ void ModelTester::HighlightAllMatchingExtensions()
       static_cast<std::int32_t>(headerCount));
 }
 
-void ModelTester::TrackingFileChange()
+void ModelTester::TogglingFileMonitoring()
 {
+   QCOMPARE(m_model->IsFileSystemBeingMonitored(), false);
+F   m_model->StartMonitoringFileSystem();
+   QCOMPARE(m_model->IsFileSystemBeingMonitored(), true);
+   m_model->StopMonitoringFileSystem();
+   QCOMPARE(m_model->IsFileSystemBeingMonitored(), false);
+}
+
+void ModelTester::TrackingFileModification()
+{
+   // The following notification will be read by the MockFileMonitor and sent to the model. Note
+   // that the provided path has to be a relative path to an actual file in the sample directory.
+   // If the path doesn't exist then we can't locate a matching node in the tree.
+   m_sampleNotification = FileChangeNotification
+   {
+      "spawn.hpp",
+      FileModification::TOUCHED,
+      std::chrono::high_resolution_clock::now()
+   };
+
    m_model->StartMonitoringFileSystem();
 
    boost::optional<FileChangeNotification> notification;
@@ -296,15 +329,15 @@ void ModelTester::TrackingFileChange()
       notification = m_model->FetchNodeUpdate();
    }
 
-   QCOMPARE(notification->status, FileSystemChange::MODIFIED);
+   const auto modifiedNode = notification->node;
+
+   QCOMPARE(notification->relativePath.c_str(), "spawn.hpp");
+   QCOMPARE(notification->status, FileModification::TOUCHED);
+   QCOMPARE(modifiedNode->GetData().file.name, std::wstring{ L"spawn" });
+   QCOMPARE(modifiedNode->GetData().file.extension, std::wstring{ L".hpp" });
 
    m_model->StopMonitoringFileSystem();
 }
-
-//void ModelTester::TrackingFileDeletion()
-//{
-//   QVERIFY(true);
-//}
 
 REGISTER_TEST(ModelTester) // NOLINT
 

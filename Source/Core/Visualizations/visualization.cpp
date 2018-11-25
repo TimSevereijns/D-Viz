@@ -332,22 +332,22 @@ namespace
    {
       switch (notification.status)
       {
-         case FileSystemChange::CREATED:
+         case FileModification::CREATED:
             spdlog::get(Constants::Logging::FILESYSTEM_LOG)->info(
                fmt::format("Create: {}", notification.relativePath.string()));
             break;
 
-         case FileSystemChange::DELETED:
+         case FileModification::DELETED:
             spdlog::get(Constants::Logging::FILESYSTEM_LOG)->info(
                fmt::format("Deleted: {}", notification.relativePath.string()));
             break;
 
-         case FileSystemChange::MODIFIED:
+         case FileModification::TOUCHED:
             spdlog::get(Constants::Logging::FILESYSTEM_LOG)->info(
                fmt::format("Modified: {}", notification.relativePath.string()));
             break;
 
-         case FileSystemChange::RENAMED:
+         case FileModification::RENAMED:
             spdlog::get(Constants::Logging::FILESYSTEM_LOG)->info(
                fmt::format("Renamed: {}", notification.relativePath.string()));
             break;
@@ -652,8 +652,8 @@ void VisualizationModel::ProcessFileSystemChanges()
       const auto successfullyResolved = ResolveNotification(*notification);
       if (successfullyResolved)
       {
-         m_pendingGraphicalUpdates.Emplace(*notification);
-         m_pendingModelChanges.emplace(*notification);
+         m_pendingViewUpdates.Emplace(*notification);
+         m_pendingModelUpdates.emplace(*notification);
       }
    }
 }
@@ -668,7 +668,7 @@ bool VisualizationModel::ResolveNotification(FileChangeNotification& notificatio
 
 void VisualizationModel::UpdateTreemap()
 {
-   for (const auto& change : m_pendingModelChanges)
+   for (const auto& change : m_pendingModelUpdates)
    {
       UpdateAffectedNodes(change);
    }
@@ -684,7 +684,7 @@ void VisualizationModel::UpdateAffectedNodes(const FileChangeNotification& notif
 
    std::error_code errorCode;
 
-   if (notification.status != FileSystemChange::DELETED
+   if (notification.status != FileModification::DELETED
       && !std::experimental::filesystem::exists(absolutePath)
       && !errorCode)
    {
@@ -700,19 +700,19 @@ void VisualizationModel::UpdateAffectedNodes(const FileChangeNotification& notif
 
    switch (notification.status)
    {
-      case FileSystemChange::CREATED:
+      case FileModification::CREATED:
          OnFileCreation(notification);
          break;
 
-      case FileSystemChange::DELETED:
+      case FileModification::DELETED:
          OnFileDeletion(notification);
          break;
 
-      case FileSystemChange::MODIFIED:
+      case FileModification::TOUCHED:
          OnFileModification(notification);
          break;
 
-      case FileSystemChange::RENAMED:
+      case FileModification::RENAMED:
          OnFileNameChange(notification);
          break;
 
@@ -864,7 +864,7 @@ boost::optional<FileChangeNotification> VisualizationModel::FetchNodeUpdate()
 {
    FileChangeNotification notification;
 
-   const auto retrievedNotification = m_pendingGraphicalUpdates.TryPop(notification);
+   const auto retrievedNotification = m_pendingViewUpdates.TryPop(notification);
    if (!retrievedNotification)
    {
       return boost::none;

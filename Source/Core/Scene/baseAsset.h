@@ -24,7 +24,7 @@ namespace Asset
       HIGHLIGHTED,
       UNSELECTED,
       DELETED,
-      MODIFIED,
+      TOUCHED,
       RENAMED
    };
 

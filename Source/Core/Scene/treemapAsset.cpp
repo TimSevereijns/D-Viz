@@ -862,7 +862,7 @@ namespace Asset
             newColor = RestoreColor(node, m_settingsManager);
             break;
          }
-         case Asset::Event::MODIFIED:
+         case Asset::Event::TOUCHED:
          {           
             newColor = Constants::Colors::BABY_BLUE; //< @todo Pick better color.
             break;

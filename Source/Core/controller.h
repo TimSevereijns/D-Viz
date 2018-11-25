@@ -257,7 +257,7 @@ public:
    /**
     * @brief Fetches oldest, unprocessed file system change notification.
     */
-   boost::optional<FileChangeNotification> FetchNodeChangeNotification();
+   boost::optional<FileChangeNotification> FetchFileModification();
 
 private:
 
