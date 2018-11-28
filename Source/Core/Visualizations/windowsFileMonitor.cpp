@@ -235,21 +235,21 @@ void WindowsFileMonitor::ProcessNotification()
          case FILE_ACTION_ADDED:
          {
             m_notificationCallback(
-               FileChangeNotification{ fileName, FileSystemChange::CREATED, timestamp });
+               FileChangeNotification{ fileName, FileModification::CREATED, timestamp });
 
             break;
          }
          case FILE_ACTION_REMOVED:
          {
             m_notificationCallback(
-               FileChangeNotification{ fileName, FileSystemChange::DELETED, timestamp });
+               FileChangeNotification{ fileName, FileModification::DELETED, timestamp });
 
             break;
          }
          case FILE_ACTION_MODIFIED:
          {
             m_notificationCallback(
-               FileChangeNotification{ fileName, FileSystemChange::MODIFIED, timestamp });
+               FileChangeNotification{ fileName, FileModification::TOUCHED, timestamp });
 
             break;
          }
@@ -264,7 +264,7 @@ void WindowsFileMonitor::ProcessNotification()
             Expects(m_pendingRenameEvent);
 
             m_notificationCallback(
-               FileChangeNotification{ fileName, FileSystemChange::RENAMED, timestamp });
+               FileChangeNotification{ fileName, FileModification::RENAMED, timestamp });
 
             break;
          }

@@ -124,8 +124,8 @@ private slots:
    void HighlightDescendants();
    void HighlightAncestors();
    void HighlightAllMatchingExtensions();
-   void TogglingFileMonitoring();
-   void TrackingFileModification();
+   void ToggleFileMonitoring();
+   void TrackFileModification();
 
 private:
 
@@ -300,8 +300,15 @@ void ModelTester::HighlightAllMatchingExtensions()
       static_cast<std::int32_t>(headerCount));
 }
 
-void ModelTester::TogglingFileMonitoring()
+void ModelTester::ToggleFileMonitoring()
 {
+   m_sampleNotification = FileChangeNotification
+   {
+      "spawn.hpp",
+      FileModification::TOUCHED,
+      std::chrono::high_resolution_clock::now()
+   };
+
    QCOMPARE(m_model->IsFileSystemBeingMonitored(), false);
    m_model->StartMonitoringFileSystem();
    QCOMPARE(m_model->IsFileSystemBeingMonitored(), true);
@@ -309,8 +316,10 @@ void ModelTester::TogglingFileMonitoring()
    QCOMPARE(m_model->IsFileSystemBeingMonitored(), false);
 }
 
-void ModelTester::TrackingFileModification()
+void ModelTester::TrackFileModification()
 {
+   QVERIFY(m_tree != nullptr);
+
    // The following notification will be read by the MockFileMonitor and sent to the model. Note
    // that the provided path has to be a relative path to an actual file in the sample directory.
    // If the path doesn't exist then we can't locate a matching node in the tree.
@@ -330,8 +339,9 @@ void ModelTester::TrackingFileModification()
    }
 
    const auto modifiedNode = notification->node;
+   const std::experimental::filesystem::path path{ "spawn.hpp" };
 
-   QCOMPARE(notification->relativePath.c_str(), "spawn.hpp");
+   QCOMPARE(notification->relativePath, path);
    QCOMPARE(notification->status, FileModification::TOUCHED);
    QCOMPARE(modifiedNode->GetData().file.name, std::wstring{ L"spawn" });
    QCOMPARE(modifiedNode->GetData().file.extension, std::wstring{ L".hpp" });
