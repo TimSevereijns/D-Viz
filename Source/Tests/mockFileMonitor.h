@@ -48,11 +48,6 @@ public:
       return m_isActive;
    }
 
-   std::experimental::filesystem::path GetPathToMonitor() const noexcept
-   {
-      return m_pathToMonitor;
-   }
-
 private:
 
    void SendFakeNotification() const noexcept

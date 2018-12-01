@@ -35,8 +35,8 @@ HEADERS += \
    fileSizeLiterals.hpp \
    mockFileMonitor.h \
    multiTestHarness.h \
-    modelTester.h
+   modelTester.h
 
 SOURCES += \
    mainTest.cpp \
-    modeltester.cpp
+   modelTester.cpp
