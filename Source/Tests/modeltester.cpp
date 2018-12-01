@@ -1,159 +1,33 @@
-#include <QString>
-#include <QtTest>
+#include "modelTester.h"
 
-#include "multiTestHarness.h"
-
-#include <iostream>
+#include <boost/optional.hpp>
+#include <gsl/gsl_assert>
 
 #include <bootstrapper.hpp>
 #include <constants.h>
 #include <DataStructs/driveScanningParameters.h>
 #include <DataStructs/scanningProgress.hpp>
-#include <DriveScanner/driveScanner.h>
-#include "Visualizations/fileChangeNotification.hpp"
-#include <Visualizations/squarifiedTreemap.h>
 
-#include <boost/optional.hpp>
-#include <gsl/gsl_assert>
-
-#if defined(Q_OS_WIN)
-   #include "Visualizations/windowsFileMonitor.h"
-#elif defined(Q_OS_LINUX)
-   #include "Visualizations/linuxFileMonitor.h"
-#endif // Q_OS_LINUX
-
-namespace Detail
+namespace
 {
-#if defined(Q_OS_WIN)
-   using FileSystemMonitor = WindowsFileMonitor;
-#elif defined(Q_OS_LINUX)
-   using FileSystemMonitor = LinuxFileMonitor;
-#endif // Q_OS_LINUX
-
-   const auto sampleDirectory = std::experimental::filesystem::path{ "../../Tests/asio" };
-
-   void VerifyExistenceOfSampleDirectory()
+   void VerifyExistenceOfSampleDirectory(const std::experimental::filesystem::path& directory)
    {
-      if (std::experimental::filesystem::exists(sampleDirectory)
-         && std::experimental::filesystem::is_directory(sampleDirectory))
+      if (std::experimental::filesystem::exists(directory)
+         && std::experimental::filesystem::is_directory(directory))
       {
          return;
       }
 
       std::cout << "Please unzip boost-asio.zip manually, and re-run tests." << std::endl;
    }
-
-   /**
-    * @brief The MockFileMonitor class
-    */
-   class MockFileMonitor : public FileMonitorBase
-   {
-   public:
-
-      MockFileMonitor(std::function<FileChangeNotification ()> notificationGenerator)
-         : m_notificationGenerator{ std::move(notificationGenerator) }
-      {
-      }
-
-      ~MockFileMonitor() noexcept override
-      {
-         if (m_workerThread.joinable())
-         {
-            m_workerThread.join();
-         }
-      }
-
-      void Start(
-         const std::experimental::filesystem::path& path,
-         const std::function<void (FileChangeNotification&&)>& callback) override
-      {
-         m_pathToMonitor = path;
-         m_callback = callback;
-         m_workerThread = std::thread{ [&]{ SendFakeNotification(); } };
-         m_isActive = true;
-      }
-
-      void Stop() override
-      {
-         m_isActive = false;
-      }
-
-      bool IsActive() const override
-      {
-         return m_isActive;
-      }
-
-      std::experimental::filesystem::path GetPathToMonitor() const noexcept
-      {
-         return m_pathToMonitor;
-      }
-
-   private:
-
-      void SendFakeNotification() const noexcept
-      {
-         auto notification = m_notificationGenerator();
-         m_callback(std::move(notification));
-      }
-
-      std::function<FileChangeNotification ()> m_notificationGenerator;
-
-      std::function<void (FileChangeNotification&&)> m_callback;
-
-      std::thread m_workerThread;
-
-      std::experimental::filesystem::path m_pathToMonitor;
-
-      bool m_isActive{ false };
-   };
 }
 
-class ModelTester : public QObject
-{
-   Q_OBJECT
-
-private slots:
-
-   void initTestCase();
-   void init();
-
-   void ProgressCallbackIsInvoked();
-   void ModelIsPopulated();
-   void ScanningProgressDataIsCorrect();
-   void SelectingNodes();
-   void HighlightDescendants();
-   void HighlightAncestors();
-   void HighlightAllMatchingExtensions();
-   void ToggleFileMonitoring();
-   void TrackFileModification();
-
-private:
-
-   FileChangeNotification m_sampleNotification;
-
-   std::experimental::filesystem::path m_path{ Detail::sampleDirectory };
-
-   DriveScanner m_scanner;
-
-   std::uintmax_t m_bytesScanned;
-   std::uintmax_t m_filesScanned;
-   std::uintmax_t m_directoriesScanned;
-
-   std::uint32_t m_progressCallbackInvocations{ 0 };
-
-   std::shared_ptr<Tree<VizBlock>> m_tree{ nullptr };
-   std::unique_ptr<SquarifiedTreeMap> m_model{ nullptr };
-};
-
-/**
- * @brief This preamble is run only once.
- */
 void ModelTester::initTestCase()
 {
    Bootstrapper::RegisterMetaTypes();
    Bootstrapper::InitializeLogs();
 
-   Detail::VerifyExistenceOfSampleDirectory();
+   VerifyExistenceOfSampleDirectory(m_sampleDirectory);
 
    const auto progressCallback = [&] (const ScanningProgress& /*progress*/)
    {
@@ -180,9 +54,6 @@ void ModelTester::initTestCase()
    completionSpy.wait(10'000);
 }
 
-/**
- * @brief This preamble is run before each test.
- */
 void ModelTester::init()
 {
    QVERIFY(m_tree != nullptr);
@@ -190,7 +61,7 @@ void ModelTester::init()
    auto notificationGenerator = [&] { return m_sampleNotification; };
 
    m_model = std::make_unique<SquarifiedTreeMap>(
-      std::make_unique<Detail::MockFileMonitor>(std::move(notificationGenerator)),
+      std::make_unique<MockFileMonitor>(std::move(notificationGenerator)),
       m_path);
 
    m_model->Parse(m_tree);
@@ -350,5 +221,3 @@ void ModelTester::TrackFileModification()
 }
 
 REGISTER_TEST(ModelTester) // NOLINT
-
-//#include "modelTester.moc"

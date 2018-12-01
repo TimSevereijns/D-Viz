@@ -32,9 +32,11 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 LIBS += -L$$DESTDIR -lD-Viz
 
 HEADERS += \
-   modelTester.hpp \
    fileSizeLiterals.hpp \
-   multiTestHarness.h
+   mockFileMonitor.h \
+   multiTestHarness.h \
+    modelTester.h
 
 SOURCES += \
-   mainTest.cpp
+   mainTest.cpp \
+    modeltester.cpp
