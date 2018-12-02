@@ -18,18 +18,6 @@ enum class FileModification
 
 struct VizBlock;
 
-namespace Detail
-{
-   template<typename DataType>
-   inline void HashCombine(
-      std::size_t& seed,
-      const DataType& value)
-   {
-      std::hash<DataType> hasher;
-      seed ^= hasher(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-   }
-}
-
 struct FileChangeNotification
 {
    FileChangeNotification() = default;
@@ -70,34 +58,28 @@ struct FileChangeNotification
 namespace std
 {
    template<>
-   struct less<FileChangeNotification>
+   struct less<std::experimental::filesystem::path>
    {
       /**
        * @returns True if the left-hand side argument is less than the right-hand side argument.
        */
       bool operator()(
-         const FileChangeNotification& lhs,
-         const FileChangeNotification& rhs) const
+         const std::experimental::filesystem::path& lhs,
+         const std::experimental::filesystem::path& rhs) const
       {
-         return lhs.timestamp < rhs.timestamp;
+         return lhs.native() < rhs.native();
       }
    };
 
    template <>
-   struct hash<FileChangeNotification>
+   struct hash<std::experimental::filesystem::path>
    {
       /**
-       * @returns A hash based on the path of the changed file, and the type of change that
-       * occurred.
+       * @returns A hash based on the path of the changed file.
        */
-      std::size_t operator()(const FileChangeNotification& notification) const
+      std::size_t operator()(const std::experimental::filesystem::path& path) const
       {
-         std::hash<std::wstring> hasher;
-
-         auto hash = hasher(notification.relativePath.wstring());
-         Detail::HashCombine(hash, static_cast<int>(notification.status));
-
-         return hash;
+         return std::hash<std::wstring>{ }(path.native());
       }
    };
 }

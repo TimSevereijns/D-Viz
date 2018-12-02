@@ -252,7 +252,7 @@ void Controller::ComputeProgress(const ScanningProgress& progress)
    }
 }
 
-bool Controller::HasVisualizationBeenLoaded() const
+bool Controller::HasModelBeenLoaded() const
 {
    return m_model != nullptr;
 }
@@ -337,7 +337,7 @@ void Controller::SelectNodeViaRay(
 {
    Expects(m_model);
 
-   if (!HasVisualizationBeenLoaded() || !IsUserAllowedToInteractWithModel())
+   if (!HasModelBeenLoaded() || !IsUserAllowedToInteractWithModel())
    {
       return;
    }
@@ -451,9 +451,8 @@ void Controller::ProcessSelection(
    const NodeSelectorType& nodeSelector,
    const std::function<void (std::vector<const Tree<VizBlock>::Node*>&)>& callback)
 {
-   nodeSelector();
-
    Expects(m_model);
+   nodeSelector();
 
    auto& nodes = m_model->GetHighlightedNodes();
    callback(nodes);
@@ -508,7 +507,7 @@ void Controller::SearchTreeMap(
    bool shouldSearchDirectories)
 {
    if (searchQuery.empty()
-      || !HasVisualizationBeenLoaded()
+      || !HasModelBeenLoaded()
       || (!shouldSearchFiles && !shouldSearchDirectories))
    {
       return;

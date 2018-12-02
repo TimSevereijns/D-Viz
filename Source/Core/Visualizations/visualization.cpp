@@ -2,6 +2,7 @@
 
 #include "../constants.h"
 #include "../DriveScanner/driveScanningUtilities.h"
+#include "../Utilities/utilities.hpp"
 #include "fileChangeNotification.hpp"
 
 #include <boost/algorithm/string/case_conv.hpp>
@@ -322,59 +323,15 @@ namespace
 
       return allIntersections;
    }
-
-   /**
-    * @brief LogFileSystemEvent
-    *
-    * @param notification
-    */
-   void LogFileSystemEvent(const FileChangeNotification& notification)
-   {
-      switch (notification.status)
-      {
-         case FileModification::CREATED:
-            spdlog::get(Constants::Logging::FILESYSTEM_LOG)->info(
-               fmt::format("Create: {}", notification.relativePath.string()));
-            break;
-
-         case FileModification::DELETED:
-            spdlog::get(Constants::Logging::FILESYSTEM_LOG)->info(
-               fmt::format("Deleted: {}", notification.relativePath.string()));
-            break;
-
-         case FileModification::TOUCHED:
-            spdlog::get(Constants::Logging::FILESYSTEM_LOG)->info(
-               fmt::format("Modified: {}", notification.relativePath.string()));
-            break;
-
-         case FileModification::RENAMED:
-            spdlog::get(Constants::Logging::FILESYSTEM_LOG)->info(
-               fmt::format("Renamed: {}", notification.relativePath.string()));
-            break;
-
-         default:
-            std::abort();
-      }
-   }
 }
 
 VisualizationModel::VisualizationModel(
-   std::unique_ptr<FileMonitorBase> fileMonitor,
+   std::unique_ptr<FileMonitorImpl> fileMonitor,
    const std::experimental::filesystem::path& path)
    :
    m_rootPath{ path },
-   m_fileSystemMonitor{ std::move(fileMonitor) }
+   m_fileSystemObserver{ std::move(fileMonitor), path }
 {
-}
-
-VisualizationModel::~VisualizationModel() noexcept
-{
-   StopMonitoringFileSystem();
-
-   if (m_fileSystemNotificationProcessor.joinable())
-   {
-      m_fileSystemNotificationProcessor.join();
-   }
 }
 
 void VisualizationModel::UpdateBoundingBoxes()
@@ -609,69 +566,22 @@ void VisualizationModel::HighlightMatchingFileName(
 
 void VisualizationModel::StartMonitoringFileSystem()
 {
-   if (m_rootPath.empty() || !std::experimental::filesystem::exists(m_rootPath))
-   {
-      return;
-   }
+   Expects(m_fileTree != nullptr);
 
-   auto callback = [&] (FileChangeNotification&& notification) noexcept
-   {
-      m_fileChangeNotifications.Emplace(std::move(notification));
-   };
-
-   m_fileSystemMonitor->Start(m_rootPath, std::move(callback));
-   m_fileSystemNotificationProcessor = std::thread{ [&] { ProcessFileSystemChanges(); } };
+   m_fileSystemObserver.StartMonitoring(m_fileTree->GetRoot());
 }
 
 void VisualizationModel::StopMonitoringFileSystem()
 {
-   if (!IsFileSystemBeingMonitored())
-   {
-      return;
-   }
-
-   m_fileSystemMonitor->Stop();
-   m_shouldKeepProcessingNotifications.store(false);
-   m_fileChangeNotifications.AbandonWait();
-}
-
-void VisualizationModel::ProcessFileSystemChanges()
-{
-   while (m_shouldKeepProcessingNotifications)
-   {
-      const auto notification = m_fileChangeNotifications.WaitAndPop();
-      if (!notification)
-      {
-         // If we got here, it may indicates that the wait operation has probably been abandoned
-         // due to a DTOR invocation.
-         continue;
-      }
-
-      LogFileSystemEvent(*notification);
-
-      const auto successfullyResolved = ResolveNotification(*notification);
-      if (successfullyResolved)
-      {
-         m_pendingViewUpdates.Emplace(*notification);
-         m_pendingModelUpdates.emplace(*notification);
-      }
-   }
-}
-
-bool VisualizationModel::ResolveNotification(FileChangeNotification& notification)
-{
-   auto* node = FindNodeUsingRelativePath(notification.relativePath);
-   notification.node = node;
-
-   return node != nullptr;
+   m_fileSystemObserver.StopMonitoring();
 }
 
 void VisualizationModel::UpdateTreemap()
 {
-   for (const auto& change : m_pendingModelUpdates)
-   {
-      UpdateAffectedNodes(change);
-   }
+//   for (const auto& pathAndNofitication : m_pendingModelUpdates)
+//   {
+//      UpdateAffectedNodes(pathAndNofitication.second);
+//   }
 
    // @todo Sort the tree.
    // @todo Update all sizes.
@@ -724,7 +634,9 @@ void VisualizationModel::UpdateAffectedNodes(const FileChangeNotification& notif
 void VisualizationModel::OnFileCreation(const FileChangeNotification& notification)
 {
    // @todo Find parent node from path:
-   auto* parentNode = FindNodeUsingRelativePath(notification.relativePath.stem());
+   auto* parentNode = Utilities::FindNodeUsingRelativePath(
+      m_fileTree->GetRoot(),
+      notification.relativePath);
 
    const auto absolutePath =
       std::experimental::filesystem::absolute(notification.relativePath, m_rootPath);
@@ -759,7 +671,10 @@ void VisualizationModel::OnFileCreation(const FileChangeNotification& notificati
 
 void VisualizationModel::OnFileDeletion(const FileChangeNotification& notification)
 {
-   auto* node = FindNodeUsingRelativePath(notification.relativePath);
+   auto* node = Utilities::FindNodeUsingRelativePath(
+      m_fileTree->GetRoot(),
+      notification.relativePath);
+
    if (node)
    {
       node->DeleteFromTree();;
@@ -779,7 +694,10 @@ void VisualizationModel::OnFileModification(const FileChangeNotification& notifi
    {
       const auto fileSize = DriveScanning::Utilities::ComputeFileSize(absolutePath);
 
-      auto* node = FindNodeUsingRelativePath(notification.relativePath);
+      auto* node = Utilities::FindNodeUsingRelativePath(
+         m_fileTree->GetRoot(),
+         notification.relativePath);
+
       if (node)
       {
          node->GetData().file.size = fileSize;;
@@ -817,60 +735,14 @@ void VisualizationModel::UpdateAncestorSizes(Tree<VizBlock>::Node* node)
    }
 }
 
-Tree<VizBlock>::Node* VisualizationModel::FindNodeUsingRelativePath(
-   const std::experimental::filesystem::path& path)
-{
-   auto* node = m_fileTree->GetRoot();
-
-   auto filePathItr = std::begin(path);
-   while (filePathItr != std::end(path))
-   {
-      auto matchingNodeItr = std::find_if(
-         Tree<VizBlock>::SiblingIterator{ node->GetFirstChild() },
-         Tree<VizBlock>::SiblingIterator{ },
-         [&] (const auto& childNode)
-      {
-         const auto pathElement = filePathItr->wstring();
-         const auto fileName = childNode->file.name + childNode->file.extension;
-
-         return fileName == pathElement;
-      });
-
-      if (matchingNodeItr != Tree<VizBlock>::SiblingIterator{ })
-      {
-         node = std::addressof(*matchingNodeItr);
-         ++filePathItr;
-      }
-      else
-      {
-         break;
-      }
-   }
-
-   if (filePathItr != std::end(path))
-   {
-      return nullptr;
-   }
-
-   return node;
-}
-
 bool VisualizationModel::IsFileSystemBeingMonitored() const
 {
-   return m_fileSystemMonitor->IsActive();
+   return m_fileSystemObserver.IsActive();
 }
 
 boost::optional<FileChangeNotification> VisualizationModel::FetchNodeUpdate()
 {
-   FileChangeNotification notification;
-
-   const auto retrievedNotification = m_pendingViewUpdates.TryPop(notification);
-   if (!retrievedNotification)
-   {
-      return boost::none;
-   }
-
-   return notification;
+   return m_fileSystemObserver.FetchNextChange();
 }
 
 std::experimental::filesystem::path VisualizationModel::GetRootPath() const

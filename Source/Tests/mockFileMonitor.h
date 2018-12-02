@@ -1,7 +1,7 @@
 #ifndef MOCKFILEMONITOR_H
 #define MOCKFILEMONITOR_H
 
-#include <Visualizations/fileMonitorBase.h>
+#include <Visualizations/fileMonitorImpl.h>
 #include <Visualizations/fileChangeNotification.hpp>
 
 #include <experimental/filesystem>
@@ -11,7 +11,7 @@
 /**
  * @brief The MockFileMonitor class
  */
-class MockFileMonitor : public FileMonitorBase
+class MockFileMonitor : public FileMonitorImpl
 {
 public:
 

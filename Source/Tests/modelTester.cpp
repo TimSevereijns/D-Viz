@@ -58,10 +58,8 @@ void ModelTester::init()
 {
    QVERIFY(m_tree != nullptr);
 
-   auto notificationGenerator = [&] { return m_sampleNotification; };
-
    m_model = std::make_unique<SquarifiedTreeMap>(
-      std::make_unique<MockFileMonitor>(std::move(notificationGenerator)),
+      std::make_unique<MockFileMonitor>([&] { return m_sampleNotification; }),
       m_path);
 
    m_model->Parse(m_tree);

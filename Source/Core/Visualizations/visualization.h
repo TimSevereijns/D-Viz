@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <memory>
 #include <numeric>
-#include <set>
+#include <unordered_map>
 #include <thread>
 
 #include <Tree/Tree.hpp>
@@ -20,7 +20,7 @@
 #include "../Viewport/camera.h"
 
 #include "fileChangeNotification.hpp"
-#include "fileMonitorBase.h"
+#include "fileSystemObserver.h"
 
 struct TreemapMetadata
 {
@@ -37,10 +37,10 @@ class VisualizationModel
 public:
 
    VisualizationModel(
-      std::unique_ptr<FileMonitorBase> fileMonitor,
+      std::unique_ptr<FileMonitorImpl> fileMonitor,
       const std::experimental::filesystem::path& path);
 
-   virtual ~VisualizationModel() noexcept;
+   virtual ~VisualizationModel() = default;
 
    VisualizationModel(const VisualizationModel&) = delete;
    VisualizationModel& operator=(const VisualizationModel&) = delete;
@@ -216,11 +216,6 @@ public:
 
 protected:
 
-   void ProcessFileSystemChanges();
-
-   Tree<VizBlock>::Node* FindNodeUsingRelativePath(
-      const std::experimental::filesystem::path& relativePath);
-
    void UpdateTreemap();
 
    void UpdateAffectedNodes(const FileChangeNotification& notification);
@@ -235,7 +230,7 @@ protected:
 
    void OnFileNameChange(const FileChangeNotification& notification);
 
-   bool ResolveNotification(FileChangeNotification& notification);
+   bool AssociatedNodeWithNotification(FileChangeNotification& notification);
 
    std::experimental::filesystem::path m_rootPath;
 
@@ -254,24 +249,7 @@ protected:
 
    bool m_hasDataBeenParsed{ false };
 
-   std::atomic_bool m_shouldKeepProcessingNotifications{ true };
-
-   std::unique_ptr<FileMonitorBase> m_fileSystemMonitor;
-
-   // This queue contains raw notifications of file system changes that still need to be
-   // parsed and the turned into tree node change notifications.
-   ThreadSafeQueue<FileChangeNotification> m_fileChangeNotifications;
-
-   // This queue contains pending tree node change notifications. These notifications
-   // still need to be retrieved by the view so that the UI can be updated to reflect filesystem
-   // activity.
-   ThreadSafeQueue<FileChangeNotification> m_pendingViewUpdates;
-
-   // This ordered set tracks changes will need to be applied to the treemap once the user
-   // refreshes the visualization to reflect filesystem changes:
-   std::set<FileChangeNotification> m_pendingModelUpdates;
-
-   std::thread m_fileSystemNotificationProcessor;
+   FileSystemObserver m_fileSystemObserver;
 };
 
 #endif // VISUALIZATIONMODEL_H

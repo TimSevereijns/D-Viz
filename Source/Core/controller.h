@@ -43,7 +43,7 @@ public:
    /**
     * @returns True if the visualization is not null;
     */
-   bool HasVisualizationBeenLoaded() const;
+   bool HasModelBeenLoaded() const;
 
    /**
     * @returns A pointer to the selected node.

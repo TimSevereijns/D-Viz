@@ -313,4 +313,9 @@ namespace Settings
    {
       return m_shouldRenderShadows;
    }
+
+   bool Manager::ShouldMonitorFileSystem() const
+   {
+      return m_shouldMonitorFileSystem;
+   }
 }

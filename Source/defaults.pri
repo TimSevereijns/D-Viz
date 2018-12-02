@@ -42,6 +42,7 @@ SOURCES += \
    $$PWD/Core/Viewport/glCanvas.cpp \
    $$PWD/Core/Viewport/mouseContextMenu.cpp \
    $$PWD/Core/Visualizations/linuxFileMonitor.cpp \
+   $$PWD/Core/Visualizations/fileSystemObserver.cpp \
    $$PWD/Core/Visualizations/squarifiedTreemap.cpp \
    $$PWD/Core/Visualizations/visualization.cpp \
    $$PWD/Core/Visualizations/windowsFileMonitor.cpp \
@@ -94,7 +95,8 @@ HEADERS += \
    $$PWD/Core/Viewport/mouseContextMenu.h \
    $$PWD/Core/Visualizations/linuxFileMonitor.h \
    $$PWD/Core/Visualizations/fileChangeNotification.hpp \
-   $$PWD/Core/Visualizations/fileMonitorBase.h \
+   $$PWD/Core/Visualizations/fileSystemObserver.h \
+   $$PWD/Core/Visualizations/fileMonitorImpl.h \
    $$PWD/Core/Visualizations/squarifiedTreemap.h \
    $$PWD/Core/Visualizations/visualization.h \
    $$PWD/Core/Visualizations/windowsFileMonitor.h \

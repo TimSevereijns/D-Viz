@@ -790,7 +790,7 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
 
 void GLCanvas::ProcessFileTreeChanges()
 {
-   if (!m_controller.HasVisualizationBeenLoaded() || !m_controller.IsFileSystemBeingMonitored())
+   if (!m_controller.HasModelBeenLoaded() || !m_controller.IsFileSystemBeingMonitored())
    {
       return;
    }

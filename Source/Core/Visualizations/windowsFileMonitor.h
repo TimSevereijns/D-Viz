@@ -6,7 +6,7 @@
 #ifdef Q_OS_WIN
 
 #include "fileChangeNotification.hpp"
-#include "fileMonitorBase.h"
+#include "fileMonitorImpl.h"
 #include "Utilities/threadSafeQueue.hpp"
 
 #include "boost/optional.hpp"
@@ -81,7 +81,7 @@ namespace Detail
 /**
  * @brief The WindowsFileMonitor class
  */
-class WindowsFileMonitor : public FileMonitorBase
+class WindowsFileMonitor : public FileMonitorImpl
 {
 public:
 

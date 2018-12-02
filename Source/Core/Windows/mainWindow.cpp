@@ -282,6 +282,10 @@ void MainWindow::SetupOptionsMenu()
       "changes");
    m_optionsMenuWrapper.enableFileSystemMonitoring.setCheckable(true);
 
+
+   const auto isMonitoringEnabled = m_controller.GetSettingsManager().ShouldMonitorFileSystem();
+   m_optionsMenuWrapper.enableFileSystemMonitoring.setChecked(isMonitoringEnabled);
+
    connect(&m_optionsMenuWrapper.enableFileSystemMonitoring, &QAction::toggled,
       &m_controller.GetSettingsManager(), &Settings::Manager::OnMonitoringOptionToggled);
 
@@ -628,6 +632,11 @@ void MainWindow::OnSearchQueryTextChanged(const QString& text)
 
 void MainWindow::OnApplyButtonPressed()
 {
+   if (!m_controller.HasModelBeenLoaded())
+   {
+       return;
+   }
+
    PruneTree();
    ApplyColorScheme();
 }

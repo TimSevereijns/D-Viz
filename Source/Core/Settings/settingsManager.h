@@ -33,130 +33,127 @@ namespace Settings
          const std::experimental::filesystem::path& preferencesFile);
 
       /**
-       * @brief GetCameraSpeed
-       * @return
+       * @returns The current camera speed.
        */
       double GetCameraSpeed() const;
 
       /**
-       * @brief SetCameraSpeed
-       * @param speed
+       * @brief Sets the current camera speed.
+       *
+       * @param[in] speed           The new speed.
        */
       void SetCameraSpeed(double speed);
 
       /**
-       * @brief GetMouseSensitivity
-       * @return
+       * @returns Gets the current mouse sensitivity.
        */
       double GetMouseSensitivity() const;
 
       /**
-       * @brief GetLightAttentuationFactor
-       * @return
+       * @return Gets the current light attentuation factor.
        */
       double GetLightAttentuationFactor() const;
 
       /**
-       * @brief GetAmbientLightCoefficient
-       * @return
+       * @returns Gets the current ambient light coefficient.
        */
       double GetAmbientLightCoefficient() const;
 
       /**
-       * @brief GetMaterialShininess
-       * @return
+       * @returns Gets the current material shininess.
        */
       double GetMaterialShininess() const;
 
       /**
-       * @brief GetSpecularColor
-       * @return
+       * @returns The current specular highlight color.
        */
       QVector3D GetSpecularColor() const;
 
       /**
-       * @brief IsPrimaryLightAttachedToCamera
-       * @return
+       * @returns True if the primary scene light source is attached to the camera.
        */
       bool IsPrimaryLightAttachedToCamera() const;
 
       /**
-       * @brief GetFileColorMap
-       * @return
+       * @returns The map that associates colors with file extensions.
        */
       const ColorMap& GetFileColorMap() const;
 
       /**
-       * @brief GetPreferenceMap
-       * @return
+       * @returns The preference map.
        */
       const PreferencesMap& GetPreferenceMap() const;
 
       /**
-       * @brief GetActiveColorScheme
-       * @return
+       * @returns The currently active file extension coloring scheme.
        */
       const std::wstring& GetActiveColorScheme() const;
 
       /**
-       * @brief SetColorScheme
-       * @param scheme
+       * @brief Sets the current color scheme.
        */
       void SetColorScheme(const std::wstring& scheme);
 
       /**
-       * @brief GetVisualizationParameters
-       * @return
+       * @returns The current visualization parameters.
        */
       const VisualizationParameters& GetVisualizationParameters() const;
 
       /**
-       * @brief GetVisualizationParameters
-       * @return
+       * @overload
        */
       VisualizationParameters& GetVisualizationParameters();
 
       /**
-       * @brief SetVisualizationParameters
-       * @param parameters
-       * @return
+       * @brief Sets the current visualization parameters.
+       *
+       * @param[in] parameters      The new visualization parameters.
        */
       VisualizationParameters& SetVisualizationParameters(
          const VisualizationParameters& parameters);
 
       /**
-       * @brief SetActiveNumericPrefix
-       * @param prefix
+       * @brief Sets the currently active prefix to be used for file sizes; e.g., MB vs MiB.
+       *
+       * @param[in] prefix          The new prefix selection.
        */
       void SetActiveNumericPrefix(Constants::FileSize::Prefix prefix);
 
       /**
-       * @brief GetActiveNumericPrefix
-       * @return
+       * @returns The currently active prefix to be used for file sizes; e.g., MB vs MiB.
        */
       Constants::FileSize::Prefix GetActiveNumericPrefix() const;
 
       /**
-       * @brief ShouldShowCascadeSplitOverlay
-       * @return
+       * @returns True if shadow cascade splits should be visualized.
        */
       bool ShouldShowCascadeSplits() const;
 
       /**
-       * @brief ShouldShowShadows
-       * @return
+       * @returns True if shadow rendering is enabled.
        */
       bool ShouldRenderShadows() const;
 
       /**
-       * @brief SaveChangeToDisk
+       * @returns True if the file system monitor is enabled;
+       */
+      bool ShouldMonitorFileSystem() const;
+
+      /**
+       * @brief ShouldNodeBeIgnored
+       * @return
+       */
+      bool ShouldBlockBeProcessed(const VizBlock& block);
+
+      /**
+       * @brief Saves preferences to a JSON file on disk.
        *
        * @todo Make private (will have to move some other functionality around as well).
        *
-       * @param property
-       * @param value
+       * @param[in] property        The name of the property to be saved or modified.
+       * @param[in] value           The value to be associated with the property name.
        *
-       * @return
+       * @returns True if the save action succeeded.
        */
       template<typename PropertyValueType>
       bool SavePreferenceChangeToDisk(
@@ -223,14 +220,14 @@ namespace Settings
       void OnFieldOfViewChanged(int fieldOfView);
 
       /**
-       * @brief OnShouldSearchFilesChanged
+       * @brief Handles toggling of whether regular files should be searched.
        *
        * @param[in] state           Pass in true if files should be searched for query matches.
        */
       void OnShouldSearchFilesChanged(bool state);
 
       /**
-       * @brief OnShouldSearchDirectoriesChanged
+       * @brief Handles toggling of whether directories should be searched.
        *
        * @param[in] state           Pass in true if directories should be searched for query
        *                            matches.
@@ -238,28 +235,25 @@ namespace Settings
       void OnShouldSearchDirectoriesChanged(bool state);
 
       /**
-       * @brief OnShowCascadeSplitsToggled
-       * @param isEnabled
+       * @brief Handles toggling of whether cascade splits should be rendered.
+       *
+       * @param[in] isEnabled       Pass in true to enable cascade split visualization.
        */
       void OnShowCascadeSplitsToggled(bool isEnabled);
 
       /**
-       * @brief OnShowShadowsToggled
-       * @param isEnabled
+       * @brief Handles toggling of whether shadows should be rendered.
+       *
+       * @param[in] isEnabled       Pass in true to enable shadow rendering.
        */
       void OnShowShadowsToggled(bool isEnabled);
 
       /**
-       * @brief OnMonitoringOptionToggled
-       * @param isEnabled
+       * @brief Handles toggling of whether the file system should be monitored for changes.
+       *
+       * @param[in] isEnabled       Pass in true to enable monitoring.
        */
       void OnMonitoringOptionToggled(bool isEnabled);
-
-      /**
-       * @brief ShouldNodeBeIgnored
-       * @return
-       */
-      bool ShouldBlockBeProcessed(const VizBlock& block);
 
    private:
 

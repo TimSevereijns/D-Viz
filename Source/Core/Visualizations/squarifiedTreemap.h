@@ -17,7 +17,7 @@ public:
     * @param[in] path            The path representing the root directory of the tree map.
     */
    SquarifiedTreeMap(
-      std::unique_ptr<FileMonitorBase> fileMonitor,
+      std::unique_ptr<FileMonitorImpl> fileMonitor,
       const std::experimental::filesystem::path& path);
 
    /**

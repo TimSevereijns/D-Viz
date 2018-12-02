@@ -6,18 +6,18 @@
 
 #include "fileChangeNotification.hpp"
 
-class FileMonitorBase
+class FileMonitorImpl
 {
 public:
 
-   FileMonitorBase() = default;
-   virtual ~FileMonitorBase() = default;
+   FileMonitorImpl() = default;
+   virtual ~FileMonitorImpl() = default;
 
-   FileMonitorBase(FileMonitorBase& other) = delete;
-   FileMonitorBase& operator=(FileMonitorBase& rhs) = delete;
+   FileMonitorImpl(FileMonitorImpl& other) = delete;
+   FileMonitorImpl& operator=(FileMonitorImpl& rhs) = delete;
 
-   FileMonitorBase(FileMonitorBase&& other) = default;
-   FileMonitorBase& operator=(FileMonitorBase&& rhs) = default;
+   FileMonitorImpl(FileMonitorImpl&& other) = default;
+   FileMonitorImpl& operator=(FileMonitorImpl&& rhs) = default;
 
    virtual void Start(
       const std::experimental::filesystem::path& path,

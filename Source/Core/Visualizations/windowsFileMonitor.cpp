@@ -85,13 +85,13 @@ void WindowsFileMonitor::Start(
       return;
    }
 
-   const auto terminationHandle = CreateEventW(
+   const auto exitThreadHandle = CreateEventW(
       /* lpEventAttributes = */ nullptr,
       /* bManualReset = */ true,
       /* bInitialState = */ false,
       /* lpName = */ L"D-VIZ_FILE_MONITOR_TERMINATE_THREAD");
 
-   m_events.SetExitHandle(terminationHandle);
+   m_events.SetExitHandle(exitThreadHandle);
 
    const auto notificationHandle = CreateEventW(
       /* lpEventAttributes = */ nullptr,
@@ -163,7 +163,7 @@ void WindowsFileMonitor::AwaitNotification()
 
          while (!HasOverlappedIoCompleted(&m_ioBuffer)) // NOLINT
          {
-            SleepEx(100, TRUE);
+            SleepEx(50, TRUE);
          }
 
          break;
