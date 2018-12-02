@@ -48,7 +48,13 @@ void ModelTester::initTestCase()
 
    QSignalSpy completionSpy(&m_scanner, &DriveScanner::Finished);
 
-   const DriveScanningParameters parameters{ m_path, progressCallback, completionCallback };
+   const DriveScanningParameters parameters
+   {
+      m_sampleDirectory,
+      progressCallback,
+      completionCallback
+   };
+
    m_scanner.StartScanning(parameters);
 
    completionSpy.wait(10'000);
@@ -60,7 +66,7 @@ void ModelTester::init()
 
    m_model = std::make_unique<SquarifiedTreeMap>(
       std::make_unique<MockFileMonitor>([&] { return m_sampleNotification; }),
-      m_path);
+      m_sampleDirectory);
 
    m_model->Parse(m_tree);
 }

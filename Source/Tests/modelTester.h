@@ -1,7 +1,7 @@
 #include <QString>
 #include <QtTest>
 
-#include "mockfilemonitor.h"
+#include "mockFileMonitor.h"
 #include "multiTestHarness.h"
 
 #include <DriveScanner/driveScanner.h>
@@ -28,47 +28,48 @@ private slots:
    void init();
 
    /**
-    * @brief During the drive scanning progress, the progress callback should be invoked.
+    * @brief Verifies that the progress callback is correctly invoked.
     */
    void ProgressCallbackIsInvoked();
 
    /**
-    * @brief After the scan completes and the data is parsed, the model should be populated.
+    * @brief Verifies that the model is correctly populated after the scan completes and after the
+    * data is parsed.
     */
    void ModelIsPopulated();
 
    /**
-    * @brief ScanningProgressDataIsCorrect
+    * @brief Verifies that scanning progress is properly reported.
     */
    void ScanningProgressDataIsCorrect();
 
    /**
-    * @brief SelectingNodes
+    * @brief Verifies that the correct node is selected.
     */
    void SelectingNodes();
 
    /**
-    * @brief HighlightDescendants
+    * @brief Verifies that node descendants are correctly highlighted.
     */
    void HighlightDescendants();
 
    /**
-    * @brief HighlightAncestors
+    * @brief Verifies that node ancestors are correctly highlighted.
     */
    void HighlightAncestors();
 
    /**
-    * @brief HighlightAllMatchingExtensions
+    * @brief Verifies that all nodes with a given extension are correctly highlighted.
     */
    void HighlightAllMatchingExtensions();
 
    /**
-    * @brief ToggleFileMonitoring
+    * @brief Verifies that file monitoring is correctly enabled and disabled.
     */
    void ToggleFileMonitoring();
 
    /**
-    * @brief TrackFileModification
+    * @brief Verifies that file system changes are correctly tracked.
     */
    void TrackFileModification();
 
@@ -76,8 +77,7 @@ private:
 
    FileChangeNotification m_sampleNotification;
 
-   const std::experimental::filesystem::path m_sampleDirectory{ "../../Tests/asio" };
-   std::experimental::filesystem::path m_path{ m_sampleDirectory };
+   std::experimental::filesystem::path m_sampleDirectory{ "../../Tests/asio" };
 
    DriveScanner m_scanner;
 

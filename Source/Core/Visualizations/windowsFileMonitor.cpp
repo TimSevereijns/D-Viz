@@ -232,38 +232,29 @@ void WindowsFileMonitor::ProcessNotification()
       {
          case FILE_ACTION_ADDED:
          {
-            m_notificationCallback(
-               FileChangeNotification{ fileName, FileModification::CREATED });
-
+            m_notificationCallback(FileChangeNotification{ fileName, FileModification::CREATED });
             break;
          }
          case FILE_ACTION_REMOVED:
          {
-            m_notificationCallback(
-               FileChangeNotification{ fileName, FileModification::DELETED });
-
+            m_notificationCallback(FileChangeNotification{ fileName, FileModification::DELETED });
             break;
          }
          case FILE_ACTION_MODIFIED:
          {
-            m_notificationCallback(
-               FileChangeNotification{ fileName, FileModification::TOUCHED });
-
+            m_notificationCallback(FileChangeNotification{ fileName, FileModification::TOUCHED });
             break;
          }
          case FILE_ACTION_RENAMED_OLD_NAME:
          {
             m_pendingRenameEvent = std::move(fileName);
-
             break;
          }
          case FILE_ACTION_RENAMED_NEW_NAME:
          {
             Expects(m_pendingRenameEvent);
 
-            m_notificationCallback(
-               FileChangeNotification{ fileName, FileModification::RENAMED });
-
+            m_notificationCallback(FileChangeNotification{ fileName, FileModification::RENAMED });
             break;
          }
          default:
