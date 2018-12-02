@@ -26,8 +26,8 @@ public:
     * @param[in] path               The path to the location to be recursively observed.
     */
    FileSystemObserver(
-         std::unique_ptr<FileMonitorImpl> fileMonitor,
-         const std::experimental::filesystem::path& path);
+      std::unique_ptr<FileMonitorImpl> fileMonitor,
+      std::experimental::filesystem::path path);
 
    /**
     * @brief Halts monitoring and destroys the observer.
@@ -61,7 +61,7 @@ public:
 
 private:
 
-   bool AssociatedNodeWithNotification(FileChangeNotification& notification);
+   bool AssociateNotificationWithNode(FileChangeNotification& notification);
 
    void ProcessChanges();
 
@@ -86,6 +86,7 @@ private:
    std::thread m_fileSystemNotificationProcessor;
 
    std::experimental::filesystem::path m_rootPath;
+
    Tree<VizBlock>::Node* m_rootNode{ nullptr };
 };
 

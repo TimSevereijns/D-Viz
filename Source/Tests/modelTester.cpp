@@ -171,12 +171,7 @@ void ModelTester::HighlightAllMatchingExtensions()
 
 void ModelTester::ToggleFileMonitoring()
 {
-   m_sampleNotification = FileChangeNotification
-   {
-      "spawn.hpp",
-      FileModification::TOUCHED,
-      std::chrono::high_resolution_clock::now()
-   };
+   m_sampleNotification = FileChangeNotification{ "spawn.hpp", FileModification::TOUCHED };
 
    QCOMPARE(m_model->IsFileSystemBeingMonitored(), false);
    m_model->StartMonitoringFileSystem();
@@ -192,12 +187,7 @@ void ModelTester::TrackFileModification()
    // The following notification will be read by the MockFileMonitor and sent to the model. Note
    // that the provided path has to be a relative path to an actual file in the sample directory.
    // If the path doesn't exist then we can't locate a matching node in the tree.
-   m_sampleNotification = FileChangeNotification
-   {
-      "spawn.hpp",
-      FileModification::TOUCHED,
-      std::chrono::high_resolution_clock::now()
-   };
+   m_sampleNotification = FileChangeNotification{ "spawn.hpp", FileModification::TOUCHED };
 
    m_model->StartMonitoringFileSystem();
 

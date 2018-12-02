@@ -24,12 +24,10 @@ struct FileChangeNotification
 
    FileChangeNotification(
       std::experimental::filesystem::path path,
-      FileModification status,
-      const std::chrono::high_resolution_clock::time_point& timestamp)
+      FileModification status)
       :
       relativePath{ std::move(path) },
-      status{ status },
-      timestamp{ timestamp }
+      status{ status }
    {
    }
 
@@ -41,9 +39,6 @@ struct FileChangeNotification
 
    // A pointer to the corresponding node in the tree, should it exist.
    const typename Tree<VizBlock>::Node* node{ nullptr };
-
-   // The time at which the change notification was produced.
-   std::chrono::high_resolution_clock::time_point timestamp;
 
    friend bool operator==(
       const FileChangeNotification& lhs,

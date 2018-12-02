@@ -228,28 +228,26 @@ void WindowsFileMonitor::ProcessNotification()
          static_cast<void*>(notificationInfo->FileName),
          notificationInfo->FileNameLength);  //< Note that this length is measured in bytes!
 
-      const auto timestamp = std::chrono::high_resolution_clock::now();
-
       switch (notificationInfo->Action)
       {
          case FILE_ACTION_ADDED:
          {
             m_notificationCallback(
-               FileChangeNotification{ fileName, FileModification::CREATED, timestamp });
+               FileChangeNotification{ fileName, FileModification::CREATED });
 
             break;
          }
          case FILE_ACTION_REMOVED:
          {
             m_notificationCallback(
-               FileChangeNotification{ fileName, FileModification::DELETED, timestamp });
+               FileChangeNotification{ fileName, FileModification::DELETED });
 
             break;
          }
          case FILE_ACTION_MODIFIED:
          {
             m_notificationCallback(
-               FileChangeNotification{ fileName, FileModification::TOUCHED, timestamp });
+               FileChangeNotification{ fileName, FileModification::TOUCHED });
 
             break;
          }
@@ -264,7 +262,7 @@ void WindowsFileMonitor::ProcessNotification()
             Expects(m_pendingRenameEvent);
 
             m_notificationCallback(
-               FileChangeNotification{ fileName, FileModification::RENAMED, timestamp });
+               FileChangeNotification{ fileName, FileModification::RENAMED });
 
             break;
          }

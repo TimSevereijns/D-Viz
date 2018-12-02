@@ -43,10 +43,10 @@ namespace
 
 FileSystemObserver::FileSystemObserver(
    std::unique_ptr<FileMonitorImpl> fileMonitor,
-   const std::experimental::filesystem::path& path)
+   std::experimental::filesystem::path path)
    :
    m_fileSystemMonitor{ std::move(fileMonitor) },
-   m_rootPath{ path }
+   m_rootPath{ std::move(path) }
 {
 }
 
@@ -92,7 +92,7 @@ void FileSystemObserver::StopMonitoring()
    m_fileChangeNotifications.AbandonWait();
 }
 
-bool FileSystemObserver::AssociatedNodeWithNotification(FileChangeNotification& notification)
+bool FileSystemObserver::AssociateNotificationWithNode(FileChangeNotification& notification)
 {
    Expects(notification.node == nullptr);
 
@@ -116,7 +116,7 @@ void FileSystemObserver::ProcessChanges()
 
       LogFileSystemEvent(*notification);
 
-      const auto successfullyAssociated = AssociatedNodeWithNotification(*notification);
+      const auto successfullyAssociated = AssociateNotificationWithNode(*notification);
       if (successfullyAssociated)
       {
          m_pendingViewUpdates.Emplace(*notification);
