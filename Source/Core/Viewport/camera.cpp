@@ -175,7 +175,7 @@ QPoint Camera::MapToOpenGLViewport(const QPoint& widgetCoordinates) const
    return { widgetCoordinates.x(), invertedY };
 }
 
-Qt3DRender::RayCasting::QRay3D Camera::ShootRayIntoScene(const QPoint& widgetCoordinates) const
+Ray Camera::ShootRayIntoScene(const QPoint& widgetCoordinates) const
 {
    const QPoint glCoordinates = MapToOpenGLViewport(widgetCoordinates);
 
@@ -184,13 +184,7 @@ Qt3DRender::RayCasting::QRay3D Camera::ShootRayIntoScene(const QPoint& widgetCoo
 
    const auto direction = QVector3D(farPlanePoint - nearPlanePoint).normalized();
 
-   const Qt3DRender::RayCasting::QRay3D ray
-   {
-      nearPlanePoint,
-      direction
-   };
-
-   return ray;
+   return Ray{ nearPlanePoint, direction };
 }
 
 bool Camera::IsPointInFrontOfCamera(const QVector3D& point) const

@@ -1,11 +1,11 @@
-QT += 3drender-private opengl gamepad
+QT += opengl gamepad
 
 # Generate PDBs for Release builds:
 win32:QMAKE_CFLAGS_RELEASE += /Zi /GL
 win32:QMAKE_LFLAGS_RELEASE += /MAP /debug /opt:ref
 
 # Unlock all the fun toys on Windows:
-win32:QMAKE_CXXFLAGS += /std:c++latest
+win32:QMAKE_CXXFLAGS += /std:c++17
 
 # @todo Make this more generic, or remove it altogether.
 unix:INCLUDEPATH += /usr/include/c++/7.2.0
@@ -43,6 +43,7 @@ SOURCES += \
    $$PWD/Core/Viewport/mouseContextMenu.cpp \
    $$PWD/Core/Visualizations/linuxFileMonitor.cpp \
    $$PWD/Core/Visualizations/fileSystemObserver.cpp \
+   $$PWD/Core/Visualizations/ray.cpp \
    $$PWD/Core/Visualizations/squarifiedTreemap.cpp \
    $$PWD/Core/Visualizations/visualization.cpp \
    $$PWD/Core/Visualizations/windowsFileMonitor.cpp \
@@ -97,6 +98,7 @@ HEADERS += \
    $$PWD/Core/Visualizations/fileChangeNotification.hpp \
    $$PWD/Core/Visualizations/fileSystemObserver.h \
    $$PWD/Core/Visualizations/fileMonitorImpl.h \
+   $$PWD/Core/Visualizations/ray.h \
    $$PWD/Core/Visualizations/squarifiedTreemap.h \
    $$PWD/Core/Visualizations/visualization.h \
    $$PWD/Core/Visualizations/windowsFileMonitor.h \

@@ -4,6 +4,7 @@
 #include "../DriveScanner/driveScanningUtilities.h"
 #include "../Utilities/utilities.hpp"
 #include "fileChangeNotification.hpp"
+#include "ray.h"
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -19,9 +20,6 @@
 
 #include <QColor>
 #include <QRectF>
-
-// @todo Replace the use of this class with something more stable.
-#include <Qt3DRender/private/qray3d_p.h>
 
 #include <gsl/gsl_assert>
 
@@ -46,19 +44,19 @@ namespace
     * error, or boost::none if no such intersection exists.
     */
    boost::optional<QVector3D> DoesRayIntersectPlane(
-      const Qt3DRender::RayCasting::QRay3D& ray,
+      const Ray& ray,
       const QVector3D& pointOnPlane,
       const QVector3D& planeNormal)
    {
       constexpr auto epsilon{ 0.0001f };
 
-      const auto denominator = QVector3D::dotProduct(ray.direction(), planeNormal);
+      const auto denominator = QVector3D::dotProduct(ray.Direction(), planeNormal);
       if (std::abs(denominator) < epsilon)
       {
          return boost::none;
       }
 
-      const auto numerator = QVector3D::dotProduct(pointOnPlane - ray.origin(), planeNormal);
+      const auto numerator = QVector3D::dotProduct(pointOnPlane - ray.Origin(), planeNormal);
 
       const auto scalar = numerator / denominator;
       const bool doesRayHitPlane = std::abs(scalar) > epsilon;
@@ -68,7 +66,7 @@ namespace
          return boost::none;
       }
 
-      return scalar * ray.direction().normalized() + ray.origin();
+      return scalar * ray.Direction().normalized() + ray.Origin();
    }
 
    /**
@@ -80,7 +78,7 @@ namespace
     * @return The closest intersection point, or boost::none should anything weird occur.
     */
    boost::optional<QVector3D> FindClosestIntersectionPoint(
-      const Qt3DRender::RayCasting::QRay3D& ray,
+      const Ray& ray,
       const std::vector<QVector3D>& allIntersections)
    {
       const auto& closest = std::min_element(
@@ -88,7 +86,7 @@ namespace
          std::end(allIntersections),
          [&ray] (const auto& lhs, const auto& rhs) noexcept
       {
-         return (ray.origin().distanceToPoint(lhs) < ray.origin().distanceToPoint(rhs));
+         return (ray.Origin().distanceToPoint(lhs) < ray.Origin().distanceToPoint(rhs));
       });
 
       if (closest == std::end(allIntersections))
@@ -108,7 +106,7 @@ namespace
     * @returns The point of intersection should it exist; boost::none otherwise.
     */
    boost::optional<QVector3D> DoesRayIntersectBlock(
-      const Qt3DRender::RayCasting::QRay3D& ray,
+      const Ray& ray,
       const Block& block)
    {
       std::vector<QVector3D> allIntersections;
@@ -261,6 +259,10 @@ namespace
       }
    }
 
+   /**
+    * @brief Represents the point at which a node intersection occured, as well as the node that
+    * was hit.
+    */
    struct IntersectionInfo
    {
       QVector3D point;
@@ -276,7 +278,7 @@ namespace
     * @param[in] node               The current node being hit-tested.
     */
    std::vector<IntersectionInfo> FindAllIntersections(
-      const Qt3DRender::RayCasting::QRay3D& ray,
+      const Ray& ray,
       const Camera& camera,
       const Settings::VisualizationParameters& parameters,
       Tree<VizBlock>::Node* node)
@@ -378,7 +380,7 @@ void VisualizationModel::UpdateBoundingBoxes()
 
 Tree<VizBlock>::Node* VisualizationModel::FindNearestIntersection(
    const Camera& camera,
-   const Qt3DRender::RayCasting::QRay3D& ray,
+   const Ray& ray,
    const Settings::VisualizationParameters& parameters) const
 {
    if (!m_hasDataBeenParsed)
@@ -401,7 +403,7 @@ Tree<VizBlock>::Node* VisualizationModel::FindNearestIntersection(
       const auto closest = std::min_element(std::begin(intersections), std::end(intersections),
          [&ray] (const auto& lhs, const auto& rhs) noexcept
       {
-         return (ray.origin().distanceToPoint(lhs.point) < ray.origin().distanceToPoint(rhs.point));
+         return (ray.Origin().distanceToPoint(lhs.point) < ray.Origin().distanceToPoint(rhs.point));
       });
 
       nearestIntersection = closest->node;
@@ -576,7 +578,7 @@ void VisualizationModel::StopMonitoringFileSystem()
    m_fileSystemObserver.StopMonitoring();
 }
 
-void VisualizationModel::UpdateTreemap()
+void VisualizationModel::RefreshTreemap()
 {
 //   for (const auto& pathAndNofitication : m_pendingModelUpdates)
 //   {
@@ -740,7 +742,7 @@ bool VisualizationModel::IsFileSystemBeingMonitored() const
    return m_fileSystemObserver.IsActive();
 }
 
-boost::optional<FileChangeNotification> VisualizationModel::FetchNodeUpdate()
+boost::optional<FileChangeNotification> VisualizationModel::FetchNextFileSystemChange()
 {
    return m_fileSystemObserver.FetchNextChange();
 }

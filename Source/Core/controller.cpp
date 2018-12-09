@@ -213,7 +213,7 @@ bool Controller::IsFileSystemBeingMonitored() const
 
 boost::optional<FileChangeNotification> Controller::FetchFileModification()
 {
-   return m_model->FetchNodeUpdate();
+   return m_model->FetchNextFileSystemChange();
 }
 
 void Controller::ComputeProgress(const ScanningProgress& progress)
@@ -331,7 +331,7 @@ void Controller::SelectNodeAndUpdateStatusBar(
 
 void Controller::SelectNodeViaRay(
    const Camera& camera,
-   const Qt3DRender::RayCasting::QRay3D& ray,
+   const Ray& ray,
    const std::function<void (const Tree<VizBlock>::Node&)>& deselectionCallback,
    const std::function<void (const Tree<VizBlock>::Node&)>& selectionCallback)
 {

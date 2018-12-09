@@ -170,7 +170,7 @@ public:
     */
    void SelectNodeViaRay(
       const Camera& camera,
-      const Qt3DRender::RayCasting::QRay3D& ray,
+      const Ray& ray,
       const std::function<void (const Tree<VizBlock>::Node&)>& deselectionCallback,
       const std::function<void (const Tree<VizBlock>::Node&)>& selectionCallback);
 

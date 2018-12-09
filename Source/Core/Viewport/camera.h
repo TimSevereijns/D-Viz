@@ -5,8 +5,7 @@
 #include <QMatrix4x4>
 #include <QRect>
 
-// @todo Replace the use of this class with something more stable.
-#include <Qt3DRender/private/qray3d_p.h>
+#include "../Visualizations/ray.h"
 
 /**
  * @brief The Camera class represents the camera through which the scene is observed.
@@ -216,7 +215,7 @@ public:
     *
     * @returns A ray extending into the scene from the near plane to the far plane.
     */
-   Qt3DRender::RayCasting::QRay3D ShootRayIntoScene(const QPoint& widgetCoordinates) const;
+   Ray ShootRayIntoScene(const QPoint& widgetCoordinates) const;
 
    /**
     * @brief Determines whether a point is in front of the camera plane.

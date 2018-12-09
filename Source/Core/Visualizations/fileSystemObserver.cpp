@@ -63,7 +63,6 @@ FileSystemObserver::~FileSystemObserver()
 void FileSystemObserver::StartMonitoring(Tree<VizBlock>::Node* rootNode)
 {
    Expects(rootNode != nullptr);
-
    m_rootNode = rootNode;
 
    if (m_rootPath.empty() || !std::experimental::filesystem::exists(m_rootPath))
@@ -119,6 +118,8 @@ void FileSystemObserver::ProcessChanges()
       const auto successfullyAssociated = AssociateNotificationWithNode(*notification);
       if (successfullyAssociated)
       {
+         // @todo Should there be an upper limit on the number of changes that can be in the queue
+         // at any given time?
          m_pendingViewUpdates.Emplace(*notification);
 
          auto absolutePath = std::experimental::filesystem::absolute(

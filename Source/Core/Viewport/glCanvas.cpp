@@ -769,8 +769,8 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
    {
       m_frameTimeDeque.pop_front();
    }
-   Expects(m_frameTimeDeque.size() <= movingAverageWindowSize);
 
+   Expects(m_frameTimeDeque.size() <= movingAverageWindowSize);
    m_frameTimeDeque.emplace_back(static_cast<int>(elapsedTime.count()));
 
    const auto total = std::accumulate(std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0ull,

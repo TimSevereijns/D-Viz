@@ -9,7 +9,7 @@
    #undef RGB
 #endif // Q_OS_WIN
 
-namespace
+namespace Detail
 {
    constexpr QVector3D RGB(int red, int green, int blue) noexcept
    {
@@ -30,16 +30,16 @@ namespace Constants
 
    namespace Colors
    {
-      constexpr static auto RED           = RGB(255,    0,    0);
-      constexpr static auto GREEN         = RGB(  0,  255,    0);
-      constexpr static auto BLUE          = RGB(  0,    0,  255);
-      constexpr static auto BABY_BLUE     = RGB(137,  207,  240);
-      constexpr static auto CANARY_YELLOW = RGB(255,  239,    0);
-      constexpr static auto HOT_PINK      = RGB(255,  105,  180);
-      constexpr static auto FILE_GREEN    = RGB(128,  255,  128);
-      constexpr static auto SLATE_GRAY    = RGB(112,  128,  144);
-      constexpr static auto WHITE         = RGB(255,  255,  255);
-      constexpr static auto CORAL         = RGB(255,  127,   80);
+      constexpr static auto RED           = Detail::RGB(255,    0,    0);
+      constexpr static auto GREEN         = Detail::RGB(  0,  255,    0);
+      constexpr static auto BLUE          = Detail::RGB(  0,    0,  255);
+      constexpr static auto BABY_BLUE     = Detail::RGB(137,  207,  240);
+      constexpr static auto CANARY_YELLOW = Detail::RGB(255,  239,    0);
+      constexpr static auto HOT_PINK      = Detail::RGB(255,  105,  180);
+      constexpr static auto FILE_GREEN    = Detail::RGB(128,  255,  128);
+      constexpr static auto SLATE_GRAY    = Detail::RGB(112,  128,  144);
+      constexpr static auto WHITE         = Detail::RGB(255,  255,  255);
+      constexpr static auto CORAL         = Detail::RGB(255,  127,   80);
    }
 
    namespace ColorScheme

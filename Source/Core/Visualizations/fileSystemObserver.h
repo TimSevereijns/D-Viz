@@ -15,6 +15,9 @@
 #include <thread>
 #include <unordered_map>
 
+/**
+ * @brief Recursively observes the file system for changes to any files.
+ */
 class FileSystemObserver
 {
 public:
@@ -35,7 +38,7 @@ public:
    ~FileSystemObserver();
 
    /**
-    * @brief Starts filesystem monitoring.
+    * @brief Starts file system monitoring.
     *
     * @param[in] rootNode           The root node of the existing file system model against which
     *                               any file system changes will be compared.
@@ -43,7 +46,7 @@ public:
    void StartMonitoring(Tree<VizBlock>::Node* rootNode);
 
    /**
-    * @brief Stop filesystem monitoring.
+    * @brief Stop file system monitoring.
     */
    void StopMonitoring();
 
@@ -78,8 +81,8 @@ private:
    // activity.
    ThreadSafeQueue<FileChangeNotification> m_pendingViewUpdates;
 
-   // This ordered set tracks changes will need to be applied to the treemap once the user
-   // refreshes the visualization to reflect filesystem changes:
+   // This map tracks changes will need to be applied to the treemap once the user
+   // refreshes the visualization to reflect filesystem changes.
    std::unordered_map<
       std::experimental::filesystem::path, FileChangeNotification> m_pendingModelUpdates;
 

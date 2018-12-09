@@ -200,7 +200,7 @@ void ModelTester::TrackFileModification()
    boost::optional<FileChangeNotification> notification;
    while (!notification)
    {
-      notification = m_model->FetchNodeUpdate();
+      notification = m_model->FetchNextFileSystemChange();
    }
 
    const auto modifiedNode = notification->node;

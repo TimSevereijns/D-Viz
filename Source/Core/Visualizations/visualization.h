@@ -24,9 +24,9 @@
 
 struct TreemapMetadata
 {
-   std::uintmax_t FileCount;
-   std::uintmax_t DirectoryCount;
-   std::uintmax_t TotalBytes;
+   std::uintmax_t FileCount{ 0ull };
+   std::uintmax_t DirectoryCount{ 0ull };
+   std::uintmax_t TotalBytes{ 0ull };
 };
 
 /**
@@ -81,7 +81,7 @@ public:
     */
    Tree<VizBlock>::Node* FindNearestIntersection(
       const Camera& camera,
-      const Qt3DRender::RayCasting::QRay3D& ray,
+      const Ray& ray,
       const Settings::VisualizationParameters& parameters) const;
 
    /**
@@ -181,12 +181,13 @@ public:
    /**
     * @brief Starts monitoring the file system for changes.
     *
-    * @todo Pass in callback to handle changes.
+    * Once file system monitoring has been enabled, call the `FetchNextFileSystemChange()`
+    * function to retrieve the next available notification.
     */
    void StartMonitoringFileSystem();
 
    /**
-    * @brief StopMonitoringFileSystem
+    * @brief Stops monitoring the file system for changes.
     */
    void StopMonitoringFileSystem();
 
@@ -196,13 +197,14 @@ public:
    bool IsFileSystemBeingMonitored() const;
 
    /**
-    * @returns The latest node to have changed.
+    * @returns The metadata on the next available file to have changed since the visualization
+    * was last refreshed.
     */
-   boost::optional<FileChangeNotification> FetchNodeUpdate();
+   boost::optional<FileChangeNotification> FetchNextFileSystemChange();
 
    /**
-    * @brief GetRootPath
-    * @return
+    * @returns The root path for the current visualization. If no visualization has been loaded,
+    * a default constructor path object will be returned.
     */
    std::experimental::filesystem::path GetRootPath() const;
 
@@ -216,7 +218,7 @@ public:
 
 protected:
 
-   void UpdateTreemap();
+   void RefreshTreemap();
 
    void UpdateAffectedNodes(const FileChangeNotification& notification);
 
