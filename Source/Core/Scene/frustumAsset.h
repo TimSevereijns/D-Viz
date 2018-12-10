@@ -33,7 +33,7 @@ namespace Asset
        *
        * @param camera
        */
-      void GenerateFrusta(Camera camera);
+      void GenerateFrusta(const Camera& camera);
 
    private:
 

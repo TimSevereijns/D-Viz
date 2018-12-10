@@ -62,7 +62,7 @@ namespace
       }
 
       QVector<QVector3D> vertices;
-      vertices.reserve(24 * cascadeCount);
+      vertices.reserve(24 * static_cast<int>(cascadeCount));
 
       for (auto& frustum : frusta)
       {
@@ -117,7 +117,7 @@ namespace
       }
 
       QVector<QVector3D> colors;
-      colors.reserve(24 * cascadeCount);
+      colors.reserve(static_cast<int>(24 * cascadeCount));
 
       for (auto index{ 0 }; index < vertices.size(); ++index)
       {
@@ -140,8 +140,6 @@ namespace
       const Camera& camera)
    {
       Camera mutableCamera = camera;
-      //mutableCamera.SetNearPlane(1.0f);
-      //mutableCamera.SetFarPlane(2000.0f);
 
       constexpr auto cascadeCount{ 3 };
       const auto cascades = FrustumUtilities::ComputeCascadeDistances(cascadeCount, mutableCamera);
@@ -172,33 +170,6 @@ namespace
          frustumAsset.AddVertexCoordinates(std::move(vertices));
          frustumAsset.AddVertexColors(std::move(colors));
       }
-   }
-
-   /**
-    * @brief Helper function to draw a single shadow caster's perspective.
-    *
-    * @param[in, out] frustumAsset  The main frustum scene asset.
-    * @param[in] camera             The main camera used to render the scene. Mainly use is to get
-    *                               the aspect ratio of the outline correct.
-    */
-   void GenerateShadowViewFrustum(
-      Asset::Frustum& frustumAsset,
-      const QMatrix4x4& lightView)
-   {
-      const auto& frustum = FrustumUtilities::GenerateFrustumPoints(lightView);
-      auto vertices = QVector<QVector3D>::fromStdVector(frustum);
-
-      QVector<QVector3D> colors;
-      colors.reserve(vertices.size());
-
-      for (auto index{ 0 }; index < vertices.size(); ++index)
-      {
-
-         colors << Constants::Colors::CORAL;
-      }
-
-      frustumAsset.AddVertexCoordinates(std::move(vertices));
-      frustumAsset.AddVertexColors(std::move(colors));
    }
 }
 
@@ -240,11 +211,9 @@ namespace Asset
       m_VAO.release();
    }
 
-   void Frustum::GenerateFrusta(Camera camera)
+   void Frustum::GenerateFrusta(const Camera& camera)
    {
       ClearBuffers();
-
-      //camera.SetFarPlane(1000.0f);
 
       GenerateCameraFrusta(*this, camera);
       GenerateCascadeBoundingBoxes(*this, camera, ComputeLightViewMatrix());
