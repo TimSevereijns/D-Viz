@@ -6,11 +6,11 @@
 #ifdef Q_OS_LINUX
 
 #include "fileChangeNotification.hpp"
-#include "fileMonitorBase.h"
+#include "fileMonitorImpl.h"
 
 #include <functional>
 
-class LinuxFileMonitor : public FileMonitorBase
+class LinuxFileMonitor : public FileMonitorImpl
 {
 public:
 

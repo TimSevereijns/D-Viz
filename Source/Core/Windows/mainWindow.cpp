@@ -550,7 +550,7 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
 
    SetupFileSizePruningDropdown();
 
-   const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
+   const auto fileSizeIndex = static_cast<std::size_t>(m_ui.pruneSizeComboBox->currentIndex());
    if (fileSizeIndex < 1)
    {
       return;
@@ -585,7 +585,7 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
 
    SetupFileSizePruningDropdown();
 
-   const auto fileSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
+   const auto fileSizeIndex = static_cast<std::size_t>(m_ui.pruneSizeComboBox->currentIndex());
    if (fileSizeIndex < 1)
    {
       return;
@@ -643,7 +643,7 @@ void MainWindow::OnApplyButtonPressed()
 
 void MainWindow::PruneTree()
 {
-   const auto pruneSizeIndex = m_ui.pruneSizeComboBox->currentIndex();
+   const auto pruneSizeIndex = static_cast<std::size_t>(m_ui.pruneSizeComboBox->currentIndex());
    const auto minimumSize = m_fileSizeOptions->at(pruneSizeIndex).first;
 
    Settings::VisualizationParameters parameters;
@@ -676,7 +676,7 @@ void MainWindow::ApplyColorScheme()
 
 void MainWindow::OnFieldOfViewChange(int fieldOfView)
 {
-   m_glCanvas->SetFieldOfView(static_cast<float>(fieldOfView));
+   m_glCanvas->SetFieldOfView(fieldOfView);
 }
 
 void MainWindow::OnDirectoryPruningChange(int state)

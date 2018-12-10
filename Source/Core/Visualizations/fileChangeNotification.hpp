@@ -66,7 +66,7 @@ namespace std
       }
    };
 
-   template <>
+   template<>
    struct hash<std::experimental::filesystem::path>
    {
       /**
@@ -74,7 +74,7 @@ namespace std
        */
       std::size_t operator()(const std::experimental::filesystem::path& path) const
       {
-         return std::hash<std::wstring>{ }(path.native());
+         return std::hash<std::experimental::filesystem::path::string_type>{ }(path.native());
       }
    };
 }

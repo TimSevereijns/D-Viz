@@ -153,6 +153,22 @@ void GLCanvas::ToggleAssetVisibility(bool shouldEnable) const noexcept
    }
 }
 
+template<>
+void GLCanvas::ToggleAssetVisibility<Asset::Tag::Frustum>(bool shouldEnable) const noexcept
+{
+   auto* const asset = GetAsset<Asset::Tag::Frustum>();
+
+   if (shouldEnable)
+   {
+      asset->GenerateFrusta(m_camera);
+      asset->Show();
+   }
+   else
+   {
+      asset->Hide();
+   }
+}
+
 void GLCanvas::resizeGL(int width, int height)
 {
    if (height == 0)

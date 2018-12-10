@@ -46,14 +46,14 @@ namespace
       const Camera& renderCamera,
       const QMatrix4x4& worldToLight)
    {
-      constexpr auto cascadeCount{ 3 };
-      const auto cascades = FrustumUtilities::ComputeCascadeDistances(cascadeCount, renderCamera);
+      const auto cascadeDistances = FrustumUtilities::GetCascadeDistances();
+      const auto cascadeCount{ cascadeDistances.size() };
 
       std::vector<std::vector<QVector3D>> frusta;
       frusta.reserve(cascadeCount);
 
       auto mutableCamera = renderCamera;
-      for (const auto& nearAndFarPlanes : cascades)
+      for (const auto& nearAndFarPlanes : cascadeDistances)
       {
          mutableCamera.SetNearPlane(nearAndFarPlanes.first);
          mutableCamera.SetFarPlane(nearAndFarPlanes.second);
@@ -140,8 +140,8 @@ namespace
       const Camera& camera)
    {
       Camera mutableCamera = camera;
-      mutableCamera.SetNearPlane(1.0f);
-      mutableCamera.SetFarPlane(2000.0f);
+      //mutableCamera.SetNearPlane(1.0f);
+      //mutableCamera.SetFarPlane(2000.0f);
 
       constexpr auto cascadeCount{ 3 };
       const auto cascades = FrustumUtilities::ComputeCascadeDistances(cascadeCount, mutableCamera);
@@ -240,22 +240,14 @@ namespace Asset
       m_VAO.release();
    }
 
-   void Frustum::GenerateFrusta(const Camera& camera)
+   void Frustum::GenerateFrusta(Camera camera)
    {
       ClearBuffers();
 
-      Camera renderCamera = camera;
-      renderCamera.SetPosition(QVector3D{ 500, 100, 0 });
-      renderCamera.SetOrientation(0.0, 0.0);
-      renderCamera.SetNearPlane(1.0f);
-      renderCamera.SetFarPlane(2000.0f);
+      //camera.SetFarPlane(1000.0f);
 
-      const auto lightMatrix = ComputeLightViewMatrix();
-
-      GenerateCameraFrusta(*this, renderCamera);
-      GenerateCascadeBoundingBoxes(*this, renderCamera, lightMatrix);
-
-      //GenerateShadowViewFrustum(*this, lightMatrix);
+      GenerateCameraFrusta(*this, camera);
+      GenerateCascadeBoundingBoxes(*this, camera, ComputeLightViewMatrix());
 
       Refresh();
    }
