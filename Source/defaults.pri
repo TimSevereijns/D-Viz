@@ -118,9 +118,11 @@ INCLUDEPATH += \
    $$PWD/../Foreign/Spdlog/include \
    $$PWD/../Foreign/Stopwatch/source \
    $$PWD/../Foreign/Tree/source \
-   $$PWD/../Foreign/GSL/include
+   $$PWD/../Foreign/GSL/include \
+   $$PWD/../Foreign/INotify-Cpp/src/include
 
-DEPENDPATH += $$PWD/../../boost_1_66_0/stage/lib
+DEPENDPATH += \
+   $$PWD/../../boost_1_66_0/stage/lib
 
 DISTFILES += \
    $$PWD/Core/Shaders/visualizationFragmentShader.frag \
@@ -166,14 +168,20 @@ unix:CONFIG(release, debug|release) {
    LIBS += \
       -lstdc++fs \
       -L$$PWD/../../boost_1_66_0/stage/lib \
-      -lboost_system
+      -L$$PWD/../Foreign/INotify-Cpp/build/src \
+      -lboost_system \
+      -lboost_filesystem \
+      -linotify-cpp
 }
 
 unix:CONFIG(debug, debug|release) {
    LIBS += \
       -lstdc++fs \
       -L$$PWD/../../boost_1_66_0/stage/lib \
-      -lboost_system
+      -L$$PWD/../Foreign/INotify-Cpp/build/src \
+      -lboost_system \
+      -lboost_filesystem \
+      -linotify-cpp
 }
 
 CONFIG(debug, debug|release) {

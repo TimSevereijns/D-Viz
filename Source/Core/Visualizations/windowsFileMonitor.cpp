@@ -41,16 +41,6 @@ WindowsFileMonitor::~WindowsFileMonitor() noexcept
    {
       Stop();
    }
-
-   if (m_monitoringThread.joinable())
-   {
-      m_monitoringThread.join();
-   }
-
-   if (m_fileHandle && m_fileHandle != INVALID_HANDLE_VALUE) // NOLINT
-   {
-      CloseHandle(m_fileHandle);
-   }
 }
 
 bool WindowsFileMonitor::IsActive() const
@@ -110,7 +100,19 @@ void WindowsFileMonitor::Start(
 
 void WindowsFileMonitor::Stop()
 {
-   SetEvent(m_events.GetExitHandle());   
+   SetEvent(m_events.GetExitHandle());
+
+   if (m_monitoringThread.joinable())
+   {
+      m_monitoringThread.join();
+   }
+
+   Expects(m_isActive == false);
+
+   if (m_fileHandle && m_fileHandle != INVALID_HANDLE_VALUE) // NOLINT
+   {
+      CloseHandle(m_fileHandle);
+   }
 }
 
 void WindowsFileMonitor::Monitor()
