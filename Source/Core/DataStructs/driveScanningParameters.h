@@ -7,8 +7,7 @@
 #include <memory>
 #include <string>
 
-template<typename T>
-class Tree;
+template <typename T> class Tree;
 
 struct ScanningProgress;
 struct VizBlock;
@@ -17,24 +16,22 @@ struct VizBlock;
  * @brief Wrapper around all of the parameters needed to scan a directories, as well as to track
  * progress.
  */
-struct DriveScanningParameters
-{
-   using ProgressCallback = std::function<void (const ScanningProgress&)>;
+struct DriveScanningParameters {
+    using ProgressCallback = std::function<void(const ScanningProgress&)>;
 
-   using ScanCompleteCallback =
-      std::function<void (const ScanningProgress&, std::shared_ptr<Tree<VizBlock>> fileTree)>;
+    using ScanCompleteCallback =
+        std::function<void(const ScanningProgress&, std::shared_ptr<Tree<VizBlock>> fileTree)>;
 
-   std::experimental::filesystem::path path{ };
+    std::experimental::filesystem::path path{};
 
-   ProgressCallback onProgressUpdateCallback{ };
-   ScanCompleteCallback onScanCompletedCallback{ };
+    ProgressCallback onProgressUpdateCallback{};
+    ScanCompleteCallback onScanCompletedCallback{};
 
-   DriveScanningParameters() = default;
+    DriveScanningParameters() = default;
 
-   DriveScanningParameters(
-      std::experimental::filesystem::path startingPath,
-      ProgressCallback progressCallback,
-      ScanCompleteCallback completionCallback);
+    DriveScanningParameters(
+        std::experimental::filesystem::path startingPath, ProgressCallback progressCallback,
+        ScanCompleteCallback completionCallback);
 };
 
 #endif // DRIVESCANNINGPARAMETERS_H

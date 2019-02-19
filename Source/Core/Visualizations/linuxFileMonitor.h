@@ -15,42 +15,40 @@
 
 class LinuxFileMonitor : public FileMonitorImpl
 {
-public:
+  public:
+    ~LinuxFileMonitor() noexcept override;
 
-   ~LinuxFileMonitor() noexcept override;
+    /**
+     * @brief Starts monitoring the file system for changes.
+     *
+     * @param[in] path            The root directory to watch.
+     */
+    void Start(
+        const std::experimental::filesystem::path& path,
+        const std::function<void(FileChangeNotification&&)>& onNotificationCallback) override;
 
-   /**
-    * @brief Starts monitoring the file system for changes.
-    *
-    * @param[in] path            The root directory to watch.
-    */
-   void Start(
-      const std::experimental::filesystem::path& path,
-      const std::function<void (FileChangeNotification&&)>& onNotificationCallback) override;
+    /**
+     * @brief Stops monitoring the file system for changes.
+     */
+    void Stop() override;
 
-   /**
-    * @brief Stops monitoring the file system for changes.
-    */
-   void Stop() override;
+    /**
+     * @returns True if the file system monitor is actively monitoring.
+     */
+    bool IsActive() const override;
 
-   /**
-    * @returns True if the file system monitor is actively monitoring.
-    */
-   bool IsActive() const override;
+  private:
+    bool ProcessNotification(
+        const inotify::Notification& notification,
+        const std::function<void(FileChangeNotification&&)>& callback) const;
 
-private:
+    bool m_isActive{ false };
 
-   bool ProcessNotification(
-      const inotify::Notification& notification,
-      const std::function<void (FileChangeNotification&&)>& callback) const;
+    boost::filesystem::path m_pathToWatch;
 
-   bool m_isActive{ false };
+    std::thread m_monitoringThread;
 
-   boost::filesystem::path m_pathToWatch;
-
-   std::thread m_monitoringThread;
-
-   inotify::NotifierBuilder m_notifier;
+    inotify::NotifierBuilder m_notifier;
 };
 
 #endif // Q_OS_UNIX

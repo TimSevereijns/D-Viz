@@ -7,9 +7,6 @@ win32:QMAKE_LFLAGS_RELEASE += /MAP /debug /opt:ref
 # Unlock all the fun toys on Windows:
 win32:QMAKE_CXXFLAGS += /std:c++17
 
-# @todo Make this more generic, or remove it altogether.
-unix:INCLUDEPATH += /usr/include/c++/7.2.0
-
 INCLUDEPATH += $$PWD/Core
 
 SOURCES += \

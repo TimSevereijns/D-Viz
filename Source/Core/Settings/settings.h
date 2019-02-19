@@ -9,44 +9,45 @@
 
 namespace Settings
 {
-   using JsonDocument = rapidjson::GenericDocument<rapidjson::UTF16<wchar_t>>;
+    using JsonDocument = rapidjson::GenericDocument<rapidjson::UTF16<wchar_t>>;
 
-   /**
-    * @brief Helper function to parse a JSON file on disk.
-    *
-    * @param[in] path               Path to the JSON file.
-    *
-    * @returns A parsed JSON document.
-    */
-   JsonDocument LoadFromDisk(const std::experimental::filesystem::path& path);
+    /**
+     * @brief Helper function to parse a JSON file on disk.
+     *
+     * @param[in] path               Path to the JSON file.
+     *
+     * @returns A parsed JSON document.
+     */
+    JsonDocument LoadFromDisk(const std::experimental::filesystem::path& path);
 
-   /**
-    * @brief Helper function to save a JSON file to disk.
-    *
-    * @param[in] document           The JSON document to save.
-    * @param[in] path               The path on disk to which to save the document.
-    *
-    * @returns True if the save succeeded.
-    */
-   bool SaveToDisk(
-      const JsonDocument& document,
-      const std::experimental::filesystem::path& path);
+    /**
+     * @brief Helper function to save a JSON file to disk.
+     *
+     * @param[in] document           The JSON document to save.
+     * @param[in] path               The path on disk to which to save the document.
+     *
+     * @returns True if the save succeeded.
+     */
+    bool SaveToDisk(const JsonDocument& document, const std::experimental::filesystem::path& path);
 
-   /**
-    * @brief The VisualizationParameters struct represents the gamut of visualization parameters
-    * that can be set to control when visualization updates occur, as well as what nodes get
-    * included.
-    */
-   struct VisualizationParameters
-   {
-      std::wstring rootDirectory{ L"" };  ///< The path to the root directory
+    /**
+     * @brief The VisualizationParameters struct represents the gamut of visualization parameters
+     * that can be set to control when visualization updates occur, as well as what nodes get
+     * included.
+     */
+    struct VisualizationParameters {
+        std::wstring rootDirectory{ L"" }; ///< The path to the root directory
 
-      std::uint64_t minimumFileSize{ 0 }; ///< The minimum size a file should be before it shows up.
+        std::uint64_t minimumFileSize{
+            0
+        }; ///< The minimum size a file should be before it shows up.
 
-      bool forceNewScan{ true };          ///< Whether a new scan should take place.
-      bool onlyShowDirectories{ false };  ///< Whether only directories should be shown.
-      bool useDirectoryGradient{ false }; ///< Whether to use gradient coloring for the directories.
-   };
+        bool forceNewScan{ true };         ///< Whether a new scan should take place.
+        bool onlyShowDirectories{ false }; ///< Whether only directories should be shown.
+        bool useDirectoryGradient{
+            false
+        }; ///< Whether to use gradient coloring for the directories.
+    };
 }
 
 #endif // SETTINGS_H

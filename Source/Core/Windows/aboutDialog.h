@@ -7,15 +7,13 @@
 
 class AboutDialog final : public QDialog
 {
-   Q_OBJECT
+    Q_OBJECT
 
-public:
+  public:
+    explicit AboutDialog(QWidget* parent = nullptr);
 
-   explicit AboutDialog(QWidget* parent = nullptr);
-
-private:
-
-   Ui::AboutDialog m_ui;
+  private:
+    Ui::AboutDialog m_ui;
 };
 
 #endif // ABOUTDIALOG_H

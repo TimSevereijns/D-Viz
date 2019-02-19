@@ -9,113 +9,104 @@
 
 namespace Asset
 {
-   Base::Base(const Settings::Manager& settings,
-      QOpenGLExtraFunctions& openGL)
-      :
-      m_openGL{ openGL },
-      m_settingsManager{ settings }
-   {
-   }
+    Base::Base(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
+        : m_openGL{ openGL }, m_settingsManager{ settings }
+    {
+    }
 
-   void Base::ClearBuffers()
-   {
-      m_rawVertices.clear();
-      m_rawColors.clear();
-   }
+    void Base::ClearBuffers()
+    {
+        m_rawVertices.clear();
+        m_rawColors.clear();
+    }
 
-   bool Base::LoadShaders(
-      const QString& vertexShaderName,
-      const QString& fragmentShaderName)
-   {
-      if (!m_mainShader.addShaderFromSourceFile(QOpenGLShader::Vertex,
-         ":/Shaders/" + vertexShaderName + ".vert"))
-      {
-         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
-         log->error("Failed to load vertex shader: " + vertexShaderName.toStdString() + ".vert");
+    bool Base::LoadShaders(const QString& vertexShaderName, const QString& fragmentShaderName)
+    {
+        if (!m_mainShader.addShaderFromSourceFile(
+                QOpenGLShader::Vertex, ":/Shaders/" + vertexShaderName + ".vert")) {
+            const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+            log->error("Failed to load vertex shader: " + vertexShaderName.toStdString() + ".vert");
 
-         return false;
-      }
+            return false;
+        }
 
-      if (!m_mainShader.addShaderFromSourceFile(QOpenGLShader::Fragment,
-         ":/Shaders/" + fragmentShaderName + ".frag"))
-      {
-         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
-         log->error("Failed to load fragment shader: " + fragmentShaderName.toStdString() + ".frag");
+        if (!m_mainShader.addShaderFromSourceFile(
+                QOpenGLShader::Fragment, ":/Shaders/" + fragmentShaderName + ".frag")) {
+            const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+            log->error(
+                "Failed to load fragment shader: " + fragmentShaderName.toStdString() + ".frag");
 
-         return false;
-      }
+            return false;
+        }
 
-      const auto linkedSuccessfully = m_mainShader.link();
-      if (!linkedSuccessfully)
-      {
-         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
-         log->error("Failed to link the shader program!");
+        const auto linkedSuccessfully = m_mainShader.link();
+        if (!linkedSuccessfully) {
+            const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+            log->error("Failed to link the shader program!");
 
-         return false;
-      }
+            return false;
+        }
 
-      return true;
-   }
+        return true;
+    }
 
-   bool Base::DetermineVisibilityFromPreferences(std::wstring_view assetName)
-   {
-      const auto preferenceName = std::wstring{ L"show" } + assetName.data();
-      const auto& preferences = m_settingsManager.GetPreferenceMap();
-      const auto shouldRender = preferences.GetValueOrDefault(preferenceName, true);
+    bool Base::DetermineVisibilityFromPreferences(std::wstring_view assetName)
+    {
+        const auto preferenceName = std::wstring{ L"show" } + assetName.data();
+        const auto& preferences = m_settingsManager.GetPreferenceMap();
+        const auto shouldRender = preferences.GetValueOrDefault(preferenceName, true);
 
-      return shouldRender;
-   }
+        return shouldRender;
+    }
 
-   bool Base::IsAssetLoaded() const
-   {
-      return !(m_rawVertices.empty() && m_rawColors.empty());
-   }
+    bool Base::IsAssetLoaded() const
+    {
+        return !(m_rawVertices.empty() && m_rawColors.empty());
+    }
 
-   void Base::SetVertexCoordinates(QVector<QVector3D>&& data)
-   {
-      m_rawVertices.clear();
-      m_rawVertices.append(data);
-   }
+    void Base::SetVertexCoordinates(QVector<QVector3D>&& data)
+    {
+        m_rawVertices.clear();
+        m_rawVertices.append(data);
+    }
 
-   void Base::SetVertexColors(QVector<QVector3D>&& data)
-   {
-      m_rawColors.clear();
-      m_rawColors.append(data);
-   }
+    void Base::SetVertexColors(QVector<QVector3D>&& data)
+    {
+        m_rawColors.clear();
+        m_rawColors.append(data);
+    }
 
-   void Base::AddVertexCoordinates(QVector<QVector3D>&& positionData)
-   {
-      m_rawVertices.append(positionData);
-   }
+    void Base::AddVertexCoordinates(QVector<QVector3D>&& positionData)
+    {
+        m_rawVertices.append(positionData);
+    }
 
-   void Base::AddVertexColors(QVector<QVector3D>&& colorData)
-   {
-      m_rawColors.append(colorData);
-   }
+    void Base::AddVertexColors(QVector<QVector3D>&& colorData)
+    {
+        m_rawColors.append(colorData);
+    }
 
-   unsigned int Base::GetVertexCount() const
-   {
-      return static_cast<unsigned int>(m_rawVertices.size());
-   }
+    unsigned int Base::GetVertexCount() const
+    {
+        return static_cast<unsigned int>(m_rawVertices.size());
+    }
 
-   unsigned int Base::GetColorCount() const
-   {
-      return static_cast<unsigned int>(m_rawColors.size());
-   }
+    unsigned int Base::GetColorCount() const
+    {
+        return static_cast<unsigned int>(m_rawColors.size());
+    }
 
-   void Base::Show()
-   {
-      m_shouldRender = true;
-   }
+    void Base::Show()
+    {
+        m_shouldRender = true;
+    }
 
-   void Base::Hide()
-   {
-      m_shouldRender = false;
-   }
+    void Base::Hide()
+    {
+        m_shouldRender = false;
+    }
 
-   void Base::UpdateVBO(
-      const Tree<VizBlock>::Node&,
-      Asset::Event)
-   {
-   }
+    void Base::UpdateVBO(const Tree<VizBlock>::Node&, Asset::Event)
+    {
+    }
 }

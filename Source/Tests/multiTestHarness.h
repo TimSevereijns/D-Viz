@@ -13,57 +13,51 @@
 
 namespace MultiTest
 {
-   namespace Detail
-   {
-      using TestMap = std::unordered_map<std::string, std::unique_ptr<QObject>>;
+    namespace Detail
+    {
+        using TestMap = std::unordered_map<std::string, std::unique_ptr<QObject>>;
 
-      inline TestMap& GetTestMap()
-      {
-         static TestMap instance;
-         return instance;
-      }
-   }
+        inline TestMap& GetTestMap()
+        {
+            static TestMap instance;
+            return instance;
+        }
+    }
 
-   template<typename TestClassType>
-   class TestRegistrar
-   {
-   public:
+    template <typename TestClassType> class TestRegistrar
+    {
+      public:
+        TestRegistrar(std::string testName)
+        {
+            auto& testMap = Detail::GetTestMap();
 
-      TestRegistrar(std::string testName)
-      {
-         auto& testMap = Detail::GetTestMap();
+            const auto itr = testMap.find(testName);
+            if (itr != std::end(testMap)) {
+                Expects(!"Test already registered under that name."); // NOLINT
+            }
 
-         const auto itr = testMap.find(testName);
-         if (itr != std::end(testMap))
-         {
-            Expects(!"Test already registered under that name."); // NOLINT
-         }
+            testMap.emplace(std::move(testName), std::make_unique<TestClassType>());
+        }
+    };
 
-         testMap.emplace(
-            std::move(testName),
-            std::make_unique<TestClassType>());
-      }
-   };
+    inline int RunAllTests(int /*argc*/, char** /*argv*/)
+    {
+        auto result{ 0 };
 
-   inline int RunAllTests(int /*argc*/, char** /*argv*/)
-   {
-      auto result{ 0 };
+        for (const auto & [ name, test ] : Detail::GetTestMap()) {
+            IgnoreUnused(name);
+            result += QTest::qExec(test.get());
+        }
 
-      for (const auto& [name, test] : Detail::GetTestMap())
-      {
-         IgnoreUnused(name);
-         result += QTest::qExec(test.get());
-      }
-
-      return result;
-   }
+        return result;
+    }
 }
 
-#define NONEXPANDING_CONCAT(A, B) A ## B
+#define NONEXPANDING_CONCAT(A, B) A##B
 
 #define CONCAT(A, B) NONEXPANDING_CONCAT(A, B)
 
-#define REGISTER_TEST(classType) \
-   MultiTest::TestRegistrar<classType> CONCAT(test, __LINE__){ #classType };
+#define REGISTER_TEST(classType)                                                                   \
+    MultiTest::TestRegistrar<classType> CONCAT(test, __LINE__){ #classType };
 
 #endif // MULTITESTHARNESS_H

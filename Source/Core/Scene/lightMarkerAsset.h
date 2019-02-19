@@ -5,30 +5,24 @@
 
 namespace Asset
 {
-   /**
-    * @brief Series of markers to highlight the position of the lights.
-    */
-   class LightMarker final : public Line
-   {
-   public:
+    /**
+     * @brief Series of markers to highlight the position of the lights.
+     */
+    class LightMarker final : public Line
+    {
+      public:
+        /**
+         * @copydoc Asset::Base::Base()
+         */
+        LightMarker(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL);
+        /**
+         * @copydoc Asset::Base::Render()
+         */
+        void Render(const Camera& camera, const std::vector<Light>& lights) override;
 
-      /**
-       * @copydoc Asset::Base::Base()
-       */
-      LightMarker(
-         const Settings::Manager& settings,
-         QOpenGLExtraFunctions& openGL);
-      /**
-       * @copydoc Asset::Base::Render()
-       */
-      void Render(
-         const Camera& camera,
-         const std::vector<Light>& lights) override;
-
-   private:
-
-      static constexpr std::wstring_view AssetName{ L"LightMarker" };
-   };
+      private:
+        static constexpr std::wstring_view AssetName{ L"LightMarker" };
+    };
 }
 
 #endif // LIGHTMARKERASSET_H

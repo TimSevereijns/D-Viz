@@ -10,15 +10,12 @@
  */
 class Gamepad final : public QGamepad
 {
-public:
+  public:
+    Gamepad(int deviceId = 0, QObject* parent = nullptr);
 
-   Gamepad(
-      int deviceId = 0,
-      QObject* parent = nullptr);
+    bool IsLeftTriggerDown() const;
 
-   bool IsLeftTriggerDown() const;
-
-   bool IsRightTriggerDown() const;
+    bool IsRightTriggerDown() const;
 };
 
 #endif // GAMEPADMONITOR_H

@@ -1,0 +1,17 @@
+﻿---
+AlignAfterOpenBracket: AlwaysBreak
+AllowShortBlocksOnASingleLine: 'false'
+AllowShortCaseLabelsOnASingleLine: 'false'
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: 'false'
+AllowShortLoopsOnASingleLine: 'false'
+BreakBeforeBraces: Linux
+ColumnLimit: '100'
+ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
+Cpp11BracedListStyle: 'false'
+IndentCaseLabels: 'true'
+IndentWidth: '4'
+NamespaceIndentation: All
+PointerAlignment: Left
+BreakBeforeTernaryOperators: 'true'
+...

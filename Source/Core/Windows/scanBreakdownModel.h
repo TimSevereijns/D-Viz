@@ -3,9 +3,9 @@
 
 #include <QAbstractTableModel>
 
-#include "../constants.h"
 #include "../DataStructs/vizBlock.h"
 #include "../Utilities/utilities.hpp"
+#include "../constants.h"
 
 #include <Tree/Tree.hpp>
 
@@ -17,61 +17,49 @@
 
 namespace Settings
 {
-   class Manager;
+    class Manager;
 }
 
-struct RowModel
-{
-   std::wstring fileExtension;
-   std::wstring formattedSize;
-   std::uintmax_t totalSize;
+struct RowModel {
+    std::wstring fileExtension;
+    std::wstring formattedSize;
+    std::uintmax_t totalSize;
 
-   RowModel() = default;
+    RowModel() = default;
 
-   RowModel(
-      std::wstring extension,
-      std::wstring formattedSize,
-      std::uintmax_t size)
-      :
-      fileExtension{ std::move(extension) },
-      formattedSize{ std::move(formattedSize) },
-      totalSize{ std::move(size) }
-   {
-   }
+    RowModel(std::wstring extension, std::wstring formattedSize, std::uintmax_t size)
+        : fileExtension{ std::move(extension) },
+          formattedSize{ std::move(formattedSize) },
+          totalSize{ std::move(size) }
+    {
+    }
 };
 
-Q_DECLARE_METATYPE( RowModel );
+Q_DECLARE_METATYPE(RowModel);
 
 class ScanBreakdownModel final : public QAbstractTableModel
 {
-   friend class BreakdownDialog;
+    friend class BreakdownDialog;
 
-public:
+  public:
+    int rowCount(const QModelIndex& parent) const override;
 
-   int rowCount(const QModelIndex& parent) const override;
+    int columnCount(const QModelIndex& parent) const override;
 
-   int columnCount(const QModelIndex& parent) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-   QVariant headerData(
-      int section,
-      Qt::Orientation orientation,
-      int role) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
 
-   QVariant data(
-      const QModelIndex& index,
-      int role) const override;
+    void insert(const Tree<VizBlock>::Node& node);
 
-   void insert(const Tree<VizBlock>::Node& node);
+  private:
+    void FinalizeInsertion(const Settings::Manager& settingsManager);
 
-private:
+    void ClearData();
 
-   void FinalizeInsertion(const Settings::Manager& settingsManager);
+    std::vector<RowModel> m_fileTypeVector;
 
-   void ClearData();
-
-   std::vector<RowModel> m_fileTypeVector;
-
-   std::unordered_map<std::wstring, std::uintmax_t> m_fileTypeMap;
+    std::unordered_map<std::wstring, std::uintmax_t> m_fileTypeMap;
 };
 
 #endif // SCANBREAKDOWNMODEL_H

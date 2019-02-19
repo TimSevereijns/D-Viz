@@ -1,8 +1,8 @@
 #ifndef MOCKFILEMONITOR_H
 #define MOCKFILEMONITOR_H
 
-#include <Visualizations/fileMonitorImpl.h>
 #include <Visualizations/fileChangeNotification.hpp>
+#include <Visualizations/fileMonitorImpl.h>
 
 #include <experimental/filesystem>
 #include <functional>
@@ -13,58 +13,55 @@
  */
 class MockFileMonitor : public FileMonitorImpl
 {
-public:
+  public:
+    MockFileMonitor(std::function<FileChangeNotification()> notificationGenerator)
+        : m_notificationGenerator{ std::move(notificationGenerator) }
+    {
+    }
 
-   MockFileMonitor(std::function<FileChangeNotification ()> notificationGenerator)
-      : m_notificationGenerator{ std::move(notificationGenerator) }
-   {
-   }
+    ~MockFileMonitor() noexcept override
+    {
+        if (m_workerThread.joinable()) {
+            m_workerThread.join();
+        }
+    }
 
-   ~MockFileMonitor() noexcept override
-   {
-      if (m_workerThread.joinable())
-      {
-         m_workerThread.join();
-      }
-   }
+    void Start(
+        const std::experimental::filesystem::path& path,
+        const std::function<void(FileChangeNotification&&)>& callback) override
+    {
+        m_pathToMonitor = path;
+        m_callback = callback;
+        m_workerThread = std::thread{ [&] { SendFakeNotification(); } };
+        m_isActive = true;
+    }
 
-   void Start(
-      const std::experimental::filesystem::path& path,
-      const std::function<void (FileChangeNotification&&)>& callback) override
-   {
-      m_pathToMonitor = path;
-      m_callback = callback;
-      m_workerThread = std::thread{ [&]{ SendFakeNotification(); } };
-      m_isActive = true;
-   }
+    void Stop() override
+    {
+        m_isActive = false;
+    }
 
-   void Stop() override
-   {
-      m_isActive = false;
-   }
+    bool IsActive() const override
+    {
+        return m_isActive;
+    }
 
-   bool IsActive() const override
-   {
-      return m_isActive;
-   }
+  private:
+    void SendFakeNotification() const noexcept
+    {
+        auto notification = m_notificationGenerator();
+        m_callback(std::move(notification));
+    }
 
-private:
+    std::function<FileChangeNotification()> m_notificationGenerator;
 
-   void SendFakeNotification() const noexcept
-   {
-      auto notification = m_notificationGenerator();
-      m_callback(std::move(notification));
-   }
+    std::function<void(FileChangeNotification&&)> m_callback;
 
-   std::function<FileChangeNotification ()> m_notificationGenerator;
+    std::thread m_workerThread;
 
-   std::function<void (FileChangeNotification&&)> m_callback;
+    std::experimental::filesystem::path m_pathToMonitor;
 
-   std::thread m_workerThread;
-
-   std::experimental::filesystem::path m_pathToMonitor;
-
-   bool m_isActive{ false };
+    bool m_isActive{ false };
 };
 
 #endif // MOCKFILEMONITOR_H

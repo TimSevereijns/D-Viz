@@ -6,15 +6,15 @@
 
 int main(int argc, char* argv[])
 {
-   Bootstrapper::RegisterMetaTypes();
-   Bootstrapper::InitializeLogs();
+    Bootstrapper::RegisterMetaTypes();
+    Bootstrapper::InitializeLogs();
 
-   QApplication application{ argc, argv };
+    QApplication application{ argc, argv };
 
-   Controller controller{ };
-   controller.LaunchUI();
+    Controller controller{};
+    controller.LaunchUI();
 
-   const auto exitCode = QApplication::exec();
-   spdlog::get(Constants::Logging::DEFAULT_LOG)->info("Exiting...");
-   return exitCode;
+    const auto exitCode = QApplication::exec();
+    spdlog::get(Constants::Logging::DEFAULT_LOG)->info("Exiting...");
+    return exitCode;
 }

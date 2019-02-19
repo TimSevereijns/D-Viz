@@ -6,38 +6,33 @@
 /**
  * @brief ScopeExit
  */
-template<typename LambdaType>
-class ScopeExit
+template <typename LambdaType> class ScopeExit
 {
-public:
+  public:
+    ScopeExit(LambdaType&& lambda) noexcept : m_lambda{ std::move(lambda) }
+    {
+    }
 
-   ScopeExit(LambdaType&& lambda) noexcept :
-      m_lambda{ std::move(lambda) }
-   {
-   }
+    ~ScopeExit() noexcept
+    {
+        m_lambda();
+    }
 
-   ~ScopeExit() noexcept
-   {
-      m_lambda();
-   }
+    ScopeExit(const ScopeExit&) = delete;
+    ScopeExit& operator=(const ScopeExit&) = delete;
 
-   ScopeExit(const ScopeExit&) = delete;
-   ScopeExit& operator=(const ScopeExit&) = delete;
+    ScopeExit(ScopeExit&&) = default;
+    ScopeExit& operator=(ScopeExit&&) = default;
 
-   ScopeExit(ScopeExit&&) = default;
-   ScopeExit& operator=(ScopeExit&&) = default;
-
-private:
-
-   LambdaType m_lambda;
+  private:
+    LambdaType m_lambda;
 };
 
 namespace
 {
-   struct DummyStruct
-   {
-      // Left intentionally empty.
-   };
+    struct DummyStruct {
+        // Left intentionally empty.
+    };
 }
 
 /**
@@ -48,17 +43,16 @@ namespace
  *
  * @returns An RAII object encapsulating the lambda.
  */
-template<typename LambdaType>
+template <typename LambdaType>
 inline ScopeExit<LambdaType> operator+(const DummyStruct&, LambdaType&& lambda)
 {
-   return ScopeExit<LambdaType>{ std::forward<LambdaType>(lambda) };
+    return ScopeExit<LambdaType>{ std::forward<LambdaType>(lambda) };
 }
 
-#define NONEXPANDING_CONCAT(A, B) A ## B
+#define NONEXPANDING_CONCAT(A, B) A##B
 
 #define CONCAT(A, B) NONEXPANDING_CONCAT(A, B)
 
-#define ON_SCOPE_EXIT \
-   auto CONCAT(scope_exit_, __LINE__) = DummyStruct{ } + [=] ()
+#define ON_SCOPE_EXIT auto CONCAT(scope_exit_, __LINE__) = DummyStruct{} + [=]()
 
 #endif // SCOPEEXIT_HPP
