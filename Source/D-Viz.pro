@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += 3drender-private gui opengl gamepad
+QT += gui opengl gamepad
 
 greaterThan(QT_MAJOR_VERSION, 5): QT += widgets 3dcore
 
