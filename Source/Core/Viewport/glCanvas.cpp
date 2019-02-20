@@ -49,7 +49,7 @@ namespace
         lightMarkerAsset.SetVertexCoordinates(std::move(vertices));
         lightMarkerAsset.SetVertexColors(std::move(colors));
     }
-}
+} // namespace
 
 GLCanvas::GLCanvas(Controller& controller, QWidget* parent)
     : QOpenGLWidget{ parent },
@@ -104,10 +104,9 @@ void GLCanvas::initializeGL()
 
 template <typename AssetTag> void GLCanvas::RegisterAsset()
 {
-    m_sceneAssets.emplace_back(
-        TagAndAsset{ std::make_unique<AssetTag>(),
-                     std::make_unique<typename AssetTag::AssetType>(
-                         m_controller.GetSettingsManager(), m_openGLContext) });
+    m_sceneAssets.emplace_back(TagAndAsset{
+        std::make_unique<AssetTag>(), std::make_unique<typename AssetTag::AssetType>(
+                                          m_controller.GetSettingsManager(), m_openGLContext) });
 }
 
 template <typename RequestedAsset>
@@ -780,7 +779,8 @@ void GLCanvas::paintGL()
             for (const auto& tagAndAsset : m_sceneAssets) {
                 tagAndAsset.asset->Render(m_camera, m_lights);
             }
-        }).GetElapsedTime();
+        })
+            .GetElapsedTime();
 
     if (m_mainWindow.ShouldShowFrameTime()) {
         UpdateFrameTime(elapsedTime);

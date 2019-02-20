@@ -17,9 +17,10 @@
 #include <thread>
 #include <vector>
 
-#include <FileApi.h>
-#include <WinBase.h>
 #include <Windows.h>
+
+#include <WinBase.h>
+#include <fileapi.h>
 
 namespace Detail
 {
@@ -73,7 +74,7 @@ namespace Detail
       private:
         std::array<HANDLE, 2> m_handles{ INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE }; // NOLINT
     };
-}
+} // namespace Detail
 
 /**
  * @brief The WindowsFileMonitor class

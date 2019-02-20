@@ -78,8 +78,8 @@ namespace
     FindClosestIntersectionPoint(const Ray& ray, const std::vector<QVector3D>& allIntersections)
     {
         const auto& closest = std::min_element(
-            std::begin(allIntersections), std::end(allIntersections),
-            [&ray](const auto& lhs, const auto& rhs) noexcept {
+            std::begin(allIntersections),
+            std::end(allIntersections), [&ray](const auto& lhs, const auto& rhs) noexcept {
                 return (ray.Origin().distanceToPoint(lhs) < ray.Origin().distanceToPoint(rhs));
             });
 
@@ -116,12 +116,14 @@ namespace
             const boost::optional<QVector3D> intersectionPoint =
                 DoesRayIntersectPlane(ray, pointOnPlane, POSITIVE_Y_NORMAL);
 
-            if (intersectionPoint && blockOrigin.xAsFloat() < intersectionPoint->x() &&
+            // clang-format off
+            if (intersectionPoint && blockOrigin.xAsFloat()             < intersectionPoint->x() &&
                 blockOrigin.xAsFloat() + static_cast<float>(blockWidth) > intersectionPoint->x() &&
-                blockOrigin.zAsFloat() > intersectionPoint->z() &&
+                blockOrigin.zAsFloat()                                  > intersectionPoint->z() &&
                 blockOrigin.zAsFloat() - static_cast<float>(blockDepth) < intersectionPoint->z()) {
                 allIntersections.emplace_back(*intersectionPoint);
             }
+            // clang-format on
         }
 
         { // Perform hit detection on the front face:
@@ -133,12 +135,14 @@ namespace
             const boost::optional<QVector3D> intersectionPoint =
                 DoesRayIntersectPlane(ray, pointOnPlane, POSITIVE_Z_NORMAL);
 
-            if (intersectionPoint && blockOrigin.xAsFloat() < intersectionPoint->x() &&
-                blockOrigin.xAsFloat() + static_cast<float>(blockWidth) > intersectionPoint->x() &&
-                blockOrigin.yAsFloat() < intersectionPoint->y() &&
+            // clang-format off
+            if (intersectionPoint && blockOrigin.xAsFloat()              < intersectionPoint->x() &&
+                blockOrigin.xAsFloat() + static_cast<float>(blockWidth)  > intersectionPoint->x() &&
+                blockOrigin.yAsFloat()                                   < intersectionPoint->y() &&
                 blockOrigin.yAsFloat() + static_cast<float>(blockHeight) > intersectionPoint->y()) {
                 allIntersections.emplace_back(*intersectionPoint);
             }
+            // clang-format on
         }
 
         { // Perform hit detection on the back face:
@@ -150,12 +154,14 @@ namespace
             const boost::optional<QVector3D> intersectionPoint =
                 DoesRayIntersectPlane(ray, pointOnPlane, NEGATIVE_Z_NORMAL);
 
-            if (intersectionPoint && blockOrigin.xAsFloat() < intersectionPoint->x() &&
-                blockOrigin.xAsFloat() + static_cast<float>(blockWidth) > intersectionPoint->x() &&
-                blockOrigin.yAsFloat() < intersectionPoint->y() &&
+            // clang-format off
+            if (intersectionPoint && blockOrigin.xAsFloat()              < intersectionPoint->x() &&
+                blockOrigin.xAsFloat() + static_cast<float>(blockWidth)  > intersectionPoint->x() &&
+                blockOrigin.yAsFloat()                                   < intersectionPoint->y() &&
                 blockOrigin.yAsFloat() + static_cast<float>(blockHeight) > intersectionPoint->y()) {
                 allIntersections.emplace_back(*intersectionPoint);
             }
+            // clang-format on
         }
 
         { // Perform hit detection on the left face:
@@ -167,12 +173,14 @@ namespace
             const boost::optional<QVector3D> intersectionPoint =
                 DoesRayIntersectPlane(ray, pointOnPlane, NEGATIVE_X_NORMAL);
 
-            if (intersectionPoint && blockOrigin.zAsFloat() > intersectionPoint->z() &&
-                blockOrigin.zAsFloat() - static_cast<float>(blockDepth) < intersectionPoint->z() &&
-                blockOrigin.yAsFloat() < intersectionPoint->y() &&
+            // clang-format off
+            if (intersectionPoint && blockOrigin.zAsFloat()              > intersectionPoint->z() &&
+                blockOrigin.zAsFloat() - static_cast<float>(blockDepth)  < intersectionPoint->z() &&
+                blockOrigin.yAsFloat()                                   < intersectionPoint->y() &&
                 blockOrigin.yAsFloat() + static_cast<float>(blockHeight) > intersectionPoint->y()) {
                 allIntersections.emplace_back(*intersectionPoint);
             }
+            // clang-format on
         }
 
         { // Perform hit detection on the right face:
@@ -184,12 +192,14 @@ namespace
             const boost::optional<QVector3D> intersectionPoint =
                 DoesRayIntersectPlane(ray, pointOnPlane, POSITIVE_X_NORMAL);
 
-            if (intersectionPoint && blockOrigin.zAsFloat() > intersectionPoint->z() &&
-                blockOrigin.zAsFloat() - static_cast<float>(blockDepth) < intersectionPoint->z() &&
-                blockOrigin.yAsFloat() < intersectionPoint->y() &&
+            // clang-format off
+            if (intersectionPoint && blockOrigin.zAsFloat()              > intersectionPoint->z() &&
+                blockOrigin.zAsFloat() - static_cast<float>(blockDepth)  < intersectionPoint->z() &&
+                blockOrigin.yAsFloat()                                   < intersectionPoint->y() &&
                 blockOrigin.yAsFloat() + static_cast<float>(blockHeight) > intersectionPoint->y()) {
                 allIntersections.emplace_back(*intersectionPoint);
             }
+            // clang-format on
         }
 
         return FindClosestIntersectionPoint(ray, allIntersections);
@@ -210,11 +220,7 @@ namespace
                 node = node->GetParent();
             }
 
-            if (node->GetParent()) {
-                node = node->GetParent()->GetNextSibling();
-            } else {
-                node = nullptr;
-            }
+            node = node->GetParent() ? node->GetParent()->GetNextSibling() : nullptr;
         }
     }
 
@@ -248,7 +254,6 @@ namespace
                 (parameters.onlyShowDirectories &&
                  node->GetData().file.type != FileType::DIRECTORY)) {
                 AdvanceToNextNonDescendant(node);
-
                 continue;
             }
 
@@ -273,7 +278,7 @@ namespace
 
         return allIntersections;
     }
-}
+} // namespace
 
 VisualizationModel::VisualizationModel(
     std::unique_ptr<FileMonitorImpl> fileMonitor, const std::experimental::filesystem::path& path)
@@ -332,8 +337,8 @@ Tree<VizBlock>::Node* VisualizationModel::FindNearestIntersection(
             }
 
             const auto closest = std::min_element(
-                std::begin(intersections), std::end(intersections),
-                [&ray](const auto& lhs, const auto& rhs) noexcept {
+                std::begin(intersections),
+                std::end(intersections), [&ray](const auto& lhs, const auto& rhs) noexcept {
                     return (
                         ray.Origin().distanceToPoint(lhs.point) <
                         ray.Origin().distanceToPoint(rhs.point));
@@ -458,8 +463,7 @@ void VisualizationModel::HighlightMatchingFileName(
 
     std::for_each(
         Tree<VizBlock>::PostOrderIterator{ GetTree().GetRoot() },
-        Tree<VizBlock>::PostOrderIterator{},
-        [&](const auto& node) {
+        Tree<VizBlock>::PostOrderIterator{}, [&](const auto& node) {
             const auto& file = node->file;
 
             if (file.size < parameters.minimumFileSize ||
@@ -563,8 +567,7 @@ void VisualizationModel::OnFileCreation(const FileChangeNotification& notificati
                                 /* size = */ 0, FileType::DIRECTORY };
 
         parentNode->AppendChild(VizBlock{ std::move(directoryInfo) });
-    } else // if (is_regular(...))
-    {
+    } else {
         const auto fileSize = DriveScanning::Utilities::ComputeFileSize(absolutePath);
 
         FileInfo fileInfo{ notification.relativePath.filename().stem().wstring(),
@@ -582,7 +585,6 @@ void VisualizationModel::OnFileDeletion(const FileChangeNotification& notificati
 
     if (node) {
         node->DeleteFromTree();
-        ;
     }
 }
 
@@ -593,8 +595,7 @@ void VisualizationModel::OnFileModification(const FileChangeNotification& notifi
 
     if (std::experimental::filesystem::is_directory(absolutePath)) {
         // @todo What does it mean for a directory to be modified?
-    } else // if (is_regular(...))
-    {
+    } else {
         const auto fileSize = DriveScanning::Utilities::ComputeFileSize(absolutePath);
 
         auto* node =
@@ -602,7 +603,6 @@ void VisualizationModel::OnFileModification(const FileChangeNotification& notifi
 
         if (node) {
             node->GetData().file.size = fileSize;
-            ;
         }
     }
 }

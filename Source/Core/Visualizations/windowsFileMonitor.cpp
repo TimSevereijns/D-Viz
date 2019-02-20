@@ -29,7 +29,7 @@ namespace
 
         return reinterpret_cast<DataType*>(reinterpret_cast<std::byte*>(ptr) + offset); // NOLINT
     }
-}
+} // namespace
 
 WindowsFileMonitor::~WindowsFileMonitor() noexcept
 {
