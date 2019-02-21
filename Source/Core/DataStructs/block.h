@@ -14,7 +14,8 @@
  * and color information. In addition to this, there is also some metadata to aid in the creation
  * of the squarified treemap.
  */
-class Block {
+class Block
+{
     friend class SquarifiedTreeMap;
 
   public:

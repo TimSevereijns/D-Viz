@@ -25,12 +25,12 @@ class KeyboardManager
     bool IsKeyDown(const Qt::Key key);
 
     /**
-    * @brief Indicates whether the key in question is currently not in a pressed state.
-    *
-    * @param[in] key                 The key whose state to check.
-    *
-    * @returns True if the key is currently up; false otherwise.
-    */
+     * @brief Indicates whether the key in question is currently not in a pressed state.
+     *
+     * @param[in] key                 The key whose state to check.
+     *
+     * @returns True if the key is currently up; false otherwise.
+     */
     bool IsKeyUp(const Qt::Key key);
 
     /**

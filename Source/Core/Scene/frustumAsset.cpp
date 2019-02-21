@@ -159,7 +159,7 @@ namespace
             frustumAsset.AddVertexColors(std::move(colors));
         }
     }
-}
+} // namespace
 
 namespace Asset
 {
@@ -202,4 +202,4 @@ namespace Asset
 
         Refresh();
     }
-}
+} // namespace Asset

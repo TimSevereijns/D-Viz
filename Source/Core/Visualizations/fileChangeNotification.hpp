@@ -58,6 +58,6 @@ namespace std
             return std::hash<std::experimental::filesystem::path::string_type>{}(path.native());
         }
     };
-}
+} // namespace std
 
 #endif // FILESTATUSCHANGE_HPP

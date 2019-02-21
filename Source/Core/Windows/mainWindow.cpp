@@ -39,29 +39,43 @@ namespace
             case Constants::FileSize::Prefix::DECIMAL: {
                 using namespace Literals::Numeric::Decimal;
 
+                // clang-format off
                 const static auto decimal = std::vector<std::pair<std::uintmax_t, QString>>{
-                    { 0u, "Show All" },     { 1_KB, "< 1 KB" },     { 1_MB, "< 1 MB" },
-                    { 10_MB, "< 10 MB" },   { 100_MB, "< 100 MB" }, { 250_MB, "< 250 MB" },
-                    { 500_MB, "< 500 MB" }, { 1_GB, "< 1 GB" },     { 5_GB, "< 5 GB" },
+                    { 0u, "Show All" },
+                    { 1_KB, "< 1 KB" },
+                    { 1_MB, "< 1 MB" },
+                    { 10_MB, "< 10 MB" },
+                    { 100_MB, "< 100 MB" },
+                    { 250_MB, "< 250 MB" },
+                    { 500_MB, "< 500 MB" },
+                    { 1_GB, "< 1 GB" },
+                    { 5_GB, "< 5 GB" },
                     { 10_GB, "< 10 GB" }
                 };
+                // clang-format on
 
                 return &decimal;
             }
             case Constants::FileSize::Prefix::BINARY: {
                 using namespace Literals::Numeric::Binary;
 
+                // clang-format off
                 const static auto binary = std::vector<std::pair<std::uintmax_t, QString>>{
-                    { 0u, "Show All" },       { 1_KiB, "< 1 KiB" },     { 1_MiB, "< 1 MiB" },
-                    { 10_MiB, "< 10 MiB" },   { 100_MiB, "< 100 MiB" }, { 250_MiB, "< 250 MiB" },
-                    { 500_MiB, "< 500 MiB" }, { 1_GiB, "< 1 GiB" },     { 5_GiB, "< 5 GiB" },
+                    { 0u, "Show All" },
+                    { 1_KiB, "< 1 KiB" },
+                    { 1_MiB, "< 1 MiB" },
+                    { 10_MiB, "< 10 MiB" },
+                    { 100_MiB, "< 100 MiB" },
+                    { 250_MiB, "< 250 MiB" },
+                    { 500_MiB, "< 500 MiB" },
+                    { 1_GiB, "< 1 GiB" },
+                    { 5_GiB, "< 5 GiB" },
                     { 10_GiB, "< 10 GiB" }
                 };
+                // clang-format om
 
                 return &binary;
             }
-
-                return nullptr;
         }
 
         GSL_ASSUME(false);
@@ -88,7 +102,7 @@ namespace
             QApplication::restoreOverrideCursor();
         }
     };
-}
+} // namespace
 
 MainWindow::MainWindow(Controller& controller, QWidget* parent /* = nullptr */)
     : QMainWindow{ parent },
@@ -257,9 +271,8 @@ void MainWindow::SetupOptionsMenu()
         &MainWindow::OnFPSReadoutToggled);
 
     m_optionsMenuWrapper.enableFileSystemMonitoring.setText("Monitor File System");
-    m_optionsMenuWrapper.enableFileSystemMonitoring.setStatusTip(
-        "Monitors the file system for any "
-        "changes");
+    m_optionsMenuWrapper.enableFileSystemMonitoring.setStatusTip("Monitors the file system for any "
+                                                                 "changes");
     m_optionsMenuWrapper.enableFileSystemMonitoring.setCheckable(true);
 
     const auto isMonitoringEnabled = m_controller.GetSettingsManager().ShouldMonitorFileSystem();
@@ -466,10 +479,9 @@ bool MainWindow::AskUserToLimitFileSize(
     messageBox.setIcon(QMessageBox::Warning);
     messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     messageBox.setDefaultButton(QMessageBox::Yes);
-    messageBox.setText(
-        "More than a quarter million files were scanned. "
-        "Would you like to limit the visualized files to those 1 MiB or larger in "
-        "order to reduce the load on the GPU and system memory?");
+    messageBox.setText("More than a quarter million files were scanned. "
+                       "Would you like to limit the visualized files to those 1 MiB or larger in "
+                       "order to reduce the load on the GPU and system memory?");
 
     const auto election = messageBox.exec();
     switch (election) {
@@ -750,8 +762,10 @@ void MainWindow::SetCameraSpeedSpinner(double speed)
 void MainWindow::SetFilePruningComboBoxValue(std::uintmax_t minimum)
 {
     const auto match = std::find_if(
-        std::begin(*m_fileSizeOptions), std::end(*m_fileSizeOptions),
-        [minimum](const auto& sizeAndUnits) noexcept { return sizeAndUnits.first >= minimum; });
+        std::begin(*m_fileSizeOptions),
+        std::end(*m_fileSizeOptions), [minimum](const auto& sizeAndUnits) noexcept {
+            return sizeAndUnits.first >= minimum;
+        });
 
     if (match == std::end(*m_fileSizeOptions)) {
         return;

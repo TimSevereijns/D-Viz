@@ -23,6 +23,6 @@ namespace Asset
       private:
         static constexpr std::wstring_view AssetName{ L"LightMarker" };
     };
-}
+} // namespace Asset
 
 #endif // LIGHTMARKERASSET_H

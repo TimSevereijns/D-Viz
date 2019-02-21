@@ -38,7 +38,7 @@ namespace
                 std::abort();
         }
     }
-}
+} // namespace
 
 FileSystemObserver::FileSystemObserver(
     std::unique_ptr<FileMonitorImpl> fileMonitor, std::experimental::filesystem::path path)

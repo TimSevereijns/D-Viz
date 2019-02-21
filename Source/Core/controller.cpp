@@ -121,15 +121,14 @@ namespace
     {
         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
 
-        log->info(
-            fmt::format(
-                "Scanned: {} directories and {} files, representing {} bytes",
-                progress.directoriesScanned.load(), progress.filesScanned.load(),
-                progress.bytesProcessed.load()));
+        log->info(fmt::format(
+            "Scanned: {} directories and {} files, representing {} bytes",
+            progress.directoriesScanned.load(), progress.filesScanned.load(),
+            progress.bytesProcessed.load()));
 
         log->flush();
     }
-}
+} // namespace
 
 Controller::Controller()
     : m_settingsManager{ GetColorJsonPath(), GetPreferencesJsonPath() },
@@ -159,31 +158,32 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
         ComputeProgress(progress);
     };
 
-    const auto completionHandler = [&, parameters](
-        const ScanningProgress& progress,
-        const std::shared_ptr<Tree<VizBlock>>& scanningResults) mutable {
-        ComputeProgress(progress);
-        LogScanCompletion(progress);
+    const auto completionHandler =
+        [&, parameters](
+            const ScanningProgress& progress,
+            const std::shared_ptr<Tree<VizBlock>>& scanningResults) mutable {
+            ComputeProgress(progress);
+            LogScanCompletion(progress);
 
-        m_view->AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
+            m_view->AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
+            m_view->SetWaitCursor();
 
-        m_view->SetWaitCursor();
-        ON_SCOPE_EXIT
-        {
-            m_view->RestoreDefaultCursor();
+            ON_SCOPE_EXIT
+            {
+                m_view->RestoreDefaultCursor();
+            };
+
+            m_model->Parse(scanningResults);
+            m_model->UpdateBoundingBoxes();
+
+            SaveScanMetadata(progress);
+
+            m_view->OnScanCompleted();
+
+            AllowUserInteractionWithModel(true);
+
+            m_model->StartMonitoringFileSystem();
         };
-
-        m_model->Parse(scanningResults);
-        m_model->UpdateBoundingBoxes();
-
-        SaveScanMetadata(progress);
-
-        m_view->OnScanCompleted();
-
-        AllowUserInteractionWithModel(true);
-
-        m_model->StartMonitoringFileSystem();
-    };
 
     DriveScanningParameters scanningParameters{ parameters.rootDirectory, progressHandler,
                                                 completionHandler };
@@ -224,7 +224,7 @@ void Controller::ComputeProgress(const ScanningProgress& progress)
         m_view->SetStatusBarMessage(message.c_str()); // NOLINT
     } else {
         const auto prefix = m_settingsManager.GetActiveNumericPrefix();
-        const auto[size, units] = Controller::ConvertFileSizeToNumericPrefix(sizeInBytes, prefix);
+        const auto [size, units] = Controller::ConvertFileSizeToNumericPrefix(sizeInBytes, prefix);
 
         const auto message = fmt::format(
             L"Files Scanned: {}  |  {:03.2f} {} and counting...",
@@ -269,8 +269,10 @@ bool Controller::IsNodeHighlighted(const Tree<VizBlock>::Node& node) const
     const auto& highlightedNodes = m_model->GetHighlightedNodes();
 
     return std::any_of(
-        std::begin(highlightedNodes), std::end(highlightedNodes),
-        [target = std::addressof(node)](auto ptr) noexcept { return ptr == target; });
+        std::begin(highlightedNodes),
+        std::end(highlightedNodes), [target = std::addressof(node)](auto ptr) noexcept {
+            return ptr == target;
+        });
 }
 
 void Controller::SelectNode(
@@ -293,7 +295,7 @@ void Controller::SelectNodeAndUpdateStatusBar(
     Expects(fileSize > 0);
 
     const auto prefix = m_settingsManager.GetActiveNumericPrefix();
-    const auto[prefixedSize, units] = ConvertFileSizeToNumericPrefix(fileSize, prefix);
+    const auto [prefixedSize, units] = ConvertFileSizeToNumericPrefix(fileSize, prefix);
     const auto isInBytes = (units == BYTES_READOUT_STRING);
 
     std::wstringstream message;
@@ -317,6 +319,7 @@ void Controller::SelectNodeViaRay(
     }
 
     const auto* const selectedNode = m_model->GetSelectedNode();
+
     if (selectedNode) {
         deselectionCallback(*selectedNode);
         m_model->ClearSelectedNode();
@@ -324,6 +327,7 @@ void Controller::SelectNodeViaRay(
 
     const auto& parameters = m_settingsManager.GetVisualizationParameters();
     const auto* node = m_model->FindNearestIntersection(camera, ray, parameters);
+
     if (node) {
         SelectNodeAndUpdateStatusBar(*node, selectionCallback);
     } else {
@@ -353,7 +357,7 @@ void Controller::DisplaySelectionDetails()
     }
 
     const auto prefix = m_settingsManager.GetActiveNumericPrefix();
-    const auto[prefixedSize, units] = ConvertFileSizeToNumericPrefix(totalBytes, prefix);
+    const auto [prefixedSize, units] = ConvertFileSizeToNumericPrefix(totalBytes, prefix);
     const auto isInBytes = (units == BYTES_READOUT_STRING);
 
     std::wstringstream message;
@@ -444,7 +448,6 @@ void Controller::HighlightAllMatchingExtensions(
     const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& callback)
 {
     const auto& parameters = m_settingsManager.GetVisualizationParameters();
-
     const auto selector = [&] { m_model->HighlightMatchingFileExtension(sampleNode, parameters); };
 
     ProcessSelection(selector, callback);

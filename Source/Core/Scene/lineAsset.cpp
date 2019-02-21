@@ -99,4 +99,4 @@ namespace Asset
     {
         Initialize();
     }
-}
+} // namespace Asset

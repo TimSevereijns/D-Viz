@@ -115,6 +115,6 @@ namespace FrustumUtilities
 
         return cascadeDistances;
     }
-}
+} // namespace FrustumUtilities
 
 #endif // VIEWFRUSTUM_HPP

@@ -282,6 +282,6 @@ namespace Settings
 
         Constants::FileSize::Prefix m_activeNumericPrefix{ Constants::FileSize::Prefix::BINARY };
     };
-}
+} // namespace Settings
 
 #endif // SETTINGSMANAGER_H

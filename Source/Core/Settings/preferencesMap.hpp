@@ -48,7 +48,7 @@ namespace Settings
       private:
         std::unordered_map<std::wstring, Entry> m_map;
     };
-}
+} // namespace Settings
 
 namespace
 {
@@ -67,7 +67,7 @@ namespace
         Type, std::void_t<decltype(Settings::PreferencesMap::Entry{ std::declval<Type&>() })>>
         : std::true_type {
     };
-}
+} // namespace
 
 namespace Settings
 {
@@ -96,6 +96,6 @@ namespace Settings
         const auto* encapsulatedValue = std::get_if<RequestedType>(&itr->second);
         return encapsulatedValue ? std::move(*encapsulatedValue) : std::move(defaultValue);
     }
-}
+} // namespace Settings
 
 #endif // PREFERENCESMAP_H

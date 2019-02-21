@@ -27,6 +27,6 @@ namespace Asset
       private:
         static constexpr std::wstring_view AssetName{ L"OriginMarker" };
     };
-}
+} // namespace Asset
 
 #endif // ORIGINMARKERASSET_H

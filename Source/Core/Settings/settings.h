@@ -38,16 +38,15 @@ namespace Settings
     struct VisualizationParameters {
         std::wstring rootDirectory{ L"" }; ///< The path to the root directory
 
-        std::uint64_t minimumFileSize{
-            0
-        }; ///< The minimum size a file should be before it shows up.
+        // The minimum size a file should be before it shows up.
+        std::uint64_t minimumFileSize{ 0 };
 
         bool forceNewScan{ true };         ///< Whether a new scan should take place.
         bool onlyShowDirectories{ false }; ///< Whether only directories should be shown.
-        bool useDirectoryGradient{
-            false
-        }; ///< Whether to use gradient coloring for the directories.
+
+        // Whether to use gradient coloring for the directories.
+        bool useDirectoryGradient{ false };
     };
-}
+} // namespace Settings
 
 #endif // SETTINGS_H

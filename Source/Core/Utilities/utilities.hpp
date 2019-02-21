@@ -39,8 +39,7 @@ namespace Utilities
         while (filePathItr != std::end(path)) {
             auto matchingNodeItr = std::find_if(
                 Tree<VizBlock>::SiblingIterator{ node->GetFirstChild() },
-                Tree<VizBlock>::SiblingIterator{},
-                [&](const auto& childNode) {
+                Tree<VizBlock>::SiblingIterator{}, [&](const auto& childNode) {
                     const auto pathElement = filePathItr->wstring();
                     const auto fileName = childNode->file.name + childNode->file.extension;
 
@@ -61,6 +60,6 @@ namespace Utilities
 
         return node;
     }
-}
+} // namespace Utilities
 
 #endif // UTILITIES_HPP

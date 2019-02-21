@@ -18,6 +18,6 @@ namespace Asset
          */
         void Render(const Camera& camera, const std::vector<Light>& lights) override;
     };
-}
+} // namespace Asset
 
 #endif // DEBUGGINGRAYASSET_H

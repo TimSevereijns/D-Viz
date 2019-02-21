@@ -22,22 +22,18 @@ namespace Bootstrapper
     {
         /**
          * @brief Returns a wide string if on Windows, and returns a narrow string on Unix.
-        */
+         */
         inline auto ToFilenameString(const std::experimental::filesystem::path& path)
         {
-            if
-                constexpr(std::is_same_v<spdlog::filename_t, std::wstring>)
-                {
-                    return path.wstring();
-                }
+            if constexpr (std::is_same_v<spdlog::filename_t, std::wstring>) {
+                return path.wstring();
+            }
 
-            if
-                constexpr(std::is_same_v<spdlog::filename_t, std::string>)
-                {
-                    return path.string();
-                }
+            if constexpr (std::is_same_v<spdlog::filename_t, std::string>) {
+                return path.string();
+            }
         }
-    }
+    } // namespace Detail
 
     /**
      * @brief Performs all the steps necessary to initialize and start the log.
@@ -70,6 +66,6 @@ namespace Bootstrapper
         qRegisterMetaType<std::uintmax_t>("std::uintmax_t");
         qRegisterMetaType<std::shared_ptr<Tree<VizBlock>>>("std::shared_ptr<Tree<VizBlock>>");
     }
-}
+} // namespace Bootstrapper
 
 #endif // BOOTSTRAPPER_HPP

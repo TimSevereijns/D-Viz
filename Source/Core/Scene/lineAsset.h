@@ -42,6 +42,6 @@ namespace Asset
 
         void InitializeColorBuffers();
     };
-}
+} // namespace Asset
 
 #endif // LINEASSET_H

@@ -245,23 +245,22 @@ namespace
         const Ray& ray, const Camera& camera, const Settings::VisualizationParameters& parameters,
         Tree<VizBlock>::Node* node)
     {
-        std::vector<IntersectionInfo> allIntersections;
-
         Expects(node != nullptr);
 
+        std::vector<IntersectionInfo> allIntersections;
+
+        const auto notTheRightFileType =
+            parameters.onlyShowDirectories && node->GetData().file.type != FileType::DIRECTORY;
+
         while (node) {
-            if (node->GetData().file.size < parameters.minimumFileSize ||
-                (parameters.onlyShowDirectories &&
-                 node->GetData().file.type != FileType::DIRECTORY)) {
+            if (node->GetData().file.size < parameters.minimumFileSize || notTheRightFileType) {
                 AdvanceToNextNonDescendant(node);
                 continue;
             }
 
-            const auto& boundingBoxIntersection =
-                DoesRayIntersectBlock(ray, node->GetData().boundingBox);
-
-            if (boundingBoxIntersection) {
+            if (DoesRayIntersectBlock(ray, node->GetData().boundingBox)) {
                 const auto& blockIntersection = DoesRayIntersectBlock(ray, node->GetData().block);
+
                 if (blockIntersection && camera.IsPointInFrontOfCamera(*blockIntersection)) {
                     allIntersections.emplace_back(IntersectionInfo{ *blockIntersection, node });
                 }
@@ -562,17 +561,21 @@ void VisualizationModel::OnFileCreation(const FileChangeNotification& notificati
 
     if (std::experimental::filesystem::is_directory(absolutePath)) //< @todo Check symlink status...
     {
-        FileInfo directoryInfo{ notification.relativePath.filename().wstring(),
+        FileInfo directoryInfo{ /* name = */ notification.relativePath.filename().wstring(),
                                 /* extension = */ L"",
-                                /* size = */ 0, FileType::DIRECTORY };
+                                /* size = */ 0,
+                                /* type = */ FileType::DIRECTORY };
 
         parentNode->AppendChild(VizBlock{ std::move(directoryInfo) });
     } else {
         const auto fileSize = DriveScanning::Utilities::ComputeFileSize(absolutePath);
 
-        FileInfo fileInfo{ notification.relativePath.filename().stem().wstring(),
-                           notification.relativePath.filename().extension().wstring(), fileSize,
-                           FileType::REGULAR };
+        FileInfo fileInfo{
+            /* name = */ notification.relativePath.filename().stem().wstring(),
+            /* extension = */ notification.relativePath.filename().extension().wstring(),
+            /* size = */ fileSize,
+            /* type = */ FileType::REGULAR
+        };
 
         parentNode->AppendChild(VizBlock{ std::move(fileInfo) });
     }

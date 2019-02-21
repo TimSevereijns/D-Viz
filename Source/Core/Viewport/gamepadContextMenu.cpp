@@ -90,7 +90,7 @@ namespace
 
         return std::sqrt(xDelta * xDelta + yDelta * yDelta);
     }
-}
+} // namespace
 
 GamepadContextMenu::GamepadContextMenu(const Gamepad& gamepad, QWidget* parent)
     : QWidget{ parent }, m_gamepad{ gamepad }

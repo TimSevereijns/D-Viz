@@ -91,7 +91,7 @@ namespace DriveScanning
 
             return fileSize;
         }
-    }
+    } // namespace Detail
 
     namespace Utilities
     {
@@ -189,5 +189,5 @@ namespace DriveScanning
         }
 
 #endif // Q_OS_WIN
-    }
-}
+    }  // namespace Utilities
+} // namespace DriveScanning

@@ -33,6 +33,6 @@ namespace Asset
       private:
         static constexpr std::wstring_view AssetName{ L"Crosshair" };
     };
-}
+} // namespace Asset
 
 #endif // CROSSHAIRASSET_H

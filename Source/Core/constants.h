@@ -15,7 +15,7 @@ namespace Detail
     {
         return { red / 255.0f, green / 255.0f, blue / 255.0f };
     }
-}
+} // namespace Detail
 
 namespace Constants
 {
@@ -36,7 +36,7 @@ namespace Constants
         constexpr static auto SLATE_GRAY = Detail::RGB(112, 128, 144);
         constexpr static auto WHITE = Detail::RGB(255, 255, 255);
         constexpr static auto CORAL = Detail::RGB(255, 127, 80);
-    }
+    } // namespace Colors
 
     namespace ColorScheme
     {
@@ -52,7 +52,7 @@ namespace Constants
     {
         constexpr static auto MOVEMENT_AMPLIFICATION{ 10.0 };
         constexpr static auto TRIGGER_ACTUATION_THRESHOLD{ 0.2 };
-    }
+    } // namespace Input
 
     namespace Concurrency
     {
@@ -63,14 +63,14 @@ namespace Constants
     {
         static std::string DEFAULT_LOG{ "D-Viz" };
         static std::string FILESYSTEM_LOG{ "Filesystem" };
-    }
+    } // namespace Logging
 
     namespace Math
     {
         constexpr static auto PI = 3.14159265358979323846;
         constexpr static auto RADIANS_TO_DEGREES = 180.0 / PI;
         constexpr static auto DEGREES_TO_RADIANS = PI / 180.0;
-    }
+    } // namespace Math
 
     namespace Preferences
     {
@@ -78,7 +78,7 @@ namespace Constants
         constexpr static auto& SHOW_GRID{ L"showGrid" };
         constexpr static auto& SHOW_LIGHT_MARKERS{ L"showLightMarkers" };
         constexpr static auto& SHOW_FRUSTUM{ L"showFrustum" };
-    }
+    } // namespace Preferences
 
     namespace Visualization
     {
@@ -88,7 +88,7 @@ namespace Constants
         constexpr static const float BLOCK_HEIGHT{ 2.0f };
         constexpr static const float ROOT_BLOCK_WIDTH{ 1000.0f };
         constexpr static const float ROOT_BLOCK_DEPTH{ 1000.0f };
-    }
-}
+    } // namespace Visualization
+} // namespace Constants
 
 #endif // CONSTANTS

@@ -37,7 +37,7 @@ namespace
 
         return colors;
     }
-}
+} // namespace
 
 namespace Asset
 {
@@ -70,4 +70,4 @@ namespace Asset
         m_mainShader.release();
         m_VAO.release();
     }
-}
+} // namespace Asset

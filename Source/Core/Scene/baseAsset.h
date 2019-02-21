@@ -185,6 +185,6 @@ namespace Asset
 
         bool m_shouldRender{ true };
     };
-}
+} // namespace Asset
 
 #endif // BASEASSET_H

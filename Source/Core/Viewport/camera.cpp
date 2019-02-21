@@ -27,7 +27,7 @@ namespace
             verticalAngle = -maxVertical;
         }
     }
-}
+} // namespace
 
 const QVector3D& Camera::GetPosition() const noexcept
 {

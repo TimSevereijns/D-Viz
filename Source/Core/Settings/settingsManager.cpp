@@ -108,7 +108,7 @@ namespace
             log->error("Encountered unsupported type while parsing the configuration JSON file.");
         }
     }
-}
+} // namespace
 
 namespace Settings
 {
@@ -294,4 +294,4 @@ namespace Settings
     {
         return m_shouldMonitorFileSystem;
     }
-}
+} // namespace Settings

@@ -155,6 +155,6 @@ namespace Asset
 
         static constexpr std::wstring_view AssetName{ L"Treemap" };
     };
-}
+} // namespace Asset
 
 #endif // VISUALIZATIONASSET_H

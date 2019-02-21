@@ -23,7 +23,8 @@ namespace
             << QVector3D{ 700.0f, 0.0f, 0.0f } << QVector3D{ 700.0f, 0.0f, -1000.0f }
             << QVector3D{ 800.0f, 0.0f, 0.0f } << QVector3D{ 800.0f, 0.0f, -1000.0f }
             << QVector3D{ 900.0f, 0.0f, 0.0f } << QVector3D{ 900.0f, 0.0f, -1000.0f }
-            << QVector3D{ 1000.0f, 0.0f, 0.0f } << QVector3D{ 1000.0f, 0.0f, -1000.0f }
+            << QVector3D{ 1000.0f, 0.0f, 0.0f }
+            << QVector3D{ 1000.0f, 0.0f, -1000.0f }
 
             // Grid (X-axis):
             << QVector3D{ 0.0f, 0.0f, 0.0f } << QVector3D{ 1000.0f, 0.0f, 0.0f }
@@ -64,7 +65,8 @@ namespace
             << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
             << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
             << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
-            << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
+            << QVector3D{ 1.0f, 1.0f, 0.0f }
+            << QVector3D{ 1.0f, 1.0f, 0.0f }
 
             // Grid (X-axis):
             << QVector3D{ 1.0f, 1.0f, 0.0f } << QVector3D{ 1.0f, 1.0f, 0.0f }
@@ -83,7 +85,7 @@ namespace
 
         return colors;
     }
-}
+} // namespace
 
 namespace Asset
 {
@@ -116,4 +118,4 @@ namespace Asset
         m_mainShader.release();
         m_VAO.release();
     }
-}
+} // namespace Asset

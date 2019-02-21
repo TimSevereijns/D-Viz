@@ -19,7 +19,7 @@ namespace
 
         std::cout << "Please unzip boost-asio.zip manually, and re-run tests." << std::endl;
     }
-}
+} // namespace
 
 void ModelTester::initTestCase()
 {
@@ -32,16 +32,16 @@ void ModelTester::initTestCase()
         m_progressCallbackInvocations++;
     };
 
-    const auto completionCallback =
-        [&](const ScanningProgress& progress, std::shared_ptr<Tree<VizBlock>> tree) {
-            QVERIFY(tree != nullptr);
+    const auto completionCallback = [&](const ScanningProgress& progress,
+                                        std::shared_ptr<Tree<VizBlock>> tree) {
+        QVERIFY(tree != nullptr);
 
-            m_bytesScanned = progress.bytesProcessed.load();
-            m_filesScanned = progress.filesScanned.load();
-            m_directoriesScanned = progress.directoriesScanned.load();
+        m_bytesScanned = progress.bytesProcessed.load();
+        m_filesScanned = progress.filesScanned.load();
+        m_directoriesScanned = progress.directoriesScanned.load();
 
-            m_tree = std::move(tree);
-        };
+        m_tree = std::move(tree);
+    };
 
     QSignalSpy completionSpy(&m_scanner, &DriveScanner::Finished);
 

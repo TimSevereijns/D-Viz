@@ -47,7 +47,7 @@ namespace Asset
 
         struct OriginMarker final : Base {
             using AssetType = Asset::OriginMarker;
-            int GetID() const noexcept override
+            int GetID() const noexcept final override
             {
                 return 1;
             }
@@ -55,7 +55,7 @@ namespace Asset
 
         struct Grid final : Base {
             using AssetType = Asset::Grid;
-            int GetID() const noexcept override
+            int GetID() const noexcept final override
             {
                 return 2;
             }
@@ -63,7 +63,7 @@ namespace Asset
 
         struct Crosshair final : Base {
             using AssetType = Asset::Crosshair;
-            int GetID() const noexcept override
+            int GetID() const noexcept final override
             {
                 return 3;
             }
@@ -71,7 +71,7 @@ namespace Asset
 
         struct Treemap final : Base {
             using AssetType = Asset::Treemap;
-            int GetID() const noexcept override
+            int GetID() const noexcept final override
             {
                 return 4;
             }
@@ -79,7 +79,7 @@ namespace Asset
 
         struct LightMarker final : Base {
             using AssetType = Asset::LightMarker;
-            int GetID() const noexcept override
+            int GetID() const noexcept final override
             {
                 return 5;
             }
@@ -87,7 +87,7 @@ namespace Asset
 
         struct Frustum final : Base {
             using AssetType = Asset::Frustum;
-            int GetID() const noexcept override
+            int GetID() const noexcept final override
             {
                 return 6;
             }

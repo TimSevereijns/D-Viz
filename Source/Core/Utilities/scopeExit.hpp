@@ -33,7 +33,7 @@ namespace
     struct DummyStruct {
         // Left intentionally empty.
     };
-}
+} // namespace
 
 /**
  * Enables the use of braces to define the contents of the RAII object.

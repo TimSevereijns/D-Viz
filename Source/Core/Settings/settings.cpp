@@ -92,7 +92,7 @@ namespace
         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
         log->error(message);
     }
-}
+} // namespace
 
 namespace Settings
 {
@@ -129,4 +129,4 @@ namespace Settings
 
         return success;
     }
-}
+} // namespace Settings

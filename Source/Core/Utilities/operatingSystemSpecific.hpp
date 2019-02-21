@@ -110,6 +110,6 @@ namespace OperatingSystemSpecific
     }
 
 #endif
-}
+} // namespace OperatingSystemSpecific
 
 #endif // OPERATINGSYSTEMSPECIFIC_HPP

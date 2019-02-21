@@ -122,10 +122,10 @@ class VisualizationModel
     void ClearSelectedNode();
 
     /**
-      * @brief Sets treemap metadata.
-      *
-      * @param[in] data
-      */
+     * @brief Sets treemap metadata.
+     *
+     * @param[in] data
+     */
     void SetTreemapMetadata(TreemapMetadata&& data);
 
     /**

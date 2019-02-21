@@ -26,7 +26,7 @@ namespace
 
         return successfullyDuplicated ? duplicate : nullptr;
     }
-}
+} // namespace
 
 ScopedHandle::ScopedHandle(HANDLE handle) : m_handle{ handle }
 {

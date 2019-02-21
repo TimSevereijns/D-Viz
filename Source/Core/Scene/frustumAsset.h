@@ -33,6 +33,6 @@ namespace Asset
       private:
         static constexpr std::wstring_view AssetName{ L"Frustum" };
     };
-}
+} // namespace Asset
 
 #endif // FRUSTUMASSET_H

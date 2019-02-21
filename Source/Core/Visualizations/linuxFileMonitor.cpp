@@ -68,12 +68,15 @@ void LinuxFileMonitor::Start(
         log->error(exception.what());
     }
 
-    m_monitoringThread = std::thread{[&]() noexcept { m_notifier.run();
-}
-}
-;
+    m_monitoringThread = std::thread
+    {
+        [&]() noexcept
+        {
+            m_notifier.run();
+        }
+    }
 
-m_isActive = true;
+    m_isActive = true;
 }
 
 void LinuxFileMonitor::Stop()

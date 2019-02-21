@@ -57,6 +57,7 @@ namespace
         frusta.reserve(static_cast<std::size_t>(cascadeCount));
 
         auto mutableCamera = renderCamera;
+
         for (const auto& nearAndFarPlanes : cascadeDistances) {
             mutableCamera.SetNearPlane(nearAndFarPlanes.first);
             mutableCamera.SetFarPlane(nearAndFarPlanes.second);
@@ -237,7 +238,7 @@ namespace
 
         return static_cast<double>(cornerA.distanceToPoint(cornerB));
     }
-}
+} // namespace
 
 namespace Asset
 {
@@ -666,8 +667,8 @@ namespace Asset
         for (auto index{ 0u }; index < static_cast<std::size_t>(m_cascadeCount); ++index) {
             m_shadowMaps[index].framebuffer->bind();
 
-            const auto& projectionViewMatrix = m_shadowMaps[index].projectionViewMatrix;
-            m_shadowMapShader.setUniformValue("lightProjectionViewMatrix", projectionViewMatrix);
+            m_shadowMapShader.setUniformValue(
+                "lightProjectionViewMatrix", m_shadowMaps[index].projectionViewMatrix);
 
             m_openGL.glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -900,4 +901,4 @@ namespace Asset
         m_texturePreviewShader.release();
         m_texturePreviewVertexBuffer.release();
     }
-}
+} // namespace Asset

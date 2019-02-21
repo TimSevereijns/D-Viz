@@ -27,6 +27,6 @@ namespace Asset
       private:
         static constexpr std::wstring_view AssetName{ L"Grid" };
     };
-}
+} // namespace Asset
 
 #endif // GRIDASSET_H

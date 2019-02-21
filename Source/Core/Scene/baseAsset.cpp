@@ -109,4 +109,4 @@ namespace Asset
     void Base::UpdateVBO(const Tree<VizBlock>::Node&, Asset::Event)
     {
     }
-}
+} // namespace Asset

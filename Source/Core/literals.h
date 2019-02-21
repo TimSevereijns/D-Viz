@@ -26,7 +26,7 @@ namespace Literals::Numeric
         {
             return value * 1'024 * 1_GiB;
         }
-    }
+    } // namespace Binary
 
     namespace Decimal
     {
@@ -49,7 +49,7 @@ namespace Literals::Numeric
         {
             return value * 1'000 * 1_GB;
         }
-    }
-}
+    } // namespace Decimal
+} // namespace Literals::Numeric
 
 #endif // LITERALS_H

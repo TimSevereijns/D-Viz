@@ -51,10 +51,11 @@ namespace
     }
 
     /**
-    * @brief Contructs the root node for the file tree.
-    *
-    * @param[in] path                The path to the directory that should constitute the root node.
-    */
+     * @brief Contructs the root node for the file tree.
+     *
+     * @param[in] path                The path to the directory that should constitute the root
+     * node.
+     */
     std::shared_ptr<Tree<VizBlock>>
     CreateTreeAndRootNode(const std::experimental::filesystem::path& path) noexcept
     {
@@ -80,7 +81,7 @@ namespace
         return !std::experimental::filesystem::is_symlink(path);
 #endif // Q_OS_LINUX
     }
-}
+} // namespace
 
 ScanningWorker::ScanningWorker(
     const DriveScanningParameters& parameters, ScanningProgress& progress)
@@ -113,8 +114,8 @@ void ScanningWorker::ProcessDirectory(
 {
     auto isRegularFile{ false };
     try {
-        // In certain cases, this function can, apparently, raise exceptions, although it
-        // isn't entirely clear to me what circumstances need to exist for this to occur:
+        // In certain cases, this function can, apparently, raise exceptions, although it isn't
+        // entirely clear to me what circumstances need to exist for this to occur:
         isRegularFile = std::experimental::filesystem::is_regular_file(path);
     } catch (...) {
         return;
@@ -125,13 +126,10 @@ void ScanningWorker::ProcessDirectory(
     } else if (std::experimental::filesystem::is_directory(path) && ShouldProcess(path)) {
         try {
             // In some edge-cases, the Windows operating system doesn't allow anyone to access
-            // certain
-            // directories, and attempts to do so will result in exceptional behaviour---pun
-            // intended.
-            // In order to deal with these rare cases, we'll need to rely on a try-catch to keep
-            // going.
-            // One example of a problematic directory in Windows 7 is: "C:\System Volume
-            // Information".
+            // certain directories, and attempts to do so will result in exceptional behaviour---pun
+            // intended. In order to deal with these rare cases, we'll need to rely on a try-catch
+            // to keep going. One example of a problematic directory in Windows 7 is: "C:\System
+            // Volume Information".
             if (std::experimental::filesystem::is_empty(path)) {
                 return;
             }
@@ -157,8 +155,8 @@ void ScanningWorker::AddSubDirectoriesToQueue(
     const std::experimental::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept
 {
     auto itr = std::experimental::filesystem::directory_iterator{ path };
-
     const auto end = std::experimental::filesystem::directory_iterator{};
+
     while (itr != end) {
         boost::asio::post(
             m_threadPool, [&, path = itr->path() ]() noexcept { ProcessDirectory(path, node); });
