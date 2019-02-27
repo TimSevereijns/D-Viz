@@ -23,7 +23,8 @@
 #endif
 
 // @todo Consider hoisting this out to another file.
-struct BoundingBox {
+struct BoundingBox
+{
     float left;
     float right;
     float bottom;

@@ -16,7 +16,8 @@ struct VizBlock;
  * @brief Wrapper around all of the parameters needed to scan a directories, as well as to track
  * progress.
  */
-struct DriveScanningParameters {
+struct DriveScanningParameters
+{
     using ProgressCallback = std::function<void(const ScanningProgress&)>;
 
     using ScanCompleteCallback =

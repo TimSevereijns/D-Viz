@@ -4,14 +4,28 @@ AllowShortBlocksOnASingleLine: 'false'
 AllowShortCaseLabelsOnASingleLine: 'false'
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: 'false'
-AllowShortLoopsOnASingleLine: 'false'
-BreakBeforeBraces: Linux
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakBeforeMultilineStrings: true
+BreakBeforeBraces: Custom
+BraceWrapping:
+    AfterClass: true
+    AfterEnum: true
+    AfterStruct: true
+    AfterFunction: true
+    AfterControlStatement: false
+    AfterNamespace: true
+    AfterUnion: true
+    AfterExternBlock: true
+    BeforeElse: false
+    SplitEmptyFunction: true
+    SplitEmptyRecord: true
+    SplitEmptyNamespace: true
 ColumnLimit: '100'
-ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
-Cpp11BracedListStyle: 'false'
-IndentCaseLabels: 'true'
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+Cpp11BracedListStyle: false
+IndentCaseLabels: true
 IndentWidth: '4'
 NamespaceIndentation: All
 PointerAlignment: Left
-BreakBeforeTernaryOperators: 'true'
+BreakBeforeTernaryOperators: true
 ...

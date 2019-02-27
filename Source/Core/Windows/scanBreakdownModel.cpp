@@ -92,7 +92,6 @@ void ScanBreakdownModel::FinalizeInsertion(const Settings::Manager& settingsMana
         std::begin(m_fileTypeMap), std::end(m_fileTypeMap), std::back_inserter(m_fileTypeVector),
         [&](const auto& extensionAndTotalSize) {
             const auto& [fileExtension, totalSize] = extensionAndTotalSize;
-
             const auto [prefixedSize, prefixUnits] =
                 Controller::ConvertFileSizeToNumericPrefix(totalSize, prefix);
 

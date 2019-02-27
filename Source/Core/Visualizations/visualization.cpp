@@ -228,7 +228,8 @@ namespace
      * @brief Represents the point at which a node intersection occured, as well as the node that
      * was hit.
      */
-    struct IntersectionInfo {
+    struct IntersectionInfo
+    {
         QVector3D point;
         Tree<VizBlock>::Node* node;
     };

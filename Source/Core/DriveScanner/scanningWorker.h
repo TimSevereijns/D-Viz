@@ -36,7 +36,8 @@
 /**
  * @brief The NodeAndPath struct
  */
-struct NodeAndPath {
+struct NodeAndPath
+{
     std::unique_ptr<Tree<VizBlock>::Node> node;
     std::experimental::filesystem::path path;
 

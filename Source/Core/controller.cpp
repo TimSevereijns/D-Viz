@@ -213,6 +213,7 @@ void Controller::ComputeProgress(const ScanningProgress& progress)
 
     const auto rootPath = m_model->GetRootPath();
     const auto doesPathRepresentEntireDrive{ rootPath.string() == rootPath.root_path() };
+
     if (doesPathRepresentEntireDrive) {
         const auto fractionOfDiskOccupied =
             (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
@@ -221,7 +222,7 @@ void Controller::ComputeProgress(const ScanningProgress& progress)
             L"Files Scanned: {}  |  {:03.2f}% Complete",
             Utilities::StringifyWithDigitSeparators(filesScanned), fractionOfDiskOccupied * 100);
 
-        m_view->SetStatusBarMessage(message.c_str()); // NOLINT
+        m_view->SetStatusBarMessage(message);
     } else {
         const auto prefix = m_settingsManager.GetActiveNumericPrefix();
         const auto [size, units] = Controller::ConvertFileSizeToNumericPrefix(sizeInBytes, prefix);

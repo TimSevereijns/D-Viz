@@ -11,12 +11,15 @@
 //
 // Inspired by: https://github.com/google/symboliclink-testing-tools
 
-struct REPARSE_DATA_BUFFER_T {
+struct REPARSE_DATA_BUFFER_T
+{
     ULONG ReparseTag;
     USHORT ReparseDataLength;
     USHORT Reserved;
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             USHORT SubstituteNameOffset;
             USHORT SubstituteNameLength;
             USHORT PrintNameOffset;
@@ -24,14 +27,16 @@ struct REPARSE_DATA_BUFFER_T {
             ULONG Flags;
             WCHAR PathBuffer[1];
         } SymbolicLinkReparseBuffer;
-        struct {
+        struct
+        {
             USHORT SubstituteNameOffset;
             USHORT SubstituteNameLength;
             USHORT PrintNameOffset;
             USHORT PrintNameLength;
             WCHAR PathBuffer[1];
         } MountPointReparseBuffer;
-        struct {
+        struct
+        {
             UCHAR DataBuffer[1];
         } GenericReparseBuffer;
     } DUMMYUNIONNAME;

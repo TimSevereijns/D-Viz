@@ -4,7 +4,8 @@
 #include <atomic>
 #include <cstdint>
 
-struct ScanningProgress {
+struct ScanningProgress
+{
     void Reset()
     {
         filesScanned.store(0);

@@ -10,7 +10,8 @@
  * @brief The VizNode struct represents everything needed to parse, render, and perform hit
  * detection on an individual file as identified during the scanning process.
  */
-struct VizBlock {
+struct VizBlock
+{
     constexpr static auto INVALID_OFFSET = std::numeric_limits<std::uint32_t>::max();
 
     FileInfo file{};     ///< The file that the block represents.
