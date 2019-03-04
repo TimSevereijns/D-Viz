@@ -1,7 +1,7 @@
 #ifndef VIEWFRUSTUM_HPP
 #define VIEWFRUSTUM_HPP
 
-#include "../Viewport/camera.h"
+#include "Viewport/camera.h"
 
 #include <cmath>
 #include <utility>
@@ -17,7 +17,7 @@ namespace FrustumUtilities
      *
      * @param worldToView
      */
-    inline auto ComputeFrustumCorners(const QMatrix4x4& worldToView)
+    inline std::vector<QVector3D> ComputeFrustumCorners(const QMatrix4x4& worldToView)
     {
         std::vector<QVector3D> unitCube{ { -1, -1, -1 }, { +1, -1, -1 }, { +1, +1, -1 },
                                          { -1, +1, -1 }, { -1, -1, +1 }, { +1, -1, +1 },
@@ -35,7 +35,7 @@ namespace FrustumUtilities
      *
      * @param[in] camera             Main scene camera.
      */
-    inline auto ComputeFrustumCorners(const Camera& camera)
+    inline std::vector<QVector3D> ComputeFrustumCorners(const Camera& camera)
     {
         const auto worldToView = camera.GetProjectionViewMatrix().inverted();
         return ComputeFrustumCorners(worldToView);
@@ -47,7 +47,7 @@ namespace FrustumUtilities
      * @param[in] camera             Main scene camera.
      * @param[in, out] frustumAsset  The main frustum scene asset.
      */
-    template <typename T> inline auto GenerateFrustumPoints(const T& view)
+    template <typename T> inline std::vector<QVector3D> GenerateFrustumPoints(const T& view)
     {
         const auto frustum = ComputeFrustumCorners(view);
 
@@ -71,7 +71,8 @@ namespace FrustumUtilities
      * @param[in] cascadeCount       The desired number of shadow mapping cascades.
      * @param[in] camera             The main scene camera.
      */
-    inline auto ComputeCascadeDistances(int cascadeCount, float nearPlane, float farPlane)
+    inline std::vector<std::pair<float, float>>
+    ComputeCascadeDistances(int cascadeCount, float nearPlane, float farPlane)
     {
         const auto planeRatio = farPlane / nearPlane;
 
@@ -95,7 +96,8 @@ namespace FrustumUtilities
     /**
      * @overload
      */
-    inline auto ComputeCascadeDistances(int cascadeCount, const Camera& camera)
+    inline std::vector<std::pair<float, float>>
+    ComputeCascadeDistances(int cascadeCount, const Camera& camera)
     {
         const auto nearPlane = camera.GetNearPlane();
         const auto farPlane = camera.GetFarPlane();
@@ -106,7 +108,7 @@ namespace FrustumUtilities
     /**
      * @brief Retrieve hard-coded split locations for each frustum cascade.
      */
-    inline auto GetCascadeDistances()
+    inline std::vector<std::pair<float, float>> GetCascadeDistances()
     {
         static const std::vector<std::pair<float, float>> cascadeDistances{
             std::make_pair(1.0f, 25.0f), std::make_pair(25.0f, 100.0f),

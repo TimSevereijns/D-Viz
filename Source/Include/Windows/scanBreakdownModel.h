@@ -3,9 +3,9 @@
 
 #include <QAbstractTableModel>
 
-#include "../DataStructs/vizBlock.h"
-#include "../Utilities/utilities.hpp"
-#include "../constants.h"
+#include "DataStructs/vizBlock.h"
+#include "Utilities/utilities.hpp"
+#include "constants.h"
 
 #include <Tree/Tree.hpp>
 
@@ -20,7 +20,8 @@ namespace Settings
     class Manager;
 }
 
-struct RowModel {
+struct RowModel
+{
     std::wstring fileExtension;
     std::wstring formattedSize;
     std::uintmax_t totalSize;

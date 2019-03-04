@@ -5,7 +5,7 @@
 #include <QMatrix4x4>
 #include <QRect>
 
-#include "../Visualizations/ray.h"
+#include "Visualizations/ray.h"
 
 /**
  * @brief The Camera class represents the camera through which the scene is observed.

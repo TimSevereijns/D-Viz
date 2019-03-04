@@ -1,4 +1,5 @@
 #include "Windows/breakdownDialog.h"
+
 #include "Windows/mainWindow.h"
 
 #include <Stopwatch/Stopwatch.hpp>

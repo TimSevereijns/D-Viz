@@ -1,7 +1,7 @@
 #ifndef GAMEPADMONITOR_H
 #define GAMEPADMONITOR_H
 
-#include "../constants.h"
+#include "constants.h"
 
 #include <QtGamepad/QGamepad>
 

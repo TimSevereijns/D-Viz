@@ -1,10 +1,10 @@
 #ifndef BASEASSET_H
 #define BASEASSET_H
 
-#include "../DataStructs/light.h"
-#include "../Settings/settingsManager.h"
-#include "../Viewport/camera.h"
-#include "../Visualizations/visualization.h"
+#include "DataStructs/light.h"
+#include "Settings/settingsManager.h"
+#include "Viewport/camera.h"
+#include "Visualizations/visualization.h"
 
 #include <QOpenGLBuffer>
 #include <QOpenGLExtraFunctions>
@@ -17,7 +17,15 @@ template <typename DataType> class TreeNode;
 
 namespace Asset
 {
-    enum struct Event : short { SELECTED = 0, HIGHLIGHTED, UNSELECTED, DELETED, TOUCHED, RENAMED };
+    enum struct Event
+    {
+        SELECTED,
+        HIGHLIGHTED,
+        UNSELECTED,
+        DELETED,
+        TOUCHED,
+        RENAMED
+    };
 
     /**
      * @brief The Asset::Base class is an abstract base class that can be used to simplify the

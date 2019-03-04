@@ -14,15 +14,15 @@
 
 #include <Tree/Tree.hpp>
 
-#include "../DataStructs/vizBlock.h"
-#include "../Settings/settings.h"
-#include "../Utilities/threadSafeQueue.hpp"
-#include "../Viewport/camera.h"
-
+#include "DataStructs/vizBlock.h"
+#include "Settings/settings.h"
+#include "Utilities/threadSafeQueue.hpp"
+#include "Viewport/camera.h"
 #include "fileChangeNotification.hpp"
 #include "fileSystemObserver.h"
 
-struct TreemapMetadata {
+struct TreemapMetadata
+{
     std::uintmax_t FileCount{ 0ull };
     std::uintmax_t DirectoryCount{ 0ull };
     std::uintmax_t TotalBytes{ 0ull };

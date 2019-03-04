@@ -26,12 +26,12 @@
 
 #include <Tree/Tree.hpp>
 
-#include "../DataStructs/block.h"
-#include "../DataStructs/driveScanningParameters.h"
-#include "../DataStructs/fileInfo.h"
-#include "../DataStructs/scanningProgress.hpp"
-#include "../DataStructs/vizBlock.h"
-#include "../Visualizations/visualization.h"
+#include "DataStructs/block.h"
+#include "DataStructs/driveScanningParameters.h"
+#include "DataStructs/fileInfo.h"
+#include "DataStructs/scanningProgress.hpp"
+#include "DataStructs/vizBlock.h"
+#include "Visualizations/visualization.h"
 
 /**
  * @brief The NodeAndPath struct

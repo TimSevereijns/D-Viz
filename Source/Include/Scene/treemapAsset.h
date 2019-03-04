@@ -3,9 +3,8 @@
 
 #include <memory>
 
-#include "baseAsset.h"
-
-#include "../Utilities/colorGradient.hpp"
+#include "Scene/baseAsset.h"
+#include "Utilities/colorGradient.hpp"
 
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLTexture>
@@ -141,7 +140,8 @@ namespace Asset
         QOpenGLShaderProgram m_shadowMapShader;
         QOpenGLShaderProgram m_texturePreviewShader;
 
-        struct ShadowMapMetadata {
+        struct ShadowMapMetadata
+        {
             ShadowMapMetadata(std::unique_ptr<QOpenGLFramebufferObject> buffer)
                 : framebuffer{ std::move(buffer) }
             {

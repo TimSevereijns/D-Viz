@@ -1,14 +1,13 @@
 #include "controller.h"
 
-#include "constants.h"
-#include "literals.h"
-
 #include "Settings/settingsManager.h"
 #include "Utilities/ignoreUnused.hpp"
 #include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Visualizations/squarifiedTreemap.h"
 #include "Windows/mainWindow.h"
+#include "constants.h"
+#include "literals.h"
 
 #include <Stopwatch/Stopwatch.hpp>
 #include <gsl/gsl_assert>
@@ -99,7 +98,7 @@ namespace
     /**
      * @returns The full path to the JSON file that contains the color mapping.
      */
-    auto GetColorJsonPath()
+    std::experimental::filesystem::path GetColorJsonPath()
     {
         return std::experimental::filesystem::current_path().append(L"colors.json");
     }
@@ -107,7 +106,7 @@ namespace
     /**
      * @returns The full path to the JSON file that contains the user preferences.
      */
-    auto GetPreferencesJsonPath()
+    std::experimental::filesystem::path GetPreferencesJsonPath()
     {
         return std::experimental::filesystem::current_path().append(L"preferences.json");
     }

@@ -8,8 +8,8 @@
 #include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
 
-#include "../DriveScanner/scopedHandle.h"
-#include "../constants.h"
+#include "DriveScanner/scopedHandle.h"
+#include "constants.h"
 
 namespace
 {
