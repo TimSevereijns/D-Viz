@@ -1,4 +1,4 @@
-#include "debuggingRayAsset.h"
+#include "Scene/debuggingRayAsset.h"
 
 namespace Asset
 {

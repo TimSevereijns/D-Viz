@@ -1,4 +1,4 @@
-#include "vizBlock.h"
+#include "DataStructs/vizBlock.h"
 
 VizBlock::VizBlock(FileInfo file) : file{ std::move(file) }
 {

@@ -1,6 +1,5 @@
-#include "driveScanner.h"
-
-#include "../DataStructs/precisePoint.h"
+#include "DriveScanner/driveScanner.h"
+#include "DataStructs/precisePoint.h"
 
 #include <iostream>
 

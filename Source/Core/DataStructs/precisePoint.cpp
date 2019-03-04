@@ -1,4 +1,4 @@
-#include "precisePoint.h"
+#include "DataStructs/precisePoint.h"
 
 PrecisePoint::PrecisePoint(double x, double y, double z) : m_x{ x }, m_y{ y }, m_z{ z }
 {

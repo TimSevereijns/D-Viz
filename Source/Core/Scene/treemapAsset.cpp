@@ -1,12 +1,11 @@
-#include "treemapAsset.h"
-
-#include "../DataStructs/vizBlock.h"
-#include "../Settings/settings.h"
-#include "../Utilities/colorGradient.hpp"
-#include "../Utilities/scopeExit.hpp"
-#include "../Utilities/viewFrustum.hpp"
-#include "../Visualizations/visualization.h"
-#include "../constants.h"
+#include "Scene/treemapAsset.h"
+#include "DataStructs/vizBlock.h"
+#include "Settings/settings.h"
+#include "Utilities/colorGradient.hpp"
+#include "Utilities/scopeExit.hpp"
+#include "Utilities/viewFrustum.hpp"
+#include "Visualizations/visualization.h"
+#include "constants.h"
 
 #include <Tree/Tree.hpp>
 #include <boost/optional.hpp>

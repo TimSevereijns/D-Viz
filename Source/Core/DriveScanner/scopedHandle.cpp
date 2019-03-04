@@ -1,4 +1,4 @@
-#include "scopedHandle.h"
+#include "DriveScanner/scopedHandle.h"
 
 #ifdef Q_OS_WIN
 

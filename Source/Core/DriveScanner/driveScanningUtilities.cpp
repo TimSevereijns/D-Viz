@@ -1,4 +1,6 @@
-#include "driveScanningUtilities.h"
+#include "DriveScanner/driveScanningUtilities.h"
+#include "DataStructs/vizBlock.h"
+#include "Utilities/ignoreUnused.hpp"
 
 #include <QtGlobal>
 
@@ -8,9 +10,6 @@
 
 #include "winhack.hpp"
 #endif // Q_OS_WIN
-
-#include "../DataStructs/vizBlock.h"
-#include "../Utilities/ignoreUnused.hpp"
 
 #include <iostream>
 #include <memory>

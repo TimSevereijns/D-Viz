@@ -1,7 +1,6 @@
 #ifndef GLCANVAS_H
 #define GLCANVAS_H
 
-#include "../constants.h"
 #include "DataStructs/light.h"
 #include "DriveScanner/driveScanner.h"
 #include "HID/keyboardManager.h"
@@ -16,6 +15,7 @@
 #include "Settings/settingsManager.h"
 #include "Visualizations/visualization.h"
 #include "camera.h"
+#include "constants.h"
 #include "gamepadContextMenu.h"
 
 #include <chrono>
@@ -35,7 +35,8 @@ namespace Asset
 {
     namespace Tag
     {
-        struct Base {
+        struct Base
+        {
             using AssetType = void;
             virtual int GetID() const noexcept
             {
@@ -45,7 +46,8 @@ namespace Asset
             virtual ~Base() = default;
         };
 
-        struct OriginMarker final : Base {
+        struct OriginMarker final : Base
+        {
             using AssetType = Asset::OriginMarker;
             int GetID() const noexcept final override
             {
@@ -53,7 +55,8 @@ namespace Asset
             }
         };
 
-        struct Grid final : Base {
+        struct Grid final : Base
+        {
             using AssetType = Asset::Grid;
             int GetID() const noexcept final override
             {
@@ -61,7 +64,8 @@ namespace Asset
             }
         };
 
-        struct Crosshair final : Base {
+        struct Crosshair final : Base
+        {
             using AssetType = Asset::Crosshair;
             int GetID() const noexcept final override
             {
@@ -69,7 +73,8 @@ namespace Asset
             }
         };
 
-        struct Treemap final : Base {
+        struct Treemap final : Base
+        {
             using AssetType = Asset::Treemap;
             int GetID() const noexcept final override
             {
@@ -77,7 +82,8 @@ namespace Asset
             }
         };
 
-        struct LightMarker final : Base {
+        struct LightMarker final : Base
+        {
             using AssetType = Asset::LightMarker;
             int GetID() const noexcept final override
             {
@@ -85,7 +91,8 @@ namespace Asset
             }
         };
 
-        struct Frustum final : Base {
+        struct Frustum final : Base
+        {
             using AssetType = Asset::Frustum;
             int GetID() const noexcept final override
             {
@@ -345,7 +352,8 @@ class GLCanvas final : public QOpenGLWidget
 
     QPoint m_lastMousePosition;
 
-    struct TagAndAsset {
+    struct TagAndAsset
+    {
         std::unique_ptr<Asset::Tag::Base> tag;
         std::unique_ptr<Asset::Base> asset;
     };

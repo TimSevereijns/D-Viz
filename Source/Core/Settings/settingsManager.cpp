@@ -1,9 +1,8 @@
-#include "settingsManager.h"
-
-#include <spdlog/spdlog.h>
-
+#include "Settings/settingsManager.h"
 #include <DataStructs/vizBlock.h>
 #include <constants.h>
+
+#include <spdlog/spdlog.h>
 
 #ifdef Q_OS_WIN
 #undef GetObject

@@ -1,4 +1,4 @@
-#include "gridAsset.h"
+#include "Scene/gridAsset.h"
 
 namespace
 {
@@ -7,7 +7,7 @@ namespace
      *
      * @returns A vector of vertices.
      */
-    auto CreateGridVertices()
+    QVector<QVector3D> CreateGridVertices()
     {
         QVector<QVector3D> vertices;
         vertices.reserve(44);
@@ -47,7 +47,7 @@ namespace
      *
      * @returns A vector of vertex colors.
      */
-    auto CreateGridColors()
+    QVector<QVector3D> CreateGridColors()
     {
         QVector<QVector3D> colors;
         colors.reserve(44);

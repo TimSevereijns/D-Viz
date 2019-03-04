@@ -1,8 +1,6 @@
-#include "gamepadContextMenu.h"
-
-#include "../constants.h"
-
-#include "../HID/gamepad.h"
+#include "Viewport/gamepadContextMenu.h"
+#include "HID/gamepad.h"
+#include "constants.h"
 
 #include <cmath>
 #include <iostream>

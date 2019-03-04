@@ -1,4 +1,4 @@
-#include "crosshairAsset.h"
+#include "Scene/crosshairAsset.h"
 
 #include <iostream>
 
@@ -11,7 +11,7 @@ namespace
      *
      * @returns All the vertices needed to draw the crosshair.
      */
-    auto CreateCrosshairVertices(const QPoint& center)
+    QVector<QVector3D> CreateCrosshairVertices(const QPoint& center)
     {
         QVector<QVector3D> vertices;
         vertices.reserve(4);
@@ -33,7 +33,7 @@ namespace
      * @returns The color of each vertex needed to represent the crosshair.
      * @see CreateCrosshairVertices
      */
-    auto CreateCrosshairColors()
+    QVector<QVector3D> CreateCrosshairColors()
     {
         QVector<QVector3D> colors;
         colors.reserve(4);

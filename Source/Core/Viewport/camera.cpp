@@ -1,6 +1,5 @@
-#include "camera.h"
-
-#include "../constants.h"
+#include "Viewport/camera.h"
+#include "constants.h"
 
 #include <cmath>
 #include <iostream>

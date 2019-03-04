@@ -1,7 +1,6 @@
-#include "frustumAsset.h"
-
-#include "../Utilities/viewFrustum.hpp"
-#include "../constants.h"
+#include "Scene/frustumAsset.h"
+#include "Utilities/viewFrustum.hpp"
+#include "constants.h"
 
 #include <algorithm>
 #include <iostream>

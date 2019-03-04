@@ -1,4 +1,4 @@
-#include "gamepad.h"
+#include "HID/gamepad.h"
 
 Gamepad::Gamepad(int deviceId, QObject* parent) : QGamepad{ deviceId, parent }
 {

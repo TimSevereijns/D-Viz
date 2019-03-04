@@ -1,4 +1,4 @@
-#include "lightMarkerAsset.h"
+#include "Scene/lightMarkerAsset.h"
 
 namespace Asset
 {

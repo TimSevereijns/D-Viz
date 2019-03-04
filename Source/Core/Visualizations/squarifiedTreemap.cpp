@@ -1,5 +1,4 @@
-#include "squarifiedTreemap.h"
-
+#include "Visualizations/squarifiedTreemap.h"
 #include "constants.h"
 
 #include <algorithm>
@@ -24,8 +23,8 @@ namespace
         const std::vector<Tree<VizBlock>::Node*>& row, const std::uintmax_t candidateSize)
     {
         auto sumOfFileSizes = std::accumulate(
-            std::begin(row), std::end(row), std::uintmax_t{ 0 },
-            [](const auto runningTotal, const auto* node) noexcept {
+            std::begin(row), std::end(row),
+            std::uintmax_t{ 0 }, [](const auto runningTotal, const auto* node) noexcept {
                 return runningTotal + (*node)->file.size;
             });
 
@@ -128,7 +127,7 @@ namespace
 
         return additionalCoverage;
     }
-}
+} // namespace
 
 Block SquarifiedTreeMap::ComputeRemainingArea(const Block& block)
 {

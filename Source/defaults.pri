@@ -7,7 +7,7 @@ win32:QMAKE_LFLAGS_RELEASE += /MAP /debug /opt:ref
 # Unlock all the fun toys on Windows:
 win32:QMAKE_CXXFLAGS += /std:c++17
 
-INCLUDEPATH += $$PWD/Core
+INCLUDEPATH += $$PWD/Include
 
 SOURCES += \
    $$PWD/Core/controller.cpp \
@@ -50,59 +50,59 @@ SOURCES += \
    $$PWD/Core/Windows/scanBreakdownModel.cpp
 
 HEADERS += \
-   $$PWD/Core/bootstrapper.hpp \
-   $$PWD/Core/constants.h \
-   $$PWD/Core/controller.h \
-   $$PWD/Core/DataStructs/block.h \
-   $$PWD/Core/DataStructs/fileInfo.h \
-   $$PWD/Core/DataStructs/light.h \
-   $$PWD/Core/DataStructs/driveScanningParameters.h \
-   $$PWD/Core/DataStructs/precisePoint.h \
-   $$PWD/Core/DataStructs/scanningProgress.hpp \
-   $$PWD/Core/DataStructs/vizBlock.h \
-   $$PWD/Core/DriveScanner/driveScanner.h \
-   $$PWD/Core/DriveScanner/driveScanningUtilities.h \
-   $$PWD/Core/DriveScanner/scanningWorker.h \
-   $$PWD/Core/DriveScanner/scopedHandle.h \
-   $$PWD/Core/DriveScanner/winHack.hpp \
-   $$PWD/Core/HID/gamepad.h \
-   $$PWD/Core/HID/keyboardManager.h \
-   $$PWD/Core/literals.h \
-   $$PWD/Core/Scene/baseAsset.h \
-   $$PWD/Core/Scene/crosshairAsset.h \
-   $$PWD/Core/Scene/debuggingRayAsset.h \
-   $$PWD/Core/Scene/frustumAsset.h \
-   $$PWD/Core/Scene/gridAsset.h \
-   $$PWD/Core/Scene/lightMarkerAsset.h \
-   $$PWD/Core/Scene/lineAsset.h \
-   $$PWD/Core/Scene/originMarkerAsset.h \
-   $$PWD/Core/Scene/treemapAsset.h \
-   $$PWD/Core/Settings/preferencesMap.hpp \
-   $$PWD/Core/Settings/settings.h \
-   $$PWD/Core/Settings/settingsManager.h \
-   $$PWD/Core/Utilities/colorGradient.hpp \
-   $$PWD/Core/Utilities/ignoreUnused.hpp \
-   $$PWD/Core/Utilities/operatingSystemSpecific.hpp \
-   $$PWD/Core/Utilities/scopeExit.hpp \
-   $$PWD/Core/Utilities/threadSafeQueue.hpp \
-   $$PWD/Core/Utilities/utilities.hpp \
-   $$PWD/Core/Utilities/viewFrustum.hpp \
-   $$PWD/Core/Viewport/camera.h \
-   $$PWD/Core/Viewport/gamepadContextMenu.h \
-   $$PWD/Core/Viewport/glCanvas.h \
-   $$PWD/Core/Viewport/mouseContextMenu.h \
-   $$PWD/Core/Visualizations/linuxFileMonitor.h \
-   $$PWD/Core/Visualizations/fileChangeNotification.hpp \
-   $$PWD/Core/Visualizations/fileSystemObserver.h \
-   $$PWD/Core/Visualizations/fileMonitorImpl.h \
-   $$PWD/Core/Visualizations/ray.h \
-   $$PWD/Core/Visualizations/squarifiedTreemap.h \
-   $$PWD/Core/Visualizations/visualization.h \
-   $$PWD/Core/Visualizations/windowsFileMonitor.h \
-   $$PWD/Core/Windows/aboutDialog.h \
-   $$PWD/Core/Windows/breakdownDialog.h \
-   $$PWD/Core/Windows/mainWindow.h \
-   $$PWD/Core/Windows/scanBreakdownModel.h
+   $$PWD/Include/bootstrapper.hpp \
+   $$PWD/Include/constants.h \
+   $$PWD/Include/controller.h \
+   $$PWD/Include/DataStructs/block.h \
+   $$PWD/Include/DataStructs/fileInfo.h \
+   $$PWD/Include/DataStructs/light.h \
+   $$PWD/Include/DataStructs/driveScanningParameters.h \
+   $$PWD/Include/DataStructs/precisePoint.h \
+   $$PWD/Include/DataStructs/scanningProgress.hpp \
+   $$PWD/Include/DataStructs/vizBlock.h \
+   $$PWD/Include/DriveScanner/driveScanner.h \
+   $$PWD/Include/DriveScanner/driveScanningUtilities.h \
+   $$PWD/Include/DriveScanner/scanningWorker.h \
+   $$PWD/Include/DriveScanner/scopedHandle.h \
+   $$PWD/Include/DriveScanner/winHack.hpp \
+   $$PWD/Include/HID/gamepad.h \
+   $$PWD/Include/HID/keyboardManager.h \
+   $$PWD/Include/literals.h \
+   $$PWD/Include/Scene/baseAsset.h \
+   $$PWD/Include/Scene/crosshairAsset.h \
+   $$PWD/Include/Scene/debuggingRayAsset.h \
+   $$PWD/Include/Scene/frustumAsset.h \
+   $$PWD/Include/Scene/gridAsset.h \
+   $$PWD/Include/Scene/lightMarkerAsset.h \
+   $$PWD/Include/Scene/lineAsset.h \
+   $$PWD/Include/Scene/originMarkerAsset.h \
+   $$PWD/Include/Scene/treemapAsset.h \
+   $$PWD/Include/Settings/preferencesMap.hpp \
+   $$PWD/Include/Settings/settings.h \
+   $$PWD/Include/Settings/settingsManager.h \
+   $$PWD/Include/Utilities/colorGradient.hpp \
+   $$PWD/Include/Utilities/ignoreUnused.hpp \
+   $$PWD/Include/Utilities/operatingSystemSpecific.hpp \
+   $$PWD/Include/Utilities/scopeExit.hpp \
+   $$PWD/Include/Utilities/threadSafeQueue.hpp \
+   $$PWD/Include/Utilities/utilities.hpp \
+   $$PWD/Include/Utilities/viewFrustum.hpp \
+   $$PWD/Include/Viewport/camera.h \
+   $$PWD/Include/Viewport/gamepadContextMenu.h \
+   $$PWD/Include/Viewport/glCanvas.h \
+   $$PWD/Include/Viewport/mouseContextMenu.h \
+   $$PWD/Include/Visualizations/linuxFileMonitor.h \
+   $$PWD/Include/Visualizations/fileChangeNotification.hpp \
+   $$PWD/Include/Visualizations/fileSystemObserver.h \
+   $$PWD/Include/Visualizations/fileMonitorImpl.h \
+   $$PWD/Include/Visualizations/ray.h \
+   $$PWD/Include/Visualizations/squarifiedTreemap.h \
+   $$PWD/Include/Visualizations/visualization.h \
+   $$PWD/Include/Visualizations/windowsFileMonitor.h \
+   $$PWD/Include/Windows/aboutDialog.h \
+   $$PWD/Include/Windows/breakdownDialog.h \
+   $$PWD/Include/Windows/mainWindow.h \
+   $$PWD/Include/Windows/scanBreakdownModel.h
 
 FORMS += \
    $$PWD/Core/Windows/aboutDialog.ui \

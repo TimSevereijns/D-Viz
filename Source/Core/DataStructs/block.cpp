@@ -1,4 +1,4 @@
-#include "block.h"
+#include "DataStructs/block.h"
 
 Block::Block(
     const PrecisePoint& origin, const double blockWidth, const double blockHeight,

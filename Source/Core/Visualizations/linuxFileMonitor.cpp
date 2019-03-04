@@ -1,6 +1,5 @@
-#include "linuxFileMonitor.h"
-
-#include "../constants.h"
+#include "Visualizations/linuxFileMonitor.h"
+#include "constants.h"
 
 #include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>

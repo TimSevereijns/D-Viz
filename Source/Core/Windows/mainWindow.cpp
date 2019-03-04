@@ -1,8 +1,4 @@
-#include "mainWindow.h"
-
-#include "constants.h"
-#include "literals.h"
-
+#include "Windows/mainWindow.h"
 #include "DataStructs/scanningProgress.hpp"
 #include "Settings/settings.h"
 #include "Settings/settingsManager.h"
@@ -10,6 +6,8 @@
 #include "Utilities/scopeExit.hpp"
 #include "Utilities/utilities.hpp"
 #include "Viewport/glCanvas.h"
+#include "constants.h"
+#include "literals.h"
 
 #include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>

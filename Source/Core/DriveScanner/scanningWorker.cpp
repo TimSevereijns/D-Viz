@@ -1,7 +1,7 @@
-#include "driveScanner.h"
-#include "driveScanningUtilities.h"
-
-#include "scanningWorker.h"
+#include "DriveScanner/scanningWorker.h"
+#include "DriveScanner/driveScanner.h"
+#include "DriveScanner/driveScanningUtilities.h"
+#include "constants.h"
 
 #ifdef Q_OS_WIN
 #pragma warning(push)
@@ -16,8 +16,6 @@
 
 #include <Stopwatch/Stopwatch.hpp>
 #include <spdlog/spdlog.h>
-
-#include "../constants.h"
 
 namespace
 {

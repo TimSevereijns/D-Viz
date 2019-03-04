@@ -1,14 +1,15 @@
-#include "glCanvas.h"
+#include "Viewport/glCanvas.h"
 
-#include "../Windows/mainWindow.h"
-#include "../constants.h"
+#include "controller.h"
 
 #include "Stopwatch/Stopwatch.hpp"
 #include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
+#include "Viewport/gamepadContextMenu.h"
+#include "Viewport/mouseContextMenu.h"
 #include "Visualizations/squarifiedTreemap.h"
-#include "gamepadContextMenu.h"
-#include "mouseContextMenu.h"
+#include "Windows/mainWindow.h"
+#include "constants.h"
 
 #include <QApplication>
 #include <QMenu>

@@ -1,4 +1,4 @@
-#include "light.h"
+#include "DataStructs/light.h"
 
 Light::Light(
     const QVector3D& lightPosition, const QVector3D& lightIntensity, const float lightAttenuation,

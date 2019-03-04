@@ -1,10 +1,9 @@
-#include "scanBreakdownModel.h"
+#include "Windows/scanBreakdownModel.h"
+#include "Settings/settingsManager.h"
+#include "controller.h"
 
 #include <gsl/gsl_assert>
 #include <spdlog/fmt/fmt.h>
-
-#include "../Settings/settingsManager.h"
-#include "../controller.h"
 
 #include <iterator>
 

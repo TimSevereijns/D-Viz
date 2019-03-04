@@ -1,4 +1,4 @@
-#include "windowsFileMonitor.h"
+#include "Visualizations/windowsFileMonitor.h"
 
 #ifdef Q_OS_WIN
 
