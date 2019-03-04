@@ -9,9 +9,9 @@
 #include "fileMonitorImpl.h"
 
 #include <boost/filesystem/path.hpp>
-#include <inotify-cpp/NotifierBuilder.h>
 
 #include <functional>
+#include <thread>
 
 class LinuxFileMonitor : public FileMonitorImpl
 {
@@ -38,17 +38,11 @@ class LinuxFileMonitor : public FileMonitorImpl
     bool IsActive() const override;
 
   private:
-    bool ProcessNotification(
-        const inotify::Notification& notification,
-        const std::function<void(FileChangeNotification&&)>& callback) const;
-
     bool m_isActive{ false };
 
     boost::filesystem::path m_pathToWatch;
 
     std::thread m_monitoringThread;
-
-    inotify::NotifierBuilder m_notifier;
 };
 
 #endif // Q_OS_UNIX

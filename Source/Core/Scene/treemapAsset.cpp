@@ -47,7 +47,7 @@ namespace
      *                               shadow casting light source.
      * @param[in] cascadeCount       The number of cascades.
      */
-    auto ComputeFrustumSplitBoundingBoxes(
+    std::vector<BoundingBox> ComputeFrustumSplitBoundingBoxes(
         const Camera& renderCamera, const QMatrix4x4& shadowViewMatrix, int cascadeCount)
     {
         Expects(cascadeCount >= 0);
@@ -102,7 +102,7 @@ namespace
                                             /* near   = */ maxZ,
                                             /* far    = */ minZ };
 
-            boundingBoxes.emplace_back(boundingBox);
+            boundingBoxes.emplace_back(std::move(boundingBox));
         }
 
         return boundingBoxes;
@@ -232,7 +232,7 @@ namespace
     /**
      * @returns The length of the diagonal of the provided bounding box.
      */
-    auto ComputeDiagonal(const BoundingBox& box)
+    double ComputeDiagonal(const BoundingBox& box)
     {
         const auto cornerA = QVector3D{ box.left, box.top, box.near };
         const auto cornerB = QVector3D{ box.right, box.bottom, box.far };

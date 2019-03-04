@@ -24,14 +24,14 @@ namespace
     void ComputeLabelAttachmentPoints(
         QPoint origin, int radius, std::vector<GamepadContextMenu::Entry>& entries)
     {
-        const auto entryCount = static_cast<int>(entries.size());
+        const auto entryCount = static_cast<std::uint32_t>(entries.size());
         const auto slice = 2 * Constants::Math::PI / entryCount;
         const auto startingAngle = (entryCount % 2) ? (Constants::Math::PI / 2) : 0;
 
         const auto x = origin.x();
         const auto y = origin.y();
 
-        for (auto index{ 0 }; index < entryCount; ++index) {
+        for (auto index{ 0u }; index < entryCount; ++index) {
             const auto angle = slice * index - startingAngle;
 
             entries[index].Position = QPoint{ static_cast<int>(x + radius * std::cos(angle)),
@@ -50,11 +50,11 @@ namespace
      *
      * @returns The adjusted 2D origin for the menu entry.
      */
-    auto AdjustTextOriginBasedOnLocation(
+    QPoint AdjustTextOriginBasedOnLocation(
         const GamepadContextMenu::Entry entry, const QPoint& menuCenter,
         const QFontMetrics& fontMetrics)
     {
-        auto adjustedPosition{ entry.Position };
+        QPoint adjustedPosition{ entry.Position };
 
         if (entry.Position.x() == menuCenter.x()) {
             const auto halfLabelWidth = fontMetrics.width(entry.Label) / 2;
@@ -83,7 +83,7 @@ namespace
      *
      * @returns The linear distance between two points.
      */
-    auto Distance(const QPoint& start, const QPoint& end)
+    double Distance(const QPoint& start, const QPoint& end)
     {
         const auto xDelta = end.x() - start.x();
         const auto yDelta = end.y() - start.y();
@@ -135,7 +135,8 @@ void GamepadContextMenu::ProcessInput()
         }
 
         selection->Color = Qt::white;
-        m_indexOfSelection = std::distance(std::begin(m_entries), selection);
+        m_indexOfSelection =
+            static_cast<std::size_t>(std::distance(std::begin(m_entries), selection));
     }
 
     repaint();
@@ -150,10 +151,10 @@ void GamepadContextMenu::AddEntry(const QString& label, const std::function<void
 
 void GamepadContextMenu::ComputeLayout()
 {
-    const auto center = QPoint{ width() / 2, height() / 2 };
+    const QPoint center{ width() / 2, height() / 2 };
 
     constexpr auto radius{ 100 };
-    ComputeLabelAttachmentPoints(center, 1.25 * radius, m_entries);
+    ComputeLabelAttachmentPoints(center, static_cast<int>(1.25 * radius), m_entries);
 }
 
 void GamepadContextMenu::paintEvent(QPaintEvent* /*event*/)
