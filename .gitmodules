@@ -18,7 +18,3 @@
    path = Foreign/GSL
    url = https://github.com/Microsoft/GSL.git
    branch = v2.0.0
-[submodule "Foreign/INotify-Cpp"]
-   path = Foreign/INotify-Cpp
-   url = https://github.com/erikzenker/inotify-cpp.git
-   branch = v0.2.0
