@@ -28,12 +28,13 @@ template <typename LambdaType> class ScopeExit
     LambdaType m_lambda;
 };
 
-namespace
+namespace Detail
 {
-    struct DummyStruct {
+    struct DummyStruct
+    {
         // Left intentionally empty.
     };
-} // namespace
+} // namespace Detail
 
 /**
  * Enables the use of braces to define the contents of the RAII object.
@@ -44,7 +45,7 @@ namespace
  * @returns An RAII object encapsulating the lambda.
  */
 template <typename LambdaType>
-inline ScopeExit<LambdaType> operator+(const DummyStruct&, LambdaType&& lambda)
+inline ScopeExit<LambdaType> operator+(const Detail::DummyStruct&, LambdaType&& lambda)
 {
     return ScopeExit<LambdaType>{ std::forward<LambdaType>(lambda) };
 }
@@ -53,6 +54,6 @@ inline ScopeExit<LambdaType> operator+(const DummyStruct&, LambdaType&& lambda)
 
 #define CONCAT(A, B) NONEXPANDING_CONCAT(A, B)
 
-#define ON_SCOPE_EXIT auto CONCAT(scope_exit_, __LINE__) = DummyStruct{} + [=]()
+#define ON_SCOPE_EXIT auto CONCAT(scope_exit_, __LINE__) = Detail::DummyStruct{} + [=]()
 
 #endif // SCOPEEXIT_HPP

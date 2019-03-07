@@ -71,7 +71,7 @@ namespace
     /**
      * @returns True if the directory should be processed.
      */
-    auto ShouldProcess(const std::experimental::filesystem::path& path) noexcept
+    bool ShouldProcess(const std::experimental::filesystem::path& path) noexcept
     {
 #if defined(Q_OS_WIN)
         return !DriveScanning::Utilities::IsReparsePoint(path);

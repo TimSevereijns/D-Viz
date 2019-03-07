@@ -435,7 +435,7 @@ void GLCanvas::ShowGamepadContextMenu()
         }
 
         m_gamepadContextMenu->AddEntry("Show in Explorer", [=] {
-            OperatingSystemSpecific::LaunchFileExplorer(*selectedNode);
+            OS::LaunchFileExplorer(*selectedNode);
         });
     }
 
@@ -495,7 +495,7 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
         menu.addSeparator();
 
         menu.addAction("Show in Explorer", [&] {
-            OperatingSystemSpecific::LaunchFileExplorer(*selectedNode);
+            OS::LaunchFileExplorer(*selectedNode);
         });
     }
 

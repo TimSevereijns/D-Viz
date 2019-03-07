@@ -19,12 +19,7 @@
 #include <sys/statvfs.h>
 #endif
 
-/**
- * @note Any functions defined in this namespace will have to be declared 'inline', since we're not
- * splitting definitions from declarations. The 'inline' keyword will direct the linker to allow
- * multiple definitions of a given function.
- */
-namespace OperatingSystemSpecific
+namespace OS
 {
 #ifdef Q_OS_WIN
 
@@ -110,6 +105,6 @@ namespace OperatingSystemSpecific
     }
 
 #endif
-} // namespace OperatingSystemSpecific
+} // namespace OS
 
 #endif // OPERATINGSYSTEMSPECIFIC_HPP

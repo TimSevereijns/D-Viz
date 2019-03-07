@@ -150,7 +150,7 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
     m_view->OnScanStarted();
 
     // @todo Look into using std::fileystem::space instead.
-    m_occupiedDiskSpace = OperatingSystemSpecific::GetUsedDiskSpace(parameters.rootDirectory);
+    m_occupiedDiskSpace = OS::GetUsedDiskSpace(parameters.rootDirectory);
     Expects(m_occupiedDiskSpace > 0u);
 
     const auto progressHandler = [&](const ScanningProgress& progress) {
@@ -512,8 +512,8 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizBlock>::Node& nod
     const auto completePath = std::accumulate(
         std::rbegin(reversePath), std::rend(reversePath), std::wstring{},
         [](const std::wstring& path, const std::wstring& file) {
-            if (!path.empty() && path.back() != OperatingSystemSpecific::PREFERRED_SLASH) {
-                return path + OperatingSystemSpecific::PREFERRED_SLASH + file;
+            if (!path.empty() && path.back() != OS::PREFERRED_SLASH) {
+                return path + OS::PREFERRED_SLASH + file;
             }
 
             return path + file;

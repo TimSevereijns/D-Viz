@@ -179,21 +179,24 @@ class MainWindow final : public QMainWindow
 
     QMenu m_fileMenu{ nullptr };
 
-    struct FileMenu {
+    struct FileMenu
+    {
         QAction newScan{ nullptr };
         QAction exit{ nullptr };
     } m_fileMenuWrapper;
 
     QMenu m_optionsMenu{ nullptr };
 
-    struct OptionsMenu {
+    struct OptionsMenu
+    {
         QAction enableFileSystemMonitoring{ nullptr };
 
         QAction toggleFrameTime{ nullptr };
 
         QMenu fileSizeMenu{ nullptr };
 
-        struct FileSizeMenu {
+        struct FileSizeMenu
+        {
             QAction binaryPrefix{ nullptr };
             QAction decimalPrefix{ nullptr };
         } fileSizeMenuWrapper;
@@ -201,10 +204,12 @@ class MainWindow final : public QMainWindow
 
     QMenu m_debuggingMenu{ nullptr };
 
-    struct DebuggingMenu {
+    struct DebuggingMenu
+    {
         QMenu renderMenu{ nullptr };
 
-        struct RenderMenuWrapper {
+        struct RenderMenuWrapper
+        {
             QAction origin{ nullptr };
             QAction grid{ nullptr };
             QAction lightMarkers{ nullptr };
@@ -213,7 +218,8 @@ class MainWindow final : public QMainWindow
 
         QMenu lightingMenu{ nullptr };
 
-        struct LightingMenuWrapper {
+        struct LightingMenuWrapper
+        {
             QAction showCascadeSplits{ nullptr };
             QAction showShadows{ nullptr };
         } lightingMenuWrapper;
@@ -221,7 +227,8 @@ class MainWindow final : public QMainWindow
 
     QMenu m_helpMenu{ nullptr };
 
-    struct HelpMenu {
+    struct HelpMenu
+    {
         QAction aboutDialog{ nullptr };
     } m_helpMenuWrapper;
 };

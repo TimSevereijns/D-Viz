@@ -23,8 +23,8 @@ namespace DriveScanning
 #ifdef Q_OS_WIN
 
         /**
-         * @returns A handle representing the repartse point found at the given path. If
-         * the path is not a reparse point, then an invalid handle will be returned instead.
+         * @returns A handle representing the repartse point found at the given path. If the path is
+         * not a reparse point, then an invalid handle will be returned instead.
          */
         ScopedHandle OpenReparsePoint(const std::experimental::filesystem::path& path) noexcept;
 
@@ -41,10 +41,8 @@ namespace DriveScanning
          *
          * The `std::experimental::filesystem::file_size(...)` function uses a different native
          * function to get at the file size for a given file, and this function (while probably
-         * faster
-         * than `FindFirstFileW(...)`) has a tendency to throw. If such exceptional behaviour were
-         * to
-         * occur, then this function can be used to hopefully still get at the file size.
+         * faster than `FindFirstFileW(...)`) has a tendency to throw. If such exceptional behaviour
+         * were to occur, then this function can be used to hopefully still get at the file size.
          *
          * @param path[in]               The path to the troublesome file.
          *

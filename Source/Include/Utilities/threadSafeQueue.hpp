@@ -16,18 +16,14 @@ template <typename Type> class ThreadSafeQueue
     void Push(Type data)
     {
         std::lock_guard<decltype(m_mutex)> lock{ m_mutex };
-
         m_queue.push(std::move(data));
-
         m_conditionVariable.notify_one();
     }
 
     template <typename... Args> void Emplace(Args&&... args)
     {
         std::lock_guard<decltype(m_mutex)> lock{ m_mutex };
-
         m_queue.emplace(std::forward<Args>(args)...);
-
         m_conditionVariable.notify_one();
     }
 

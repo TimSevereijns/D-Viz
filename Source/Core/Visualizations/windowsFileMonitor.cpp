@@ -27,7 +27,46 @@ namespace
             return ptr;
         }
 
-        return reinterpret_cast<DataType*>(reinterpret_cast<std::byte*>(ptr) + offset); // NOLINT
+        return reinterpret_cast<DataType*>(reinterpret_cast<std::byte*>(ptr) + offset);
+    }
+
+    /**
+     * @brief GetLastErrorAsString
+     * @return
+     */
+    std::string GetLastErrorAsString()
+    {
+        DWORD errorMessageID = ::GetLastError();
+        if (errorMessageID == 0) {
+            return {};
+        }
+
+        LPSTR messageBuffer = nullptr;
+
+        constexpr auto formattingOptions = FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                                           FORMAT_MESSAGE_FROM_SYSTEM |
+                                           FORMAT_MESSAGE_IGNORE_INSERTS;
+
+        const auto characterCount = FormatMessageA(
+            formattingOptions, nullptr, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            reinterpret_cast<LPSTR>(&messageBuffer), 0, nullptr);
+
+        std::string message{ messageBuffer, characterCount };
+
+        LocalFree(messageBuffer);
+
+        return message;
+    }
+
+    /**
+     * @brief LogLastError
+     * @param message
+     */
+    void LogLastError(std::string_view message)
+    {
+        const auto lastError = GetLastErrorAsString();
+        const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+        log->error("{} Last Error: {}.", message, lastError);
     }
 } // namespace
 
@@ -49,10 +88,18 @@ void WindowsFileMonitor::Start(
 {
     m_notificationCallback = onNotificationCallback;
 
-    constexpr auto sizeOfNotification =
-        sizeof(FILE_NOTIFY_INFORMATION) + MAX_PATH * sizeof(wchar_t);
+    // When monitoring a file on a network drive, the size of the buffer cannot exceed 64 KiB.
+    // To quote the documentation: "This is due to a packet size limitation with the underlying file
+    // sharing protocols."
+    //
+    // In the C# documentation for the analogous `FileSystemWatcher`, Microsoft appears to default
+    // the buffer's size to 8,192 bytes (or 8 KiB), so we'll do the same.
+    //
+    // Interestingly, a small buffer can also be significantly faster:
+    // https://randomascii.wordpress.com/2018/04/17/making-windows-slower-part-1-file-access/
 
-    m_notificationBuffer.resize(1024 * sizeOfNotification, std::byte{ 0 });
+    using namespace Literals::Numeric::Binary;
+    m_notificationBuffer.resize(8_KiB, std::byte{ 0 });
 
     m_fileHandle = CreateFileW(
         /* lpFileName = */ path.wstring().data(),
@@ -63,8 +110,7 @@ void WindowsFileMonitor::Start(
         /* dwFlagsAndAttributes = */ FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
         /* hTemplateFile = */ nullptr);
 
-    if (!m_fileHandle || m_fileHandle == INVALID_HANDLE_VALUE) // NOLINT
-    {
+    if (!m_fileHandle || m_fileHandle == INVALID_HANDLE_VALUE) {
         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
         log->error("Could not acquire handle to: {}.", path.string());
 
@@ -104,8 +150,7 @@ void WindowsFileMonitor::Stop()
 
     Expects(m_isActive == false);
 
-    if (m_fileHandle && m_fileHandle != INVALID_HANDLE_VALUE) // NOLINT
-    {
+    if (m_fileHandle && m_fileHandle != INVALID_HANDLE_VALUE) {
         CloseHandle(m_fileHandle);
     }
 }
@@ -121,10 +166,9 @@ void WindowsFileMonitor::Monitor()
 
 void WindowsFileMonitor::AwaitNotification()
 {
-    constexpr auto desiredNotifications =
-        FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_ATTRIBUTES |
-        FILE_NOTIFY_CHANGE_SIZE | FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_LAST_ACCESS |
-        FILE_NOTIFY_CHANGE_CREATION | FILE_NOTIFY_CHANGE_SECURITY;
+    constexpr auto desiredNotifications = FILE_NOTIFY_CHANGE_FILE_NAME |
+                                          FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_SIZE |
+                                          FILE_NOTIFY_CHANGE_CREATION;
 
     const bool successfullyQueued = ReadDirectoryChangesW(
         /* hDirectory = */ m_fileHandle,
@@ -136,7 +180,9 @@ void WindowsFileMonitor::AwaitNotification()
         /* lpOverlapped = */ &m_ioBuffer,
         /* lpCompletionRoutine = */ nullptr);
 
-    Expects(successfullyQueued);
+    if (!successfullyQueued) {
+        LogLastError("Encountered error queuing filesytem changes.");
+    }
 
     const auto waitResult = WaitForMultipleObjects(
         /* nCount = */ m_events.Size(),
@@ -145,23 +191,23 @@ void WindowsFileMonitor::AwaitNotification()
         /* dwMilliseconds = */ INFINITE);
 
     switch (waitResult) {
-        case WAIT_OBJECT_0: // NOLINT
-        {
+        case WAIT_OBJECT_0: {
             m_keepMonitoring.store(false);
 
             CancelIo(m_fileHandle);
 
-            while (!HasOverlappedIoCompleted(&m_ioBuffer)) // NOLINT
-            {
+            while (!HasOverlappedIoCompleted(&m_ioBuffer)) {
                 SleepEx(50, TRUE);
             }
 
             break;
         }
-        case WAIT_OBJECT_0 + 1: // NOLINT
-        {
+        case WAIT_OBJECT_0 + 1: {
             RetrieveNotification();
-
+            break;
+        }
+        case WAIT_FAILED: {
+            LogLastError("Encountered error waiting on event.");
             break;
         }
         default: {
@@ -182,15 +228,18 @@ void WindowsFileMonitor::RetrieveNotification()
 
     if (successfullyRead && bytesTransferred > 0) {
         ProcessNotification();
+    } else if (GetLastError() == ERROR_NOTIFY_ENUM_DIR && bytesTransferred == 0) {
+        const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+        log->error("Detected a file change notification buffer overflow.");
     } else {
-        Expects(false);
+        LogLastError("Encountered error retrieving filesystem change details.");
     }
 }
 
 void WindowsFileMonitor::ProcessNotification()
 {
     auto* notificationInfo =
-        reinterpret_cast<FILE_NOTIFY_INFORMATION*>(m_notificationBuffer.data()); // NOLINT
+        reinterpret_cast<FILE_NOTIFY_INFORMATION*>(m_notificationBuffer.data());
 
     while (notificationInfo != nullptr) {
         if (notificationInfo->FileNameLength == 0) {
@@ -206,11 +255,10 @@ void WindowsFileMonitor::ProcessNotification()
         Expects(fileNameLength);
 
         std::wstring fileName(fileNameLength, '\0');
+        const auto fileSizeInBytes = notificationInfo->FileNameLength;
 
         // @todo Handle short filenames correctly.
-        std::memcpy(
-            &fileName[0], static_cast<void*>(notificationInfo->FileName),
-            notificationInfo->FileNameLength); //< Note that this length is measured in bytes!
+        std::memcpy(&fileName[0], static_cast<void*>(notificationInfo->FileName), fileSizeInBytes);
 
         switch (notificationInfo->Action) {
             case FILE_ACTION_ADDED: {
