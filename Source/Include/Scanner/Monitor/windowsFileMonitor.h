@@ -7,7 +7,7 @@
 
 #include "Utilities/threadSafeQueue.hpp"
 #include "fileChangeNotification.hpp"
-#include "fileMonitorImpl.h"
+#include "fileMonitorBase.h"
 
 #include "boost/optional.hpp"
 
@@ -78,7 +78,7 @@ namespace Detail
 /**
  * @brief The WindowsFileMonitor class
  */
-class WindowsFileMonitor : public FileMonitorImpl
+class WindowsFileMonitor : public FileMonitorBase
 {
   public:
     WindowsFileMonitor() = default;

@@ -35,7 +35,7 @@ class VisualizationModel
 {
   public:
     VisualizationModel(
-        std::unique_ptr<FileMonitorImpl> fileMonitor,
+        std::unique_ptr<FileMonitorBase> fileMonitor,
         const std::experimental::filesystem::path& path);
 
     virtual ~VisualizationModel() = default;

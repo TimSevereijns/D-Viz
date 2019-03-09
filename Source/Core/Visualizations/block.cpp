@@ -23,11 +23,9 @@ Block::Block(
     const auto depth = static_cast<float>(blockDepth);
 
     // clang-format off
-
     m_vertices.reserve(VERTICES_PER_BLOCK * 2);
     m_vertices
-        // Front:                                          // Vertex Normals:
-        // Index
+        // Front:                                        // Vertex Normals:               // Index
         << QVector3D{ x, y, z }                          << QVector3D{ 0.0f, 0.0f, 1.0f } // 0
         << QVector3D{ x + width, y, z }                  << QVector3D{ 0.0f, 0.0f, 1.0f } // 2
         << QVector3D{ x, y + height, z }                 << QVector3D{ 0.0f, 0.0f, 1.0f } // 4
@@ -66,7 +64,6 @@ Block::Block(
         << QVector3D{ x + width, y + height, z - depth } << QVector3D{ 0.0f, 1.0f, 0.0f }  // 54
         << QVector3D{ x, y + height, z - depth }         << QVector3D{ 0.0f, 1.0f, 0.0f }  // 56
         << QVector3D{ x + width, y + height, z }         << QVector3D{ 0.0f, 1.0f, 0.0f }; // 58
-
     // clang-format on
 }
 

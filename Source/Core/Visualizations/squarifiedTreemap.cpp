@@ -380,7 +380,7 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
 }
 
 SquarifiedTreeMap::SquarifiedTreeMap(
-    std::unique_ptr<FileMonitorImpl> fileMonitor, const std::experimental::filesystem::path& path)
+    std::unique_ptr<FileMonitorBase> fileMonitor, const std::experimental::filesystem::path& path)
     : VisualizationModel{ std::move(fileMonitor), path }
 {
 }

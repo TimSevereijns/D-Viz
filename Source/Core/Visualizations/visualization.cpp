@@ -280,7 +280,7 @@ namespace
 } // namespace
 
 VisualizationModel::VisualizationModel(
-    std::unique_ptr<FileMonitorImpl> fileMonitor, const std::experimental::filesystem::path& path)
+    std::unique_ptr<FileMonitorBase> fileMonitor, const std::experimental::filesystem::path& path)
     : m_rootPath{ path }, m_fileSystemObserver{ std::move(fileMonitor), path }
 {
 }

@@ -63,7 +63,7 @@ HEADERS += \
    $$PWD/Include/Scanner/scanningUtilities.h \
    $$PWD/Include/Scanner/scanningWorker.h \
    $$PWD/Include/Scanner/Monitor/fileChangeNotification.hpp \
-   $$PWD/Include/Scanner/Monitor/fileMonitorImpl.h \
+   $$PWD/Include/Scanner/Monitor/fileMonitorBase.h \
    $$PWD/Include/Scanner/Monitor/fileSystemObserver.h \
    $$PWD/Include/Scanner/Monitor/linuxFileMonitor.h \
    $$PWD/Include/Scanner/Monitor/windowsFileMonitor.h \
@@ -164,20 +164,14 @@ unix:CONFIG(release, debug|release) {
    LIBS += \
       -lstdc++fs \
       -L$$PWD/../../boost_1_66_0/stage/lib \
-      -L$$PWD/../Foreign/INotify-Cpp/build/src \
-      -lboost_system \
-      -lboost_filesystem \
-      -linotify-cpp
+      -lboost_system
 }
 
 unix:CONFIG(debug, debug|release) {
    LIBS += \
       -lstdc++fs \
       -L$$PWD/../../boost_1_66_0/stage/lib \
-      -L$$PWD/../Foreign/INotify-Cpp/build/src \
-      -lboost_system \
-      -lboost_filesystem \
-      -linotify-cpp
+      -lboost_system
 }
 
 CONFIG(debug, debug|release) {

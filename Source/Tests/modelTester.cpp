@@ -43,7 +43,7 @@ void ModelTester::initTestCase()
         m_tree = std::move(tree);
     };
 
-    QSignalSpy completionSpy(&m_scanner, &DriveScanner::Finished);
+    QSignalSpy completionSpy{ &m_scanner, &DriveScanner::Finished };
 
     const ScanningParameters parameters{ m_sampleDirectory, progressCallback, completionCallback };
 

@@ -4,7 +4,7 @@
 #include "Utilities/threadSafeQueue.hpp"
 #include "Visualizations/vizBlock.h"
 #include "fileChangeNotification.hpp"
-#include "fileMonitorImpl.h"
+#include "fileMonitorBase.h"
 
 #include <Tree/Tree.hpp>
 #include <boost/optional.hpp>
@@ -28,7 +28,7 @@ class FileSystemObserver
      * @param[in] path               The path to the location to be recursively observed.
      */
     FileSystemObserver(
-        std::unique_ptr<FileMonitorImpl> fileMonitor, std::experimental::filesystem::path path);
+        std::unique_ptr<FileMonitorBase> fileMonitor, std::experimental::filesystem::path path);
 
     /**
      * @brief Halts monitoring and destroys the observer.
@@ -67,7 +67,7 @@ class FileSystemObserver
 
     std::atomic_bool m_shouldKeepProcessingNotifications{ true };
 
-    std::unique_ptr<FileMonitorImpl> m_fileSystemMonitor;
+    std::unique_ptr<FileMonitorBase> m_fileSystemMonitor;
 
     // This queue contains raw notifications of file system changes that still need to be
     // parsed and the turned into tree node change notifications.

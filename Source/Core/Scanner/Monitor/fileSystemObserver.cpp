@@ -40,7 +40,7 @@ namespace
 } // namespace
 
 FileSystemObserver::FileSystemObserver(
-    std::unique_ptr<FileMonitorImpl> fileMonitor, std::experimental::filesystem::path path)
+    std::unique_ptr<FileMonitorBase> fileMonitor, std::experimental::filesystem::path path)
     : m_fileSystemMonitor{ std::move(fileMonitor) }, m_rootPath{ std::move(path) }
 {
 }

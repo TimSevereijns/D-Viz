@@ -2,7 +2,7 @@
 #define MOCKFILEMONITOR_H
 
 #include <Scanner/Monitor/fileChangeNotification.hpp>
-#include <Scanner/Monitor/fileMonitorImpl.h>
+#include <Scanner/Monitor/fileMonitorBase.h>
 
 #include <experimental/filesystem>
 #include <functional>
@@ -11,7 +11,7 @@
 /**
  * @brief The MockFileMonitor class
  */
-class MockFileMonitor : public FileMonitorImpl
+class MockFileMonitor : public FileMonitorBase
 {
   public:
     MockFileMonitor(std::function<FileChangeNotification()> notificationGenerator)
