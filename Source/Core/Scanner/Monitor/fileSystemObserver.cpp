@@ -108,9 +108,8 @@ void FileSystemObserver::ProcessChanges()
         const auto successfullyAssociated = AssociateNotificationWithNode(*notification);
         if (successfullyAssociated) {
             // @todo Should there be an upper limit on the number of changes that can be in the
-            // queue
-            // at any given time?
-            m_pendingViewUpdates.Emplace(*notification);
+            // queue at any given time?
+            m_pendingVisualUpdates.Emplace(*notification);
 
             auto absolutePath =
                 std::experimental::filesystem::absolute(notification->relativePath, m_rootPath);
@@ -129,10 +128,10 @@ boost::optional<FileChangeNotification> FileSystemObserver::FetchNextChange()
 {
     FileChangeNotification notification;
 
-    const auto retrievedNotification = m_pendingViewUpdates.TryPop(notification);
+    const auto retrievedNotification = m_pendingVisualUpdates.TryPop(notification);
     if (!retrievedNotification) {
         return boost::none;
     }
 
-    return notification;
+    return std::move(notification);
 }

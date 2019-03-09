@@ -18,13 +18,13 @@ template <typename DataType> class TreeNode;
  */
 struct BoundingBox;
 
-namespace Asset
+namespace Assets
 {
     /**
      * @brief The Treemap class implements the functionality needed to render the treemap to the
      * OpenGL canvas.
      */
-    class Treemap final : public Base
+    class Treemap final : public AssetBase
     {
       public:
         /**
@@ -55,7 +55,7 @@ namespace Asset
         /**
          * @copydoc Asset::Base::UpdateVBO()
          */
-        void UpdateVBO(const Tree<VizBlock>::Node& node, Asset::Event action) override;
+        void UpdateVBO(const Tree<VizBlock>::Node& node, Assets::Event action) override;
 
         /**
          * @copydoc Asset::Base::IsAssetLoaded()
@@ -155,6 +155,6 @@ namespace Asset
 
         static constexpr std::wstring_view AssetName{ L"Treemap" };
     };
-} // namespace Asset
+} // namespace Assets
 
 #endif // VISUALIZATIONASSET_H

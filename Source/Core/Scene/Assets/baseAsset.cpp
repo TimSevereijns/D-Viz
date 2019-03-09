@@ -7,20 +7,20 @@
 #include <iostream>
 #include <utility>
 
-namespace Asset
+namespace Assets
 {
-    Base::Base(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
+    AssetBase::AssetBase(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
         : m_openGL{ openGL }, m_settingsManager{ settings }
     {
     }
 
-    void Base::ClearBuffers()
+    void AssetBase::ClearBuffers()
     {
         m_rawVertices.clear();
         m_rawColors.clear();
     }
 
-    bool Base::LoadShaders(const QString& vertexShaderName, const QString& fragmentShaderName)
+    bool AssetBase::LoadShaders(const QString& vertexShaderName, const QString& fragmentShaderName)
     {
         if (!m_mainShader.addShaderFromSourceFile(
                 QOpenGLShader::Vertex, ":/Shaders/" + vertexShaderName + ".vert")) {
@@ -50,7 +50,7 @@ namespace Asset
         return true;
     }
 
-    bool Base::DetermineVisibilityFromPreferences(std::wstring_view assetName)
+    bool AssetBase::DetermineVisibilityFromPreferences(std::wstring_view assetName)
     {
         const auto preferenceName = std::wstring{ L"show" } + assetName.data();
         const auto& preferences = m_settingsManager.GetPreferenceMap();
@@ -59,54 +59,54 @@ namespace Asset
         return shouldRender;
     }
 
-    bool Base::IsAssetLoaded() const
+    bool AssetBase::IsAssetLoaded() const
     {
         return !(m_rawVertices.empty() && m_rawColors.empty());
     }
 
-    void Base::SetVertexCoordinates(QVector<QVector3D>&& data)
+    void AssetBase::SetVertexCoordinates(QVector<QVector3D>&& data)
     {
         m_rawVertices.clear();
         m_rawVertices.append(data);
     }
 
-    void Base::SetVertexColors(QVector<QVector3D>&& data)
+    void AssetBase::SetVertexColors(QVector<QVector3D>&& data)
     {
         m_rawColors.clear();
         m_rawColors.append(data);
     }
 
-    void Base::AddVertexCoordinates(QVector<QVector3D>&& positionData)
+    void AssetBase::AddVertexCoordinates(QVector<QVector3D>&& positionData)
     {
         m_rawVertices.append(positionData);
     }
 
-    void Base::AddVertexColors(QVector<QVector3D>&& colorData)
+    void AssetBase::AddVertexColors(QVector<QVector3D>&& colorData)
     {
         m_rawColors.append(colorData);
     }
 
-    unsigned int Base::GetVertexCount() const
+    unsigned int AssetBase::GetVertexCount() const
     {
         return static_cast<unsigned int>(m_rawVertices.size());
     }
 
-    unsigned int Base::GetColorCount() const
+    unsigned int AssetBase::GetColorCount() const
     {
         return static_cast<unsigned int>(m_rawColors.size());
     }
 
-    void Base::Show()
+    void AssetBase::Show()
     {
         m_shouldRender = true;
     }
 
-    void Base::Hide()
+    void AssetBase::Hide()
     {
         m_shouldRender = false;
     }
 
-    void Base::UpdateVBO(const Tree<VizBlock>::Node&, Asset::Event)
+    void AssetBase::UpdateVBO(const Tree<VizBlock>::Node&, Assets::Event)
     {
     }
 } // namespace Asset

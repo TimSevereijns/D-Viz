@@ -1,6 +1,6 @@
 #include "Scene/Assets/lightMarkerAsset.h"
 
-namespace Asset
+namespace Assets
 {
     LightMarker::LightMarker(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
         : Line{ settings, openGL }

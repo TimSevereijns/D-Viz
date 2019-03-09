@@ -31,7 +31,7 @@ class Controller;
 class Gamepad;
 class MainWindow;
 
-namespace Asset
+namespace Assets
 {
     namespace Tag
     {
@@ -48,7 +48,7 @@ namespace Asset
 
         struct OriginMarker final : Base
         {
-            using AssetType = Asset::OriginMarker;
+            using AssetType = Assets::OriginMarker;
             int GetID() const noexcept final override
             {
                 return 1;
@@ -57,7 +57,7 @@ namespace Asset
 
         struct Grid final : Base
         {
-            using AssetType = Asset::Grid;
+            using AssetType = Assets::Grid;
             int GetID() const noexcept final override
             {
                 return 2;
@@ -66,7 +66,7 @@ namespace Asset
 
         struct Crosshair final : Base
         {
-            using AssetType = Asset::Crosshair;
+            using AssetType = Assets::Crosshair;
             int GetID() const noexcept final override
             {
                 return 3;
@@ -75,7 +75,7 @@ namespace Asset
 
         struct Treemap final : Base
         {
-            using AssetType = Asset::Treemap;
+            using AssetType = Assets::Treemap;
             int GetID() const noexcept final override
             {
                 return 4;
@@ -84,7 +84,7 @@ namespace Asset
 
         struct LightMarker final : Base
         {
-            using AssetType = Asset::LightMarker;
+            using AssetType = Assets::LightMarker;
             int GetID() const noexcept final override
             {
                 return 5;
@@ -93,7 +93,7 @@ namespace Asset
 
         struct Frustum final : Base
         {
-            using AssetType = Asset::Frustum;
+            using AssetType = Assets::Frustum;
             int GetID() const noexcept final override
             {
                 return 6;
@@ -354,8 +354,8 @@ class GLCanvas final : public QOpenGLWidget
 
     struct TagAndAsset
     {
-        std::unique_ptr<Asset::Tag::Base> tag;
-        std::unique_ptr<Asset::Base> asset;
+        std::unique_ptr<Assets::Tag::Base> tag;
+        std::unique_ptr<Assets::AssetBase> asset;
     };
 
     // @note Using an unsorted, linear container to store and retrieve assets is likely to

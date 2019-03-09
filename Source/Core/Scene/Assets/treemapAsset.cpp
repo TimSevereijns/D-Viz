@@ -240,10 +240,10 @@ namespace
     }
 } // namespace
 
-namespace Asset
+namespace Assets
 {
     Treemap::Treemap(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
-        : Base{ settings, openGL }
+        : AssetBase{ settings, openGL }
     {
         m_shouldRender = DetermineVisibilityFromPreferences(AssetName);
 
@@ -275,7 +275,8 @@ namespace Asset
 
         auto success = m_shadowMapShader.link();
 
-        success &= Base::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
+        success &=
+            AssetBase::LoadShaders("visualizationVertexShader", "visualizationFragmentShader");
         success &= LoadTexturePreviewShaders();
 
         return success;
@@ -695,7 +696,7 @@ namespace Asset
     {
         m_mainShader.bind();
 
-        const auto shouldShowShadows = m_settingsManager.ShouldRenderShadows();
+        const auto shouldRenderShadows = m_settingsManager.ShouldRenderShadows();
         const auto shouldShowCascadeSplits = m_settingsManager.ShouldShowCascadeSplits();
 
         m_mainShader.setUniformValue(
@@ -706,11 +707,11 @@ namespace Asset
         m_mainShader.setUniformValue(
             "materialShininess", static_cast<float>(m_settingsManager.GetMaterialShininess()));
         m_mainShader.setUniformValue("shouldShowCascadeSplits", shouldShowCascadeSplits);
-        m_mainShader.setUniformValue("shouldShowShadows", shouldShowShadows);
+        m_mainShader.setUniformValue("shouldShowShadows", shouldRenderShadows);
 
         SetUniformLights(lights, m_settingsManager, m_mainShader);
 
-        if (shouldShowShadows) {
+        if (shouldRenderShadows) {
             Expects(m_shadowMaps.size() == static_cast<std::size_t>(m_cascadeCount));
 
             for (auto index{ 0u }; index < static_cast<std::size_t>(m_cascadeCount); ++index) {
@@ -758,7 +759,7 @@ namespace Asset
         InitializeBlockTransformations();
     }
 
-    void Treemap::UpdateVBO(const Tree<VizBlock>::Node& node, Asset::Event action)
+    void Treemap::UpdateVBO(const Tree<VizBlock>::Node& node, Assets::Event action)
     {
         Expects(m_VAO.isCreated());
         Expects(m_blockColorBuffer.isCreated());
@@ -773,30 +774,30 @@ namespace Asset
         QVector3D newColor;
 
         switch (action) {
-            case Asset::Event::SELECTED: {
+            case Assets::Event::SELECTED: {
                 newColor = Constants::Colors::CANARY_YELLOW;
                 break;
             }
-            case Asset::Event::HIGHLIGHTED: {
+            case Assets::Event::HIGHLIGHTED: {
                 newColor = Constants::Colors::SLATE_GRAY;
                 break;
             }
-            case Asset::Event::UNSELECTED: {
+            case Assets::Event::UNSELECTED: {
                 // @todo Update restoration logic to account for colors that represent file system
                 // modifications.
 
                 newColor = RestoreColor(node, m_settingsManager);
                 break;
             }
-            case Asset::Event::TOUCHED: {
+            case Assets::Event::TOUCHED: {
                 newColor = Constants::Colors::BABY_BLUE; //< @todo Pick better color.
                 break;
             }
-            case Asset::Event::RENAMED: {
+            case Assets::Event::RENAMED: {
                 newColor = Constants::Colors::HOT_PINK; //< @todo Pick better color.
                 break;
             }
-            case Asset::Event::DELETED: {
+            case Assets::Event::DELETED: {
                 newColor = Constants::Colors::CORAL; //< @todo Pick better color.
                 break;
             }
@@ -901,4 +902,4 @@ namespace Asset
         m_texturePreviewShader.release();
         m_texturePreviewVertexBuffer.release();
     }
-} // namespace Asset
+} // namespace Assets

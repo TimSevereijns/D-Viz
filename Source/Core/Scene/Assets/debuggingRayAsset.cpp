@@ -1,6 +1,6 @@
 #include "Scene/Assets/debuggingRayAsset.h"
 
-namespace Asset
+namespace Assets
 {
     DebuggingRay::DebuggingRay(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
         : Line{ settings, openGL }

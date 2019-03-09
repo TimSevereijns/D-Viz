@@ -1,15 +1,15 @@
 #include "Scene/Assets/lineAsset.h"
 
-namespace Asset
+namespace Assets
 {
     Line::Line(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
-        : Base{ settings, openGL }
+        : AssetBase{ settings, openGL }
     {
     }
 
     bool Line::LoadShaders()
     {
-        return Base::LoadShaders("simpleLineVertexShader", "simpleLineFragmentShader");
+        return AssetBase::LoadShaders("simpleLineVertexShader", "simpleLineFragmentShader");
     }
 
     void Line::Initialize()

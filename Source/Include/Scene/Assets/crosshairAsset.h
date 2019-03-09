@@ -3,7 +3,7 @@
 
 #include "lineAsset.h"
 
-namespace Asset
+namespace Assets
 {
     /**
      * @brief A simple crosshair overlay that's rendered over the visualization.

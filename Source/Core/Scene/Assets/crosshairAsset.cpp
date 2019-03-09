@@ -44,7 +44,7 @@ namespace
     }
 } // namespace
 
-namespace Asset
+namespace Assets
 {
     Crosshair::Crosshair(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
         : Line{ settings, openGL }

@@ -41,7 +41,7 @@ namespace
      *                               perspective.
      */
     void GenerateCascadeBoundingBoxes(
-        Asset::Frustum& frustumAsset, const Camera& renderCamera, const QMatrix4x4& worldToLight)
+        Assets::Frustum& frustumAsset, const Camera& renderCamera, const QMatrix4x4& worldToLight)
     {
         const auto cascadeDistances = FrustumUtilities::GetCascadeDistances();
         const auto cascadeCount{ cascadeDistances.size() };
@@ -129,7 +129,7 @@ namespace
      * @param[in] camera             The main camera used to render the scene. Mainly use is to get
      *                               the aspect ratio of the outline correct.
      */
-    void GenerateCameraFrusta(Asset::Frustum& frustumAsset, const Camera& camera)
+    void GenerateCameraFrusta(Assets::Frustum& frustumAsset, const Camera& camera)
     {
         Camera mutableCamera = camera;
 
@@ -163,7 +163,7 @@ namespace
     }
 } // namespace
 
-namespace Asset
+namespace Assets
 {
     Frustum::Frustum(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
         : Line{ settings, openGL }

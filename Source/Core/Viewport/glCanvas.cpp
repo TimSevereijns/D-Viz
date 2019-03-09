@@ -28,7 +28,7 @@ namespace
      * @param[out] lightMarkerAsset        The scene asset to be updated
      */
     void
-    InitializeLightMarkers(const std::vector<Light>& lights, Asset::LightMarker& lightMarkerAsset)
+    InitializeLightMarkers(const std::vector<Light>& lights, Assets::LightMarker& lightMarkerAsset)
     {
         constexpr auto verticesPerMarker{ 6 };
 
@@ -87,14 +87,14 @@ void GLCanvas::initializeGL()
     m_openGLContext.glEnable(GL_MULTISAMPLE);
     m_openGLContext.glEnable(GL_LINE_SMOOTH);
 
-    RegisterAsset<Asset::Tag::Grid>();
-    RegisterAsset<Asset::Tag::OriginMarker>();
-    RegisterAsset<Asset::Tag::Treemap>();
-    RegisterAsset<Asset::Tag::Crosshair>();
-    RegisterAsset<Asset::Tag::LightMarker>();
-    RegisterAsset<Asset::Tag::Frustum>();
+    RegisterAsset<Assets::Tag::Grid>();
+    RegisterAsset<Assets::Tag::OriginMarker>();
+    RegisterAsset<Assets::Tag::Treemap>();
+    RegisterAsset<Assets::Tag::Crosshair>();
+    RegisterAsset<Assets::Tag::LightMarker>();
+    RegisterAsset<Assets::Tag::Frustum>();
 
-    auto* lightMarkers = GetAsset<Asset::Tag::LightMarker>();
+    auto* lightMarkers = GetAsset<Assets::Tag::LightMarker>();
     InitializeLightMarkers(m_lights, *lightMarkers);
 
     for (const auto& tagAndAsset : m_sceneAssets) {
@@ -138,9 +138,9 @@ template <typename TagType> void GLCanvas::ToggleAssetVisibility(bool shouldEnab
 }
 
 template <>
-void GLCanvas::ToggleAssetVisibility<Asset::Tag::Frustum>(bool shouldEnable) const noexcept
+void GLCanvas::ToggleAssetVisibility<Assets::Tag::Frustum>(bool shouldEnable) const noexcept
 {
-    auto* const asset = GetAsset<Asset::Tag::Frustum>();
+    auto* const asset = GetAsset<Assets::Tag::Frustum>();
 
     if (shouldEnable) {
         asset->GenerateFrusta(m_camera);
@@ -159,7 +159,7 @@ void GLCanvas::resizeGL(int width, int height)
     m_openGLContext.glViewport(0, 0, width, height);
     m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
 
-    auto* const frusta = GetAsset<Asset::Tag::Frustum>();
+    auto* const frusta = GetAsset<Assets::Tag::Frustum>();
     frusta->GenerateFrusta(m_camera);
 }
 
@@ -173,7 +173,7 @@ void GLCanvas::ReloadVisualization()
 
     m_isPaintingSuspended = true;
 
-    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
+    auto* const treemap = GetAsset<Assets::Tag::Treemap>();
     const auto blockCount = treemap->LoadBufferData(m_controller.GetTree());
 
     Expects(blockCount == treemap->GetBlockCount());
@@ -191,7 +191,7 @@ void GLCanvas::ApplyColorScheme()
 
     m_controller.ClearHighlightedNodes(deselectionCallback);
 
-    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
+    auto* const treemap = GetAsset<Assets::Tag::Treemap>();
     treemap->ReloadColorBufferData(m_controller.GetTree());
     treemap->Refresh();
 
@@ -360,34 +360,34 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
 void GLCanvas::SelectNode(const Tree<VizBlock>::Node& node)
 {
-    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
-    treemap->UpdateVBO(node, Asset::Event::SELECTED);
+    auto* const treemap = GetAsset<Assets::Tag::Treemap>();
+    treemap->UpdateVBO(node, Assets::Event::SELECTED);
 }
 
 void GLCanvas::RestoreSelectedNode(const Tree<VizBlock>::Node& node)
 {
-    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
+    auto* const treemap = GetAsset<Assets::Tag::Treemap>();
 
     treemap->UpdateVBO(
-        node, m_controller.IsNodeHighlighted(node) ? Asset::Event::HIGHLIGHTED
-                                                   : Asset::Event::UNSELECTED);
+        node, m_controller.IsNodeHighlighted(node) ? Assets::Event::HIGHLIGHTED
+                                                   : Assets::Event::UNSELECTED);
 }
 
 void GLCanvas::HighlightNodes(std::vector<const Tree<VizBlock>::Node*>& nodes)
 {
-    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
+    auto* const treemap = GetAsset<Assets::Tag::Treemap>();
 
     for (const auto* const node : nodes) {
-        treemap->UpdateVBO(*node, Asset::Event::HIGHLIGHTED);
+        treemap->UpdateVBO(*node, Assets::Event::HIGHLIGHTED);
     }
 }
 
 void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizBlock>::Node*>& nodes)
 {
-    auto* const treemap = GetAsset<Asset::Tag::Treemap>();
+    auto* const treemap = GetAsset<Assets::Tag::Treemap>();
 
     for (const auto* const node : nodes) {
-        treemap->UpdateVBO(*node, Asset::Event::UNSELECTED);
+        treemap->UpdateVBO(*node, Assets::Event::UNSELECTED);
     }
 }
 
@@ -434,9 +434,8 @@ void GLCanvas::ShowGamepadContextMenu()
             });
         }
 
-        m_gamepadContextMenu->AddEntry("Show in Explorer", [=] {
-            OS::LaunchFileExplorer(*selectedNode);
-        });
+        m_gamepadContextMenu->AddEntry(
+            "Show in Explorer", [=] { OS::LaunchFileExplorer(*selectedNode); });
     }
 
     m_gamepadContextMenu->move(mapToGlobal(QPoint{ 0, 0 }));
@@ -494,9 +493,7 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
         menu.addSeparator();
 
-        menu.addAction("Show in Explorer", [&] {
-            OS::LaunchFileExplorer(*selectedNode);
-        });
+        menu.addAction("Show in Explorer", [&] { OS::LaunchFileExplorer(*selectedNode); });
     }
 
     const QPoint globalPoint = mapToGlobal(point);
@@ -654,13 +651,13 @@ void GLCanvas::HandleGamepadTriggerInput(const Gamepad& gamepad)
     if (!m_isLeftTriggerDown && gamepad.IsLeftTriggerDown()) {
         m_isLeftTriggerDown = true;
 
-        auto* const crosshair = GetAsset<Asset::Tag::Crosshair>();
+        auto* const crosshair = GetAsset<Assets::Tag::Crosshair>();
         crosshair->SetCrosshairLocation(m_camera.GetViewport().center());
         crosshair->Show();
     } else if (m_isLeftTriggerDown && !gamepad.IsLeftTriggerDown()) {
         m_isLeftTriggerDown = false;
 
-        auto* const crosshair = GetAsset<Asset::Tag::Crosshair>();
+        auto* const crosshair = GetAsset<Assets::Tag::Crosshair>();
         crosshair->Hide();
     }
 
@@ -693,8 +690,8 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
     m_frameTimeDeque.emplace_back(static_cast<int>(elapsedTime.count()));
 
     const auto total = std::accumulate(
-        std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque),
-        0ull, [](const auto runningTotal, const auto frameTime) noexcept {
+        std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0ull,
+        [](const auto runningTotal, const auto frameTime) noexcept {
             return runningTotal + frameTime;
         });
 
@@ -714,11 +711,11 @@ void GLCanvas::ProcessFileTreeChanges()
 
     const auto startTime = std::chrono::high_resolution_clock::now();
 
-    Asset::Treemap* treemap = nullptr;
+    Assets::Treemap* treemap = nullptr;
 
     auto notification = m_controller.FetchFileModification();
     if (notification) {
-        treemap = GetAsset<Asset::Tag::Treemap>();
+        treemap = GetAsset<Assets::Tag::Treemap>();
     }
 
     while (notification) {
@@ -730,14 +727,14 @@ void GLCanvas::ProcessFileTreeChanges()
                     // visualization.
                     break;
                 case FileModification::DELETED:
-                    treemap->UpdateVBO(*notification->node, Asset::Event::DELETED);
+                    treemap->UpdateVBO(*notification->node, Assets::Event::DELETED);
                     break;
                 case FileModification::TOUCHED:
-                    treemap->UpdateVBO(*notification->node, Asset::Event::TOUCHED);
+                    treemap->UpdateVBO(*notification->node, Assets::Event::TOUCHED);
                     break;
                 case FileModification::RENAMED:
                     // @todo I'll need to be notified of the old name to pick up rename events.
-                    treemap->UpdateVBO(*notification->node, Asset::Event::RENAMED);
+                    treemap->UpdateVBO(*notification->node, Assets::Event::RENAMED);
                     break;
                 default:
                     Expects(false);
@@ -788,7 +785,7 @@ void GLCanvas::paintGL()
     }
 }
 
-template void GLCanvas::ToggleAssetVisibility<Asset::Tag::Grid>(bool) const noexcept;
-template void GLCanvas::ToggleAssetVisibility<Asset::Tag::LightMarker>(bool) const noexcept;
-template void GLCanvas::ToggleAssetVisibility<Asset::Tag::OriginMarker>(bool) const noexcept;
-template void GLCanvas::ToggleAssetVisibility<Asset::Tag::Frustum>(bool) const noexcept;
+template void GLCanvas::ToggleAssetVisibility<Assets::Tag::Grid>(bool) const noexcept;
+template void GLCanvas::ToggleAssetVisibility<Assets::Tag::LightMarker>(bool) const noexcept;
+template void GLCanvas::ToggleAssetVisibility<Assets::Tag::OriginMarker>(bool) const noexcept;
+template void GLCanvas::ToggleAssetVisibility<Assets::Tag::Frustum>(bool) const noexcept;

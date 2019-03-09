@@ -3,7 +3,7 @@
 
 #include "lineAsset.h"
 
-namespace Asset
+namespace Assets
 {
     /**
      * @brief Series of markers to highlight the position of the lights.

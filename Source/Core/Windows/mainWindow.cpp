@@ -669,7 +669,7 @@ void MainWindow::OnShowBreakdownButtonPressed()
 
 void MainWindow::OnRenderOriginToggled(bool isEnabled)
 {
-    m_glCanvas->ToggleAssetVisibility<Asset::Tag::OriginMarker>(isEnabled);
+    m_glCanvas->ToggleAssetVisibility<Assets::Tag::OriginMarker>(isEnabled);
 
     m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
         Constants::Preferences::SHOW_ORIGIN, isEnabled);
@@ -677,7 +677,7 @@ void MainWindow::OnRenderOriginToggled(bool isEnabled)
 
 void MainWindow::OnRenderGridToggled(bool isEnabled)
 {
-    m_glCanvas->ToggleAssetVisibility<Asset::Tag::Grid>(isEnabled);
+    m_glCanvas->ToggleAssetVisibility<Assets::Tag::Grid>(isEnabled);
 
     m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
         Constants::Preferences::SHOW_GRID, isEnabled);
@@ -685,7 +685,7 @@ void MainWindow::OnRenderGridToggled(bool isEnabled)
 
 void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
 {
-    m_glCanvas->ToggleAssetVisibility<Asset::Tag::LightMarker>(isEnabled);
+    m_glCanvas->ToggleAssetVisibility<Assets::Tag::LightMarker>(isEnabled);
 
     m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
         Constants::Preferences::SHOW_LIGHT_MARKERS, isEnabled);
@@ -693,7 +693,7 @@ void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
 
 void MainWindow::OnRenderFrustumToggled(bool isEnabled)
 {
-    m_glCanvas->ToggleAssetVisibility<Asset::Tag::Frustum>(isEnabled);
+    m_glCanvas->ToggleAssetVisibility<Assets::Tag::Frustum>(isEnabled);
 
     m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
         Constants::Preferences::SHOW_FRUSTUM, isEnabled);

@@ -15,7 +15,7 @@ struct VizBlock;
 
 template <typename DataType> class TreeNode;
 
-namespace Asset
+namespace Assets
 {
     enum struct Event
     {
@@ -31,7 +31,7 @@ namespace Asset
      * @brief The Asset::Base class is an abstract base class that can be used to simplify the
      * management and rendering of assets in the scene.
      */
-    class Base
+    class AssetBase
     {
       public:
         /**
@@ -40,15 +40,15 @@ namespace Asset
          * @param[in] settings              Reference to the settings manager.
          * @param[in] openGL                The OpenGL function bindings.
          */
-        Base(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL);
+        AssetBase(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL);
 
-        Base(const Base& other) = delete;
-        Base& operator=(const Base& other) = delete;
+        AssetBase(const AssetBase& other) = delete;
+        AssetBase& operator=(const AssetBase& other) = delete;
 
-        Base(Base&& other) = default;
-        Base& operator=(Base&& other) = default;
+        AssetBase(AssetBase&& other) = default;
+        AssetBase& operator=(AssetBase&& other) = default;
 
-        virtual ~Base() = default;
+        virtual ~AssetBase() = default;
 
         /**
          * @brief Loads the vertex and color data into the OpenGL buffers. Use
@@ -193,6 +193,6 @@ namespace Asset
 
         bool m_shouldRender{ true };
     };
-} // namespace Asset
+} // namespace Assets
 
 #endif // BASEASSET_H

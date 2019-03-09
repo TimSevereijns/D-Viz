@@ -87,7 +87,7 @@ namespace
     }
 } // namespace
 
-namespace Asset
+namespace Assets
 {
     Grid::Grid(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
         : Line{ settings, openGL }

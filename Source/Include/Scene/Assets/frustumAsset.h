@@ -5,7 +5,7 @@
 
 #include <string_view>
 
-namespace Asset
+namespace Assets
 {
     /**
      * @brief The frustumAsset class

@@ -3,7 +3,7 @@
 
 #include "lineAsset.h"
 
-namespace Asset
+namespace Assets
 {
     class DebuggingRay final : public Line
     {

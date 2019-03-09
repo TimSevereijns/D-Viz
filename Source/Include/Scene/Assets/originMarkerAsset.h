@@ -5,7 +5,7 @@
 
 #include <string_view>
 
-namespace Asset
+namespace Assets
 {
     /**
      * @brief The Origin Marker class is meant to highlight the origin of the coordinate system

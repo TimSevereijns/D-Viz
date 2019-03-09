@@ -10,6 +10,7 @@
 #include <boost/optional.hpp>
 
 #include <Stopwatch/Stopwatch.hpp>
+#include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
 
 #include <algorithm>
@@ -19,8 +20,6 @@
 
 #include <QColor>
 #include <QRectF>
-
-#include <gsl/gsl_assert>
 
 namespace
 {

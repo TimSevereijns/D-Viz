@@ -76,10 +76,10 @@ class FileSystemObserver
     // This queue contains pending tree node change notifications. These notifications
     // still need to be retrieved by the view so that the UI can be updated to reflect filesystem
     // activity.
-    ThreadSafeQueue<FileChangeNotification> m_pendingViewUpdates;
+    ThreadSafeQueue<FileChangeNotification> m_pendingVisualUpdates;
 
-    // This map tracks changes will need to be applied to the treemap once the user
-    // refreshes the visualization to reflect filesystem changes.
+    // This map tracks changes that will need to be applied to the treemap once the user refreshes
+    // the visualization to reflect filesystem changes.
     std::unordered_map<std::experimental::filesystem::path, FileChangeNotification>
         m_pendingModelUpdates;
 

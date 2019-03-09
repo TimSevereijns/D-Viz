@@ -5,7 +5,7 @@
 
 #include <string_view>
 
-namespace Asset
+namespace Assets
 {
     /**
      * @brief The GridAsset class implements the setup and rendering logic for the yellow grid that

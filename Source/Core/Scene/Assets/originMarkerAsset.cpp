@@ -39,7 +39,7 @@ namespace
     }
 } // namespace
 
-namespace Asset
+namespace Assets
 {
     OriginMarker::OriginMarker(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
         : Line{ settings, openGL }
