@@ -1,5 +1,5 @@
-#ifndef DRIVESCANNINGPARAMETERS_H
-#define DRIVESCANNINGPARAMETERS_H
+#ifndef SCANNINGPARAMETERS_H
+#define SCANNINGPARAMETERS_H
 
 #include <cstdint>
 #include <experimental/filesystem>
@@ -35,4 +35,4 @@ struct ScanningParameters
         ScanCompleteCallback completionCallback);
 };
 
-#endif // DRIVESCANNINGPARAMETERS_H
+#endif // SCANNINGPARAMETERS_H

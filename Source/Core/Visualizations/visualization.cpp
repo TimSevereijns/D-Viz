@@ -1,6 +1,6 @@
 #include "Visualizations/visualization.h"
 #include "Scanner/Monitor/fileChangeNotification.hpp"
-#include "Scanner/driveScanningUtilities.h"
+#include "Scanner/scanningUtilities.h"
 #include "Utilities/utilities.hpp"
 #include "Visualizations/ray.h"
 #include "constants.h"
@@ -529,24 +529,25 @@ void VisualizationModel::UpdateAffectedNodes(const FileChangeNotification& notif
     }
 
     switch (notification.status) {
-        case FileModification::CREATED:
+        case FileModification::CREATED: {
             OnFileCreation(notification);
             break;
-
-        case FileModification::DELETED:
+        }
+        case FileModification::DELETED: {
             OnFileDeletion(notification);
             break;
-
-        case FileModification::TOUCHED:
+        }
+        case FileModification::TOUCHED: {
             OnFileModification(notification);
             break;
-
-        case FileModification::RENAMED:
+        }
+        case FileModification::RENAMED: {
             OnFileNameChange(notification);
             break;
-
-        default:
+        }
+        default: {
             std::abort();
+        }
     }
 }
 
@@ -568,7 +569,7 @@ void VisualizationModel::OnFileCreation(const FileChangeNotification& notificati
 
         parentNode->AppendChild(VizBlock{ std::move(directoryInfo) });
     } else {
-        const auto fileSize = DriveScanning::Utilities::ComputeFileSize(absolutePath);
+        const auto fileSize = Scanner::ComputeFileSize(absolutePath);
 
         FileInfo fileInfo{
             /* name = */ notification.relativePath.filename().stem().wstring(),
@@ -599,7 +600,7 @@ void VisualizationModel::OnFileModification(const FileChangeNotification& notifi
     if (std::experimental::filesystem::is_directory(absolutePath)) {
         // @todo What does it mean for a directory to be modified?
     } else {
-        const auto fileSize = DriveScanning::Utilities::ComputeFileSize(absolutePath);
+        const auto fileSize = Scanner::ComputeFileSize(absolutePath);
 
         auto* node =
             Utilities::FindNodeUsingRelativePath(m_fileTree->GetRoot(), notification.relativePath);

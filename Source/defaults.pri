@@ -14,9 +14,9 @@ SOURCES += \
    $$PWD/Core/HID/gamepad.cpp \
    $$PWD/Core/HID/keyboardManager.cpp \
    $$PWD/Core/Scanner/driveScanner.cpp \
-   $$PWD/Core/Scanner/driveScanningUtilities.cpp \
    $$PWD/Core/Scanner/fileInfo.cpp \
    $$PWD/Core/Scanner/scanningParameters.cpp \
+   $$PWD/Core/Scanner/scanningUtilities.cpp \
    $$PWD/Core/Scanner/scanningWorker.cpp \
    $$PWD/Core/Scanner/Monitor/fileSystemObserver.cpp \
    $$PWD/Core/Scanner/Monitor/linuxFileMonitor.cpp \
@@ -57,10 +57,10 @@ HEADERS += \
    $$PWD/Include/HID/keyboardManager.h \
    $$PWD/Include/literals.h \
    $$PWD/Include/Scanner/driveScanner.h \
-   $$PWD/Include/Scanner/driveScanningUtilities.h \
    $$PWD/Include/Scanner/fileInfo.h \
    $$PWD/Include/Scanner/scanningParameters.h \
    $$PWD/Include/Scanner/scanningProgress.hpp \
+   $$PWD/Include/Scanner/scanningUtilities.h \
    $$PWD/Include/Scanner/scanningWorker.h \
    $$PWD/Include/Scanner/Monitor/fileChangeNotification.hpp \
    $$PWD/Include/Scanner/Monitor/fileMonitorImpl.h \

@@ -1,6 +1,6 @@
 #include "Scanner/scanningWorker.h"
 #include "Scanner/driveScanner.h"
-#include "Scanner/driveScanningUtilities.h"
+#include "Scanner/scanningUtilities.h"
 #include "constants.h"
 
 #ifdef Q_OS_WIN
@@ -74,7 +74,7 @@ namespace
     bool ShouldProcess(const std::experimental::filesystem::path& path) noexcept
     {
 #if defined(Q_OS_WIN)
-        return !DriveScanning::Utilities::IsReparsePoint(path);
+        return !Scanner::IsReparsePoint(path);
 #elif defined(Q_OS_LINUX)
         return !std::experimental::filesystem::is_symlink(path);
 #endif // Q_OS_LINUX
@@ -91,7 +91,7 @@ ScanningWorker::ScanningWorker(const ScanningParameters& parameters, ScanningPro
 void ScanningWorker::ProcessFile(
     const std::experimental::filesystem::path& path, Tree<VizBlock>::Node& treeNode) noexcept
 {
-    const auto fileSize = DriveScanning::Utilities::ComputeFileSize(path);
+    const auto fileSize = Scanner::ComputeFileSize(path);
     if (fileSize == 0u) {
         return;
     }
@@ -179,7 +179,7 @@ void ScanningWorker::Start()
                 ->info(fmt::format("Scanned Drive in: {} {}", elapsed.count(), units));
         });
 
-    DriveScanning::Utilities::ComputeDirectorySizes(*m_fileTree);
+    Scanner::ComputeDirectorySizes(*m_fileTree);
     PruneEmptyFilesAndDirectories(*m_fileTree);
 
     emit Finished(m_fileTree);
