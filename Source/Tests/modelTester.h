@@ -4,8 +4,8 @@
 #include "mockFileMonitor.h"
 #include "multiTestHarness.h"
 
-#include <DriveScanner/driveScanner.h>
-#include <Visualizations/fileChangeNotification.hpp>
+#include <Scanner/Monitor/fileChangeNotification.hpp>
+#include <Scanner/driveScanner.h>
 #include <Visualizations/squarifiedTreemap.h>
 
 #include <iostream>

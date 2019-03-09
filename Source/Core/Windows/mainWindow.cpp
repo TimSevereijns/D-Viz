@@ -1,5 +1,5 @@
 #include "Windows/mainWindow.h"
-#include "DataStructs/scanningProgress.hpp"
+#include "Scanner/scanningProgress.hpp"
 #include "Settings/settings.h"
 #include "Settings/settingsManager.h"
 #include "Utilities/operatingSystemSpecific.hpp"

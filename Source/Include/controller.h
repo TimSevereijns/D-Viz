@@ -3,11 +3,11 @@
 
 #include "constants.h"
 
-#include "DataStructs/light.h"
-#include "DataStructs/vizBlock.h"
-#include "DriveScanner/driveScanner.h"
+#include "Scanner/Monitor/fileChangeNotification.hpp"
+#include "Scanner/driveScanner.h"
+#include "Scene/light.h"
 #include "Settings/settingsManager.h"
-#include "Visualizations/fileChangeNotification.hpp"
+#include "Visualizations/vizBlock.h"
 #include "Windows/mainWindow.h"
 
 #include <Tree/Tree.hpp>

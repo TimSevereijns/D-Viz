@@ -14,12 +14,12 @@
 
 #include <Tree/Tree.hpp>
 
-#include "DataStructs/vizBlock.h"
+#include "Scanner/Monitor/fileChangeNotification.hpp"
+#include "Scanner/Monitor/fileSystemObserver.h"
 #include "Settings/settings.h"
 #include "Utilities/threadSafeQueue.hpp"
 #include "Viewport/camera.h"
-#include "fileChangeNotification.hpp"
-#include "fileSystemObserver.h"
+#include "Visualizations/vizBlock.h"
 
 struct TreemapMetadata
 {

@@ -3,8 +3,8 @@
 
 #include <QAbstractTableModel>
 
-#include "DataStructs/vizBlock.h"
 #include "Utilities/utilities.hpp"
+#include "Visualizations/vizBlock.h"
 #include "constants.h"
 
 #include <Tree/Tree.hpp>

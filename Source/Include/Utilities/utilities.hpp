@@ -5,7 +5,7 @@
 #include <mutex>
 #include <sstream>
 
-#include "DataStructs/vizBlock.h"
+#include "Visualizations/vizBlock.h"
 
 #include <Tree/Tree.hpp>
 

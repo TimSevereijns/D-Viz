@@ -1,5 +1,5 @@
 #include "Settings/settingsManager.h"
-#include <DataStructs/vizBlock.h>
+#include <Visualizations/vizBlock.h>
 #include <constants.h>
 
 #include <spdlog/spdlog.h>

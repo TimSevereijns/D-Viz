@@ -11,39 +11,39 @@ INCLUDEPATH += $$PWD/Include
 
 SOURCES += \
    $$PWD/Core/controller.cpp \
-   $$PWD/Core/DataStructs/block.cpp \
-   $$PWD/Core/DataStructs/fileInfo.cpp \
-   $$PWD/Core/DataStructs/light.cpp \
-   $$PWD/Core/DataStructs/precisePoint.cpp \
-   $$PWD/Core/DataStructs/driveScanningParameters.cpp \
-   $$PWD/Core/DataStructs/vizBlock.cpp \
-   $$PWD/Core/DriveScanner/driveScanner.cpp \
-   $$PWD/Core/DriveScanner/driveScanningUtilities.cpp \
-   $$PWD/Core/DriveScanner/scanningWorker.cpp \
-   $$PWD/Core/DriveScanner/scopedHandle.cpp \
    $$PWD/Core/HID/gamepad.cpp \
    $$PWD/Core/HID/keyboardManager.cpp \
-   $$PWD/Core/Scene/baseAsset.cpp \
-   $$PWD/Core/Scene/crosshairAsset.cpp \
-   $$PWD/Core/Scene/debuggingRayAsset.cpp \
-   $$PWD/Core/Scene/frustumAsset.cpp \
-   $$PWD/Core/Scene/gridAsset.cpp \
-   $$PWD/Core/Scene/lightMarkerAsset.cpp \
-   $$PWD/Core/Scene/lineAsset.cpp \
-   $$PWD/Core/Scene/originMarkerAsset.cpp \
-   $$PWD/Core/Scene/treemapAsset.cpp \
+   $$PWD/Core/Scanner/driveScanner.cpp \
+   $$PWD/Core/Scanner/driveScanningUtilities.cpp \
+   $$PWD/Core/Scanner/fileInfo.cpp \
+   $$PWD/Core/Scanner/scanningParameters.cpp \
+   $$PWD/Core/Scanner/scanningWorker.cpp \
+   $$PWD/Core/Scanner/Monitor/fileSystemObserver.cpp \
+   $$PWD/Core/Scanner/Monitor/linuxFileMonitor.cpp \
+   $$PWD/Core/Scanner/Monitor/windowsFileMonitor.cpp \
+   $$PWD/Core/Scene/light.cpp \
+   $$PWD/Core/Scene/Assets/baseAsset.cpp \
+   $$PWD/Core/Scene/Assets/crosshairAsset.cpp \
+   $$PWD/Core/Scene/Assets/debuggingRayAsset.cpp \
+   $$PWD/Core/Scene/Assets/frustumAsset.cpp \
+   $$PWD/Core/Scene/Assets/gridAsset.cpp \
+   $$PWD/Core/Scene/Assets/lightMarkerAsset.cpp \
+   $$PWD/Core/Scene/Assets/lineAsset.cpp \
+   $$PWD/Core/Scene/Assets/originMarkerAsset.cpp \
+   $$PWD/Core/Scene/Assets/treemapAsset.cpp \
    $$PWD/Core/Settings/settings.cpp \
    $$PWD/Core/Settings/settingsManager.cpp \
+   $$PWD/Core/Utilities/scopedHandle.cpp \
    $$PWD/Core/Viewport/camera.cpp \
    $$PWD/Core/Viewport/gamepadContextMenu.cpp \
    $$PWD/Core/Viewport/glCanvas.cpp \
    $$PWD/Core/Viewport/mouseContextMenu.cpp \
-   $$PWD/Core/Visualizations/linuxFileMonitor.cpp \
-   $$PWD/Core/Visualizations/fileSystemObserver.cpp \
+   $$PWD/Core/Visualizations/block.cpp \
+   $$PWD/Core/Visualizations/precisePoint.cpp \
    $$PWD/Core/Visualizations/ray.cpp \
    $$PWD/Core/Visualizations/squarifiedTreemap.cpp \
    $$PWD/Core/Visualizations/visualization.cpp \
-   $$PWD/Core/Visualizations/windowsFileMonitor.cpp \
+   $$PWD/Core/Visualizations/vizBlock.cpp \
    $$PWD/Core/Windows/aboutDialog.cpp \
    $$PWD/Core/Windows/breakdownDialog.cpp \
    $$PWD/Core/Windows/mainWindow.cpp \
@@ -53,30 +53,30 @@ HEADERS += \
    $$PWD/Include/bootstrapper.hpp \
    $$PWD/Include/constants.h \
    $$PWD/Include/controller.h \
-   $$PWD/Include/DataStructs/block.h \
-   $$PWD/Include/DataStructs/fileInfo.h \
-   $$PWD/Include/DataStructs/light.h \
-   $$PWD/Include/DataStructs/driveScanningParameters.h \
-   $$PWD/Include/DataStructs/precisePoint.h \
-   $$PWD/Include/DataStructs/scanningProgress.hpp \
-   $$PWD/Include/DataStructs/vizBlock.h \
-   $$PWD/Include/DriveScanner/driveScanner.h \
-   $$PWD/Include/DriveScanner/driveScanningUtilities.h \
-   $$PWD/Include/DriveScanner/scanningWorker.h \
-   $$PWD/Include/DriveScanner/scopedHandle.h \
-   $$PWD/Include/DriveScanner/winHack.hpp \
    $$PWD/Include/HID/gamepad.h \
    $$PWD/Include/HID/keyboardManager.h \
    $$PWD/Include/literals.h \
-   $$PWD/Include/Scene/baseAsset.h \
-   $$PWD/Include/Scene/crosshairAsset.h \
-   $$PWD/Include/Scene/debuggingRayAsset.h \
-   $$PWD/Include/Scene/frustumAsset.h \
-   $$PWD/Include/Scene/gridAsset.h \
-   $$PWD/Include/Scene/lightMarkerAsset.h \
-   $$PWD/Include/Scene/lineAsset.h \
-   $$PWD/Include/Scene/originMarkerAsset.h \
-   $$PWD/Include/Scene/treemapAsset.h \
+   $$PWD/Include/Scanner/driveScanner.h \
+   $$PWD/Include/Scanner/driveScanningUtilities.h \
+   $$PWD/Include/Scanner/fileInfo.h \
+   $$PWD/Include/Scanner/scanningParameters.h \
+   $$PWD/Include/Scanner/scanningProgress.hpp \
+   $$PWD/Include/Scanner/scanningWorker.h \
+   $$PWD/Include/Scanner/Monitor/fileChangeNotification.hpp \
+   $$PWD/Include/Scanner/Monitor/fileMonitorImpl.h \
+   $$PWD/Include/Scanner/Monitor/fileSystemObserver.h \
+   $$PWD/Include/Scanner/Monitor/linuxFileMonitor.h \
+   $$PWD/Include/Scanner/Monitor/windowsFileMonitor.h \
+   $$PWD/Include/Scene/light.h \
+   $$PWD/Include/Scene/Assets/baseAsset.h \
+   $$PWD/Include/Scene/Assets/crosshairAsset.h \
+   $$PWD/Include/Scene/Assets/debuggingRayAsset.h \
+   $$PWD/Include/Scene/Assets/frustumAsset.h \
+   $$PWD/Include/Scene/Assets/gridAsset.h \
+   $$PWD/Include/Scene/Assets/lightMarkerAsset.h \
+   $$PWD/Include/Scene/Assets/lineAsset.h \
+   $$PWD/Include/Scene/Assets/originMarkerAsset.h \
+   $$PWD/Include/Scene/Assets/treemapAsset.h \
    $$PWD/Include/Settings/preferencesMap.hpp \
    $$PWD/Include/Settings/settings.h \
    $$PWD/Include/Settings/settingsManager.h \
@@ -87,18 +87,18 @@ HEADERS += \
    $$PWD/Include/Utilities/threadSafeQueue.hpp \
    $$PWD/Include/Utilities/utilities.hpp \
    $$PWD/Include/Utilities/viewFrustum.hpp \
+   $$PWD/Include/Utilities/scopedHandle.h \
+   $$PWD/Include/Utilities/reparsePointDeclarations.hpp \
    $$PWD/Include/Viewport/camera.h \
    $$PWD/Include/Viewport/gamepadContextMenu.h \
    $$PWD/Include/Viewport/glCanvas.h \
    $$PWD/Include/Viewport/mouseContextMenu.h \
-   $$PWD/Include/Visualizations/linuxFileMonitor.h \
-   $$PWD/Include/Visualizations/fileChangeNotification.hpp \
-   $$PWD/Include/Visualizations/fileSystemObserver.h \
-   $$PWD/Include/Visualizations/fileMonitorImpl.h \
+   $$PWD/Include/Visualizations/block.h \
+   $$PWD/Include/Visualizations/precisePoint.cpp \
    $$PWD/Include/Visualizations/ray.h \
    $$PWD/Include/Visualizations/squarifiedTreemap.h \
    $$PWD/Include/Visualizations/visualization.h \
-   $$PWD/Include/Visualizations/windowsFileMonitor.h \
+   $$PWD/Include/Visualizations/vizBlock.h \
    $$PWD/Include/Windows/aboutDialog.h \
    $$PWD/Include/Windows/breakdownDialog.h \
    $$PWD/Include/Windows/mainWindow.h \

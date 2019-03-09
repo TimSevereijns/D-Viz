@@ -1,8 +1,8 @@
 #ifndef MOCKFILEMONITOR_H
 #define MOCKFILEMONITOR_H
 
-#include <Visualizations/fileChangeNotification.hpp>
-#include <Visualizations/fileMonitorImpl.h>
+#include <Scanner/Monitor/fileChangeNotification.hpp>
+#include <Scanner/Monitor/fileMonitorImpl.h>
 
 #include <experimental/filesystem>
 #include <functional>

@@ -20,9 +20,9 @@
 #include <QCursor>
 
 #if defined(Q_OS_WIN)
-#include "Visualizations/windowsFileMonitor.h"
+#include "Scanner/Monitor/windowsFileMonitor.h"
 #elif defined(Q_OS_LINUX)
-#include "Visualizations/linuxFileMonitor.h"
+#include "Scanner/Monitor/linuxFileMonitor.h"
 #endif // Q_OS_LINUX
 
 namespace
@@ -184,8 +184,8 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
             m_model->StartMonitoringFileSystem();
         };
 
-    DriveScanningParameters scanningParameters{ parameters.rootDirectory, progressHandler,
-                                                completionHandler };
+    ScanningParameters scanningParameters{ parameters.rootDirectory, progressHandler,
+                                           completionHandler };
 
     const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
     log->info(fmt::format("Started a new scan at: \"{}\"", m_model->GetRootPath().string()));

@@ -3,8 +3,8 @@
 #include <boost/optional.hpp>
 #include <gsl/gsl_assert>
 
-#include <DataStructs/driveScanningParameters.h>
-#include <DataStructs/scanningProgress.hpp>
+#include <Scanner/scanningParameters.h>
+#include <Scanner/scanningProgress.hpp>
 #include <bootstrapper.hpp>
 #include <constants.h>
 
@@ -45,8 +45,7 @@ void ModelTester::initTestCase()
 
     QSignalSpy completionSpy(&m_scanner, &DriveScanner::Finished);
 
-    const DriveScanningParameters parameters{ m_sampleDirectory, progressCallback,
-                                              completionCallback };
+    const ScanningParameters parameters{ m_sampleDirectory, progressCallback, completionCallback };
 
     m_scanner.StartScanning(parameters);
 
