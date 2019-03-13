@@ -1,7 +1,5 @@
 #include "Viewport/glCanvas.h"
 
-#include "controller.h"
-
 #include "Stopwatch/Stopwatch.hpp"
 #include "Utilities/operatingSystemSpecific.hpp"
 #include "Utilities/scopeExit.hpp"
@@ -10,6 +8,7 @@
 #include "Visualizations/squarifiedTreemap.h"
 #include "Windows/mainWindow.h"
 #include "constants.h"
+#include "controller.h"
 
 #include <QApplication>
 #include <QMenu>
@@ -763,29 +762,26 @@ void GLCanvas::paintGL()
         return;
     }
 
-    const auto elapsedTime =
-        Stopwatch<std::chrono::microseconds>([&]() noexcept {
-            ProcessFileTreeChanges();
+    const auto stopwatch = Stopwatch<std::chrono::microseconds>([&]() noexcept {
+        ProcessFileTreeChanges();
 
-            m_openGLContext.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        m_openGLContext.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            if (m_controller.GetSettingsManager().IsPrimaryLightAttachedToCamera()) {
-                Expects(m_lights.empty() == false);
-                m_lights.front().position = m_camera.GetPosition();
-            }
+        if (m_controller.GetSettingsManager().IsPrimaryLightAttachedToCamera()) {
+            Expects(m_lights.empty() == false);
+            m_lights.front().position = m_camera.GetPosition();
+        }
 
-            for (const auto& tagAndAsset : m_sceneAssets) {
-                tagAndAsset.asset->Render(m_camera, m_lights);
-            }
-        })
-            .GetElapsedTime();
+        for (const auto& tagAndAsset : m_sceneAssets) {
+            tagAndAsset.asset->Render(m_camera, m_lights);
+        }
+    });
 
     if (m_mainWindow.ShouldShowFrameTime()) {
-        UpdateFrameTime(elapsedTime);
+        UpdateFrameTime(stopwatch.GetElapsedTime());
     }
 }
 
 template void GLCanvas::ToggleAssetVisibility<Assets::Tag::Grid>(bool) const noexcept;
 template void GLCanvas::ToggleAssetVisibility<Assets::Tag::LightMarker>(bool) const noexcept;
 template void GLCanvas::ToggleAssetVisibility<Assets::Tag::OriginMarker>(bool) const noexcept;
-template void GLCanvas::ToggleAssetVisibility<Assets::Tag::Frustum>(bool) const noexcept;

@@ -3,6 +3,7 @@
 
 #include "Utilities/ignoreUnused.hpp"
 #include "Utilities/scopeExit.hpp"
+#include "controller.h"
 
 #include <experimental/filesystem>
 #include <string>

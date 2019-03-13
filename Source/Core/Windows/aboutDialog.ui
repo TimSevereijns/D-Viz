@@ -6,31 +6,55 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>200</width>
+    <width>300</width>
     <height>100</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>About D-Viz</string>
   </property>
-  <widget class="QLabel" name="headerLabel">
+  <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>20</y>
-     <width>121</width>
-     <height>51</height>
+     <x>20</x>
+     <y>10</y>
+     <width>271</width>
+     <height>80</height>
     </rect>
    </property>
-   <property name="font">
-    <font>
-     <family>Segoe UI</family>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string> Version: 0.2.6</string>
-   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLabel" name="headerLabel">
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string> Version: 0.2.6</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="builtOnLabel">
+        <property name="text">
+         <string>Built On: </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="timeStampLabel">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>
