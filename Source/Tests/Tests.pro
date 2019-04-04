@@ -7,11 +7,11 @@
 include(../defaults.pri)
 
 QT += testlib widgets
-
 QT -= gui
 
 TARGET = UnitTests
-CONFIG += console c++1z
+
+CONFIG += console c++17
 CONFIG -= app_bundle
 
 TEMPLATE = app

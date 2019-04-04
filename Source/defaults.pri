@@ -1,3 +1,6 @@
+CONFIG += conan_basic_setup
+include(../build/conanbuildinfo.pri)
+
 QT += opengl gamepad
 
 # Generate PDBs for Release builds:
@@ -94,7 +97,7 @@ HEADERS += \
    $$PWD/Include/Viewport/glCanvas.h \
    $$PWD/Include/Viewport/mouseContextMenu.h \
    $$PWD/Include/Visualizations/block.h \
-   $$PWD/Include/Visualizations/precisePoint.cpp \
+   $$PWD/Include/Visualizations/precisePoint.h \
    $$PWD/Include/Visualizations/ray.h \
    $$PWD/Include/Visualizations/squarifiedTreemap.h \
    $$PWD/Include/Visualizations/visualization.h \
@@ -110,15 +113,11 @@ FORMS += \
    $$PWD/Core/Windows/mainWindow.ui
 
 INCLUDEPATH += \
-   $$PWD/../../boost_1_66_0/ \
    $$PWD/../Foreign/RapidJson/include \
    $$PWD/../Foreign/Spdlog/include \
    $$PWD/../Foreign/Stopwatch/source \
    $$PWD/../Foreign/Tree/source \
    $$PWD/../Foreign/GSL/include
-
-DEPENDPATH += \
-   $$PWD/../../boost_1_66_0/stage/lib
 
 DISTFILES += \
    $$PWD/Core/Shaders/visualizationFragmentShader.frag \
@@ -143,9 +142,7 @@ win32:CONFIG(release, debug|release) {
    LIBS += \
       -lXInput9_1_0 \
       -lShell32 \
-      -lOle32 \
-      -L$$PWD/../../boost_1_66_0/stage/lib \
-      -llibboost_system-vc141-mt-x64-1_66
+      -lOle32
 }
 
 win32:CONFIG(debug, debug|release) {
@@ -155,23 +152,17 @@ win32:CONFIG(debug, debug|release) {
    LIBS += \
       -lXInput9_1_0 \
       -lShell32 \
-      -lOle32 \
-      -L$$PWD/../../boost_1_66_0/stage/lib \
-      -llibboost_system-vc141-mt-gd-x64-1_66
+      -lOle32
 }
 
 unix:CONFIG(release, debug|release) {
    LIBS += \
-      -lstdc++fs \
-      -L$$PWD/../../boost_1_66_0/stage/lib \
-      -lboost_system
+      -lstdc++fs
 }
 
 unix:CONFIG(debug, debug|release) {
    LIBS += \
-      -lstdc++fs \
-      -L$$PWD/../../boost_1_66_0/stage/lib \
-      -lboost_system
+      -lstdc++fs
 }
 
 CONFIG(debug, debug|release) {

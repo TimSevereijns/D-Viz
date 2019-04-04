@@ -18,4 +18,11 @@ For information on how to set up and build the project, please see the Wiki.
 
 ## Technical Notes
 
-* This project is being actively developed against `MSVC++ 14.1` on Windows, and `GCC 7.2` on Mint Linux. The version of Qt being used is 5.9. Since this is purely a hobby project, I liberally use the latest C++ features as they become available on both platforms, and as such this project is likely not very backwards compatible---sorry.
+Run the following commands from the project root directory to initialize dependencies via Conan:
+
+```
+mkdir Conan && cd Conan
+conan install ..
+```
+
+If Conan is not installed, install Python first, and then run `pip install conan`.
