@@ -1,5 +1,5 @@
 CONFIG += conan_basic_setup
-include(../build/conanbuildinfo.pri)
+include(../Conan/conanbuildinfo.pri)
 
 QT += opengl gamepad
 
