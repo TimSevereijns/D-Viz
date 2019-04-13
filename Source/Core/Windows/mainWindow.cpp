@@ -83,7 +83,8 @@ namespace
      * @brief The Scoped Cursor struct provides an easy wait to set a specific cursor for the
      * duration of the resulting variable.
      */
-    struct ScopedCursor {
+    struct ScopedCursor
+    {
         ScopedCursor(Qt::CursorShape desiredCursor)
         {
             QApplication::setOverrideCursor(desiredCursor);

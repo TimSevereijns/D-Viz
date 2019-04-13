@@ -100,7 +100,7 @@ namespace Assets
             }
         };
     } // namespace Tag
-} // namespace Asset
+} // namespace Assets
 
 /**
  * @brief The GLCanvas class represents the canvas object on which the visualization is to be drawn.

@@ -253,7 +253,10 @@ void WindowsFileMonitor::RetrieveNotification()
         ProcessNotification();
     } else if (GetLastError() == ERROR_NOTIFY_ENUM_DIR && bytesTransferred == 0) {
         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
-        log->error("Detected a file change notification buffer overflow.");
+        log->error(
+            "Detected a file change notification buffer overflow. This means that too many file "
+            "changes occurred at once, and some change notifications may have been missed as a "
+            "result.");
     } else {
         LogLastError("Encountered error retrieving filesystem change details.");
     }

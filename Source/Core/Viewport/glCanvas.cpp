@@ -275,10 +275,10 @@ void GLCanvas::mouseReleaseEvent(QMouseEvent* const event)
         if (m_isCursorHidden) {
             const auto globalCursorPosition = mapToGlobal(m_camera.GetViewport().center());
             QCursor::setPos(globalCursorPosition.x(), globalCursorPosition.y());
-        }
 
-        setCursor(Qt::ArrowCursor);
-        m_isCursorHidden = false;
+            setCursor(Qt::ArrowCursor);
+            m_isCursorHidden = false;
+        }
     }
 }
 
@@ -296,30 +296,24 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
     }
 
     if (event->buttons() & Qt::LeftButton) {
-        const auto now = std::chrono::system_clock::now();
-        const auto timeSinceStartOfLookEvent =
-            std::chrono::duration_cast<std::chrono::seconds>(now - m_startOfMouseLookEvent);
-
-        if (timeSinceStartOfLookEvent >= std::chrono::seconds{ 2 }) {
-            setCursor(Qt::BlankCursor);
-            m_isCursorHidden = true;
-
-            // In order to correctly set the cursor's position, we need to use coordinates that are
-            // relative to the virtual monitor. However, in order to correctly process mouse
-            // movements
-            // within this class, we need to store the cursor's position relative to the widget's
-            // coordinate system.
-
-            const auto cursorPositionOnCanvas = m_camera.GetViewport().center();
-            const auto cursorPositionOnMonitor = mapToGlobal(cursorPositionOnCanvas);
-            QCursor::setPos(cursorPositionOnMonitor.x(), cursorPositionOnMonitor.y());
-
-            m_lastMousePosition = cursorPositionOnCanvas;
-        }
+        const auto timeSinceStartOfLookEvent = std::chrono::duration_cast<std::chrono::seconds>(
+            std::chrono::system_clock::now() - m_startOfMouseLookEvent);
 
         m_camera.OffsetOrientation(
             m_controller.GetSettingsManager().GetMouseSensitivity() * deltaY,
             m_controller.GetSettingsManager().GetMouseSensitivity() * deltaX);
+
+        if (timeSinceStartOfLookEvent >= std::chrono::seconds{ 2 }) {
+            if (!m_isCursorHidden) {
+                m_isCursorHidden = true;
+            }
+
+            const auto cursorPositionOnCanvas = m_camera.GetViewport().center();
+            const auto cursorPositionOnMonitor = mapToGlobal(cursorPositionOnCanvas);
+            QCursor::setPos(cursorPositionOnMonitor);
+
+            m_lastMousePosition = cursorPositionOnCanvas;
+        }
     }
 
     event->accept();

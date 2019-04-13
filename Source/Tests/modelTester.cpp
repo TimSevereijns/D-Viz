@@ -1,5 +1,11 @@
 #include "modelTester.h"
 
+#include <fstream>
+#include <ostream>
+
+#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/optional.hpp>
 #include <gsl/gsl_assert>
 
@@ -10,6 +16,30 @@
 
 namespace
 {
+    void SetupTestData(
+        const std::experimental::filesystem::path& zipFile,
+        const std::experimental::filesystem::path& directory)
+    {
+        if (std::experimental::filesystem::exists(directory) &&
+            std::experimental::filesystem::is_directory(directory)) {
+            std::experimental::filesystem::remove_all(directory);
+        }
+
+        std::ifstream inputStream{ zipFile, std::ios_base::in | std::ios_base::binary };
+
+        boost::iostreams::filtering_streambuf<boost::iostreams::input> zipStream;
+        zipStream.push(boost::iostreams::gzip_decompressor{});
+        zipStream.push(inputStream);
+
+        std::ofstream outputStream{ directory, std::ios_base::out | std::ios_base::binary };
+
+        try {
+            boost::iostreams::copy(zipStream, outputStream);
+        } catch (const std::exception& exception) {
+            std::cout << exception.what() << std::endl;
+        }
+    }
+
     void VerifyExistenceOfSampleDirectory(const std::experimental::filesystem::path& directory)
     {
         if (std::experimental::filesystem::exists(directory) &&
@@ -26,10 +56,11 @@ void ModelTester::initTestCase()
     Bootstrapper::RegisterMetaTypes();
     Bootstrapper::InitializeLogs();
 
-    VerifyExistenceOfSampleDirectory(m_sampleDirectory);
+    // VerifyExistenceOfSampleDirectory(m_sampleDirectory);
+    SetupTestData("../../Tests/boost-asio.zip", m_sampleDirectory);
 
     const auto progressCallback = [&](const ScanningProgress& /*progress*/) {
-        m_progressCallbackInvocations++;
+        ++m_progressCallbackInvocations;
     };
 
     const auto completionCallback = [&](const ScanningProgress& progress,
