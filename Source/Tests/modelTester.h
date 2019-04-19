@@ -76,7 +76,7 @@ class ModelTester : public QObject
   private:
     FileChangeNotification m_sampleNotification;
 
-    std::experimental::filesystem::path m_sampleDirectory{ "../../Tests/boost-asio" };
+    std::experimental::filesystem::path m_sampleDirectory{ "../../Tests/Sandbox/asio" };
 
     DriveScanner m_scanner;
 

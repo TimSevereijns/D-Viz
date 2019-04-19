@@ -57,5 +57,5 @@ build-D-Viz-*-Release/
 
 Foreign/
 Source/Build/
-Source/Tests/asio
+Source/Tests/Sandbox/
 Conan/

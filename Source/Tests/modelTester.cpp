@@ -1,11 +1,9 @@
 #include "modelTester.h"
 
+#include <cstdlib>
 #include <fstream>
 #include <ostream>
 
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/optional.hpp>
 #include <gsl/gsl_assert>
 
@@ -16,39 +14,27 @@
 
 namespace
 {
+    /**
+     * @brief Decompressing a ZIP archive is such a pain in C++, that I'd rather make a potentially
+     * unsafe call to a Python script than try to integrate ZLib. This is just test code, after all.
+     *
+     * @param[in] zipFile           The path to the ZIP archive.
+     * @param[in] outputDirectory   The location we'd at which we'd like to store the decompressed
+     *                              data.
+     */
     void SetupTestData(
         const std::experimental::filesystem::path& zipFile,
-        const std::experimental::filesystem::path& directory)
+        const std::experimental::filesystem::path& outputDirectory)
     {
-        if (std::experimental::filesystem::exists(directory) &&
-            std::experimental::filesystem::is_directory(directory)) {
-            std::experimental::filesystem::remove_all(directory);
-        }
+        const std::string script = "../../Tests/Scripts/unzipTestData.py";
+        const auto command = "python " + script + " --input " + zipFile.string() + " --output " +
+                             outputDirectory.string();
 
-        std::ifstream inputStream{ zipFile, std::ios_base::in | std::ios_base::binary };
+        std::system(command.c_str());
 
-        boost::iostreams::filtering_streambuf<boost::iostreams::input> zipStream;
-        zipStream.push(boost::iostreams::gzip_decompressor{});
-        zipStream.push(inputStream);
-
-        std::ofstream outputStream{ directory, std::ios_base::out | std::ios_base::binary };
-
-        try {
-            boost::iostreams::copy(zipStream, outputStream);
-        } catch (const std::exception& exception) {
-            std::cout << exception.what() << std::endl;
-        }
+        const auto currentDirectory = std::experimental::filesystem::current_path().native();
     }
 
-    void VerifyExistenceOfSampleDirectory(const std::experimental::filesystem::path& directory)
-    {
-        if (std::experimental::filesystem::exists(directory) &&
-            std::experimental::filesystem::is_directory(directory)) {
-            return;
-        }
-
-        std::cout << "Please unzip boost-asio.zip manually, and re-run tests." << std::endl;
-    }
 } // namespace
 
 void ModelTester::initTestCase()
@@ -56,8 +42,7 @@ void ModelTester::initTestCase()
     Bootstrapper::RegisterMetaTypes();
     Bootstrapper::InitializeLogs();
 
-    // VerifyExistenceOfSampleDirectory(m_sampleDirectory);
-    SetupTestData("../../Tests/boost-asio.zip", m_sampleDirectory);
+    SetupTestData("../../Tests/Data/boost-asio.zip", "../../Tests/Sandbox");
 
     const auto progressCallback = [&](const ScanningProgress& /*progress*/) {
         ++m_progressCallbackInvocations;
