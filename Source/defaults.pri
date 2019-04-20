@@ -7,9 +7,6 @@ QT += opengl gamepad
 win32:QMAKE_CFLAGS_RELEASE += /Zi /GL
 win32:QMAKE_LFLAGS_RELEASE += /MAP /debug /opt:ref
 
-# Unlock all the fun toys on Windows:
-win32:QMAKE_CXXFLAGS += /std:c++17
-
 INCLUDEPATH += $$PWD/Include
 
 SOURCES += \
@@ -137,7 +134,7 @@ DEFINES += \
 
 win32:CONFIG(release, debug|release) {
    DEFINES += \
-      _WIN32_WINNT=0x0501 \
+      _WIN32_WINNT=0x0601 \
       NOMINMAX
    LIBS += \
       -lXInput9_1_0 \
@@ -147,7 +144,7 @@ win32:CONFIG(release, debug|release) {
 
 win32:CONFIG(debug, debug|release) {
    DEFINES += \
-      _WIN32_WINNT=0x0501 \
+      _WIN32_WINNT=0x0601 \
       NOMINMAX
    LIBS += \
       -lXInput9_1_0 \
