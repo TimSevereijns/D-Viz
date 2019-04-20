@@ -1,7 +1,7 @@
 import argparse
 import os
-import sys
 import shutil
+import sys
 import zipfile
 
 def getArguments():
@@ -22,8 +22,8 @@ def unzip(inputDir, outputDir):
 
     os.mkdir(outputDir)
 
-    with zipfile.ZipFile(inputDir, 'r') as zip_ref:
-        zip_ref.extractall(outputDir)
+    with zipfile.ZipFile(inputDir, 'r') as zipRef:
+        zipRef.extractall(outputDir)
 
 def main():
     inputDir, outputDir = getArguments()

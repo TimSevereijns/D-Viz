@@ -3,12 +3,13 @@
 #include <cstdlib>
 #include <fstream>
 #include <ostream>
+#include <thread>
 
-#include <boost/optional.hpp>
 #include <gsl/gsl_assert>
 
 #include <Scanner/scanningParameters.h>
 #include <Scanner/scanningProgress.hpp>
+#include <Utilities/operatingSystemSpecific.hpp>
 #include <bootstrapper.hpp>
 #include <constants.h>
 
@@ -22,19 +23,43 @@ namespace
      * @param[in] outputDirectory   The location we'd at which we'd like to store the decompressed
      *                              data.
      */
-    void SetupTestData(
+    void UnzipTestData(
         const std::experimental::filesystem::path& zipFile,
         const std::experimental::filesystem::path& outputDirectory)
     {
         const std::string script = "../../Tests/Scripts/unzipTestData.py";
-        const auto command = "python " + script + " --input " + zipFile.string() + " --output " +
-                             outputDirectory.string();
+        const std::string command = "python " + script + " --input " + zipFile.string() +
+                                    " --output " + outputDirectory.string();
 
         std::system(command.c_str());
 
         const auto currentDirectory = std::experimental::filesystem::current_path().native();
     }
 
+    std::wstring PathFromRootToNode(const Tree<VizBlock>::Node& node)
+    {
+        std::vector<std::reference_wrapper<const std::wstring>> reversePath;
+        reversePath.reserve(Tree<VizBlock>::Depth(node));
+        reversePath.emplace_back(node->file.name);
+
+        const auto* currentNode = &node;
+        while (currentNode->GetParent() && currentNode->GetParent()->GetParent()) {
+            currentNode = currentNode->GetParent();
+            reversePath.emplace_back(currentNode->GetData().file.name);
+        }
+
+        const auto pathFromRoot = std::accumulate(
+            std::rbegin(reversePath), std::rend(reversePath), std::wstring{},
+            [](const std::wstring& path, const std::wstring& file) {
+                if (!path.empty() && path.back() != OS::PREFERRED_SLASH) {
+                    return path + OS::PREFERRED_SLASH + file;
+                }
+
+                return path + file;
+            });
+
+        return pathFromRoot;
+    }
 } // namespace
 
 void ModelTester::initTestCase()
@@ -42,7 +67,7 @@ void ModelTester::initTestCase()
     Bootstrapper::RegisterMetaTypes();
     Bootstrapper::InitializeLogs();
 
-    SetupTestData("../../Tests/Data/boost-asio.zip", "../../Tests/Sandbox");
+    UnzipTestData("../../Tests/Data/boost-asio.zip", "../../Tests/Sandbox");
 
     const auto progressCallback = [&](const ScanningProgress& /*progress*/) {
         ++m_progressCallbackInvocations;
@@ -62,7 +87,6 @@ void ModelTester::initTestCase()
     QSignalSpy completionSpy{ &m_scanner, &DriveScanner::Finished };
 
     const ScanningParameters parameters{ m_sampleDirectory, progressCallback, completionCallback };
-
     m_scanner.StartScanning(parameters);
 
     completionSpy.wait(10'000);
@@ -72,8 +96,19 @@ void ModelTester::init()
 {
     QVERIFY(m_tree != nullptr);
 
+    const auto notificationGenerator = [&]() -> boost::optional<FileChangeNotification> {
+        if (m_sampleNotifications.empty()) {
+            return boost::none;
+        };
+
+        const auto nextNotification = m_sampleNotifications.back();
+        m_sampleNotifications.pop_back();
+
+        return nextNotification;
+    };
+
     m_model = std::make_unique<SquarifiedTreeMap>(
-        std::make_unique<MockFileMonitor>([&] { return m_sampleNotification; }), m_sampleDirectory);
+        std::make_unique<MockFileMonitor>(notificationGenerator), m_sampleDirectory);
 
     m_model->Parse(m_tree);
 }
@@ -177,7 +212,8 @@ void ModelTester::HighlightAllMatchingExtensions()
 
 void ModelTester::ToggleFileMonitoring()
 {
-    m_sampleNotification = FileChangeNotification{ "spawn.hpp", FileModification::TOUCHED };
+    m_sampleNotifications =
+        std::vector<FileChangeNotification>{ { "spawn.hpp", FileModification::TOUCHED } };
 
     QCOMPARE(m_model->IsFileSystemBeingMonitored(), false);
     m_model->StartMonitoringFileSystem();
@@ -186,14 +222,14 @@ void ModelTester::ToggleFileMonitoring()
     QCOMPARE(m_model->IsFileSystemBeingMonitored(), false);
 }
 
-void ModelTester::TrackFileModification()
+void ModelTester::TestSingleNotification(FileModification eventType)
 {
     QVERIFY(m_tree != nullptr);
 
     // The following notification will be read by the MockFileMonitor and sent to the model. Note
     // that the provided path has to be a relative path to an actual file in the sample directory.
     // If the path doesn't exist then we can't locate a matching node in the tree.
-    m_sampleNotification = FileChangeNotification{ "spawn.hpp", FileModification::TOUCHED };
+    m_sampleNotifications = std::vector<FileChangeNotification>{ { "spawn.hpp", eventType } };
 
     m_model->StartMonitoringFileSystem();
 
@@ -206,9 +242,65 @@ void ModelTester::TrackFileModification()
     const std::experimental::filesystem::path path{ "spawn.hpp" };
 
     QCOMPARE(notification->relativePath, path);
-    QCOMPARE(notification->status, FileModification::TOUCHED);
+    QCOMPARE(notification->status, eventType);
     QCOMPARE(modifiedNode->GetData().file.name, std::wstring{ L"spawn" });
     QCOMPARE(modifiedNode->GetData().file.extension, std::wstring{ L".hpp" });
+}
+
+void ModelTester::TrackSingleFileModification()
+{
+    TestSingleNotification(FileModification::TOUCHED);
+}
+
+void ModelTester::TrackSingleFileDeletion()
+{
+    TestSingleNotification(FileModification::DELETED);
+}
+
+void ModelTester::TrackSingleFileRename()
+{
+    TestSingleNotification(FileModification::RENAMED);
+}
+
+void ModelTester::TrackMultipleDeletions()
+{
+    QVERIFY(m_tree != nullptr);
+
+    // Simulate the deletion of all ".ipp" files:
+    m_sampleNotifications = std::vector<FileChangeNotification>{};
+
+    std::for_each(
+        Tree<VizBlock>::LeafIterator{ m_tree->GetRoot() }, Tree<VizBlock>::LeafIterator{},
+        [&](const auto& node) {
+            if (node->file.extension == L".ipp") {
+                const auto path = PathFromRootToNode(node);
+
+                m_sampleNotifications.emplace_back(FileChangeNotification{
+                    path + node->file.extension, FileModification::DELETED });
+            }
+        });
+
+    m_model->StartMonitoringFileSystem();
+
+    boost::optional<FileChangeNotification> notification;
+
+    const auto totalNotifications = m_sampleNotifications.size();
+    auto processedNotifications{ 0u };
+
+    // @todo Should notification break, this will turn into an infinite loop. Look into adding
+    // a timeout for this portion of the test.
+    while (processedNotifications != totalNotifications) {
+        notification = m_model->FetchNextFileSystemChange();
+
+        if (notification) {
+            ++processedNotifications;
+
+            const auto modifiedNode = notification->node;
+
+            QCOMPARE(notification->status, FileModification::DELETED);
+            QCOMPARE(modifiedNode->GetData().file.extension, std::wstring{ L".ipp" });
+        }
+    }
 
     m_model->StopMonitoringFileSystem();
 }

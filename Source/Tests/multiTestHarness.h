@@ -44,7 +44,7 @@ namespace MultiTest
     {
         auto result{ 0 };
 
-        for (const auto & [ name, test ] : Detail::GetTestMap()) {
+        for (const auto& [name, test] : Detail::GetTestMap()) {
             IgnoreUnused(name);
             result += QTest::qExec(test.get());
         }

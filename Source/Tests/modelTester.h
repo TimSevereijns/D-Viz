@@ -69,20 +69,38 @@ class ModelTester : public QObject
     void ToggleFileMonitoring();
 
     /**
-     * @brief Verifies that file system changes are correctly tracked.
+     * @brief Verifies that file system changes are correctly detected and tracked.
      */
-    void TrackFileModification();
+    void TrackSingleFileModification();
+
+    /**
+     * @brief Verifies that file deletions are correctly detected and tracked.
+     */
+    void TrackSingleFileDeletion();
+
+    /**
+     * @brief Verifies that file deletions are correctly detected and tracked.
+     */
+    void TrackSingleFileRename();
+
+    /**
+     * @brief TrackMultipleDeletions
+     */
+    void TrackMultipleDeletions();
 
   private:
-    FileChangeNotification m_sampleNotification;
+    void TestSingleNotification(FileModification eventType);
 
-    std::experimental::filesystem::path m_sampleDirectory{ "../../Tests/Sandbox/asio" };
+    std::vector<FileChangeNotification> m_sampleNotifications;
+
+    std::experimental::filesystem::path m_sampleDirectory{ std::experimental::filesystem::absolute(
+        "../../Tests/Sandbox/asio") };
 
     DriveScanner m_scanner;
 
-    std::uintmax_t m_bytesScanned;
-    std::uintmax_t m_filesScanned;
-    std::uintmax_t m_directoriesScanned;
+    std::uintmax_t m_bytesScanned{ 0 };
+    std::uintmax_t m_filesScanned{ 0 };
+    std::uintmax_t m_directoriesScanned{ 0 };
 
     std::uint32_t m_progressCallbackInvocations{ 0 };
 
