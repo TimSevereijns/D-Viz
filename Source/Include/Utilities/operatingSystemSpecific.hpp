@@ -59,7 +59,7 @@ namespace OS
             path.c_str(), NULL, (PULARGE_INTEGER)&totalNumberOfBytes,
             (PULARGE_INTEGER)&totalNumberOfFreeBytes);
 
-        assert(wasOperationSuccessful);
+        Expects(wasOperationSuccessful);
 
         const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
         log->info(fmt::format("Disk Size:  {} bytes", totalNumberOfBytes));

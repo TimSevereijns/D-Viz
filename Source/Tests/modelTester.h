@@ -88,6 +88,11 @@ class ModelTester : public QObject
      */
     void TrackMultipleDeletions();
 
+    /**
+     * @brief ApplyFileDeletion
+     */
+    void ApplyFileDeletion();
+
   private:
     void TestSingleNotification(FileModification eventType);
 

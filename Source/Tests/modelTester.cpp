@@ -230,24 +230,18 @@ void ModelTester::TestSingleNotification(FileModification eventType)
     m_sampleNotifications = std::vector<FileChangeNotification>{ { "spawn.hpp", eventType } };
 
     m_model->StartMonitoringFileSystem();
+    m_model->WaitForNextChange();
 
-    const auto startTime = std::chrono::high_resolution_clock::now();
-    auto elapsedTime = std::chrono::milliseconds{ 0 };
+    const auto possibleNotification = m_model->FetchNextFileSystemChange();
+    QVERIFY(possibleNotification.is_initialized());
 
-    boost::optional<FileChangeNotification> notification;
-    while (!notification && elapsedTime < std::chrono::milliseconds(500)) {
-        notification = m_model->FetchNextFileSystemChange();
+    m_model->StopMonitoringFileSystem();
 
-        elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::high_resolution_clock::now() - startTime);
-    }
-
-    const auto modifiedNode = notification->node;
+    const auto modifiedNode = possibleNotification->node;
     const std::experimental::filesystem::path path{ "spawn.hpp" };
 
-    QVERIFY(notification.is_initialized());
-    QCOMPARE(notification->relativePath, path);
-    QCOMPARE(notification->status, eventType);
+    QCOMPARE(possibleNotification->relativePath, path);
+    QCOMPARE(possibleNotification->status, eventType);
     QCOMPARE(modifiedNode->GetData().file.name, std::wstring{ L"spawn" });
     QCOMPARE(modifiedNode->GetData().file.extension, std::wstring{ L".hpp" });
 }
@@ -315,6 +309,24 @@ void ModelTester::TrackMultipleDeletions()
     m_model->StopMonitoringFileSystem();
 
     QCOMPARE(processedNotifications, totalNotifications);
+}
+
+void ModelTester::ApplyFileDeletion()
+{
+    //    m_sampleNotifications =
+    //        std::vector<FileChangeNotification>{ { "spawn.hpp", FileModification::DELETED } };
+
+    //    m_model->StartMonitoringFileSystem();
+    //    m_model->WaitForNextChange();
+
+    //    // m_model->RefreshTreemap();
+    //    m_model->StopMonitoringFileSystem();
+
+    //    const auto nodeIsGone = std::find_if(
+    //        Tree<VizBlock>::LeafIterator{ m_tree->GetRoot() }, Tree<VizBlock>::LeafIterator{},
+    //        [&](const auto& node) { return node->file.name == L"spawn"; });
+
+    //    QVERIFY(nodeIsGone);
 }
 
 REGISTER_TEST(ModelTester) // NOLINT

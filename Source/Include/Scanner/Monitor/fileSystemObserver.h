@@ -60,6 +60,8 @@ class FileSystemObserver
      */
     boost::optional<FileChangeNotification> FetchNextChange();
 
+    void WaitForNextChange();
+
   private:
     bool AssociateNotificationWithNode(FileChangeNotification& notification);
 
@@ -84,6 +86,9 @@ class FileSystemObserver
         m_pendingModelUpdates;
 
     std::thread m_fileSystemNotificationProcessor;
+
+    std::condition_variable m_notificationReady;
+    std::mutex m_notificationMutex;
 
     std::experimental::filesystem::path m_rootPath;
 

@@ -203,6 +203,16 @@ class VisualizationModel
     std::experimental::filesystem::path GetRootPath() const;
 
     /**
+     * @brief WaitForNextChange
+     */
+    void WaitForNextChange();
+
+    /**
+     * @brief Applies all pending visualization updates to the model.
+     */
+    void RefreshTreemap();
+
+    /**
      * @brief SortNodes traverses the tree in a post-order fashion, sorting the children of each
      * node by their respective file sizes.
      *
@@ -211,8 +221,6 @@ class VisualizationModel
     static void SortNodes(Tree<VizBlock>& tree);
 
   protected:
-    void RefreshTreemap();
-
     void UpdateAffectedNodes(const FileChangeNotification& notification);
 
     void UpdateAncestorSizes(Tree<VizBlock>::Node* node);

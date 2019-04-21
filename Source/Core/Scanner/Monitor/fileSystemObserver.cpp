@@ -93,6 +93,12 @@ bool FileSystemObserver::AssociateNotificationWithNode(FileChangeNotification& n
     return node != nullptr;
 }
 
+void FileSystemObserver::WaitForNextChange()
+{
+    std::unique_lock<std::mutex> lock{ m_notificationMutex };
+    m_notificationReady.wait(lock, [&]() { return !m_pendingModelUpdates.empty(); });
+}
+
 void FileSystemObserver::ProcessChanges()
 {
     while (m_shouldKeepProcessingNotifications) {
@@ -106,16 +112,21 @@ void FileSystemObserver::ProcessChanges()
         LogFileSystemEvent(*notification);
 
         const auto successfullyAssociated = AssociateNotificationWithNode(*notification);
-        if (successfullyAssociated) {
-            // @todo Should there be an upper limit on the number of changes that can be in the
-            // queue at any given time?
-            m_pendingVisualUpdates.Emplace(*notification);
-
-            auto absolutePath =
-                std::experimental::filesystem::absolute(notification->relativePath, m_rootPath);
-
-            m_pendingModelUpdates.emplace(std::move(absolutePath), *notification);
+        if (!successfullyAssociated) {
+            return;
         }
+
+        // @todo Should there be an upper limit on the number of changes that can be in the
+        // queue at any given time?
+        m_pendingVisualUpdates.Emplace(*notification);
+
+        auto absolutePath =
+            std::experimental::filesystem::absolute(notification->relativePath, m_rootPath);
+
+        m_pendingModelUpdates.emplace(std::move(absolutePath), *notification);
+
+        std::lock_guard<std::mutex> guard{ m_notificationMutex };
+        m_notificationReady.notify_one();
     }
 }
 

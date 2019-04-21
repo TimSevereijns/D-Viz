@@ -497,12 +497,19 @@ void VisualizationModel::StopMonitoringFileSystem()
     m_fileSystemObserver.StopMonitoring();
 }
 
+void VisualizationModel::WaitForNextChange()
+{
+    m_fileSystemObserver.WaitForNextChange();
+}
+
 void VisualizationModel::RefreshTreemap()
 {
-    //   for (const auto& pathAndNofitication : m_pendingModelUpdates)
-    //   {
-    //      UpdateAffectedNodes(pathAndNofitication.second);
-    //   }
+    auto notification = m_fileSystemObserver.FetchNextChange();
+    while (notification) {
+        UpdateAffectedNodes(*notification);
+
+        notification = m_fileSystemObserver.FetchNextChange();
+    }
 
     // @todo Sort the tree.
     // @todo Update all sizes.
@@ -622,8 +629,8 @@ void VisualizationModel::UpdateAncestorSizes(Tree<VizBlock>::Node* node)
         if (parent) {
             const auto totalSize = std::accumulate(
                 Tree<VizBlock>::SiblingIterator{ parent->GetFirstChild() },
-                Tree<VizBlock>::SiblingIterator{}, std::uintmax_t{ 0 },
-                [](const auto runningTotal, const auto& node) noexcept {
+                Tree<VizBlock>::SiblingIterator{},
+                std::uintmax_t{ 0 }, [](const auto runningTotal, const auto& node) noexcept {
                     Expects(node->file.size > 0);
                     return runningTotal + node->file.size;
                 });
