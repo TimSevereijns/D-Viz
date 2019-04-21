@@ -6,14 +6,14 @@
 #ifdef Q_OS_LINUX
 
 #include "fileChangeNotification.hpp"
-#include "fileMonitorImpl.h"
+#include "fileMonitorBase.h"
 
 #include <boost/filesystem/path.hpp>
 
 #include <functional>
 #include <thread>
 
-class LinuxFileMonitor : public FileMonitorImpl
+class LinuxFileMonitor : public FileMonitorBase
 {
   public:
     ~LinuxFileMonitor() noexcept override;

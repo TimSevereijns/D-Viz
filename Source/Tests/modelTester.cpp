@@ -28,7 +28,7 @@ namespace
         const std::experimental::filesystem::path& outputDirectory)
     {
         const std::string script = "../../Tests/Scripts/unzipTestData.py";
-        const std::string command = "python " + script + " --input " + zipFile.string() +
+        const std::string command = "python3 " + script + " --input " + zipFile.string() +
                                     " --output " + outputDirectory.string();
 
         std::system(command.c_str());
