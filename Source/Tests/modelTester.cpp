@@ -32,8 +32,6 @@ namespace
                                     " --output " + outputDirectory.string();
 
         std::system(command.c_str());
-
-        const auto currentDirectory = std::experimental::filesystem::current_path().native();
     }
 
     std::wstring PathFromRootToNode(const Tree<VizBlock>::Node& node)
@@ -233,14 +231,21 @@ void ModelTester::TestSingleNotification(FileModification eventType)
 
     m_model->StartMonitoringFileSystem();
 
+    const auto startTime = std::chrono::high_resolution_clock::now();
+    auto elapsedTime = std::chrono::milliseconds{ 0 };
+
     boost::optional<FileChangeNotification> notification;
-    while (!notification) {
+    while (!notification && elapsedTime < std::chrono::milliseconds(500)) {
         notification = m_model->FetchNextFileSystemChange();
+
+        elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::high_resolution_clock::now() - startTime);
     }
 
     const auto modifiedNode = notification->node;
     const std::experimental::filesystem::path path{ "spawn.hpp" };
 
+    QVERIFY(notification.is_initialized());
     QCOMPARE(notification->relativePath, path);
     QCOMPARE(notification->status, eventType);
     QCOMPARE(modifiedNode->GetData().file.name, std::wstring{ L"spawn" });
@@ -287,9 +292,11 @@ void ModelTester::TrackMultipleDeletions()
     const auto totalNotifications = m_sampleNotifications.size();
     auto processedNotifications{ 0u };
 
-    // @todo Should notification break, this will turn into an infinite loop. Look into adding
-    // a timeout for this portion of the test.
-    while (processedNotifications != totalNotifications) {
+    const auto startTime = std::chrono::high_resolution_clock::now();
+    auto elapsedTime = std::chrono::milliseconds{ 0 };
+
+    while (processedNotifications != totalNotifications &&
+           elapsedTime < std::chrono::milliseconds(500)) {
         notification = m_model->FetchNextFileSystemChange();
 
         if (notification) {
@@ -300,9 +307,14 @@ void ModelTester::TrackMultipleDeletions()
             QCOMPARE(notification->status, FileModification::DELETED);
             QCOMPARE(modifiedNode->GetData().file.extension, std::wstring{ L".ipp" });
         }
+
+        elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::high_resolution_clock::now() - startTime);
     }
 
     m_model->StopMonitoringFileSystem();
+
+    QCOMPARE(processedNotifications, totalNotifications);
 }
 
 REGISTER_TEST(ModelTester) // NOLINT
