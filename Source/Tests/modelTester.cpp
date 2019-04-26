@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <fstream>
+#include <memory>
 #include <ostream>
 #include <thread>
 
@@ -28,8 +29,14 @@ namespace
         const std::experimental::filesystem::path& outputDirectory)
     {
         const std::string script = "../../Tests/Scripts/unzipTestData.py";
+
+#if defined(Q_OS_WIN)
+        const std::string command = "python " + script + " --input " + zipFile.string() +
+                                    " --output " + outputDirectory.string();
+#elif defined(Q_OS_LINUX)
         const std::string command = "python3 " + script + " --input " + zipFile.string() +
                                     " --output " + outputDirectory.string();
+#endif // Q_OS_LINUX
 
         std::system(command.c_str());
     }
@@ -118,7 +125,7 @@ void ModelTester::ProgressCallbackIsInvoked()
 
 void ModelTester::ModelIsPopulated()
 {
-    const auto tree = m_model->GetTree();
+    const auto& tree = m_model->GetTree();
 
     // Number of items in sample directory:
     QCOMPARE(static_cast<unsigned long>(tree.Size()), 490ul);
@@ -313,20 +320,28 @@ void ModelTester::TrackMultipleDeletions()
 
 void ModelTester::ApplyFileDeletion()
 {
-    //    m_sampleNotifications =
-    //        std::vector<FileChangeNotification>{ { "spawn.hpp", FileModification::DELETED } };
+    m_sampleNotifications =
+        std::vector<FileChangeNotification>{ { "basic_socket.hpp", FileModification::DELETED } };
 
-    //    m_model->StartMonitoringFileSystem();
-    //    m_model->WaitForNextChange();
+    m_model->StartMonitoringFileSystem();
+    m_model->WaitForNextChange();
 
-    //    // m_model->RefreshTreemap();
-    //    m_model->StopMonitoringFileSystem();
+    const auto foundTargetNode = std::any_of(
+        Tree<VizBlock>::PostOrderIterator{ m_model->GetTree().GetRoot() },
+        Tree<VizBlock>::PostOrderIterator{},
+        [&](const auto& node) { return node->file.name == L"basic_socket"; });
 
-    //    const auto nodeIsGone = std::find_if(
-    //        Tree<VizBlock>::LeafIterator{ m_tree->GetRoot() }, Tree<VizBlock>::LeafIterator{},
-    //        [&](const auto& node) { return node->file.name == L"spawn"; });
+    QVERIFY(foundTargetNode == true);
 
-    //    QVERIFY(nodeIsGone);
+    m_model->RefreshTreemap();
+    m_model->StopMonitoringFileSystem();
+
+    const auto wasTargetNodeRemoved = std::none_of(
+        Tree<VizBlock>::PostOrderIterator{ m_model->GetTree().GetRoot() },
+        Tree<VizBlock>::PostOrderIterator{},
+        [&](const auto& node) { return node->file.name == L"basic_socket"; });
+
+    QVERIFY(wasTargetNodeRemoved == true);
 }
 
 REGISTER_TEST(ModelTester) // NOLINT
