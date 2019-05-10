@@ -12,8 +12,7 @@
 
 namespace
 {
-    void LogJsonParsingError(
-        const std::filesystem::path& path, rapidjson::ParseErrorCode errorCode)
+    void LogJsonParsingError(const std::filesystem::path& path, rapidjson::ParseErrorCode errorCode)
     {
         auto message = "Error parsing the JSON file found at: " + path.string() + ". ";
 

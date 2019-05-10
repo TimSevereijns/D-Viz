@@ -319,7 +319,6 @@ void ModelTester::TrackMultipleDeletions()
 void ModelTester::ApplyFileDeletion()
 {
     std::filesystem::path absoluteRootPath = m_model->GetTree().GetRoot()->GetData().file.name;
-
     std::filesystem::path targetFile = absoluteRootPath / "basic_socket.hpp";
 
     m_sampleNotifications =

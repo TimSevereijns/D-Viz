@@ -105,8 +105,7 @@ class ScanningWorker final : public QObject
      * @param[in] path            The location on disk to scan.
      * @param[in] fileNode        The TreeNode in Tree to append newly discoved files to.
      */
-    void ProcessFile(
-        const std::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept;
+    void ProcessFile(const std::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept;
 
     /**
      * @brief Performs a recursive depth-first exploration of the file system.
@@ -114,8 +113,7 @@ class ScanningWorker final : public QObject
      * @param[in] path            The location on disk to scan.
      * @param[in] fileNode        The TreeNode in Tree to append newly discoved files to.
      */
-    void ProcessDirectory(
-        const std::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept;
+    void ProcessDirectory(const std::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept;
 
     /**
      * @brief Helper function to facilitate exception-free iteration over a directory.

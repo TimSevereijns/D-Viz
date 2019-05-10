@@ -91,9 +91,7 @@ namespace std
         /**
          * @returns True if the left-hand side argument is less than the right-hand side argument.
          */
-        bool operator()(
-            const std::filesystem::path& lhs,
-            const std::filesystem::path& rhs) const
+        bool operator()(const std::filesystem::path& lhs, const std::filesystem::path& rhs) const
         {
             return lhs.native() < rhs.native();
         }

@@ -24,8 +24,7 @@ namespace OS
 {
 #ifdef Q_OS_WIN
 
-    static constexpr auto PREFERRED_SLASH =
-        std::filesystem::path::preferred_separator;
+    static constexpr auto PREFERRED_SLASH = std::filesystem::path::preferred_separator;
 
     inline void LaunchFileExplorer(const Tree<VizBlock>::Node& node)
     {

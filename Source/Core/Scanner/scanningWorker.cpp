@@ -22,9 +22,8 @@ namespace
     /**
      * @brief Removes nodes whose corresponding file or directory size is zero. This is often
      * necessary because a directory may contain only a single other directory within it that is
-     * empty. In such a case, the outer directory has a size of zero, but
-     * std::filesystem::is_empty will still have reported this directory as being
-     * non-empty.
+     * empty. In such a case, the outer directory has a size of zero, but std::filesystem::is_empty
+     * will still have reported this directory as being non-empty.
      *
      * @param[in, out] tree           The tree to be pruned.
      */

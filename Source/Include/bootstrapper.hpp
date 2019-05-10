@@ -45,8 +45,7 @@ namespace Bootstrapper
         const auto& defaultLog = spdlog::basic_logger_mt(
             Constants::Logging::DEFAULT_LOG, Detail::ToFilenameString(defaultLogPath));
 
-        const auto fileLogPath =
-            std::filesystem::current_path().append("fileSytem.txt");
+        const auto fileLogPath = std::filesystem::current_path().append("fileSytem.txt");
 
         const auto& filesystemLog = spdlog::basic_logger_mt(
             Constants::Logging::FILESYSTEM_LOG, Detail::ToFilenameString(fileLogPath));

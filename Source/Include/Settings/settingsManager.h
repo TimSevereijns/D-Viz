@@ -28,8 +28,7 @@ namespace Settings
 
       public:
         Manager(
-            const std::filesystem::path& colorFile,
-            const std::filesystem::path& preferencesFile);
+            const std::filesystem::path& colorFile, const std::filesystem::path& preferencesFile);
 
         /**
          * @returns The current camera speed.
