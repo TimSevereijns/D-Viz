@@ -10,27 +10,27 @@ namespace
     /**
      * @brief Logs File System changes.
      */
-    void LogFileSystemEvent(const FileChangeNotification& notification)
+    void LogFileSystemEvent(const FileEvent& event)
     {
-        switch (notification.status) {
-            case FileModification::CREATED:
+        switch (event.eventType) {
+            case FileEventType::CREATED:
                 spdlog::get(Constants::Logging::FILESYSTEM_LOG)
-                    ->info(fmt::format("Create: {}", notification.relativePath.string()));
+                    ->info(fmt::format("Create: {}", event.path.string()));
                 break;
 
-            case FileModification::DELETED:
+            case FileEventType::DELETED:
                 spdlog::get(Constants::Logging::FILESYSTEM_LOG)
-                    ->info(fmt::format("Deleted: {}", notification.relativePath.string()));
+                    ->info(fmt::format("Deleted: {}", event.path.string()));
                 break;
 
-            case FileModification::TOUCHED:
+            case FileEventType::TOUCHED:
                 spdlog::get(Constants::Logging::FILESYSTEM_LOG)
-                    ->info(fmt::format("Modified: {}", notification.relativePath.string()));
+                    ->info(fmt::format("Modified: {}", event.path.string()));
                 break;
 
-            case FileModification::RENAMED:
+            case FileEventType::RENAMED:
                 spdlog::get(Constants::Logging::FILESYSTEM_LOG)
-                    ->info(fmt::format("Renamed: {}", notification.relativePath.string()));
+                    ->info(fmt::format("Renamed: {}", event.path.string()));
                 break;
 
             default:
@@ -63,9 +63,9 @@ void FileSystemObserver::StartMonitoring(Tree<VizBlock>::Node* rootNode)
         return;
     }
 
-    auto callback = [&](FileChangeNotification && notification) noexcept
+    auto callback = [&](FileEvent && event) noexcept
     {
-        m_fileChangeNotifications.Emplace(std::move(notification));
+        m_fileEvents.Emplace(std::move(event));
     };
 
     m_fileSystemMonitor->Start(m_rootPath, std::move(callback));
@@ -80,53 +80,41 @@ void FileSystemObserver::StopMonitoring()
 
     m_fileSystemMonitor->Stop();
     m_shouldKeepProcessingNotifications.store(false);
-    m_fileChangeNotifications.AbandonWait();
-}
-
-bool FileSystemObserver::AssociateNotificationWithNode(FileChangeNotification& notification)
-{
-    Expects(notification.node == nullptr);
-
-    auto* node = Utilities::FindNodeUsingRelativePath(m_rootNode, notification.relativePath);
-    notification.node = node;
-
-    return node != nullptr;
+    m_fileEvents.AbandonWait();
 }
 
 void FileSystemObserver::WaitForNextChange()
 {
-    std::unique_lock<std::mutex> lock{ m_notificationMutex };
-    m_notificationReady.wait(lock, [&]() { return !m_pendingModelUpdates.empty(); });
+    // @todo Use model updates queue instead!
+    std::unique_lock<std::mutex> lock{ m_eventNotificationMutex };
+    m_eventNotificationReady.wait(lock, [&]() { return !m_pendingModelUpdates.empty(); });
 }
 
 void FileSystemObserver::ProcessChanges()
 {
     while (m_shouldKeepProcessingNotifications) {
-        const auto notification = m_fileChangeNotifications.WaitAndPop();
-        if (!notification) {
+        const auto event = m_fileEvents.WaitAndPop();
+        if (!event) {
             // If we got here, it may indicates that the wait operation has probably been abandoned
             // due to a DTOR invocation.
             continue;
         }
 
-        LogFileSystemEvent(*notification);
+        LogFileSystemEvent(*event);
 
-        const auto successfullyAssociated = AssociateNotificationWithNode(*notification);
-        if (!successfullyAssociated) {
-            return;
-        }
+        //        const auto successfullyAssociated = AssociateNotificationWithNode(*notification);
+        //        if (!successfullyAssociated) {
+        //            return;
+        //        }
 
         // @todo Should there be an upper limit on the number of changes that can be in the
         // queue at any given time?
-        m_pendingVisualUpdates.Emplace(*notification);
+        m_pendingVisualUpdates.Emplace(*event);
+        m_pendingModelUpdates.emplace(
+            std::move(event->path), *event); //< @todo Is this even necessary?
 
-        auto absolutePath =
-            std::experimental::filesystem::absolute(notification->relativePath, m_rootPath);
-
-        m_pendingModelUpdates.emplace(std::move(absolutePath), *notification);
-
-        std::lock_guard<std::mutex> guard{ m_notificationMutex };
-        m_notificationReady.notify_one();
+        std::lock_guard<std::mutex> guard{ m_eventNotificationMutex };
+        m_eventNotificationReady.notify_one();
     }
 }
 
@@ -135,9 +123,9 @@ bool FileSystemObserver::IsActive() const
     return m_fileSystemMonitor->IsActive();
 }
 
-boost::optional<FileChangeNotification> FileSystemObserver::FetchNextChange()
+boost::optional<FileEvent> FileSystemObserver::FetchNextChange()
 {
-    FileChangeNotification notification;
+    FileEvent notification;
 
     const auto retrievedNotification = m_pendingVisualUpdates.TryPop(notification);
     if (!retrievedNotification) {

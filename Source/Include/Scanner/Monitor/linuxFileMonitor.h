@@ -5,7 +5,7 @@
 
 #ifdef Q_OS_LINUX
 
-#include "fileChangeNotification.hpp"
+#include "FileEvent.hpp"
 #include "fileMonitorBase.h"
 
 #include <boost/filesystem/path.hpp>
@@ -24,8 +24,8 @@ class LinuxFileMonitor : public FileMonitorBase
      * @param[in] path            The root directory to watch.
      */
     void Start(
-        const std::experimental::filesystem::path& path,
-        const std::function<void(FileChangeNotification&&)>& onNotificationCallback) override;
+        const std::filesystem::path& path,
+        const std::function<void(FileEvent&&)>& onNotificationCallback) override;
 
     /**
      * @brief Stops monitoring the file system for changes.

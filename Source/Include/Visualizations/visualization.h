@@ -194,7 +194,7 @@ class VisualizationModel
      * @returns The metadata on the next available file to have changed since the visualization
      * was last refreshed.
      */
-    boost::optional<FileChangeNotification> FetchNextFileSystemChange();
+    boost::optional<FileEvent> FetchNextFileSystemChange();
 
     /**
      * @returns The root path for the current visualization. If no visualization has been loaded,
@@ -221,19 +221,19 @@ class VisualizationModel
     static void SortNodes(Tree<VizBlock>& tree);
 
   protected:
-    void UpdateAffectedNodes(const FileChangeNotification& notification);
+    void UpdateAffectedNodes(const FileEvent& notification);
 
     void UpdateAncestorSizes(Tree<VizBlock>::Node* node);
 
-    void OnFileCreation(const FileChangeNotification& notification);
+    void OnFileCreation(const FileEvent& notification);
 
-    void OnFileDeletion(const FileChangeNotification& notification);
+    void OnFileDeletion(const FileEvent& notification);
 
-    void OnFileModification(const FileChangeNotification& notification);
+    void OnFileModification(const FileEvent& notification);
 
-    void OnFileNameChange(const FileChangeNotification& notification);
+    void OnFileNameChange(const FileEvent& notification);
 
-    bool AssociatedNodeWithNotification(FileChangeNotification& notification);
+    bool AssociatedNodeWithNotification(FileEvent& notification);
 
     std::experimental::filesystem::path m_rootPath;
 

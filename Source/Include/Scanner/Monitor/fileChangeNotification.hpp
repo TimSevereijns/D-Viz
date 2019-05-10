@@ -5,39 +5,89 @@
 #include <experimental/filesystem>
 #include <functional>
 
-#include <Tree/Tree.hpp>
+#include "constants.h"
 
-enum class FileModification { NONE, CREATED, DELETED, TOUCHED, RENAMED };
+#include <Tree/Tree.hpp>
+#include <spdlog/spdlog.h>
+
+enum class FileModification
+{
+    NONE,
+    CREATED,
+    DELETED,
+    TOUCHED,
+    RENAMED
+};
 
 struct VizBlock;
 
-struct FileChangeNotification {
-    FileChangeNotification() = default;
+/**
+ * @brief The FileEvent struct
+ *
+ * @todo File size should probably be added to the FileEvent struct. This will make
+ * it far easier to unit test, since I can then more easily fake notifications.
+ */
+// struct FileEvent
+//{
+//    FileEvent() = default;
 
-    FileChangeNotification(std::experimental::filesystem::path path, FileModification status)
-        : relativePath{ std::move(path) }, status{ status }
+//    FileEvent(std::experimental::filesystem::path path, FileModification status)
+//        : path{ std::move(path) }, status{ status }
+//    {
+//    }
+
+//    // The relative path from the root of the visualization to the node that changed.
+//    std::experimental::filesystem::path path;
+
+//    // The type of change that occurred.
+//    FileModification status{ FileModification::NONE };
+
+//    // A pointer to the corresponding node in the tree, should it exist.
+//    typename Tree<VizBlock>::Node* node{ nullptr }; //< @todo Should this be const?
+
+//    friend bool operator==(const FileEvent& lhs, const FileEvent& rhs)
+//    {
+//        return lhs.node == rhs.node && lhs.path == rhs.path && lhs.status == rhs.status;
+//    }
+//};
+
+enum class FileEventType
+{
+    NONE,
+    CREATED,
+    DELETED,
+    TOUCHED,
+    RENAMED
+};
+
+struct FileEvent
+{
+    FileEvent() = default;
+
+    FileEvent(std::experimental::filesystem::path path, FileEventType eventType)
+        : path{ std::move(path) }, eventType{ eventType }
     {
+        try {
+            if (std::experimental::filesystem::is_regular_file(path)) {
+                fileSize = std::experimental::filesystem::file_size(path);
+            }
+        } catch (const std::experimental::filesystem::filesystem_error& /*exception*/) {
+            spdlog::get(Constants::Logging::FILESYSTEM_LOG)
+                ->error(fmt::format("Failed to obtain size of \"{}\"", path.string()));
+        }
     }
 
-    // The relative path from the root of the visualization to the node that changed.
-    std::experimental::filesystem::path relativePath;
+    std::experimental::filesystem::path path;
+    std::uint32_t eventId = 0u;
+    std::uintmax_t fileSize = 0u;
 
-    // The type of change that occurred.
-    FileModification status{ FileModification::NONE };
-
-    // A pointer to the corresponding node in the tree, should it exist.
-    const typename Tree<VizBlock>::Node* node{ nullptr };
-
-    friend bool operator==(const FileChangeNotification& lhs, const FileChangeNotification& rhs)
-    {
-        return lhs.node == rhs.node && lhs.relativePath == rhs.relativePath &&
-               lhs.status == rhs.status;
-    }
+    FileEventType eventType;
 };
 
 namespace std
 {
-    template <> struct less<std::experimental::filesystem::path> {
+    template <> struct less<std::experimental::filesystem::path>
+    {
         /**
          * @returns True if the left-hand side argument is less than the right-hand side argument.
          */
@@ -49,7 +99,8 @@ namespace std
         }
     };
 
-    template <> struct hash<std::experimental::filesystem::path> {
+    template <> struct hash<std::experimental::filesystem::path>
+    {
         /**
          * @returns A hash based on the path of the changed file.
          */

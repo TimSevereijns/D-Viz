@@ -504,25 +504,24 @@ void VisualizationModel::WaitForNextChange()
 
 void VisualizationModel::RefreshTreemap()
 {
-    auto notification = m_fileSystemObserver.FetchNextChange();
-    while (notification) {
-        UpdateAffectedNodes(*notification);
+    auto fileEvent = m_fileSystemObserver.FetchNextChange();
 
-        notification = m_fileSystemObserver.FetchNextChange();
+    while (fileEvent) {
+        UpdateAffectedNodes(*fileEvent);
+        fileEvent = m_fileSystemObserver.FetchNextChange();
     }
 
     // @todo Sort the tree.
     // @todo Update all sizes.
 }
 
-void VisualizationModel::UpdateAffectedNodes(const FileChangeNotification& notification)
+void VisualizationModel::UpdateAffectedNodes(const FileEvent& event)
 {
-    const auto absolutePath =
-        std::experimental::filesystem::absolute(notification.relativePath, m_rootPath);
+    const auto absolutePath = event.path;
 
     std::error_code errorCode;
 
-    if (notification.status != FileModification::DELETED &&
+    if (event.eventType == FileEventType::TOUCHED &&
         !std::experimental::filesystem::exists(absolutePath) && !errorCode) {
         // @note The absence of a file may not necessarily indicate a bug, since there tend to be
         // a lot of transient files that may only exist for a fraction of a second. For example,
@@ -534,21 +533,21 @@ void VisualizationModel::UpdateAffectedNodes(const FileChangeNotification& notif
         return;
     }
 
-    switch (notification.status) {
-        case FileModification::CREATED: {
-            OnFileCreation(notification);
+    switch (event.eventType) {
+        case FileEventType::CREATED: {
+            OnFileCreation(event);
             break;
         }
-        case FileModification::DELETED: {
-            OnFileDeletion(notification);
+        case FileEventType::DELETED: {
+            OnFileDeletion(event);
             break;
         }
-        case FileModification::TOUCHED: {
-            OnFileModification(notification);
+        case FileEventType::TOUCHED: {
+            OnFileModification(event);
             break;
         }
-        case FileModification::RENAMED: {
-            OnFileNameChange(notification);
+        case FileEventType::RENAMED: {
+            OnFileNameChange(event);
             break;
         }
         default: {
@@ -557,41 +556,20 @@ void VisualizationModel::UpdateAffectedNodes(const FileChangeNotification& notif
     }
 }
 
-void VisualizationModel::OnFileCreation(const FileChangeNotification& notification)
+void VisualizationModel::OnFileCreation(const FileEvent& event)
 {
-    // @todo Find parent node from path:
-    auto* parentNode =
-        Utilities::FindNodeUsingRelativePath(m_fileTree->GetRoot(), notification.relativePath);
+    FileInfo fileInfo{ /* name = */ event.path.stem().wstring(),
+                       /* extension = */ event.path.extension().wstring(),
+                       /* size = */ event.fileSize,
+                       /* type = */ FileType::REGULAR };
 
-    const auto absolutePath =
-        std::experimental::filesystem::absolute(notification.relativePath, m_rootPath);
-
-    if (std::experimental::filesystem::is_directory(absolutePath)) //< @todo Check symlink status...
-    {
-        FileInfo directoryInfo{ /* name = */ notification.relativePath.filename().wstring(),
-                                /* extension = */ L"",
-                                /* size = */ 0,
-                                /* type = */ FileType::DIRECTORY };
-
-        parentNode->AppendChild(VizBlock{ std::move(directoryInfo) });
-    } else {
-        const auto fileSize = Scanner::ComputeFileSize(absolutePath);
-
-        FileInfo fileInfo{
-            /* name = */ notification.relativePath.filename().stem().wstring(),
-            /* extension = */ notification.relativePath.filename().extension().wstring(),
-            /* size = */ fileSize,
-            /* type = */ FileType::REGULAR
-        };
-
-        parentNode->AppendChild(VizBlock{ std::move(fileInfo) });
-    }
+    auto* node = Utilities::FindNodeViaPath(m_fileTree->GetRoot(), event.path);
+    node->AppendChild(VizBlock{ std::move(fileInfo) });
 }
 
-void VisualizationModel::OnFileDeletion(const FileChangeNotification& notification)
+void VisualizationModel::OnFileDeletion(const FileEvent& event)
 {
-    auto* node =
-        Utilities::FindNodeUsingRelativePath(m_fileTree->GetRoot(), notification.relativePath);
+    auto* node = Utilities::FindNodeViaPath(m_fileTree->GetRoot(), event.path);
 
     if (node) {
         node->DeleteFromTree();
@@ -599,26 +577,20 @@ void VisualizationModel::OnFileDeletion(const FileChangeNotification& notificati
     }
 }
 
-void VisualizationModel::OnFileModification(const FileChangeNotification& notification)
+void VisualizationModel::OnFileModification(const FileEvent& event)
 {
-    const auto absolutePath =
-        std::experimental::filesystem::absolute(notification.relativePath, m_rootPath);
-
-    if (std::experimental::filesystem::is_directory(absolutePath)) {
-        // @todo What does it mean for a directory to be modified?
-    } else {
-        const auto fileSize = Scanner::ComputeFileSize(absolutePath);
-
-        auto* node =
-            Utilities::FindNodeUsingRelativePath(m_fileTree->GetRoot(), notification.relativePath);
+    if (std::experimental::filesystem::is_regular_file(event.path)) {
+        auto* node = Utilities::FindNodeViaPath(m_fileTree->GetRoot(), event.path);
 
         if (node) {
-            node->GetData().file.size = fileSize;
+            node->GetData().file.size = event.fileSize;
         }
+    } else {
+        // @todo What does it mean for a directory to be modified?
     }
 }
 
-void VisualizationModel::OnFileNameChange(const FileChangeNotification& /*notification*/)
+void VisualizationModel::OnFileNameChange(const FileEvent& /*event*/)
 {
     // @todo Need to associate new file names with old file names in order to resolve rename events.
 }
@@ -627,6 +599,7 @@ void VisualizationModel::UpdateAncestorSizes(Tree<VizBlock>::Node* node)
 {
     while (node) {
         auto* parent = node->GetParent();
+
         if (parent) {
             const auto totalSize = std::accumulate(
                 Tree<VizBlock>::SiblingIterator{ parent->GetFirstChild() },
@@ -649,7 +622,7 @@ bool VisualizationModel::IsFileSystemBeingMonitored() const
     return m_fileSystemObserver.IsActive();
 }
 
-boost::optional<FileChangeNotification> VisualizationModel::FetchNextFileSystemChange()
+boost::optional<FileEvent> VisualizationModel::FetchNextFileSystemChange()
 {
     return m_fileSystemObserver.FetchNextChange();
 }
@@ -663,7 +636,7 @@ void VisualizationModel::SortNodes(Tree<VizBlock>& tree)
 {
     for (auto& node : tree) {
         node.SortChildren([](const auto& lhs, const auto& rhs) noexcept {
-            return lhs->file.size > rhs->file.size;
+            return lhs.file.size > rhs.file.size;
         });
     }
 }

@@ -15,7 +15,7 @@ LinuxFileMonitor::~LinuxFileMonitor() noexcept
 
 void LinuxFileMonitor::Start(
     const std::experimental::filesystem::path& path,
-    const std::function<void(FileChangeNotification&&)>& /*onNotificationCallback*/)
+    const std::function<void(FileEvent&&)>& /*onNotificationCallback*/)
 {
     m_pathToWatch = path.native();
 

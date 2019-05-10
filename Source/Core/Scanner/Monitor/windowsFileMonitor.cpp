@@ -106,7 +106,7 @@ bool WindowsFileMonitor::IsActive() const
 
 void WindowsFileMonitor::Start(
     const std::experimental::filesystem::path& path,
-    const std::function<void(FileChangeNotification&&)>& onNotificationCallback)
+    const std::function<void(FileEvent&&)>& onNotificationCallback)
 {
     m_notificationCallback = onNotificationCallback;
 
@@ -285,18 +285,15 @@ void WindowsFileMonitor::ProcessNotification()
 
         switch (notificationInfo->Action) {
             case FILE_ACTION_ADDED: {
-                m_notificationCallback(
-                    FileChangeNotification{ fileName, FileModification::CREATED });
+                m_notificationCallback(FileEvent{ fileName, FileEventType::CREATED });
                 break;
             }
             case FILE_ACTION_REMOVED: {
-                m_notificationCallback(
-                    FileChangeNotification{ fileName, FileModification::DELETED });
+                m_notificationCallback(FileEvent{ fileName, FileEventType::DELETED });
                 break;
             }
             case FILE_ACTION_MODIFIED: {
-                m_notificationCallback(
-                    FileChangeNotification{ fileName, FileModification::TOUCHED });
+                m_notificationCallback(FileEvent{ fileName, FileEventType::TOUCHED });
                 break;
             }
             case FILE_ACTION_RENAMED_OLD_NAME: {
@@ -304,8 +301,7 @@ void WindowsFileMonitor::ProcessNotification()
                 break;
             }
             case FILE_ACTION_RENAMED_NEW_NAME: {
-                m_notificationCallback(
-                    FileChangeNotification{ fileName, FileModification::RENAMED });
+                m_notificationCallback(FileEvent{ fileName, FileEventType::RENAMED });
                 break;
             }
             default: {

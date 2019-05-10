@@ -17,7 +17,7 @@
 
 #include <QVector3D>
 
-struct FileChangeNotification;
+struct FileEvent;
 struct ScanningProgress;
 
 class GLCanvas;
@@ -253,7 +253,7 @@ class Controller
     /**
      * @brief Fetches oldest, unprocessed file system change notification.
      */
-    boost::optional<FileChangeNotification> FetchFileModification();
+    boost::optional<FileEvent> FetchFileModification();
 
   private:
     template <typename NodeSelectorType>

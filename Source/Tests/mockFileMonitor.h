@@ -17,7 +17,7 @@
 class MockFileMonitor : public FileMonitorBase
 {
   public:
-    MockFileMonitor(std::function<boost::optional<FileChangeNotification>()> notificationGenerator)
+    MockFileMonitor(std::function<boost::optional<FileEvent>()> notificationGenerator)
         : m_notificationGenerator{ std::move(notificationGenerator) }
     {
     }
@@ -33,7 +33,7 @@ class MockFileMonitor : public FileMonitorBase
 
     void Start(
         const std::experimental::filesystem::path& path,
-        const std::function<void(FileChangeNotification&&)>& onNotificationCallback) override
+        const std::function<void(FileEvent&&)>& onNotificationCallback) override
     {
         m_pathToMonitor = path;
         m_onNotificationCallback = onNotificationCallback;
@@ -64,9 +64,9 @@ class MockFileMonitor : public FileMonitorBase
         }
     }
 
-    std::function<boost::optional<FileChangeNotification>()> m_notificationGenerator;
+    std::function<boost::optional<FileEvent>()> m_notificationGenerator;
 
-    std::function<void(FileChangeNotification&&)> m_onNotificationCallback;
+    std::function<void(FileEvent&&)> m_onNotificationCallback;
 
     std::thread m_workerThread;
 

@@ -55,6 +55,46 @@ namespace Utilities
 
         return node;
     }
+
+    inline static Tree<VizBlock>::Node*
+    FindNodeViaPath(Tree<VizBlock>::Node* rootNode, const std::experimental::filesystem::path& path)
+    {
+        assert(rootNode->GetData().file.type == FileType::DIRECTORY);
+
+        //        std::filesystem::path rootPath = rootNode->GetData().file.name;
+        //        const auto relativePath = std::filesystem::relative(path, rootPath);
+
+        //        return FindNodeUsingRelativePath(rootNode, relativePath);
+
+        return nullptr;
+    }
+
+    inline static Tree<VizBlock>::Node* FindClosestNodeUsingRelativePath(
+        Tree<VizBlock>::Node* rootNode, const std::experimental::filesystem::path& path)
+    {
+        auto* node = rootNode;
+
+        auto filePathItr = std::begin(path);
+        while (filePathItr != std::end(path)) {
+            auto matchingNodeItr = std::find_if(
+                Tree<VizBlock>::SiblingIterator{ node->GetFirstChild() },
+                Tree<VizBlock>::SiblingIterator{}, [&](const auto& childNode) {
+                    const auto pathElement = filePathItr->wstring();
+                    const auto fileName = childNode->file.name + childNode->file.extension;
+
+                    return fileName == pathElement;
+                });
+
+            if (matchingNodeItr != Tree<VizBlock>::SiblingIterator{}) {
+                node = std::addressof(*matchingNodeItr);
+                ++filePathItr;
+            } else {
+                break;
+            }
+        }
+
+        return node;
+    }
 } // namespace Utilities
 
 #endif // UTILITIES_HPP

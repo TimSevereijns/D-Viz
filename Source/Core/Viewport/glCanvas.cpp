@@ -712,28 +712,29 @@ void GLCanvas::ProcessFileTreeChanges()
     }
 
     while (notification) {
-        const auto& node = notification->node;
-        if (m_controller.GetSettingsManager().ShouldBlockBeProcessed(node->GetData())) {
-            switch (notification->status) {
-                case FileModification::CREATED:
-                    // If a file is newly added, then there's nothing to update in the existing
-                    // visualization.
-                    break;
-                case FileModification::DELETED:
-                    treemap->UpdateVBO(*notification->node, Assets::Event::DELETED);
-                    break;
-                case FileModification::TOUCHED:
-                    treemap->UpdateVBO(*notification->node, Assets::Event::TOUCHED);
-                    break;
-                case FileModification::RENAMED:
-                    // @todo I'll need to be notified of the old name to pick up rename events.
-                    treemap->UpdateVBO(*notification->node, Assets::Event::RENAMED);
-                    break;
-                default:
-                    Expects(false);
-                    break;
-            }
-        }
+        //        const auto& node = notification->node;
+        //        if (m_controller.GetSettingsManager().ShouldBlockBeProcessed(node->GetData())) {
+        //            switch (FileEventType->eventType) {
+        //                case FileEventType::CREATED:
+        //                    // If a file is newly added, then there's nothing to update in the
+        //                    existing
+        //                    // visualization.
+        //                    break;
+        //                case FileEventType::DELETED:
+        //                    treemap->UpdateVBO(*notification->node, Assets::Event::DELETED);
+        //                    break;
+        //                case FileEventType::TOUCHED:
+        //                    treemap->UpdateVBO(*notification->node, Assets::Event::TOUCHED);
+        //                    break;
+        //                case FileEventType::RENAMED:
+        //                    // @todo I'll need to be notified of the old name to pick up rename
+        //                    events. treemap->UpdateVBO(*notification->node,
+        //                    Assets::Event::RENAMED); break;
+        //                default:
+        //                    Expects(false);
+        //                    break;
+        //            }
+        //}
 
         const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now() - startTime);
@@ -757,7 +758,7 @@ void GLCanvas::paintGL()
     }
 
     const auto stopwatch = Stopwatch<std::chrono::microseconds>([&]() noexcept {
-        ProcessFileTreeChanges();
+        // ProcessFileTreeChanges();
 
         m_openGLContext.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

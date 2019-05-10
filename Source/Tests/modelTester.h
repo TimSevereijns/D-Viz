@@ -93,10 +93,15 @@ class ModelTester : public QObject
      */
     void ApplyFileDeletion();
 
-  private:
-    void TestSingleNotification(FileModification eventType);
+    /**
+     * @brief ApplyFileCreation
+     */
+    void ApplyFileCreation();
 
-    std::vector<FileChangeNotification> m_sampleNotifications;
+  private:
+    void TestSingleNotification(FileEventType eventType);
+
+    std::vector<FileEvent> m_sampleNotifications;
 
     std::experimental::filesystem::path m_sampleDirectory{ std::experimental::filesystem::absolute(
         "../../Tests/Sandbox/asio") };

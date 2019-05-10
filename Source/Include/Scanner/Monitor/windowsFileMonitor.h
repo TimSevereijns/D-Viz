@@ -98,7 +98,7 @@ class WindowsFileMonitor : public FileMonitorBase
      */
     void Start(
         const std::experimental::filesystem::path& path,
-        const std::function<void(FileChangeNotification&&)>& onNotificationCallback) override;
+        const std::function<void(FileEvent&&)>& onNotificationCallback) override;
 
     /**
      * @brief Stops monitoring the file system for changes.
@@ -131,7 +131,7 @@ class WindowsFileMonitor : public FileMonitorBase
 
     std::thread m_monitoringThread;
 
-    std::function<void(FileChangeNotification&&)> m_notificationCallback;
+    std::function<void(FileEvent&&)> m_notificationCallback;
 
     boost::optional<std::wstring> m_pendingRenameEvent;
 };

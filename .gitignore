@@ -49,13 +49,11 @@ Temporary Items
 *.exe
 *.ilk
 *.user*
-build-D-Viz-*-Debug/
-build-D-Viz-*-Release/
-
+build-D-Viz-*
 
 *.tlog
 
 Foreign/
 Source/Build/
-Source/Tests/Sandbox/
+Source/Tests/Sandbox*
 Conan/

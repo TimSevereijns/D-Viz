@@ -58,12 +58,12 @@ class FileSystemObserver
      *
      * @returns A notification is one is available, and boost::none if nothing is available.
      */
-    boost::optional<FileChangeNotification> FetchNextChange();
+    boost::optional<FileEvent> FetchNextChange();
 
     void WaitForNextChange();
 
   private:
-    bool AssociateNotificationWithNode(FileChangeNotification& notification);
+    bool AssociateNotificationWithNode(FileEvent& notification);
 
     void ProcessChanges();
 
@@ -73,22 +73,21 @@ class FileSystemObserver
 
     // This queue contains raw notifications of file system changes that still need to be
     // parsed and the turned into tree node change notifications.
-    ThreadSafeQueue<FileChangeNotification> m_fileChangeNotifications;
+    ThreadSafeQueue<FileEvent> m_fileEvents;
 
     // This queue contains pending tree node change notifications. These notifications
     // still need to be retrieved by the view so that the UI can be updated to reflect filesystem
     // activity.
-    ThreadSafeQueue<FileChangeNotification> m_pendingVisualUpdates;
+    ThreadSafeQueue<FileEvent> m_pendingVisualUpdates;
 
     // This map tracks changes that will need to be applied to the treemap once the user refreshes
     // the visualization to reflect filesystem changes.
-    std::unordered_map<std::experimental::filesystem::path, FileChangeNotification>
-        m_pendingModelUpdates;
+    std::unordered_map<std::experimental::filesystem::path, FileEvent> m_pendingModelUpdates;
 
     std::thread m_fileSystemNotificationProcessor;
 
-    std::condition_variable m_notificationReady;
-    std::mutex m_notificationMutex;
+    std::condition_variable m_eventNotificationReady;
+    std::mutex m_eventNotificationMutex;
 
     std::experimental::filesystem::path m_rootPath;
 
