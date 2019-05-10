@@ -8,7 +8,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -39,7 +39,7 @@
 struct NodeAndPath
 {
     std::unique_ptr<Tree<VizBlock>::Node> node;
-    std::experimental::filesystem::path path;
+    std::filesystem::path path;
 
     NodeAndPath(decltype(node) node, decltype(path) path)
         : node{ std::move(node) }, path{ std::move(path) }
@@ -106,7 +106,7 @@ class ScanningWorker final : public QObject
      * @param[in] fileNode        The TreeNode in Tree to append newly discoved files to.
      */
     void ProcessFile(
-        const std::experimental::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept;
+        const std::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept;
 
     /**
      * @brief Performs a recursive depth-first exploration of the file system.
@@ -115,7 +115,7 @@ class ScanningWorker final : public QObject
      * @param[in] fileNode        The TreeNode in Tree to append newly discoved files to.
      */
     void ProcessDirectory(
-        const std::experimental::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept;
+        const std::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept;
 
     /**
      * @brief Helper function to facilitate exception-free iteration over a directory.
@@ -124,7 +124,7 @@ class ScanningWorker final : public QObject
      * @param[in] treeNode        The TreeNode to append the contents of the directory to.
      */
     void AddSubDirectoriesToQueue(
-        const std::experimental::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept;
+        const std::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept;
 
     ScanningParameters m_parameters;
 

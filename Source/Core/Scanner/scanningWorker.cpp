@@ -23,7 +23,7 @@ namespace
      * @brief Removes nodes whose corresponding file or directory size is zero. This is often
      * necessary because a directory may contain only a single other directory within it that is
      * empty. In such a case, the outer directory has a size of zero, but
-     * std::experimental::filesystem::is_empty will still have reported this directory as being
+     * std::filesystem::is_empty will still have reported this directory as being
      * non-empty.
      *
      * @param[in, out] tree           The tree to be pruned.
@@ -55,9 +55,9 @@ namespace
      * node.
      */
     std::shared_ptr<Tree<VizBlock>>
-    CreateTreeAndRootNode(const std::experimental::filesystem::path& path) noexcept
+    CreateTreeAndRootNode(const std::filesystem::path& path) noexcept
     {
-        if (!std::experimental::filesystem::is_directory(path)) {
+        if (!std::filesystem::is_directory(path)) {
             return nullptr;
         }
 
@@ -71,12 +71,12 @@ namespace
     /**
      * @returns True if the directory should be processed.
      */
-    bool ShouldProcess(const std::experimental::filesystem::path& path) noexcept
+    bool ShouldProcess(const std::filesystem::path& path) noexcept
     {
 #if defined(Q_OS_WIN)
         return !Scanner::IsReparsePoint(path);
 #elif defined(Q_OS_LINUX)
-        return !std::experimental::filesystem::is_symlink(path);
+        return !std::filesystem::is_symlink(path);
 #endif // Q_OS_LINUX
     }
 } // namespace
@@ -89,7 +89,7 @@ ScanningWorker::ScanningWorker(const ScanningParameters& parameters, ScanningPro
 }
 
 void ScanningWorker::ProcessFile(
-    const std::experimental::filesystem::path& path, Tree<VizBlock>::Node& treeNode) noexcept
+    const std::filesystem::path& path, Tree<VizBlock>::Node& treeNode) noexcept
 {
     const auto fileSize = Scanner::ComputeFileSize(path);
     if (fileSize == 0u) {
@@ -107,27 +107,27 @@ void ScanningWorker::ProcessFile(
 }
 
 void ScanningWorker::ProcessDirectory(
-    const std::experimental::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept
+    const std::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept
 {
     auto isRegularFile{ false };
     try {
         // In certain cases, this function can, apparently, raise exceptions, although it isn't
         // entirely clear to me what circumstances need to exist for this to occur:
-        isRegularFile = std::experimental::filesystem::is_regular_file(path);
+        isRegularFile = std::filesystem::is_regular_file(path);
     } catch (...) {
         return;
     }
 
     if (isRegularFile) {
         ProcessFile(path, node);
-    } else if (std::experimental::filesystem::is_directory(path) && ShouldProcess(path)) {
+    } else if (std::filesystem::is_directory(path) && ShouldProcess(path)) {
         try {
             // In some edge-cases, the Windows operating system doesn't allow anyone to access
             // certain directories, and attempts to do so will result in exceptional behaviour---pun
             // intended. In order to deal with these rare cases, we'll need to rely on a try-catch
             // to keep going. One example of a problematic directory in Windows 7 is: "C:\System
             // Volume Information".
-            if (std::experimental::filesystem::is_empty(path)) {
+            if (std::filesystem::is_empty(path)) {
                 return;
             }
         } catch (...) {
@@ -149,10 +149,10 @@ void ScanningWorker::ProcessDirectory(
 }
 
 void ScanningWorker::AddSubDirectoriesToQueue(
-    const std::experimental::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept
+    const std::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept
 {
-    auto itr = std::experimental::filesystem::directory_iterator{ path };
-    const auto end = std::experimental::filesystem::directory_iterator{};
+    auto itr = std::filesystem::directory_iterator{ path };
+    const auto end = std::filesystem::directory_iterator{};
 
     while (itr != end) {
         boost::asio::post(

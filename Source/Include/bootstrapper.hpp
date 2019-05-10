@@ -3,7 +3,7 @@
 
 #include "constants.h"
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <type_traits>
 
 #include <spdlog/sinks/basic_file_sink.h>
@@ -23,7 +23,7 @@ namespace Bootstrapper
         /**
          * @brief Returns a wide string if on Windows, and returns a narrow string on Unix.
          */
-        inline auto ToFilenameString(const std::experimental::filesystem::path& path)
+        inline auto ToFilenameString(const std::filesystem::path& path)
         {
             if constexpr (std::is_same_v<spdlog::filename_t, std::wstring>) {
                 return path.wstring();
@@ -40,13 +40,13 @@ namespace Bootstrapper
      */
     inline void InitializeLogs()
     {
-        const auto defaultLogPath = std::experimental::filesystem::current_path().append("log.txt");
+        const auto defaultLogPath = std::filesystem::current_path().append("log.txt");
 
         const auto& defaultLog = spdlog::basic_logger_mt(
             Constants::Logging::DEFAULT_LOG, Detail::ToFilenameString(defaultLogPath));
 
         const auto fileLogPath =
-            std::experimental::filesystem::current_path().append("fileSytem.txt");
+            std::filesystem::current_path().append("fileSytem.txt");
 
         const auto& filesystemLog = spdlog::basic_logger_mt(
             Constants::Logging::FILESYSTEM_LOG, Detail::ToFilenameString(fileLogPath));

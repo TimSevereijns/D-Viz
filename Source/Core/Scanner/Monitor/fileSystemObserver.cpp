@@ -40,7 +40,7 @@ namespace
 } // namespace
 
 FileSystemObserver::FileSystemObserver(
-    std::unique_ptr<FileMonitorBase> fileMonitor, std::experimental::filesystem::path path)
+    std::unique_ptr<FileMonitorBase> fileMonitor, std::filesystem::path path)
     : m_fileSystemMonitor{ std::move(fileMonitor) }, m_rootPath{ std::move(path) }
 {
 }
@@ -59,7 +59,7 @@ void FileSystemObserver::StartMonitoring(Tree<VizBlock>::Node* rootNode)
     Expects(rootNode != nullptr);
     m_rootNode = rootNode;
 
-    if (m_rootPath.empty() || !std::experimental::filesystem::exists(m_rootPath)) {
+    if (m_rootPath.empty() || !std::filesystem::exists(m_rootPath)) {
         return;
     }
 

@@ -13,7 +13,7 @@
 namespace
 {
     void LogJsonParsingError(
-        const std::experimental::filesystem::path& path, rapidjson::ParseErrorCode errorCode)
+        const std::filesystem::path& path, rapidjson::ParseErrorCode errorCode)
     {
         auto message = "Error parsing the JSON file found at: " + path.string() + ". ";
 
@@ -95,7 +95,7 @@ namespace
 
 namespace Settings
 {
-    JsonDocument LoadFromDisk(const std::experimental::filesystem::path& path)
+    JsonDocument LoadFromDisk(const std::filesystem::path& path)
     {
         std::ifstream fileStream{ path.string() };
         rapidjson::IStreamWrapper streamWrapper{ fileStream };
@@ -110,7 +110,7 @@ namespace Settings
         return document;
     }
 
-    bool SaveToDisk(const JsonDocument& document, const std::experimental::filesystem::path& path)
+    bool SaveToDisk(const JsonDocument& document, const std::filesystem::path& path)
     {
         std::ofstream fileStream{ path.string() };
         rapidjson::OStreamWrapper streamWrapper{ fileStream };

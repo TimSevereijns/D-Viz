@@ -1,7 +1,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <memory>
 
 #include <rapidjson/document.h>
@@ -18,7 +18,7 @@ namespace Settings
      *
      * @returns A parsed JSON document.
      */
-    JsonDocument LoadFromDisk(const std::experimental::filesystem::path& path);
+    JsonDocument LoadFromDisk(const std::filesystem::path& path);
 
     /**
      * @brief Helper function to save a JSON file to disk.
@@ -28,7 +28,7 @@ namespace Settings
      *
      * @returns True if the save succeeded.
      */
-    bool SaveToDisk(const JsonDocument& document, const std::experimental::filesystem::path& path);
+    bool SaveToDisk(const JsonDocument& document, const std::filesystem::path& path);
 
     /**
      * @brief The VisualizationParameters struct represents the gamut of visualization parameters

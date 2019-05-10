@@ -28,8 +28,8 @@ namespace Settings
 
       public:
         Manager(
-            const std::experimental::filesystem::path& colorFile,
-            const std::experimental::filesystem::path& preferencesFile);
+            const std::filesystem::path& colorFile,
+            const std::filesystem::path& preferencesFile);
 
         /**
          * @returns The current camera speed.
@@ -270,8 +270,8 @@ namespace Settings
         JsonDocument m_fileColorMapDocument;
         JsonDocument m_preferencesDocument;
 
-        std::experimental::filesystem::path m_preferencesPath;
-        std::experimental::filesystem::path m_fileColorMapPath;
+        std::filesystem::path m_preferencesPath;
+        std::filesystem::path m_fileColorMapPath;
 
         ColorMap m_colorMap;
         PreferencesMap m_preferencesMap;

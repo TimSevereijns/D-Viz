@@ -7,7 +7,7 @@
 #include <boost/optional.hpp>
 
 #include <atomic>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <functional>
 #include <thread>
 
@@ -32,7 +32,7 @@ class MockFileMonitor : public FileMonitorBase
     }
 
     void Start(
-        const std::experimental::filesystem::path& path,
+        const std::filesystem::path& path,
         const std::function<void(FileEvent&&)>& onNotificationCallback) override
     {
         m_pathToMonitor = path;
@@ -70,7 +70,7 @@ class MockFileMonitor : public FileMonitorBase
 
     std::thread m_workerThread;
 
-    std::experimental::filesystem::path m_pathToMonitor;
+    std::filesystem::path m_pathToMonitor;
 
     std::atomic_bool m_isActive{ false };
 };

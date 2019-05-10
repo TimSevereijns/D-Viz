@@ -2,7 +2,7 @@
 #define FILESTATUSCHANGE_HPP
 
 #include <chrono>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <functional>
 
 #include "constants.h"
@@ -64,20 +64,20 @@ struct FileEvent
 {
     FileEvent() = default;
 
-    FileEvent(std::experimental::filesystem::path path, FileEventType eventType)
+    FileEvent(std::filesystem::path path, FileEventType eventType)
         : path{ std::move(path) }, eventType{ eventType }
     {
         try {
-            if (std::experimental::filesystem::is_regular_file(path)) {
-                fileSize = std::experimental::filesystem::file_size(path);
+            if (std::filesystem::is_regular_file(path)) {
+                fileSize = std::filesystem::file_size(path);
             }
-        } catch (const std::experimental::filesystem::filesystem_error& /*exception*/) {
+        } catch (const std::filesystem::filesystem_error& /*exception*/) {
             spdlog::get(Constants::Logging::FILESYSTEM_LOG)
                 ->error(fmt::format("Failed to obtain size of \"{}\"", path.string()));
         }
     }
 
-    std::experimental::filesystem::path path;
+    std::filesystem::path path;
     std::uint32_t eventId = 0u;
     std::uintmax_t fileSize = 0u;
 
@@ -86,27 +86,27 @@ struct FileEvent
 
 namespace std
 {
-    template <> struct less<std::experimental::filesystem::path>
+    template <> struct less<std::filesystem::path>
     {
         /**
          * @returns True if the left-hand side argument is less than the right-hand side argument.
          */
         bool operator()(
-            const std::experimental::filesystem::path& lhs,
-            const std::experimental::filesystem::path& rhs) const
+            const std::filesystem::path& lhs,
+            const std::filesystem::path& rhs) const
         {
             return lhs.native() < rhs.native();
         }
     };
 
-    template <> struct hash<std::experimental::filesystem::path>
+    template <> struct hash<std::filesystem::path>
     {
         /**
          * @returns A hash based on the path of the changed file.
          */
-        std::size_t operator()(const std::experimental::filesystem::path& path) const
+        std::size_t operator()(const std::filesystem::path& path) const
         {
-            return std::hash<std::experimental::filesystem::path::string_type>{}(path.native());
+            return std::hash<std::filesystem::path::string_type>{}(path.native());
         }
     };
 } // namespace std

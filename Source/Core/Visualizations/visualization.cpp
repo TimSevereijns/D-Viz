@@ -279,7 +279,7 @@ namespace
 } // namespace
 
 VisualizationModel::VisualizationModel(
-    std::unique_ptr<FileMonitorBase> fileMonitor, const std::experimental::filesystem::path& path)
+    std::unique_ptr<FileMonitorBase> fileMonitor, const std::filesystem::path& path)
     : m_rootPath{ path }, m_fileSystemObserver{ std::move(fileMonitor), path }
 {
 }
@@ -521,8 +521,8 @@ void VisualizationModel::UpdateAffectedNodes(const FileEvent& event)
 
     std::error_code errorCode;
 
-    if (event.eventType == FileEventType::TOUCHED &&
-        !std::experimental::filesystem::exists(absolutePath) && !errorCode) {
+    if (event.eventType == FileEventType::TOUCHED && !std::filesystem::exists(absolutePath) &&
+        !errorCode) {
         // @note The absence of a file may not necessarily indicate a bug, since there tend to be
         // a lot of transient files that may only exist for a fraction of a second. For example,
         // some applications tend to create temporary files when saving changes made to a file.
@@ -579,7 +579,7 @@ void VisualizationModel::OnFileDeletion(const FileEvent& event)
 
 void VisualizationModel::OnFileModification(const FileEvent& event)
 {
-    if (std::experimental::filesystem::is_regular_file(event.path)) {
+    if (std::filesystem::is_regular_file(event.path)) {
         auto* node = Utilities::FindNodeViaPath(m_fileTree->GetRoot(), event.path);
 
         if (node) {
@@ -627,7 +627,7 @@ boost::optional<FileEvent> VisualizationModel::FetchNextFileSystemChange()
     return m_fileSystemObserver.FetchNextChange();
 }
 
-std::experimental::filesystem::path VisualizationModel::GetRootPath() const
+std::filesystem::path VisualizationModel::GetRootPath() const
 {
     return m_rootPath;
 }

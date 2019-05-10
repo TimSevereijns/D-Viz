@@ -103,7 +103,7 @@ class ModelTester : public QObject
 
     std::vector<FileEvent> m_sampleNotifications;
 
-    std::experimental::filesystem::path m_sampleDirectory{ std::experimental::filesystem::absolute(
+    std::filesystem::path m_sampleDirectory{ std::filesystem::absolute(
         "../../Tests/Sandbox/asio") };
 
     DriveScanner m_scanner;

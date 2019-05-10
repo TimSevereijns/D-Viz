@@ -1,7 +1,7 @@
 #ifndef UTILITIES_HPP
 #define UTILITIES_HPP
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <mutex>
 #include <sstream>
 
@@ -25,8 +25,8 @@ namespace Utilities
         return stream.str();
     }
 
-    inline static Tree<VizBlock>::Node* FindNodeUsingRelativePath(
-        Tree<VizBlock>::Node* rootNode, const std::experimental::filesystem::path& path)
+    inline static Tree<VizBlock>::Node*
+    FindNodeUsingRelativePath(Tree<VizBlock>::Node* rootNode, const std::filesystem::path& path)
     {
         auto* node = rootNode;
 
@@ -57,20 +57,18 @@ namespace Utilities
     }
 
     inline static Tree<VizBlock>::Node*
-    FindNodeViaPath(Tree<VizBlock>::Node* rootNode, const std::experimental::filesystem::path& path)
+    FindNodeViaPath(Tree<VizBlock>::Node* rootNode, const std::filesystem::path& path)
     {
         assert(rootNode->GetData().file.type == FileType::DIRECTORY);
 
-        //        std::filesystem::path rootPath = rootNode->GetData().file.name;
-        //        const auto relativePath = std::filesystem::relative(path, rootPath);
+        std::filesystem::path rootPath = rootNode->GetData().file.name;
+        const auto relativePath = std::filesystem::relative(path, rootPath);
 
-        //        return FindNodeUsingRelativePath(rootNode, relativePath);
-
-        return nullptr;
+        return FindNodeUsingRelativePath(rootNode, relativePath);
     }
 
     inline static Tree<VizBlock>::Node* FindClosestNodeUsingRelativePath(
-        Tree<VizBlock>::Node* rootNode, const std::experimental::filesystem::path& path)
+        Tree<VizBlock>::Node* rootNode, const std::filesystem::path& path)
     {
         auto* node = rootNode;
 

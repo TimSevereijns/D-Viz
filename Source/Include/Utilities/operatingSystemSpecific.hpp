@@ -5,7 +5,7 @@
 #include "Utilities/scopeExit.hpp"
 #include "controller.h"
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <string>
 
 #include <gsl/gsl_assert>
@@ -25,7 +25,7 @@ namespace OS
 #ifdef Q_OS_WIN
 
     static constexpr auto PREFERRED_SLASH =
-        std::experimental::filesystem::path::preferred_separator;
+        std::filesystem::path::preferred_separator;
 
     inline void LaunchFileExplorer(const Tree<VizBlock>::Node& node)
     {
@@ -74,12 +74,12 @@ namespace OS
 #ifdef Q_OS_LINUX
 
     static constexpr auto PREFERRED_SLASH =
-        static_cast<wchar_t>(std::experimental::filesystem::path::preferred_separator);
+        static_cast<wchar_t>(std::filesystem::path::preferred_separator);
 
     inline void LaunchFileExplorer(const Tree<VizBlock>::Node& node)
     {
         const std::wstring rawPath = Controller::ResolveCompleteFilePath(node);
-        const std::experimental::filesystem::path path{ rawPath };
+        const std::filesystem::path path{ rawPath };
 
         // @todo Look into adding support for other popular file browsers, like Nautilus.
 
@@ -90,7 +90,7 @@ namespace OS
 
     inline std::uint64_t GetUsedDiskSpace(const std::wstring& rawPath)
     {
-        const std::experimental::filesystem::path path{ rawPath };
+        const std::filesystem::path path{ rawPath };
 
         struct statvfs diskInfo;
         statvfs(path.string().data(), &diskInfo);

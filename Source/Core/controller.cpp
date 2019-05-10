@@ -98,17 +98,17 @@ namespace
     /**
      * @returns The full path to the JSON file that contains the color mapping.
      */
-    std::experimental::filesystem::path GetColorJsonPath()
+    std::filesystem::path GetColorJsonPath()
     {
-        return std::experimental::filesystem::current_path().append(L"colors.json");
+        return std::filesystem::current_path().append(L"colors.json");
     }
 
     /**
      * @returns The full path to the JSON file that contains the user preferences.
      */
-    std::experimental::filesystem::path GetPreferencesJsonPath()
+    std::filesystem::path GetPreferencesJsonPath()
     {
-        return std::experimental::filesystem::current_path().append(L"preferences.json");
+        return std::filesystem::current_path().append(L"preferences.json");
     }
 
     /**
@@ -533,7 +533,7 @@ const Settings::Manager& Controller::GetSettingsManager() const
     return m_settingsManager;
 }
 
-std::experimental::filesystem::path Controller::GetRootPath() const
+std::filesystem::path Controller::GetRootPath() const
 {
     return m_model->GetRootPath();
 }

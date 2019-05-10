@@ -112,8 +112,8 @@ namespace
 namespace Settings
 {
     Manager::Manager(
-        const std::experimental::filesystem::path& colorFile,
-        const std::experimental::filesystem::path& preferencesFile)
+        const std::filesystem::path& colorFile,
+        const std::filesystem::path& preferencesFile)
         : m_fileColorMapDocument{ Settings::LoadFromDisk(colorFile) },
           m_preferencesDocument{ Settings::LoadFromDisk(preferencesFile) },
           m_preferencesPath{ preferencesFile },

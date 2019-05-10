@@ -12,7 +12,7 @@
 #include "boost/optional.hpp"
 
 #include <array>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <functional>
 #include <thread>
 #include <vector>
@@ -97,7 +97,7 @@ class WindowsFileMonitor : public FileMonitorBase
      * @param[in] path            The root directory to watch.
      */
     void Start(
-        const std::experimental::filesystem::path& path,
+        const std::filesystem::path& path,
         const std::function<void(FileEvent&&)>& onNotificationCallback) override;
 
     /**

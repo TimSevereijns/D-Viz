@@ -236,7 +236,7 @@ class Controller
      * @brief GetRootPath
      * @return
      */
-    std::experimental::filesystem::path GetRootPath() const;
+    std::filesystem::path GetRootPath() const;
 
     /**
      * @brief Starts monitoring the file system. This is only possible after the first scan.

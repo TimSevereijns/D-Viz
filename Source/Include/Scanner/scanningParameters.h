@@ -2,7 +2,7 @@
 #define SCANNINGPARAMETERS_H
 
 #include <cstdint>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <string>
@@ -23,7 +23,7 @@ struct ScanningParameters
     using ScanCompleteCallback =
         std::function<void(const ScanningProgress&, std::shared_ptr<Tree<VizBlock>> fileTree)>;
 
-    std::experimental::filesystem::path path{};
+    std::filesystem::path path{};
 
     ProgressCallback onProgressUpdateCallback{};
     ScanCompleteCallback onScanCompletedCallback{};
@@ -31,7 +31,7 @@ struct ScanningParameters
     ScanningParameters() = default;
 
     ScanningParameters(
-        std::experimental::filesystem::path startingPath, ProgressCallback progressCallback,
+        std::filesystem::path startingPath, ProgressCallback progressCallback,
         ScanCompleteCallback completionCallback);
 };
 

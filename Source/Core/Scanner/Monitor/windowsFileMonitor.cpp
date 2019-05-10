@@ -105,7 +105,7 @@ bool WindowsFileMonitor::IsActive() const
 }
 
 void WindowsFileMonitor::Start(
-    const std::experimental::filesystem::path& path,
+    const std::filesystem::path& path,
     const std::function<void(FileEvent&&)>& onNotificationCallback)
 {
     m_notificationCallback = onNotificationCallback;

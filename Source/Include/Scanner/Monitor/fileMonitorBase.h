@@ -1,7 +1,7 @@
 #ifndef FILEMONITORBASE_H
 #define FILEMONITORBASE_H
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <functional>
 
 #include "fileChangeNotification.hpp"
@@ -19,7 +19,7 @@ class FileMonitorBase
     FileMonitorBase& operator=(FileMonitorBase&& rhs) = default;
 
     virtual void Start(
-        const std::experimental::filesystem::path& path,
+        const std::filesystem::path& path,
         const std::function<void(FileEvent&&)>& onNotificationCallback) = 0;
 
     virtual void Stop() = 0;

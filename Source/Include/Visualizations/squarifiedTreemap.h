@@ -17,7 +17,7 @@ class SquarifiedTreeMap final : public VisualizationModel
      */
     SquarifiedTreeMap(
         std::unique_ptr<FileMonitorBase> fileMonitor,
-        const std::experimental::filesystem::path& path);
+        const std::filesystem::path& path);
 
     /**
      * @brief Parses the file system tree into the model.

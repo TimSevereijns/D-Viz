@@ -35,8 +35,7 @@ class VisualizationModel
 {
   public:
     VisualizationModel(
-        std::unique_ptr<FileMonitorBase> fileMonitor,
-        const std::experimental::filesystem::path& path);
+        std::unique_ptr<FileMonitorBase> fileMonitor, const std::filesystem::path& path);
 
     virtual ~VisualizationModel() = default;
 
@@ -200,7 +199,7 @@ class VisualizationModel
      * @returns The root path for the current visualization. If no visualization has been loaded,
      * a default constructor path object will be returned.
      */
-    std::experimental::filesystem::path GetRootPath() const;
+    std::filesystem::path GetRootPath() const;
 
     /**
      * @brief WaitForNextChange
@@ -235,7 +234,7 @@ class VisualizationModel
 
     bool AssociatedNodeWithNotification(FileEvent& notification);
 
-    std::experimental::filesystem::path m_rootPath;
+    std::filesystem::path m_rootPath;
 
     // The tree is stored in a shared pointer so that it can be passed through the Qt
     // signaling framework; any type passed through it needs to be copy-constructible.

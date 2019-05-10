@@ -25,8 +25,7 @@ namespace
      *                              data.
      */
     void UnzipTestData(
-        const std::experimental::filesystem::path& zipFile,
-        const std::experimental::filesystem::path& outputDirectory)
+        const std::filesystem::path& zipFile, const std::filesystem::path& outputDirectory)
     {
         const std::string script = "../../Tests/Scripts/unzipTestData.py";
 
@@ -319,10 +318,9 @@ void ModelTester::TrackMultipleDeletions()
 
 void ModelTester::ApplyFileDeletion()
 {
-    std::experimental::filesystem::path absoluteRootPath =
-        m_model->GetTree().GetRoot()->GetData().file.name;
+    std::filesystem::path absoluteRootPath = m_model->GetTree().GetRoot()->GetData().file.name;
 
-    std::experimental::filesystem::path targetFile = absoluteRootPath / "basic_socket.hpp";
+    std::filesystem::path targetFile = absoluteRootPath / "basic_socket.hpp";
 
     m_sampleNotifications =
         std::vector<FileEvent>{ { targetFile.string(), FileEventType::DELETED } };

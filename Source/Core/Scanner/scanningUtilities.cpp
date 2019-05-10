@@ -27,7 +27,7 @@ namespace Scanner
 {
 #ifdef Q_OS_WIN
 
-    ScopedHandle OpenReparsePoint(const std::experimental::filesystem::path& path) noexcept
+    ScopedHandle OpenReparsePoint(const std::filesystem::path& path) noexcept
     {
         const auto handle = CreateFile(
             /* lpFileName = */ path.wstring().c_str(),
@@ -66,7 +66,7 @@ namespace Scanner
 
 #endif // Q_OS_WIN
 
-    std::uintmax_t GetFileSizeUsingWinAPI(const std::experimental::filesystem::path& path) noexcept
+    std::uintmax_t GetFileSizeUsingWinAPI(const std::filesystem::path& path) noexcept
     {
         std::uintmax_t fileSize{ 0 };
 
@@ -89,12 +89,12 @@ namespace Scanner
         return fileSize;
     }
 
-    std::uintmax_t ComputeFileSize(const std::experimental::filesystem::path& path) noexcept
+    std::uintmax_t ComputeFileSize(const std::filesystem::path& path) noexcept
     {
         try {
-            Expects(std::experimental::filesystem::is_directory(path) == false);
+            Expects(std::filesystem::is_directory(path) == false);
 
-            return std::experimental::filesystem::file_size(path);
+            return std::filesystem::file_size(path);
         } catch (...) {
             std::lock_guard<std::mutex> lock{ streamMutex };
             IgnoreUnused(lock);
@@ -125,7 +125,7 @@ namespace Scanner
 
 #ifdef Q_OS_WIN
 
-    bool IsReparseTag(const std::experimental::filesystem::path& path, DWORD targetTag) noexcept
+    bool IsReparseTag(const std::filesystem::path& path, DWORD targetTag) noexcept
     {
         static std::vector<std::byte> buffer{ MAXIMUM_REPARSE_DATA_BUFFER_SIZE };
 
@@ -137,7 +137,7 @@ namespace Scanner
                    : false;
     }
 
-    bool IsMountPoint(const std::experimental::filesystem::path& path) noexcept
+    bool IsMountPoint(const std::filesystem::path& path) noexcept
     {
         const auto isMountPoint = IsReparseTag(path, IO_REPARSE_TAG_MOUNT_POINT);
         if (isMountPoint) {
@@ -150,7 +150,7 @@ namespace Scanner
         return isMountPoint;
     }
 
-    bool IsSymlink(const std::experimental::filesystem::path& path) noexcept
+    bool IsSymlink(const std::filesystem::path& path) noexcept
     {
         const auto isSymlink = IsReparseTag(path, IO_REPARSE_TAG_SYMLINK);
         if (isSymlink) {
@@ -163,7 +163,7 @@ namespace Scanner
         return isSymlink;
     }
 
-    bool IsReparsePoint(const std::experimental::filesystem::path& path) noexcept
+    bool IsReparsePoint(const std::filesystem::path& path) noexcept
     {
         const auto handle = OpenReparsePoint(path);
         if (!handle.IsValid()) {

@@ -10,7 +10,7 @@
 #include <boost/optional.hpp>
 
 #include <atomic>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <memory>
 #include <thread>
 #include <unordered_map>
@@ -27,8 +27,7 @@ class FileSystemObserver
      * @param[in] fileMonitor        Dependency injected file monitoring implementation.
      * @param[in] path               The path to the location to be recursively observed.
      */
-    FileSystemObserver(
-        std::unique_ptr<FileMonitorBase> fileMonitor, std::experimental::filesystem::path path);
+    FileSystemObserver(std::unique_ptr<FileMonitorBase> fileMonitor, std::filesystem::path path);
 
     /**
      * @brief Halts monitoring and destroys the observer.
@@ -82,14 +81,14 @@ class FileSystemObserver
 
     // This map tracks changes that will need to be applied to the treemap once the user refreshes
     // the visualization to reflect filesystem changes.
-    std::unordered_map<std::experimental::filesystem::path, FileEvent> m_pendingModelUpdates;
+    std::unordered_map<std::filesystem::path, FileEvent> m_pendingModelUpdates;
 
     std::thread m_fileSystemNotificationProcessor;
 
     std::condition_variable m_eventNotificationReady;
     std::mutex m_eventNotificationMutex;
 
-    std::experimental::filesystem::path m_rootPath;
+    std::filesystem::path m_rootPath;
 
     Tree<VizBlock>::Node* m_rootNode{ nullptr };
 };
