@@ -57,12 +57,14 @@ template <typename Type> class ThreadSafeQueue
 
     void AbandonWait()
     {
+        std::lock_guard<decltype(m_mutex)> lock{ m_mutex };
         m_shouldAbandonWait = true;
         m_conditionVariable.notify_all();
     }
 
     void ResetWaitingPrivileges()
     {
+        std::lock_guard<decltype(m_mutex)> lock{ m_mutex };
         m_shouldAbandonWait = false;
     }
 
@@ -103,7 +105,7 @@ template <typename Type> class ThreadSafeQueue
   private:
     mutable std::mutex m_mutex;
 
-    std::atomic_bool m_shouldAbandonWait{ false };
+    bool m_shouldAbandonWait{ false };
 
     std::queue<Type> m_queue;
     std::condition_variable m_conditionVariable;

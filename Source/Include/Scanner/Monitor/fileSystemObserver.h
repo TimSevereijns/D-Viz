@@ -6,8 +6,6 @@
 #include "fileChangeNotification.hpp"
 #include "fileMonitorBase.h"
 
-#include <Tree/Tree.hpp>
-
 #include <atomic>
 #include <filesystem>
 #include <memory>
@@ -36,10 +34,9 @@ class FileSystemObserver
     /**
      * @brief Starts file system monitoring.
      *
-     * @param[in] rootNode           The root node of the existing file system model against which
-     *                               any file system changes will be compared.
+     * @param[in] callback          Callback to be invoked when a filesystem event occurs.
      */
-    void StartMonitoring(Tree<VizBlock>::Node* rootNode);
+    void StartMonitoring(const std::function<void(FileEvent&&)>& callback);
 
     /**
      * @brief Stop file system monitoring.
@@ -51,58 +48,10 @@ class FileSystemObserver
      */
     bool IsActive() const;
 
-    /**
-     * @brief Fetches the next pending file system change.
-     *
-     * @returns A notification is one is available, and std::nullopt if nothing is available.
-     */
-    std::optional<FileEvent> FetchNextModelChange();
-
-    /**
-     * @brief Fetches the next pending file system change.
-     *
-     * @returns A notification is one is available, and std::nullopt if nothing is available.
-     */
-    std::optional<FileEvent> FetchNextVisualChange();
-
-    /**
-     * @brief Blocks until the next model change occurs.
-     *
-     * This is rather useful for unit testing...
-     */
-    void WaitForNextModelChange();
-
   private:
-    bool AssociateNotificationWithNode(FileEvent& notification);
-
-    void ProcessChanges();
-
-    std::atomic_bool m_shouldKeepProcessingNotifications{ true };
-
     std::unique_ptr<FileMonitorBase> m_fileSystemMonitor;
 
-    // This queue contains raw notifications of file system changes that still need to be
-    // parsed and the turned into tree node change notifications.
-    ThreadSafeQueue<FileEvent> m_fileEvents;
-
-    // This queue contains pending tree node change notifications. These notifications
-    // still need to be retrieved by the view so that the UI can be updated to visually represent
-    // filesystem activity.
-    ThreadSafeQueue<FileEvent> m_pendingVisualUpdates;
-
-    // This queue contains pending changes that will need to be applied to the treemap once the user
-    // refreshes the visualization to reflect filesystem changes. These notifications are best
-    // processed in the order in which they occurred.
-    ThreadSafeQueue<FileEvent> m_pendingModelUpdates;
-
-    std::thread m_fileSystemNotificationProcessor;
-
-    std::condition_variable m_eventNotificationReady;
-    std::mutex m_eventNotificationMutex;
-
     std::filesystem::path m_rootPath;
-
-    Tree<VizBlock>::Node* m_rootNode{ nullptr };
 };
 
 #endif // FILESYSEMOBSERVER_H

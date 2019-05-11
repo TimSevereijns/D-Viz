@@ -487,28 +487,62 @@ void VisualizationModel::HighlightMatchingFileName(
 
 void VisualizationModel::StartMonitoringFileSystem()
 {
-    Expects(m_fileTree != nullptr);
+    const auto callback = [&](FileEvent && event) noexcept
+    {
+        m_fileEvents.Emplace(std::move(event));
+    };
 
-    m_fileSystemObserver.StartMonitoring(m_fileTree->GetRoot());
+    m_fileSystemObserver.StartMonitoring(callback);
+    m_fileSystemNotificationProcessor = std::thread{ [&] { ProcessChanges(); } };
 }
 
 void VisualizationModel::StopMonitoringFileSystem()
 {
     m_fileSystemObserver.StopMonitoring();
+
+    m_shouldKeepProcessingNotifications.store(false);
+    m_fileEvents.AbandonWait();
+
+    if (m_fileSystemNotificationProcessor.joinable()) {
+        m_fileSystemNotificationProcessor.join();
+    }
+}
+
+void VisualizationModel::ProcessChanges()
+{
+    while (m_shouldKeepProcessingNotifications) {
+        const auto event = m_fileEvents.WaitAndPop();
+        if (!event) {
+            // @note If we got here, it may indicates that the wait operation has probably been
+            // abandoned due to a DTOR invocation.
+            continue;
+        }
+
+        // LogFileSystemEvent(*event);
+
+        // @todo Should there be an upper limit on the number of changes that can be in the
+        // queue at any given time?
+
+        m_pendingVisualUpdates.Push(*event);
+        m_pendingModelUpdates.Push(*event);
+
+        m_eventNotificationReady.notify_one();
+    }
 }
 
 void VisualizationModel::WaitForNextModelChange()
 {
-    m_fileSystemObserver.WaitForNextModelChange();
+    std::unique_lock<std::mutex> lock{ m_eventNotificationMutex };
+    m_eventNotificationReady.wait(lock, [&]() { return !m_pendingModelUpdates.IsEmpty(); });
 }
 
 void VisualizationModel::RefreshTreemap()
 {
-    auto fileEvent = m_fileSystemObserver.FetchNextModelChange();
+    auto fileEvent = FetchNextModelChange();
 
     while (fileEvent) {
         UpdateAffectedNodes(*fileEvent);
-        fileEvent = m_fileSystemObserver.FetchNextModelChange();
+        fileEvent = FetchNextModelChange();
     }
 
     // @todo Sort the tree.
@@ -629,12 +663,26 @@ bool VisualizationModel::IsFileSystemBeingMonitored() const
 
 std::optional<FileEvent> VisualizationModel::FetchNextVisualChange()
 {
-    return m_fileSystemObserver.FetchNextVisualChange();
+    FileEvent notification;
+
+    const auto retrievedNotification = m_pendingVisualUpdates.TryPop(notification);
+    if (!retrievedNotification) {
+        return std::nullopt;
+    }
+
+    return std::move(notification);
 }
 
 std::optional<FileEvent> VisualizationModel::FetchNextModelChange()
 {
-    return m_fileSystemObserver.FetchNextModelChange();
+    FileEvent notification;
+
+    const auto retrievedNotification = m_pendingModelUpdates.TryPop(notification);
+    if (!retrievedNotification) {
+        return std::nullopt;
+    }
+
+    return std::move(notification);
 }
 
 std::filesystem::path VisualizationModel::GetRootPath() const

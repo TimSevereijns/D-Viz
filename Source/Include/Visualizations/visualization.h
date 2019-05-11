@@ -261,6 +261,29 @@ class VisualizationModel
     bool m_hasDataBeenParsed{ false };
 
     FileSystemObserver m_fileSystemObserver;
+
+    // This queue contains raw notifications of file system changes that still need to be
+    // parsed and the turned into tree node change notifications.
+    ThreadSafeQueue<FileEvent> m_fileEvents;
+
+    // This queue contains pending tree node change notifications. These notifications
+    // still need to be retrieved by the view so that the UI can be updated to visually represent
+    // filesystem activity.
+    ThreadSafeQueue<FileEvent> m_pendingVisualUpdates;
+
+    // This queue contains pending changes that will need to be applied to the treemap once the user
+    // refreshes the visualization to reflect filesystem changes. These notifications are best
+    // processed in the order in which they occurred.
+    ThreadSafeQueue<FileEvent> m_pendingModelUpdates;
+
+    std::thread m_fileSystemNotificationProcessor;
+
+    std::condition_variable m_eventNotificationReady;
+    std::mutex m_eventNotificationMutex;
+
+    void ProcessChanges();
+
+    std::atomic_bool m_shouldKeepProcessingNotifications{ true };
 };
 
 #endif // VISUALIZATIONMODEL_H
