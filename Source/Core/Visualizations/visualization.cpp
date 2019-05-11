@@ -725,7 +725,7 @@ void VisualizationModel::SortNodes(Tree<VizBlock>& tree)
 {
     for (auto& node : tree) {
         node.SortChildren([](const auto& lhs, const auto& rhs) noexcept {
-            return lhs.file.size > rhs.file.size;
+            return lhs->file.size > rhs->file.size;
         });
     }
 }
