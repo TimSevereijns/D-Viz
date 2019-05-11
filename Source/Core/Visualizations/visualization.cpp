@@ -563,8 +563,11 @@ void VisualizationModel::OnFileCreation(const FileEvent& event)
                        /* size = */ event.fileSize,
                        /* type = */ FileType::REGULAR };
 
-    auto* node = Utilities::FindNodeViaPath(m_fileTree->GetRoot(), event.path);
-    node->AppendChild(VizBlock{ std::move(fileInfo) });
+    auto* node = Utilities::FindNodeViaPath(m_fileTree->GetRoot(), event.path.parent_path());
+
+    if (node) {
+        node->AppendChild(VizBlock{ std::move(fileInfo) });
+    }
 }
 
 void VisualizationModel::OnFileDeletion(const FileEvent& event)

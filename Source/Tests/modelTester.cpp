@@ -64,6 +64,25 @@ namespace
 
         return pathFromRoot;
     }
+
+    std::vector<FileEvent> SelectAllFiles(
+        const typename Tree<VizBlock>::Node& rootNode, const std::wstring_view& fileExtension,
+        FileEventType eventType)
+    {
+        std::vector<FileEvent> allEvents;
+
+        std::for_each(
+            Tree<VizBlock>::LeafIterator{ &rootNode }, Tree<VizBlock>::LeafIterator{},
+            [&](const auto& node) {
+                if (node->file.extension == fileExtension) {
+                    const auto path = PathFromRootToNode(node);
+
+                    allEvents.emplace_back(FileEvent{ path + node->file.extension, eventType });
+                }
+            });
+
+        return allEvents;
+    }
 } // namespace
 
 void ModelTester::initTestCase()
@@ -229,10 +248,10 @@ void ModelTester::TestSingleNotification(FileEventType eventType)
 {
     QVERIFY(m_tree != nullptr);
 
-    // The following notification will be read by the MockFileMonitor and sent to the model. Note
-    // that the provided path has to be a relative path to an actual file in the sample directory.
-    // If the path doesn't exist then we can't locate a matching node in the tree.
-    m_sampleNotifications = std::vector<FileEvent>{ { "spawn.hpp", eventType } };
+    std::filesystem::path absolutePathToRoot = m_model->GetTree().GetRoot()->GetData().file.name;
+    std::filesystem::path targetFile = absolutePathToRoot / "spawn.hpp";
+
+    m_sampleNotifications = std::vector<FileEvent>{ { targetFile, eventType } };
 
     m_model->StartMonitoringFileSystem();
     m_model->WaitForNextChange();
@@ -242,13 +261,8 @@ void ModelTester::TestSingleNotification(FileEventType eventType)
 
     m_model->StopMonitoringFileSystem();
 
-    //    const auto modifiedNode = possibleNotification->node;
-    //    const std::filesystem::path path{ "spawn.hpp" };
-
-    //    QCOMPARE(possibleNotification->path, path);
-    //    QCOMPARE(possibleNotification->eventType, eventType);
-    //    QCOMPARE(modifiedNode->GetData().file.name, std::wstring{ L"spawn" });
-    //    QCOMPARE(modifiedNode->GetData().file.extension, std::wstring{ L".hpp" });
+    QCOMPARE(possibleNotification->path, targetFile);
+    QCOMPARE(possibleNotification->eventType, eventType);
 }
 
 void ModelTester::TrackSingleFileModification()
@@ -270,23 +284,9 @@ void ModelTester::TrackMultipleDeletions()
 {
     QVERIFY(m_tree != nullptr);
 
-    // Simulate the deletion of all ".ipp" files:
-    m_sampleNotifications = std::vector<FileEvent>{};
-
-    std::for_each(
-        Tree<VizBlock>::LeafIterator{ m_tree->GetRoot() }, Tree<VizBlock>::LeafIterator{},
-        [&](const auto& node) {
-            if (node->file.extension == L".ipp") {
-                const auto path = PathFromRootToNode(node);
-
-                m_sampleNotifications.emplace_back(
-                    FileEvent{ path + node->file.extension, FileEventType::DELETED });
-            }
-        });
+    m_sampleNotifications = SelectAllFiles(*m_tree->GetRoot(), L".ipp", FileEventType::DELETED);
 
     m_model->StartMonitoringFileSystem();
-
-    boost::optional<FileEvent> notification;
 
     const auto totalNotifications = m_sampleNotifications.size();
     auto processedNotifications{ 0u };
@@ -294,21 +294,22 @@ void ModelTester::TrackMultipleDeletions()
     const auto startTime = std::chrono::high_resolution_clock::now();
     auto elapsedTime = std::chrono::milliseconds{ 0 };
 
-    while (processedNotifications != totalNotifications &&
-           elapsedTime < std::chrono::milliseconds(500)) {
-        notification = m_model->FetchNextFileSystemChange();
+    while (processedNotifications != totalNotifications) {
+        boost::optional<FileEvent> notification = m_model->FetchNextFileSystemChange();
 
         if (notification) {
             ++processedNotifications;
 
-            //            const auto modifiedNode = notification->node;
-
-            //            QCOMPARE(notification->eventType, FileEventType::DELETED);
-            //            QCOMPARE(modifiedNode->GetData().file.extension, std::wstring{ L".ipp" });
+            QCOMPARE(notification->eventType, FileEventType::DELETED);
+            QCOMPARE(notification->path.extension(), L".ipp");
         }
 
         elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now() - startTime);
+
+        if (elapsedTime > std::chrono::milliseconds(500)) {
+            break;
+        }
     }
 
     m_model->StopMonitoringFileSystem();
@@ -318,8 +319,8 @@ void ModelTester::TrackMultipleDeletions()
 
 void ModelTester::ApplyFileDeletion()
 {
-    std::filesystem::path absoluteRootPath = m_model->GetTree().GetRoot()->GetData().file.name;
-    std::filesystem::path targetFile = absoluteRootPath / "basic_socket.hpp";
+    std::filesystem::path absolutePathToRoot = m_model->GetTree().GetRoot()->GetData().file.name;
+    std::filesystem::path targetFile = absolutePathToRoot / "basic_socket.hpp";
 
     m_sampleNotifications =
         std::vector<FileEvent>{ { targetFile.string(), FileEventType::DELETED } };
@@ -346,7 +347,10 @@ void ModelTester::ApplyFileDeletion()
 
 void ModelTester::ApplyFileCreation()
 {
-    m_sampleNotifications = std::vector<FileEvent>{ { "fake_file.hpp", FileEventType::CREATED } };
+    std::filesystem::path absolutePathToRoot = m_model->GetTree().GetRoot()->GetData().file.name;
+    std::filesystem::path targetFile = absolutePathToRoot / "fake_file.hpp";
+
+    m_sampleNotifications = std::vector<FileEvent>{ { targetFile, FileEventType::CREATED } };
 
     const auto nodeDoesNotExist = std::none_of(
         Tree<VizBlock>::PostOrderIterator{ m_model->GetTree().GetRoot() },

@@ -28,6 +28,10 @@ namespace Utilities
     inline static Tree<VizBlock>::Node*
     FindNodeUsingRelativePath(Tree<VizBlock>::Node* rootNode, const std::filesystem::path& path)
     {
+        if (path == ".") {
+            return rootNode;
+        }
+
         auto* node = rootNode;
 
         auto filePathItr = std::begin(path);
