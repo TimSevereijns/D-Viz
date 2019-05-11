@@ -7,11 +7,11 @@
 #include "fileMonitorBase.h"
 
 #include <Tree/Tree.hpp>
-#include <boost/optional.hpp>
 
 #include <atomic>
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <thread>
 #include <unordered_map>
 
@@ -57,7 +57,7 @@ class FileSystemObserver
      *
      * @returns A notification is one is available, and boost::none if nothing is available.
      */
-    boost::optional<FileEvent> FetchNextChange();
+    std::optional<FileEvent> FetchNextChange();
 
     void WaitForNextChange();
 

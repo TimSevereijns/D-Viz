@@ -8,12 +8,12 @@
 #include "constants.h"
 
 #include <Tree/Tree.hpp>
-#include <boost/optional.hpp>
 #include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
 
 #include <cmath>
 #include <iostream>
+#include <optional>
 #include <vector>
 
 #ifdef Q_OS_WIN
@@ -147,18 +147,18 @@ namespace
      *
      * @returns The appropriate color found in the color map.
      */
-    boost::optional<QVector3D>
+    std::optional<QVector3D>
     DetermineColorFromExtension(const Tree<VizBlock>::Node& node, const Settings::Manager& settings)
     {
         const auto& colorMap = settings.GetFileColorMap();
         const auto categoryItr = colorMap.find(settings.GetActiveColorScheme());
         if (categoryItr == std::end(colorMap)) {
-            return boost::none;
+            return std::nullopt;
         }
 
         const auto extensionItr = categoryItr->second.find(node->file.extension);
         if (extensionItr == std::end(categoryItr->second)) {
-            return boost::none;
+            return std::nullopt;
         }
 
         return extensionItr->second;

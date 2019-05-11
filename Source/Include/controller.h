@@ -253,7 +253,7 @@ class Controller
     /**
      * @brief Fetches oldest, unprocessed file system change notification.
      */
-    boost::optional<FileEvent> FetchFileModification();
+    std::optional<FileEvent> FetchFileModification();
 
   private:
     template <typename NodeSelectorType>

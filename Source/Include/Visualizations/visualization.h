@@ -1,14 +1,13 @@
 #ifndef VISUALIZATIONMODEL_H
 #define VISUALIZATIONMODEL_H
 
-#include <boost/optional.hpp>
-
 #include <QVector3D>
 #include <QVector>
 
 #include <cstdint>
 #include <memory>
 #include <numeric>
+#include <optional>
 #include <thread>
 #include <unordered_map>
 
@@ -193,7 +192,7 @@ class VisualizationModel
      * @returns The metadata on the next available file to have changed since the visualization
      * was last refreshed.
      */
-    boost::optional<FileEvent> FetchNextFileSystemChange();
+    std::optional<FileEvent> FetchNextFileSystemChange();
 
     /**
      * @returns The root path for the current visualization. If no visualization has been loaded,

@@ -9,11 +9,10 @@
 #include "fileChangeNotification.hpp"
 #include "fileMonitorBase.h"
 
-#include "boost/optional.hpp"
-
 #include <array>
 #include <filesystem>
 #include <functional>
+#include <optional>
 #include <thread>
 #include <vector>
 
@@ -133,7 +132,7 @@ class WindowsFileMonitor : public FileMonitorBase
 
     std::function<void(FileEvent&&)> m_notificationCallback;
 
-    boost::optional<std::wstring> m_pendingRenameEvent;
+    std::optional<std::wstring> m_pendingRenameEvent;
 };
 
 #endif // Q_OS_WIN

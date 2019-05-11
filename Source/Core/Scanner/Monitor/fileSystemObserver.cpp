@@ -123,13 +123,13 @@ bool FileSystemObserver::IsActive() const
     return m_fileSystemMonitor->IsActive();
 }
 
-boost::optional<FileEvent> FileSystemObserver::FetchNextChange()
+std::optional<FileEvent> FileSystemObserver::FetchNextChange()
 {
     FileEvent notification;
 
     const auto retrievedNotification = m_pendingVisualUpdates.TryPop(notification);
     if (!retrievedNotification) {
-        return boost::none;
+        return std::nullopt;
     }
 
     return std::move(notification);

@@ -119,9 +119,9 @@ void ModelTester::init()
 {
     QVERIFY(m_tree != nullptr);
 
-    const auto notificationGenerator = [&]() -> boost::optional<FileEvent> {
+    const auto notificationGenerator = [&]() -> std::optional<FileEvent> {
         if (m_sampleNotifications.empty()) {
-            return boost::none;
+            return std::nullopt;
         };
 
         const auto nextNotification = m_sampleNotifications.back();
@@ -257,7 +257,7 @@ void ModelTester::TestSingleNotification(FileEventType eventType)
     m_model->WaitForNextChange();
 
     const auto possibleNotification = m_model->FetchNextFileSystemChange();
-    QVERIFY(possibleNotification.is_initialized());
+    QVERIFY(possibleNotification.has_value());
 
     m_model->StopMonitoringFileSystem();
 
@@ -295,7 +295,7 @@ void ModelTester::TrackMultipleDeletions()
     auto elapsedTime = std::chrono::milliseconds{ 0 };
 
     while (processedNotifications != totalNotifications) {
-        boost::optional<FileEvent> notification = m_model->FetchNextFileSystemChange();
+        std::optional<FileEvent> notification = m_model->FetchNextFileSystemChange();
 
         if (notification) {
             ++processedNotifications;

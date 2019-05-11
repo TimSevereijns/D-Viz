@@ -4,11 +4,10 @@
 #include <Scanner/Monitor/fileChangeNotification.hpp>
 #include <Scanner/Monitor/fileMonitorBase.h>
 
-#include <boost/optional.hpp>
-
 #include <atomic>
 #include <filesystem>
 #include <functional>
+#include <optional>
 #include <thread>
 
 /**
@@ -17,7 +16,7 @@
 class MockFileMonitor : public FileMonitorBase
 {
   public:
-    MockFileMonitor(std::function<boost::optional<FileEvent>()> notificationGenerator)
+    MockFileMonitor(std::function<std::optional<FileEvent>()> notificationGenerator)
         : m_notificationGenerator{ std::move(notificationGenerator) }
     {
     }
@@ -64,7 +63,7 @@ class MockFileMonitor : public FileMonitorBase
         }
     }
 
-    std::function<boost::optional<FileEvent>()> m_notificationGenerator;
+    std::function<std::optional<FileEvent>()> m_notificationGenerator;
 
     std::function<void(FileEvent&&)> m_onNotificationCallback;
 

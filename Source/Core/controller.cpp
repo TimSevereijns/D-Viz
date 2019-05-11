@@ -198,7 +198,7 @@ bool Controller::IsFileSystemBeingMonitored() const
     return m_model->IsFileSystemBeingMonitored();
 }
 
-boost::optional<FileEvent> Controller::FetchFileModification()
+std::optional<FileEvent> Controller::FetchFileModification()
 {
     return m_model->FetchNextFileSystemChange();
 }

@@ -7,7 +7,6 @@
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/optional.hpp>
 
 #include <Stopwatch/Stopwatch.hpp>
 #include <gsl/gsl_assert>
@@ -16,6 +15,7 @@
 #include <algorithm>
 #include <chrono>
 #include <iostream>
+#include <optional>
 #include <string>
 
 #include <QColor>
@@ -42,14 +42,14 @@ namespace
      * @returns The point of intersection if there is an intersection greater than the margin of
      * error, or boost::none if no such intersection exists.
      */
-    boost::optional<QVector3D> DoesRayIntersectPlane(
+    std::optional<QVector3D> DoesRayIntersectPlane(
         const Ray& ray, const QVector3D& pointOnPlane, const QVector3D& planeNormal)
     {
         constexpr auto epsilon{ 0.0001f };
 
         const auto denominator = QVector3D::dotProduct(ray.Direction(), planeNormal);
         if (std::abs(denominator) < epsilon) {
-            return boost::none;
+            return std::nullopt;
         }
 
         const auto numerator = QVector3D::dotProduct(pointOnPlane - ray.Origin(), planeNormal);
@@ -58,7 +58,7 @@ namespace
         const bool doesRayHitPlane = std::abs(scalar) > epsilon;
 
         if (!doesRayHitPlane) {
-            return boost::none;
+            return std::nullopt;
         }
 
         return scalar * ray.Direction().normalized() + ray.Origin();
@@ -72,7 +72,7 @@ namespace
      *
      * @return The closest intersection point, or boost::none should anything weird occur.
      */
-    boost::optional<QVector3D>
+    std::optional<QVector3D>
     FindClosestIntersectionPoint(const Ray& ray, const std::vector<QVector3D>& allIntersections)
     {
         const auto& closest = std::min_element(
@@ -82,7 +82,7 @@ namespace
             });
 
         if (closest == std::end(allIntersections)) {
-            return boost::none;
+            return std::nullopt;
         }
 
         return *closest;
@@ -96,7 +96,7 @@ namespace
      *
      * @returns The point of intersection should it exist; boost::none otherwise.
      */
-    boost::optional<QVector3D> DoesRayIntersectBlock(const Ray& ray, const Block& block)
+    std::optional<QVector3D> DoesRayIntersectBlock(const Ray& ray, const Block& block)
     {
         std::vector<QVector3D> allIntersections;
 
@@ -111,7 +111,7 @@ namespace
                                           static_cast<float>(randomPointOnTopFace.y()),
                                           static_cast<float>(randomPointOnTopFace.z()) };
 
-            const boost::optional<QVector3D> intersectionPoint =
+            const std::optional<QVector3D> intersectionPoint =
                 DoesRayIntersectPlane(ray, pointOnPlane, POSITIVE_Y_NORMAL);
 
             // clang-format off
@@ -130,7 +130,7 @@ namespace
                                           static_cast<float>(randomPointOnFrontFace.y()),
                                           static_cast<float>(randomPointOnFrontFace.z()) };
 
-            const boost::optional<QVector3D> intersectionPoint =
+            const std::optional<QVector3D> intersectionPoint =
                 DoesRayIntersectPlane(ray, pointOnPlane, POSITIVE_Z_NORMAL);
 
             // clang-format off
@@ -149,7 +149,7 @@ namespace
                                           static_cast<float>(randomPointOnBackFace.y()),
                                           static_cast<float>(randomPointOnBackFace.z()) };
 
-            const boost::optional<QVector3D> intersectionPoint =
+            const std::optional<QVector3D> intersectionPoint =
                 DoesRayIntersectPlane(ray, pointOnPlane, NEGATIVE_Z_NORMAL);
 
             // clang-format off
@@ -168,7 +168,7 @@ namespace
                                           static_cast<float>(randomPointOnLeftFace.y()),
                                           static_cast<float>(randomPointOnLeftFace.z()) };
 
-            const boost::optional<QVector3D> intersectionPoint =
+            const std::optional<QVector3D> intersectionPoint =
                 DoesRayIntersectPlane(ray, pointOnPlane, NEGATIVE_X_NORMAL);
 
             // clang-format off
@@ -187,7 +187,7 @@ namespace
                                           static_cast<float>(randomPointOnRightFace.y()),
                                           static_cast<float>(randomPointOnRightFace.z()) };
 
-            const boost::optional<QVector3D> intersectionPoint =
+            const std::optional<QVector3D> intersectionPoint =
                 DoesRayIntersectPlane(ray, pointOnPlane, POSITIVE_X_NORMAL);
 
             // clang-format off
@@ -625,7 +625,7 @@ bool VisualizationModel::IsFileSystemBeingMonitored() const
     return m_fileSystemObserver.IsActive();
 }
 
-boost::optional<FileEvent> VisualizationModel::FetchNextFileSystemChange()
+std::optional<FileEvent> VisualizationModel::FetchNextFileSystemChange()
 {
     return m_fileSystemObserver.FetchNextChange();
 }
