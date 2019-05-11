@@ -233,6 +233,8 @@ class VisualizationModel
 
     void UpdateAncestorSizes(Tree<VizBlock>::Node* node);
 
+    void ProcessChanges();
+
     void OnFileCreation(const FileEvent& notification);
 
     void OnFileDeletion(const FileEvent& notification);
@@ -240,8 +242,6 @@ class VisualizationModel
     void OnFileModification(const FileEvent& notification);
 
     void OnFileNameChange(const FileEvent& notification);
-
-    bool AssociatedNodeWithNotification(FileEvent& notification);
 
     std::filesystem::path m_rootPath;
 
@@ -280,8 +280,6 @@ class VisualizationModel
 
     std::condition_variable m_eventNotificationReady;
     std::mutex m_eventNotificationMutex;
-
-    void ProcessChanges();
 
     std::atomic_bool m_shouldKeepProcessingNotifications{ true };
 };

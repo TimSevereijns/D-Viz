@@ -41,7 +41,7 @@ class FileSystemObserver
     /**
      * @brief Stop file system monitoring.
      */
-    void StopMonitoring() noexcept;
+    void StopMonitoring();
 
     /**
      * @returns True if the file system observer is actively monitoring; false othwerise.

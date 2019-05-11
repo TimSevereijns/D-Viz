@@ -276,6 +276,37 @@ namespace
 
         return allIntersections;
     }
+
+    /**
+     * @brief Logs filesystem changes.
+     */
+    void LogFileSystemEvent(const FileEvent& event)
+    {
+        switch (event.eventType) {
+            case FileEventType::CREATED:
+                spdlog::get(Constants::Logging::FILESYSTEM_LOG)
+                    ->info(fmt::format("Create: {}", event.path.string()));
+                break;
+
+            case FileEventType::DELETED:
+                spdlog::get(Constants::Logging::FILESYSTEM_LOG)
+                    ->info(fmt::format("Deleted: {}", event.path.string()));
+                break;
+
+            case FileEventType::TOUCHED:
+                spdlog::get(Constants::Logging::FILESYSTEM_LOG)
+                    ->info(fmt::format("Modified: {}", event.path.string()));
+                break;
+
+            case FileEventType::RENAMED:
+                spdlog::get(Constants::Logging::FILESYSTEM_LOG)
+                    ->info(fmt::format("Renamed: {}", event.path.string()));
+                break;
+
+            default:
+                std::abort();
+        }
+    }
 } // namespace
 
 VisualizationModel::VisualizationModel(
@@ -518,7 +549,7 @@ void VisualizationModel::ProcessChanges()
             continue;
         }
 
-        // LogFileSystemEvent(*event);
+        LogFileSystemEvent(*event);
 
         // @todo Should there be an upper limit on the number of changes that can be in the
         // queue at any given time?
