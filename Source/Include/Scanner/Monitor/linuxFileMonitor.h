@@ -8,8 +8,7 @@
 #include "FileEvent.hpp"
 #include "fileMonitorBase.h"
 
-#include <boost/filesystem/path.hpp>
-
+#include <filesystem>
 #include <functional>
 #include <thread>
 
@@ -40,7 +39,7 @@ class LinuxFileMonitor : public FileMonitorBase
   private:
     bool m_isActive{ false };
 
-    boost::filesystem::path m_pathToWatch;
+    std::filesystem::path m_pathToWatch;
 
     std::thread m_monitoringThread;
 };

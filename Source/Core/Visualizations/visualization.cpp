@@ -497,18 +497,18 @@ void VisualizationModel::StopMonitoringFileSystem()
     m_fileSystemObserver.StopMonitoring();
 }
 
-void VisualizationModel::WaitForNextChange()
+void VisualizationModel::WaitForNextModelChange()
 {
-    m_fileSystemObserver.WaitForNextChange();
+    m_fileSystemObserver.WaitForNextModelChange();
 }
 
 void VisualizationModel::RefreshTreemap()
 {
-    auto fileEvent = m_fileSystemObserver.FetchNextChange();
+    auto fileEvent = m_fileSystemObserver.FetchNextModelChange();
 
     while (fileEvent) {
         UpdateAffectedNodes(*fileEvent);
-        fileEvent = m_fileSystemObserver.FetchNextChange();
+        fileEvent = m_fileSystemObserver.FetchNextModelChange();
     }
 
     // @todo Sort the tree.
@@ -558,16 +558,18 @@ void VisualizationModel::UpdateAffectedNodes(const FileEvent& event)
 
 void VisualizationModel::OnFileCreation(const FileEvent& event)
 {
+    auto* node = Utilities::FindNodeViaPath(m_fileTree->GetRoot(), event.path.parent_path());
+
+    if (!node) {
+        return;
+    }
+
     FileInfo fileInfo{ /* name = */ event.path.stem().wstring(),
                        /* extension = */ event.path.extension().wstring(),
                        /* size = */ event.fileSize,
                        /* type = */ FileType::REGULAR };
 
-    auto* node = Utilities::FindNodeViaPath(m_fileTree->GetRoot(), event.path.parent_path());
-
-    if (node) {
-        node->AppendChild(VizBlock{ std::move(fileInfo) });
-    }
+    node->AppendChild(VizBlock{ std::move(fileInfo) });
 }
 
 void VisualizationModel::OnFileDeletion(const FileEvent& event)
@@ -589,7 +591,7 @@ void VisualizationModel::OnFileModification(const FileEvent& event)
             node->GetData().file.size = event.fileSize;
         }
     } else {
-        // @todo What does it mean for a directory to be modified?
+        // @todo What does it mean for a directory to be modified? Can this be ignored?
     }
 }
 
@@ -625,9 +627,14 @@ bool VisualizationModel::IsFileSystemBeingMonitored() const
     return m_fileSystemObserver.IsActive();
 }
 
-std::optional<FileEvent> VisualizationModel::FetchNextFileSystemChange()
+std::optional<FileEvent> VisualizationModel::FetchNextVisualChange()
 {
-    return m_fileSystemObserver.FetchNextChange();
+    return m_fileSystemObserver.FetchNextVisualChange();
+}
+
+std::optional<FileEvent> VisualizationModel::FetchNextModelChange()
+{
+    return m_fileSystemObserver.FetchNextModelChange();
 }
 
 std::filesystem::path VisualizationModel::GetRootPath() const

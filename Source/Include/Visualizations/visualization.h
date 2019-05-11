@@ -189,10 +189,20 @@ class VisualizationModel
     bool IsFileSystemBeingMonitored() const;
 
     /**
+     * @brief Returns the next visual changes in need of processing.
+     *
      * @returns The metadata on the next available file to have changed since the visualization
      * was last refreshed.
      */
-    std::optional<FileEvent> FetchNextFileSystemChange();
+    std::optional<FileEvent> FetchNextVisualChange();
+
+    /**
+     * @brief Returns the next model changes in need of processing.
+     *
+     * @returns The metadata on the next available file to have changed since the visualization
+     * was last refreshed.
+     */
+    std::optional<FileEvent> FetchNextModelChange();
 
     /**
      * @returns The root path for the current visualization. If no visualization has been loaded,
@@ -201,9 +211,9 @@ class VisualizationModel
     std::filesystem::path GetRootPath() const;
 
     /**
-     * @brief WaitForNextChange
+     * @brief
      */
-    void WaitForNextChange();
+    void WaitForNextModelChange();
 
     /**
      * @brief Applies all pending visualization updates to the model.

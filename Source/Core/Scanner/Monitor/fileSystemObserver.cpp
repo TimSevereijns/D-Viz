@@ -72,7 +72,7 @@ void FileSystemObserver::StartMonitoring(Tree<VizBlock>::Node* rootNode)
     m_fileSystemNotificationProcessor = std::thread{ [&] { ProcessChanges(); } };
 }
 
-void FileSystemObserver::StopMonitoring()
+void FileSystemObserver::StopMonitoring() noexcept
 {
     if (!m_fileSystemMonitor->IsActive()) {
         return;
@@ -83,11 +83,10 @@ void FileSystemObserver::StopMonitoring()
     m_fileEvents.AbandonWait();
 }
 
-void FileSystemObserver::WaitForNextChange()
+void FileSystemObserver::WaitForNextModelChange()
 {
-    // @todo Use model updates queue instead!
     std::unique_lock<std::mutex> lock{ m_eventNotificationMutex };
-    m_eventNotificationReady.wait(lock, [&]() { return !m_pendingModelUpdates.empty(); });
+    m_eventNotificationReady.wait(lock, [&]() { return !m_pendingModelUpdates.IsEmpty(); });
 }
 
 void FileSystemObserver::ProcessChanges()
@@ -95,25 +94,19 @@ void FileSystemObserver::ProcessChanges()
     while (m_shouldKeepProcessingNotifications) {
         const auto event = m_fileEvents.WaitAndPop();
         if (!event) {
-            // If we got here, it may indicates that the wait operation has probably been abandoned
-            // due to a DTOR invocation.
+            // @note If we got here, it may indicates that the wait operation has probably been
+            // abandoned due to a DTOR invocation.
             continue;
         }
 
         LogFileSystemEvent(*event);
 
-        //        const auto successfullyAssociated = AssociateNotificationWithNode(*notification);
-        //        if (!successfullyAssociated) {
-        //            return;
-        //        }
-
         // @todo Should there be an upper limit on the number of changes that can be in the
         // queue at any given time?
-        m_pendingVisualUpdates.Emplace(*event);
-        m_pendingModelUpdates.emplace(
-            std::move(event->path), *event); //< @todo Is this even necessary?
 
-        std::lock_guard<std::mutex> guard{ m_eventNotificationMutex };
+        m_pendingVisualUpdates.Push(*event);
+        m_pendingModelUpdates.Push(*event);
+
         m_eventNotificationReady.notify_one();
     }
 }
@@ -123,7 +116,19 @@ bool FileSystemObserver::IsActive() const
     return m_fileSystemMonitor->IsActive();
 }
 
-std::optional<FileEvent> FileSystemObserver::FetchNextChange()
+std::optional<FileEvent> FileSystemObserver::FetchNextModelChange()
+{
+    FileEvent notification;
+
+    const auto retrievedNotification = m_pendingModelUpdates.TryPop(notification);
+    if (!retrievedNotification) {
+        return std::nullopt;
+    }
+
+    return std::move(notification);
+}
+
+std::optional<FileEvent> FileSystemObserver::FetchNextVisualChange()
 {
     FileEvent notification;
 

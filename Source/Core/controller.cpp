@@ -200,7 +200,7 @@ bool Controller::IsFileSystemBeingMonitored() const
 
 std::optional<FileEvent> Controller::FetchFileModification()
 {
-    return m_model->FetchNextFileSystemChange();
+    return m_model->FetchNextVisualChange();
 }
 
 void Controller::ComputeProgress(const ScanningProgress& progress)

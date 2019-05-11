@@ -124,10 +124,10 @@ void ModelTester::init()
             return std::nullopt;
         };
 
-        const auto nextNotification = m_sampleNotifications.back();
+        auto nextNotification = m_sampleNotifications.back();
         m_sampleNotifications.pop_back();
 
-        return nextNotification;
+        return std::move(nextNotification);
     };
 
     m_model = std::make_unique<SquarifiedTreeMap>(
@@ -254,12 +254,11 @@ void ModelTester::TestSingleNotification(FileEventType eventType)
     m_sampleNotifications = std::vector<FileEvent>{ { targetFile, eventType } };
 
     m_model->StartMonitoringFileSystem();
-    m_model->WaitForNextChange();
-
-    const auto possibleNotification = m_model->FetchNextFileSystemChange();
-    QVERIFY(possibleNotification.has_value());
-
+    m_model->WaitForNextModelChange();
     m_model->StopMonitoringFileSystem();
+
+    const auto possibleNotification = m_model->FetchNextModelChange();
+    QVERIFY(possibleNotification.has_value());
 
     QCOMPARE(possibleNotification->path, targetFile);
     QCOMPARE(possibleNotification->eventType, eventType);
@@ -292,10 +291,9 @@ void ModelTester::TrackMultipleDeletions()
     auto processedNotifications{ 0u };
 
     const auto startTime = std::chrono::high_resolution_clock::now();
-    auto elapsedTime = std::chrono::milliseconds{ 0 };
 
     while (processedNotifications != totalNotifications) {
-        std::optional<FileEvent> notification = m_model->FetchNextFileSystemChange();
+        std::optional<FileEvent> notification = m_model->FetchNextModelChange();
 
         if (notification) {
             ++processedNotifications;
@@ -304,7 +302,7 @@ void ModelTester::TrackMultipleDeletions()
             QCOMPARE(notification->path.extension(), L".ipp");
         }
 
-        elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now() - startTime);
 
         if (elapsedTime > std::chrono::milliseconds(500)) {
@@ -333,7 +331,7 @@ void ModelTester::ApplyFileDeletion()
     QVERIFY(foundTargetNode == true);
 
     m_model->StartMonitoringFileSystem();
-    m_model->WaitForNextChange();
+    m_model->WaitForNextModelChange();
     m_model->RefreshTreemap();
     m_model->StopMonitoringFileSystem();
 
@@ -360,7 +358,7 @@ void ModelTester::ApplyFileCreation()
     QVERIFY(nodeDoesNotExist == true);
 
     m_model->StartMonitoringFileSystem();
-    m_model->WaitForNextChange();
+    m_model->WaitForNextModelChange();
     m_model->RefreshTreemap();
     m_model->StopMonitoringFileSystem();
 

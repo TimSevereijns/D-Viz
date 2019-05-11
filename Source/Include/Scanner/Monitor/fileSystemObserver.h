@@ -13,10 +13,9 @@
 #include <memory>
 #include <optional>
 #include <thread>
-#include <unordered_map>
 
 /**
- * @brief Recursively observes the file system for changes to any files.
+ * @brief Observes the filesystem for changes.
  */
 class FileSystemObserver
 {
@@ -45,7 +44,7 @@ class FileSystemObserver
     /**
      * @brief Stop file system monitoring.
      */
-    void StopMonitoring();
+    void StopMonitoring() noexcept;
 
     /**
      * @returns True if the file system observer is actively monitoring; false othwerise.
@@ -55,11 +54,23 @@ class FileSystemObserver
     /**
      * @brief Fetches the next pending file system change.
      *
-     * @returns A notification is one is available, and boost::none if nothing is available.
+     * @returns A notification is one is available, and std::nullopt if nothing is available.
      */
-    std::optional<FileEvent> FetchNextChange();
+    std::optional<FileEvent> FetchNextModelChange();
 
-    void WaitForNextChange();
+    /**
+     * @brief Fetches the next pending file system change.
+     *
+     * @returns A notification is one is available, and std::nullopt if nothing is available.
+     */
+    std::optional<FileEvent> FetchNextVisualChange();
+
+    /**
+     * @brief Blocks until the next model change occurs.
+     *
+     * This is rather useful for unit testing...
+     */
+    void WaitForNextModelChange();
 
   private:
     bool AssociateNotificationWithNode(FileEvent& notification);
@@ -75,13 +86,14 @@ class FileSystemObserver
     ThreadSafeQueue<FileEvent> m_fileEvents;
 
     // This queue contains pending tree node change notifications. These notifications
-    // still need to be retrieved by the view so that the UI can be updated to reflect filesystem
-    // activity.
+    // still need to be retrieved by the view so that the UI can be updated to visually represent
+    // filesystem activity.
     ThreadSafeQueue<FileEvent> m_pendingVisualUpdates;
 
-    // This map tracks changes that will need to be applied to the treemap once the user refreshes
-    // the visualization to reflect filesystem changes.
-    std::unordered_map<std::filesystem::path, FileEvent> m_pendingModelUpdates;
+    // This queue contains pending changes that will need to be applied to the treemap once the user
+    // refreshes the visualization to reflect filesystem changes. These notifications are best
+    // processed in the order in which they occurred.
+    ThreadSafeQueue<FileEvent> m_pendingModelUpdates;
 
     std::thread m_fileSystemNotificationProcessor;
 
