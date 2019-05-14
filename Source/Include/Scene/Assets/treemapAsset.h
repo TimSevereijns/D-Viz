@@ -53,14 +53,14 @@ namespace Assets
         void Refresh() override;
 
         /**
-         * @copydoc Asset::Base::UpdateVBO()
-         */
-        void UpdateVBO(const Tree<VizBlock>::Node& node, Assets::Event action) override;
-
-        /**
          * @copydoc Asset::Base::IsAssetLoaded()
          */
         bool IsAssetLoaded() const override;
+
+        /**
+         * @todo
+         */
+        void SetNodeColor(const Tree<VizBlock>::Node& node, const QVector3D& color);
 
         /**
          * @brief Loads the TreeMap nodes into the necessary graphics buffers.
@@ -90,6 +90,8 @@ namespace Assets
         std::uint32_t GetBlockCount() const;
 
       private:
+        void UpdateVBO(const Tree<VizBlock>::Node& node, const QVector3D& color);
+
         float ComputeWorldUnitsPerTexel(const BoundingBox& boundingBox);
 
         void InitializeShadowMachineryOnMainShader();

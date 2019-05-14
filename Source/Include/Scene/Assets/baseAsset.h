@@ -17,16 +17,6 @@ template <typename DataType> class TreeNode;
 
 namespace Assets
 {
-    enum struct Event
-    {
-        SELECTED,
-        HIGHLIGHTED,
-        UNSELECTED,
-        DELETED,
-        TOUCHED,
-        RENAMED
-    };
-
     /**
      * @brief The Asset::Base class is an abstract base class that can be used to simplify the
      * management and rendering of assets in the scene.
@@ -155,14 +145,6 @@ namespace Assets
          * and color data buffers if the asset is to remain hidden for a while.
          */
         virtual void Hide();
-
-        /**
-         * @brief Updates the portion of the VBO associated with the specified TreeNode.
-         *
-         * @param[in] node            The TreeNode whose visualization should be updated.
-         * @param[in] action          The type of update to perform on the target VBO segment.
-         */
-        virtual void UpdateVBO(const Tree<VizBlock>::Node& node, Event action);
 
       protected:
         /**

@@ -105,8 +105,4 @@ namespace Assets
     {
         m_shouldRender = false;
     }
-
-    void AssetBase::UpdateVBO(const Tree<VizBlock>::Node&, Assets::Event)
-    {
-    }
-} // namespace Asset
+} // namespace Assets

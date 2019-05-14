@@ -150,6 +150,8 @@ namespace
     std::optional<QVector3D>
     DetermineColorFromExtension(const Tree<VizBlock>::Node& node, const Settings::Manager& settings)
     {
+        // @todo Move this function to the settings manager.
+
         const auto& colorMap = settings.GetFileColorMap();
         const auto categoryItr = colorMap.find(settings.GetActiveColorScheme());
         if (categoryItr == std::end(colorMap)) {
@@ -162,42 +164,6 @@ namespace
         }
 
         return extensionItr->second;
-    }
-
-    /**
-     * @brief Restores the previously selected node to its non-selected color based on the rendering
-     * settings.
-     *
-     * @param[in] node               The node whose color needs to be restored.
-     * @param[in] settings           The settings that will determine the color.
-     *
-     * @returns The color to restore the node to.
-     */
-    QVector3D RestoreColor(const Tree<VizBlock>::Node& node, const Settings::Manager& settings)
-    {
-        const auto fileColor = DetermineColorFromExtension(node, settings);
-        if (fileColor) {
-            return *fileColor;
-        }
-
-        if (node.GetData().file.type != FileType::DIRECTORY) {
-            return Constants::Colors::FILE_GREEN;
-        }
-
-        if (!settings.GetVisualizationParameters().useDirectoryGradient) {
-            return Constants::Colors::WHITE;
-        }
-
-        auto* rootNode = &node;
-        while (rootNode->GetParent()) {
-            rootNode = rootNode->GetParent();
-        }
-
-        const auto ratio =
-            static_cast<float>(node->file.size) / static_cast<float>((*rootNode)->file.size);
-
-        ColorGradient gradient;
-        return gradient.GetColorAtValue(ratio);
     }
 
     /**
@@ -582,9 +548,6 @@ namespace Assets
 
     void Treemap::ComputeAppropriateBlockColor(const Tree<VizBlock>::Node& node)
     {
-        // @todo Need to also take into consideration whether the node is highlighted or selected,
-        // since we don't want to get out of sync with the controller's view of the world.
-
         if (m_settingsManager.GetActiveColorScheme() != Constants::ColorScheme::DEFAULT) {
             const auto fileColor = DetermineColorFromExtension(node, m_settingsManager);
             if (fileColor) {
@@ -759,7 +722,7 @@ namespace Assets
         InitializeBlockTransformations();
     }
 
-    void Treemap::UpdateVBO(const Tree<VizBlock>::Node& node, Assets::Event action)
+    void Treemap::SetNodeColor(const Tree<VizBlock>::Node& node, const QVector3D& color)
     {
         Expects(m_VAO.isCreated());
         Expects(m_blockColorBuffer.isCreated());
@@ -768,40 +731,13 @@ namespace Assets
             return;
         }
 
+        UpdateVBO(node, color);
+    }
+
+    void Treemap::UpdateVBO(const Tree<VizBlock>::Node& node, const QVector3D& color)
+    {
         constexpr auto colorTupleSize = static_cast<int>(sizeof(QVector3D));
         const auto offsetIntoColorBuffer = node->offsetIntoVBO * colorTupleSize;
-
-        QVector3D newColor;
-
-        switch (action) {
-            case Assets::Event::SELECTED: {
-                newColor = Constants::Colors::CANARY_YELLOW;
-                break;
-            }
-            case Assets::Event::HIGHLIGHTED: {
-                newColor = Constants::Colors::SLATE_GRAY;
-                break;
-            }
-            case Assets::Event::UNSELECTED: {
-                // @todo Update restoration logic to account for colors that represent file system
-                // modifications.
-
-                newColor = RestoreColor(node, m_settingsManager);
-                break;
-            }
-            case Assets::Event::TOUCHED: {
-                newColor = Constants::Colors::BABY_BLUE; //< @todo Pick better color.
-                break;
-            }
-            case Assets::Event::RENAMED: {
-                newColor = Constants::Colors::HOT_PINK; //< @todo Pick better color.
-                break;
-            }
-            case Assets::Event::DELETED: {
-                newColor = Constants::Colors::CORAL; //< @todo Pick better color.
-                break;
-            }
-        }
 
         m_VAO.bind();
         m_blockColorBuffer.bind();
@@ -810,7 +746,7 @@ namespace Assets
             /* target = */ GL_ARRAY_BUFFER,
             /* offset = */ offsetIntoColorBuffer,
             /* size = */ colorTupleSize,
-            /* data = */ &newColor);
+            /* data = */ &color);
 
         m_blockColorBuffer.release();
         m_VAO.release();
