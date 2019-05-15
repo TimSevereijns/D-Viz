@@ -257,7 +257,7 @@ class Controller
 
   private:
     template <typename NodeSelectorType>
-    void ProcessSelection(
+    void ProcessHighlightedNodes(
         const NodeSelectorType& nodeSelector,
         const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& callback);
 

@@ -407,7 +407,7 @@ void Controller::ClearHighlightedNodes(
 }
 
 template <typename NodeSelectorType>
-void Controller::ProcessSelection(
+void Controller::ProcessHighlightedNodes(
     const NodeSelectorType& nodeSelector,
     const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& callback)
 {
@@ -429,7 +429,7 @@ void Controller::HighlightAncestors(
         m_model->HighlightAncestors(node);
     };
 
-    ProcessSelection(selector, callback);
+    ProcessHighlightedNodes(selector, callback);
 }
 
 void Controller::HighlightDescendants(
@@ -440,7 +440,7 @@ void Controller::HighlightDescendants(
         m_model->HighlightDescendants(node, m_settingsManager.GetVisualizationParameters());
     };
 
-    ProcessSelection(selector, callback);
+    ProcessHighlightedNodes(selector, callback);
 }
 
 void Controller::HighlightAllMatchingExtensions(
@@ -450,7 +450,7 @@ void Controller::HighlightAllMatchingExtensions(
     const auto& parameters = m_settingsManager.GetVisualizationParameters();
     const auto selector = [&] { m_model->HighlightMatchingFileExtension(sampleNode, parameters); };
 
-    ProcessSelection(selector, callback);
+    ProcessHighlightedNodes(selector, callback);
 }
 
 void Controller::SearchTreeMap(
@@ -479,7 +479,7 @@ void Controller::SearchTreeMap(
             });
     };
 
-    ProcessSelection(selector, selectionCallback);
+    ProcessHighlightedNodes(selector, selectionCallback);
 }
 
 std::pair<double, std::wstring> Controller::ConvertFileSizeToNumericPrefix(
