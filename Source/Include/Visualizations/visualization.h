@@ -36,7 +36,7 @@ class VisualizationModel
     VisualizationModel(
         std::unique_ptr<FileMonitorBase> fileMonitor, const std::filesystem::path& path);
 
-    virtual ~VisualizationModel() = default;
+    virtual ~VisualizationModel();
 
     VisualizationModel(const VisualizationModel&) = delete;
     VisualizationModel& operator=(const VisualizationModel&) = delete;

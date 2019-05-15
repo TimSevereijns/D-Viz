@@ -315,6 +315,11 @@ VisualizationModel::VisualizationModel(
 {
 }
 
+VisualizationModel::~VisualizationModel()
+{
+    StopMonitoringFileSystem();
+}
+
 void VisualizationModel::UpdateBoundingBoxes()
 {
     Expects(m_hasDataBeenParsed == true);
@@ -446,6 +451,7 @@ void VisualizationModel::HighlightAncestors(const Tree<VizBlock>::Node& node)
     auto* currentNode = node.GetParent();
     while (currentNode) {
         m_highlightedNodes.emplace_back(currentNode);
+
         currentNode = currentNode->GetParent();
     }
 }
@@ -461,7 +467,7 @@ void VisualizationModel::HighlightDescendants(
                 return;
             }
 
-            m_highlightedNodes.emplace_back(&node);
+            HighlightNode(&node);
         });
 }
 
@@ -477,7 +483,7 @@ void VisualizationModel::HighlightMatchingFileExtension(
                 return;
             }
 
-            m_highlightedNodes.emplace_back(&node);
+            HighlightNode(&node);
         });
 }
 
@@ -512,8 +518,15 @@ void VisualizationModel::HighlightMatchingFileName(
                 return;
             }
 
-            m_highlightedNodes.emplace_back(&node);
+            HighlightNode(&node);
         });
+}
+
+void VisualizationModel::HighlightNode(const Tree<VizBlock>::Node* const node)
+{
+    Expects(node != nullptr);
+
+    m_highlightedNodes.emplace_back(node);
 }
 
 void VisualizationModel::StartMonitoringFileSystem()
