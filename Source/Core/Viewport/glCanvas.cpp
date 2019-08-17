@@ -773,7 +773,7 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
         QString::fromStdWString(L" \xB5s / frame"));
 }
 
-void GLCanvas::ProcessFileTreeChanges()
+void GLCanvas::VisualizeFilesystemActivity()
 {
     if (!m_controller.HasModelBeenLoaded() || !m_controller.IsFileSystemBeingMonitored()) {
         return;
@@ -789,29 +789,23 @@ void GLCanvas::ProcessFileTreeChanges()
     }
 
     while (notification) {
-        //        const auto& node = notification->node;
-        //        if (m_controller.GetSettingsManager().ShouldBlockBeProcessed(node->GetData())) {
-        //            switch (FileEventType->eventType) {
-        //                case FileEventType::CREATED:
-        //                    // If a file is newly added, then there's nothing to update in the
-        //                    existing
-        //                    // visualization.
-        //                    break;
-        //                case FileEventType::DELETED:
-        //                    treemap->UpdateVBO(*notification->node, Assets::Event::DELETED);
-        //                    break;
-        //                case FileEventType::TOUCHED:
-        //                    treemap->UpdateVBO(*notification->node, Assets::Event::TOUCHED);
-        //                    break;
-        //                case FileEventType::RENAMED:
-        //                    // @todo I'll need to be notified of the old name to pick up rename
-        //                    events. treemap->UpdateVBO(*notification->node,
-        //                    Assets::Event::RENAMED); break;
-        //                default:
-        //                    Expects(false);
-        //                    break;
-        //            }
-        //}
+        const auto& fileEvent = *notification;
+
+        const auto* affectedNode =
+            Utilities::FindNodeUsingRelativePath(m_controller.GetTree().GetRoot(), fileEvent.path);
+
+        if (affectedNode == nullptr) {
+            // @note Since temporary files may have been created after the latest scan, it is
+            // possible for an event to not have an associated node in the tree.
+            notification = m_controller.FetchFileModification();
+            continue;
+        }
+
+        if (fileEvent.eventType == FileEventType::TOUCHED) {
+            treemap->SetNodeColor(*affectedNode, Constants::Colors::BABY_BLUE);
+        } else if (fileEvent.eventType == FileEventType::DELETED) {
+            treemap->SetNodeColor(*affectedNode, Constants::Colors::HOT_PINK);
+        }
 
         const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now() - startTime);
@@ -835,7 +829,7 @@ void GLCanvas::paintGL()
     }
 
     const auto stopwatch = Stopwatch<std::chrono::microseconds>([&]() noexcept {
-        // ProcessFileTreeChanges();
+        VisualizeFilesystemActivity();
 
         m_openGLContext.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

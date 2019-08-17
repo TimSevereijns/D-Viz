@@ -40,7 +40,7 @@ namespace
         std::system(command.c_str());
     }
 
-    std::wstring PathFromRootToNode(const Tree<VizBlock>::Node& node)
+    std::filesystem::path PathFromRootToNode(const Tree<VizBlock>::Node& node)
     {
         std::vector<std::reference_wrapper<const std::wstring>> reversePath;
         reversePath.reserve(Tree<VizBlock>::Depth(node));
@@ -55,14 +55,19 @@ namespace
         const auto pathFromRoot = std::accumulate(
             std::rbegin(reversePath), std::rend(reversePath), std::wstring{},
             [](const std::wstring& path, const std::wstring& file) {
-                if (!path.empty() && path.back() != OS::PREFERRED_SLASH) {
-                    return path + OS::PREFERRED_SLASH + file;
+                constexpr auto slash = L'/';
+
+                if (!path.empty() && path.back() != slash) {
+                    return path + slash + file;
                 }
 
                 return path + file;
             });
 
-        return pathFromRoot;
+        auto finalPath = std::filesystem::path{ pathFromRoot };
+        finalPath.make_preferred();
+
+        return finalPath;
     }
 
     std::vector<FileEvent> SelectAllFiles(
@@ -77,7 +82,8 @@ namespace
                 if (node->file.extension == fileExtension) {
                     const auto path = PathFromRootToNode(node);
 
-                    allEvents.emplace_back(FileEvent{ path + node->file.extension, eventType });
+                    allEvents.emplace_back(
+                        FileEvent{ path.wstring() + node->file.extension, eventType });
                 }
             });
 

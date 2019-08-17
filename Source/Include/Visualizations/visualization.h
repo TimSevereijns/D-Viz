@@ -132,6 +132,12 @@ class VisualizationModel
     TreemapMetadata GetTreemapMetadata();
 
     /**
+     * @brief HighlightNode
+     * @param node
+     */
+    void HighlightNode(const Tree<VizBlock>::Node* const node);
+
+    /**
      * @brief Highlights all ancestors of the given node.
      *
      * @param[in] node            The starting node.

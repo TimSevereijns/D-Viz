@@ -298,11 +298,12 @@ void Controller::SelectNodeAndUpdateStatusBar(
     const auto [prefixedSize, units] = ConvertFileSizeToNumericPrefix(fileSize, prefix);
     const auto isInBytes = (units == BYTES_READOUT_STRING);
 
+    const auto path = Controller::ResolveCompleteFilePath(node).wstring();
+
     std::wstringstream message;
     message.imbue(std::locale{ "" });
     message.precision(isInBytes ? 0 : 2);
-    message << std::fixed << Controller::ResolveCompleteFilePath(node) << L"  |  " << prefixedSize
-            << units;
+    message << std::fixed << path << L"  |  " << prefixedSize << units;
 
     m_view->SetStatusBarMessage(message.str());
 }
@@ -497,7 +498,7 @@ std::pair<double, std::wstring> Controller::ConvertFileSizeToNumericPrefix(
     GSL_ASSUME(false);
 }
 
-std::wstring Controller::ResolveCompleteFilePath(const Tree<VizBlock>::Node& node)
+std::filesystem::path Controller::ResolveCompleteFilePath(const Tree<VizBlock>::Node& node)
 {
     std::vector<std::reference_wrapper<const std::wstring>> reversePath;
     reversePath.reserve(Tree<VizBlock>::Depth(node));
@@ -512,15 +513,21 @@ std::wstring Controller::ResolveCompleteFilePath(const Tree<VizBlock>::Node& nod
     const auto completePath = std::accumulate(
         std::rbegin(reversePath), std::rend(reversePath), std::wstring{},
         [](const std::wstring& path, const std::wstring& file) {
-            if (!path.empty() && path.back() != OS::PREFERRED_SLASH) {
-                return path + OS::PREFERRED_SLASH + file;
+            constexpr auto slash = L'/';
+
+            if (!path.empty() && path.back() != slash) {
+                return path + slash + file;
             }
 
             return path + file;
         });
 
     Expects(completePath.empty() == false);
-    return completePath + node->file.extension;
+
+    auto finalPath = std::filesystem::path{ completePath + node->file.extension };
+    finalPath.make_preferred();
+
+    return finalPath;
 }
 
 Settings::Manager& Controller::GetSettingsManager()

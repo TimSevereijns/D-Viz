@@ -12,6 +12,7 @@
 
 #include <Tree/Tree.hpp>
 
+#include <filesystem>
 #include <memory>
 #include <vector>
 
@@ -196,7 +197,7 @@ class Controller
      *
      * @returns The absolute file path.
      */
-    static std::wstring ResolveCompleteFilePath(const Tree<VizBlock>::Node& node);
+    static std::filesystem::path ResolveCompleteFilePath(const Tree<VizBlock>::Node& node);
 
     /**
      * @brief Prints selection details to the main window's status bar.

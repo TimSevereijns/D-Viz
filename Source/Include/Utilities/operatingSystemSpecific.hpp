@@ -24,11 +24,9 @@ namespace OS
 {
 #ifdef Q_OS_WIN
 
-    static constexpr auto PREFERRED_SLASH = std::filesystem::path::preferred_separator;
-
     inline void LaunchFileExplorer(const Tree<VizBlock>::Node& node)
     {
-        CoInitializeEx(NULL, COINIT_MULTITHREADED);
+        CoInitializeEx(nullptr, COINIT_MULTITHREADED);
         ON_SCOPE_EXIT noexcept
         {
             CoUninitialize();
@@ -42,7 +40,7 @@ namespace OS
 
         auto* const idList = ILCreateFromPath(filePath.c_str());
         if (idList) {
-            SHOpenFolderAndSelectItems(idList, 0, 0, 0);
+            SHOpenFolderAndSelectItems(idList, 0, nullptr, 0);
             ILFree(idList);
         }
     }
@@ -71,9 +69,6 @@ namespace OS
 #endif
 
 #ifdef Q_OS_LINUX
-
-    static constexpr auto PREFERRED_SLASH =
-        static_cast<wchar_t>(std::filesystem::path::preferred_separator);
 
     inline void LaunchFileExplorer(const Tree<VizBlock>::Node& node)
     {
