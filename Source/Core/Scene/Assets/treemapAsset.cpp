@@ -1,6 +1,5 @@
 #include "Scene/Assets/treemapAsset.h"
 #include "Settings/settings.h"
-#include "Utilities/colorGradient.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Utilities/viewFrustum.hpp"
 #include "Visualizations/visualization.h"
@@ -508,15 +507,6 @@ namespace Assets
         Expects(largestDirectory > std::numeric_limits<std::uintmax_t>::min());
 
         m_largestDirectorySize = largestDirectory;
-    }
-
-    QVector3D Treemap::ComputeGradientColor(const Tree<VizBlock>::Node& node)
-    {
-        const auto blockSize = static_cast<long double>(node.GetData().file.size);
-        const auto ratio = blockSize / static_cast<long double>(m_largestDirectorySize);
-
-        const auto finalColor = m_directoryColorGradient.GetColorAtValue(static_cast<float>(ratio));
-        return finalColor;
     }
 
     void Treemap::ComputeAppropriateBlockColor(const Tree<VizBlock>::Node& node)

@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -105,13 +105,6 @@
       <widget class="QCheckBox" name="directoriesOnlyCheckBox">
        <property name="text">
         <string>Show Directories Only</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="directoryGradientCheckBox">
-       <property name="text">
-        <string>Use Directory Gradient</string>
        </property>
       </widget>
      </item>

@@ -79,7 +79,6 @@ HEADERS += \
    $$PWD/Include/Settings/preferencesMap.hpp \
    $$PWD/Include/Settings/settings.h \
    $$PWD/Include/Settings/settingsManager.h \
-   $$PWD/Include/Utilities/colorGradient.hpp \
    $$PWD/Include/Utilities/ignoreUnused.hpp \
    $$PWD/Include/Utilities/operatingSystemSpecific.hpp \
    $$PWD/Include/Utilities/scopeExit.hpp \

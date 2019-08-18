@@ -132,10 +132,6 @@ void MainWindow::SetupSidebar()
         m_ui.directoriesOnlyCheckBox, &QCheckBox::stateChanged, this,
         &MainWindow::OnDirectoryPruningChange);
 
-    connect(
-        m_ui.directoryGradientCheckBox, &QCheckBox::stateChanged, this,
-        &MainWindow::OnGradientUseChange);
-
     connect(m_ui.applyButton, &QPushButton::clicked, this, &MainWindow::OnApplyButtonPressed);
 
     connect(m_ui.fieldOfViewSlider, &QSlider::valueChanged, this, &MainWindow::OnFieldOfViewChange);
@@ -621,7 +617,7 @@ void MainWindow::PruneTree()
     Settings::VisualizationParameters parameters;
     parameters.rootDirectory = m_controller.GetRootPath().wstring();
     parameters.onlyShowDirectories = m_showDirectoriesOnly;
-    parameters.useDirectoryGradient = m_useDirectoryGradient;
+    //parameters.useDirectoryGradient = m_useDirectoryGradient;
     parameters.forceNewScan = false;
     parameters.minimumFileSize = minimumSize;
 
@@ -654,10 +650,10 @@ void MainWindow::OnDirectoryPruningChange(int state)
     m_showDirectoriesOnly = (state == Qt::Checked);
 }
 
-void MainWindow::OnGradientUseChange(int state)
-{
-    m_useDirectoryGradient = (state == Qt::Checked);
-}
+//void MainWindow::OnGradientUseChange(int state)
+//{
+//    m_useDirectoryGradient = (state == Qt::Checked);
+//}
 
 void MainWindow::OnShowBreakdownButtonPressed()
 {

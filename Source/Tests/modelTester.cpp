@@ -183,7 +183,6 @@ void ModelTester::HighlightDescendants()
     visualizationParameters.rootDirectory = L"";
     visualizationParameters.minimumFileSize = 0u;
     visualizationParameters.onlyShowDirectories = false;
-    visualizationParameters.useDirectoryGradient = false;
 
     const Tree<VizBlock>::Node* rootNode = m_tree->GetRoot();
     m_model->HighlightDescendants(*rootNode, visualizationParameters);
@@ -222,7 +221,6 @@ void ModelTester::HighlightAllMatchingExtensions()
     visualizationParameters.rootDirectory = L"";
     visualizationParameters.minimumFileSize = 0u;
     visualizationParameters.onlyShowDirectories = false;
-    visualizationParameters.useDirectoryGradient = false;
 
     constexpr auto shouldSearchFiles{ true };
     constexpr auto shouldSearchDirectories{ false };

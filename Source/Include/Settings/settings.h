@@ -35,7 +35,8 @@ namespace Settings
      * that can be set to control when visualization updates occur, as well as what nodes get
      * included.
      */
-    struct VisualizationParameters {
+    struct VisualizationParameters
+    {
         std::wstring rootDirectory{ L"" }; ///< The path to the root directory
 
         // The minimum size a file should be before it shows up.
@@ -43,9 +44,6 @@ namespace Settings
 
         bool forceNewScan{ true };         ///< Whether a new scan should take place.
         bool onlyShowDirectories{ false }; ///< Whether only directories should be shown.
-
-        // Whether to use gradient coloring for the directories.
-        bool useDirectoryGradient{ false };
     };
 } // namespace Settings
 

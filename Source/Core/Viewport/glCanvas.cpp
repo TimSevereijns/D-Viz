@@ -49,78 +49,6 @@ namespace
         lightMarkerAsset.SetVertexCoordinates(std::move(vertices));
         lightMarkerAsset.SetVertexColors(std::move(colors));
     }
-
-    /**
-     * @brief Determines the appropriate color for the file based on the user-configurable color set
-     * in the color.json file.
-     *
-     * @param[in] node               The node whose color needs to be restored.
-     * @param[in] settings           The settings that will determine the color.
-     *
-     * @returns The appropriate color found in the color map.
-     */
-    std::optional<QVector3D>
-    DetermineColorFromExtension(const Tree<VizBlock>::Node& node, const Settings::Manager& settings)
-    {
-        const auto& colorMap = settings.GetFileColorMap();
-        const auto categoryItr = colorMap.find(settings.GetActiveColorScheme());
-        if (categoryItr == std::end(colorMap)) {
-            return std::nullopt;
-        }
-
-        const auto extensionItr = categoryItr->second.find(node->file.extension);
-        if (extensionItr == std::end(categoryItr->second)) {
-            return std::nullopt;
-        }
-
-        return extensionItr->second;
-    }
-
-    /**
-     * @brief Restores the previously selected node to its non-selected color based on the rendering
-     * settings.
-     *
-     * @param[in] node               The node whose color needs to be restored.
-     * @param[in] settings           The settings that will determine the color.
-     *
-     * @returns The color to restore the node to.
-     */
-    QVector3D
-    RestoreOriginalColor(const Tree<VizBlock>::Node& node, const Settings::Manager& settings)
-    {
-        const auto fileColor = DetermineColorFromExtension(node, settings);
-        if (fileColor) {
-            return *fileColor;
-        }
-
-        // @todo Take filesystem activity into account. You'll probably want to make this function
-        // a member function so that the color can be properly restored.
-        //
-        // Consider adding a map of some sort that would contain a mapping of node to whatever non-
-        // standard color color. This would take care of selections, highlights, filesystem changes,
-        // et cetera...
-        //
-        // Have all this go through the controller, via a callback to alter the color.
-
-        if (node.GetData().file.type != FileType::DIRECTORY) {
-            return Constants::Colors::FileGreen;
-        }
-
-        if (!settings.GetVisualizationParameters().useDirectoryGradient) {
-            return Constants::Colors::White;
-        }
-
-        auto* rootNode = &node;
-        while (rootNode->GetParent()) {
-            rootNode = rootNode->GetParent();
-        }
-
-        const auto ratio =
-            static_cast<float>(node->file.size) / static_cast<float>((*rootNode)->file.size);
-
-        ColorGradient gradient;
-        return gradient.GetColorAtValue(ratio);
-    }
 } // namespace
 
 GLCanvas::GLCanvas(Controller& controller, QWidget* parent)
@@ -431,10 +359,9 @@ void GLCanvas::SelectNode(const Tree<VizBlock>::Node& node)
 
 void GLCanvas::RestoreSelectedNode(const Tree<VizBlock>::Node& node)
 {
-    const auto restorationColor =
-        m_controller.IsNodeHighlighted(node)
-            ? Constants::Colors::SlateGray
-            : RestoreOriginalColor(node, m_controller.GetSettingsManager());
+    const auto restorationColor = m_controller.IsNodeHighlighted(node)
+                                      ? Constants::Colors::SlateGray
+                                      : m_controller.DetermineNodeColor(node);
 
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
     treemap->SetNodeColor(node, restorationColor);
@@ -453,10 +380,8 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizBlock>::Node*>&
 {
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
 
-    const auto& settingsManager = m_controller.GetSettingsManager();
-
     for (const auto* const node : nodes) {
-        const auto restorationColor = RestoreOriginalColor(*node, settingsManager);
+        const auto restorationColor = m_controller.DetermineNodeColor(*node);
         treemap->SetNodeColor(*node, restorationColor);
     }
 }

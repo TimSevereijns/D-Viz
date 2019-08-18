@@ -22,10 +22,11 @@ namespace
     std::uintmax_t ComputeBytesInRow(
         const std::vector<Tree<VizBlock>::Node*>& row, const std::uintmax_t candidateSize)
     {
-        auto sumOfFileSizes = std::accumulate(std::begin(row), std::end(row), std::uintmax_t{ 0 }, [
-        ](const auto runningTotal, const auto* node) noexcept {
-            return runningTotal + (*node)->file.size;
-        });
+        auto sumOfFileSizes = std::accumulate(
+            std::begin(row), std::end(row),
+            std::uintmax_t{ 0 }, [](const auto runningTotal, const auto* node) noexcept {
+                return runningTotal + (*node)->file.size;
+            });
 
         sumOfFileSizes += candidateSize;
 
@@ -393,24 +394,24 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
 
     m_fileTree = theTree;
 
-    Stopwatch<std::chrono::milliseconds>([&] { VisualizationModel::SortNodes(*m_fileTree); }, [
-    ](const auto& elapsed, const auto& units) noexcept {
-        spdlog::get(Constants::Logging::DefaultLog)
-            ->info(fmt::format("Sorted tree in: {} {}", elapsed.count(), units));
-    });
+    Stopwatch<std::chrono::milliseconds>(
+        [&]() { VisualizationModel::SortNodes(*m_fileTree); },
+        [](const auto& elapsed, const auto& units) noexcept {
+            spdlog::get(Constants::Logging::DefaultLog)
+                ->info(fmt::format("Sorted tree in: {} {}", elapsed.count(), units));
+        });
 
-    const Block rootBlock{ PrecisePoint{},
-                           static_cast<double>(Constants::Visualization::RootBlockWidth),
-                           static_cast<double>(Constants::Visualization::BlockHeight),
-                           static_cast<double>(Constants::Visualization::RootBlockDepth) };
+    m_fileTree->GetRoot()->GetData().block =
+        Block{ PrecisePoint{}, static_cast<double>(Constants::Visualization::RootBlockWidth),
+               static_cast<double>(Constants::Visualization::BlockHeight),
+               static_cast<double>(Constants::Visualization::RootBlockDepth) };
 
-    m_fileTree->GetRoot()->GetData().block = rootBlock;
-
-    Stopwatch<std::chrono::milliseconds>([&] { SquarifyRecursively(*m_fileTree->GetRoot()); }, [
-    ](const auto& elapsed, const auto& units) noexcept {
-        spdlog::get(Constants::Logging::DefaultLog)
-            ->info(fmt::format("Visualization Generated in: {} {}", elapsed.count(), units));
-    });
+    Stopwatch<std::chrono::milliseconds>(
+        [&]() { SquarifyRecursively(*m_fileTree->GetRoot()); },
+        [](const auto& elapsed, const auto& units) noexcept {
+            spdlog::get(Constants::Logging::DefaultLog)
+                ->info(fmt::format("Visualization Generated in: {} {}", elapsed.count(), units));
+        });
 
     m_hasDataBeenParsed = true;
 }

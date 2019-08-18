@@ -187,10 +187,10 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
     ScanningParameters scanningParameters{ parameters.rootDirectory, progressHandler,
                                            completionHandler };
 
-    const auto& log = spdlog::get(Constants::Logging::DefaultLog);
-    log->info(fmt::format("Started a new scan at: \"{}\"", m_model->GetRootPath().string()));
+    spdlog::get(Constants::Logging::DefaultLog)
+        ->info(fmt::format("Started a new scan at: \"{}\"", m_model->GetRootPath().string()));
 
-    m_scanner.StartScanning(scanningParameters);
+    m_scanner.StartScanning(std::move(scanningParameters));
 }
 
 bool Controller::IsFileSystemBeingMonitored() const
@@ -205,6 +205,9 @@ std::optional<FileEvent> Controller::FetchFileModification()
 
 QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
 {
+    // @todo Have model track any non-scheme node colors (in a hashtable), and use that information
+    // to determine the appropriate node color.
+
     if (m_settingsManager.GetActiveColorScheme() != Constants::ColorScheme::Default) {
         const auto fileColor = m_settingsManager.DetermineColorFromExtension(node);
         if (fileColor) {
@@ -216,9 +219,8 @@ QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
         return Constants::Colors::White;
     }
 
-    if (node->file.type == FileType::REGULAR) {
-        return Constants::Colors::FileGreen;
-    }
+    Expects(node->file.type == FileType::REGULAR);
+    return Constants::Colors::FileGreen;
 }
 
 void Controller::ComputeProgress(const ScanningProgress& progress)

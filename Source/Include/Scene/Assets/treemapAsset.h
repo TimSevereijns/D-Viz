@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "Scene/Assets/baseAsset.h"
-#include "Utilities/colorGradient.hpp"
 
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLTexture>
@@ -102,8 +101,6 @@ namespace Assets
 
         void RenderMainPass(const Camera& camera, const std::vector<Light>& lights);
 
-        QVector3D ComputeGradientColor(const Tree<VizBlock>::Node& node);
-
         void ComputeAppropriateBlockColor(const Tree<VizBlock>::Node& node);
 
         void FindLargestDirectory(const Tree<VizBlock>& tree);
@@ -115,8 +112,6 @@ namespace Assets
 
         bool LoadTexturePreviewShaders();
         bool InitializeTexturePreviewer();
-
-        ColorGradient m_directoryColorGradient;
 
         int m_cascadeCount{ 4 };
         int m_shadowMapResolution{ 4 * 1024 };

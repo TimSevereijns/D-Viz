@@ -111,8 +111,6 @@ class MainWindow final : public QMainWindow
 
     void OnDirectoryPruningChange(int state);
 
-    void OnGradientUseChange(int state);
-
     void OnShowBreakdownButtonPressed();
 
     void OnRenderOriginToggled(bool isEnabled);
@@ -155,7 +153,6 @@ class MainWindow final : public QMainWindow
     Controller& m_controller;
 
     bool m_showDirectoriesOnly{ false };
-    bool m_useDirectoryGradient{ false };
 
     int m_sizePruningComboBoxIndex{ 0 };
 
