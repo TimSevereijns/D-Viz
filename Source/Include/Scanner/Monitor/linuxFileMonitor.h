@@ -5,7 +5,6 @@
 
 #ifdef Q_OS_LINUX
 
-#include "FileEvent.hpp"
 #include "fileMonitorBase.h"
 
 #include <filesystem>

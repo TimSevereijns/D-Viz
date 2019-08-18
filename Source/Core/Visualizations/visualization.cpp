@@ -284,22 +284,22 @@ namespace
     {
         switch (event.eventType) {
             case FileEventType::CREATED:
-                spdlog::get(Constants::Logging::FILESYSTEM_LOG)
+                spdlog::get(Constants::Logging::FilesystemLog)
                     ->info(fmt::format("Create: {}", event.path.string()));
                 break;
 
             case FileEventType::DELETED:
-                spdlog::get(Constants::Logging::FILESYSTEM_LOG)
+                spdlog::get(Constants::Logging::FilesystemLog)
                     ->info(fmt::format("Deleted: {}", event.path.string()));
                 break;
 
             case FileEventType::TOUCHED:
-                spdlog::get(Constants::Logging::FILESYSTEM_LOG)
+                spdlog::get(Constants::Logging::FilesystemLog)
                     ->info(fmt::format("Modified: {}", event.path.string()));
                 break;
 
             case FileEventType::RENAMED:
-                spdlog::get(Constants::Logging::FILESYSTEM_LOG)
+                spdlog::get(Constants::Logging::FilesystemLog)
                     ->info(fmt::format("Renamed: {}", event.path.string()));
                 break;
 
@@ -381,7 +381,7 @@ Tree<VizBlock>::Node* VisualizationModel::FindNearestIntersection(
             nearestIntersection = closest->node;
         },
         [](const auto& elapsed, const auto& units) noexcept {
-            spdlog::get(Constants::Logging::DEFAULT_LOG)
+            spdlog::get(Constants::Logging::DefaultLog)
                 ->info(fmt::format("Selected node in: {} {}", elapsed.count(), units));
         });
 
@@ -605,7 +605,7 @@ void VisualizationModel::UpdateAffectedNodes(const FileEvent& event)
         // a lot of transient files that may only exist for a fraction of a second. For example,
         // some applications tend to create temporary files when saving changes made to a file.
 
-        spdlog::get(Constants::Logging::DEFAULT_LOG)
+        spdlog::get(Constants::Logging::DefaultLog)
             ->error(fmt::format("File no longer exists: {}", absolutePath.string()));
 
         return;

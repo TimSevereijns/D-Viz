@@ -72,7 +72,7 @@ namespace OS
 
     inline void LaunchFileExplorer(const Tree<VizBlock>::Node& node)
     {
-        const std::wstring rawPath = Controller::ResolveCompleteFilePath(node);
+        const std::wstring rawPath = Controller::ResolveCompleteFilePath(node).wstring();
         const std::filesystem::path path{ rawPath };
 
         // @todo Look into adding support for other popular file browsers, like Nautilus.
@@ -92,7 +92,7 @@ namespace OS
         const auto totalNumberOfBytes = diskInfo.f_blocks * diskInfo.f_bsize;
         const auto totalNumberOfFreeBytes = diskInfo.f_bfree * diskInfo.f_bsize;
 
-        const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->info(fmt::format("Disk Size:  {} bytes", totalNumberOfBytes));
         log->info(fmt::format("Free Space: {} bytes", totalNumberOfFreeBytes));
 

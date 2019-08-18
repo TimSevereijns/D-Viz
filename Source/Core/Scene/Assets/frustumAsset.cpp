@@ -115,7 +115,7 @@ namespace
         colors.reserve(static_cast<int>(24 * cascadeCount));
 
         for (auto index{ 0 }; index < vertices.size(); ++index) {
-            colors << Constants::Colors::GREEN;
+            colors << Constants::Colors::Green;
         }
 
         frustumAsset.AddVertexCoordinates(std::move(vertices));
@@ -154,7 +154,7 @@ namespace
             colors.reserve(vertices.size());
 
             for (auto index{ 0 }; index < vertices.size(); ++index) {
-                colors << Constants::Colors::HOT_PINK;
+                colors << Constants::Colors::HotPink;
             }
 
             frustumAsset.AddVertexCoordinates(std::move(vertices));

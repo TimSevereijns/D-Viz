@@ -43,7 +43,7 @@ namespace
             node->DeleteFromTree();
         }
 
-        spdlog::get(Constants::Logging::DEFAULT_LOG)
+        spdlog::get(Constants::Logging::DefaultLog)
             ->info(fmt::format("Number of Sizeless Files Removed: {}", nodesRemoved));
     }
 
@@ -174,7 +174,7 @@ void ScanningWorker::Start()
             m_threadPool.join();
         },
         [](const auto& elapsed, const auto& units) noexcept {
-            spdlog::get(Constants::Logging::DEFAULT_LOG)
+            spdlog::get(Constants::Logging::DefaultLog)
                 ->info(fmt::format("Scanned Drive in: {} {}", elapsed.count(), units));
         });
 

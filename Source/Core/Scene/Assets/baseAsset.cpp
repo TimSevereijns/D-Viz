@@ -24,7 +24,7 @@ namespace Assets
     {
         if (!m_mainShader.addShaderFromSourceFile(
                 QOpenGLShader::Vertex, ":/Shaders/" + vertexShaderName + ".vert")) {
-            const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+            const auto& log = spdlog::get(Constants::Logging::DefaultLog);
             log->error("Failed to load vertex shader: " + vertexShaderName.toStdString() + ".vert");
 
             return false;
@@ -32,7 +32,7 @@ namespace Assets
 
         if (!m_mainShader.addShaderFromSourceFile(
                 QOpenGLShader::Fragment, ":/Shaders/" + fragmentShaderName + ".frag")) {
-            const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+            const auto& log = spdlog::get(Constants::Logging::DefaultLog);
             log->error(
                 "Failed to load fragment shader: " + fragmentShaderName.toStdString() + ".frag");
 
@@ -41,7 +41,7 @@ namespace Assets
 
         const auto linkedSuccessfully = m_mainShader.link();
         if (!linkedSuccessfully) {
-            const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+            const auto& log = spdlog::get(Constants::Logging::DefaultLog);
             log->error("Failed to link the shader program!");
 
             return false;

@@ -87,7 +87,7 @@ namespace
             }
         }
 
-        const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->error(message);
     }
 } // namespace
@@ -121,7 +121,7 @@ namespace Settings
         const auto success = document.Accept(writer);
 
         if (!success) {
-            const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+            const auto& log = spdlog::get(Constants::Logging::DefaultLog);
             log->error("Encountered error writing JSON document to \"{}\".", path.string());
         }
 

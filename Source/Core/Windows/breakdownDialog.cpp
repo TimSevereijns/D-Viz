@@ -47,7 +47,7 @@ void BreakdownDialog::ReloadData()
             }
         },
         [](const auto& elapsed, const auto& units) noexcept {
-            spdlog::get(Constants::Logging::DEFAULT_LOG)
+            spdlog::get(Constants::Logging::DefaultLog)
                 ->info(fmt::format("Built break-down model in: {} {}", elapsed.count(), units));
         });
 

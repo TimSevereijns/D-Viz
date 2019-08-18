@@ -76,10 +76,10 @@ void Camera::LookAt(const QVector3D& point)
     direction.normalize();
 
     m_verticalAngle =
-        static_cast<double>(std::asin(-direction.y())) * Constants::Math::RADIANS_TO_DEGREES;
+        static_cast<double>(std::asin(-direction.y())) * Constants::Math::RadiansToDegrees;
 
     m_horizontalAngle = static_cast<double>(std::atan2(direction.x(), -direction.z())) *
-                        Constants::Math::RADIANS_TO_DEGREES;
+                        Constants::Math::RadiansToDegrees;
 
     NormalizeAngles(m_horizontalAngle, m_verticalAngle);
 }

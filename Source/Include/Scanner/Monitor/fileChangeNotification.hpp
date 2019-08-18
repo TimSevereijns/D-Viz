@@ -72,7 +72,7 @@ struct FileEvent
                 fileSize = std::filesystem::file_size(path);
             }
         } catch (const std::filesystem::filesystem_error& /*exception*/) {
-            spdlog::get(Constants::Logging::FILESYSTEM_LOG)
+            spdlog::get(Constants::Logging::FilesystemLog)
                 ->error(fmt::format("Failed to obtain size of \"{}\"", path.string()));
         }
     }

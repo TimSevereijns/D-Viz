@@ -33,7 +33,7 @@ namespace
     using FileSystemMonitor = LinuxFileMonitor;
 #endif // Q_OS_LINUX
 
-    constexpr const std::wstring_view BYTES_READOUT_STRING{ L" bytes" };
+    constexpr const std::wstring_view bytesLabel{ L" bytes" };
 
     /**
      * @brief Converts bytes to binary prefix size and notation.
@@ -47,7 +47,7 @@ namespace
         using namespace Literals::Numeric::Binary;
 
         if (sizeInBytes < 1_KiB) {
-            return std::make_pair(sizeInBytes, std::wstring{ BYTES_READOUT_STRING });
+            return std::make_pair(sizeInBytes, std::wstring{ bytesLabel });
         }
 
         if (sizeInBytes < 1_MiB) {
@@ -77,7 +77,7 @@ namespace
         using namespace Literals::Numeric::Decimal;
 
         if (sizeInBytes < 1_KB) {
-            return std::make_pair(sizeInBytes, std::wstring{ BYTES_READOUT_STRING });
+            return std::make_pair(sizeInBytes, std::wstring{ bytesLabel });
         }
 
         if (sizeInBytes < 1_MB) {
@@ -118,7 +118,7 @@ namespace
      */
     void LogScanCompletion(const ScanningProgress& progress)
     {
-        const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
 
         log->info(fmt::format(
             "Scanned: {} directories and {} files, representing {} bytes",
@@ -187,7 +187,7 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
     ScanningParameters scanningParameters{ parameters.rootDirectory, progressHandler,
                                            completionHandler };
 
-    const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+    const auto& log = spdlog::get(Constants::Logging::DefaultLog);
     log->info(fmt::format("Started a new scan at: \"{}\"", m_model->GetRootPath().string()));
 
     m_scanner.StartScanning(scanningParameters);
@@ -296,7 +296,7 @@ void Controller::SelectNodeAndUpdateStatusBar(
 
     const auto prefix = m_settingsManager.GetActiveNumericPrefix();
     const auto [prefixedSize, units] = ConvertFileSizeToNumericPrefix(fileSize, prefix);
-    const auto isInBytes = (units == BYTES_READOUT_STRING);
+    const auto isInBytes = (units == bytesLabel);
 
     const auto path = Controller::ResolveCompleteFilePath(node).wstring();
 
@@ -359,7 +359,7 @@ void Controller::DisplaySelectionDetails()
 
     const auto prefix = m_settingsManager.GetActiveNumericPrefix();
     const auto [prefixedSize, units] = ConvertFileSizeToNumericPrefix(totalBytes, prefix);
-    const auto isInBytes = (units == BYTES_READOUT_STRING);
+    const auto isInBytes = (units == bytesLabel);
 
     std::wstringstream message;
     message.imbue(std::locale{ "" });
@@ -475,7 +475,7 @@ void Controller::SearchTreeMap(
                     shouldSearchDirectories);
             },
             [](const auto& elapsed, const auto& units) noexcept {
-                spdlog::get(Constants::Logging::DEFAULT_LOG)
+                spdlog::get(Constants::Logging::DefaultLog)
                     ->info(fmt::format("Search Completed in: {} {}", elapsed.count(), units));
             });
     };

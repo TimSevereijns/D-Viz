@@ -15,6 +15,6 @@ int main(int argc, char* argv[])
     controller.LaunchUI();
 
     const auto exitCode = QApplication::exec();
-    spdlog::get(Constants::Logging::DEFAULT_LOG)->info("Exiting...");
+    spdlog::get(Constants::Logging::DefaultLog)->info("Exiting...");
     return exitCode;
 }

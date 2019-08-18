@@ -43,7 +43,7 @@ namespace
 
         QVector<QVector3D> colors;
         for (std::size_t index{ 0 }; index < lights.size() * verticesPerMarker; ++index) {
-            colors << Constants::Colors::WHITE;
+            colors << Constants::Colors::White;
         }
 
         lightMarkerAsset.SetVertexCoordinates(std::move(vertices));
@@ -103,11 +103,11 @@ namespace
         // Have all this go through the controller, via a callback to alter the color.
 
         if (node.GetData().file.type != FileType::DIRECTORY) {
-            return Constants::Colors::FILE_GREEN;
+            return Constants::Colors::FileGreen;
         }
 
         if (!settings.GetVisualizationParameters().useDirectoryGradient) {
-            return Constants::Colors::WHITE;
+            return Constants::Colors::White;
         }
 
         auto* rootNode = &node;
@@ -140,7 +140,7 @@ GLCanvas::GLCanvas(Controller& controller, QWidget* parent)
     setFormat(format);
 
     connect(&m_frameRedrawTimer, &QTimer::timeout, this, &GLCanvas::RunMainLoop);
-    m_frameRedrawTimer.start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
+    m_frameRedrawTimer.start(Constants::Graphics::DesiredTimeBetweenFrames);
 }
 
 void GLCanvas::RunMainLoop()
@@ -426,14 +426,14 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 void GLCanvas::SelectNode(const Tree<VizBlock>::Node& node)
 {
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
-    treemap->SetNodeColor(node, Constants::Colors::CANARY_YELLOW);
+    treemap->SetNodeColor(node, Constants::Colors::CanaryYellow);
 }
 
 void GLCanvas::RestoreSelectedNode(const Tree<VizBlock>::Node& node)
 {
     const auto restorationColor =
         m_controller.IsNodeHighlighted(node)
-            ? Constants::Colors::SLATE_GRAY
+            ? Constants::Colors::SlateGray
             : RestoreOriginalColor(node, m_controller.GetSettingsManager());
 
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
@@ -445,7 +445,7 @@ void GLCanvas::HighlightNodes(std::vector<const Tree<VizBlock>::Node*>& nodes)
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
 
     for (const auto* const node : nodes) {
-        treemap->SetNodeColor(*node, Constants::Colors::SLATE_GRAY);
+        treemap->SetNodeColor(*node, Constants::Colors::SlateGray);
     }
 }
 
@@ -639,7 +639,7 @@ void GLCanvas::HandleGamepadButtonInput(
 {
     const auto millisecondsElapsed = elapsedTime.count();
     const auto cameraSpeed = m_controller.GetSettingsManager().GetCameraSpeed() /
-                             Constants::Input::MOVEMENT_AMPLIFICATION;
+                             Constants::Input::MovementAmplification;
 
     if (gamepad.buttonUp()) {
         m_camera.OffsetPosition(
@@ -688,11 +688,11 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
     }
 
     if (gamepad.axisRightX() > 0.0 || gamepad.axisRightY() > 0.0) {
-        const auto pitch = Constants::Input::MOVEMENT_AMPLIFICATION *
+        const auto pitch = Constants::Input::MovementAmplification *
                            m_controller.GetSettingsManager().GetMouseSensitivity() *
                            gamepad.axisRightY();
 
-        const auto yaw = Constants::Input::MOVEMENT_AMPLIFICATION *
+        const auto yaw = Constants::Input::MovementAmplification *
                          m_controller.GetSettingsManager().GetMouseSensitivity() *
                          gamepad.axisRightX();
 
@@ -702,7 +702,7 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
     if (gamepad.axisLeftY() > 0.0) {
         m_camera.OffsetPosition(
             static_cast<float>(
-                Constants::Input::MOVEMENT_AMPLIFICATION *
+                Constants::Input::MovementAmplification *
                 m_controller.GetSettingsManager().GetCameraSpeed() * -gamepad.axisLeftY()) *
             m_camera.Forward());
     }
@@ -710,7 +710,7 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
     if (gamepad.axisLeftX() > 0.0) {
         m_camera.OffsetPosition(
             static_cast<float>(
-                Constants::Input::MOVEMENT_AMPLIFICATION *
+                Constants::Input::MovementAmplification *
                 m_controller.GetSettingsManager().GetCameraSpeed() * gamepad.axisLeftX()) *
             m_camera.Right());
     }
@@ -760,8 +760,8 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
     m_frameTimeDeque.emplace_back(static_cast<int>(elapsedTime.count()));
 
     const auto total = std::accumulate(
-        std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0ull,
-        [](const auto runningTotal, const auto frameTime) noexcept {
+        std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque),
+        0ull, [](const auto runningTotal, const auto frameTime) noexcept {
             return runningTotal + frameTime;
         });
 
@@ -802,15 +802,15 @@ void GLCanvas::VisualizeFilesystemActivity()
         }
 
         if (fileEvent.eventType == FileEventType::TOUCHED) {
-            treemap->SetNodeColor(*affectedNode, Constants::Colors::BABY_BLUE);
+            treemap->SetNodeColor(*affectedNode, Constants::Colors::BabyBlue);
         } else if (fileEvent.eventType == FileEventType::DELETED) {
-            treemap->SetNodeColor(*affectedNode, Constants::Colors::HOT_PINK);
+            treemap->SetNodeColor(*affectedNode, Constants::Colors::HotPink);
         }
 
         const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now() - startTime);
 
-        constexpr auto timeoutValue = Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES / 2;
+        constexpr auto timeoutValue = Constants::Graphics::DesiredTimeBetweenFrames / 2;
         constexpr auto timeLimit = std::chrono::milliseconds{ timeoutValue };
         if (elapsedTime >= timeLimit) {
             // @note Since this processing is happening on the UI thread, we'll want to make sure

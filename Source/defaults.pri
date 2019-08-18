@@ -62,7 +62,6 @@ HEADERS += \
    $$PWD/Include/Scanner/scanningProgress.hpp \
    $$PWD/Include/Scanner/scanningUtilities.h \
    $$PWD/Include/Scanner/scanningWorker.h \
-   $$PWD/Include/Scanner/Monitor/FileEvent.hpp \
    $$PWD/Include/Scanner/Monitor/fileMonitorBase.h \
    $$PWD/Include/Scanner/Monitor/fileSystemObserver.h \
    $$PWD/Include/Scanner/Monitor/linuxFileMonitor.h \

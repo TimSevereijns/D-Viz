@@ -338,10 +338,10 @@ class GLCanvas final : public QOpenGLWidget
 
     std::vector<Light> m_lights{
         Light{}, Light{ QVector3D{ -200.0f, 250.0f, 200.0f } },
-        Light{ QVector3D{ 0.0f, 80.0f, -Constants::Visualization::ROOT_BLOCK_DEPTH } },
-        Light{ QVector3D{ Constants::Visualization::ROOT_BLOCK_WIDTH, 80.0f, 0.0f } },
-        Light{ QVector3D{ Constants::Visualization::ROOT_BLOCK_WIDTH, 80.0f,
-                          -Constants::Visualization::ROOT_BLOCK_DEPTH } }
+        Light{ QVector3D{ 0.0f, 80.0f, -Constants::Visualization::RootBlockDepth } },
+        Light{ QVector3D{ Constants::Visualization::RootBlockWidth, 80.0f, 0.0f } },
+        Light{ QVector3D{ Constants::Visualization::RootBlockWidth, 80.0f,
+                          -Constants::Visualization::RootBlockDepth } }
     };
 
     Camera m_camera;

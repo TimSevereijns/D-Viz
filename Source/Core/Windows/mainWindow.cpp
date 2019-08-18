@@ -188,7 +188,7 @@ void MainWindow::SetupColorSchemeDropdown()
 {
     m_ui.colorSchemeComboBox->clear();
 
-    const auto& defaultScheme = QString::fromStdWString(Constants::ColorScheme::DEFAULT);
+    const auto& defaultScheme = QString::fromStdWString(Constants::ColorScheme::Default);
     m_ui.colorSchemeComboBox->addItem(defaultScheme, defaultScheme);
 
     const auto& colorMap = m_controller.GetSettingsManager().GetFileColorMap();
@@ -413,28 +413,28 @@ void MainWindow::SetDebuggingMenuState()
     const auto& preferences = m_controller.GetSettingsManager().GetPreferenceMap();
 
     const auto shouldShowOrigin =
-        preferences.GetValueOrDefault(Constants::Preferences::SHOW_ORIGIN, true);
+        preferences.GetValueOrDefault(Constants::Preferences::ShowOrigin, true);
 
     renderMenuWrapper.origin.blockSignals(true);
     renderMenuWrapper.origin.setChecked(shouldShowOrigin);
     renderMenuWrapper.origin.blockSignals(false);
 
     const auto shouldShowGrid =
-        preferences.GetValueOrDefault(Constants::Preferences::SHOW_GRID, true);
+        preferences.GetValueOrDefault(Constants::Preferences::ShowGrid, true);
 
     renderMenuWrapper.grid.blockSignals(true);
     renderMenuWrapper.grid.setChecked(shouldShowGrid);
     renderMenuWrapper.grid.blockSignals(false);
 
     const auto shouldShowLightMarkers =
-        preferences.GetValueOrDefault(Constants::Preferences::SHOW_LIGHT_MARKERS, true);
+        preferences.GetValueOrDefault(Constants::Preferences::ShowLightMarkers, true);
 
     renderMenuWrapper.lightMarkers.blockSignals(true);
     renderMenuWrapper.lightMarkers.setChecked(shouldShowLightMarkers);
     renderMenuWrapper.lightMarkers.blockSignals(false);
 
     const auto shouldShowFrustum =
-        preferences.GetValueOrDefault(Constants::Preferences::SHOW_FRUSTUM, true);
+        preferences.GetValueOrDefault(Constants::Preferences::ShowFrustum, true);
 
     renderMenuWrapper.frustum.blockSignals(true);
     renderMenuWrapper.frustum.setChecked(shouldShowFrustum);
@@ -673,7 +673,7 @@ void MainWindow::OnRenderOriginToggled(bool isEnabled)
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::OriginMarker>(isEnabled);
 
     m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
-        Constants::Preferences::SHOW_ORIGIN, isEnabled);
+        Constants::Preferences::ShowOrigin, isEnabled);
 }
 
 void MainWindow::OnRenderGridToggled(bool isEnabled)
@@ -681,7 +681,7 @@ void MainWindow::OnRenderGridToggled(bool isEnabled)
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::Grid>(isEnabled);
 
     m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
-        Constants::Preferences::SHOW_GRID, isEnabled);
+        Constants::Preferences::ShowGrid, isEnabled);
 }
 
 void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
@@ -689,7 +689,7 @@ void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::LightMarker>(isEnabled);
 
     m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
-        Constants::Preferences::SHOW_LIGHT_MARKERS, isEnabled);
+        Constants::Preferences::ShowLightMarkers, isEnabled);
 }
 
 void MainWindow::OnRenderFrustumToggled(bool isEnabled)
@@ -697,7 +697,7 @@ void MainWindow::OnRenderFrustumToggled(bool isEnabled)
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::Frustum>(isEnabled);
 
     m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
-        Constants::Preferences::SHOW_FRUSTUM, isEnabled);
+        Constants::Preferences::ShowFrustum, isEnabled);
 }
 
 bool MainWindow::ShouldShowFrameTime() const

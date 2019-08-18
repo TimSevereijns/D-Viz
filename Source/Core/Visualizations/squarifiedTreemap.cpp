@@ -51,27 +51,27 @@ namespace
         const auto blockWidthPlusPadding = land.GetWidth() * percentageOfParent;
         const auto ratioBasedPadding = ((land.GetWidth() * 0.1) / nodeCount) / 2.0;
 
-        auto widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
+        auto widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MaxPadding);
         auto finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPaddingPerSide);
         if (finalBlockWidth < 0.0) {
-            finalBlockWidth = blockWidthPlusPadding * Visualization::PADDING_RATIO;
+            finalBlockWidth = blockWidthPlusPadding * Visualization::PaddingRatio;
             widthPaddingPerSide =
-                (blockWidthPlusPadding * (1.0 - Visualization::PADDING_RATIO)) / 2.0;
+                (blockWidthPlusPadding * (1.0 - Visualization::PaddingRatio)) / 2.0;
         }
 
-        const auto ratioBasedBlockDepth = std::abs(land.GetDepth() * Visualization::PADDING_RATIO);
+        const auto ratioBasedBlockDepth = std::abs(land.GetDepth() * Visualization::PaddingRatio);
         const auto depthPaddingPerSide =
-            std::min((land.GetDepth() - ratioBasedBlockDepth) / 2.0, Visualization::MAX_PADDING);
+            std::min((land.GetDepth() - ratioBasedBlockDepth) / 2.0, Visualization::MaxPadding);
 
         const auto finalBlockDepth =
-            (depthPaddingPerSide == Visualization::MAX_PADDING)
-                ? std::abs(land.GetDepth()) - (2.0 * Visualization::MAX_PADDING)
+            (depthPaddingPerSide == Visualization::MaxPadding)
+                ? std::abs(land.GetDepth()) - (2.0 * Visualization::MaxPadding)
                 : ratioBasedBlockDepth;
 
         const PrecisePoint offset{ (land.GetWidth() * land.GetCoverage()) + widthPaddingPerSide,
                                    0.0, -depthPaddingPerSide };
 
-        node.block = Block{ land.GetOrigin() + offset, finalBlockWidth, Visualization::BLOCK_HEIGHT,
+        node.block = Block{ land.GetOrigin() + offset, finalBlockWidth, Visualization::BlockHeight,
                             finalBlockDepth };
 
         const auto additionalCoverage = blockWidthPlusPadding / land.GetWidth();
@@ -99,26 +99,26 @@ namespace
         const auto blockDepthPlusPadding = std::abs(land.GetDepth() * percentageOfParent);
         const auto ratioBasedPadding = (land.GetDepth() * 0.1) / nodeCount / 2.0;
 
-        auto depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MAX_PADDING);
+        auto depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MaxPadding);
         auto finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPaddingPerSide);
         if (finalBlockDepth < 0) {
-            finalBlockDepth = blockDepthPlusPadding * Visualization::PADDING_RATIO;
+            finalBlockDepth = blockDepthPlusPadding * Visualization::PaddingRatio;
             depthPaddingPerSide =
-                (blockDepthPlusPadding * (1.0 - Visualization::PADDING_RATIO)) / 2.0;
+                (blockDepthPlusPadding * (1.0 - Visualization::PaddingRatio)) / 2.0;
         }
 
-        const auto ratioBasedWidth = land.GetWidth() * Visualization::PADDING_RATIO;
+        const auto ratioBasedWidth = land.GetWidth() * Visualization::PaddingRatio;
         const auto widthPaddingPerSide =
-            std::min((land.GetWidth() - ratioBasedWidth) / 2.0, Visualization::MAX_PADDING);
+            std::min((land.GetWidth() - ratioBasedWidth) / 2.0, Visualization::MaxPadding);
 
-        const auto finalBlockWidth = (widthPaddingPerSide == Visualization::MAX_PADDING)
-                                         ? land.GetWidth() - (2.0 * Visualization::MAX_PADDING)
+        const auto finalBlockWidth = (widthPaddingPerSide == Visualization::MaxPadding)
+                                         ? land.GetWidth() - (2.0 * Visualization::MaxPadding)
                                          : ratioBasedWidth;
 
         const PrecisePoint offset{ widthPaddingPerSide, 0.0,
                                    -(land.GetDepth() * land.GetCoverage()) - depthPaddingPerSide };
 
-        node.block = Block{ land.GetOrigin() + offset, finalBlockWidth, Visualization::BLOCK_HEIGHT,
+        node.block = Block{ land.GetOrigin() + offset, finalBlockWidth, Visualization::BlockHeight,
                             std::abs(finalBlockDepth) };
 
         const auto additionalCoverage = blockDepthPlusPadding / land.GetDepth();
@@ -141,7 +141,7 @@ Block SquarifiedTreeMap::ComputeRemainingArea(const Block& block)
 
     const Block remainingArea{ /* origin = */ nearCorner,
                                /* width = */ farCorner.x() - nearCorner.x(),
-                               /* height = */ Constants::Visualization::BLOCK_HEIGHT,
+                               /* height = */ Constants::Visualization::BlockHeight,
                                /* depth = */ farCorner.z() - nearCorner.z() };
 
     Expects(remainingArea.HasVolume());
@@ -395,20 +395,20 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
 
     Stopwatch<std::chrono::milliseconds>([&] { VisualizationModel::SortNodes(*m_fileTree); }, [
     ](const auto& elapsed, const auto& units) noexcept {
-        spdlog::get(Constants::Logging::DEFAULT_LOG)
+        spdlog::get(Constants::Logging::DefaultLog)
             ->info(fmt::format("Sorted tree in: {} {}", elapsed.count(), units));
     });
 
     const Block rootBlock{ PrecisePoint{},
-                           static_cast<double>(Constants::Visualization::ROOT_BLOCK_WIDTH),
-                           static_cast<double>(Constants::Visualization::BLOCK_HEIGHT),
-                           static_cast<double>(Constants::Visualization::ROOT_BLOCK_DEPTH) };
+                           static_cast<double>(Constants::Visualization::RootBlockWidth),
+                           static_cast<double>(Constants::Visualization::BlockHeight),
+                           static_cast<double>(Constants::Visualization::RootBlockDepth) };
 
     m_fileTree->GetRoot()->GetData().block = rootBlock;
 
     Stopwatch<std::chrono::milliseconds>([&] { SquarifyRecursively(*m_fileTree->GetRoot()); }, [
     ](const auto& elapsed, const auto& units) noexcept {
-        spdlog::get(Constants::Logging::DEFAULT_LOG)
+        spdlog::get(Constants::Logging::DefaultLog)
             ->info(fmt::format("Visualization Generated in: {} {}", elapsed.count(), units));
     });
 

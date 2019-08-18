@@ -34,8 +34,8 @@ struct BoundingBox
 
 namespace
 {
-    constexpr auto TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE{ 0 };
-    constexpr auto TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE{ 1 };
+    constexpr auto TexturePreviewerVertexAttribute = 0;
+    constexpr auto TexturePreviewerTextureCoordinateAttribute = 1;
 
     /**
      * @brief Calculates an Axis Aligned Bounding Box (AABB) for each of the frustum splits.
@@ -217,7 +217,7 @@ namespace Assets
         m_cascadeCount = preferences.GetValueOrDefault(L"shadowMapCascadeCount", 4);
         m_shadowMapResolution = preferences.GetValueOrDefault(L"shadowMapQuality", 4) * 1024;
 
-        const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->info("Shadow map width & height is set at {} pixels.", m_shadowMapResolution);
 
         m_shadowMaps.reserve(static_cast<std::size_t>(m_cascadeCount));
@@ -548,7 +548,7 @@ namespace Assets
 
     void Treemap::ComputeAppropriateBlockColor(const Tree<VizBlock>::Node& node)
     {
-        if (m_settingsManager.GetActiveColorScheme() != Constants::ColorScheme::DEFAULT) {
+        if (m_settingsManager.GetActiveColorScheme() != Constants::ColorScheme::Default) {
             const auto fileColor = DetermineColorFromExtension(node, m_settingsManager);
             if (fileColor) {
                 m_blockColors << *fileColor;
@@ -560,10 +560,10 @@ namespace Assets
             if (m_settingsManager.GetVisualizationParameters().useDirectoryGradient) {
                 m_blockColors << ComputeGradientColor(node);
             } else {
-                m_blockColors << Constants::Colors::WHITE;
+                m_blockColors << Constants::Colors::White;
             }
         } else if (node->file.type == FileType::REGULAR) {
-            m_blockColors << Constants::Colors::FILE_GREEN;
+            m_blockColors << Constants::Colors::FileGreen;
         }
     }
 
@@ -773,10 +773,10 @@ namespace Assets
             { +1, -1, -1 }, { -1, -1, -1 }, { -1, +1, -1 }, { +1, +1, -1 }
         };
 
-        m_texturePreviewShader.bindAttributeLocation("vertex", TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE);
+        m_texturePreviewShader.bindAttributeLocation("vertex", TexturePreviewerVertexAttribute);
 
         m_texturePreviewShader.bindAttributeLocation(
-            "texCoord", TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE);
+            "texCoord", TexturePreviewerTextureCoordinateAttribute);
 
         QVector<GLfloat> vertexData;
         for (int i = 0; i < 4; ++i) {
@@ -812,17 +812,19 @@ namespace Assets
 
         m_texturePreviewShader.bind();
         m_texturePreviewShader.setUniformValue("matrix", viewMatrix);
-        m_texturePreviewShader.enableAttributeArray(TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE);
-        m_texturePreviewShader.enableAttributeArray(TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE);
+        m_texturePreviewShader.enableAttributeArray(TexturePreviewerVertexAttribute);
+        m_texturePreviewShader.enableAttributeArray(TexturePreviewerTextureCoordinateAttribute);
 
         m_texturePreviewShader.setAttributeBuffer(
-            TEXTURE_PREVIEWER_VERTEX_ATTRIBUTE, GL_FLOAT,
+            /* location = */ TexturePreviewerVertexAttribute,
+            /* type = */ GL_FLOAT,
             /* offset = */ 0,
             /* tupleSize = */ 3,
             /* stride = */ 5 * sizeof(GLfloat));
 
         m_texturePreviewShader.setAttributeBuffer(
-            TEXTURE_PREVIEWER_TEXCOORD_ATTRIBUTE, GL_FLOAT,
+            /* location = */ TexturePreviewerTextureCoordinateAttribute,
+            /* type = */ GL_FLOAT,
             /* offset = */ 3 * sizeof(GLfloat),
             /* tupleSize = */ 2,
             /* stride = */ 5 * sizeof(GLfloat));

@@ -51,7 +51,7 @@ namespace
         }
 
         if (encounteredError) {
-            const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+            const auto& log = spdlog::get(Constants::Logging::DefaultLog);
             log->error("Encountered an error converting JSON document to file color map.");
         }
     }
@@ -103,7 +103,7 @@ namespace
         }
 
         if (encounteredError) {
-            const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+            const auto& log = spdlog::get(Constants::Logging::DefaultLog);
             log->error("Encountered unsupported type while parsing the configuration JSON file.");
         }
     }
@@ -224,7 +224,7 @@ namespace Settings
 
     QVector3D Manager::GetSpecularColor() const
     {
-        return Constants::Colors::WHITE;
+        return Constants::Colors::White;
     }
 
     bool Manager::IsPrimaryLightAttachedToCamera() const

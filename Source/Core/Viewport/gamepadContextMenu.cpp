@@ -23,8 +23,8 @@ namespace
         QPoint origin, int radius, std::vector<GamepadContextMenu::Entry>& entries)
     {
         const auto entryCount = static_cast<std::uint32_t>(entries.size());
-        const auto slice = 2 * Constants::Math::PI / entryCount;
-        const auto startingAngle = (entryCount % 2) ? (Constants::Math::PI / 2) : 0;
+        const auto slice = 2 * Constants::Math::Pi / entryCount;
+        const auto startingAngle = (entryCount % 2) ? (Constants::Math::Pi / 2) : 0;
 
         const auto x = origin.x();
         const auto y = origin.y();
@@ -108,7 +108,7 @@ GamepadContextMenu::GamepadContextMenu(const Gamepad& gamepad, QWidget* parent)
     m_pen.setWidth(4);
 
     connect(&m_inputTimer, &QTimer::timeout, this, &GamepadContextMenu::ProcessInput);
-    m_inputTimer.start(Constants::Graphics::DESIRED_TIME_BETWEEN_FRAMES);
+    m_inputTimer.start(Constants::Graphics::DesiredTimeBetweenFrames);
 }
 
 void GamepadContextMenu::ProcessInput()
