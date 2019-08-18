@@ -10,6 +10,8 @@
 #include <unordered_map>
 #include <variant>
 
+#include <Tree/Tree.hpp>
+
 #include <QObject>
 #include <QVector3D>
 
@@ -142,6 +144,17 @@ namespace Settings
          * @return
          */
         bool ShouldBlockBeProcessed(const VizBlock& block);
+
+        /**
+         * @brief Determines the appropriate color for the file based on the user-configurable color
+         * set in the color.json file.
+         *
+         * @param[in] node               The node whose color needs to be restored.
+         *
+         * @returns The appropriate color found in the color map.
+         */
+        std::optional<QVector3D>
+        DetermineColorFromExtension(const Tree<VizBlock>::Node& node) const;
 
         /**
          * @brief Saves preferences to a JSON file on disk.

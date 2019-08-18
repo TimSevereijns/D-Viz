@@ -203,6 +203,24 @@ std::optional<FileEvent> Controller::FetchFileModification()
     return m_model->FetchNextVisualChange();
 }
 
+QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
+{
+    if (m_settingsManager.GetActiveColorScheme() != Constants::ColorScheme::Default) {
+        const auto fileColor = m_settingsManager.DetermineColorFromExtension(node);
+        if (fileColor) {
+            return *fileColor;
+        }
+    }
+
+    if (node->file.type == FileType::DIRECTORY) {
+        return Constants::Colors::White;
+    }
+
+    if (node->file.type == FileType::REGULAR) {
+        return Constants::Colors::FileGreen;
+    }
+}
+
 void Controller::ComputeProgress(const ScanningProgress& progress)
 {
     Expects(m_occupiedDiskSpace > 0u);

@@ -89,8 +89,8 @@ namespace
 
 namespace Assets
 {
-    Grid::Grid(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
-        : Line{ settings, openGL }
+    Grid::Grid(const Controller& controller, QOpenGLExtraFunctions& openGL)
+        : Line{ controller, openGL }
     {
         m_shouldRender = DetermineVisibilityFromPreferences(AssetName);
 
@@ -118,4 +118,4 @@ namespace Assets
         m_mainShader.release();
         m_VAO.release();
     }
-} // namespace Asset
+} // namespace Assets

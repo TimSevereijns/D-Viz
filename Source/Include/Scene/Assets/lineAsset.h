@@ -15,7 +15,7 @@ namespace Assets
         /**
          * @copydoc Asset::Base::Base()
          */
-        Line(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL);
+        Line(const Controller& controller, QOpenGLExtraFunctions& openGL);
 
         /**
          * @copydoc Asset::Base::LoadShaders()
@@ -42,6 +42,6 @@ namespace Assets
 
         void InitializeColorBuffers();
     };
-} // namespace Asset
+} // namespace Assets
 
 #endif // LINEASSET_H

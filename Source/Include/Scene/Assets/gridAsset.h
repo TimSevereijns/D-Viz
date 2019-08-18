@@ -17,7 +17,7 @@ namespace Assets
         /**
          * @copydoc Asset::Base::Base()
          */
-        Grid(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL);
+        Grid(const Controller& controller, QOpenGLExtraFunctions& openGL);
 
         /**
          * @copydoc Asset::Base::Render()
@@ -27,6 +27,6 @@ namespace Assets
       private:
         static constexpr std::wstring_view AssetName{ L"Grid" };
     };
-} // namespace Asset
+} // namespace Assets
 
 #endif // GRIDASSET_H

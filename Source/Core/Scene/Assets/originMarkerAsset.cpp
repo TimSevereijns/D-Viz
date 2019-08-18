@@ -41,8 +41,8 @@ namespace
 
 namespace Assets
 {
-    OriginMarker::OriginMarker(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
-        : Line{ settings, openGL }
+    OriginMarker::OriginMarker(const Controller& controller, QOpenGLExtraFunctions& openGL)
+        : Line{ controller, openGL }
     {
         m_shouldRender = DetermineVisibilityFromPreferences(AssetName);
 
@@ -70,4 +70,4 @@ namespace Assets
         m_mainShader.release();
         m_VAO.release();
     }
-} // namespace Asset
+} // namespace Assets

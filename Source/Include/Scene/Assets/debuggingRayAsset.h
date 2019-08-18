@@ -11,13 +11,13 @@ namespace Assets
         /**
          * @copydoc Asset::Base::Base()
          */
-        DebuggingRay(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL);
+        DebuggingRay(const Controller& controller, QOpenGLExtraFunctions& openGL);
 
         /**
          * @copydoc Asset::Base::Render()
          */
         void Render(const Camera& camera, const std::vector<Light>& lights) override;
     };
-} // namespace Asset
+} // namespace Assets
 
 #endif // DEBUGGINGRAYASSET_H

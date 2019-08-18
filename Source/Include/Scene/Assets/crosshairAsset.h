@@ -14,7 +14,7 @@ namespace Assets
         /**
          * @copydoc Asset::Base::Base()
          */
-        Crosshair(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL);
+        Crosshair(const Controller& controller, QOpenGLExtraFunctions& openGL);
 
         /**
          * @copydoc Asset::Base::Render()
@@ -33,6 +33,6 @@ namespace Assets
       private:
         static constexpr std::wstring_view AssetName{ L"Crosshair" };
     };
-} // namespace Asset
+} // namespace Assets
 
 #endif // CROSSHAIRASSET_H

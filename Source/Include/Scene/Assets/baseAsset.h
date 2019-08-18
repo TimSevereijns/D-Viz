@@ -15,6 +15,8 @@ struct VizBlock;
 
 template <typename DataType> class TreeNode;
 
+class Controller;
+
 namespace Assets
 {
     /**
@@ -27,10 +29,10 @@ namespace Assets
         /**
          * @brief Constructs a new instance of the Asset::Base class.
          *
-         * @param[in] settings              Reference to the settings manager.
+         * @param[in] controller            Reference to the controller class.
          * @param[in] openGL                The OpenGL function bindings.
          */
-        AssetBase(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL);
+        AssetBase(const Controller& controller, QOpenGLExtraFunctions& openGL);
 
         AssetBase(const AssetBase& other) = delete;
         AssetBase& operator=(const AssetBase& other) = delete;

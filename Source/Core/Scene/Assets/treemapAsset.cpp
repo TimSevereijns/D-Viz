@@ -6,6 +6,7 @@
 #include "Visualizations/visualization.h"
 #include "Visualizations/vizBlock.h"
 #include "constants.h"
+#include "controller.h"
 
 #include <Tree/Tree.hpp>
 #include <gsl/gsl_assert>
@@ -139,34 +140,6 @@ namespace
     }
 
     /**
-     * @brief Determines the appropriate color for the file based on the user-configurable color set
-     * in the color.json file.
-     *
-     * @param[in] node               The node whose color needs to be restored.
-     * @param[in] settings           The settings that will determine the color.
-     *
-     * @returns The appropriate color found in the color map.
-     */
-    std::optional<QVector3D>
-    DetermineColorFromExtension(const Tree<VizBlock>::Node& node, const Settings::Manager& settings)
-    {
-        // @todo Move this function to the settings manager.
-
-        const auto& colorMap = settings.GetFileColorMap();
-        const auto categoryItr = colorMap.find(settings.GetActiveColorScheme());
-        if (categoryItr == std::end(colorMap)) {
-            return std::nullopt;
-        }
-
-        const auto extensionItr = categoryItr->second.find(node->file.extension);
-        if (extensionItr == std::end(categoryItr->second)) {
-            return std::nullopt;
-        }
-
-        return extensionItr->second;
-    }
-
-    /**
      * @returns The view matrix for the shadow casting light source.
      */
     QMatrix4x4 ComputeLightViewMatrix()
@@ -208,8 +181,8 @@ namespace
 
 namespace Assets
 {
-    Treemap::Treemap(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
-        : AssetBase{ settings, openGL }
+    Treemap::Treemap(const Controller& controller, QOpenGLExtraFunctions& openGL)
+        : AssetBase{ controller, openGL }, m_controller{ controller }
     {
         m_shouldRender = DetermineVisibilityFromPreferences(AssetName);
 
@@ -548,23 +521,7 @@ namespace Assets
 
     void Treemap::ComputeAppropriateBlockColor(const Tree<VizBlock>::Node& node)
     {
-        if (m_settingsManager.GetActiveColorScheme() != Constants::ColorScheme::Default) {
-            const auto fileColor = DetermineColorFromExtension(node, m_settingsManager);
-            if (fileColor) {
-                m_blockColors << *fileColor;
-                return;
-            }
-        }
-
-        if (node->file.type == FileType::DIRECTORY) {
-            if (m_settingsManager.GetVisualizationParameters().useDirectoryGradient) {
-                m_blockColors << ComputeGradientColor(node);
-            } else {
-                m_blockColors << Constants::Colors::White;
-            }
-        } else if (node->file.type == FileType::REGULAR) {
-            m_blockColors << Constants::Colors::FileGreen;
-        }
+        m_blockColors << m_controller.DetermineNodeColor(node);
     }
 
     std::uint32_t Treemap::GetBlockCount() const

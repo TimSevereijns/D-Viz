@@ -46,8 +46,8 @@ namespace
 
 namespace Assets
 {
-    Crosshair::Crosshair(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
-        : Line{ settings, openGL }
+    Crosshair::Crosshair(const Controller& controller, QOpenGLExtraFunctions& openGL)
+        : Line{ controller, openGL }
     {
         m_shouldRender = DetermineVisibilityFromPreferences(AssetName);
         m_rawColors = CreateCrosshairColors();
@@ -91,4 +91,4 @@ namespace Assets
         m_VAO.release();
         m_mainShader.release();
     }
-} // namespace Asset
+} // namespace Assets

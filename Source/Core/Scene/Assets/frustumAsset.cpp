@@ -165,8 +165,8 @@ namespace
 
 namespace Assets
 {
-    Frustum::Frustum(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
-        : Line{ settings, openGL }
+    Frustum::Frustum(const Controller& controller, QOpenGLExtraFunctions& openGL)
+        : Line{ controller, openGL }
     {
         m_shouldRender = DetermineVisibilityFromPreferences(AssetName);
     }
@@ -204,4 +204,4 @@ namespace Assets
 
         Refresh();
     }
-} // namespace Asset
+} // namespace Assets

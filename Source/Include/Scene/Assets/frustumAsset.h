@@ -16,7 +16,7 @@ namespace Assets
         /**
          * @copydoc Asset::Base::Base()
          */
-        Frustum(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL);
+        Frustum(const Controller& controller, QOpenGLExtraFunctions& openGL);
 
         /**
          * @copydoc Asset::Base::Render()
@@ -33,6 +33,6 @@ namespace Assets
       private:
         static constexpr std::wstring_view AssetName{ L"Frustum" };
     };
-} // namespace Asset
+} // namespace Assets
 
 #endif // FRUSTUMASSET_H

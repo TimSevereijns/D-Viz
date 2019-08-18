@@ -2,8 +2,8 @@
 
 namespace Assets
 {
-    DebuggingRay::DebuggingRay(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
-        : Line{ settings, openGL }
+    DebuggingRay::DebuggingRay(const Controller& controller, QOpenGLExtraFunctions& openGL)
+        : Line{ controller, openGL }
     {
         m_shouldRender = DetermineVisibilityFromPreferences(L"DebuggingRay");
     }
@@ -31,4 +31,4 @@ namespace Assets
         m_mainShader.release();
         m_VAO.release();
     }
-} // namespace Asset
+} // namespace Assets

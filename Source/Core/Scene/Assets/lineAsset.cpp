@@ -2,8 +2,8 @@
 
 namespace Assets
 {
-    Line::Line(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
-        : AssetBase{ settings, openGL }
+    Line::Line(const Controller& controller, QOpenGLExtraFunctions& openGL)
+        : AssetBase{ controller, openGL }
     {
     }
 
@@ -99,4 +99,4 @@ namespace Assets
     {
         Initialize();
     }
-} // namespace Asset
+} // namespace Assets

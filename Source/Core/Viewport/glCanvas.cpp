@@ -177,8 +177,8 @@ void GLCanvas::initializeGL()
 template <typename AssetTag> void GLCanvas::RegisterAsset()
 {
     m_sceneAssets.emplace_back(TagAndAsset{
-        std::make_unique<AssetTag>(), std::make_unique<typename AssetTag::AssetType>(
-                                          m_controller.GetSettingsManager(), m_openGLContext) });
+        std::make_unique<AssetTag>(),
+        std::make_unique<typename AssetTag::AssetType>(m_controller, m_openGLContext) });
 }
 
 template <typename RequestedAsset>

@@ -112,8 +112,7 @@ namespace
 namespace Settings
 {
     Manager::Manager(
-        const std::filesystem::path& colorFile,
-        const std::filesystem::path& preferencesFile)
+        const std::filesystem::path& colorFile, const std::filesystem::path& preferencesFile)
         : m_fileColorMapDocument{ Settings::LoadFromDisk(colorFile) },
           m_preferencesDocument{ Settings::LoadFromDisk(preferencesFile) },
           m_preferencesPath{ preferencesFile },
@@ -190,6 +189,22 @@ namespace Settings
         }
 
         return true;
+    }
+
+    std::optional<QVector3D>
+    Manager::DetermineColorFromExtension(const Tree<VizBlock>::Node& node) const
+    {
+        const auto categoryItr = m_colorMap.find(m_colorScheme);
+        if (categoryItr == std::end(m_colorMap)) {
+            return std::nullopt;
+        }
+
+        const auto extensionItr = categoryItr->second.find(node->file.extension);
+        if (extensionItr == std::end(categoryItr->second)) {
+            return std::nullopt;
+        }
+
+        return extensionItr->second;
     }
 
     double Manager::GetCameraSpeed() const

@@ -13,9 +13,6 @@ struct VizBlock;
 
 template <typename DataType> class TreeNode;
 
-/**
- * @brief The Bounding Box struct
- */
 struct BoundingBox;
 
 namespace Assets
@@ -30,7 +27,7 @@ namespace Assets
         /**
          * @copydoc Asset::Base::Base()
          */
-        Treemap(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL);
+        Treemap(const Controller& controller, QOpenGLExtraFunctions& openGL);
 
         /**
          * @copydoc Asset::Base::LoadShaders()
@@ -154,6 +151,8 @@ namespace Assets
         };
 
         std::vector<ShadowMapMetadata> m_shadowMaps;
+
+        const Controller& m_controller;
 
         static constexpr std::wstring_view AssetName{ L"Treemap" };
     };

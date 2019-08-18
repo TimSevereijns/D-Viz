@@ -17,7 +17,7 @@ namespace Assets
         /**
          * @copydoc Asset::Base::Base()
          */
-        OriginMarker(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL);
+        OriginMarker(const Controller& controller, QOpenGLExtraFunctions& openGL);
 
         /**
          * @copydoc Asset::Base::Render()
@@ -27,6 +27,6 @@ namespace Assets
       private:
         static constexpr std::wstring_view AssetName{ L"OriginMarker" };
     };
-} // namespace Asset
+} // namespace Assets
 
 #endif // ORIGINMARKERASSET_H

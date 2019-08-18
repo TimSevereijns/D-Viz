@@ -256,6 +256,13 @@ class Controller
      */
     std::optional<FileEvent> FetchFileModification();
 
+    /**
+     * @brief DetermineNodeColor
+     * @param node
+     * @return
+     */
+    QVector3D DetermineNodeColor(const Tree<VizBlock>::Node& node) const;
+
   private:
     template <typename NodeSelectorType>
     void ProcessHighlightedNodes(

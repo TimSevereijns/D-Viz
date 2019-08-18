@@ -2,8 +2,8 @@
 
 namespace Assets
 {
-    LightMarker::LightMarker(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
-        : Line{ settings, openGL }
+    LightMarker::LightMarker(const Controller& controller, QOpenGLExtraFunctions& openGL)
+        : Line{ controller, openGL }
     {
         m_shouldRender = DetermineVisibilityFromPreferences(AssetName);
     }
@@ -31,4 +31,4 @@ namespace Assets
         m_mainShader.release();
         m_VAO.release();
     }
-} // namespace Asset
+} // namespace Assets

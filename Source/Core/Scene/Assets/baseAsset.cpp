@@ -1,6 +1,7 @@
 #include "Scene/Assets/baseAsset.h"
 
 #include "constants.h"
+#include "controller.h"
 
 #include <spdlog/spdlog.h>
 
@@ -9,8 +10,8 @@
 
 namespace Assets
 {
-    AssetBase::AssetBase(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL)
-        : m_openGL{ openGL }, m_settingsManager{ settings }
+    AssetBase::AssetBase(const Controller& controller, QOpenGLExtraFunctions& openGL)
+        : m_openGL{ openGL }, m_settingsManager{ controller.GetSettingsManager() }
     {
     }
 

@@ -14,7 +14,7 @@ namespace Assets
         /**
          * @copydoc Asset::Base::Base()
          */
-        LightMarker(const Settings::Manager& settings, QOpenGLExtraFunctions& openGL);
+        LightMarker(const Controller& controller, QOpenGLExtraFunctions& openGL);
         /**
          * @copydoc Asset::Base::Render()
          */
@@ -23,6 +23,6 @@ namespace Assets
       private:
         static constexpr std::wstring_view AssetName{ L"LightMarker" };
     };
-} // namespace Asset
+} // namespace Assets
 
 #endif // LIGHTMARKERASSET_H
