@@ -5,6 +5,7 @@
 #include "preferencesMap.hpp"
 #include "settings.h"
 
+#include <optional>
 #include <string_view>
 #include <type_traits>
 #include <unordered_map>

@@ -73,7 +73,7 @@ namespace
     void LogLastError(std::string_view message)
     {
         const auto lastError = GetLastErrorAsString();
-        const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->error("{} Last Error: {}.", message, lastError);
     }
 
@@ -130,7 +130,7 @@ void WindowsFileMonitor::Start(
         /* hTemplateFile = */ nullptr);
 
     if (!m_fileHandle || m_fileHandle == INVALID_HANDLE_VALUE) {
-        const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->error("Could not acquire handle to: {}.", path.string());
 
         return;
@@ -252,7 +252,7 @@ void WindowsFileMonitor::RetrieveNotification()
     if (successfullyRead && bytesTransferred > 0) {
         ProcessNotification();
     } else if (GetLastError() == ERROR_NOTIFY_ENUM_DIR && bytesTransferred == 0) {
-        const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->error(
             "Detected a file change notification buffer overflow. This means that too many file "
             "changes occurred at once, and some change notifications may have been missed as a "
@@ -305,7 +305,7 @@ void WindowsFileMonitor::ProcessNotification()
                 break;
             }
             default: {
-                const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+                const auto& log = spdlog::get(Constants::Logging::DefaultLog);
                 log->error("Encountered unknown file system event: {}.", notificationInfo->Action);
             }
         }

@@ -205,8 +205,16 @@ std::optional<FileEvent> Controller::FetchFileModification()
 
 QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
 {
-    // @todo Have model track any non-scheme node colors (in a hashtable), and use that information
-    // to determine the appropriate node color.
+    Expects(node.GetData().offsetIntoVBO != VizBlock::INVALID_OFFSET);
+
+    const auto nodeColor = m_nodeColorMap.find(node.GetData().offsetIntoVBO);
+    if (nodeColor != std::end(m_nodeColorMap)) {
+        return nodeColor->second;
+    }
+
+    if (IsNodeHighlighted(node)) {
+        return Constants::Colors::SlateGray;
+    }
 
     if (m_settingsManager.GetActiveColorScheme() != Constants::ColorScheme::Default) {
         const auto fileColor = m_settingsManager.DetermineColorFromExtension(node);
@@ -421,10 +429,13 @@ void Controller::ClearHighlightedNodes(
 {
     Expects(m_model);
 
-    auto& nodes = m_model->GetHighlightedNodes();
-    callback(nodes);
-
+    // @note This is a deliberate copy. The nodes have to be cleared from the model before we can
+    // ask the UI to update. This is because the UI will call back into the controller to determine
+    // if a node is highlighted (so that we can choose the appropriate color).
+    auto nodes = m_model->GetHighlightedNodes();
     m_model->ClearHighlightedNodes();
+
+    callback(nodes);
 }
 
 template <typename NodeSelectorType>
@@ -563,4 +574,10 @@ const Settings::Manager& Controller::GetSettingsManager() const
 std::filesystem::path Controller::GetRootPath() const
 {
     return m_model->GetRootPath();
+}
+
+void Controller::RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVector3D& color)
+{
+    Expects(node.GetData().offsetIntoVBO != VizBlock::INVALID_OFFSET);
+    m_nodeColorMap.insert_or_assign(node.GetData().offsetIntoVBO, color);
 }

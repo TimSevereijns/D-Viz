@@ -157,8 +157,7 @@ class Controller
         const std::function<void(const Tree<VizBlock>::Node&)>& selectorCallback);
 
     /**
-     * @brief Uses the passed in ray to select the nearest node from the perspective of the
-     * camera.
+     * @brief Uses the passed in ray to select the nearest node from the perspective of the camera.
      *
      * @todo Remove the camera object, and pass in the camera's position instead.
      *
@@ -180,8 +179,7 @@ class Controller
     /**
      * @brief Converts the given size of the file from bytes to the most human readable units.
      *
-     * @param[in] sizeInBytes     The size (in bytes) to be converted to a more appropriate
-     *                            unit.
+     * @param[in] sizeInBytes     The size (in bytes) to be converted to a more appropriate unit.
      * @param[in] prefix          The desired prefix.
      *
      * @returns A std::pair encapsulating the converted file size, and corresponding unit readout
@@ -245,9 +243,7 @@ class Controller
     void StartMonitoringFileSystem();
 
     /**
-     * @brief IsFileSystemBeingMonitored
-     *
-     * @return
+     * @returns True if filesystem monitoring is enabled; false otherwise.
      */
     bool IsFileSystemBeingMonitored() const;
 
@@ -262,6 +258,13 @@ class Controller
      * @return
      */
     QVector3D DetermineNodeColor(const Tree<VizBlock>::Node& node) const;
+
+    /**
+     * @brief RegisterNodeColor
+     * @param node
+     * @param color
+     */
+    void RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVector3D& color);
 
   private:
     template <typename NodeSelectorType>
@@ -282,6 +285,9 @@ class Controller
     DriveScanner m_scanner;
 
     std::uint64_t m_occupiedDiskSpace{ 0u };
+
+    // @todo Move this onto the model.
+    std::unordered_map<std::uint32_t, QVector3D> m_nodeColorMap;
 };
 
 #endif // CONTROLLER_H

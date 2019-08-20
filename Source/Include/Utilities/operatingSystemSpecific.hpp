@@ -58,7 +58,7 @@ namespace OS
 
         Expects(wasOperationSuccessful);
 
-        const auto& log = spdlog::get(Constants::Logging::DEFAULT_LOG);
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->info(fmt::format("Disk Size:  {} bytes", totalNumberOfBytes));
         log->info(fmt::format("Free Space: {} bytes", totalNumberOfFreeBytes));
 

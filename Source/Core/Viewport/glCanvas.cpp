@@ -359,11 +359,9 @@ void GLCanvas::SelectNode(const Tree<VizBlock>::Node& node)
 
 void GLCanvas::RestoreSelectedNode(const Tree<VizBlock>::Node& node)
 {
-    const auto restorationColor = m_controller.IsNodeHighlighted(node)
-                                      ? Constants::Colors::SlateGray
-                                      : m_controller.DetermineNodeColor(node);
-
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
+
+    const auto restorationColor = m_controller.DetermineNodeColor(node);
     treemap->SetNodeColor(node, restorationColor);
 }
 
@@ -685,8 +683,8 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
     m_frameTimeDeque.emplace_back(static_cast<int>(elapsedTime.count()));
 
     const auto total = std::accumulate(
-        std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque),
-        0ull, [](const auto runningTotal, const auto frameTime) noexcept {
+        std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0ull,
+        [](const auto runningTotal, const auto frameTime) noexcept {
             return runningTotal + frameTime;
         });
 
@@ -704,31 +702,34 @@ void GLCanvas::VisualizeFilesystemActivity()
         return;
     }
 
+    auto notification = m_controller.FetchFileModification();
+    Assets::Treemap* treemap = notification ? GetAsset<Assets::Tag::Treemap>() : nullptr;
+
     const auto startTime = std::chrono::high_resolution_clock::now();
 
-    Assets::Treemap* treemap = nullptr;
-
-    auto notification = m_controller.FetchFileModification();
-    if (notification) {
-        treemap = GetAsset<Assets::Tag::Treemap>();
-    }
-
     while (notification) {
-        const auto& fileEvent = *notification;
+        const ScopeExit onScopeExit = [&]() {
+            notification = m_controller.FetchFileModification();
+        };
 
-        const auto* affectedNode =
-            Utilities::FindNodeUsingRelativePath(m_controller.GetTree().GetRoot(), fileEvent.path);
+        const auto* affectedNode = Utilities::FindNodeUsingRelativePath(
+            m_controller.GetTree().GetRoot(), notification->path);
 
         if (affectedNode == nullptr) {
-            // @note Since temporary files may have been created after the latest scan, it is
-            // possible for an event to not have an associated node in the tree.
-            notification = m_controller.FetchFileModification();
+            // @note Since files may have been created after the latest scan, it is possible for an
+            // event to not have an associated node in the tree.
             continue;
         }
 
-        if (fileEvent.eventType == FileEventType::TOUCHED) {
+        if (!m_controller.GetSettingsManager().ShouldBlockBeProcessed(affectedNode->GetData())) {
+            continue;
+        }
+
+        if (notification->eventType == FileEventType::TOUCHED) {
+            m_controller.RegisterNodeColor(*affectedNode, Constants::Colors::BabyBlue);
             treemap->SetNodeColor(*affectedNode, Constants::Colors::BabyBlue);
-        } else if (fileEvent.eventType == FileEventType::DELETED) {
+        } else if (notification->eventType == FileEventType::DELETED) {
+            m_controller.RegisterNodeColor(*affectedNode, Constants::Colors::HotPink);
             treemap->SetNodeColor(*affectedNode, Constants::Colors::HotPink);
         }
 
@@ -742,8 +743,6 @@ void GLCanvas::VisualizeFilesystemActivity()
             // that we don't exceed a reasonable fraction of the total allotted frame time.
             break;
         }
-
-        notification = m_controller.FetchFileModification();
     }
 }
 
