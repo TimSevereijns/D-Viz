@@ -33,10 +33,13 @@ LIBS += -L$$DESTDIR -lD-Viz
 
 HEADERS += \
    fileSizeLiterals.hpp \
+   filesystemObserverTests.h \
    mockFileMonitor.h \
+   modelTests.h \
    multiTestHarness.h \
-   modelTester.h
+   testUtilities.hpp
 
 SOURCES += \
+   filesystemObserverTests.cpp \
    mainTest.cpp \
-   modelTester.cpp
+   modelTests.cpp

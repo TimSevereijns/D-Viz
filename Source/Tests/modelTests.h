@@ -1,3 +1,6 @@
+#ifndef MODELTESTER_H
+#define MODELTESTER_H
+
 #include <QString>
 #include <QtTest>
 
@@ -11,7 +14,7 @@
 #include <iostream>
 #include <memory>
 
-class ModelTester : public QObject
+class ModelTests : public QObject
 {
     Q_OBJECT
 
@@ -21,6 +24,11 @@ class ModelTester : public QObject
      * @brief This preamble is run only per Model Tester class instance.
      */
     void initTestCase();
+
+    /**
+     * @brief Clean up code for the entire class; called once.
+     */
+    void cleanupTestCase();
 
     /**
      * @brief This preamble is run before each test.
@@ -117,3 +125,5 @@ class ModelTester : public QObject
     std::shared_ptr<Tree<VizBlock>> m_tree{ nullptr };
     std::unique_ptr<SquarifiedTreeMap> m_model{ nullptr };
 };
+
+#endif // MODELTESTER_H

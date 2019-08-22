@@ -1,4 +1,4 @@
-#include "modelTester.h"
+#include "modelTests.h"
 
 #include <cstdlib>
 #include <fstream>
@@ -11,35 +11,12 @@
 #include <Scanner/scanningParameters.h>
 #include <Scanner/scanningProgress.hpp>
 #include <Utilities/operatingSystemSpecific.hpp>
-#include <bootstrapper.hpp>
 #include <constants.h>
+
+#include "testUtilities.hpp"
 
 namespace
 {
-    /**
-     * @brief Decompressing a ZIP archive is such a pain in C++, that I'd rather make a potentially
-     * unsafe call to a Python script than try to integrate ZLib. This is just test code, after all.
-     *
-     * @param[in] zipFile           The path to the ZIP archive.
-     * @param[in] outputDirectory   The location we'd at which we'd like to store the decompressed
-     *                              data.
-     */
-    void UnzipTestData(
-        const std::filesystem::path& zipFile, const std::filesystem::path& outputDirectory)
-    {
-        const std::string script = "../../Tests/Scripts/unzipTestData.py";
-
-#if defined(Q_OS_WIN)
-        const std::string command = "python " + script + " --input " + zipFile.string() +
-                                    " --output " + outputDirectory.string();
-#elif defined(Q_OS_LINUX)
-        const std::string command = "python3 " + script + " --input " + zipFile.string() +
-                                    " --output " + outputDirectory.string();
-#endif // Q_OS_LINUX
-
-        std::system(command.c_str());
-    }
-
     std::filesystem::path PathFromRootToNode(const Tree<VizBlock>::Node& node)
     {
         std::vector<std::reference_wrapper<const std::wstring>> reversePath;
@@ -91,12 +68,9 @@ namespace
     }
 } // namespace
 
-void ModelTester::initTestCase()
+void ModelTests::initTestCase()
 {
-    Bootstrapper::RegisterMetaTypes();
-    Bootstrapper::InitializeLogs();
-
-    UnzipTestData("../../Tests/Data/boost-asio.zip", "../../Tests/Sandbox");
+    TestUtilities::UnzipTestData("../../Tests/Data/boost-asio.zip", "../../Tests/Sandbox");
 
     const auto progressCallback = [&](const ScanningProgress& /*progress*/) {
         ++m_progressCallbackInvocations;
@@ -121,7 +95,12 @@ void ModelTester::initTestCase()
     completionSpy.wait(10'000);
 }
 
-void ModelTester::init()
+void ModelTests::cleanupTestCase()
+{
+    std::filesystem::remove_all("../../Tests/Sandbox");
+}
+
+void ModelTests::init()
 {
     QVERIFY(m_tree != nullptr);
 
@@ -142,12 +121,12 @@ void ModelTester::init()
     m_model->Parse(m_tree);
 }
 
-void ModelTester::ProgressCallbackIsInvoked()
+void ModelTests::ProgressCallbackIsInvoked()
 {
     QVERIFY(m_progressCallbackInvocations > 0); //< Scanning time determines exact count.
 }
 
-void ModelTester::ModelIsPopulated()
+void ModelTests::ModelIsPopulated()
 {
     const auto& tree = m_model->GetTree();
 
@@ -155,7 +134,7 @@ void ModelTester::ModelIsPopulated()
     QCOMPARE(static_cast<unsigned long>(tree.Size()), 490ul);
 }
 
-void ModelTester::ScanningProgressDataIsCorrect()
+void ModelTests::ScanningProgressDataIsCorrect()
 {
     // Counts as seen in Windows File Explorer:
     QCOMPARE(static_cast<unsigned long>(m_bytesScanned), 3'407'665ul);
@@ -163,7 +142,7 @@ void ModelTester::ScanningProgressDataIsCorrect()
     QCOMPARE(static_cast<unsigned long>(m_directoriesScanned), 20ul);
 }
 
-void ModelTester::SelectingNodes()
+void ModelTests::SelectingNodes()
 {
     QVERIFY(m_model->GetSelectedNode() == nullptr);
 
@@ -175,7 +154,7 @@ void ModelTester::SelectingNodes()
     QVERIFY(m_model->GetSelectedNode() == nullptr);
 }
 
-void ModelTester::HighlightDescendants()
+void ModelTests::HighlightDescendants()
 {
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
@@ -196,7 +175,7 @@ void ModelTester::HighlightDescendants()
         static_cast<std::int32_t>(leafCount));
 }
 
-void ModelTester::HighlightAncestors()
+void ModelTests::HighlightAncestors()
 {
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
@@ -213,7 +192,7 @@ void ModelTester::HighlightAncestors()
         static_cast<std::int32_t>(4));
 }
 
-void ModelTester::HighlightAllMatchingExtensions()
+void ModelTests::HighlightAllMatchingExtensions()
 {
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
@@ -237,7 +216,7 @@ void ModelTester::HighlightAllMatchingExtensions()
         static_cast<std::int32_t>(headerCount));
 }
 
-void ModelTester::ToggleFileMonitoring()
+void ModelTests::ToggleFileMonitoring()
 {
     m_sampleNotifications = std::vector<FileEvent>{ { "spawn.hpp", FileEventType::TOUCHED } };
 
@@ -248,7 +227,7 @@ void ModelTester::ToggleFileMonitoring()
     QCOMPARE(m_model->IsFileSystemBeingMonitored(), false);
 }
 
-void ModelTester::TestSingleNotification(FileEventType eventType)
+void ModelTests::TestSingleNotification(FileEventType eventType)
 {
     QVERIFY(m_tree != nullptr);
 
@@ -268,22 +247,22 @@ void ModelTester::TestSingleNotification(FileEventType eventType)
     QCOMPARE(possibleNotification->eventType, eventType);
 }
 
-void ModelTester::TrackSingleFileModification()
+void ModelTests::TrackSingleFileModification()
 {
     TestSingleNotification(FileEventType::TOUCHED);
 }
 
-void ModelTester::TrackSingleFileDeletion()
+void ModelTests::TrackSingleFileDeletion()
 {
     TestSingleNotification(FileEventType::DELETED);
 }
 
-void ModelTester::TrackSingleFileRename()
+void ModelTests::TrackSingleFileRename()
 {
     TestSingleNotification(FileEventType::RENAMED);
 }
 
-void ModelTester::TrackMultipleDeletions()
+void ModelTests::TrackMultipleDeletions()
 {
     QVERIFY(m_tree != nullptr);
 
@@ -319,7 +298,7 @@ void ModelTester::TrackMultipleDeletions()
     QCOMPARE(processedNotifications, totalNotifications);
 }
 
-void ModelTester::ApplyFileDeletion()
+void ModelTests::ApplyFileDeletion()
 {
     std::filesystem::path absolutePathToRoot = m_model->GetTree().GetRoot()->GetData().file.name;
     std::filesystem::path targetFile = absolutePathToRoot / "basic_socket.hpp";
@@ -347,7 +326,7 @@ void ModelTester::ApplyFileDeletion()
     QVERIFY(wasTargetNodeRemoved == true);
 }
 
-void ModelTester::ApplyFileCreation()
+void ModelTests::ApplyFileCreation()
 {
     std::filesystem::path absolutePathToRoot = m_model->GetTree().GetRoot()->GetData().file.name;
     std::filesystem::path targetFile = absolutePathToRoot / "fake_file.hpp";
@@ -374,4 +353,4 @@ void ModelTester::ApplyFileCreation()
     QVERIFY(nodeWasAdded == true);
 }
 
-REGISTER_TEST(ModelTester) // NOLINT
+REGISTER_TEST(ModelTests) // NOLINT

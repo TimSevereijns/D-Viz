@@ -108,6 +108,7 @@ void WindowsFileMonitor::Start(
     const std::filesystem::path& path,
     const std::function<void(FileEvent&&)>& onNotificationCallback)
 {
+    m_pathBeingMonitored = path;
     m_notificationCallback = onNotificationCallback;
 
     // When monitoring a file on a network drive, the size of the buffer cannot exceed 64 KiB.
@@ -177,6 +178,14 @@ void WindowsFileMonitor::Stop()
 void WindowsFileMonitor::ShutdownThread()
 {
     m_keepMonitoring.store(false);
+
+    if (!std::filesystem::exists(m_pathBeingMonitored)) {
+        // @note If the path being monitored now longer exists (for whatever reason), then we can't
+        // cancel I/O operations on it. So, if that happens, we'll just bail.
+
+        Expects(false);
+        return;
+    }
 
     CancelIo(m_fileHandle);
 

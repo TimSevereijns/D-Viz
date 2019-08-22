@@ -133,6 +133,8 @@ class WindowsFileMonitor : public FileMonitorBase
     std::function<void(FileEvent&&)> m_notificationCallback;
 
     std::optional<std::wstring> m_pendingRenameEvent;
+
+    std::filesystem::path m_pathBeingMonitored;
 };
 
 #endif // Q_OS_WIN
