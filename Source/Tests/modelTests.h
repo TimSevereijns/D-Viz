@@ -1,5 +1,5 @@
-#ifndef MODELTESTER_H
-#define MODELTESTER_H
+#ifndef MODELTESTS_H
+#define MODELTESTS_H
 
 #include <QString>
 #include <QtTest>
@@ -21,7 +21,8 @@ class ModelTests : public QObject
   private slots:
 
     /**
-     * @brief This preamble is run only per Model Tester class instance.
+     * @brief This preamble is run only once for the entire class. All setup work should be done
+     * here.
      */
     void initTestCase();
 
@@ -126,4 +127,4 @@ class ModelTests : public QObject
     std::unique_ptr<SquarifiedTreeMap> m_model{ nullptr };
 };
 
-#endif // MODELTESTER_H
+#endif // MODELTESTS_H
