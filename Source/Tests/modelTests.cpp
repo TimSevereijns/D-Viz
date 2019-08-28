@@ -70,7 +70,8 @@ namespace
 
 void ModelTests::initTestCase()
 {
-    TestUtilities::UnzipTestData("../../Tests/Data/boost-asio.zip", "../../Tests/Sandbox");
+    TestUtilities::UnzipTestData(
+        "../../Tests/Data/boost-asio.zip", std::filesystem::absolute("../../Tests/Sandbox"));
 
     const auto progressCallback = [&](const ScanningProgress& /*progress*/) {
         ++m_progressCallbackInvocations;

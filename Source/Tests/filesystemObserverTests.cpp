@@ -21,7 +21,8 @@ namespace
 
 void FilesystemObserverTests::initTestCase()
 {
-    TestUtilities::UnzipTestData("../../Tests/Data/boost-asio.zip", "../../Tests/Sandbox");
+    TestUtilities::UnzipTestData(
+        "../../Tests/Data/boost-asio.zip", std::filesystem::absolute("../../Tests/Sandbox"));
 }
 
 void FilesystemObserverTests::cleanupTestCase()
@@ -37,17 +38,16 @@ void FilesystemObserverTests::MonitorDeletions()
         receivedNotifications.emplace_back(std::move(notification));
     };
 
-    std::unique_ptr<FileMonitorBase> fileMonitor = std::make_unique<FileSystemMonitor>();
-
-    FileSystemObserver observer{ std::move(fileMonitor), "../../Tests/Sandbox" };
+    FileSystemObserver observer{ std::make_unique<FileSystemMonitor>(), "../../Tests/Sandbox" };
     observer.StartMonitoring(onNotifications);
+    QVERIFY(observer.IsActive() == true);
 
     // @todo Deleting the path being monitored might be problematic. Verify fix, and add test case.
     std::filesystem::remove_all("../../Tests/Sandbox/asio");
 
     observer.StopMonitoring();
-
     QVERIFY(observer.IsActive() == false);
+
     QCOMPARE(receivedNotifications.size(), 490ul);
 }
 

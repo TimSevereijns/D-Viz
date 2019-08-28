@@ -705,6 +705,15 @@ void GLCanvas::VisualizeFilesystemActivity()
     auto notification = m_controller.FetchFileModification();
     Assets::Treemap* treemap = notification ? GetAsset<Assets::Tag::Treemap>() : nullptr;
 
+    const auto markNode = [&](const Tree<VizBlock>::Node& node, const QVector3D& color) {
+        if (!m_controller.GetSettingsManager().ShouldBlockBeProcessed(node.GetData())) {
+            return;
+        }
+
+        m_controller.RegisterNodeColor(node, color);
+        treemap->SetNodeColor(node, color);
+    };
+
     const auto startTime = std::chrono::high_resolution_clock::now();
 
     while (notification) {
@@ -721,16 +730,20 @@ void GLCanvas::VisualizeFilesystemActivity()
             continue;
         }
 
-        if (!m_controller.GetSettingsManager().ShouldBlockBeProcessed(affectedNode->GetData())) {
-            continue;
-        }
-
         if (notification->eventType == FileEventType::TOUCHED) {
-            m_controller.RegisterNodeColor(*affectedNode, Constants::Colors::BabyBlue);
-            treemap->SetNodeColor(*affectedNode, Constants::Colors::BabyBlue);
+            markNode(*affectedNode, Constants::Colors::BabyBlue);
         } else if (notification->eventType == FileEventType::DELETED) {
-            m_controller.RegisterNodeColor(*affectedNode, Constants::Colors::HotPink);
-            treemap->SetNodeColor(*affectedNode, Constants::Colors::HotPink);
+            if (affectedNode->GetData().file.type == FileType::DIRECTORY) {
+                // @todo If a directory is deleted via the Windows File Explorer, no notifications
+                // are sent for any file that resides below that directory. Investigate if this
+                // behavior is Windows specific.
+                std::for_each(
+                    Tree<VizBlock>::PostOrderIterator{ affectedNode },
+                    Tree<VizBlock>::PostOrderIterator{},
+                    [&](const auto& node) { markNode(node, Constants::Colors::HotPink); });
+            } else {
+                markNode(*affectedNode, Constants::Colors::HotPink);
+            }
         }
 
         const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
