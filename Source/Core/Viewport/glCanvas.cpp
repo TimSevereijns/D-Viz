@@ -165,7 +165,7 @@ void GLCanvas::resizeGL(int width, int height)
 void GLCanvas::ReloadVisualization()
 {
     const auto previousSuspensionState = m_isPaintingSuspended;
-    ON_SCOPE_EXIT noexcept
+    const ScopeExit onScopeExit = [&]() noexcept
     {
         m_isPaintingSuspended = previousSuspensionState;
     };
@@ -496,7 +496,7 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 void GLCanvas::HandleUserInput()
 {
     const auto now = std::chrono::system_clock::now();
-    ON_SCOPE_EXIT noexcept
+    const ScopeExit onScopeExit = [&]() noexcept
     {
         m_lastCameraPositionUpdatelTime = now;
     };
@@ -717,7 +717,8 @@ void GLCanvas::VisualizeFilesystemActivity()
     const auto startTime = std::chrono::high_resolution_clock::now();
 
     while (notification) {
-        const ScopeExit onScopeExit = [&]() {
+        const ScopeExit onScopeExit = [&]() noexcept
+        {
             notification = m_controller.FetchFileModification();
         };
 

@@ -27,7 +27,7 @@ namespace OS
     inline void LaunchFileExplorer(const Tree<VizBlock>::Node& node)
     {
         CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-        ON_SCOPE_EXIT noexcept
+        const ScopeExit onScopeExit = [&]() noexcept
         {
             CoUninitialize();
         };
@@ -35,7 +35,7 @@ namespace OS
         const std::wstring filePath = Controller::ResolveCompleteFilePath(node);
 
         Expects(std::none_of(std::begin(filePath), std::end(filePath), [](const auto character) {
-            return character == L'/';
+            return character == L'/'; //< Certain Windows API functions can't deal with this slash.
         }));
 
         auto* const idList = ILCreateFromPath(filePath.c_str());

@@ -4,13 +4,17 @@
 #include <utility>
 
 /**
- * @brief ScopeExit
+ * @brief An RAII wrapper that will execute an action when the wrapper falls out of scope, or is
+ * otherwise destroyed.
  */
 template <typename LambdaType> class ScopeExit
 {
   public:
     ScopeExit(LambdaType&& lambda) noexcept : m_lambda{ std::move(lambda) }
     {
+        static_assert(
+            std::is_nothrow_invocable<LambdaType>::value,
+            "Since the callable type is invoked from the destructor, exceptions are not allowed.");
     }
 
     ~ScopeExit() noexcept
@@ -27,33 +31,5 @@ template <typename LambdaType> class ScopeExit
   private:
     LambdaType m_lambda;
 };
-
-namespace Detail
-{
-    struct DummyStruct
-    {
-        // Left intentionally empty.
-    };
-} // namespace Detail
-
-/**
- * Enables the use of braces to define the contents of the RAII object.
- *
- * @param[in] function              The lambda to be executed upon destruction of the ScopeExit
- *                                  object.
- *
- * @returns An RAII object encapsulating the lambda.
- */
-template <typename LambdaType>
-inline ScopeExit<LambdaType> operator+(const Detail::DummyStruct&, LambdaType&& lambda)
-{
-    return ScopeExit<LambdaType>{ std::forward<LambdaType>(lambda) };
-}
-
-#define NONEXPANDING_CONCAT(A, B) A##B
-
-#define CONCAT(A, B) NONEXPANDING_CONCAT(A, B)
-
-#define ON_SCOPE_EXIT auto CONCAT(scope_exit_, __LINE__) = Detail::DummyStruct{} + [=]()
 
 #endif // SCOPEEXIT_HPP

@@ -140,7 +140,34 @@ void Controller::LaunchUI()
     m_view->show();
 }
 
-void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
+void Controller::OnScanComplete(
+    const Settings::VisualizationParameters& parameters, const ScanningProgress& progress,
+    const std::shared_ptr<Tree<VizBlock>>& scanningResults)
+{
+    ComputeProgress(progress);
+    LogScanCompletion(progress);
+
+    m_view->AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
+
+    m_view->SetWaitCursor();
+    const ScopeExit onScopeExit = [&]() noexcept
+    {
+        m_view->RestoreDefaultCursor();
+    };
+
+    m_model->Parse(scanningResults);
+    m_model->UpdateBoundingBoxes();
+
+    SaveScanMetadata(progress);
+
+    m_view->OnScanCompleted();
+
+    AllowUserInteractionWithModel(true);
+
+    m_model->StartMonitoringFileSystem();
+}
+
+void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
 {
     AllowUserInteractionWithModel(false);
 
@@ -157,32 +184,10 @@ void Controller::ScanDrive(Settings::VisualizationParameters& parameters)
         ComputeProgress(progress);
     };
 
-    const auto completionHandler =
-        [&, parameters](
-            const ScanningProgress& progress,
-            const std::shared_ptr<Tree<VizBlock>>& scanningResults) mutable {
-            ComputeProgress(progress);
-            LogScanCompletion(progress);
-
-            m_view->AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
-            m_view->SetWaitCursor();
-
-            ON_SCOPE_EXIT
-            {
-                m_view->RestoreDefaultCursor();
-            };
-
-            m_model->Parse(scanningResults);
-            m_model->UpdateBoundingBoxes();
-
-            SaveScanMetadata(progress);
-
-            m_view->OnScanCompleted();
-
-            AllowUserInteractionWithModel(true);
-
-            m_model->StartMonitoringFileSystem();
-        };
+    const auto completionHandler = [&](const ScanningProgress& progress,
+                                       const std::shared_ptr<Tree<VizBlock>>& scanningResults) {
+        OnScanComplete(parameters, progress, scanningResults);
+    };
 
     ScanningParameters scanningParameters{ parameters.rootDirectory, progressHandler,
                                            completionHandler };

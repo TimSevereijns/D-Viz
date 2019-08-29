@@ -38,7 +38,7 @@ class Controller
      *
      * @param[in] parameters      Drive scanning parameters; where to start, et cetera.
      */
-    void ScanDrive(Settings::VisualizationParameters& parameters);
+    void ScanDrive(const Settings::VisualizationParameters& parameters);
 
     /**
      * @returns True if the visualization is not null;
@@ -273,6 +273,10 @@ class Controller
         const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& callback);
 
     void ComputeProgress(const ScanningProgress& progress);
+
+    void OnScanComplete(
+        const Settings::VisualizationParameters& parameters, const ScanningProgress& progress,
+        const std::shared_ptr<Tree<VizBlock>>& scanningResults);
 
     bool m_allowInteractionWithModel{ false };
 

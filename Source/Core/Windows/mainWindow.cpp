@@ -462,7 +462,7 @@ void MainWindow::OnFileMenuNewScan()
 }
 
 bool MainWindow::AskUserToLimitFileSize(
-    std::uintmax_t numberOfFilesScanned, Settings::VisualizationParameters& parameters)
+    std::uintmax_t numberOfFilesScanned, Settings::VisualizationParameters parameters)
 {
     using namespace Literals::Numeric::Binary;
 
@@ -482,7 +482,7 @@ bool MainWindow::AskUserToLimitFileSize(
     switch (election) {
         case QMessageBox::Yes: {
             parameters.minimumFileSize = 1_MiB;
-            m_controller.GetSettingsManager().SetVisualizationParameters(parameters);
+            m_controller.GetSettingsManager().SetVisualizationParameters(std::move(parameters));
             SetFilePruningComboBoxValue(1_MiB);
 
             return true;
@@ -514,7 +514,7 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
     menuWrapper.binaryPrefix.blockSignals(true);
     menuWrapper.decimalPrefix.blockSignals(true);
 
-    ON_SCOPE_EXIT
+    const ScopeExit onScopeExit = [&]() noexcept
     {
         m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.blockSignals(false);
         m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(false);
@@ -548,7 +548,7 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
     menuWrapper.binaryPrefix.blockSignals(true);
     menuWrapper.decimalPrefix.blockSignals(true);
 
-    ON_SCOPE_EXIT
+    const ScopeExit onScopeExit = [&]() noexcept
     {
         m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.blockSignals(false);
         m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(false);

@@ -123,7 +123,7 @@ class MainWindow final : public QMainWindow
 
   private:
     bool AskUserToLimitFileSize(
-        std::uintmax_t numberOfFilesScanned, Settings::VisualizationParameters& parameters);
+        std::uintmax_t numberOfFilesScanned, Settings::VisualizationParameters parameters);
 
     void SetWaitCursor();
 
