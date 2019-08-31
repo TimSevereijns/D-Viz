@@ -49,6 +49,23 @@ namespace
         lightMarkerAsset.SetVertexCoordinates(std::move(vertices));
         lightMarkerAsset.SetVertexColors(std::move(colors));
     }
+
+    /**
+     * @brief Creates the "Highlight All..." message for the context menus.
+     *
+     * @param[in] node              The node that the menu is based off of.
+     *
+     * @returns The formatted label.
+     */
+    QString GetHighlightExtensionLabel(const Tree<VizBlock>::Node& node)
+    {
+        const auto extension = node.GetData().file.extension.empty()
+                                   ? L"Extensionless"
+                                   : L"\"" + node.GetData().file.extension + L"\"";
+
+        const auto label = L"Highlight All " + extension + L" Files";
+        return QString::fromStdWString(label);
+    }
 } // namespace
 
 GLCanvas::GLCanvas(Controller& controller, QWidget* parent)
@@ -417,10 +434,9 @@ void GLCanvas::ShowGamepadContextMenu()
         });
 
         if (selectedNode->GetData().file.type == FileType::REGULAR) {
-            const std::wstring message =
-                L"Highlight All \"" + selectedNode->GetData().file.extension + L"\" Files";
+            const auto message = GetHighlightExtensionLabel(*selectedNode);
 
-            m_gamepadContextMenu->AddEntry(QString::fromStdWString(message), [=] {
+            m_gamepadContextMenu->AddEntry(message, [=] {
                 m_controller.ClearHighlightedNodes(unhighlightCallback);
                 m_controller.HighlightAllMatchingExtensions(*selectedNode, highlightCallback);
                 m_controller.SelectNode(*selectedNode, selectionCallback);
@@ -474,10 +490,9 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
         });
 
         if (selectedNode->GetData().file.type == FileType::REGULAR) {
-            const std::wstring message =
-                L"Highlight All \"" + selectedNode->GetData().file.extension + L"\" Files";
+            const auto message = GetHighlightExtensionLabel(*selectedNode);
 
-            menu.addAction(QString::fromStdWString(message), [&] {
+            menu.addAction(message, [&] {
                 m_controller.ClearHighlightedNodes(unhighlightCallback);
                 m_controller.HighlightAllMatchingExtensions(*selectedNode, highlightCallback);
                 m_controller.SelectNode(*selectedNode, selectionCallback);
