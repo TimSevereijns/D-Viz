@@ -11,6 +11,14 @@
 #include <functional>
 #include <thread>
 
+#include <sys/epoll.h>
+#include <sys/inotify.h>
+
+/**
+ * @brief The LinuxFileMonitor class
+ *
+ * @note Inspired by: https://github.com/erikzenker/inotify-cpp
+ */
 class LinuxFileMonitor : public FileMonitorBase
 {
   public:
@@ -36,11 +44,30 @@ class LinuxFileMonitor : public FileMonitorBase
     bool IsActive() const override;
 
   private:
+    void InitializeInotify();
+
+    void RegisterWatchersRecursively(const std::filesystem::path& path);
+    void RegisterWatcher(const std::filesystem::path& path);
+
     bool m_isActive{ false };
 
     std::filesystem::path m_pathToWatch;
 
     std::thread m_monitoringThread;
+
+    std::unordered_map<int, std::filesystem::path> watchDescriptorToPathMap;
+
+    int m_inotifyFileDescriptor{ 0 };
+    int m_epollFileDescriptor{ 0 };
+
+    epoll_event m_inotifyEpollEvent;
+    epoll_event m_stopPipeEpollEvent;
+    epoll_event m_epollEvents[1024];
+
+    int m_stopPipeFileDescriptor[2];
+
+    constexpr static int m_pipeReadIndex{ 0 };
+    constexpr static int mPipeWriteIdx{ 0 };
 };
 
 #endif // Q_OS_UNIX

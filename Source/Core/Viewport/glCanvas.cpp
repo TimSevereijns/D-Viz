@@ -698,17 +698,16 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
     m_frameTimeDeque.emplace_back(static_cast<int>(elapsedTime.count()));
 
     const auto total = std::accumulate(
-        std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0ull,
-        [](const auto runningTotal, const auto frameTime) noexcept {
+        std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque),
+        0ull, [](const auto runningTotal, const auto frameTime) noexcept {
             return runningTotal + frameTime;
         });
 
     Expects(m_frameTimeDeque.empty() == false);
     const auto averageFrameTime = total / m_frameTimeDeque.size();
 
-    m_mainWindow.setWindowTitle(
-        QString::fromStdWString(L"D-Viz @ ") + QString::number(averageFrameTime) +
-        QString::fromStdWString(L" \xB5s / frame"));
+    const auto label = L"D-Viz @ " + std::to_wstring(averageFrameTime) + L" \xB5s / frame";
+    m_mainWindow.setWindowTitle(QString::fromStdWString(label));
 }
 
 void GLCanvas::VisualizeFilesystemActivity()
