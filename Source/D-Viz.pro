@@ -12,9 +12,6 @@ TARGET = D-Viz
 TEMPLATE = subdirs
 CONFIG += c++17
 
-INSTALLS += library_files
-INSTALLS += plugin_files
-
 CONFIG += \
    ordered
 SUBDIRS += \

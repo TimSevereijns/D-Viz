@@ -30,3 +30,5 @@ SOURCES += \
    main.cpp
 
 LIBS += -L$$DESTDIR -lD-Viz
+
+RC_ICONS += D-Viz.ico
