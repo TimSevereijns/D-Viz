@@ -5,7 +5,7 @@ namespace Assets
     DebuggingRay::DebuggingRay(const Controller& controller, QOpenGLExtraFunctions& openGL)
         : Line{ controller, openGL }
     {
-        m_shouldRender = DetermineVisibilityFromPreferences(L"DebuggingRay");
+        m_shouldRender = false;
     }
 
     void DebuggingRay::Render(const Camera& camera, const std::vector<Light>&)

@@ -49,7 +49,7 @@ namespace Assets
     Crosshair::Crosshair(const Controller& controller, QOpenGLExtraFunctions& openGL)
         : Line{ controller, openGL }
     {
-        m_shouldRender = DetermineVisibilityFromPreferences(AssetName);
+        m_shouldRender = false;
         m_rawColors = CreateCrosshairColors();
     }
 

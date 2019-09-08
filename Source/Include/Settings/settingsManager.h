@@ -131,9 +131,19 @@ namespace Settings
         bool ShouldShowCascadeSplits() const;
 
         /**
+         * @brief Passing in `true` will render the cascade splits overlay.
+         */
+        void SetShowCascadeSplits(bool isEnabled);
+
+        /**
          * @returns True if shadow rendering is enabled.
          */
         bool ShouldRenderShadows() const;
+
+        /**
+         * @brief Passing in `true` will enable the rendering of shadows.
+         */
+        void SetShowShadows(bool isEnabled);
 
         /**
          * @returns True if the file system monitor is enabled;
@@ -243,20 +253,6 @@ namespace Settings
         void OnShouldSearchDirectoriesChanged(bool state);
 
         /**
-         * @brief Handles toggling of whether cascade splits should be rendered.
-         *
-         * @param[in] isEnabled       Pass in true to enable cascade split visualization.
-         */
-        void OnShowCascadeSplitsToggled(bool isEnabled);
-
-        /**
-         * @brief Handles toggling of whether shadows should be rendered.
-         *
-         * @param[in] isEnabled       Pass in true to enable shadow rendering.
-         */
-        void OnShowShadowsToggled(bool isEnabled);
-
-        /**
          * @brief Handles toggling of whether the file system should be monitored for changes.
          *
          * @param[in] isEnabled       Pass in true to enable monitoring.
@@ -264,6 +260,8 @@ namespace Settings
         void OnMonitoringOptionToggled(bool isEnabled);
 
       private:
+        JsonDocument CreatePreferencesFile();
+
         double m_cameraSpeed{ 0.25 };
         double m_mouseSensitivity{ 0.20 };
 
@@ -276,8 +274,8 @@ namespace Settings
         bool m_isLightAttachedToCamera{ true };
         bool m_shouldSearchDirectories{ false };
         bool m_shouldSearchFiles{ true };
-        bool m_shouldShowCascadeSplitOverlay{ false };
-        bool m_shouldRenderShadows{ true };
+        bool m_showCascadeSplits{ false };
+        bool m_shouldShowShadows{ true };
         bool m_shouldMonitorFileSystem{ true };
 
         JsonDocument m_fileColorMapDocument;

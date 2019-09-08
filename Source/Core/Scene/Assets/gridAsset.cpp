@@ -92,7 +92,7 @@ namespace Assets
     Grid::Grid(const Controller& controller, QOpenGLExtraFunctions& openGL)
         : Line{ controller, openGL }
     {
-        m_shouldRender = DetermineVisibilityFromPreferences(AssetName);
+        m_shouldRender = DetermineVisibilityFromPreferences(Constants::Preferences::ShowGrid);
 
         m_rawVertices = CreateGridVertices();
         m_rawColors = CreateGridColors();

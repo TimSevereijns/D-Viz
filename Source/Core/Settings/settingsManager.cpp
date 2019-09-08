@@ -113,13 +113,40 @@ namespace Settings
 {
     Manager::Manager(
         const std::filesystem::path& colorFile, const std::filesystem::path& preferencesFile)
-        : m_fileColorMapDocument{ Settings::LoadFromDisk(colorFile) },
-          m_preferencesDocument{ Settings::LoadFromDisk(preferencesFile) },
+        : // m_fileColorMapDocument{ Settings::LoadFromDisk(colorFile) },
+          // m_preferencesDocument{ Settings::LoadFromDisk(preferencesFile) },
           m_preferencesPath{ preferencesFile },
           m_fileColorMapPath{ colorFile }
     {
+        if (!std::filesystem::exists(m_preferencesPath)) {
+            m_preferencesDocument = CreatePreferencesFile();
+        }
+
+        m_preferencesDocument = LoadFromDisk(m_preferencesPath);
+
         PopulateColorMapFromJsonDocument(m_fileColorMapDocument, m_colorMap);
         PopulatePreferencesMapFromJsonDocument(m_preferencesDocument, m_preferencesMap);
+    }
+
+    JsonDocument Manager::CreatePreferencesFile()
+    {
+        JsonDocument document;
+        document.SetObject();
+
+        auto& allocator = document.GetAllocator();
+
+        document.AddMember(Constants::Preferences::ShowGrid, true, allocator);
+        document.AddMember(Constants::Preferences::ShowOrigin, false, allocator);
+        document.AddMember(Constants::Preferences::ShowFrusta, false, allocator);
+        document.AddMember(Constants::Preferences::ShowLights, false, allocator);
+        document.AddMember(Constants::Preferences::ShowShadows, true, allocator);
+        document.AddMember(Constants::Preferences::ShowCascadeSplits, false, allocator);
+        document.AddMember(Constants::Preferences::ShadowMapQuality, 4, allocator);
+        document.AddMember(Constants::Preferences::ShowDebuggingMenu, false, allocator);
+
+        SaveToDisk(document, m_preferencesPath);
+
+        return document;
     }
 
     void Manager::OnCameraSpeedChanged(double speed)
@@ -160,16 +187,6 @@ namespace Settings
     void Manager::OnShouldSearchDirectoriesChanged(bool state)
     {
         m_shouldSearchDirectories = state;
-    }
-
-    void Manager::OnShowCascadeSplitsToggled(bool isEnabled)
-    {
-        m_shouldShowCascadeSplitOverlay = isEnabled;
-    }
-
-    void Manager::OnShowShadowsToggled(bool isEnabled)
-    {
-        m_shouldRenderShadows = isEnabled;
     }
 
     void Manager::OnMonitoringOptionToggled(bool isEnabled)
@@ -294,14 +311,24 @@ namespace Settings
         return m_activeNumericPrefix;
     }
 
+    void Manager::SetShowCascadeSplits(bool isEnabled)
+    {
+        m_showCascadeSplits = isEnabled;
+    }
+
     bool Manager::ShouldShowCascadeSplits() const
     {
-        return m_shouldShowCascadeSplitOverlay;
+        return m_showCascadeSplits;
+    }
+
+    void Manager::SetShowShadows(bool isEnabled)
+    {
+        m_shouldShowShadows = isEnabled;
     }
 
     bool Manager::ShouldRenderShadows() const
     {
-        return m_shouldRenderShadows;
+        return m_shouldShowShadows;
     }
 
     bool Manager::ShouldMonitorFileSystem() const

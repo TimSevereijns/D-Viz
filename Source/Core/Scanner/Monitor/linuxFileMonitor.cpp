@@ -1,5 +1,7 @@
 #include "Scanner/Monitor/linuxFileMonitor.h"
 
+#ifdef Q_OS_LINUX
+
 #include "constants.h"
 
 #include <strstream>
@@ -9,8 +11,6 @@
 
 #include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
-
-#ifdef Q_OS_LINUX
 
 LinuxFileMonitor::~LinuxFileMonitor() noexcept
 {

@@ -183,7 +183,7 @@ namespace Assets
     Treemap::Treemap(const Controller& controller, QOpenGLExtraFunctions& openGL)
         : AssetBase{ controller, openGL }, m_controller{ controller }
     {
-        m_shouldRender = DetermineVisibilityFromPreferences(AssetName);
+        m_shouldRender = true;
 
         const auto& preferences = m_settingsManager.GetPreferenceMap();
         m_cascadeCount = preferences.GetValueOrDefault(L"shadowMapCascadeCount", 4);

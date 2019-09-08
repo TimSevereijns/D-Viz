@@ -357,23 +357,32 @@ void MainWindow::SetupDebuggingMenu()
     auto& lightingMenuWrapper = m_debuggingMenuWrapper.lightingMenuWrapper;
     auto& lightingMenu = m_debuggingMenuWrapper.lightingMenu;
 
+    const auto& preferences = m_controller.GetSettingsManager().GetPreferenceMap();
+    const auto shouldShowCascadeSplits =
+        preferences.GetValueOrDefault(Constants::Preferences::ShowCascadeSplits, true);
+
+    m_controller.GetSettingsManager().SetShowCascadeSplits(shouldShowCascadeSplits);
+
     lightingMenuWrapper.showCascadeSplits.setText("Show Cascade Splits");
     lightingMenuWrapper.showCascadeSplits.setCheckable(true);
-    lightingMenuWrapper.showCascadeSplits.setChecked(
-        m_controller.GetSettingsManager().ShouldShowCascadeSplits());
+    lightingMenuWrapper.showCascadeSplits.setChecked(shouldShowCascadeSplits);
 
     connect(
-        &lightingMenuWrapper.showCascadeSplits, &QAction::toggled,
-        &m_controller.GetSettingsManager(), &Settings::Manager::OnShowCascadeSplitsToggled);
+        &lightingMenuWrapper.showCascadeSplits, &QAction::toggled, this,
+        &MainWindow::OnShowCascadeSplitsToggled);
+
+    const auto shouldShowShadows =
+        preferences.GetValueOrDefault(Constants::Preferences::ShowShadows, true);
+
+    m_controller.GetSettingsManager().SetShowShadows(shouldShowShadows);
 
     lightingMenuWrapper.showShadows.setText("Show Shadows");
     lightingMenuWrapper.showShadows.setCheckable(true);
-    lightingMenuWrapper.showShadows.setChecked(
-        m_controller.GetSettingsManager().ShouldRenderShadows());
+    lightingMenuWrapper.showShadows.setChecked(shouldShowShadows);
 
     connect(
-        &lightingMenuWrapper.showShadows, &QAction::toggled, &m_controller.GetSettingsManager(),
-        &Settings::Manager::OnShowShadowsToggled);
+        &lightingMenuWrapper.showShadows, &QAction::toggled, this,
+        &MainWindow::OnShowShadowsToggled);
 
     lightingMenu.setTitle("Lighting");
     lightingMenu.setStatusTip("Toggle visualization aids");
@@ -423,14 +432,14 @@ void MainWindow::SetDebuggingMenuState()
     renderMenuWrapper.grid.blockSignals(false);
 
     const auto shouldShowLightMarkers =
-        preferences.GetValueOrDefault(Constants::Preferences::ShowLightMarkers, true);
+        preferences.GetValueOrDefault(Constants::Preferences::ShowLights, true);
 
     renderMenuWrapper.lightMarkers.blockSignals(true);
     renderMenuWrapper.lightMarkers.setChecked(shouldShowLightMarkers);
     renderMenuWrapper.lightMarkers.blockSignals(false);
 
     const auto shouldShowFrustum =
-        preferences.GetValueOrDefault(Constants::Preferences::ShowFrustum, true);
+        preferences.GetValueOrDefault(Constants::Preferences::ShowFrusta, true);
 
     renderMenuWrapper.frustum.blockSignals(true);
     renderMenuWrapper.frustum.setChecked(shouldShowFrustum);
@@ -617,7 +626,6 @@ void MainWindow::PruneTree()
     Settings::VisualizationParameters parameters;
     parameters.rootDirectory = m_controller.GetRootPath().wstring();
     parameters.onlyShowDirectories = m_showDirectoriesOnly;
-    //parameters.useDirectoryGradient = m_useDirectoryGradient;
     parameters.forceNewScan = false;
     parameters.minimumFileSize = minimumSize;
 
@@ -650,11 +658,6 @@ void MainWindow::OnDirectoryPruningChange(int state)
     m_showDirectoriesOnly = (state == Qt::Checked);
 }
 
-//void MainWindow::OnGradientUseChange(int state)
-//{
-//    m_useDirectoryGradient = (state == Qt::Checked);
-//}
-
 void MainWindow::OnShowBreakdownButtonPressed()
 {
     if (!m_breakdownDialog) {
@@ -664,36 +667,53 @@ void MainWindow::OnShowBreakdownButtonPressed()
     m_breakdownDialog->show();
 }
 
-void MainWindow::OnRenderOriginToggled(bool isEnabled)
+void MainWindow::OnRenderOriginToggled(bool shouldShow)
 {
-    m_glCanvas->ToggleAssetVisibility<Assets::Tag::OriginMarker>(isEnabled);
+    m_glCanvas->ToggleAssetVisibility<Assets::Tag::OriginMarker>(shouldShow);
 
     m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
-        Constants::Preferences::ShowOrigin, isEnabled);
+        Constants::Preferences::ShowOrigin, shouldShow);
 }
 
-void MainWindow::OnRenderGridToggled(bool isEnabled)
+void MainWindow::OnRenderGridToggled(bool shouldShow)
 {
-    m_glCanvas->ToggleAssetVisibility<Assets::Tag::Grid>(isEnabled);
+    m_glCanvas->ToggleAssetVisibility<Assets::Tag::Grid>(shouldShow);
 
     m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
-        Constants::Preferences::ShowGrid, isEnabled);
+        Constants::Preferences::ShowGrid, shouldShow);
 }
 
-void MainWindow::OnRenderLightMarkersToggled(bool isEnabled)
+void MainWindow::OnRenderLightMarkersToggled(bool shouldShow)
 {
-    m_glCanvas->ToggleAssetVisibility<Assets::Tag::LightMarker>(isEnabled);
+    m_glCanvas->ToggleAssetVisibility<Assets::Tag::LightMarker>(shouldShow);
 
     m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
-        Constants::Preferences::ShowLightMarkers, isEnabled);
+        Constants::Preferences::ShowLights, shouldShow);
 }
 
-void MainWindow::OnRenderFrustumToggled(bool isEnabled)
+void MainWindow::OnRenderFrustumToggled(bool shouldShow)
 {
-    m_glCanvas->ToggleAssetVisibility<Assets::Tag::Frustum>(isEnabled);
+    m_glCanvas->ToggleAssetVisibility<Assets::Tag::Frustum>(shouldShow);
 
     m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
-        Constants::Preferences::ShowFrustum, isEnabled);
+        Constants::Preferences::ShowFrusta, shouldShow);
+}
+
+void MainWindow::OnShowShadowsToggled(bool shouldShow)
+{
+    auto& settingsManager = m_controller.GetSettingsManager();
+
+    settingsManager.SetShowShadows(shouldShow);
+    settingsManager.SavePreferenceChangeToDisk(Constants::Preferences::ShowShadows, shouldShow);
+}
+
+void MainWindow::OnShowCascadeSplitsToggled(bool shouldShow)
+{
+    auto& settingsManager = m_controller.GetSettingsManager();
+
+    settingsManager.SetShowCascadeSplits(shouldShow);
+    settingsManager.SavePreferenceChangeToDisk(Constants::Preferences::ShowCascadeSplits,
+                                               shouldShow);
 }
 
 bool MainWindow::ShouldShowFrameTime() const

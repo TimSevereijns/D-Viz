@@ -113,13 +113,17 @@ class MainWindow final : public QMainWindow
 
     void OnShowBreakdownButtonPressed();
 
-    void OnRenderOriginToggled(bool isEnabled);
+    void OnRenderOriginToggled(bool shouldShow);
 
-    void OnRenderGridToggled(bool isEnabled);
+    void OnRenderGridToggled(bool shouldShow);
 
-    void OnRenderLightMarkersToggled(bool isEnabled);
+    void OnRenderLightMarkersToggled(bool shouldShow);
 
-    void OnRenderFrustumToggled(bool isEnabled);
+    void OnRenderFrustumToggled(bool shouldShow);
+
+    void OnShowShadowsToggled(bool shouldShow);
+
+    void OnShowCascadeSplitsToggled(bool shouldShow);
 
   private:
     bool AskUserToLimitFileSize(

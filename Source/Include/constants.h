@@ -80,8 +80,12 @@ namespace Constants
     {
         constexpr static auto& ShowOrigin = L"showOrigin";
         constexpr static auto& ShowGrid = L"showGrid";
-        constexpr static auto& ShowLightMarkers = L"showLightMarkers";
-        constexpr static auto& ShowFrustum = L"showFrustum";
+        constexpr static auto& ShowLights = L"showLights";
+        constexpr static auto& ShowFrusta = L"showFrusta";
+        constexpr static auto& ShowShadows = L"showShadows";
+        constexpr static auto& ShowCascadeSplits = L"showCascadeSplits";
+        constexpr static auto& ShadowMapQuality = L"shadowMapQuality";
+        constexpr static auto& ShowDebuggingMenu = L"showDebuggingMenu";
     } // namespace Preferences
 
     namespace Visualization

@@ -51,9 +51,8 @@ namespace Assets
         return true;
     }
 
-    bool AssetBase::DetermineVisibilityFromPreferences(std::wstring_view assetName)
+    bool AssetBase::DetermineVisibilityFromPreferences(std::wstring_view preferenceName)
     {
-        const auto preferenceName = std::wstring{ L"show" } + assetName.data();
         const auto& preferences = m_settingsManager.GetPreferenceMap();
         const auto shouldRender = preferences.GetValueOrDefault(preferenceName, true);
 
