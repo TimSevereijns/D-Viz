@@ -29,9 +29,6 @@ namespace Assets
          *                            be overlaid.
          */
         void SetCrosshairLocation(const QPoint& canvasCenter);
-
-      private:
-        static constexpr std::wstring_view AssetName{ L"Crosshair" };
     };
 } // namespace Assets
 

@@ -19,9 +19,6 @@ namespace Assets
          * @copydoc Asset::Base::Render()
          */
         void Render(const Camera& camera, const std::vector<Light>& lights) override;
-
-      private:
-        static constexpr std::wstring_view AssetName{ L"LightMarker" };
     };
 } // namespace Assets
 

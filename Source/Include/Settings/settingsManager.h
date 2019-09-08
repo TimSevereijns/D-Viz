@@ -260,7 +260,7 @@ namespace Settings
         void OnMonitoringOptionToggled(bool isEnabled);
 
       private:
-        JsonDocument CreatePreferencesFile();
+        JsonDocument CreatePreferencesDocument();
 
         double m_cameraSpeed{ 0.25 };
         double m_mouseSensitivity{ 0.20 };

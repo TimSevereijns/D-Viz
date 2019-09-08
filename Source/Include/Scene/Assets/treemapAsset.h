@@ -148,8 +148,6 @@ namespace Assets
         std::vector<ShadowMapMetadata> m_shadowMaps;
 
         const Controller& m_controller;
-
-        static constexpr std::wstring_view AssetName{ L"Treemap" };
     };
 } // namespace Assets
 

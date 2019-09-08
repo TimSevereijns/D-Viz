@@ -113,22 +113,19 @@ namespace Settings
 {
     Manager::Manager(
         const std::filesystem::path& colorFile, const std::filesystem::path& preferencesFile)
-        : // m_fileColorMapDocument{ Settings::LoadFromDisk(colorFile) },
-          // m_preferencesDocument{ Settings::LoadFromDisk(preferencesFile) },
-          m_preferencesPath{ preferencesFile },
-          m_fileColorMapPath{ colorFile }
+        : m_preferencesPath{ preferencesFile }, m_fileColorMapPath{ colorFile }
     {
         if (!std::filesystem::exists(m_preferencesPath)) {
-            m_preferencesDocument = CreatePreferencesFile();
+            m_preferencesDocument = CreatePreferencesDocument();
+        } else {
+            m_preferencesDocument = LoadFromDisk(m_preferencesPath);
         }
-
-        m_preferencesDocument = LoadFromDisk(m_preferencesPath);
 
         PopulateColorMapFromJsonDocument(m_fileColorMapDocument, m_colorMap);
         PopulatePreferencesMapFromJsonDocument(m_preferencesDocument, m_preferencesMap);
     }
 
-    JsonDocument Manager::CreatePreferencesFile()
+    JsonDocument Manager::CreatePreferencesDocument()
     {
         JsonDocument document;
         document.SetObject();

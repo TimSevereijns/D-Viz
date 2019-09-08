@@ -29,9 +29,6 @@ namespace Assets
          * @param camera
          */
         void GenerateFrusta(const Camera& camera);
-
-      private:
-        static constexpr std::wstring_view AssetName{ L"Frustum" };
     };
 } // namespace Assets
 
