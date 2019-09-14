@@ -3,8 +3,6 @@
 
 #include "lineAsset.h"
 
-#include <string_view>
-
 namespace Assets
 {
     /**

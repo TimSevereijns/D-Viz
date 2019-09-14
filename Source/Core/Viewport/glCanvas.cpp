@@ -313,16 +313,22 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
     }
 
     if (event->buttons() & Qt::LeftButton) {
-        const auto timeSinceStartOfLookEvent = std::chrono::duration_cast<std::chrono::seconds>(
-            std::chrono::system_clock::now() - m_startOfMouseLookEvent);
-
         m_camera.OffsetOrientation(
             m_controller.GetSettingsManager().GetMouseSensitivity() * deltaY,
             m_controller.GetSettingsManager().GetMouseSensitivity() * deltaX);
 
+#ifdef Q_OS_UNIX
+        // @note This only appears to work as expected on Linux. The camera angle jumps when the
+        // cursor is hidden on Windows; I think there might still be messages in the event queue
+        // that messes up the delta computation. @todo Investigate...
+
+        const auto timeSinceStartOfLookEvent = std::chrono::duration_cast<std::chrono::seconds>(
+            std::chrono::system_clock::now() - m_startOfMouseLookEvent);
+
         if (timeSinceStartOfLookEvent >= std::chrono::seconds{ 2 }) {
             if (!m_isCursorHidden) {
                 m_isCursorHidden = true;
+                setCursor(Qt::BlankCursor);
             }
 
             const auto cursorPositionOnCanvas = m_camera.GetViewport().center();
@@ -331,6 +337,7 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 
             m_lastMousePosition = cursorPositionOnCanvas;
         }
+#endif
     }
 
     event->accept();
@@ -698,8 +705,8 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
     m_frameTimeDeque.emplace_back(static_cast<int>(elapsedTime.count()));
 
     const auto total = std::accumulate(
-        std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque),
-        0ull, [](const auto runningTotal, const auto frameTime) noexcept {
+        std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0ull,
+        [](const auto runningTotal, const auto frameTime) noexcept {
             return runningTotal + frameTime;
         });
 

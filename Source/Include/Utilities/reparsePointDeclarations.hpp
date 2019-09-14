@@ -16,9 +16,9 @@ struct REPARSE_DATA_BUFFER_T
     ULONG ReparseTag;
     USHORT ReparseDataLength;
     USHORT Reserved;
-    union
+    union DummyUnion_t
     {
-        struct
+        struct SymbolicLinkReparseBuffer_t
         {
             USHORT SubstituteNameOffset;
             USHORT SubstituteNameLength;
@@ -27,7 +27,7 @@ struct REPARSE_DATA_BUFFER_T
             ULONG Flags;
             WCHAR PathBuffer[1];
         } SymbolicLinkReparseBuffer;
-        struct
+        struct MountPointReparseBuffer_t
         {
             USHORT SubstituteNameOffset;
             USHORT SubstituteNameLength;
@@ -35,7 +35,7 @@ struct REPARSE_DATA_BUFFER_T
             USHORT PrintNameLength;
             WCHAR PathBuffer[1];
         } MountPointReparseBuffer;
-        struct
+        struct GenericReparseBuffer_t
         {
             UCHAR DataBuffer[1];
         } GenericReparseBuffer;

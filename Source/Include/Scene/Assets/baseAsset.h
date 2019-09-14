@@ -37,8 +37,8 @@ namespace Assets
         AssetBase(const AssetBase& other) = delete;
         AssetBase& operator=(const AssetBase& other) = delete;
 
-        AssetBase(AssetBase&& other) = default;
-        AssetBase& operator=(AssetBase&& other) = default;
+        AssetBase(AssetBase&& other) = delete;
+        AssetBase& operator=(AssetBase&& other) = delete;
 
         virtual ~AssetBase() = default;
 

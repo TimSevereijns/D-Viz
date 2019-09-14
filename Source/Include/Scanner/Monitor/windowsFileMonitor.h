@@ -84,11 +84,12 @@ class WindowsFileMonitor : public FileMonitorBase
 
     ~WindowsFileMonitor() noexcept override;
 
+    // @note Atomics can't be copied or moved...
     WindowsFileMonitor(const WindowsFileMonitor& other) = delete;
     WindowsFileMonitor& operator=(const WindowsFileMonitor& other) = delete;
 
-    WindowsFileMonitor(WindowsFileMonitor&& other) = default;
-    WindowsFileMonitor& operator=(WindowsFileMonitor&& other) = default;
+    WindowsFileMonitor(WindowsFileMonitor&& other) = delete;
+    WindowsFileMonitor& operator=(WindowsFileMonitor&& other) = delete;
 
     /**
      * @brief Starts monitoring the file system for changes.
