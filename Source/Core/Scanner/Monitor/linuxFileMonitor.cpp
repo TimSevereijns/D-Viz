@@ -77,6 +77,25 @@ void LinuxFileMonitor::InitializeInotify()
     }
 }
 
+void LinuxFileMonitor::ShutdownInotify()
+{
+    epoll_ctl(m_epollFileDescriptor, EPOLL_CTL_DEL, m_inotifyFileDescriptor, nullptr);
+    epoll_ctl(m_epollFileDescriptor, EPOLL_CTL_DEL, m_stopPipeFileDescriptor[m_pipeReadIndex], 0);
+
+    if (!close(m_inotifyFileDescriptor)) {
+        const auto lastError = errno;
+        // @todo Log error...
+    }
+
+    if (!close(m_epollFileDescriptor)) {
+        const auto lastError = errno;
+        // @todo Log error...
+    }
+
+    close(m_stopPipeFileDescriptor[m_pipeReadIndex]);
+    close(m_stopPipeFileDescriptor[m_pipeWriteIndex]);
+}
+
 void LinuxFileMonitor::RegisterWatchersRecursively(const std::filesystem::path& path)
 {
     std::vector<std::filesystem::path> paths;
@@ -116,36 +135,89 @@ void LinuxFileMonitor::RegisterWatchersRecursively(const std::filesystem::path& 
 
 void LinuxFileMonitor::RegisterWatcher(const std::filesystem::path& path)
 {
-    if (!std::filesystem::exists(path)) {
-        // throw
-    }
-
     const int watchDescriptor =
         inotify_add_watch(m_inotifyFileDescriptor, path.string().c_str(), IN_ALL_EVENTS);
 
     if (watchDescriptor == -1) {
-        const std::string lastError = strerror(errno);
-        if (lastError == "28") {
+        const auto lastError = errno;
+        const std::string errorMessage = strerror(lastError);
+        if (lastError == 28) {
             const auto message =
                 "Exceeded watch limit. Edit \"/proc/sys/fs/inotify/max_user_watches\" to increase "
                 "limit. Error: " +
-                lastError + ".";
+                errorMessage + ".";
 
             throw std::runtime_error(message);
         }
 
-        const auto message = "Failed to register watch. Error: " + lastError + ".";
+        if (lastError == 2) {
+            return;
+        }
+
+        const auto message = "Failed to register watch. Error: " + errorMessage + ".";
         throw std::runtime_error(message);
     }
 
     watchDescriptorToPathMap.emplace(watchDescriptor, path);
 }
 
+int LinuxFileMonitor::ReadEventBuffer()
+{
+    constexpr auto timeout = -1;
+    auto eventsRead = epoll_wait(m_epollFileDescriptor, m_epollEvents, m_maxEpollEvents, timeout);
+
+    if (eventsRead == -1) {
+        return eventsRead;
+    }
+
+    for (auto i = 0; i < eventsRead; ++i) {
+        if (m_epollEvents[i].data.fd == m_stopPipeFileDescriptor[m_pipeReadIndex]) {
+            break;
+        }
+
+        const auto bytesRead =
+            read(m_epollEvents[i].data.fd, m_eventBuffer.data(), m_eventBuffer.size());
+
+        if (bytesRead == -1) {
+            const auto lastError = errno;
+            if (lastError == EINTR) {
+                // @todo Log error...
+                break;
+            }
+        }
+    }
+
+    return eventsRead;
+}
+
+void LinuxFileMonitor::ProcessEvents(int /*eventsToProcess*/)
+{
+    // @todo Read events from the eventBuffer, create the FileEvent object for that event, and then
+    // insert that new FileEvent into the eventQueue.
+}
+
+std::optional<FileEvent> LinuxFileMonitor::AwaitNextEvent()
+{
+    while (m_eventQueue.empty() && m_isActive) {
+        const auto eventsRead = ReadEventBuffer();
+        ProcessEvents(eventsRead);
+    }
+
+    if (!m_isActive) {
+        return std::nullopt;
+    }
+
+    const auto latestEvent = m_eventQueue.front();
+    m_eventQueue.pop();
+
+    return latestEvent;
+}
+
 void LinuxFileMonitor::Stop()
 {
     m_isActive = false;
 
-    // m_notifier.stop();
+    ShutdownInotify();
 
     if (m_monitoringThread.joinable()) {
         m_monitoringThread.join();

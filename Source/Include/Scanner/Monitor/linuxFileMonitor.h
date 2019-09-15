@@ -9,6 +9,7 @@
 
 #include <filesystem>
 #include <functional>
+#include <queue>
 #include <thread>
 
 #include <sys/epoll.h>
@@ -45,6 +46,11 @@ class LinuxFileMonitor : public FileMonitorBase
 
   private:
     void InitializeInotify();
+    void ShutdownInotify();
+
+    int ReadEventBuffer();
+    void ProcessEvents(int eventsToProcess);
+    std::optional<FileEvent> AwaitNextEvent();
 
     void RegisterWatchersRecursively(const std::filesystem::path& path);
     void RegisterWatcher(const std::filesystem::path& path);
@@ -66,8 +72,16 @@ class LinuxFileMonitor : public FileMonitorBase
 
     int m_stopPipeFileDescriptor[2];
 
+    constexpr static int m_maxEvents{ 4096 };
+    constexpr static int m_eventSize{ sizeof(inotify_event) };
+    std::vector<std::uint8_t> m_eventBuffer =
+        std::vector<std::uint8_t>(m_maxEvents * (m_eventSize + 16), 0);
+
+    std::queue<FileEvent> m_eventQueue;
+
     constexpr static int m_pipeReadIndex{ 0 };
-    constexpr static int mPipeWriteIdx{ 0 };
+    constexpr static int m_pipeWriteIndex{ 0 };
+    constexpr static int m_maxEpollEvents{ 10 };
 };
 
 #endif // Q_OS_UNIX
