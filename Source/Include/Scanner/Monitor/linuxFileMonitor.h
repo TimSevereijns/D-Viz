@@ -28,11 +28,12 @@ class LinuxFileMonitor : public FileMonitorBase
     /**
      * @brief Starts monitoring the file system for changes.
      *
-     * @param[in] path            The root directory to watch.
+     * @param[in] path                      The root directory to watch.
+     * @param[in] onNotificationCallback    The callback to invoke when an event occurs.
      */
     void Start(
         const std::filesystem::path& path,
-        const std::function<void(FileEvent&&)>& onNotificationCallback) override;
+        std::function<void(FileEvent&&)> onNotificationCallback) override;
 
     /**
      * @brief Stops monitoring the file system for changes.
@@ -45,43 +46,46 @@ class LinuxFileMonitor : public FileMonitorBase
     bool IsActive() const override;
 
   private:
-    void InitializeInotify();
-    void ShutdownInotify();
+    void Monitor();
 
-    int ReadEventBuffer();
-    void ProcessEvents(int eventsToProcess);
-    std::optional<FileEvent> AwaitNextEvent();
+    void InitializeInotify();
+    void CleanUpInotify() noexcept;
+
+    void AwaitNotification();
+    void ProcessEvents(long eventsToProcess);
 
     void RegisterWatchersRecursively(const std::filesystem::path& path);
     void RegisterWatcher(const std::filesystem::path& path);
 
-    bool m_isActive{ false };
+    std::thread m_monitoringThread;
+
+    std::atomic_bool m_isActive{ false };
+    std::atomic_bool m_keepMonitoring{ true };
 
     std::filesystem::path m_pathToWatch;
 
-    std::thread m_monitoringThread;
+    std::unordered_map<int, std::filesystem::path> m_watchDescriptorToPathMap;
 
-    std::unordered_map<int, std::filesystem::path> watchDescriptorToPathMap;
+    std::function<void(FileEvent&&)> m_notificationCallback;
 
     int m_inotifyFileDescriptor{ 0 };
     int m_epollFileDescriptor{ 0 };
+
+    int m_stopPipeFileDescriptor[2];
 
     epoll_event m_inotifyEpollEvent;
     epoll_event m_stopPipeEpollEvent;
     epoll_event m_epollEvents[1024];
 
-    int m_stopPipeFileDescriptor[2];
-
-    constexpr static int m_maxEvents{ 4096 };
-    constexpr static int m_eventSize{ sizeof(inotify_event) };
-    std::vector<std::uint8_t> m_eventBuffer =
-        std::vector<std::uint8_t>(m_maxEvents * (m_eventSize + 16), 0);
-
-    std::queue<FileEvent> m_eventQueue;
-
     constexpr static int m_pipeReadIndex{ 0 };
     constexpr static int m_pipeWriteIndex{ 0 };
     constexpr static int m_maxEpollEvents{ 10 };
+
+    constexpr static int m_maxEvents{ 4096 };
+    constexpr static int m_eventSize{ sizeof(inotify_event) };
+
+    std::vector<std::uint8_t> m_eventBuffer =
+        std::vector<std::uint8_t>(m_maxEvents * (m_eventSize + 16), 0);
 };
 
 #endif // Q_OS_UNIX

@@ -4,7 +4,7 @@
 
 #include "constants.h"
 
-#include <strstream>
+#include <sstream>
 #include <system_error>
 
 #include <unistd.h>
@@ -14,19 +14,25 @@
 
 LinuxFileMonitor::~LinuxFileMonitor() noexcept
 {
-    if (m_isActive) {
+    if (m_isActive.load()) {
         Stop();
     }
+
+    // @todo Might not want to call this unconditionally.
+    CleanUpInotify();
 }
 
 void LinuxFileMonitor::Start(
-    const std::filesystem::path& path,
-    const std::function<void(FileEvent&&)>& /*onNotificationCallback*/)
+    const std::filesystem::path& path, std::function<void(FileEvent&&)> onNotificationCallback)
 {
     m_pathToWatch = path;
+    m_notificationCallback = std::move(onNotificationCallback);
 
     InitializeInotify();
     RegisterWatchersRecursively(path);
+
+    m_isActive.store(true);
+    m_monitoringThread = std::thread{ [&] { Monitor(); } };
 }
 
 void LinuxFileMonitor::InitializeInotify()
@@ -77,18 +83,19 @@ void LinuxFileMonitor::InitializeInotify()
     }
 }
 
-void LinuxFileMonitor::ShutdownInotify()
+void LinuxFileMonitor::CleanUpInotify() noexcept
 {
     epoll_ctl(m_epollFileDescriptor, EPOLL_CTL_DEL, m_inotifyFileDescriptor, nullptr);
-    epoll_ctl(m_epollFileDescriptor, EPOLL_CTL_DEL, m_stopPipeFileDescriptor[m_pipeReadIndex], 0);
+    epoll_ctl(
+        m_epollFileDescriptor, EPOLL_CTL_DEL, m_stopPipeFileDescriptor[m_pipeReadIndex], nullptr);
 
     if (!close(m_inotifyFileDescriptor)) {
-        const auto lastError = errno;
+        // const auto lastError = errno;
         // @todo Log error...
     }
 
     if (!close(m_epollFileDescriptor)) {
-        const auto lastError = errno;
+        // const auto lastError = errno;
         // @todo Log error...
     }
 
@@ -158,25 +165,27 @@ void LinuxFileMonitor::RegisterWatcher(const std::filesystem::path& path)
         throw std::runtime_error(message);
     }
 
-    watchDescriptorToPathMap.emplace(watchDescriptor, path);
+    m_watchDescriptorToPathMap.emplace(watchDescriptor, path);
 }
 
-int LinuxFileMonitor::ReadEventBuffer()
+void LinuxFileMonitor::AwaitNotification()
 {
     constexpr auto timeout = -1;
-    auto eventsRead = epoll_wait(m_epollFileDescriptor, m_epollEvents, m_maxEpollEvents, timeout);
+    const auto eventsRead =
+        epoll_wait(m_epollFileDescriptor, m_epollEvents, m_maxEpollEvents, timeout);
 
     if (eventsRead == -1) {
-        return eventsRead;
+        return;
     }
+
+    long bytesRead = 0;
 
     for (auto i = 0; i < eventsRead; ++i) {
         if (m_epollEvents[i].data.fd == m_stopPipeFileDescriptor[m_pipeReadIndex]) {
             break;
         }
 
-        const auto bytesRead =
-            read(m_epollEvents[i].data.fd, m_eventBuffer.data(), m_eventBuffer.size());
+        bytesRead = read(m_epollEvents[i].data.fd, m_eventBuffer.data(), m_eventBuffer.size());
 
         if (bytesRead == -1) {
             const auto lastError = errno;
@@ -187,46 +196,65 @@ int LinuxFileMonitor::ReadEventBuffer()
         }
     }
 
-    return eventsRead;
+    ProcessEvents(bytesRead);
 }
 
-void LinuxFileMonitor::ProcessEvents(int /*eventsToProcess*/)
+void LinuxFileMonitor::ProcessEvents(long bytesAvailable)
 {
-    // @todo Read events from the eventBuffer, create the FileEvent object for that event, and then
-    // insert that new FileEvent into the eventQueue.
+    int i = 0;
+    while (i > bytesAvailable) {
+        auto* const event = reinterpret_cast<inotify_event*>(m_eventBuffer.data() + i);
+
+        if (event->mask & IN_IGNORED) {
+            i += m_eventSize + event->len;
+            m_watchDescriptorToPathMap.erase(event->wd);
+            continue;
+        }
+
+        const auto itr = m_watchDescriptorToPathMap.find(event->wd);
+        if (itr == std::end(m_watchDescriptorToPathMap)) {
+            // @todo Log
+        }
+
+        const auto path = itr->second / std::filesystem::path{ std::string{ event->name } };
+
+        switch (event->mask) {
+            case IN_MODIFY:
+                m_notificationCallback(FileEvent{ path, FileEventType::TOUCHED });
+                break;
+            case IN_DELETE:
+                m_notificationCallback(FileEvent{ path, FileEventType::DELETED });
+                break;
+        }
+
+        i += m_eventSize + event->len;
+    }
 }
 
-std::optional<FileEvent> LinuxFileMonitor::AwaitNextEvent()
+void LinuxFileMonitor::Monitor()
 {
-    while (m_eventQueue.empty() && m_isActive) {
-        const auto eventsRead = ReadEventBuffer();
-        ProcessEvents(eventsRead);
+    while (m_keepMonitoring) {
+        AwaitNotification();
     }
 
-    if (!m_isActive) {
-        return std::nullopt;
-    }
-
-    const auto latestEvent = m_eventQueue.front();
-    m_eventQueue.pop();
-
-    return latestEvent;
+    m_isActive.store(false);
 }
 
 void LinuxFileMonitor::Stop()
 {
-    m_isActive = false;
-
-    ShutdownInotify();
+    constexpr std::array<std::uint8_t, 2> buffer = { 1, 0 };
+    write(m_stopPipeFileDescriptor[m_pipeWriteIndex], buffer.data(), buffer.size());
 
     if (m_monitoringThread.joinable()) {
         m_monitoringThread.join();
     }
+
+    Expects(m_isActive.load() == false);
 }
 
 bool LinuxFileMonitor::IsActive() const
 {
-    return m_isActive;
+    return m_isActive.load();
 }
 
 #endif // Q_OS_LINUX

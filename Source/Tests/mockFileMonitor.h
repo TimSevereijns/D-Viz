@@ -32,10 +32,10 @@ class MockFileMonitor : public FileMonitorBase
 
     void Start(
         const std::filesystem::path& path,
-        const std::function<void(FileEvent&&)>& onNotificationCallback) override
+        std::function<void(FileEvent&&)> onNotificationCallback) override
     {
         m_pathToMonitor = path;
-        m_onNotificationCallback = onNotificationCallback;
+        m_onNotificationCallback = std::move(onNotificationCallback);
 
         m_isActive.store(true);
         m_workerThread = std::thread{ [&] { SendFakeNotification(); } };

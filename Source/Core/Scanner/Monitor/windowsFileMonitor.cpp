@@ -105,11 +105,10 @@ bool WindowsFileMonitor::IsActive() const
 }
 
 void WindowsFileMonitor::Start(
-    const std::filesystem::path& path,
-    const std::function<void(FileEvent&&)>& onNotificationCallback)
+    const std::filesystem::path& path, std::function<void(FileEvent&&)> onNotificationCallback)
 {
     m_pathBeingMonitored = path;
-    m_notificationCallback = onNotificationCallback;
+    m_notificationCallback = std::move(onNotificationCallback);
 
     // When monitoring a file on a network drive, the size of the buffer cannot exceed 64 KiB.
     // To quote the documentation: "This is due to a packet size limitation with the underlying file

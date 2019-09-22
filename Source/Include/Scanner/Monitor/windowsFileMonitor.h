@@ -94,11 +94,12 @@ class WindowsFileMonitor : public FileMonitorBase
     /**
      * @brief Starts monitoring the file system for changes.
      *
-     * @param[in] path            The root directory to watch.
+     * @param[in] path                      The root directory to watch.
+     * @param[in] onNotificationCallback    The callback to invoke when an event occurs.
      */
     void Start(
         const std::filesystem::path& path,
-        const std::function<void(FileEvent&&)>& onNotificationCallback) override;
+        std::function<void(FileEvent&&)> onNotificationCallback) override;
 
     /**
      * @brief Stops monitoring the file system for changes.

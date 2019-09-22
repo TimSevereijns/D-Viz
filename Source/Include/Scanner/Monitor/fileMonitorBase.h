@@ -20,7 +20,7 @@ class FileMonitorBase
 
     virtual void Start(
         const std::filesystem::path& path,
-        const std::function<void(FileEvent&&)>& onNotificationCallback) = 0;
+        std::function<void(FileEvent&&)> onNotificationCallback) = 0;
 
     virtual void Stop() = 0;
 
