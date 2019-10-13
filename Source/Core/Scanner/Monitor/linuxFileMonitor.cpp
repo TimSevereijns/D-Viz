@@ -90,13 +90,15 @@ void LinuxFileMonitor::CleanUpInotify() noexcept
         m_epollFileDescriptor, EPOLL_CTL_DEL, m_stopPipeFileDescriptor[m_pipeReadIndex], nullptr);
 
     if (!close(m_inotifyFileDescriptor)) {
-        // const auto lastError = errno;
-        // @todo Log error...
+        const auto lastError = errno;
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+        log->error("Encountered an error closing inotify file descriptor. Error: {}.", lastError);
     }
 
     if (!close(m_epollFileDescriptor)) {
-        // const auto lastError = errno;
-        // @todo Log error...
+        const auto lastError = errno;
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+        log->error("Encountered an error closing epoll file descriptor. Error: {}.", lastError);
     }
 
     close(m_stopPipeFileDescriptor[m_pipeReadIndex]);
@@ -142,8 +144,10 @@ void LinuxFileMonitor::RegisterWatchersRecursively(const std::filesystem::path& 
 
 void LinuxFileMonitor::RegisterWatcher(const std::filesystem::path& path)
 {
+    const auto absolutePath = std::filesystem::absolute(path);
+
     const int watchDescriptor =
-        inotify_add_watch(m_inotifyFileDescriptor, path.string().c_str(), IN_ALL_EVENTS);
+        inotify_add_watch(m_inotifyFileDescriptor, absolutePath.string().c_str(), IN_ALL_EVENTS);
 
     if (watchDescriptor == -1) {
         const auto lastError = errno;
@@ -178,7 +182,7 @@ void LinuxFileMonitor::AwaitNotification()
         return;
     }
 
-    long bytesRead = 0;
+    ssize_t bytesRead = 0;
 
     for (auto i = 0; i < eventsRead; ++i) {
         if (m_epollEvents[i].data.fd == m_stopPipeFileDescriptor[m_pipeReadIndex]) {
@@ -190,7 +194,9 @@ void LinuxFileMonitor::AwaitNotification()
         if (bytesRead == -1) {
             const auto lastError = errno;
             if (lastError == EINTR) {
-                // @todo Log error...
+                const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+                log->error("Encountered an error reading epoll events. Error: {}.", lastError);
+
                 break;
             }
         }
@@ -201,33 +207,38 @@ void LinuxFileMonitor::AwaitNotification()
 
 void LinuxFileMonitor::ProcessEvents(long bytesAvailable)
 {
-    int i = 0;
-    while (i > bytesAvailable) {
-        auto* const event = reinterpret_cast<inotify_event*>(m_eventBuffer.data() + i);
+    auto offset = 0;
+
+    while (offset < bytesAvailable) {
+        auto* const event = reinterpret_cast<inotify_event*>(m_eventBuffer.data() + offset);
 
         if (event->mask & IN_IGNORED) {
-            i += m_eventSize + event->len;
+            offset += m_eventSize + event->len;
             m_watchDescriptorToPathMap.erase(event->wd);
+
             continue;
         }
 
         const auto itr = m_watchDescriptorToPathMap.find(event->wd);
         if (itr == std::end(m_watchDescriptorToPathMap)) {
-            // @todo Log
+            const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+            log->error("Encountered an error associating epoll event with corresponding file.");
         }
 
-        const auto path = itr->second / std::filesystem::path{ std::string{ event->name } };
+        const auto path = itr->second / std::filesystem::path{ event->name };
 
         switch (event->mask) {
             case IN_MODIFY:
                 m_notificationCallback(FileEvent{ path, FileEventType::TOUCHED });
                 break;
+            case IN_DELETE_SELF:
+                [[fallthrough]];
             case IN_DELETE:
                 m_notificationCallback(FileEvent{ path, FileEventType::DELETED });
                 break;
         }
 
-        i += m_eventSize + event->len;
+        offset += m_eventSize + event->len;
     }
 }
 
@@ -242,6 +253,12 @@ void LinuxFileMonitor::Monitor()
 
 void LinuxFileMonitor::Stop()
 {
+    if (m_isActive.load() == false) {
+        return;
+    }
+
+    m_keepMonitoring.store(false);
+
     constexpr std::array<std::uint8_t, 2> buffer = { 1, 0 };
     write(m_stopPipeFileDescriptor[m_pipeWriteIndex], buffer.data(), buffer.size());
 
