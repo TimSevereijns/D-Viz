@@ -44,7 +44,10 @@ jobs:
             cd ${GITHUB_WORKSPACE}
             mkdir Conan && cd Conan
             conan install ..
-            cd ${GITHUB_WORKSPACE}        
+            cd ${GITHUB_WORKSPACE}
+            
+      - name: Install OpenGL
+        run: sudo apt-get install libgl-dev
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v1
