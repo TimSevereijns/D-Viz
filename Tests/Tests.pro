@@ -9,6 +9,9 @@ include(../defaults.pri)
 QT += testlib widgets
 QT -= gui
 
+unix: QMAKE_CXXFLAGS += --coverage
+unix: QMAKE_LFLAGS += --coverage
+
 TARGET = UnitTests
 
 CONFIG += console c++17
