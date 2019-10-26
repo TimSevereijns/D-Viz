@@ -34,4 +34,4 @@ jobs:
         uses: jurplel/install-qt-action@v1
 
       - name: Build D-Viz
-        run: Qt5_Dir/qmake D-Viz.pro
+        run: ${Qt5_Dir}/qmake D-Viz.pro
