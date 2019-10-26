@@ -10,6 +10,28 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v1
+      
+      - name: Checkout Submodule
+        run: git submodule sync --recursive && git submodule update --init --recursive
+      
+      - name: Install Python3
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.x'
+          architecture: 'x64' # (x64 or x86)
+          
+      - name: Install Conan
+        run: pip install conan
+      
+      - name: Download Conan Packages
+        run: |
+            cd D-Viz
+            mkdir Conan && cd Conan
+            conan install ..
+            cd ..        
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v1
+
+      - name: Build D-Viz
+        run: Qt5_Dir/qmake D-Viz.pro
