@@ -15,9 +15,9 @@ CONFIG += c++17
 CONFIG += \
    ordered
 SUBDIRS += \
-   Core \
+   Source \
    Tests \
    App
 
-App.depends = Core
-Tests.depends = Core
+App.depends = Source
+Tests.depends = Source

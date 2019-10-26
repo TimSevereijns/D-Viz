@@ -1,5 +1,5 @@
 CONFIG += conan_basic_setup
-include(../Conan/conanbuildinfo.pri)
+include(Conan/conanbuildinfo.pri)
 
 QT += opengl gamepad
 
@@ -10,44 +10,44 @@ win32:QMAKE_LFLAGS_RELEASE += /MAP /debug /opt:ref
 INCLUDEPATH += $$PWD/Include
 
 SOURCES += \
-   $$PWD/Core/controller.cpp \
-   $$PWD/Core/HID/gamepad.cpp \
-   $$PWD/Core/HID/keyboardManager.cpp \
-   $$PWD/Core/Scanner/driveScanner.cpp \
-   $$PWD/Core/Scanner/fileInfo.cpp \
-   $$PWD/Core/Scanner/scanningParameters.cpp \
-   $$PWD/Core/Scanner/scanningUtilities.cpp \
-   $$PWD/Core/Scanner/scanningWorker.cpp \
-   $$PWD/Core/Scanner/Monitor/fileSystemObserver.cpp \
-   $$PWD/Core/Scanner/Monitor/linuxFileMonitor.cpp \
-   $$PWD/Core/Scanner/Monitor/windowsFileMonitor.cpp \
-   $$PWD/Core/Scene/light.cpp \
-   $$PWD/Core/Scene/Assets/baseAsset.cpp \
-   $$PWD/Core/Scene/Assets/crosshairAsset.cpp \
-   $$PWD/Core/Scene/Assets/debuggingRayAsset.cpp \
-   $$PWD/Core/Scene/Assets/frustumAsset.cpp \
-   $$PWD/Core/Scene/Assets/gridAsset.cpp \
-   $$PWD/Core/Scene/Assets/lightMarkerAsset.cpp \
-   $$PWD/Core/Scene/Assets/lineAsset.cpp \
-   $$PWD/Core/Scene/Assets/originMarkerAsset.cpp \
-   $$PWD/Core/Scene/Assets/treemapAsset.cpp \
-   $$PWD/Core/Settings/settings.cpp \
-   $$PWD/Core/Settings/settingsManager.cpp \
-   $$PWD/Core/Utilities/scopedHandle.cpp \
-   $$PWD/Core/Viewport/camera.cpp \
-   $$PWD/Core/Viewport/gamepadContextMenu.cpp \
-   $$PWD/Core/Viewport/glCanvas.cpp \
-   $$PWD/Core/Viewport/mouseContextMenu.cpp \
-   $$PWD/Core/Visualizations/block.cpp \
-   $$PWD/Core/Visualizations/precisePoint.cpp \
-   $$PWD/Core/Visualizations/ray.cpp \
-   $$PWD/Core/Visualizations/squarifiedTreemap.cpp \
-   $$PWD/Core/Visualizations/visualization.cpp \
-   $$PWD/Core/Visualizations/vizBlock.cpp \
-   $$PWD/Core/Windows/aboutDialog.cpp \
-   $$PWD/Core/Windows/breakdownDialog.cpp \
-   $$PWD/Core/Windows/mainWindow.cpp \
-   $$PWD/Core/Windows/scanBreakdownModel.cpp
+   $$PWD/Source/controller.cpp \
+   $$PWD/Source/HID/gamepad.cpp \
+   $$PWD/Source/HID/keyboardManager.cpp \
+   $$PWD/Source/Scanner/driveScanner.cpp \
+   $$PWD/Source/Scanner/fileInfo.cpp \
+   $$PWD/Source/Scanner/scanningParameters.cpp \
+   $$PWD/Source/Scanner/scanningUtilities.cpp \
+   $$PWD/Source/Scanner/scanningWorker.cpp \
+   $$PWD/Source/Scanner/Monitor/fileSystemObserver.cpp \
+   $$PWD/Source/Scanner/Monitor/linuxFileMonitor.cpp \
+   $$PWD/Source/Scanner/Monitor/windowsFileMonitor.cpp \
+   $$PWD/Source/Scene/light.cpp \
+   $$PWD/Source/Scene/Assets/baseAsset.cpp \
+   $$PWD/Source/Scene/Assets/crosshairAsset.cpp \
+   $$PWD/Source/Scene/Assets/debuggingRayAsset.cpp \
+   $$PWD/Source/Scene/Assets/frustumAsset.cpp \
+   $$PWD/Source/Scene/Assets/gridAsset.cpp \
+   $$PWD/Source/Scene/Assets/lightMarkerAsset.cpp \
+   $$PWD/Source/Scene/Assets/lineAsset.cpp \
+   $$PWD/Source/Scene/Assets/originMarkerAsset.cpp \
+   $$PWD/Source/Scene/Assets/treemapAsset.cpp \
+   $$PWD/Source/Settings/settings.cpp \
+   $$PWD/Source/Settings/settingsManager.cpp \
+   $$PWD/Source/Utilities/scopedHandle.cpp \
+   $$PWD/Source/Viewport/camera.cpp \
+   $$PWD/Source/Viewport/gamepadContextMenu.cpp \
+   $$PWD/Source/Viewport/glCanvas.cpp \
+   $$PWD/Source/Viewport/mouseContextMenu.cpp \
+   $$PWD/Source/Visualizations/block.cpp \
+   $$PWD/Source/Visualizations/precisePoint.cpp \
+   $$PWD/Source/Visualizations/ray.cpp \
+   $$PWD/Source/Visualizations/squarifiedTreemap.cpp \
+   $$PWD/Source/Visualizations/visualization.cpp \
+   $$PWD/Source/Visualizations/vizBlock.cpp \
+   $$PWD/Source/Windows/aboutDialog.cpp \
+   $$PWD/Source/Windows/breakdownDialog.cpp \
+   $$PWD/Source/Windows/mainWindow.cpp \
+   $$PWD/Source/Windows/scanBreakdownModel.cpp
 
 HEADERS += \
    $$PWD/Include/bootstrapper.hpp \
@@ -103,29 +103,29 @@ HEADERS += \
    $$PWD/Include/Windows/scanBreakdownModel.h
 
 FORMS += \
-   $$PWD/Core/Windows/aboutDialog.ui \
-   $$PWD/Core/Windows/breakdownDialog.ui \
-   $$PWD/Core/Windows/mainWindow.ui
+   $$PWD/Source/Windows/aboutDialog.ui \
+   $$PWD/Source/Windows/breakdownDialog.ui \
+   $$PWD/Source/Windows/mainWindow.ui
 
 INCLUDEPATH += \
-   $$PWD/../Foreign/RapidJson/include \
-   $$PWD/../Foreign/Spdlog/include \
-   $$PWD/../Foreign/Stopwatch/source \
-   $$PWD/../Foreign/Tree/source \
-   $$PWD/../Foreign/GSL/include
+   $$PWD/ThirdParty/Rapidjson/include \
+   $$PWD/ThirdParty/Spdlog/include \
+   $$PWD/ThirdParty/Stopwatch/source \
+   $$PWD/ThirdParty/Tree/source \
+   $$PWD/ThirdParty/GSL/include
 
 DISTFILES += \
-   $$PWD/Core/Shaders/visualizationFragmentShader.frag \
-   $$PWD/Core/Shaders/visualizationVertexShader.vert \
-   $$PWD/Core/Shaders/simpleLineFragmentShader.frag \
-   $$PWD/Core/Shaders/simpleLineVertexShader.vert \
-   $$PWD/Core/Shaders/shadowMapping.frag \
-   $$PWD/Core/Shaders/shadowMapping.vert \
-   $$PWD/Core/Shaders/texturePreview.vert \
-   $$PWD/Core/Shaders/texturePreview.frag
+   $$PWD/Source/Shaders/visualizationFragmentShader.frag \
+   $$PWD/Source/Shaders/visualizationVertexShader.vert \
+   $$PWD/Source/Shaders/simpleLineFragmentShader.frag \
+   $$PWD/Source/Shaders/simpleLineVertexShader.vert \
+   $$PWD/Source/Shaders/shadowMapping.frag \
+   $$PWD/Source/Shaders/shadowMapping.vert \
+   $$PWD/Source/Shaders/texturePreview.vert \
+   $$PWD/Source/Shaders/texturePreview.frag
 
 RESOURCES += \
-   $$PWD/Core/resources.qrc
+   $$PWD/Source/resources.qrc
 
 DEFINES += \
    BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE
@@ -161,9 +161,9 @@ unix:CONFIG(debug, debug|release) {
 }
 
 CONFIG(debug, debug|release) {
-    DESTDIR = $$PWD/Build/Debug
+    DESTDIR = $$PWD/Output/Debug
 } else {
-    DESTDIR = $$PWD/Build/Release
+    DESTDIR = $$PWD/Output/Release
 }
 
 OBJECTS_DIR = $$DESTDIR/.obj

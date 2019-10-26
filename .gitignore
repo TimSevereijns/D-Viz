@@ -53,7 +53,8 @@ build-D-Viz-*
 
 *.tlog
 
-Foreign/
-Source/Build/
-Source/Tests/Sandbox*
+ThirdParty/
+Output/*
+Build/*
+Tests/Sandbox*
 Conan/

@@ -1,20 +1,15 @@
-[submodule "Foreign/Stopwatch"]
-   path = Foreign/Stopwatch
-   url = https://github.com/TimSevereijns/Stopwatch.git
-   branch = master
-[submodule "Foreign/Tree"]
-   path = Foreign/Tree
-   url = https://github.com/TimSevereijns/Tree.git
-   branch = master
-[submodule "Foreign/Spdlog"]
-   path = Foreign/Spdlog
-   url = https://github.com/gabime/spdlog.git
-   branch = v1.2.1
-[submodule "Foreign/RapidJson"]
-   path = Foreign/RapidJson
-   url = https://github.com/Tencent/rapidjson.git
-   branch = v1.1.0
-[submodule "Foreign/GSL"]
-   path = Foreign/GSL
-   url = https://github.com/Microsoft/GSL.git
-   branch = v2.0.0
+[submodule "ThirdParty/Rapidjson"]
+	path = ThirdParty/Rapidjson
+	url = https://github.com/Tencent/rapidjson.git
+[submodule "ThirdParty/Tree"]
+	path = ThirdParty/Tree
+	url = https://github.com/TimSevereijns/Tree.git
+[submodule "ThirdParty/Stopwatch"]
+	path = ThirdParty/Stopwatch
+	url = https://github.com/TimSevereijns/Stopwatch.git
+[submodule "ThirdParty/Spdlog"]
+	path = ThirdParty/Spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "ThirdParty/GSL"]
+	path = ThirdParty/GSL
+	url = https://github.com/Microsoft/GSL.git
