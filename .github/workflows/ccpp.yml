@@ -25,7 +25,8 @@ jobs:
       
       - name: Download Conan Packages
         run: |
-            cd D-Viz
+            pwd
+            cd ~/D-Viz
             mkdir Conan && cd Conan
             conan install ..
             cd ..        
