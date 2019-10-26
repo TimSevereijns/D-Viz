@@ -25,7 +25,7 @@ jobs:
       
       - name: Download Conan Packages
         run: |
-            cd GITHUB_WORKSPACE
+            cd ${GITHUB_WORKSPACE}
             mkdir Conan && cd Conan
             conan install ..
             cd GITHUB_WORKSPACE        
