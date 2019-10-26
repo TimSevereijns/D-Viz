@@ -19,7 +19,12 @@ jobs:
         with:
           python-version: '3.x'
           architecture: 'x64' # (x64 or x86)
-          
+      
+      - name: Update Software Repository
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update -qq
+      
       - name: Install GCC 8
         run: |  
           sudo apt-get install -qq g++-8
