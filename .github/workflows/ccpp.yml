@@ -10,49 +10,54 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v1
-      
+
       - name: Checkout Submodule
         run: git submodule sync --recursive && git submodule update --init --recursive
-      
+
+      - name: Update Software Repository
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update -qq
+
       - name: Install Python3
         uses: actions/setup-python@v1
         with:
           python-version: '3.x'
           architecture: 'x64' # (x64 or x86)
-      
-      - name: Update Software Repository
-        run: |
-          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-          sudo apt-get update -qq
-      
+
       - name: Install GCC 8
-        run: |  
+        run: |
           sudo apt-get install -qq g++-8
           sudo apt-get install -qq gcc-8
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 20
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 20
-          sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 20  
+          sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 20
           sudo update-alternatives --config gcc
           sudo update-alternatives --config g++
-          sudo update-alternatives --config gcov        
-          
+          sudo update-alternatives --config gcov
+ 
       - name: Install Conan
         run: pip install conan
-      
-      - name: Download Conan Packages
-        run: |
-            cd ${GITHUB_WORKSPACE}
-            mkdir Conan && cd Conan
-            conan install ..
-            cd ${GITHUB_WORKSPACE}
-            
+
       - name: Install OpenGL
         run: sudo apt-get install libgl-dev
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v1
 
+      - name: Download Conan Packages
+        run: |
+            cd ${GITHUB_WORKSPACE}
+            mkdir Conan && cd Conan
+            conan install ..
+            cd ${GITHUB_WORKSPACE}
+
       - name: Build D-Viz
         run: |
           qmake D-Viz.pro
-          make        
+          make
+
+      - name: Run Tests
+        run: |
+          cd ${GITHUB_WORKSPACE}/Output/Debug
+          ./UnitTests
