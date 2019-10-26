@@ -25,11 +25,10 @@ jobs:
       
       - name: Download Conan Packages
         run: |
-            pwd
-            cd ~/D-Viz
+            cd GITHUB_WORKSPACE
             mkdir Conan && cd Conan
             conan install ..
-            cd ..        
+            cd GITHUB_WORKSPACE        
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v1
