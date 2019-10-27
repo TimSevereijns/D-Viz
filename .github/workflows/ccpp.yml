@@ -12,7 +12,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v1
 
-      - name: Checkout Submodule
+      - name: Checkout Submodules
         run: git submodule sync --recursive && git submodule update --init --recursive
 
       - name: Update Software Repository
@@ -48,7 +48,7 @@ jobs:
       
       - name: Set Environment Variables
         run: |
-          export QT_PLUGIN_PATH=${QT_DIR}/plugins/platforms
+          export QT_PLUGIN_PATH=${Qt5_Dir}/plugins/platforms
           export QT_DEBUG_PLUGINS=1
 
       - name: Download Conan Packages
@@ -65,6 +65,5 @@ jobs:
 
       - name: Run Tests
         run: |
-          ls ${GITHUB_WORKSPACE}/Output
           cd ${GITHUB_WORKSPACE}/Output/Debug
           ./UnitTests
