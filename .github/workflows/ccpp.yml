@@ -50,11 +50,11 @@ jobs:
           pip3 install cuteci
           cuteci \
               --rm \
-              --installer ~/workspace/qt-opensource-linux-x64-5.13.0.run \
+              --installer http://download.qt.io/official_releases/qt/5.13/5.13.0/qt-opensource-linux-x64-5.13.0.run \
               install \
               --verbose \
               --destdir ~/Qt \
-              --packages qt.qt5.5130.gcc_64
+              --packages qt.qt5.5130.gcc_644
       
       - name: Set Environment Variables
         run: |
