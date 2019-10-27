@@ -20,7 +20,7 @@ jobs:
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
           sudo apt-get update -qq
 
-      - name: Install Python3
+      - name: Install Python 3
         uses: actions/setup-python@v1
         with:
           python-version: '3.x'
@@ -44,7 +44,8 @@ jobs:
         run: sudo apt-get install libgl-dev
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v1
+        #uses: jurplel/install-qt-action@v1
+        run: sudo apt-get install qtcreator -y
       
       - name: Set Environment Variables
         run: |
