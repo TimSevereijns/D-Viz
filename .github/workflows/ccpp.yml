@@ -67,5 +67,5 @@ jobs:
 
       - name: Run Tests
         run: |
-          cd ${GITHUB_WORKSPACE}/Output/Debug
-          ./UnitTests
+          ldd ${QT_PLUGIN_PATH}/libqxcb.so
+          ldd ./UnitTests
