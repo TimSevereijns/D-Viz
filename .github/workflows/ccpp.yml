@@ -47,7 +47,7 @@ jobs:
         #uses: jurplel/install-qt-action@v1
         run: |
           sudo apt-get install -y python3-setuptools
-          pip3 install --user cuteci
+          pip3 install cuteci
           cuteci \
               --rm \
               --installer ~/workspace/qt-opensource-linux-x64-5.13.0.run \
