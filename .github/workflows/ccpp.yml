@@ -48,13 +48,12 @@ jobs:
         run: |
           sudo apt-get install -y python3-setuptools
           pip3 install cuteci
-          cuteci \
-              --rm \
-              --installer http://download.qt.io/official_releases/qt/5.13/5.13.0/qt-opensource-linux-x64-5.13.0.run \
+          cuteci 
+              --installer http://download.qt.io/official_releases/qt/5.13/5.13.1/qt-opensource-linux-x64-5.13.1.run \
               install \
               --verbose \
               --destdir ~/Qt \
-              --packages qt.qt5.5130.gcc_644,qt.tools \
+              --packages qt.qt5.5131 \
               --keep-tools
       
       - name: List Home
@@ -63,13 +62,11 @@ jobs:
       - name: List Qt
         run: ls -al /home/runner/Qt
        
-      - name: List Qt 5.13.0
-        run: ls -al /home/runner/Qt/5.13.0
+      - name: List Qt 5.13.1
+        run: ls -al /home/runner/Qt/5.13.1
       
-      - name: Set Environment Variables
-        run: |
-          export QT_DEBUG_PLUGINS=1
-          echo ${PATH}
+      - name: Where is
+        run: whereis qmake
 
       - name: Download Conan Packages
         run: |
@@ -80,11 +77,7 @@ jobs:
 
       - name: Build D-Viz
         run: |
-          ls -al ~/Qt
-          ls -al ~/Qt/5.13.0
-          ls -al ~/Qt/5.13.0/gcc_64
-          ls -al ~/Qt/5.13.0/gcc_64/bin/
-          ~/Qt/5.13.0/gcc_64/bin/qmake CONFIG+=debug D-Viz.pro
+          qmake CONFIG+=debug D-Viz.pro
           make
 
       - name: Run Tests
