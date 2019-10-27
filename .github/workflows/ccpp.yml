@@ -54,10 +54,11 @@ jobs:
 
       - name: Build D-Viz
         run: |
-          qmake D-Viz.pro
+          qmake CONFIG+=release D-Viz.pro
           make
 
       - name: Run Tests
         run: |
+          ls ${GITHUB_WORKSPACE}/Output
           cd ${GITHUB_WORKSPACE}/Output/Debug
           ./UnitTests
