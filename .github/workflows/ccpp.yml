@@ -54,7 +54,7 @@ jobs:
 
       - name: Build D-Viz
         run: |
-          qmake CONFIG+=release D-Viz.pro
+          qmake CONFIG+=debug D-Viz.pro
           make
 
       - name: Run Tests
