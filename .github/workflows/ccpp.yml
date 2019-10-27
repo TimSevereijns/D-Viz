@@ -58,8 +58,14 @@ jobs:
               --verbose \
               --keep-tools
       
-      - name: List Qt Files
-        run: ls ~/Qt/5.13.0/gcc_64
+      - name: List Home
+        run: ls -al ~
+      
+      - name: List Qt
+        run: ls -al ~/Qt/
+       
+      - name: List Qt 5.13.0
+        run: ls -al ~/Qt/5.13.0
       
       - name: Set Environment Variables
         run: |
