@@ -45,15 +45,10 @@ jobs:
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v1
-
-      - name: Install Additional Dependencies
-        run: sudo apt-get install libx11-xcb1
       
       - name: Set Environment Variables
         run: |
-          export QT_PLUGIN_PATH=${Qt5_Dir}/plugins/platforms
           export QT_DEBUG_PLUGINS=1
-          export PATH=$PATH:${QT_PLUGIN_PATH}
           echo ${PATH}
 
       - name: Download Conan Packages
@@ -68,8 +63,12 @@ jobs:
           qmake CONFIG+=debug D-Viz.pro
           make
 
+      - name: Copy Dependencies
+        run: |
+          mkdir plugins
+          cp -r ${Qt5_Dir}/plugins/platform ./plugins/
+
       - name: Run Tests
         run: |
-          ls -al ${Qt5_Dir}/plugins/platforms
           cd ${GITHUB_WORKSPACE}/Output/Debug
           ./UnitTests
