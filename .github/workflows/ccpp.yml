@@ -50,6 +50,8 @@ jobs:
         run: |
           export QT_PLUGIN_PATH=${Qt5_Dir}/plugins/platforms
           export QT_DEBUG_PLUGINS=1
+          ls -al ${QT_PLUGIN_PATH}
+          ls -al ${QT_PLUGIN_PATH}/..
 
       - name: Download Conan Packages
         run: |
