@@ -50,7 +50,7 @@ jobs:
               install \
               --verbose \
               --destdir ~/Qt \
-              --packages qt.qt5.5131 \
+              --packages qt.qt5.5131.gcc_64 \
               --keep-tools
       
       - name: List Home
