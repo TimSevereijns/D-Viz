@@ -48,14 +48,18 @@ jobs:
         run: |
           sudo apt-get install -y python3-setuptools
           pip3 install cuteci
-          sudo cuteci \
+          cuteci \
               --rm \
               --installer http://download.qt.io/official_releases/qt/5.13/5.13.0/qt-opensource-linux-x64-5.13.0.run \
               install \
               --verbose \
               --destdir ~/Qt \
-              --packages qt.qt5.5130.gcc_644,qt.tools
-          ls ~/Qt/5.13.0/gcc_64
+              --packages qt.qt5.5130.gcc_644,qt.tools \
+              --verbose \
+              --keep-tools
+      
+      - name: List Qt Files
+        run: ls ~/Qt/5.13.0/gcc_64
       
       - name: Set Environment Variables
         run: |
