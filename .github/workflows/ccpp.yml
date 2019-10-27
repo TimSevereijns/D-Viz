@@ -19,11 +19,12 @@ jobs:
         run: |
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
           sudo apt-get update -qq
+
       - name: Install Python 3
         uses: actions/setup-python@v1
         with:
           python-version: '3.x'
-          architecture: 'x64' # (x64 or x86)
+          architecture: 'x64'
 
       - name: Install GCC 8
         run: |
@@ -45,27 +46,33 @@ jobs:
       - name: Install Qt
         #uses: jurplel/install-qt-action@v1
         run: |
-          sudo apt-get install qtcreator
-          sudo apt-get install qt5-default
+          sudo apt-get install -y python3-setuptools
+          pip3 install --user cuteci
+          cuteci \
+              --rm \
+              --installer ~/workspace/qt-opensource-linux-x64-5.13.0.run \
+              install \
+              --verbose \
+              --destdir ~/Qt \
+              --packages qt.qt5.5130.gcc_64
       
       - name: Set Environment Variables
         run: |
           export QT_DEBUG_PLUGINS=1
           echo ${PATH}
+
       - name: Download Conan Packages
         run: |
             cd ${GITHUB_WORKSPACE}
             mkdir Conan && cd Conan
             conan install ..
             cd ${GITHUB_WORKSPACE}
+
       - name: Build D-Viz
         run: |
           qmake CONFIG+=debug D-Viz.pro
           make
-      - name: Copy Dependencies
-        run: |
-          mkdir plugins
-          cp -r ${Qt5_Dir}/plugins/platforms ./plugins/
+
       - name: Run Tests
         run: |
           cd ${GITHUB_WORKSPACE}/Output/Debug
