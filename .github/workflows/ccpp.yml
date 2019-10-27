@@ -63,9 +63,10 @@ jobs:
       - name: Build D-Viz
         run: |
           qmake CONFIG+=debug D-Viz.pro
-          make
+          make Tests
 
       - name: Run Tests
         run: |
-          ls -al ${QT_PLUGIN_PATH}
+          ls -al ${Qt5_Dir}/plugins/platforms
+          cd ${GITHUB_WORKSPACE}/Output/Debug
           ldd ./UnitTests
