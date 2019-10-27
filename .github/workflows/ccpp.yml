@@ -70,6 +70,10 @@ jobs:
 
       - name: Build D-Viz
         run: |
+          ls -al ~/Qt
+          ls -al ~/Qt/5.13.0
+          ls -al ~/Qt/5.13.0/gcc_64
+          ls -al ~/Qt/5.13.0/gcc_64/bin/
           ~/Qt/5.13.0/gcc_64/bin/qmake CONFIG+=debug D-Viz.pro
           make
 
