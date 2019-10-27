@@ -54,17 +54,17 @@ jobs:
               install \
               --verbose \
               --destdir ~/Qt \
-              --packages qt.qt5.5130,qt.qt5.5130.qtnetworkauth,qt.qt5.5130.gcc_644,qt.tools \
+              --packages qt.qt5.5130.gcc_644,qt.tools \
               --keep-tools
       
       - name: List Home
         run: ls -al ~
       
       - name: List Qt
-        run: ls -al ~/Qt/
+        run: ls -al /home/runner/Qt
        
       - name: List Qt 5.13.0
-        run: ls -al ~/Qt/5.13.0
+        run: ls -al /home/runner/Qt/5.13.0
       
       - name: Set Environment Variables
         run: |
