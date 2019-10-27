@@ -67,6 +67,5 @@ jobs:
 
       - name: Run Tests
         run: |
-          cd ${QT_PLUGIN_PATH}
-          ldd ./libqxcb.so
+          ls -al ${QT_PLUGIN_PATH}
           ldd ./UnitTests
