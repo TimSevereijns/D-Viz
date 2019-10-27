@@ -17,9 +17,8 @@ jobs:
 
       - name: Update Software Repository
         run: |
-          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test     # For GCC 8
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
           sudo apt-get update -qq
-
       - name: Install Python 3
         uses: actions/setup-python@v1
         with:
@@ -44,34 +43,29 @@ jobs:
         run: sudo apt-get install libgl-dev
 
       - name: Install Qt
+        #uses: jurplel/install-qt-action@v1
         run: |
-          sudo apt-get -y install build-essential libgl1-mesa-dev libassimp-dev libfontconfig1 libdbus-1-3 wget
-          wget http://download.qt.io/official_releases/qt/5.12/5.12.5/qt-opensource-linux-x64-5.12.5.run
-          chmod +x qt-opensource-linux-x64-5.12.5.run
-          ./qt-opensource-linux-x64-5.12.5.run
+          sudo apt-get install qtcreator
+          sudo apt-get install qt5-default
       
       - name: Set Environment Variables
         run: |
           export QT_DEBUG_PLUGINS=1
           echo ${PATH}
-
       - name: Download Conan Packages
         run: |
             cd ${GITHUB_WORKSPACE}
             mkdir Conan && cd Conan
             conan install ..
             cd ${GITHUB_WORKSPACE}
-
       - name: Build D-Viz
         run: |
           qmake CONFIG+=debug D-Viz.pro
           make
-
       - name: Copy Dependencies
         run: |
           mkdir plugins
           cp -r ${Qt5_Dir}/plugins/platforms ./plugins/
-
       - name: Run Tests
         run: |
           cd ${GITHUB_WORKSPACE}/Output/Debug
