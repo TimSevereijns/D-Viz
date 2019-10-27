@@ -40,15 +40,12 @@ jobs:
       - name: Install Conan
         run: pip install conan
 
-      - name: Install OpenGL
-        run: sudo apt-get install libgl-dev
-
       - name: Install Qt
         #uses: jurplel/install-qt-action@v1
         run: |
           sudo apt-get install -y python3-setuptools
           pip3 install cuteci
-          cuteci 
+          cuteci \
               --installer http://download.qt.io/official_releases/qt/5.13/5.13.1/qt-opensource-linux-x64-5.13.1.run \
               install \
               --verbose \
