@@ -54,8 +54,7 @@ jobs:
               install \
               --verbose \
               --destdir ~/Qt \
-              --packages qt.qt5.5130.gcc_644,qt.tools \
-              --verbose \
+              --packages qt.qt5.5130,qt.qt5.5130.qtnetworkauth,qt.qt5.5130.gcc_644,qt.tools \
               --keep-tools
       
       - name: List Home
