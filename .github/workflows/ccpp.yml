@@ -44,6 +44,9 @@ jobs:
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v1
+      
+      - name: Set Environment Variables
+        run: export QT_PLUGIN_PATH=${QT_DIR}/plugins
 
       - name: Download Conan Packages
         run: |
