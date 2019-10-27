@@ -55,6 +55,7 @@ jobs:
               --verbose \
               --destdir ~/Qt \
               --packages qt.qt5.5130.gcc_644,qt.tools
+          ls ~/Qt/5.13.0/gcc_64
       
       - name: Set Environment Variables
         run: |
