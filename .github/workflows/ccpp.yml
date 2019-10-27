@@ -63,7 +63,7 @@ jobs:
       - name: Build D-Viz
         run: |
           qmake CONFIG+=debug D-Viz.pro
-          make Tests
+          make
 
       - name: Run Tests
         run: |
