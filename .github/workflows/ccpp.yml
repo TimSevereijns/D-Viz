@@ -42,9 +42,6 @@ jobs:
  
       - name: Install Conan
         run: pip install conan
-      
-      - name: Install XCB
-        run: sudo apt-get install libxcb-xinerama
 
       - name: Install Qt
         run: |
@@ -69,6 +66,9 @@ jobs:
         run: |
           export QT_QPA_PLATFORM=offscreen
           export QT_DEBUG_PLUGINS=1
+
+      - name: Debug
+        run:  ldd ~/Qt/5.13.1/gcc_64/bin/plugins/platforms/libqxcb.so
 
       - name: Build D-Viz
         run: |
