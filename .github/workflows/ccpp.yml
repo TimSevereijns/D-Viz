@@ -21,8 +21,8 @@ jobs:
           sudo apt-get update -qq
 
       - name: Install Desktop
-        run: sudo apt-get install lxde
-
+        run: sudo apt-get install libxkbcommon-x11-0
+ 
       - name: Install Python 3
         uses: actions/setup-python@v1
         with:
