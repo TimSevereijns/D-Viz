@@ -66,6 +66,9 @@ jobs:
             conan install ..
             cd ${GITHUB_WORKSPACE}
 
+      - name: Set Environment Variables
+        run: export QT_QPA_PLATFORM=offscreen
+
       - name: Build D-Viz
         run: |
           ~/Qt/5.13.1/gcc_64/bin/qmake CONFIG+=debug D-Viz.pro
