@@ -44,7 +44,6 @@ jobs:
         run: pip install conan
 
       - name: Install Qt
-        #uses: jurplel/install-qt-action@v1
         run: |
           sudo apt-get install -y python3-setuptools
           pip3 install cuteci
@@ -55,9 +54,6 @@ jobs:
               --destdir ~/Qt \
               --packages qt.qt5.5131.gcc_64 \
               --keep-tools
-       
-      - name: List Qt 5.13.1
-        run: ls -al /home/runner/Qt/5.13.1
 
       - name: Download Conan Packages
         run: |
@@ -67,7 +63,9 @@ jobs:
             cd ${GITHUB_WORKSPACE}
 
       - name: Set Environment Variables
-        run: export QT_QPA_PLATFORM=offscreen
+        run: |
+          export QT_QPA_PLATFORM=offscreen
+          export QT_DEBUG_PLUGINS=1
 
       - name: Build D-Viz
         run: |
