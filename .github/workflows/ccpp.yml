@@ -52,18 +52,9 @@ jobs:
               --destdir ~/Qt \
               --packages qt.qt5.5131.gcc_64 \
               --keep-tools
-      
-      - name: List Home
-        run: ls -al ~
-      
-      - name: List Qt
-        run: ls -al /home/runner/Qt
        
       - name: List Qt 5.13.1
         run: ls -al /home/runner/Qt/5.13.1
-      
-      - name: Where is
-        run: whereis qmake
 
       - name: Download Conan Packages
         run: |
@@ -74,7 +65,7 @@ jobs:
 
       - name: Build D-Viz
         run: |
-          qmake CONFIG+=debug D-Viz.pro
+          ~/Qt/5.13.1/gcc_64/bin/qmake CONFIG+=debug D-Viz.pro
           make
 
       - name: Run Tests
