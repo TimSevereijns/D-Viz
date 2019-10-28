@@ -20,6 +20,9 @@ jobs:
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
           sudo apt-get update -qq
 
+      - name: Install Desktop
+        run: sudo apt-get install lxde
+
       - name: Install Python 3
         uses: actions/setup-python@v1
         with:
