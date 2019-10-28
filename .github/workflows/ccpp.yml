@@ -44,7 +44,7 @@ jobs:
         run: pip install conan
       
       - name: Install XCB
-        run: sudo apt install libxcb-xinerama
+        run: sudo apt-get install libxcb-xinerama
 
       - name: Install Qt
         run: |
