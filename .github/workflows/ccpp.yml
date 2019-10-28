@@ -68,7 +68,7 @@ jobs:
           export QT_DEBUG_PLUGINS=1
 
       - name: Debug
-        run:  ldd ~/Qt/5.13.1/gcc_64/bin/plugins/platforms/libqxcb.so
+        run:  ldd ~/Qt/5.13.1/gcc_64/plugins/platforms/libqxcb.so
 
       - name: Build D-Viz
         run: |
