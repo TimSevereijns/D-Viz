@@ -90,8 +90,13 @@ jobs:
       - name: Collect Coverage
         run: |
           lcov --capture --directory . --output-file coverage.info
-          lcov --remove coverage.info '/usr/*' '*/conan/*' '*/Tests/*' '*/QtCore/*' '*/QtGui/*' '*/QtTest/*' '*/QtWidget/*' '*/ThirdParty/*' --output-file coverage.info
+          lcov --remove coverage.info \
+            '/usr/*' '*/conan/*' '*/Tests/*' '*/QtCore/*' '*/QtGui/*' '*/QtTest/*' \
+            '*/QtWidgets/*' '*/ThirdParty/*' '*/.moc/*' --output-file coverage.info
           lcov --list coverage.info
           
       - name: Upload Coverage Report
-        run: bash <(curl -s https://codecov.io/bash) -f coverage.info -t :${{ secrets.CodeCov }} || echo "Codecov did not collect coverage reports"
+        run: |
+          export CODECOV_TOKEN=${{ secrets.CodeCov }}
+          bash <(curl -s https://codecov.io/bash) -f coverage.info || \
+          echo "Codecov did not collect coverage reports"
