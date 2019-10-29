@@ -19,7 +19,6 @@ jobs:
         run: |
           export QT_DEBUG_PLUGINS=1
           export QT_QPA_PLATFORM=offscreen
-          export CODECOV_TOKEN=${{ secrets.CodeCov }}
 
       - name: Update Software Repository
         run: |
@@ -91,8 +90,8 @@ jobs:
       - name: Collect Coverage
         run: |
           lcov --capture --directory . --output-file coverage.info
-          lcov --remove coverage.info '/usr/*' '*/third-party/*' '*/tests/*' --output-file coverage.info
+          lcov --remove coverage.info '/usr/*' '*/conan/*' '*/Tests/*' '*/QtCore/*' '*/QtGui/*' '*/QtTest/*' '*/QtWidget/*' '*/ThirdParty/*' --output-file coverage.info
           lcov --list coverage.info
           
       - name: Upload Coverage Report
-        run: bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"
+        run: bash <(curl -s https://codecov.io/bash) -f coverage.info -t :${{ secrets.CodeCov }} || echo "Codecov did not collect coverage reports"
