@@ -15,6 +15,12 @@ jobs:
       - name: Checkout Submodules
         run: git submodule sync --recursive && git submodule update --init --recursive
 
+      - name: Set Environment Variables
+        run: |
+          export QT_DEBUG_PLUGINS=1
+          export QT_QPA_PLATFORM=offscreen
+          export CODECOV_TOKEN=${{ secrets.CodeCov }}
+
       - name: Update Software Repository
         run: |
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
@@ -40,16 +46,18 @@ jobs:
           sudo update-alternatives --config g++
           sudo update-alternatives --config gcov
           
+      - name: Install LCov
+        run: |
+          wget http://downloads.sourceforge.net/ltp/lcov-1.14.tar.gz
+          tar -xvf lcov-1.14.tar.gz
+          cd lcov-1.14 && sudo make install
+          cd ..
+          
       - name: Install OpenGL
         run: sudo apt-get install libgl-dev
  
       - name: Install Conan
         run: pip install conan
-
-      - name: Set Environment Variables
-        run: |
-          export QT_DEBUG_PLUGINS=1
-          export QT_QPA_PLATFORM=offscreen
 
       - name: Install Qt
         run: |
@@ -70,9 +78,6 @@ jobs:
             conan install ..
             cd ${GITHUB_WORKSPACE}
 
-      - name: Debug
-        run:  ldd ~/Qt/5.12.0/gcc_64/plugins/platforms/libqxcb.so
-
       - name: Build D-Viz
         run: |
           ~/Qt/5.12.0/gcc_64/bin/qmake CONFIG+=debug D-Viz.pro
@@ -82,3 +87,12 @@ jobs:
         run: |
           cd ${GITHUB_WORKSPACE}/Output/Debug
           ./UnitTests -platform offscreen
+          
+      - name: Collect Coverage
+        run: |
+          lcov --capture --directory . --output-file coverage.info
+          lcov --remove coverage.info '/usr/*' '*/third-party/*' '*/tests/*' --output-file coverage.info
+          lcov --list coverage.info
+          
+      - name: Upload Coverage Report
+        run: bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"
