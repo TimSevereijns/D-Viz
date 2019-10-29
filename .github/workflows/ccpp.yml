@@ -21,7 +21,7 @@ jobs:
           sudo apt-get update -qq
 
       - name: Install XCB
-        run: sudo apt-get install libxcb
+        run: sudo apt-get install libxkbcommon-x11-0
  
       - name: Install Python 3
         uses: actions/setup-python@v1
@@ -46,6 +46,11 @@ jobs:
       - name: Install Conan
         run: pip install conan
 
+      - name: Set Environment Variables
+        run: |
+          export QT_DEBUG_PLUGINS=1
+          export QT_QPA_PLATFORM=offscreen
+
       - name: Install Qt
         run: |
           sudo apt-get install -y python3-setuptools
@@ -64,9 +69,6 @@ jobs:
             mkdir Conan && cd Conan
             conan install ..
             cd ${GITHUB_WORKSPACE}
-
-      - name: Set Environment Variables
-        run: export QT_DEBUG_PLUGINS=1
 
       - name: Debug
         run:  ldd ~/Qt/5.12.0/gcc_64/plugins/platforms/libqxcb.so
