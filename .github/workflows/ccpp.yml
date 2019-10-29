@@ -55,11 +55,11 @@ jobs:
           sudo apt-get install -y python3-setuptools
           pip3 install cuteci
           cuteci \
-              --installer http://download.qt.io/official_releases/qt/5.12/5.12.0/qt-opensource-linux-x64-5.12.0.run \
+              --installer http://download.qt.io/official_releases/qt/5.13/5.13.1/qt-opensource-linux-x64-5.13.1.run \
               install \
               --verbose \
               --destdir ~/Qt \
-              --packages qt.qt5.5120.gcc_64 \
+              --packages qt.qt5.5131.gcc_64 \
               --keep-tools
 
       - name: Download Conan Packages
@@ -71,7 +71,7 @@ jobs:
 
       - name: Build D-Viz
         run: |
-          ~/Qt/5.12.0/gcc_64/bin/qmake CONFIG+=debug D-Viz.pro
+          ~/Qt/5.13.1/gcc_64/bin/qmake CONFIG+=debug D-Viz.pro
           make
 
       - name: Run Tests
