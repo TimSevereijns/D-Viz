@@ -15,18 +15,10 @@ jobs:
       - name: Checkout Submodules
         run: git submodule sync --recursive && git submodule update --init --recursive
 
-      - name: Set Environment Variables
-        run: |
-          export QT_DEBUG_PLUGINS=1
-          export QT_QPA_PLATFORM=offscreen
-
       - name: Update Software Repository
         run: |
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
           sudo apt-get update -qq
-
-      - name: Install XCB
-        run: sudo apt-get install libxkbcommon-x11-0
  
       - name: Install Python 3
         uses: actions/setup-python@v1
@@ -89,7 +81,8 @@ jobs:
           
       - name: Collect Coverage
         run: |
-          lcov --capture --directory . --output-file coverage.info
+          lcov --capture --directory . --output-file coverage.info \
+            --base-directory ${GITHUB_WORKSPACE}/Source
           lcov --remove coverage.info \
             '/usr/*' '*/conan/*' '*/Tests/*' '*/QtCore/*' '*/QtGui/*' '*/QtTest/*' \
             '*/QtWidgets/*' '*/ThirdParty/*' '*/.moc/*' --output-file coverage.info
