@@ -1,0 +1,95 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v1
+
+      - name: Checkout Submodules
+        run: git submodule sync --recursive && git submodule update --init --recursive
+
+      - name: Update Software Repository
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update -qq
+ 
+      - name: Install Python 3
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+
+      - name: Install GCC 8
+        run: |
+          sudo apt-get install -qq g++-8
+          sudo apt-get install -qq gcc-8
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 20
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 20
+          sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 20
+          sudo update-alternatives --config gcc
+          sudo update-alternatives --config g++
+          sudo update-alternatives --config gcov
+          
+      - name: Install LCov
+        run: |
+          wget http://downloads.sourceforge.net/ltp/lcov-1.14.tar.gz
+          tar -xvf lcov-1.14.tar.gz
+          cd lcov-1.14 && sudo make install
+          cd ..
+          
+      - name: Install OpenGL
+        run: sudo apt-get install libgl-dev
+ 
+      - name: Install Conan
+        run: pip install conan
+
+      - name: Install Qt
+        run: |
+          sudo apt-get install -y python3-setuptools
+          pip3 install cuteci
+          cuteci \
+              --installer http://download.qt.io/official_releases/qt/5.13/5.13.1/qt-opensource-linux-x64-5.13.1.run \
+              install \
+              --verbose \
+              --destdir ~/Qt \
+              --packages qt.qt5.5131.gcc_64 \
+              --keep-tools
+
+      - name: Download Conan Packages
+        run: |
+            cd ${GITHUB_WORKSPACE}
+            mkdir Conan && cd Conan
+            conan install ..
+            cd ${GITHUB_WORKSPACE}
+
+      - name: Build D-Viz
+        run: |
+          ~/Qt/5.13.1/gcc_64/bin/qmake CONFIG+=debug D-Viz.pro
+          make
+
+      - name: Run Tests
+        run: |
+          cd ${GITHUB_WORKSPACE}/Output/Debug
+          ./UnitTests -platform offscreen
+          
+      - name: Collect Coverage
+        run: |
+          lcov --capture --directory . --output-file coverage.info \
+            --base-directory ${GITHUB_WORKSPACE}/Source
+          lcov --remove coverage.info \
+            '/usr/*' '*/conan/*' '*/Tests/*' '*/QtCore/*' '*/QtGui/*' '*/QtTest/*' \
+            '*/QtWidgets/*' '*/ThirdParty/*' '*/.moc/*' --output-file coverage.info
+          lcov --list coverage.info
+          
+      - name: Upload Coverage Report
+        run: |
+          export CODECOV_TOKEN=${{ secrets.CodeCov }}
+          bash <(curl -s https://codecov.io/bash) -f coverage.info || \
+          echo "Codecov did not collect coverage reports"

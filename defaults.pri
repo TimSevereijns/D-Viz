@@ -156,6 +156,8 @@ unix:CONFIG(release, debug|release) {
 }
 
 unix:CONFIG(debug, debug|release) {
+   QMAKE_CXXFLAGS += --coverage
+   QMAKE_LFLAGS += --coverage
    LIBS += \
       -lstdc++fs
 }
