@@ -161,10 +161,9 @@ void Controller::OnScanComplete(
     SaveScanMetadata(progress);
 
     m_view->OnScanCompleted();
+    m_model->StartMonitoringFileSystem();
 
     AllowUserInteractionWithModel(true);
-
-    m_model->StartMonitoringFileSystem();
 }
 
 void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
@@ -189,13 +188,11 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
         OnScanComplete(parameters, progress, scanningResults);
     };
 
-    ScanningParameters scanningParameters{ parameters.rootDirectory, progressHandler,
-                                           completionHandler };
-
     spdlog::get(Constants::Logging::DefaultLog)
         ->info(fmt::format("Started a new scan at: \"{}\"", m_model->GetRootPath().string()));
 
-    m_scanner.StartScanning(std::move(scanningParameters));
+    m_scanner.StartScanning(
+        ScanningParameters{ parameters.rootDirectory, progressHandler, completionHandler });
 }
 
 bool Controller::IsFileSystemBeingMonitored() const
@@ -313,8 +310,8 @@ void Controller::SelectNode(
     const std::function<void(const Tree<VizBlock>::Node&)>& selectorCallback)
 {
     Expects(m_model);
-    m_model->SelectNode(node);
 
+    m_model->SelectNode(node);
     selectorCallback(node);
 }
 
@@ -322,11 +319,11 @@ void Controller::SelectNodeAndUpdateStatusBar(
     const Tree<VizBlock>::Node& node,
     const std::function<void(const Tree<VizBlock>::Node&)>& selectorCallback)
 {
+    Expects(node->file.size > 0);
+
     SelectNode(node, selectorCallback);
 
     const auto fileSize = node->file.size;
-    Expects(fileSize > 0);
-
     const auto prefix = m_settingsManager.GetActiveNumericPrefix();
     const auto [prefixedSize, units] = ConvertFileSizeToNumericPrefix(fileSize, prefix);
     const auto isInBytes = (units == bytesLabel);
@@ -416,11 +413,10 @@ bool Controller::IsUserAllowedToInteractWithModel() const
 
 void Controller::SaveScanMetadata(const ScanningProgress& progress)
 {
-    TreemapMetadata data{ progress.filesScanned.load(), progress.directoriesScanned.load(),
-                          progress.bytesProcessed.load() };
-
     Expects(m_model);
-    m_model->SetTreemapMetadata(std::move(data));
+    m_model->SetTreemapMetadata(TreemapMetadata{ progress.filesScanned.load(),
+                                                 progress.directoriesScanned.load(),
+                                                 progress.bytesProcessed.load() });
 }
 
 void Controller::ClearSelectedNode()
@@ -461,10 +457,9 @@ void Controller::HighlightAncestors(
     const Tree<VizBlock>::Node& node,
     const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& callback)
 {
-    const auto selector = [&] {
-        Expects(m_model);
-        m_model->HighlightAncestors(node);
-    };
+    Expects(m_model);
+
+    const auto selector = [&] { m_model->HighlightAncestors(node); };
 
     ProcessHighlightedNodes(selector, callback);
 }
@@ -473,6 +468,8 @@ void Controller::HighlightDescendants(
     const Tree<VizBlock>::Node& node,
     const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& callback)
 {
+    Expects(m_model);
+
     const auto selector = [&] {
         m_model->HighlightDescendants(node, m_settingsManager.GetVisualizationParameters());
     };
@@ -484,6 +481,8 @@ void Controller::HighlightAllMatchingExtensions(
     const Tree<VizBlock>::Node& sampleNode,
     const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& callback)
 {
+    Expects(m_model);
+
     const auto& parameters = m_settingsManager.GetVisualizationParameters();
     const auto selector = [&] { m_model->HighlightMatchingFileExtension(sampleNode, parameters); };
 
@@ -496,6 +495,8 @@ void Controller::SearchTreeMap(
     const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& selectionCallback,
     bool shouldSearchFiles, bool shouldSearchDirectories)
 {
+    Expects(m_model);
+
     if (searchQuery.empty() || !HasModelBeenLoaded() ||
         (!shouldSearchFiles && !shouldSearchDirectories)) {
         return;

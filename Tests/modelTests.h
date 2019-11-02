@@ -73,6 +73,11 @@ class ModelTests : public QObject
     void HighlightAllMatchingExtensions();
 
     /**
+     * @brief Verifies that bounding boxes are correctly computed.
+     */
+    void ComputeBoundingBoxes();
+
+    /**
      * @brief Verifies that file monitoring is correctly enabled and disabled.
      */
     void ToggleFileMonitoring();
@@ -98,12 +103,12 @@ class ModelTests : public QObject
     void TrackMultipleDeletions();
 
     /**
-     * @brief ApplyFileDeletion
+     * @brief Verifies that a file deletion is correctly applied to the mode once refreshed.
      */
     void ApplyFileDeletion();
 
     /**
-     * @brief ApplyFileCreation
+     * @brief Verifies that a file creation is correctly applied to the mode once refreshed.
      */
     void ApplyFileCreation();
 

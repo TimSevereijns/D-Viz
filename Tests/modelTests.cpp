@@ -108,7 +108,7 @@ void ModelTests::init()
     const auto notificationGenerator = [&]() -> std::optional<FileEvent> {
         if (m_sampleNotifications.empty()) {
             return std::nullopt;
-        };
+        }
 
         auto nextNotification = m_sampleNotifications.back();
         m_sampleNotifications.pop_back();
@@ -215,6 +215,40 @@ void ModelTests::HighlightAllMatchingExtensions()
     QCOMPARE(
         static_cast<std::int32_t>(m_model->GetHighlightedNodes().size()),
         static_cast<std::int32_t>(headerCount));
+}
+
+void ModelTests::ComputeBoundingBoxes()
+{
+    m_model->UpdateBoundingBoxes();
+
+    const auto rootNode = m_model->GetTree().GetRoot();
+    const auto rootBlock = rootNode->GetData();
+    const auto rootBoundingBox = rootBlock.boundingBox;
+
+    QCOMPARE(rootBoundingBox.GetDepth(), rootBlock.block.GetDepth());
+    QCOMPARE(rootBoundingBox.GetWidth(), rootBlock.block.GetWidth());
+
+    const auto itr = std::max_element(
+        Tree<VizBlock>::LeafIterator{ rootNode }, Tree<VizBlock>::LeafIterator{},
+        [&](const Tree<VizBlock>::Node& lhs, const Tree<VizBlock>::Node& rhs) {
+            const auto leftPeak = lhs->block.GetOrigin().y() + lhs->block.GetHeight();
+            const auto rightPeak = rhs->block.GetOrigin().y() + rhs->block.GetHeight();
+
+            return leftPeak < rightPeak;
+        });
+
+    QVERIFY(itr != Tree<VizBlock>::LeafIterator{});
+
+    const auto highestPoint =
+        itr->GetData().block.GetOrigin().y() + itr->GetData().block.GetHeight();
+
+    // The height of the root's bounding box should match the tallest peak:
+    QCOMPARE(rootBoundingBox.GetHeight(), highestPoint);
+
+    // The dimensions of the bounding box enclosing the node at the peak should be equal to itself.
+    QCOMPARE(itr->GetData().block.GetWidth(), itr->GetData().boundingBox.GetWidth());
+    QCOMPARE(itr->GetData().block.GetDepth(), itr->GetData().boundingBox.GetDepth());
+    QCOMPARE(itr->GetData().block.GetHeight(), itr->GetData().boundingBox.GetHeight());
 }
 
 void ModelTests::ToggleFileMonitoring()
