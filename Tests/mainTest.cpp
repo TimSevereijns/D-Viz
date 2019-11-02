@@ -11,7 +11,6 @@ int main(int argc, char* argv[])
     Bootstrapper::RegisterMetaTypes();
     Bootstrapper::InitializeLogs();
 
-    MultiTest::RunAllTests(argc, argv);
-
-    return 0;
+    const auto failures = MultiTest::RunAllTests(argc, argv);
+    return failures;
 }

@@ -42,14 +42,14 @@ namespace MultiTest
 
     inline int RunAllTests(int /*argc*/, char** /*argv*/)
     {
-        auto result{ 0 };
+        auto failures{ 0 };
 
         for (const auto& [name, test] : Detail::GetTestMap()) {
             IgnoreUnused(name);
-            result += QTest::qExec(test.get());
+            failures += QTest::qExec(test.get());
         }
 
-        return result;
+        return failures;
     }
 }
 
