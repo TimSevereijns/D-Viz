@@ -79,18 +79,6 @@ namespace Scanner
     bool IsReparseTag(const std::filesystem::path& path, DWORD targetTag) noexcept;
 
     /**
-     * @note Junctions in Windows are considered mount points.
-     *
-     * @returns True if the given file path represents a mount point, and false otherwise.
-     */
-    bool IsMountPoint(const std::filesystem::path& path) noexcept;
-
-    /**
-     * @returns True if the given file path represents a symlink, and false otherwise.
-     */
-    bool IsSymlink(const std::filesystem::path& path) noexcept;
-
-    /**
      * @returns True if the given path represents a reparse point, and false otherwise.
      */
     bool IsReparsePoint(const std::filesystem::path& path) noexcept;

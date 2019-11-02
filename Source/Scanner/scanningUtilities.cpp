@@ -99,6 +99,7 @@ namespace Scanner
             std::lock_guard<std::mutex> lock{ streamMutex };
             IgnoreUnused(lock);
 
+            // @todo Log Properly
             std::wcout << "Falling back on the Win API for: \"" << path.wstring() << "\""
                        << std::endl;
 
@@ -130,56 +131,28 @@ namespace Scanner
         static std::vector<std::byte> buffer{ MAXIMUM_REPARSE_DATA_BUFFER_SIZE };
 
         const auto successfullyRead = ReadReparsePoint(path, buffer);
-
         return successfullyRead
-                   ? reinterpret_cast<REPARSE_DATA_BUFFER*>(buffer.data())->ReparseTag ==
-                         targetTag // NOLINT
+                   ? reinterpret_cast<REPARSE_DATA_BUFFER*>(buffer.data())->ReparseTag == targetTag
                    : false;
-    }
-
-    bool IsMountPoint(const std::filesystem::path& path) noexcept
-    {
-        const auto isMountPoint = IsReparseTag(path, IO_REPARSE_TAG_MOUNT_POINT);
-        if (isMountPoint) {
-            const std::lock_guard<decltype(streamMutex)> lock{ streamMutex };
-            IgnoreUnused(lock);
-
-            std::wcout << L"Found Mount Point: " << path.wstring() << std::endl;
-        }
-
-        return isMountPoint;
-    }
-
-    bool IsSymlink(const std::filesystem::path& path) noexcept
-    {
-        const auto isSymlink = IsReparseTag(path, IO_REPARSE_TAG_SYMLINK);
-        if (isSymlink) {
-            const std::lock_guard<decltype(streamMutex)> lock{ streamMutex };
-            IgnoreUnused(lock);
-
-            std::wcout << L"Found Symlink: " << path.wstring() << std::endl;
-        }
-
-        return isSymlink;
     }
 
     bool IsReparsePoint(const std::filesystem::path& path) noexcept
     {
-        const auto handle = OpenReparsePoint(path);
-        if (!handle.IsValid()) {
+        WIN32_FIND_DATA findData;
+        HANDLE handle = FindFirstFile(path.native().c_str(), &findData);
+        if (handle == INVALID_HANDLE_VALUE) {
             return false;
         }
 
-        BY_HANDLE_FILE_INFORMATION fileInfo;
-
-        const auto successfullyRetrieved =
-            GetFileInformationByHandle(static_cast<HANDLE>(handle), &fileInfo);
-
-        if (!successfullyRetrieved) {
-            return false;
+        const auto attributes = findData.dwFileAttributes;
+        if ((attributes & FILE_ATTRIBUTE_REPARSE_POINT) &&
+            (attributes & FILE_ATTRIBUTE_DIRECTORY)) {
+            FindClose(handle);
+            return true;
         }
 
-        return fileInfo.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT;
+        FindClose(handle);
+        return false;
     }
 
 #endif // Q_OS_WIN
