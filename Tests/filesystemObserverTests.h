@@ -26,6 +26,8 @@ class FilesystemObserverTests : public QObject
      * @brief Monitors an actual directory on disk as the files it contains are deleted.
      */
     void MonitorDeletions();
+
+    void SymlinkDetection();
 };
 
 #endif // FILESYSTEMOBSERVERTESTS_H

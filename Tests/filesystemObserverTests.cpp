@@ -8,6 +8,8 @@
 #include <Scanner/Monitor/linuxFileMonitor.h>
 #endif // Q_OS_LINUX
 
+#include <Scanner/scanningUtilities.h>
+
 #include "testUtilities.hpp"
 
 namespace
@@ -49,6 +51,12 @@ void FilesystemObserverTests::MonitorDeletions()
     QVERIFY(observer.IsActive() == false);
 
     QCOMPARE(receivedNotifications.size(), 490ul);
+}
+
+void FilesystemObserverTests::SymlinkDetection()
+{
+    const std::filesystem::path path = "C:\\Users\\All Users";
+    QVERIFY(Scanner::IsReparsePoint(path) == true);
 }
 
 REGISTER_TEST(FilesystemObserverTests);

@@ -1,9 +1,3 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2018-06-03T16:30:26
-#
-#-------------------------------------------------
-
 include(../defaults.pri)
 
 QT += testlib widgets
@@ -29,10 +23,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
+INCLUDEPATH += \
+   $$PWD/../ThirdParty/Catch2/single_include \
+
 LIBS += -L$$DESTDIR -lD-Viz
 
 HEADERS += \
-   fileSizeLiterals.hpp \
+   fileSizeLiteralTests.hpp \
    filesystemObserverTests.h \
    mockFileMonitor.h \
    modelTests.h \
