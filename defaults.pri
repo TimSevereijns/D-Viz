@@ -1,11 +1,10 @@
-CONFIG += conan_basic_setup
+CONFIG += \
+    conan_basic_setup
+    force_debug_info
+
 include(Conan/conanbuildinfo.pri)
 
 QT += opengl gamepad
-
-# Generate PDBs for Release builds:
-win32:QMAKE_CFLAGS_RELEASE += /Zi /GL
-win32:QMAKE_LFLAGS_RELEASE += /MAP /debug /opt:ref
 
 INCLUDEPATH += $$PWD/Include
 
