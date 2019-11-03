@@ -156,12 +156,11 @@ class VisualizationModel
     /**
      * @brief Highlights all nodes that match the sample node's extension.
      *
-     * @param[in] sampleNode      The node whose extension should be highlighted.
+     * @param[in] extension       The extension that should be highlighted.
      * @param parameters
      */
-    void HighlightMatchingFileExtension(
-        const Tree<VizBlock>::Node& sampleNode,
-        const Settings::VisualizationParameters& parameters);
+    void HighlightMatchingFileExtensions(
+        const std::wstring& extension, const Settings::VisualizationParameters& parameters);
 
     /**
      * @brief Highlights all nodes that match the search query, given the search parameters.
@@ -172,7 +171,7 @@ class VisualizationModel
      * @param[in] shouldSearchFiles        Pass in true to search files.
      * @param[in] shouldSearchDirectories  Pass in true to search directories.
      */
-    void HighlightMatchingFileName(
+    void HighlightMatchingFileNames(
         const std::wstring& searchQuery, const Settings::VisualizationParameters& parameters,
         bool shouldSearchFiles, bool shouldSearchDirectories);
 

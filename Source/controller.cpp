@@ -484,7 +484,9 @@ void Controller::HighlightAllMatchingExtensions(
     Expects(m_model);
 
     const auto& parameters = m_settingsManager.GetVisualizationParameters();
-    const auto selector = [&] { m_model->HighlightMatchingFileExtension(sampleNode, parameters); };
+    const auto selector = [&] {
+        m_model->HighlightMatchingFileExtensions(sampleNode.GetData().file.extension, parameters);
+    };
 
     ProcessHighlightedNodes(selector, callback);
 }
@@ -507,7 +509,7 @@ void Controller::SearchTreeMap(
     const auto selector = [&] {
         Stopwatch<std::chrono::milliseconds>(
             [&]() noexcept {
-                m_model->HighlightMatchingFileName(
+                m_model->HighlightMatchingFileNames(
                     searchQuery, m_settingsManager.GetVisualizationParameters(), shouldSearchFiles,
                     shouldSearchDirectories);
             },

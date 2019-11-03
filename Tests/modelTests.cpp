@@ -1,13 +1,5 @@
 #include "modelTests.h"
 
-#include <cstdlib>
-#include <fstream>
-#include <memory>
-#include <ostream>
-#include <thread>
-
-#include <gsl/gsl_assert>
-
 #include <Scanner/scanningParameters.h>
 #include <Scanner/scanningProgress.hpp>
 #include <Utilities/operatingSystemSpecific.hpp>
@@ -143,6 +135,14 @@ void ModelTests::ScanningProgressDataIsCorrect()
     QCOMPARE(static_cast<unsigned long>(m_directoriesScanned), 20ul);
 }
 
+void ModelTests::GetRootPath()
+{
+    const auto path = m_model->GetRootPath();
+
+    const auto expectation = std::filesystem::absolute("../../Tests/Sandbox/asio");
+    QCOMPARE(expectation.wstring(), path);
+}
+
 void ModelTests::SelectingNodes()
 {
     QVERIFY(m_model->GetSelectedNode() == nullptr);
@@ -193,7 +193,7 @@ void ModelTests::HighlightAncestors()
         static_cast<std::int32_t>(4));
 }
 
-void ModelTests::HighlightAllMatchingExtensions()
+void ModelTests::HighlightAllMatchingFileNames()
 {
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
@@ -205,8 +205,28 @@ void ModelTests::HighlightAllMatchingExtensions()
     constexpr auto shouldSearchFiles{ true };
     constexpr auto shouldSearchDirectories{ false };
 
-    m_model->HighlightMatchingFileName(
-        L".hpp", visualizationParameters, shouldSearchFiles, shouldSearchDirectories);
+    m_model->HighlightMatchingFileNames(
+        L"socket", visualizationParameters, shouldSearchFiles, shouldSearchDirectories);
+
+    const auto headerCount = std::count_if(
+        Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() }, Tree<VizBlock>::PostOrderIterator{},
+        [](const auto& node) { return node->file.name.find(L"socket") != std::wstring::npos; });
+
+    QCOMPARE(
+        static_cast<std::int32_t>(m_model->GetHighlightedNodes().size()),
+        static_cast<std::int32_t>(headerCount));
+}
+
+void ModelTests::HighlightMatchingFileExtensions()
+{
+    QVERIFY(m_model->GetHighlightedNodes().size() == 0);
+
+    auto visualizationParameters = Settings::VisualizationParameters{};
+    visualizationParameters.rootDirectory = L"";
+    visualizationParameters.minimumFileSize = 0u;
+    visualizationParameters.onlyShowDirectories = false;
+
+    m_model->HighlightMatchingFileExtensions(L".hpp", visualizationParameters);
 
     const auto headerCount = std::count_if(
         Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() }, Tree<VizBlock>::PostOrderIterator{},
@@ -215,6 +235,22 @@ void ModelTests::HighlightAllMatchingExtensions()
     QCOMPARE(
         static_cast<std::int32_t>(m_model->GetHighlightedNodes().size()),
         static_cast<std::int32_t>(headerCount));
+}
+
+void ModelTests::ClearHighlightedNodes()
+{
+    QVERIFY(m_model->GetHighlightedNodes().size() == 0);
+
+    auto visualizationParameters = Settings::VisualizationParameters{};
+    visualizationParameters.rootDirectory = L"";
+    visualizationParameters.minimumFileSize = 0u;
+    visualizationParameters.onlyShowDirectories = false;
+
+    m_model->HighlightMatchingFileExtensions(L".hpp", visualizationParameters);
+    QCOMPARE(false, m_model->GetHighlightedNodes().empty());
+
+    m_model->ClearHighlightedNodes();
+    QCOMPARE(true, m_model->GetHighlightedNodes().empty());
 }
 
 void ModelTests::ComputeBoundingBoxes()
@@ -230,11 +266,11 @@ void ModelTests::ComputeBoundingBoxes()
 
     const auto itr = std::max_element(
         Tree<VizBlock>::LeafIterator{ rootNode }, Tree<VizBlock>::LeafIterator{},
-        [&](const Tree<VizBlock>::Node& lhs, const Tree<VizBlock>::Node& rhs) {
-            const auto leftPeak = lhs->block.GetOrigin().y() + lhs->block.GetHeight();
-            const auto rightPeak = rhs->block.GetOrigin().y() + rhs->block.GetHeight();
+        [](const Tree<VizBlock>::Node& lhs, const Tree<VizBlock>::Node& rhs) {
+            const auto leftHeight = lhs->block.GetOrigin().y() + lhs->block.GetHeight();
+            const auto rightHeight = rhs->block.GetOrigin().y() + rhs->block.GetHeight();
 
-            return leftPeak < rightPeak;
+            return leftHeight < rightHeight;
         });
 
     QVERIFY(itr != Tree<VizBlock>::LeafIterator{});
@@ -242,13 +278,43 @@ void ModelTests::ComputeBoundingBoxes()
     const auto highestPoint =
         itr->GetData().block.GetOrigin().y() + itr->GetData().block.GetHeight();
 
-    // The height of the root's bounding box should match the tallest peak:
+    // The height of the root's bounding box should match the height of the tallest node:
     QCOMPARE(rootBoundingBox.GetHeight(), highestPoint);
 
     // The dimensions of the bounding box enclosing the node at the peak should be equal to itself.
     QCOMPARE(itr->GetData().block.GetWidth(), itr->GetData().boundingBox.GetWidth());
     QCOMPARE(itr->GetData().block.GetDepth(), itr->GetData().boundingBox.GetDepth());
     QCOMPARE(itr->GetData().block.GetHeight(), itr->GetData().boundingBox.GetHeight());
+}
+
+void ModelTests::FindNearestNode()
+{
+    const std::wstring targetName = L"socket_ops.ipp";
+
+    const auto targetNode = std::find_if(
+        Tree<VizBlock>::LeafIterator{ m_tree->GetRoot() }, Tree<VizBlock>::LeafIterator{},
+        [&](const auto& node) { return (node->file.name + node->file.extension) == targetName; });
+
+    QVERIFY(targetNode != Tree<VizBlock>::LeafIterator{});
+
+    const auto targetBlock = targetNode->GetData().block;
+    const auto x = static_cast<float>((targetBlock.GetOrigin().x() + targetBlock.GetWidth()) / 2.0);
+    const auto y = static_cast<float>((targetBlock.GetOrigin().y() + targetBlock.GetDepth()) / 2.0);
+
+    Camera camera;
+    camera.SetPosition(QVector3D{ -300, 300, 300 });
+    camera.LookAt(QVector3D{ x, y, 1 });
+
+    const Ray ray{ camera.GetPosition(), camera.Forward() };
+
+    Settings::VisualizationParameters parameters;
+    parameters.minimumFileSize = 0;
+
+    const auto* node = m_model->FindNearestIntersection(camera, ray, parameters);
+    QVERIFY(node != nullptr);
+
+    const auto fileName = node->GetData().file.name + node->GetData().file.extension;
+    QCOMPARE(fileName, targetName);
 }
 
 void ModelTests::ToggleFileMonitoring()

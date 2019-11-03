@@ -11,7 +11,6 @@
 #include <Scanner/driveScanner.h>
 #include <Visualizations/squarifiedTreemap.h>
 
-#include <iostream>
 #include <memory>
 
 class ModelTests : public QObject
@@ -53,6 +52,11 @@ class ModelTests : public QObject
     void ScanningProgressDataIsCorrect();
 
     /**
+     * @brief Verifies that the root path is correctly returned.
+     */
+    void GetRootPath();
+
+    /**
      * @brief Verifies that the correct node is selected.
      */
     void SelectingNodes();
@@ -70,12 +74,27 @@ class ModelTests : public QObject
     /**
      * @brief Verifies that all nodes with a given extension are correctly highlighted.
      */
-    void HighlightAllMatchingExtensions();
+    void HighlightAllMatchingFileNames();
+
+    /**
+     * @brief Verifies that matching extensions are correctly highlighted.
+     */
+    void HighlightMatchingFileExtensions();
+
+    /**
+     * @brief Verifies that highlights get correctly cleared.
+     */
+    void ClearHighlightedNodes();
 
     /**
      * @brief Verifies that bounding boxes are correctly computed.
      */
     void ComputeBoundingBoxes();
+
+    /**
+     * @brief FindNearestNode
+     */
+    void FindNearestNode();
 
     /**
      * @brief Verifies that file monitoring is correctly enabled and disabled.
