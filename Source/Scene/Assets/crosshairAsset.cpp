@@ -1,7 +1,5 @@
 #include "Scene/Assets/crosshairAsset.h"
 
-#include <iostream>
-
 namespace
 {
     /**

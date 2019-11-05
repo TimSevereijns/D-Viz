@@ -12,7 +12,6 @@
 #include <spdlog/spdlog.h>
 
 #include <cmath>
-#include <iostream>
 #include <optional>
 #include <vector>
 
@@ -703,12 +702,14 @@ namespace Assets
     {
         if (!m_texturePreviewShader.addShaderFromSourceFile(
                 QOpenGLShader::Vertex, ":/Shaders/texturePreview.vert")) {
-            std::cout << "Error loading vertex shader!" << std::endl;
+            const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+            log->error("Error loading vertex shader!");
         }
 
         if (!m_texturePreviewShader.addShaderFromSourceFile(
                 QOpenGLShader::Fragment, ":/Shaders/texturePreview.frag")) {
-            std::cout << "Error loading fragment shader!" << std::endl;
+            const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+            log->error("Error loading fragment shader!");
         }
 
         return m_texturePreviewShader.link();

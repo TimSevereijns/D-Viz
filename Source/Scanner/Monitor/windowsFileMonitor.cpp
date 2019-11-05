@@ -4,7 +4,6 @@
 
 #include <Utilities/scopeExit.hpp>
 #include <exception>
-#include <iostream>
 
 #include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>

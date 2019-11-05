@@ -4,7 +4,8 @@ CONFIG += \
 
 include(Conan/conanbuildinfo.pri)
 
-QT += opengl gamepad winextras
+QT += opengl gamepad
+win32: QT += winextras
 
 INCLUDEPATH += $$PWD/Include
 
@@ -129,7 +130,7 @@ RESOURCES += \
 DEFINES += \
    BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE
 
-win32:CONFIG(release, debug|release) {
+win32: CONFIG(release, debug|release) {
    DEFINES += \
       _WIN32_WINNT=0x0601 \
       NOMINMAX
@@ -139,7 +140,7 @@ win32:CONFIG(release, debug|release) {
       -lOle32
 }
 
-win32:CONFIG(debug, debug|release) {
+win32: CONFIG(debug, debug|release) {
    DEFINES += \
       _WIN32_WINNT=0x0601 \
       NOMINMAX
@@ -149,12 +150,12 @@ win32:CONFIG(debug, debug|release) {
       -lOle32
 }
 
-unix:CONFIG(release, debug|release) {
+unix: CONFIG(release, debug|release) {
    LIBS += \
       -lstdc++fs
 }
 
-unix:CONFIG(debug, debug|release) {
+unix: CONFIG(debug, debug|release) {
    QMAKE_CXXFLAGS += --coverage
    QMAKE_LFLAGS += --coverage
    LIBS += \

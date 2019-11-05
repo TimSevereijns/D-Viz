@@ -11,22 +11,18 @@
 #include "Utilities/reparsePointDeclarations.hpp"
 #endif // Q_OS_WIN
 
-#include <iostream>
+#include "constants.h"
+
 #include <memory>
 #include <mutex>
 
 #include <Tree/Tree.hpp>
 #include <gsl/gsl_assert>
-
-namespace
-{
-    std::mutex streamMutex;
-}
+#include <spdlog/spdlog.h>
 
 namespace Scanner
 {
 #ifdef Q_OS_WIN
-
     ScopedHandle OpenReparsePoint(const std::filesystem::path& path) noexcept
     {
         const auto handle = CreateFile(
@@ -63,7 +59,6 @@ namespace Scanner
 
         return successfullyRetrieved && bytesReturned;
     }
-
 #endif // Q_OS_WIN
 
     std::uintmax_t GetFileSizeUsingWinAPI(const std::filesystem::path& path) noexcept
@@ -73,7 +68,6 @@ namespace Scanner
         IgnoreUnused(path);
 
 #ifdef Q_OS_WIN
-
         WIN32_FIND_DATA fileData;
         const HANDLE fileHandle = FindFirstFileW(path.wstring().data(), &fileData);
         if (fileHandle == INVALID_HANDLE_VALUE) // NOLINT
@@ -83,7 +77,6 @@ namespace Scanner
 
         const auto highWord = static_cast<std::uintmax_t>(fileData.nFileSizeHigh);
         fileSize = (highWord << sizeof(fileData.nFileSizeLow) * 8) | fileData.nFileSizeLow;
-
 #endif // Q_OS_WIN
 
         return fileSize;
@@ -96,12 +89,8 @@ namespace Scanner
 
             return std::filesystem::file_size(path);
         } catch (...) {
-            std::lock_guard<std::mutex> lock{ streamMutex };
-            IgnoreUnused(lock);
-
-            // @todo Log Properly
-            std::wcout << "Falling back on the Win API for: \"" << path.wstring() << "\""
-                       << std::endl;
+            const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+            log->warn("Falling back on the Win API for: \"{}\".", path.string());
 
             return GetFileSizeUsingWinAPI(path);
         }
@@ -125,7 +114,6 @@ namespace Scanner
     }
 
 #ifdef Q_OS_WIN
-
     bool IsReparseTag(const std::filesystem::path& path, DWORD targetTag) noexcept
     {
         static std::vector<std::byte> buffer{ MAXIMUM_REPARSE_DATA_BUFFER_SIZE };
@@ -154,6 +142,5 @@ namespace Scanner
         FindClose(handle);
         return false;
     }
-
 #endif // Q_OS_WIN
 } // namespace Scanner

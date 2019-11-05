@@ -22,7 +22,7 @@
 #if defined(Q_OS_WIN)
 #include <QWinTaskbarButton>
 #include <QWinTaskbarProgress>
-#endif
+#endif // Q_OS_WIN
 
 #if defined(Q_OS_WIN)
 #include "Scanner/Monitor/windowsFileMonitor.h"
@@ -200,14 +200,14 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
 #if defined(Q_OS_WIN)
     auto button = std::make_shared<QWinTaskbarButton>(m_view.get());
     button->setWindow(m_view->windowHandle());
-#endif
+#endif // Q_OS_WIN
 
     const auto progressHandler = [&, button](const ScanningProgress& progress) {
         WriteProgressToStatusBar(progress);
 
 #if defined(Q_OS_WIN)
         UpdateIconProgress(*button, progress);
-#endif
+#endif // Q_OS_WIN
     };
 
     const auto completionHandler =
@@ -219,7 +219,7 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
 #if defined(Q_OS_WIN)
             button->progress()->reset();
             button.reset();
-#endif
+#endif // Q_OS_WIN
         };
 
     spdlog::get(Constants::Logging::DefaultLog)
@@ -645,5 +645,5 @@ void Controller::UpdateIconProgress(QWinTaskbarButton& button, const ScanningPro
         progressOverlay->setMinimum(0);
         progressOverlay->setMaximum(0);
     }
-#endif
+#endif // Q_OS_WIN
 }

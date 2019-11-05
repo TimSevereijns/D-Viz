@@ -1,7 +1,5 @@
 #include "HID/keyboardManager.h"
 
-#include <iostream>
-
 bool KeyboardManager::IsKeyDown(const Qt::Key key)
 {
     return m_keyMap[key] == KEY_STATE::DOWN;
