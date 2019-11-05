@@ -47,7 +47,7 @@ namespace
     {
         static std::shared_ptr<NullProgress> s_progress;
 
-        NullTaskbarButton(QWidget*)
+        NullTaskbarButton(QObject*)
         {
         }
 
@@ -60,7 +60,7 @@ namespace
     std::shared_ptr<NullProgress> NullTaskbarButton::s_progress = std::make_shared<NullProgress>();
 
     using FileSystemMonitor = LinuxFileMonitor;
-    using TaskBarButton = NullTaskbarButton;
+    using TaskbarButton = NullTaskbarButton;
 #endif // Q_OS_LINUX
 
     constexpr const std::wstring_view bytesLabel{ L" bytes" };
