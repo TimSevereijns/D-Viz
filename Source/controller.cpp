@@ -38,7 +38,7 @@ namespace
 #elif defined(Q_OS_LINUX)
     struct NullProgress
     {
-        void reset()
+        void reset() const
         {
         }
     };
@@ -49,10 +49,11 @@ namespace
 
         NullTaskbarButton(QWidget*)
         {
-            NullProgress progress()
-            {
-                return s_progress.get();
-            }
+        }
+
+        const NullProgress* progress() const
+        {
+            return s_progress.get();
         }
     };
 
