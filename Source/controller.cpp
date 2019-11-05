@@ -34,8 +34,30 @@ namespace
 {
 #if defined(Q_OS_WIN)
     using FileSystemMonitor = WindowsFileMonitor;
+    using TaskbarButton = QWinTaskbarButton;
 #elif defined(Q_OS_LINUX)
+    struct NullProgress
+    {
+        void reset()
+        {
+        }
+    };
+
+    struct NullTaskbarButton
+    {
+        static auto s_progress = std::make_shared<NullProgress>();
+
+        NullTaskbarButton(QWidget*)
+        {
+            NullProgress progress()
+            {
+                return s_progress.get();
+            }
+        }
+    };
+
     using FileSystemMonitor = LinuxFileMonitor;
+    using TaskBarButton = NullTaskbarButton;
 #endif // Q_OS_LINUX
 
     constexpr const std::wstring_view bytesLabel{ L" bytes" };
@@ -197,17 +219,12 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
     m_occupiedDiskSpace = spaceInfo.capacity - spaceInfo.free;
     Expects(m_occupiedDiskSpace > 0u);
 
-#if defined(Q_OS_WIN)
-    auto button = std::make_shared<QWinTaskbarButton>(m_view.get());
+    auto button = std::make_shared<TaskbarButton>(m_view.get());
     button->setWindow(m_view->windowHandle());
-#endif // Q_OS_WIN
 
     const auto progressHandler = [&, button](const ScanningProgress& progress) {
         WriteProgressToStatusBar(progress);
-
-#if defined(Q_OS_WIN)
         UpdateIconProgress(*button, progress);
-#endif // Q_OS_WIN
     };
 
     const auto completionHandler =
@@ -216,10 +233,8 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
             const std::shared_ptr<Tree<VizBlock>>& scanningResults) mutable {
             OnScanComplete(parameters, progress, scanningResults);
 
-#if defined(Q_OS_WIN)
             button->progress()->reset();
             button.reset();
-#endif // Q_OS_WIN
         };
 
     spdlog::get(Constants::Logging::DefaultLog)
@@ -624,8 +639,11 @@ void Controller::RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVect
     m_nodeColorMap.insert_or_assign(node.GetData().offsetIntoVBO, color);
 }
 
-void Controller::UpdateIconProgress(QWinTaskbarButton& button, const ScanningProgress& progress)
+template <typename ButtonType>
+void Controller::UpdateIconProgress(ButtonType& button, const ScanningProgress& progress)
 {
+    IgnoreUnused(button, progress);
+
 #if defined(Q_OS_WIN)
     const auto sizeInBytes = progress.bytesProcessed.load();
 

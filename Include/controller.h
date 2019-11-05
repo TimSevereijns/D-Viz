@@ -278,9 +278,8 @@ class Controller
 
     void WriteProgressToStatusBar(const ScanningProgress& progress);
 
-#if defined(Q_OS_WIN)
-    void UpdateIconProgress(QWinTaskbarButton& button, const ScanningProgress& progress);
-#endif
+    template <typename ButtonType>
+    void UpdateIconProgress(ButtonType& button, const ScanningProgress& progress);
 
     void OnScanComplete(
         const Settings::VisualizationParameters& parameters, const ScanningProgress& progress,
