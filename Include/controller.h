@@ -21,6 +21,10 @@
 struct FileEvent;
 struct ScanningProgress;
 
+#if defined(Q_OS_WIN)
+class QWinTaskbarButton;
+#endif
+
 class GLCanvas;
 
 class Controller
@@ -272,7 +276,11 @@ class Controller
         const NodeSelectorType& nodeSelector,
         const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& callback);
 
-    void ComputeProgress(const ScanningProgress& progress);
+    void WriteProgressToStatusBar(const ScanningProgress& progress);
+
+#if defined(Q_OS_WIN)
+    void UpdateIconProgress(QWinTaskbarButton& button, const ScanningProgress& progress);
+#endif
 
     void OnScanComplete(
         const Settings::VisualizationParameters& parameters, const ScanningProgress& progress,

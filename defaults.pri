@@ -4,7 +4,7 @@ CONFIG += \
 
 include(Conan/conanbuildinfo.pri)
 
-QT += opengl gamepad
+QT += opengl gamepad winextras
 
 INCLUDEPATH += $$PWD/Include
 
