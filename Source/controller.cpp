@@ -45,7 +45,7 @@ namespace
 
     struct NullTaskbarButton
     {
-        static auto s_progress = std::make_shared<NullProgress>();
+        static std::shared_ptr<NullProgress> s_progress;
 
         NullTaskbarButton(QWidget*)
         {
@@ -55,6 +55,8 @@ namespace
             }
         }
     };
+
+    std::shared_ptr<NullProgress> NullTaskbarButton::s_progress = std::make_shared<NullProgress>();
 
     using FileSystemMonitor = LinuxFileMonitor;
     using TaskBarButton = NullTaskbarButton;
