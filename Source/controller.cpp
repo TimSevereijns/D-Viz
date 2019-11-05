@@ -60,12 +60,11 @@ namespace
         {
         }
     };
-};
 
-std::shared_ptr<NullProgress> NullTaskbarButton::s_progress = std::make_shared<NullProgress>();
+    std::shared_ptr<NullProgress> NullTaskbarButton::s_progress = std::make_shared<NullProgress>();
 
-using FileSystemMonitor = LinuxFileMonitor;
-using TaskbarButton = NullTaskbarButton;
+    using FileSystemMonitor = LinuxFileMonitor;
+    using TaskbarButton = NullTaskbarButton;
 #endif // Q_OS_LINUX
 
     constexpr const std::wstring_view bytesLabel{ L" bytes" };
