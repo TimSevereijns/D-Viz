@@ -2,6 +2,7 @@
 #define NULLTASKBARBUTTON_H
 
 #if defined(Q_OS_LINUX)
+#include <memory>
 
 class QObject;
 class QWindow;
@@ -15,8 +16,6 @@ struct NullProgress
 
 struct NullTaskbarButton
 {
-    static std::shared_ptr<NullProgress> s_progress;
-
     NullTaskbarButton(QObject*)
     {
     }
@@ -29,8 +28,10 @@ struct NullTaskbarButton
     void setWindow(QWindow*) const
     {
     }
+    
+  private:
+    static std::shared_ptr<NullProgress> s_progress;
 };
-
 #endif // Q_OS_LINUX
 
 #endif // NULLTASKBARBUTTON_H
