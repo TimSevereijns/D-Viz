@@ -36,33 +36,6 @@ namespace
     using FileSystemMonitor = WindowsFileMonitor;
     using TaskbarButton = QWinTaskbarButton;
 #elif defined(Q_OS_LINUX)
-    struct NullProgress
-    {
-        void reset() const
-        {
-        }
-    };
-
-    struct NullTaskbarButton
-    {
-        static std::shared_ptr<NullProgress> s_progress;
-
-        NullTaskbarButton(QObject*)
-        {
-        }
-
-        const NullProgress* progress() const
-        {
-            return s_progress.get();
-        }
-
-        void setWindow(QWindow*) const
-        {
-        }
-    };
-
-    std::shared_ptr<NullProgress> NullTaskbarButton::s_progress = std::make_shared<NullProgress>();
-
     using FileSystemMonitor = LinuxFileMonitor;
     using TaskbarButton = NullTaskbarButton;
 #endif // Q_OS_LINUX

@@ -21,10 +21,6 @@
 struct FileEvent;
 struct ScanningProgress;
 
-#if defined(Q_OS_WIN)
-class QWinTaskbarButton;
-#endif
-
 class GLCanvas;
 
 class Controller
