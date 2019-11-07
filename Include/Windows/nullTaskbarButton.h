@@ -1,6 +1,8 @@
 #ifndef NULLTASKBARBUTTON_H
 #define NULLTASKBARBUTTON_H
 
+#include <QtGlobal>
+
 #if defined(Q_OS_LINUX)
 #include <memory>
 
