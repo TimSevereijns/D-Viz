@@ -74,9 +74,9 @@ jobs:
           ~/Qt/5.13.1/gcc_64/bin/qmake \
             D-Viz.pro \
             CONFIG+=debug \
-            QMAKE_CXXFLAGS+=fno-inline \
-            QMAKE_CXXFLAGS+=fno-inline-small-functions \
-            QMAKE_CXXFLAGS+=fno-default-inline
+            QMAKE_CXXFLAGS+=-fno-inline \
+            QMAKE_CXXFLAGS+=-fno-inline-small-functions \
+            QMAKE_CXXFLAGS+=-fno-default-inline
           make -j4
 
       - name: Run Tests
