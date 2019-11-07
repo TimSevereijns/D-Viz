@@ -1,9 +1,9 @@
-name: C/C++ CI
+name: Coverage
 
 on: [push]
 
 jobs:
-  test:
+  codecov:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -71,8 +71,13 @@ jobs:
 
       - name: Build D-Viz
         run: |
-          ~/Qt/5.13.1/gcc_64/bin/qmake CONFIG+=debug D-Viz.pro
-          make
+          ~/Qt/5.13.1/gcc_64/bin/qmake \
+            D-Viz.pro \
+            CONFIG+=debug \
+            QMAKE_CXXFLAGS+=-fno-inline \
+            QMAKE_CXXFLAGS+=-fno-inline-small-functions \
+            QMAKE_CXXFLAGS+=-fno-default-inline
+          make -j4
 
       - name: Run Tests
         run: |
