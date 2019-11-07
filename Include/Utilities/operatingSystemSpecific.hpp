@@ -45,27 +45,6 @@ namespace OS
         }
     }
 
-    inline std::uint64_t GetUsedDiskSpace(std::wstring path)
-    {
-        std::replace(std::begin(path), std::end(path), L'/', L'\\');
-        path += '\\';
-
-        std::uint64_t totalNumberOfFreeBytes{ 0 };
-        std::uint64_t totalNumberOfBytes{ 0 };
-        const bool wasOperationSuccessful = GetDiskFreeSpaceExW(
-            path.c_str(), NULL, (PULARGE_INTEGER)&totalNumberOfBytes,
-            (PULARGE_INTEGER)&totalNumberOfFreeBytes);
-
-        Expects(wasOperationSuccessful);
-
-        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
-        log->info(fmt::format("Disk Size:  {} bytes", totalNumberOfBytes));
-        log->info(fmt::format("Free Space: {} bytes", totalNumberOfFreeBytes));
-
-        const auto occupiedSpace = totalNumberOfBytes - totalNumberOfFreeBytes;
-        return occupiedSpace;
-    }
-
 #endif
 
 #ifdef Q_OS_LINUX
@@ -80,23 +59,6 @@ namespace OS
         const auto message = "nemo \"" + std::string{ path.c_str() } + "\" &";
         const auto result = std::system(message.c_str());
         IgnoreUnused(result);
-    }
-
-    inline std::uint64_t GetUsedDiskSpace(const std::wstring& rawPath)
-    {
-        const std::filesystem::path path{ rawPath };
-
-        struct statvfs diskInfo;
-        statvfs(path.string().data(), &diskInfo);
-
-        const auto totalNumberOfBytes = diskInfo.f_blocks * diskInfo.f_bsize;
-        const auto totalNumberOfFreeBytes = diskInfo.f_bfree * diskInfo.f_bsize;
-
-        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
-        log->info(fmt::format("Disk Size:  {} bytes", totalNumberOfBytes));
-        log->info(fmt::format("Free Space: {} bytes", totalNumberOfFreeBytes));
-
-        return totalNumberOfBytes - totalNumberOfFreeBytes;
     }
 
 #endif

@@ -3,7 +3,6 @@
 #include "constants.h"
 
 #include <cmath>
-#include <iostream>
 
 #include <gsl/gsl_assert>
 

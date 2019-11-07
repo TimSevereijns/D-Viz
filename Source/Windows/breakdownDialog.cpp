@@ -9,7 +9,6 @@
 #include <QScrollBar>
 
 #include <functional>
-#include <iostream>
 #include <vector>
 
 BreakdownDialog::BreakdownDialog(QWidget* parent)

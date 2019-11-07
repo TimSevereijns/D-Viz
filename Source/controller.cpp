@@ -21,16 +21,22 @@
 
 #if defined(Q_OS_WIN)
 #include "Scanner/Monitor/windowsFileMonitor.h"
+
+#include <QWinTaskbarButton>
+#include <QWinTaskbarProgress>
 #elif defined(Q_OS_LINUX)
 #include "Scanner/Monitor/linuxFileMonitor.h"
+#include "Windows/nullTaskbarButton.h"
 #endif // Q_OS_LINUX
 
 namespace
 {
 #if defined(Q_OS_WIN)
     using FileSystemMonitor = WindowsFileMonitor;
+    using TaskbarButton = QWinTaskbarButton;
 #elif defined(Q_OS_LINUX)
     using FileSystemMonitor = LinuxFileMonitor;
+    using TaskbarButton = NullTaskbarButton;
 #endif // Q_OS_LINUX
 
     constexpr const std::wstring_view bytesLabel{ L" bytes" };
@@ -127,6 +133,18 @@ namespace
 
         log->flush();
     }
+
+    /**
+     * @brief Helper function to log basic disk statistics.
+     *
+     * @param[in] spaceInfo         Disk information.
+     */
+    void LogDiskStatistics(const std::filesystem::space_info& spaceInfo)
+    {
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+        log->info(fmt::format("Disk Size:  {} bytes", spaceInfo.capacity));
+        log->info(fmt::format("Free Space: {} bytes", spaceInfo.free));
+    }
 } // namespace
 
 Controller::Controller()
@@ -144,7 +162,7 @@ void Controller::OnScanComplete(
     const Settings::VisualizationParameters& parameters, const ScanningProgress& progress,
     const std::shared_ptr<Tree<VizBlock>>& scanningResults)
 {
-    ComputeProgress(progress);
+    WriteProgressToStatusBar(progress);
     LogScanCompletion(progress);
 
     m_view->AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
@@ -175,18 +193,28 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
 
     m_view->OnScanStarted();
 
-    // @todo Look into using std::fileystem::space instead.
-    m_occupiedDiskSpace = OS::GetUsedDiskSpace(parameters.rootDirectory);
+    const auto spaceInfo = std::filesystem::space(parameters.rootDirectory);
+    LogDiskStatistics(spaceInfo);
+    m_occupiedDiskSpace = spaceInfo.capacity - spaceInfo.free;
     Expects(m_occupiedDiskSpace > 0u);
 
-    const auto progressHandler = [&](const ScanningProgress& progress) {
-        ComputeProgress(progress);
+    auto button = std::make_shared<TaskbarButton>(m_view.get());
+    button->setWindow(m_view->windowHandle());
+
+    const auto progressHandler = [&, button](const ScanningProgress& progress) {
+        WriteProgressToStatusBar(progress);
+        UpdateIconProgress(*button, progress);
     };
 
-    const auto completionHandler = [&](const ScanningProgress& progress,
-                                       const std::shared_ptr<Tree<VizBlock>>& scanningResults) {
-        OnScanComplete(parameters, progress, scanningResults);
-    };
+    const auto completionHandler =
+        [&, button](
+            const ScanningProgress& progress,
+            const std::shared_ptr<Tree<VizBlock>>& scanningResults) mutable {
+            OnScanComplete(parameters, progress, scanningResults);
+
+            button->progress()->reset();
+            button.reset();
+        };
 
     spdlog::get(Constants::Logging::DefaultLog)
         ->info(fmt::format("Started a new scan at: \"{}\"", m_model->GetRootPath().string()));
@@ -233,7 +261,7 @@ QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
     return Constants::Colors::FileGreen;
 }
 
-void Controller::ComputeProgress(const ScanningProgress& progress)
+void Controller::WriteProgressToStatusBar(const ScanningProgress& progress)
 {
     Expects(m_occupiedDiskSpace > 0u);
 
@@ -241,15 +269,15 @@ void Controller::ComputeProgress(const ScanningProgress& progress)
     const auto sizeInBytes = progress.bytesProcessed.load();
 
     const auto rootPath = m_model->GetRootPath();
-    const auto doesPathRepresentEntireDrive{ rootPath.string() == rootPath.root_path() };
+    const auto doesPathRepresentEntireDrive{ rootPath == rootPath.root_path() };
 
     if (doesPathRepresentEntireDrive) {
-        const auto fractionOfDiskOccupied =
+        const auto fraction =
             (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
 
         const auto message = fmt::format(
             L"Files Scanned: {}  |  {:03.2f}% Complete",
-            Utilities::StringifyWithDigitSeparators(filesScanned), fractionOfDiskOccupied * 100);
+            Utilities::StringifyWithDigitSeparators(filesScanned), fraction * 100);
 
         m_view->SetStatusBarMessage(message);
     } else {
@@ -588,4 +616,31 @@ void Controller::RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVect
 {
     Expects(node.GetData().offsetIntoVBO != VizBlock::INVALID_OFFSET);
     m_nodeColorMap.insert_or_assign(node.GetData().offsetIntoVBO, color);
+}
+
+template <typename ButtonType>
+void Controller::UpdateIconProgress(ButtonType& button, const ScanningProgress& progress)
+{
+    IgnoreUnused(button, progress);
+
+#if defined(Q_OS_WIN)
+    const auto sizeInBytes = progress.bytesProcessed.load();
+
+    const auto rootPath = m_model->GetRootPath();
+    const auto doesPathRepresentEntireDrive{ rootPath == rootPath.root_path() };
+
+    if (doesPathRepresentEntireDrive) {
+        const auto progressValue =
+            (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
+
+        QWinTaskbarProgress* const progressOverlay = button.progress();
+        progressOverlay->setVisible(true);
+        progressOverlay->setValue(static_cast<int>(100.0 * progressValue));
+    } else {
+        QWinTaskbarProgress* const progressOverlay = button.progress();
+        progressOverlay->setVisible(true);
+        progressOverlay->setMinimum(0);
+        progressOverlay->setMaximum(0);
+    }
+#endif // Q_OS_WIN
 }

@@ -12,7 +12,6 @@
 #include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
 
-#include <iostream>
 #include <limits>
 #include <memory>
 #include <sstream>

@@ -3,7 +3,6 @@
 #include "constants.h"
 
 #include <cmath>
-#include <iostream>
 
 #include <QFontMetrics>
 #include <QLine>
@@ -55,10 +54,10 @@ namespace
         QPoint adjustedPosition{ entry.Position };
 
         if (entry.Position.x() == menuCenter.x()) {
-            const auto halfLabelWidth = fontMetrics.width(entry.Label) / 2;
+            const auto halfLabelWidth = fontMetrics.horizontalAdvance(entry.Label) / 2;
             adjustedPosition -= QPoint{ halfLabelWidth, 0 };
         } else if (entry.Position.x() < menuCenter.x()) {
-            const auto fullLabelWidth = fontMetrics.width(entry.Label);
+            const auto fullLabelWidth = fontMetrics.horizontalAdvance(entry.Label);
             adjustedPosition -= QPoint{ fullLabelWidth, 0 };
         }
 

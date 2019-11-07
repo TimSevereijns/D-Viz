@@ -14,7 +14,6 @@
 
 #include <algorithm>
 #include <chrono>
-#include <iostream>
 #include <optional>
 #include <string>
 
@@ -685,8 +684,8 @@ void VisualizationModel::UpdateAncestorSizes(Tree<VizBlock>::Node* node)
         if (parent) {
             const auto totalSize = std::accumulate(
                 Tree<VizBlock>::SiblingIterator{ parent->GetFirstChild() },
-                Tree<VizBlock>::SiblingIterator{},
-                std::uintmax_t{ 0 }, [](const auto runningTotal, const auto& node) noexcept {
+                Tree<VizBlock>::SiblingIterator{}, std::uintmax_t{ 0 },
+                [](const auto runningTotal, const auto& node) noexcept {
                     Expects(node->file.size > 0);
                     return runningTotal + node->file.size;
                 });

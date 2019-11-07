@@ -5,6 +5,7 @@ CONFIG += \
 include(Conan/conanbuildinfo.pri)
 
 QT += opengl gamepad
+win32: QT += winextras
 
 INCLUDEPATH += $$PWD/Include
 
@@ -46,6 +47,7 @@ SOURCES += \
    $$PWD/Source/Windows/aboutDialog.cpp \
    $$PWD/Source/Windows/breakdownDialog.cpp \
    $$PWD/Source/Windows/mainWindow.cpp \
+   $$PWD/Source/Windows/nullTaskbarButton.cpp \
    $$PWD/Source/Windows/scanBreakdownModel.cpp
 
 HEADERS += \
@@ -99,6 +101,7 @@ HEADERS += \
    $$PWD/Include/Windows/aboutDialog.h \
    $$PWD/Include/Windows/breakdownDialog.h \
    $$PWD/Include/Windows/mainWindow.h \
+   $$PWD/Include/Windows/nullTaskbarButton.h \
    $$PWD/Include/Windows/scanBreakdownModel.h
 
 FORMS += \
@@ -129,7 +132,7 @@ RESOURCES += \
 DEFINES += \
    BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE
 
-win32:CONFIG(release, debug|release) {
+win32: CONFIG(release, debug|release) {
    DEFINES += \
       _WIN32_WINNT=0x0601 \
       NOMINMAX
@@ -139,7 +142,7 @@ win32:CONFIG(release, debug|release) {
       -lOle32
 }
 
-win32:CONFIG(debug, debug|release) {
+win32: CONFIG(debug, debug|release) {
    DEFINES += \
       _WIN32_WINNT=0x0601 \
       NOMINMAX
@@ -149,12 +152,12 @@ win32:CONFIG(debug, debug|release) {
       -lOle32
 }
 
-unix:CONFIG(release, debug|release) {
+unix: CONFIG(release, debug|release) {
    LIBS += \
       -lstdc++fs
 }
 
-unix:CONFIG(debug, debug|release) {
+unix: CONFIG(debug, debug|release) {
    QMAKE_CXXFLAGS += --coverage
    QMAKE_LFLAGS += --coverage
    LIBS += \

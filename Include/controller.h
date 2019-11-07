@@ -272,7 +272,10 @@ class Controller
         const NodeSelectorType& nodeSelector,
         const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& callback);
 
-    void ComputeProgress(const ScanningProgress& progress);
+    void WriteProgressToStatusBar(const ScanningProgress& progress);
+
+    template <typename ButtonType>
+    void UpdateIconProgress(ButtonType& button, const ScanningProgress& progress);
 
     void OnScanComplete(
         const Settings::VisualizationParameters& parameters, const ScanningProgress& progress,

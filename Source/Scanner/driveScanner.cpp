@@ -2,8 +2,6 @@
 
 #include "Visualizations/precisePoint.h"
 
-#include <iostream>
-
 #include <QMessageBox>
 
 void DriveScanner::HandleProgressUpdates()
