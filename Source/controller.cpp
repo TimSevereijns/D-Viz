@@ -20,12 +20,10 @@
 #include <QCursor>
 
 #if defined(Q_OS_WIN)
+#include "Scanner/Monitor/windowsFileMonitor.h"
+
 #include <QWinTaskbarButton>
 #include <QWinTaskbarProgress>
-#endif // Q_OS_WIN
-
-#if defined(Q_OS_WIN)
-#include "Scanner/Monitor/windowsFileMonitor.h"
 #elif defined(Q_OS_LINUX)
 #include "Scanner/Monitor/linuxFileMonitor.h"
 #include "Windows/nullTaskbarButton.h"

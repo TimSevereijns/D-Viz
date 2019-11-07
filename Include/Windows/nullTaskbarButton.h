@@ -28,7 +28,7 @@ struct NullTaskbarButton
     void setWindow(QWindow*) const
     {
     }
-    
+
   private:
     static std::shared_ptr<NullProgress> s_progress;
 };
