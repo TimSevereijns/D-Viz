@@ -275,7 +275,7 @@ class Controller
     void WriteProgressToStatusBar(const ScanningProgress& progress);
 
     template <typename ButtonType>
-    void UpdateIconProgress(ButtonType& button, const ScanningProgress& progress);
+    void ReportProgressToTaskbar(ButtonType& button, const ScanningProgress& progress);
 
     void OnScanComplete(
         const Settings::VisualizationParameters& parameters, const ScanningProgress& progress,

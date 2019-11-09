@@ -22,11 +22,10 @@ namespace
     std::uintmax_t ComputeBytesInRow(
         const std::vector<Tree<VizBlock>::Node*>& row, const std::uintmax_t candidateSize)
     {
-        auto sumOfFileSizes = std::accumulate(
-            std::begin(row), std::end(row),
-            std::uintmax_t{ 0 }, [](const auto runningTotal, const auto* node) noexcept {
-                return runningTotal + (*node)->file.size;
-            });
+        auto sumOfFileSizes = std::accumulate(std::begin(row), std::end(row), std::uintmax_t{ 0 }, [
+        ](const auto runningTotal, const auto* node) noexcept {
+            return runningTotal + (*node)->file.size;
+        });
 
         sumOfFileSizes += candidateSize;
 
@@ -54,6 +53,7 @@ namespace
 
         auto widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MaxPadding);
         auto finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPaddingPerSide);
+
         if (finalBlockWidth < 0.0) {
             finalBlockWidth = blockWidthPlusPadding * Visualization::PaddingRatio;
             widthPaddingPerSide =
@@ -102,6 +102,7 @@ namespace
 
         auto depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MaxPadding);
         auto finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPaddingPerSide);
+
         if (finalBlockDepth < 0) {
             finalBlockDepth = blockDepthPlusPadding * Visualization::PaddingRatio;
             depthPaddingPerSide =
@@ -123,7 +124,7 @@ namespace
                             std::abs(finalBlockDepth) };
 
         const auto additionalCoverage = blockDepthPlusPadding / land.GetDepth();
-        Expects(additionalCoverage);
+        Expects(additionalCoverage > 0.0);
 
         return additionalCoverage;
     }
@@ -132,10 +133,9 @@ namespace
 Block SquarifiedTreeMap::ComputeRemainingArea(const Block& block)
 {
     const auto& originOfNextRow = block.GetNextRowOrigin();
+    const auto& originOfNextChild = block.ComputeNextChildOrigin();
 
     const PrecisePoint nearCorner{ originOfNextRow.x(), originOfNextRow.y(), originOfNextRow.z() };
-
-    const auto& originOfNextChild = block.ComputeNextChildOrigin();
 
     const PrecisePoint farCorner{ originOfNextChild.x() + block.GetWidth(), originOfNextChild.y(),
                                   originOfNextChild.z() - block.GetDepth() };
@@ -151,7 +151,7 @@ Block SquarifiedTreeMap::ComputeRemainingArea(const Block& block)
 
 double SquarifiedTreeMap::ComputeShortestEdgeOfRemainingBounds(const VizBlock& node)
 {
-    const Block remainingRealEstate = ComputeRemainingArea(node.block);
+    const auto remainingRealEstate = ComputeRemainingArea(node.block);
     const auto shortestEdge = std::min(
         std::abs(remainingRealEstate.GetDepth()), std::abs(remainingRealEstate.GetWidth()));
 
@@ -180,10 +180,9 @@ double SquarifiedTreeMap::ComputeWorstAspectRatio(
 
     Expects(largestNodeInBytes > 0);
 
-    const auto updateOffset{ false };
-    const std::uintmax_t bytesInRow = ComputeBytesInRow(row, candidateSize);
-    const Block rowBounds = CalculateRowBounds(bytesInRow, parentNode, updateOffset);
-
+    const auto updateOffset = false;
+    const auto bytesInRow = ComputeBytesInRow(row, candidateSize);
+    const auto rowBounds = CalculateRowBounds(bytesInRow, parentNode, updateOffset);
     const auto totalRowArea = std::abs(rowBounds.GetWidth() * rowBounds.GetDepth());
 
     const auto largestArea =
@@ -302,11 +301,9 @@ Block SquarifiedTreeMap::CalculateRowBounds(
     const double parentArea = parentBlock.GetWidth() * parentBlock.GetDepth();
     const double remainingArea = std::abs(remainingLand.GetWidth() * remainingLand.GetDepth());
     const double remainingBytes = (remainingArea / parentArea) * parentNode.file.size;
-
     const double rowToParentRatio = bytesInRow / remainingBytes;
 
     const auto& originOfNextRow = parentBlock.GetNextRowOrigin();
-
     const PrecisePoint nearCorner{ originOfNextRow.x(), originOfNextRow.y(), originOfNextRow.z() };
 
     Block rowRealEstate;
@@ -316,7 +313,6 @@ Block SquarifiedTreeMap::CalculateRowBounds(
 
         if (updateOffset) {
             const PrecisePoint nextRowOffset{ rowRealEstate.GetWidth(), 0.0, 0.0 };
-
             parentNode.block.SetNextRowOrigin(nearCorner + nextRowOffset);
         }
     } else {
@@ -326,7 +322,6 @@ Block SquarifiedTreeMap::CalculateRowBounds(
 
         if (updateOffset) {
             const PrecisePoint nextRowOffset{ 0.0, 0.0, -rowRealEstate.GetDepth() };
-
             parentNode.block.SetNextRowOrigin(nearCorner + nextRowOffset);
         }
     }
@@ -345,10 +340,8 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
 
     const std::uintmax_t bytesInRow = ComputeBytesInRow(row, /*candidateSize =*/0);
 
-    Block land = CalculateRowBounds(
-        bytesInRow, row.front()->GetParent()->GetData(),
-        /*updateOffset =*/true);
-
+    constexpr auto updateOffset = true;
+    Block land = CalculateRowBounds(bytesInRow, row.front()->GetParent()->GetData(), updateOffset);
     Expects(land.HasVolume());
 
     const auto nodeCount = row.size();
@@ -394,24 +387,22 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
 
     m_fileTree = theTree;
 
-    Stopwatch<std::chrono::milliseconds>(
-        [&]() { VisualizationModel::SortNodes(*m_fileTree); },
-        [](const auto& elapsed, const auto& units) noexcept {
-            spdlog::get(Constants::Logging::DefaultLog)
-                ->info(fmt::format("Sorted tree in: {} {}", elapsed.count(), units));
-        });
+    Stopwatch<std::chrono::milliseconds>([&]() { VisualizationModel::SortNodes(*m_fileTree); }, [
+    ](const auto& elapsed, const auto& units) noexcept {
+        spdlog::get(Constants::Logging::DefaultLog)
+            ->info(fmt::format("Sorted tree in: {} {}", elapsed.count(), units));
+    });
 
     m_fileTree->GetRoot()->GetData().block =
         Block{ PrecisePoint{}, static_cast<double>(Constants::Visualization::RootBlockWidth),
                static_cast<double>(Constants::Visualization::BlockHeight),
                static_cast<double>(Constants::Visualization::RootBlockDepth) };
 
-    Stopwatch<std::chrono::milliseconds>(
-        [&]() { SquarifyRecursively(*m_fileTree->GetRoot()); },
-        [](const auto& elapsed, const auto& units) noexcept {
-            spdlog::get(Constants::Logging::DefaultLog)
-                ->info(fmt::format("Visualization Generated in: {} {}", elapsed.count(), units));
-        });
+    Stopwatch<std::chrono::milliseconds>([&]() { SquarifyRecursively(*m_fileTree->GetRoot()); }, [
+    ](const auto& elapsed, const auto& units) noexcept {
+        spdlog::get(Constants::Logging::DefaultLog)
+            ->info(fmt::format("Visualization Generated in: {} {}", elapsed.count(), units));
+    });
 
     m_hasDataBeenParsed = true;
 }

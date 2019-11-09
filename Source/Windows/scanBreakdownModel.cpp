@@ -41,7 +41,7 @@ QVariant ScanBreakdownModel::data(const QModelIndex& index, int role) const
         return {};
     }
 
-    const auto& data = m_fileTypeVector[index.row()];
+    const auto& data = m_fileTypeVector[static_cast<std::size_t>(index.row())];
 
     if (role == Qt::DisplayRole) {
         return index.column() == 0 ? QString::fromStdWString(data.fileExtension)

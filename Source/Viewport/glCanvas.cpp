@@ -694,7 +694,7 @@ void GLCanvas::SelectNodeViaRay(const QPoint& rayOrigin)
 
 void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
 {
-    constexpr auto movingAverageWindowSize{ 64 };
+    constexpr auto movingAverageWindowSize = 64;
     if (m_frameTimeDeque.size() > movingAverageWindowSize) {
         m_frameTimeDeque.pop_front();
     }
@@ -703,13 +703,13 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
     m_frameTimeDeque.emplace_back(static_cast<int>(elapsedTime.count()));
 
     const auto total = std::accumulate(
-        std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0ull,
+        std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0,
         [](const auto runningTotal, const auto frameTime) noexcept {
             return runningTotal + frameTime;
         });
 
     Expects(m_frameTimeDeque.empty() == false);
-    const auto averageFrameTime = total / m_frameTimeDeque.size();
+    const auto averageFrameTime = total / static_cast<int>(m_frameTimeDeque.size());
 
     const auto label = L"D-Viz @ " + std::to_wstring(averageFrameTime) + L" \xB5s / frame";
     m_mainWindow.setWindowTitle(QString::fromStdWString(label));

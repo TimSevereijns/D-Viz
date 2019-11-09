@@ -12,8 +12,8 @@
 #include <spdlog/spdlog.h>
 
 #ifdef Q_OS_WIN
-#include <Objbase.h>
 #include <ShlObj.h>
+#include <objbase.h>
 #endif
 
 #ifdef Q_OS_LINUX

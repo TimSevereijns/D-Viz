@@ -20,10 +20,10 @@
 #include <QCursor>
 
 #if defined(Q_OS_WIN)
-#include "Scanner/Monitor/windowsFileMonitor.h"
-
 #include <QWinTaskbarButton>
 #include <QWinTaskbarProgress>
+
+#include "Scanner/Monitor/windowsFileMonitor.h"
 #elif defined(Q_OS_LINUX)
 #include "Scanner/Monitor/linuxFileMonitor.h"
 #include "Windows/nullTaskbarButton.h"
@@ -203,7 +203,7 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
 
     const auto progressHandler = [&, button](const ScanningProgress& progress) {
         WriteProgressToStatusBar(progress);
-        UpdateIconProgress(*button, progress);
+        ReportProgressToTaskbar(*button, progress);
     };
 
     const auto completionHandler =
@@ -619,7 +619,7 @@ void Controller::RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVect
 }
 
 template <typename ButtonType>
-void Controller::UpdateIconProgress(ButtonType& button, const ScanningProgress& progress)
+void Controller::ReportProgressToTaskbar(ButtonType& button, const ScanningProgress& progress)
 {
     IgnoreUnused(button, progress);
 

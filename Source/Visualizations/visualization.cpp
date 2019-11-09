@@ -286,24 +286,20 @@ namespace
                 spdlog::get(Constants::Logging::FilesystemLog)
                     ->info(fmt::format("Create: {}", event.path.string()));
                 break;
-
             case FileEventType::DELETED:
                 spdlog::get(Constants::Logging::FilesystemLog)
                     ->info(fmt::format("Deleted: {}", event.path.string()));
                 break;
-
             case FileEventType::TOUCHED:
                 spdlog::get(Constants::Logging::FilesystemLog)
                     ->info(fmt::format("Modified: {}", event.path.string()));
                 break;
-
             case FileEventType::RENAMED:
                 spdlog::get(Constants::Logging::FilesystemLog)
                     ->info(fmt::format("Renamed: {}", event.path.string()));
                 break;
-
             default:
-                std::abort();
+                GSL_ASSUME(false);
         }
     }
 } // namespace

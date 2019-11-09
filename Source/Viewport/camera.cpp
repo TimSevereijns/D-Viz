@@ -10,7 +10,6 @@ namespace
 {
     void NormalizeAngles(double& horizontalAngle, double& verticalAngle) noexcept
     {
-        // Calculate floating point remainder:
         horizontalAngle = std::fmod(horizontalAngle, 360.0);
 
         // Ensure all values are positive:
@@ -18,7 +17,7 @@ namespace
             horizontalAngle += 360.0;
         }
 
-        const double maxVertical{ 90.0 };
+        constexpr auto maxVertical = 90.0;
 
         if (verticalAngle > maxVertical) {
             verticalAngle = maxVertical;
@@ -56,6 +55,7 @@ QMatrix4x4 Camera::GetOrientation() const
     QMatrix4x4 orientation;
     orientation.rotate(static_cast<float>(m_verticalAngle), 1, 0, 0);
     orientation.rotate(static_cast<float>(m_horizontalAngle), 0, 1, 0);
+
     return orientation;
 }
 
@@ -74,19 +74,18 @@ void Camera::LookAt(const QVector3D& point)
     QVector3D direction = point - m_position;
     direction.normalize();
 
-    m_verticalAngle =
-        static_cast<double>(std::asin(-direction.y())) * Constants::Math::RadiansToDegrees;
+    const auto verticalAngle = static_cast<double>(std::asin(-direction.y()));
+    m_verticalAngle = verticalAngle * Constants::Math::RadiansToDegrees;
 
-    m_horizontalAngle = static_cast<double>(std::atan2(direction.x(), -direction.z())) *
-                        Constants::Math::RadiansToDegrees;
+    const auto horizontalAngle = static_cast<double>(std::atan2(direction.x(), -direction.z()));
+    m_horizontalAngle = horizontalAngle * Constants::Math::RadiansToDegrees;
 
     NormalizeAngles(m_horizontalAngle, m_verticalAngle);
 }
 
 QVector3D Camera::Forward() const
 {
-    const QVector4D forwardVector = GetOrientation().inverted() * QVector4D{ 0, 0, -1, 1 };
-    return QVector3D{ forwardVector };
+    return QVector3D{ GetOrientation().inverted() * QVector4D{ 0, 0, -1, 1 } };
 }
 
 QVector3D Camera::Backward() const
@@ -96,8 +95,7 @@ QVector3D Camera::Backward() const
 
 QVector3D Camera::Right() const
 {
-    const QVector4D rightVector = GetOrientation().inverted() * QVector4D{ 1, 0, 0, 1 };
-    return QVector3D{ rightVector };
+    return QVector3D{ GetOrientation().inverted() * QVector4D{ 1, 0, 0, 1 } };
 }
 
 QVector3D Camera::Left() const
@@ -107,8 +105,7 @@ QVector3D Camera::Left() const
 
 QVector3D Camera::Up() const
 {
-    const QVector4D upVector = GetOrientation().inverted() * QVector4D{ 0, 1, 0, 1 };
-    return QVector3D{ upVector };
+    return QVector3D{ GetOrientation().inverted() * QVector4D{ 0, 1, 0, 1 } };
 }
 
 QVector3D Camera::Down() const
@@ -128,6 +125,7 @@ QMatrix4x4 Camera::GetViewMatrix() const
 {
     QMatrix4x4 matrix = GetOrientation();
     matrix.translate(-m_position);
+
     return matrix;
 }
 
@@ -141,7 +139,7 @@ Camera::Unproject(const QPoint& point, float viewDepth, const QMatrix4x4& modelM
 {
     const auto modelViewProjectionMatrix = GetProjectionMatrix() * GetViewMatrix() * modelMatrix;
 
-    bool wasMatrixInvertible = false;
+    auto wasMatrixInvertible = false;
     const QMatrix4x4 inverseMatrix = modelViewProjectionMatrix.inverted(&wasMatrixInvertible);
 
     if (!wasMatrixInvertible) {
@@ -149,11 +147,12 @@ Camera::Unproject(const QPoint& point, float viewDepth, const QMatrix4x4& modelM
         return {};
     }
 
-    const float x =
-        2.0f * (point.x() - m_viewport.x()) / static_cast<float>(m_viewport.width()) - 1;
-    const float y =
-        2.0f * (point.y() - m_viewport.y()) / static_cast<float>(m_viewport.height()) - 1;
-    const float z = 2.0f * viewDepth - 1.0f;
+    const auto viewportWidth = static_cast<float>(m_viewport.width());
+    const auto viewportHeight = static_cast<float>(m_viewport.height());
+
+    const auto x = 2.0f * (point.x() - m_viewport.x()) / viewportWidth - 1;
+    const auto y = 2.0f * (point.y() - m_viewport.y()) / viewportHeight - 1;
+    const auto z = 2.0f * viewDepth - 1.0f;
 
     const QVector3D viewportPoint{ x, y, z };
     const QVector3D unprojectedPoint = inverseMatrix.map(viewportPoint);
