@@ -15,4 +15,17 @@ SOURCES += \
 
 LIBS += -L$$DESTDIR -lD-Viz
 
-RC_ICONS += D-Viz.ico
+win32: RC_ICONS += Icons/Windows/D-Viz.ico
+
+unix {
+    icon32.files = Icons/Linux/32x32/D-Viz.png
+    icon32.path = /usr/share/icons/hicolor/32x32/apps
+    icon64.files = Icons/Linux/64x64/D-Viz.png
+    icon64.path = /usr/share/icons/hicolor/64x64/apps
+    icon128.files = Icons/Linux/128x128/D-Viz.png
+    icon128.path = /usr/share/icons/hicolor/128x128/apps
+    icon256.files = Icons/Linux/256x256/D-Viz.png
+    icon256.path = /usr/share/icons/hicolor/256x256/apps
+
+    INSTALLS += icon32 icon64 icon128 icon256
+}
