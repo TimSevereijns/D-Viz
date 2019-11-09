@@ -15,4 +15,4 @@ SOURCES += \
 
 LIBS += -L$$DESTDIR -lD-Viz
 
-RC_ICONS += D-Viz.ico
+RC_ICONS += Icons/Windows/D-Viz.ico

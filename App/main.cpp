@@ -10,7 +10,10 @@ int main(int argc, char* argv[])
     Bootstrapper::InitializeLogs();
 
     QApplication application{ argc, argv };
-    application.setWindowIcon(QIcon{ "D-Viz.ico" });
+
+#if defined(Q_OS_WIN)
+    application.setWindowIcon(QIcon{ "Icons/Windows/D-Viz.ico" });
+#endif
 
     Controller controller{};
     controller.LaunchUI();
