@@ -37,72 +37,61 @@ void LinuxFileMonitor::Start(
 
 void LinuxFileMonitor::InitializeInotify()
 {
-    if (pipe2(m_stopPipeFileDescriptor, O_NONBLOCK) == -1) {
-        const std::string lastError = strerror(errno);
-        const auto message = "Can't initialize stop pipe! " + lastError + ".";
-        throw std::runtime_error(message);
-    }
-
-    m_inotifyFileDescriptor = inotify_init1(IN_NONBLOCK);
+    m_inotifyFileDescriptor = ::inotify_init1(IN_NONBLOCK);
     if (m_inotifyFileDescriptor == -1) {
-        const std::string lastError = strerror(errno);
-        const auto message = "Can't initialize inotify " + lastError + ".";
+        const std::string lastError = ::strerror(errno);
+        const auto message = "Couldn't initialize inotify " + lastError + ".";
         throw std::runtime_error(message);
     }
 
-    m_epollFileDescriptor = epoll_create1(0);
+    m_epollFileDescriptor = ::epoll_create1(0);
     if (m_epollFileDescriptor == -1) {
-        const std::string lastError = strerror(errno);
-        const auto message = "Can't initialize epoll " + lastError + ".";
+        const std::string lastError = ::strerror(errno);
+        const auto message = "Couldn't initialize epoll " + lastError + ".";
         throw std::runtime_error(message);
     }
 
     m_inotifyEpollEvent.events = EPOLLIN | EPOLLET;
     m_inotifyEpollEvent.data.fd = m_inotifyFileDescriptor;
 
-    auto epollResult = epoll_ctl(
+    auto epollResult = ::epoll_ctl(
         m_epollFileDescriptor, EPOLL_CTL_ADD, m_inotifyFileDescriptor, &m_inotifyEpollEvent);
 
     if (epollResult == -1) {
-        const std::string lastError = strerror(errno);
-        const auto message = "Can't inotify file descriptor to epoll. Error: " + lastError + ".";
+        const std::string lastError = ::strerror(errno);
+        const auto message =
+            "Couldn't add inotify file descriptor to epoll. Error: " + lastError + ".";
         throw std::runtime_error(message);
     }
 
-    m_stopPipeEpollEvent.events = EPOLLIN | EPOLLET;
-    m_stopPipeEpollEvent.data.fd = m_stopPipeFileDescriptor[m_pipeReadIndex];
-
-    epollResult = epoll_ctl(
-        m_epollFileDescriptor, EPOLL_CTL_ADD, m_stopPipeFileDescriptor[m_pipeReadIndex],
-        &m_stopPipeEpollEvent);
+    m_stopEventFileDescriptor = ::eventfd(0, EFD_NONBLOCK);
+    m_stopEpollEvent.data.fd = m_stopEventFileDescriptor;
+    m_stopEpollEvent.events = EPOLLIN | EPOLLET;
+    epollResult = ::epoll_ctl(
+        m_epollFileDescriptor, EPOLL_CTL_ADD, m_stopEventFileDescriptor, &m_stopEpollEvent);
 
     if (epollResult == -1) {
-        const std::string lastError = strerror(errno);
-        const auto message = "Can't add pipe filedescriptor to epoll!  Error: " + lastError + ".";
+        const std::string lastError = ::strerror(errno);
+        const auto message = "Couldn't add stop event to epoll. Error: " + lastError + ".";
         throw std::runtime_error(message);
     }
 }
 
 void LinuxFileMonitor::CleanUpInotify() noexcept
 {
-    epoll_ctl(m_epollFileDescriptor, EPOLL_CTL_DEL, m_inotifyFileDescriptor, nullptr);
-    epoll_ctl(
-        m_epollFileDescriptor, EPOLL_CTL_DEL, m_stopPipeFileDescriptor[m_pipeReadIndex], nullptr);
+    ::epoll_ctl(m_epollFileDescriptor, EPOLL_CTL_DEL, m_inotifyFileDescriptor, nullptr);
 
-    if (!close(m_inotifyFileDescriptor)) {
+    if (!::close(m_inotifyFileDescriptor)) {
         const auto lastError = errno;
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->error("Encountered an error closing inotify file descriptor. Error: {}.", lastError);
     }
 
-    if (!close(m_epollFileDescriptor)) {
+    if (!::close(m_epollFileDescriptor)) {
         const auto lastError = errno;
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->error("Encountered an error closing epoll file descriptor. Error: {}.", lastError);
     }
-
-    close(m_stopPipeFileDescriptor[m_pipeReadIndex]);
-    close(m_stopPipeFileDescriptor[m_pipeWriteIndex]);
 }
 
 void LinuxFileMonitor::RegisterWatchersRecursively(const std::filesystem::path& path)
@@ -147,11 +136,11 @@ void LinuxFileMonitor::RegisterWatcher(const std::filesystem::path& path)
     const auto absolutePath = std::filesystem::absolute(path);
 
     const int watchDescriptor =
-        inotify_add_watch(m_inotifyFileDescriptor, absolutePath.string().c_str(), IN_ALL_EVENTS);
+        ::inotify_add_watch(m_inotifyFileDescriptor, absolutePath.string().c_str(), IN_ALL_EVENTS);
 
     if (watchDescriptor == -1) {
         const auto lastError = errno;
-        const std::string errorMessage = strerror(lastError);
+        const std::string errorMessage = ::strerror(lastError);
         if (lastError == 28) {
             const auto message =
                 "Exceeded watch limit. Edit \"/proc/sys/fs/inotify/max_user_watches\" to increase "
@@ -176,7 +165,7 @@ void LinuxFileMonitor::AwaitNotification()
 {
     constexpr auto timeout = -1;
     const auto eventsRead =
-        epoll_wait(m_epollFileDescriptor, m_epollEvents, m_maxEpollEvents, timeout);
+        ::epoll_wait(m_epollFileDescriptor, m_epollEvents, m_maxEpollEvents, timeout);
 
     if (eventsRead == -1) {
         return;
@@ -185,11 +174,11 @@ void LinuxFileMonitor::AwaitNotification()
     ssize_t bytesRead = 0;
 
     for (auto i = 0; i < eventsRead; ++i) {
-        if (m_epollEvents[i].data.fd == m_stopPipeFileDescriptor[m_pipeReadIndex]) {
+        if (m_epollEvents[i].data.fd == m_stopEventFileDescriptor) {
             break;
         }
 
-        bytesRead = read(m_epollEvents[i].data.fd, m_eventBuffer.data(), m_eventBuffer.size());
+        bytesRead = ::read(m_epollEvents[i].data.fd, m_eventBuffer.data(), m_eventBuffer.size());
 
         if (bytesRead == -1) {
             const auto lastError = errno;
@@ -200,9 +189,9 @@ void LinuxFileMonitor::AwaitNotification()
                 break;
             }
         }
-    }
 
-    ProcessEvents(bytesRead);
+        ProcessEvents(bytesRead);
+    }
 }
 
 void LinuxFileMonitor::ProcessEvents(long bytesAvailable)
@@ -259,8 +248,7 @@ void LinuxFileMonitor::Stop()
 
     m_keepMonitoring.store(false);
 
-    constexpr std::array<std::uint8_t, 2> buffer = { 1, 0 };
-    write(m_stopPipeFileDescriptor[m_pipeWriteIndex], buffer.data(), buffer.size());
+    ::eventfd_write(m_stopEventFileDescriptor, 1);
 
     if (m_monitoringThread.joinable()) {
         m_monitoringThread.join();

@@ -22,7 +22,14 @@ void FileSystemObserver::StartMonitoring(const std::function<void(FileEvent&&)>&
         return;
     }
 
-    m_fileSystemMonitor->Start(m_rootPath, callback);
+    try {
+        m_fileSystemMonitor->Start(m_rootPath, callback);
+    } catch (const std::runtime_error& exception) {
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+        log->error(
+            "Encountered an error starting filesystem monitoring logic. Error: {}.",
+            exception.what());
+    }
 }
 
 void FileSystemObserver::StopMonitoring()

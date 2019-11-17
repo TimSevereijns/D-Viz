@@ -13,6 +13,7 @@
 #include <thread>
 
 #include <sys/epoll.h>
+#include <sys/eventfd.h>
 #include <sys/inotify.h>
 
 /**
@@ -70,17 +71,13 @@ class LinuxFileMonitor : public FileMonitorBase
 
     int m_inotifyFileDescriptor{ 0 };
     int m_epollFileDescriptor{ 0 };
-
-    int m_stopPipeFileDescriptor[2];
+    int m_stopEventFileDescriptor{ 0 };
 
     epoll_event m_inotifyEpollEvent;
-    epoll_event m_stopPipeEpollEvent;
+    epoll_event m_stopEpollEvent;
     epoll_event m_epollEvents[1024];
 
-    constexpr static int m_pipeReadIndex{ 0 };
-    constexpr static int m_pipeWriteIndex{ 0 };
     constexpr static int m_maxEpollEvents{ 10 };
-
     constexpr static int m_maxEvents{ 4096 };
     constexpr static int m_eventSize{ sizeof(inotify_event) };
 
