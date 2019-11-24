@@ -26,7 +26,7 @@ namespace Utilities
     }
 
     inline static Tree<VizBlock>::Node*
-    FindNodeUsingRelativePath(Tree<VizBlock>::Node* rootNode, const std::filesystem::path& path)
+    FindNodeViaRelativePath(Tree<VizBlock>::Node* rootNode, const std::filesystem::path& path)
     {
         if (path == ".") {
             return rootNode;
@@ -61,14 +61,12 @@ namespace Utilities
     }
 
     inline static Tree<VizBlock>::Node*
-    FindNodeViaPath(Tree<VizBlock>::Node* rootNode, const std::filesystem::path& path)
+    FindNodeViaAbsolutePath(Tree<VizBlock>::Node* rootNode, const std::filesystem::path& path)
     {
-        assert(rootNode->GetData().file.type == FileType::DIRECTORY);
-
         std::filesystem::path rootPath = rootNode->GetData().file.name;
         const auto relativePath = std::filesystem::relative(path, rootPath);
 
-        return FindNodeUsingRelativePath(rootNode, relativePath);
+        return FindNodeViaRelativePath(rootNode, relativePath);
     }
 
     inline static Tree<VizBlock>::Node* FindClosestNodeUsingRelativePath(

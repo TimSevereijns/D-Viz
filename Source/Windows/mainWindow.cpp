@@ -807,6 +807,17 @@ void MainWindow::ReloadVisualization()
     m_glCanvas->ReloadVisualization();
 }
 
+void MainWindow::DisplayErrorDialog(std::string_view message)
+{
+    QMessageBox messageBox;
+    messageBox.setIcon(QMessageBox::Warning);
+    messageBox.setStandardButtons(QMessageBox::Ok);
+    messageBox.setDefaultButton(QMessageBox::Ok);
+    messageBox.setText(message.data());
+
+    messageBox.exec();
+}
+
 void MainWindow::SetWaitCursor()
 {
     QApplication::setOverrideCursor(Qt::WaitCursor);

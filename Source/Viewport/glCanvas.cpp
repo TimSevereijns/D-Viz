@@ -703,8 +703,8 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
     m_frameTimeDeque.emplace_back(static_cast<int>(elapsedTime.count()));
 
     const auto total = std::accumulate(
-        std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque), 0,
-        [](const auto runningTotal, const auto frameTime) noexcept {
+        std::begin(m_frameTimeDeque), std::end(m_frameTimeDeque),
+        0, [](const auto runningTotal, const auto frameTime) noexcept {
             return runningTotal + frameTime;
         });
 
@@ -741,8 +741,15 @@ void GLCanvas::VisualizeFilesystemActivity()
             notification = m_controller.FetchFileModification();
         };
 
-        const auto* affectedNode = Utilities::FindNodeUsingRelativePath(
-            m_controller.GetTree().GetRoot(), notification->path);
+        Tree<VizBlock>::Node* affectedNode = nullptr;
+
+        if (notification->path.is_absolute()) {
+            affectedNode = Utilities::FindNodeViaAbsolutePath(
+                m_controller.GetTree().GetRoot(), notification->path);
+        } else {
+            affectedNode = Utilities::FindNodeViaRelativePath(
+                m_controller.GetTree().GetRoot(), notification->path);
+        }
 
         if (affectedNode == nullptr) {
             // @note Since files may have been created after the latest scan, it is possible for an

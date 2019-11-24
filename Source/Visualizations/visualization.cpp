@@ -630,7 +630,8 @@ void VisualizationModel::UpdateAffectedNodes(const FileEvent& event)
 
 void VisualizationModel::OnFileCreation(const FileEvent& event)
 {
-    auto* node = Utilities::FindNodeViaPath(m_fileTree->GetRoot(), event.path.parent_path());
+    auto* node =
+        Utilities::FindNodeViaAbsolutePath(m_fileTree->GetRoot(), event.path.parent_path());
 
     if (!node) {
         return;
@@ -646,7 +647,7 @@ void VisualizationModel::OnFileCreation(const FileEvent& event)
 
 void VisualizationModel::OnFileDeletion(const FileEvent& event)
 {
-    auto* node = Utilities::FindNodeViaPath(m_fileTree->GetRoot(), event.path);
+    auto* node = Utilities::FindNodeViaAbsolutePath(m_fileTree->GetRoot(), event.path);
 
     if (node) {
         node->DeleteFromTree();
@@ -657,7 +658,7 @@ void VisualizationModel::OnFileDeletion(const FileEvent& event)
 void VisualizationModel::OnFileModification(const FileEvent& event)
 {
     if (std::filesystem::is_regular_file(event.path)) {
-        auto* node = Utilities::FindNodeViaPath(m_fileTree->GetRoot(), event.path);
+        auto* node = Utilities::FindNodeViaAbsolutePath(m_fileTree->GetRoot(), event.path);
 
         if (node) {
             node->GetData().file.size = event.fileSize;
@@ -680,8 +681,8 @@ void VisualizationModel::UpdateAncestorSizes(Tree<VizBlock>::Node* node)
         if (parent) {
             const auto totalSize = std::accumulate(
                 Tree<VizBlock>::SiblingIterator{ parent->GetFirstChild() },
-                Tree<VizBlock>::SiblingIterator{}, std::uintmax_t{ 0 },
-                [](const auto runningTotal, const auto& node) noexcept {
+                Tree<VizBlock>::SiblingIterator{},
+                std::uintmax_t{ 0 }, [](const auto runningTotal, const auto& node) noexcept {
                     Expects(node->file.size > 0);
                     return runningTotal + node->file.size;
                 });

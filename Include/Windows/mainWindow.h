@@ -6,6 +6,8 @@
 #include <QMainWindow>
 #include <QMenu>
 
+#include <string_view>
+
 #include "HID/gamepad.h"
 #include "Viewport/glCanvas.h"
 #include "aboutDialog.h"
@@ -128,6 +130,8 @@ class MainWindow final : public QMainWindow
   private:
     bool AskUserToLimitFileSize(
         std::uintmax_t numberOfFilesScanned, Settings::VisualizationParameters parameters);
+
+    void DisplayErrorDialog(std::string_view message);
 
     void SetWaitCursor();
 
