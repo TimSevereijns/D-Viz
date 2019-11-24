@@ -629,16 +629,15 @@ void Controller::ReportProgressToTaskbar(ButtonType& button, const ScanningProgr
     const auto rootPath = m_model->GetRootPath();
     const auto doesPathRepresentEntireDrive{ rootPath == rootPath.root_path() };
 
+    QWinTaskbarProgress* const progressOverlay = button.progress();
+    progressOverlay->setVisible(true);
+
     if (doesPathRepresentEntireDrive) {
         const auto progressValue =
             (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
 
-        QWinTaskbarProgress* const progressOverlay = button.progress();
-        progressOverlay->setVisible(true);
         progressOverlay->setValue(static_cast<int>(100.0 * progressValue));
     } else {
-        QWinTaskbarProgress* const progressOverlay = button.progress();
-        progressOverlay->setVisible(true);
         progressOverlay->setMinimum(0);
         progressOverlay->setMaximum(0);
     }

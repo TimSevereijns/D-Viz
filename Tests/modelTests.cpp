@@ -454,4 +454,4 @@ void ModelTests::ApplyFileCreation()
     QVERIFY(nodeWasAdded == true);
 }
 
-REGISTER_TEST(ModelTests) // NOLINT
+REGISTER_TEST(ModelTests)

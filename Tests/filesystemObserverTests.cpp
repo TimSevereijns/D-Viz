@@ -52,4 +52,18 @@ void FilesystemObserverTests::MonitorDeletions()
     QCOMPARE(receivedNotifications.size(), 490ul);
 }
 
+void FilesystemObserverTests::HandleInvalidPath()
+{
+    std::vector<FileEvent> receivedNotifications;
+
+    const auto onNotifications = [&](FileEvent&& notification) {
+        receivedNotifications.emplace_back(std::move(notification));
+    };
+
+    FileSystemObserver observer{ std::make_unique<FileSystemMonitor>(), "" };
+    observer.StartMonitoring(onNotifications);
+
+    QVERIFY(observer.IsActive() == false);
+}
+
 REGISTER_TEST(FilesystemObserverTests);

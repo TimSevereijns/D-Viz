@@ -26,6 +26,11 @@ class FilesystemObserverTests : public QObject
      * @brief Monitors an actual directory on disk as the files it contains are deleted.
      */
     void MonitorDeletions();
+
+    /**
+     * @brief An invalid path should not start the monitor.
+     */
+    void HandleInvalidPath();
 };
 
 #endif // FILESYSTEMOBSERVERTESTS_H

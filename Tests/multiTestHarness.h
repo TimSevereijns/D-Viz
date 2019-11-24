@@ -33,7 +33,7 @@ namespace MultiTest
 
             const auto itr = testMap.find(testName);
             if (itr != std::end(testMap)) {
-                Expects(!"Test already registered under that name."); // NOLINT
+                Expects(false);
             }
 
             testMap.emplace(std::move(testName), std::make_unique<TestClassType>());
