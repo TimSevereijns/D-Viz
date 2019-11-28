@@ -179,7 +179,12 @@ void Controller::OnScanComplete(
     SaveScanMetadata(progress);
 
     m_view->OnScanCompleted();
-    m_model->StartMonitoringFileSystem();
+
+    try {
+        m_model->StartMonitoringFileSystem();
+    } catch (const std::exception& exception) {
+        m_view->DisplayErrorDialog(exception.what());
+    }
 
     AllowUserInteractionWithModel(true);
 }

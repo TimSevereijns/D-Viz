@@ -40,15 +40,13 @@ void LinuxFileMonitor::InitializeInotify()
     m_inotifyFileDescriptor = ::inotify_init1(IN_NONBLOCK);
     if (m_inotifyFileDescriptor == -1) {
         const std::string lastError = ::strerror(errno);
-        const auto message = "Couldn't initialize inotify " + lastError + ".";
-        throw std::runtime_error(message);
+        throw std::runtime_error("Couldn't initialize inotify " + lastError + ".");
     }
 
     m_epollFileDescriptor = ::epoll_create1(0);
     if (m_epollFileDescriptor == -1) {
         const std::string lastError = ::strerror(errno);
-        const auto message = "Couldn't initialize epoll " + lastError + ".";
-        throw std::runtime_error(message);
+        throw std::runtime_error("Couldn't initialize epoll " + lastError + ".");
     }
 
     m_inotifyEpollEvent.events = EPOLLIN | EPOLLET;
@@ -59,21 +57,20 @@ void LinuxFileMonitor::InitializeInotify()
 
     if (epollResult == -1) {
         const std::string lastError = ::strerror(errno);
-        const auto message =
-            "Couldn't add inotify file descriptor to epoll. Error: " + lastError + ".";
-        throw std::runtime_error(message);
+        throw std::runtime_error(
+            "Couldn't add inotify file descriptor to epoll. Error: " + lastError + ".");
     }
 
     m_stopEventFileDescriptor = ::eventfd(0, EFD_NONBLOCK);
     m_stopEpollEvent.data.fd = m_stopEventFileDescriptor;
     m_stopEpollEvent.events = EPOLLIN | EPOLLET;
+
     epollResult = ::epoll_ctl(
         m_epollFileDescriptor, EPOLL_CTL_ADD, m_stopEventFileDescriptor, &m_stopEpollEvent);
 
     if (epollResult == -1) {
         const std::string lastError = ::strerror(errno);
-        const auto message = "Couldn't add stop event to epoll. Error: " + lastError + ".";
-        throw std::runtime_error(message);
+        throw std::runtime_error("Couldn't add stop event to epoll. Error: " + lastError + ".");
     }
 }
 
@@ -135,30 +132,37 @@ void LinuxFileMonitor::RegisterWatcher(const std::filesystem::path& path)
 {
     const auto absolutePath = std::filesystem::absolute(path);
 
+    constexpr auto flags = IN_MODIFY | IN_IGNORED | IN_DELETE | IN_DELETE_SELF;
+
     const int watchDescriptor =
-        ::inotify_add_watch(m_inotifyFileDescriptor, absolutePath.string().c_str(), IN_ALL_EVENTS);
+        ::inotify_add_watch(m_inotifyFileDescriptor, absolutePath.string().c_str(), flags);
 
-    if (watchDescriptor == -1) {
-        const auto lastError = errno;
-        const std::string errorMessage = ::strerror(lastError);
-        if (lastError == 28) {
-            const auto message =
-                "Exceeded watch limit. Edit \"/proc/sys/fs/inotify/max_user_watches\" to increase "
-                "limit. Error: " +
-                errorMessage + ".";
-
-            throw std::runtime_error(message);
-        }
-
-        if (lastError == 2) {
-            return;
-        }
-
-        const auto message = "Failed to register watch. Error: " + errorMessage + ".";
-        throw std::runtime_error(message);
+    if (watchDescriptor != -1) {
+        m_watchDescriptorToPathMap.emplace(watchDescriptor, path);
     }
 
-    m_watchDescriptorToPathMap.emplace(watchDescriptor, path);
+    const auto lastError = errno;
+    const std::string errorMessage = ::strerror(lastError);
+
+    switch (lastError) {
+        case 2: {
+            return;
+        }
+        case 13: {
+            const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+            log->error("Denied permission to set watch on: {}.", absolutePath.string());
+
+            return;
+        }
+        case 28: {
+            throw std::runtime_error(
+                "Exceeded watch limit. Edit \"/proc/sys/fs/inotify/max_user_watches\" to increase "
+                "limit.");
+        }
+        default: {
+            throw std::runtime_error("Failed to register watch. Error: " + errorMessage + ".");
+        }
+    }
 }
 
 void LinuxFileMonitor::AwaitNotification()
