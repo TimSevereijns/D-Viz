@@ -15,6 +15,11 @@ SOURCES += \
 
 LIBS += -L$$DESTDIR -lD-Viz
 
+win32: CONFIG(release, debug|release) {
+    QMAKE_CXXFLAGS += /Zi
+    QMAKE_LFLAGS += /INCREMENTAL:NO /Debug
+}
+
 win32: RC_ICONS += Icons/Windows/D-Viz.ico
 
 unix {

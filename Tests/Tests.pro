@@ -30,3 +30,8 @@ SOURCES += \
    filesystemObserverTests.cpp \
    mainTest.cpp \
    modelTests.cpp
+
+win32: CONFIG(release, debug|release) {
+    QMAKE_CXXFLAGS += /Zi
+    QMAKE_LFLAGS += /INCREMENTAL:NO /Debug
+}
