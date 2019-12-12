@@ -4,7 +4,7 @@
 #include <QString>
 #include <QtTest>
 
-#include "mockFileMonitor.h"
+#include "Mocks/mockFileMonitor.h"
 #include "multiTestHarness.h"
 
 #include <Scanner/Monitor/fileChangeNotification.hpp>
@@ -92,9 +92,21 @@ class ModelTests : public QObject
     void ComputeBoundingBoxes();
 
     /**
-     * @brief FindNearestNode
+     * @brief Verifies that the correct node is found when the camera is in front of the targeted
+     * node.
      */
-    void FindNearestNode();
+    void FindNearestNodeFromFront();
+
+    /**
+     * @brief Verifies that the correct node is found when the camera is behind of the targeted
+     * node.
+     */
+    void FindNearestNodeFromBack();
+
+    /**
+     * @brief Verifies that the correct node is found when we specify a minimum file size.
+     */
+    void FindNearestNodeWithSizeLimitations();
 
     /**
      * @brief Verifies that file monitoring is correctly enabled and disabled.

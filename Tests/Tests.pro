@@ -20,10 +20,10 @@ HEADERS += \
    cameraTests.h \
    fileSizeLiterals.hpp \
    filesystemObserverTests.h \
-   mockFileMonitor.h \
    modelTests.h \
    multiTestHarness.h \
-   testUtilities.hpp
+   testUtilities.hpp \
+   Mocks\mockFileMonitor.h
 
 SOURCES += \
    cameraTests.cpp \

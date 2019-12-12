@@ -43,14 +43,14 @@ class Camera
      * @param[in] pitch           In degrees.
      * @param[in] yaw             In degrees.
      */
-    void SetOrientation(double pitch, double yaw);
+    void SetOrientation(double pitch, double yaw) noexcept;
 
     /**
      * @brief Retrieves the camera's current orientation matrix.
      *
      * @returns The current orientation of the camera; that is, pitch, roll, and yaw.
      */
-    QMatrix4x4 GetOrientation() const;
+    QMatrix4x4 GetOrientation() const noexcept;
 
     /**
      * @brief Offset the current camera orientation in terms of pitch and yaw.
@@ -67,7 +67,7 @@ class Camera
      *
      * @param[in] point           The point to be brought into view.
      */
-    void LookAt(const QVector3D& point);
+    void LookAt(const QVector3D& point) noexcept;
 
     /**
      * @brief Retrieves a vector pointing forward from the camera.
@@ -75,7 +75,7 @@ class Camera
      * @returns A vector that points forward relative to the current camera's position and
      * orientation.
      */
-    QVector3D Forward() const;
+    QVector3D Forward() const noexcept;
 
     /**
      * @brief Retrieves a vector pointing backswards from the camera.
@@ -83,7 +83,7 @@ class Camera
      * @returns A vector that points backwards relative to the current camera's position and
      * orientation.
      */
-    QVector3D Backward() const;
+    QVector3D Backward() const noexcept;
 
     /**
      * @brief Retrieves a vector pointing to the right of the camera.
@@ -91,7 +91,7 @@ class Camera
      * @returns A vector that points to the right relative to the current camera's position and
      * orientation.
      */
-    QVector3D Right() const;
+    QVector3D Right() const noexcept;
 
     /**
      * @brief Retrieves a vector pointing to the left of the camera.
@@ -99,14 +99,14 @@ class Camera
      * @returns A vector that points to the left relative to the current camera's position and
      * orientation.
      */
-    QVector3D Left() const;
+    QVector3D Left() const noexcept;
 
     /**
      * @brief Retrieves a vector pointing up from the camera.
      *
      * @returns A vector that points up relative to the current camera's position and orientation.
      */
-    QVector3D Up() const;
+    QVector3D Up() const noexcept;
 
     /**
      * @brief Retrieves a vector pointing down from the camera.
@@ -114,28 +114,28 @@ class Camera
      * @returns A vector that points down relative to the current camera's position and
      * orientation.
      */
-    QVector3D Down() const;
+    QVector3D Down() const noexcept;
 
     /**
      * @brief Retrieves the camera's current projection matrix.
      *
      * @returns The current projection matrix.
      */
-    QMatrix4x4 GetProjectionMatrix() const;
+    QMatrix4x4 GetProjectionMatrix() const noexcept;
 
     /**
      * @brief Retrieves the camera's current view matrix.
      *
      * @returns The current view matrix.
      */
-    QMatrix4x4 GetViewMatrix() const;
+    QMatrix4x4 GetViewMatrix() const noexcept;
 
     /**
      * @brief Retrieves the camera's projection-view matrix.
      *
      * @returns The projection matrix multiplied by the view matrix.
      */
-    QMatrix4x4 GetProjectionViewMatrix() const;
+    QMatrix4x4 GetProjectionViewMatrix() const noexcept;
 
     /**
      * @brief Translates a 2D point on the viewport into a 3D point at a specified distance
@@ -149,7 +149,8 @@ class Camera
      *
      * @returns A 3D point representing the 2D canvas coordinates in 3D world coordinates.
      */
-    QVector3D Unproject(const QPoint& point, float viewDepth, const QMatrix4x4& modelMatrix) const;
+    QVector3D Unproject(const QPoint& point, float viewDepth, const QMatrix4x4& modelMatrix) const
+        noexcept;
 
     /**
      * @brief Maps the 2D coordinates of the OpenGL Qt widget to the coordinates used by OpenGL.
@@ -161,7 +162,7 @@ class Camera
      *
      * @returns The converted point.
      */
-    QPoint MapToOpenGLViewport(const QPoint& widgetCoordinates) const;
+    QPoint MapToOpenGLViewport(const QPoint& widgetCoordinates) const noexcept;
 
     /**
      * @brief Sets the size of the OpenGL canvas viewport.
@@ -211,7 +212,7 @@ class Camera
      *
      * @returns A ray extending into the scene from the near plane to the far plane.
      */
-    Ray ShootRayIntoScene(const QPoint& widgetCoordinates) const;
+    Ray ShootRayIntoScene(const QPoint& widgetCoordinates) const noexcept;
 
     /**
      * @brief Determines whether a point is in front of the camera plane.
@@ -222,7 +223,7 @@ class Camera
      * that the near plane still lies a little bit in front of camera's actual position.
      * Returns false if the point lies behind the camera's near view plane.
      */
-    bool IsPointInFrontOfCamera(const QVector3D& point) const;
+    bool IsPointInFrontOfCamera(const QVector3D& point) const noexcept;
 
     /**
      * @brief Sets the near plane distance.
@@ -232,7 +233,7 @@ class Camera
      *
      * @param[in] nearPlane         The new plane distance.
      */
-    void SetNearPlane(float nearPlane);
+    void SetNearPlane(float nearPlane) noexcept;
 
     /**
      * @brief Retrieves the distance from the camera's focal plane to the near viewing plane.
@@ -246,7 +247,7 @@ class Camera
      *
      * @param[in] farPlane        The new plane distance.
      */
-    void SetFarPlane(float farPlane);
+    void SetFarPlane(float farPlane) noexcept;
 
     /**
      * @brief Retrieves the distance from the camera's focal plane to the far viewing plane.
@@ -263,10 +264,12 @@ class Camera
   private:
     QVector3D m_position;
 
+    QMatrix4x4 m_viewMatrix;
+
     QRect m_viewport;
 
-    double m_horizontalAngle{ 0.0 };
-    double m_verticalAngle{ 0.0 };
+    double m_yaw{ 0.0 };
+    double m_pitch{ 0.0 };
 
     int m_fieldOfView{ 45 };
 

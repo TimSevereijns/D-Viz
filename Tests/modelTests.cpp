@@ -63,7 +63,8 @@ namespace
 void ModelTests::initTestCase()
 {
     TestUtilities::UnzipTestData(
-        "../../Tests/Data/boost-asio.zip", std::filesystem::absolute("../../Tests/Sandbox"));
+        std::filesystem::absolute("../../Tests/Data/boost-asio.zip"),
+        std::filesystem::absolute("../../Tests/Sandbox"));
 
     const auto progressCallback = [&](const ScanningProgress& /*progress*/) {
         ++m_progressCallbackInvocations;
@@ -287,7 +288,7 @@ void ModelTests::ComputeBoundingBoxes()
     QCOMPARE(itr->GetData().block.GetHeight(), itr->GetData().boundingBox.GetHeight());
 }
 
-void ModelTests::FindNearestNode()
+void ModelTests::FindNearestNodeFromFront()
 {
     const std::wstring targetName = L"socket_ops.ipp";
 
@@ -298,12 +299,13 @@ void ModelTests::FindNearestNode()
     QVERIFY(targetNode != Tree<VizBlock>::LeafIterator{});
 
     const auto targetBlock = targetNode->GetData().block;
-    const auto x = static_cast<float>((targetBlock.GetOrigin().x() + targetBlock.GetWidth()) / 2.0);
-    const auto y = static_cast<float>((targetBlock.GetOrigin().y() + targetBlock.GetDepth()) / 2.0);
+    const auto x = static_cast<float>(targetBlock.GetOrigin().x() + targetBlock.GetWidth() / 2.0);
+    const auto y = static_cast<float>(targetBlock.GetOrigin().y() + targetBlock.GetHeight());
+    const auto z = static_cast<float>(targetBlock.GetOrigin().z() - targetBlock.GetDepth() / 2.0);
 
     Camera camera;
     camera.SetPosition(QVector3D{ -300, 300, 300 });
-    camera.LookAt(QVector3D{ x, y, 1 });
+    camera.LookAt(QVector3D{ x, y, z });
 
     const Ray ray{ camera.GetPosition(), camera.Forward() };
 
@@ -315,6 +317,70 @@ void ModelTests::FindNearestNode()
 
     const auto fileName = node->GetData().file.name + node->GetData().file.extension;
     QCOMPARE(fileName, targetName);
+}
+
+void ModelTests::FindNearestNodeFromBack()
+{
+    const std::wstring targetName = L"socket_ops.ipp";
+
+    const auto targetNode = std::find_if(
+        Tree<VizBlock>::LeafIterator{ m_tree->GetRoot() }, Tree<VizBlock>::LeafIterator{},
+        [&](const auto& node) { return (node->file.name + node->file.extension) == targetName; });
+
+    QVERIFY(targetNode != Tree<VizBlock>::LeafIterator{});
+
+    const auto targetBlock = targetNode->GetData().block;
+    const auto x = static_cast<float>(targetBlock.GetOrigin().x() + targetBlock.GetWidth() / 2.0);
+    const auto y = static_cast<float>(targetBlock.GetOrigin().y() + targetBlock.GetHeight());
+    const auto z = static_cast<float>(targetBlock.GetOrigin().z() - targetBlock.GetDepth() / 2.0);
+
+    Camera camera;
+    camera.SetPosition(QVector3D{ 300, 300, -300 });
+    camera.LookAt(QVector3D{ x, y, z });
+
+    const Ray ray{ camera.GetPosition(), camera.Forward() };
+
+    Settings::VisualizationParameters parameters;
+    parameters.minimumFileSize = 0;
+
+    const auto* node = m_model->FindNearestIntersection(camera, ray, parameters);
+    QVERIFY(node != nullptr);
+
+    const auto fileName = node->GetData().file.name + node->GetData().file.extension;
+    QCOMPARE(fileName, targetName);
+}
+
+void ModelTests::FindNearestNodeWithSizeLimitations()
+{
+    const std::wstring targetName = L"socket_ops.ipp";
+
+    const auto targetNode = std::find_if(
+        Tree<VizBlock>::LeafIterator{ m_tree->GetRoot() }, Tree<VizBlock>::LeafIterator{},
+        [&](const auto& node) { return (node->file.name + node->file.extension) == targetName; });
+
+    QVERIFY(targetNode != Tree<VizBlock>::LeafIterator{});
+
+    const auto targetBlock = targetNode->GetData().block;
+    const auto x = static_cast<float>(targetBlock.GetOrigin().x() + targetBlock.GetWidth() / 2.0);
+    const auto y = static_cast<float>(targetBlock.GetOrigin().y() + targetBlock.GetHeight());
+    const auto z = static_cast<float>(targetBlock.GetOrigin().z() - targetBlock.GetDepth() / 2.0);
+
+    Camera camera;
+    camera.SetPosition(QVector3D{ -300, 300, 300 });
+    camera.LookAt(QVector3D{ x, y, z });
+
+    const Ray ray{ camera.GetPosition(), camera.Forward() };
+
+    using namespace Literals::Numeric::Binary;
+
+    Settings::VisualizationParameters parameters;
+    parameters.minimumFileSize = 128_KiB;
+
+    const auto* node = m_model->FindNearestIntersection(camera, ray, parameters);
+    QVERIFY(node != nullptr);
+
+    const auto fileName = node->GetData().file.name + node->GetData().file.extension;
+    QCOMPARE(targetNode->GetParent()->GetData().file.name, fileName);
 }
 
 void ModelTests::ToggleFileMonitoring()

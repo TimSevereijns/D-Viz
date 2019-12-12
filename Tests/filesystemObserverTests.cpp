@@ -22,7 +22,8 @@ namespace
 void FilesystemObserverTests::initTestCase()
 {
     TestUtilities::UnzipTestData(
-        "../../Tests/Data/boost-asio.zip", std::filesystem::absolute("../../Tests/Sandbox"));
+        std::filesystem::absolute("../../Tests/Data/boost-asio.zip"),
+        std::filesystem::absolute("../../Tests/Sandbox"));
 }
 
 void FilesystemObserverTests::cleanupTestCase()
