@@ -14,6 +14,10 @@ struct NullProgress
     void reset() const
     {
     }
+
+    void hide() const
+    {
+    }
 };
 
 struct NullTaskbarButton
