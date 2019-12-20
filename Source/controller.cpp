@@ -162,8 +162,8 @@ void Controller::OnScanComplete(
     const Settings::VisualizationParameters& parameters, const ScanningProgress& progress,
     const std::shared_ptr<Tree<VizBlock>>& scanningResults)
 {
-    WriteProgressToStatusBar(progress);
     LogScanCompletion(progress);
+    ReportProgressToStatusBar(progress);
 
     m_view->AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
 
@@ -191,6 +191,11 @@ void Controller::OnScanComplete(
 
 void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
 {
+    if (parameters.rootDirectory.empty() ||
+        !ScanningWorker::ShouldProcess(parameters.rootDirectory)) {
+        return;
+    }
+
     AllowUserInteractionWithModel(false);
 
     m_model = std::make_unique<SquarifiedTreeMap>(
@@ -200,6 +205,7 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
 
     const auto spaceInfo = std::filesystem::space(parameters.rootDirectory);
     LogDiskStatistics(spaceInfo);
+
     m_occupiedDiskSpace = spaceInfo.capacity - spaceInfo.free;
     Expects(m_occupiedDiskSpace > 0u);
 
@@ -207,7 +213,7 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
     button->setWindow(m_view->windowHandle());
 
     const auto progressHandler = [&, button](const ScanningProgress& progress) {
-        WriteProgressToStatusBar(progress);
+        ReportProgressToStatusBar(progress);
         ReportProgressToTaskbar(*button, progress);
     };
 
@@ -218,6 +224,7 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
             OnScanComplete(parameters, progress, scanningResults);
 
             button->progress()->reset();
+            button->progress()->hide();
             button.reset();
         };
 
@@ -266,7 +273,7 @@ QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
     return Constants::Colors::FileGreen;
 }
 
-void Controller::WriteProgressToStatusBar(const ScanningProgress& progress)
+void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
 {
     Expects(m_occupiedDiskSpace > 0u);
 
@@ -540,16 +547,16 @@ void Controller::SearchTreeMap(
     ClearHighlightedNodes(deselectionCallback);
 
     const auto selector = [&] {
-        Stopwatch<std::chrono::milliseconds>(
-            [&]() noexcept {
-                m_model->HighlightMatchingFileNames(
-                    searchQuery, m_settingsManager.GetVisualizationParameters(), shouldSearchFiles,
-                    shouldSearchDirectories);
-            },
-            [](const auto& elapsed, const auto& units) noexcept {
-                spdlog::get(Constants::Logging::DefaultLog)
-                    ->info(fmt::format("Search Completed in: {} {}", elapsed.count(), units));
-            });
+        const auto timingResults = Stopwatch<std::chrono::milliseconds>([&]() noexcept {
+            m_model->HighlightMatchingFileNames(
+                searchQuery, m_settingsManager.GetVisualizationParameters(), shouldSearchFiles,
+                shouldSearchDirectories);
+        });
+
+        spdlog::get(Constants::Logging::DefaultLog)
+            ->info(fmt::format(
+                "Search Completed in: {} {}", timingResults.GetElapsedTime().count(),
+                timingResults.GetUnitsAsCharacterArray()));
     };
 
     ProcessHighlightedNodes(selector, selectionCallback);

@@ -33,6 +33,33 @@ class CameraTests : public QObject
     void OffsetPosition();
 
     /**
+     * @brief Verify that the forward vector is the opposite of the backwards vector.
+     */
+    void ForwardIsOppositeOfBackward();
+
+    /**
+     * @brief Verify that the left vector is the opposite of the right vector.
+     */
+    void LeftIsOppositeOfRight();
+
+    /**
+     * @brief Verify that the up vector is the opposite of the down vector.
+     */
+    void UpIsOppositeOfDown();
+
+    /**
+     * @brief Verify that a point in front of the camera's near plan is indeed detected as being in
+     * front of the camera.
+     */
+    void PointIsInFrontOfCamera();
+
+    /**
+     * @brief Verify that a point not in front of the camera's near plan is indeed detected as not
+     * being in front of the camera.
+     */
+    void PointIsNotInFrontOfCamera();
+
+    /**
      * @brief Verify that a ray can be emitted from the camera.
      */
     void PickingRay();

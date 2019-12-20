@@ -70,14 +70,7 @@ namespace
     /**
      * @returns True if the directory should be processed.
      */
-    bool ShouldProcess(const std::filesystem::path& path) noexcept
-    {
-#if defined(Q_OS_WIN)
-        return !Scanner::IsReparsePoint(path);
-#elif defined(Q_OS_LINUX)
-        return !std::filesystem::is_symlink(path);
-#endif // Q_OS_LINUX
-    }
+
 } // namespace
 
 ScanningWorker::ScanningWorker(const ScanningParameters& parameters, ScanningProgress& progress)
@@ -85,6 +78,15 @@ ScanningWorker::ScanningWorker(const ScanningParameters& parameters, ScanningPro
       m_progress{ progress },
       m_fileTree{ CreateTreeAndRootNode(parameters.path) }
 {
+}
+
+bool ScanningWorker::ShouldProcess(const std::filesystem::path& path) noexcept
+{
+#if defined(Q_OS_WIN)
+    return !Scanner::IsReparsePoint(path);
+#elif defined(Q_OS_LINUX)
+    return !std::filesystem::is_symlink(path);
+#endif // Q_OS_LINUX
 }
 
 void ScanningWorker::ProcessFile(
@@ -133,9 +135,9 @@ void ScanningWorker::ProcessDirectory(
             return;
         }
 
-        FileInfo directoryInfo{ path.filename().wstring(),
-                                /* extension = */ L"", ScanningWorker::SIZE_UNDEFINED,
-                                FileType::DIRECTORY };
+        constexpr auto emptyExtension = L"";
+        FileInfo directoryInfo{ path.filename().wstring(), emptyExtension,
+                                ScanningWorker::SIZE_UNDEFINED, FileType::DIRECTORY };
 
         std::unique_lock<decltype(m_mutex)> lock{ m_mutex };
         auto* const lastChild = node.AppendChild(VizBlock{ std::move(directoryInfo) });

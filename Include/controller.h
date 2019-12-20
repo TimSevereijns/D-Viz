@@ -232,8 +232,7 @@ class Controller
     const Settings::Manager& GetSettingsManager() const;
 
     /**
-     * @brief GetRootPath
-     * @return
+     * @returns The filesystem path belonging to the root of the visualization.
      */
     std::filesystem::path GetRootPath() const;
 
@@ -253,16 +252,23 @@ class Controller
     std::optional<FileEvent> FetchFileModification();
 
     /**
-     * @brief DetermineNodeColor
-     * @param node
-     * @return
+     * @brief Determines the color a given node should be.
+     *
+     * @param[in] node              The node whose color is to be determined.
+     *
+     * @returns The appropriate color.
      */
     QVector3D DetermineNodeColor(const Tree<VizBlock>::Node& node) const;
 
     /**
-     * @brief RegisterNodeColor
-     * @param node
-     * @param color
+     * @brief Records the temporary color of a node.
+     *
+     * This function should only be called to register colors that are not the "normal" color for a
+     * particular node, given the current visualization settings. Instead, this function is to be
+     * used to register the fact that a node might be highlight as part of a search, for instance.
+     *
+     * @param[in] node              The node whose color is to be registered.
+     * @param[in] color             The color that the node is to be assigned.
      */
     void RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVector3D& color);
 
@@ -272,7 +278,7 @@ class Controller
         const NodeSelectorType& nodeSelector,
         const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& callback);
 
-    void WriteProgressToStatusBar(const ScanningProgress& progress);
+    void ReportProgressToStatusBar(const ScanningProgress& progress);
 
     template <typename ButtonType>
     void ReportProgressToTaskbar(ButtonType& button, const ScanningProgress& progress);

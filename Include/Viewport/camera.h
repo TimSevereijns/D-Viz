@@ -264,8 +264,6 @@ class Camera
   private:
     QVector3D m_position;
 
-    QMatrix4x4 m_viewMatrix;
-
     QRect m_viewport;
 
     double m_yaw{ 0.0 };

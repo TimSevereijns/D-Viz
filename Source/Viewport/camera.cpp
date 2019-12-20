@@ -8,21 +8,21 @@
 
 namespace
 {
-    void NormalizeAngles(double& horizontalAngle, double& verticalAngle) noexcept
+    void NormalizeAngles(double& yaw, double& pitch) noexcept
     {
-        horizontalAngle = std::fmod(horizontalAngle, 360.0);
+        yaw = std::fmod(yaw, 360.0);
 
         // Ensure all values are positive:
-        if (horizontalAngle < 0.0) {
-            horizontalAngle += 360.0;
+        if (yaw < 0.0) {
+            yaw += 360.0;
         }
 
         constexpr auto maxVertical = 90.0;
 
-        if (verticalAngle > maxVertical) {
-            verticalAngle = maxVertical;
-        } else if (verticalAngle < -maxVertical) {
-            verticalAngle = -maxVertical;
+        if (pitch > maxVertical) {
+            pitch = maxVertical;
+        } else if (pitch < -maxVertical) {
+            pitch = -maxVertical;
         }
     }
 } // namespace

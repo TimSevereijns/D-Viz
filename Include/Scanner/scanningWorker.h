@@ -61,6 +61,8 @@ class ScanningWorker final : public QObject
 
     ScanningWorker(const ScanningParameters& parameters, ScanningProgress& progress);
 
+    static bool ShouldProcess(const std::filesystem::path& path) noexcept;
+
   public slots:
 
     /**

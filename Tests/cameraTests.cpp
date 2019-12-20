@@ -12,9 +12,9 @@ void CameraTests::cleanupTestCase()
 
 void CameraTests::SettingPosition()
 {
-    const QVector3D position{ 100, 100, 100 };
-
     Camera camera;
+
+    const QVector3D position{ 100, 100, 100 };
     camera.SetPosition(position);
 
     QCOMPARE(camera.GetPosition(), position);
@@ -22,24 +22,88 @@ void CameraTests::SettingPosition()
 
 void CameraTests::OffsetPosition()
 {
-    const QVector3D position{ 100, 100, 100 };
-
     Camera camera;
+
+    const QVector3D position{ 100, 100, 100 };
     camera.SetPosition(position);
+
     camera.OffsetPosition({ 10, 10, 10 });
 
     const auto expectedPosition = QVector3D{ 110, 110, 110 };
     QCOMPARE(camera.GetPosition(), expectedPosition);
 }
 
-void CameraTests::PickingRay()
+void CameraTests::ForwardIsOppositeOfBackward()
 {
-    const QVector3D position{ 100, 100, 100 };
-
     Camera camera;
+
+    const QVector3D position{ 0, 0, 0 };
     camera.SetPosition(position);
 
-    QRect viewport{ 0, 0, 100, 100 };
+    camera.LookAt(QVector3D{ 100, 100, 100 });
+
+    const auto forwards = camera.Forward();
+    QCOMPARE(forwards, -camera.Backward());
+}
+
+void CameraTests::LeftIsOppositeOfRight()
+{
+    Camera camera;
+
+    const QVector3D position{ 0, 0, 0 };
+    camera.SetPosition(position);
+
+    camera.LookAt(QVector3D{ -100, -100, -100 });
+
+    const auto left = camera.Left();
+    QCOMPARE(left, -camera.Right());
+}
+
+void CameraTests::UpIsOppositeOfDown()
+{
+    Camera camera;
+
+    const QVector3D position{ 0, 0, 0 };
+    camera.SetPosition(position);
+
+    camera.LookAt(QVector3D{ -100, 100, -100 });
+
+    const auto up = camera.Up();
+    QCOMPARE(up, -camera.Down());
+}
+
+void CameraTests::PointIsInFrontOfCamera()
+{
+    Camera camera;
+
+    const QVector3D position{ 100, 100, 100 };
+    camera.SetPosition(position);
+
+    camera.LookAt(QVector3D{ 200, 100, 100 });
+
+    QVERIFY(camera.IsPointInFrontOfCamera(QVector3D{ 128, 100, 100 }));
+}
+
+void CameraTests::PointIsNotInFrontOfCamera()
+{
+    Camera camera;
+
+    const QVector3D position{ 100, 100, 100 };
+    camera.SetPosition(position);
+
+    camera.LookAt(QVector3D{ 99, 100, 100 });
+
+    QCOMPARE(camera.IsPointInFrontOfCamera(QVector3D{ 128, 100, 100 }), false);
+}
+
+void CameraTests::PickingRay()
+{
+    Camera camera;
+
+    const QVector3D position{ 100, 100, 100 };
+    camera.SetPosition(position);
+
+    const QRect viewport{ 0, 0, 100, 100 };
     camera.SetViewport(viewport);
 
     camera.SetNearPlane(1.0f);
