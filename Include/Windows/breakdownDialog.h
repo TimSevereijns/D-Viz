@@ -54,6 +54,9 @@ class BreakdownDialog final : public QDialog
   protected:
     void resizeEvent(QResizeEvent* event) override;
 
+  private slots:
+    void DisplayContextMenu(const QPoint& point);
+
   private:
     void AdjustColumnWidthsToFitViewport();
 

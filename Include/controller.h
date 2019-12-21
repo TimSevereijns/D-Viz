@@ -93,11 +93,11 @@ class Controller
     /**
      * @brief Highlights all nodes in the tree whose extension matches that of the passed in node.
      *
-     * @param[in] sampleNode      The node whose extension is to be highlighted.
+     * @param[in] extension       The extension to be highlighted.
      * @param[in] callback        UI callback to highlight matching nodes on the canvas.
      */
     void HighlightAllMatchingExtensions(
-        const Tree<VizBlock>::Node& sampleNode,
+        const std::wstring& extension,
         const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& callback);
 
     /**

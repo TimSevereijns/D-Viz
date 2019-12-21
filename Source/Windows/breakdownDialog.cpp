@@ -16,6 +16,12 @@ BreakdownDialog::BreakdownDialog(QWidget* parent)
 {
     m_ui.setupUi(this);
 
+    m_ui.tableView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    connect(
+        m_ui.tableView, SIGNAL(customContextMenuRequested(QPoint)),
+        SLOT(DisplayContextMenu(QPoint)));
+
     ReloadData();
 }
 
@@ -32,23 +38,23 @@ void BreakdownDialog::ReloadData()
 
     const auto& parameters = controller.GetSettingsManager().GetVisualizationParameters();
 
-    Stopwatch<std::chrono::milliseconds>(
-        [&] {
-            for (const auto& node : tree) {
-                const auto fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
-                if (fileIsTooSmall) {
-                    continue;
-                }
-
-                if (node->file.type != FileType::DIRECTORY) {
-                    m_model.insert(node);
-                }
+    const auto stopwatch = Stopwatch<std::chrono::milliseconds>([&] {
+        for (const auto& node : tree) {
+            const auto fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
+            if (fileIsTooSmall) {
+                continue;
             }
-        },
-        [](const auto& elapsed, const auto& units) noexcept {
-            spdlog::get(Constants::Logging::DefaultLog)
-                ->info(fmt::format("Built break-down model in: {} {}", elapsed.count(), units));
-        });
+
+            if (node->file.type != FileType::DIRECTORY) {
+                m_model.insert(node);
+            }
+        }
+    });
+
+    spdlog::get(Constants::Logging::DefaultLog)
+        ->info(fmt::format(
+            "Built break-down model in: {} {}", stopwatch.GetElapsedTime().count(),
+            stopwatch.GetUnitsAsCharacterArray()));
 
     m_model.FinalizeInsertion(controller.GetSettingsManager());
 
@@ -82,4 +88,32 @@ void BreakdownDialog::AdjustColumnWidthsToFitViewport()
 void BreakdownDialog::resizeEvent(QResizeEvent* /*event*/)
 {
     AdjustColumnWidthsToFitViewport();
+}
+
+void BreakdownDialog::DisplayContextMenu(const QPoint& point)
+{
+    QMenu menu;
+
+    QModelIndex index = m_ui.tableView->indexAt(point);
+
+    const auto variant = m_proxyModel.index(index.row(), 0).data(Qt::UserRole);
+    const auto extension = variant.toString();
+
+    const auto unhighlightCallback = [&](auto& nodes) {
+        m_mainWindow.GetCanvas().RestoreHighlightedNodes(nodes);
+    };
+
+    const auto highlightCallback = [&](auto& nodes) {
+        m_mainWindow.GetCanvas().HighlightNodes(nodes);
+    };
+
+    menu.addAction("Highlight All \"" + extension + "\" Files", [&] {
+        auto& controller = m_mainWindow.GetController();
+
+        controller.ClearHighlightedNodes(unhighlightCallback);
+        controller.HighlightAllMatchingExtensions(extension.toStdWString(), highlightCallback);
+    });
+
+    const QPoint globalPoint = m_ui.tableView->viewport()->mapToGlobal(point);
+    menu.exec(globalPoint);
 }

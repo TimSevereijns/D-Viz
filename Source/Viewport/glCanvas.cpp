@@ -443,7 +443,10 @@ void GLCanvas::ShowGamepadContextMenu()
 
             m_gamepadContextMenu->AddEntry(message, [=] {
                 m_controller.ClearHighlightedNodes(unhighlightCallback);
-                m_controller.HighlightAllMatchingExtensions(*selectedNode, highlightCallback);
+
+                m_controller.HighlightAllMatchingExtensions(
+                    selectedNode->GetData().file.extension, highlightCallback);
+
                 m_controller.SelectNode(*selectedNode, selectionCallback);
             });
         }
@@ -499,7 +502,10 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
             menu.addAction(message, [&] {
                 m_controller.ClearHighlightedNodes(unhighlightCallback);
-                m_controller.HighlightAllMatchingExtensions(*selectedNode, highlightCallback);
+
+                m_controller.HighlightAllMatchingExtensions(
+                    selectedNode->GetData().file.extension, highlightCallback);
+
                 m_controller.SelectNode(*selectedNode, selectionCallback);
             });
         }

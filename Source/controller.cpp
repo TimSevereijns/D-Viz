@@ -518,15 +518,13 @@ void Controller::HighlightDescendants(
 }
 
 void Controller::HighlightAllMatchingExtensions(
-    const Tree<VizBlock>::Node& sampleNode,
+    const std::wstring& extension,
     const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& callback)
 {
     Expects(m_model);
 
     const auto& parameters = m_settingsManager.GetVisualizationParameters();
-    const auto selector = [&] {
-        m_model->HighlightMatchingFileExtensions(sampleNode.GetData().file.extension, parameters);
-    };
+    const auto selector = [&] { m_model->HighlightMatchingFileExtensions(extension, parameters); };
 
     ProcessHighlightedNodes(selector, callback);
 }
@@ -547,7 +545,7 @@ void Controller::SearchTreeMap(
     ClearHighlightedNodes(deselectionCallback);
 
     const auto selector = [&] {
-        const auto timingResults = Stopwatch<std::chrono::milliseconds>([&]() noexcept {
+        const auto stopwatch = Stopwatch<std::chrono::milliseconds>([&]() noexcept {
             m_model->HighlightMatchingFileNames(
                 searchQuery, m_settingsManager.GetVisualizationParameters(), shouldSearchFiles,
                 shouldSearchDirectories);
@@ -555,8 +553,8 @@ void Controller::SearchTreeMap(
 
         spdlog::get(Constants::Logging::DefaultLog)
             ->info(fmt::format(
-                "Search Completed in: {} {}", timingResults.GetElapsedTime().count(),
-                timingResults.GetUnitsAsCharacterArray()));
+                "Search Completed in: {} {}", stopwatch.GetElapsedTime().count(),
+                stopwatch.GetUnitsAsCharacterArray()));
     };
 
     ProcessHighlightedNodes(selector, selectionCallback);
