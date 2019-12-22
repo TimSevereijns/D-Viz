@@ -92,9 +92,7 @@ void BreakdownDialog::resizeEvent(QResizeEvent* /*event*/)
 
 void BreakdownDialog::DisplayContextMenu(const QPoint& point)
 {
-    QMenu menu;
-
-    QModelIndex index = m_ui.tableView->indexAt(point);
+    const QModelIndex index = m_ui.tableView->indexAt(point);
 
     const auto variant = m_proxyModel.index(index.row(), 0).data(Qt::UserRole);
     const auto extension = variant.toString();
@@ -106,6 +104,8 @@ void BreakdownDialog::DisplayContextMenu(const QPoint& point)
     const auto highlightCallback = [&](auto& nodes) {
         m_mainWindow.GetCanvas().HighlightNodes(nodes);
     };
+
+    QMenu menu;
 
     menu.addAction("Highlight All \"" + extension + "\" Files", [&] {
         auto& controller = m_mainWindow.GetController();
