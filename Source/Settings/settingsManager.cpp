@@ -191,7 +191,7 @@ namespace Settings
         m_shouldMonitorFileSystem = isEnabled;
     }
 
-    bool Manager::ShouldBlockBeProcessed(const VizBlock& block)
+    bool Manager::IsBlockVisible(const VizBlock& block)
     {
         if (block.file.size < m_visualizationParameters.minimumFileSize) {
             return false;

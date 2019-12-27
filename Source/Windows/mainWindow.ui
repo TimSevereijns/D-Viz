@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
@@ -252,17 +252,20 @@
         <double>0.001000000000000</double>
        </property>
        <property name="value">
-        <double>0.002000000000000</double>
+        <double>0.000000000000000</double>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QCheckBox" name="attachLightToCameraCheckBox">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="text">
         <string>Attach Primary Light to Camera</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </item>

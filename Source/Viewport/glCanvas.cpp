@@ -61,8 +61,7 @@ namespace
                                    ? L"Extensionless"
                                    : L"\"" + node.GetData().file.extension + L"\"";
 
-        const auto label = L"Highlight All " + extension + L" Files";
-        return QString::fromStdWString(label);
+        return QString::fromStdWString(L"Highlight All " + extension + L" Files");
     }
 } // namespace
 
@@ -73,6 +72,9 @@ GLCanvas::GLCanvas(Controller& controller, QWidget* parent)
 {
     m_camera.SetPosition(QVector3D{ 500, 100, 0 });
     m_camera.SetFarPlane(10'000.0f);
+
+    // @note The first light is the one most associated with the "sun."
+    m_lights.front().position = QVector3D{ 0, 400, 0 };
 
     setFocusPolicy(Qt::StrongFocus);
 
@@ -731,7 +733,7 @@ void GLCanvas::VisualizeFilesystemActivity()
     Assets::Treemap* treemap = notification ? GetAsset<Assets::Tag::Treemap>() : nullptr;
 
     const auto markNode = [&](const Tree<VizBlock>::Node& node, const QVector3D& color) {
-        if (!m_controller.GetSettingsManager().ShouldBlockBeProcessed(node.GetData())) {
+        if (!m_controller.GetSettingsManager().IsBlockVisible(node.GetData())) {
             return;
         }
 

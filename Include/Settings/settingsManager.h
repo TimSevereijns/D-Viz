@@ -151,10 +151,9 @@ namespace Settings
         bool ShouldMonitorFileSystem() const;
 
         /**
-         * @brief ShouldNodeBeIgnored
-         * @return
+         * @returns True if the block in question is visible to the end-user.
          */
-        bool ShouldBlockBeProcessed(const VizBlock& block);
+        bool IsBlockVisible(const VizBlock& block);
 
         /**
          * @brief Determines the appropriate color for the file based on the user-configurable color
@@ -266,12 +265,12 @@ namespace Settings
         double m_mouseSensitivity{ 0.20 };
 
         double m_ambientLightCoefficient{ 0.2 };
-        double m_lightAttenuationFactor{ 0.002 };
+        double m_lightAttenuationFactor{ 0.000 };
         double m_materialShininess{ 80.0 };
 
         int m_fieldOfView{ 45 };
 
-        bool m_isLightAttachedToCamera{ true };
+        bool m_isLightAttachedToCamera{ false };
         bool m_shouldSearchDirectories{ false };
         bool m_shouldSearchFiles{ true };
         bool m_showCascadeSplits{ false };
