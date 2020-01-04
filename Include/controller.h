@@ -177,18 +177,6 @@ class Controller
     void PrintMetadataToStatusBar();
 
     /**
-     * @brief Converts the given size of the file from bytes to the most human readable units.
-     *
-     * @param[in] sizeInBytes     The size (in bytes) to be converted to a more appropriate unit.
-     * @param[in] prefix          The desired prefix.
-     *
-     * @returns A std::pair encapsulating the converted file size, and corresponding unit readout
-     * string.
-     */
-    static std::pair<double, std::wstring>
-    ConvertFileSizeToNumericPrefix(std::uintmax_t sizeInBytes, Constants::FileSize::Prefix prefix);
-
-    /**
      * @brief Computes the absolute file path of the selected node by traveling up tree.
      *
      * @param[in] node            The selected node.
@@ -217,7 +205,7 @@ class Controller
     /**
      * @brief Saves the results of the scan.
      *
-     * @param[in] progress        @see ScanningProgress
+     * @param[in] progress        See ScanningProgress
      */
     void SaveScanMetadata(const ScanningProgress& progress);
 

@@ -1,9 +1,6 @@
 #include "Windows/scanBreakdownModel.h"
-#include "Settings/settingsManager.h"
-#include "controller.h"
 
 #include <gsl/gsl_assert>
-#include <spdlog/fmt/fmt.h>
 
 #include <iterator>
 
@@ -14,7 +11,7 @@ int ScanBreakdownModel::rowCount(const QModelIndex& /*parent*/) const
 
 int ScanBreakdownModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return 2;
+    return 3;
 }
 
 QVariant ScanBreakdownModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -29,6 +26,8 @@ QVariant ScanBreakdownModel::headerData(int section, Qt::Orientation orientation
                 return QString{ "File Type" };
             case 1:
                 return QString{ "Cumulative Size" };
+            case 2:
+                return QString{ "Item Count" };
         }
     }
 
@@ -44,17 +43,24 @@ QVariant ScanBreakdownModel::data(const QModelIndex& index, int role) const
     const auto& data = m_fileTypeVector[static_cast<std::size_t>(index.row())];
 
     if (role == Qt::DisplayRole) {
-        return index.column() == 0 ? QString::fromStdWString(data.fileExtension)
-                                   : QString::fromStdWString(data.formattedSize);
+        switch (index.column()) {
+            case 0:
+                return QString::fromStdWString(data.fileExtension);
+            case 1:
+                return QString::fromStdWString(data.formattedSize);
+            case 2:
+                return QString::fromStdWString(data.formattedCount);
+        }
     }
 
     if (role == Qt::UserRole) {
-        if (index.column() == 0) {
-            return QString::fromStdWString(data.fileExtension);
-        }
-
-        if (index.column() == 1) {
-            return static_cast<qulonglong>(data.totalSize);
+        switch (index.column()) {
+            case 0:
+                return QString::fromStdWString(data.fileExtension);
+            case 1:
+                return data.totalSize;
+            case 2:
+                return data.itemCount;
         }
     }
 
@@ -69,9 +75,13 @@ void ScanBreakdownModel::insert(const Tree<VizBlock>::Node& node)
     }
 
     if (file.extension.empty()) {
-        m_fileTypeMap[L"No Extension"] += file.size;
+        auto& fileType = m_fileTypeMap[L"No Extension"];
+        fileType.totalSize += file.size;
+        fileType.count += 1;
     } else {
-        m_fileTypeMap[file.extension] += file.size;
+        auto& fileType = m_fileTypeMap[file.extension];
+        fileType.totalSize += file.size;
+        fileType.count += 1;
     }
 }
 
@@ -81,21 +91,17 @@ void ScanBreakdownModel::ClearData()
     m_fileTypeVector.clear();
 }
 
-void ScanBreakdownModel::FinalizeInsertion(const Settings::Manager& settingsManager)
+void ScanBreakdownModel::FinalizeInsertion(Constants::FileSize::Prefix sizePrefix)
 {
     Expects(!m_fileTypeMap.empty() && m_fileTypeVector.empty());
 
-    const auto prefix = settingsManager.GetActiveNumericPrefix();
-
     std::transform(
         std::begin(m_fileTypeMap), std::end(m_fileTypeMap), std::back_inserter(m_fileTypeVector),
-        [&](const auto& extensionAndTotalSize) {
-            const auto& [fileExtension, totalSize] = extensionAndTotalSize;
-            const auto [prefixedSize, prefixUnits] =
-                Controller::ConvertFileSizeToNumericPrefix(totalSize, prefix);
+        [&](const auto& entry) {
+            const auto& extension = entry.first;
+            const auto& itemCount = entry.second.count;
+            const auto& totalSize = entry.second.totalSize;
 
-            return RowModel{ fileExtension,
-                             fmt::format(L"{:03.2f} {}", prefixedSize, prefixUnits).c_str(),
-                             static_cast<std::uintmax_t>(totalSize) };
+            return RowModel{ extension, sizePrefix, totalSize, itemCount };
         });
 }

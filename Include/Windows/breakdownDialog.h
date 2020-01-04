@@ -20,18 +20,25 @@ class ScanBreakdownFilterProxyModel final : public QSortFilterProxyModel
         const auto lhsData = sourceModel()->data(lhs, Qt::UserRole);
         const auto rhsData = sourceModel()->data(rhs, Qt::UserRole);
 
-        if (lhs.column() == 0) {
-            const auto lhsExtension = lhsData.value<QString>();
-            const auto rhsExtension = rhsData.value<QString>();
+        switch (lhs.column()) {
+            case 0: {
+                const auto lhsExtension = lhsData.value<QString>();
+                const auto rhsExtension = rhsData.value<QString>();
 
-            return lhsExtension < rhsExtension;
-        }
+                return lhsExtension < rhsExtension;
+            }
+            case 1: {
+                const auto lhsSize = lhsData.value<std::uintmax_t>();
+                const auto rhsSize = rhsData.value<std::uintmax_t>();
 
-        if (lhs.column() == 1) {
-            const auto lhsSize = lhsData.value<std::uintmax_t>();
-            const auto rhsSize = rhsData.value<std::uintmax_t>();
+                return lhsSize < rhsSize;
+            }
+            case 2: {
+                const auto lhsSize = lhsData.value<std::uintmax_t>();
+                const auto rhsSize = rhsData.value<std::uintmax_t>();
 
-            return lhsSize < rhsSize;
+                return lhsSize < rhsSize;
+            }
         }
 
         Expects(false);

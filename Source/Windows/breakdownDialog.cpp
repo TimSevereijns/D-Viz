@@ -56,11 +56,11 @@ void BreakdownDialog::ReloadData()
             "Built break-down model in: {} {}", stopwatch.GetElapsedTime().count(),
             stopwatch.GetUnitsAsCharacterArray()));
 
-    m_model.FinalizeInsertion(controller.GetSettingsManager());
+    m_model.FinalizeInsertion(controller.GetSettingsManager().GetActiveNumericPrefix());
 
     m_proxyModel.setSourceModel(&m_model);
-    m_ui.tableView->setModel(&m_proxyModel);
 
+    m_ui.tableView->setModel(&m_proxyModel);
     m_ui.tableView->setSelectionMode(QAbstractItemView::SingleSelection);
     m_ui.tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_ui.tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -81,8 +81,9 @@ void BreakdownDialog::AdjustColumnWidthsToFitViewport()
 
     const auto tableWidth = m_ui.tableView->width() - headerWidth - scrollbarWidth;
 
-    m_ui.tableView->setColumnWidth(0, tableWidth / 2);
-    m_ui.tableView->setColumnWidth(1, tableWidth / 2);
+    m_ui.tableView->setColumnWidth(0, tableWidth / 3);
+    m_ui.tableView->setColumnWidth(1, tableWidth / 3);
+    m_ui.tableView->setColumnWidth(2, tableWidth / 3);
 }
 
 void BreakdownDialog::resizeEvent(QResizeEvent* /*event*/)
@@ -92,11 +93,6 @@ void BreakdownDialog::resizeEvent(QResizeEvent* /*event*/)
 
 void BreakdownDialog::DisplayContextMenu(const QPoint& point)
 {
-    const QModelIndex index = m_ui.tableView->indexAt(point);
-
-    const auto variant = m_proxyModel.index(index.row(), 0).data(Qt::UserRole);
-    const auto extension = variant.toString();
-
     const auto unhighlightCallback = [&](auto& nodes) {
         m_mainWindow.GetCanvas().RestoreHighlightedNodes(nodes);
     };
@@ -104,6 +100,11 @@ void BreakdownDialog::DisplayContextMenu(const QPoint& point)
     const auto highlightCallback = [&](auto& nodes) {
         m_mainWindow.GetCanvas().HighlightNodes(nodes);
     };
+
+    const QModelIndex index = m_ui.tableView->indexAt(point);
+
+    const auto extensionVariant = m_proxyModel.index(index.row(), 0).data(Qt::UserRole);
+    const auto extension = extensionVariant.toString();
 
     QMenu menu;
 

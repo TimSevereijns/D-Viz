@@ -22,9 +22,9 @@
 
 struct TreemapMetadata
 {
-    std::uintmax_t FileCount{ 0ull };
-    std::uintmax_t DirectoryCount{ 0ull };
-    std::uintmax_t TotalBytes{ 0ull };
+    std::uintmax_t FileCount{ 0 };
+    std::uintmax_t DirectoryCount{ 0 };
+    std::uintmax_t TotalBytes{ 0 };
 };
 
 /**
@@ -70,7 +70,7 @@ class VisualizationModel
      *
      * @param[in] camera          The camera from which the ray originated.
      * @param[in] ray             The picking ray.
-     * @param[in] parameters      @see VisualizationParameters. Used to prune disqualified nodes.
+     * @param[in] parameters      Used to prune disqualified nodes. @see VisualizationParameters.
      *
      * @returns A pointer to the TreeNode that was clicked on, and nullptr if no intersection
      * exists.
@@ -122,7 +122,7 @@ class VisualizationModel
     /**
      * @brief Sets treemap metadata.
      *
-     * @param[in] data
+     * @param[in] data              The data to be saved.
      */
     void SetTreemapMetadata(TreemapMetadata&& data);
 
@@ -133,7 +133,7 @@ class VisualizationModel
 
     /**
      * @brief HighlightNode
-     * @param node
+     * @param[in] node              The node to be highlighted.
      */
     void HighlightNode(const Tree<VizBlock>::Node* const node);
 
@@ -147,17 +147,17 @@ class VisualizationModel
     /**
      * @brief Highlights all descendents of the given node.
      *
-     * @param[in] node            The starting node.
-     * @param parameters          @see VisualizationParameters. Used to prune disqualified nodes.
+     * @param[in] root            The starting node.
+     * @param parameters          Used to prune disqualified nodes. @see VisualizationParameters.
      */
     void HighlightDescendants(
-        const Tree<VizBlock>::Node& node, const Settings::VisualizationParameters& parameters);
+        const Tree<VizBlock>::Node& root, const Settings::VisualizationParameters& parameters);
 
     /**
      * @brief Highlights all nodes that match the sample node's extension.
      *
      * @param[in] extension       The extension that should be highlighted.
-     * @param parameters
+     * @param[in] parameters      Used to prune disqualified nodes. @see VisualizationParameters.
      */
     void HighlightMatchingFileExtensions(
         const std::wstring& extension, const Settings::VisualizationParameters& parameters);
@@ -166,8 +166,8 @@ class VisualizationModel
      * @brief Highlights all nodes that match the search query, given the search parameters.
      *
      * @param[in] searchQuery              The raw search query.
-     * @param[in] parameters               @see VisualizationParameters. Used to prune
-     *                                     disqualified nodes.
+     * @param[in] parameters               Used to prune disqualified nodes. @see
+     *                                     VisualizationParameters.
      * @param[in] shouldSearchFiles        Pass in true to search files.
      * @param[in] shouldSearchDirectories  Pass in true to search directories.
      */
@@ -216,7 +216,7 @@ class VisualizationModel
     std::filesystem::path GetRootPath() const;
 
     /**
-     * @brief
+     * @brief Blocks thread until the next filesystem model change has been observed.
      */
     void WaitForNextModelChange();
 
@@ -252,7 +252,7 @@ class VisualizationModel
 
     // The tree is stored in a shared pointer so that it can be passed through the Qt
     // signaling framework; any type passed through it needs to be copy-constructible.
-    std::shared_ptr<Tree<VizBlock>> m_fileTree{ nullptr }; //< @todo Does this need a mutex?
+    std::shared_ptr<Tree<VizBlock>> m_fileTree{ nullptr }; ///< @todo Does this need a mutex?
 
     // While only a single node can be "selected" at any given time, multiple nodes can be
     // "highlighted." This vector tracks those highlighted nodes.

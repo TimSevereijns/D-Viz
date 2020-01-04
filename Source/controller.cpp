@@ -39,68 +39,6 @@ namespace
     using TaskbarButton = NullTaskbarButton;
 #endif // Q_OS_LINUX
 
-    constexpr const std::wstring_view bytesLabel{ L" bytes" };
-
-    /**
-     * @brief Converts bytes to binary prefix size and notation.
-     *
-     * @param[in] sizeInBytes
-     *
-     * @returns A pair containing the numeric file size, and the associated units.
-     */
-    std::pair<double, std::wstring> ConvertToBinaryPrefix(double sizeInBytes)
-    {
-        using namespace Literals::Numeric::Binary;
-
-        if (sizeInBytes < 1_KiB) {
-            return std::make_pair(sizeInBytes, std::wstring{ bytesLabel });
-        }
-
-        if (sizeInBytes < 1_MiB) {
-            return std::make_pair(sizeInBytes / 1_KiB, L" KiB");
-        }
-
-        if (sizeInBytes < 1_GiB) {
-            return std::make_pair(sizeInBytes / 1_MiB, L" MiB");
-        }
-
-        if (sizeInBytes < 1_TiB) {
-            return std::make_pair(sizeInBytes / 1_GiB, L" GiB");
-        }
-
-        return std::make_pair(sizeInBytes / 1_TiB, L" TiB");
-    }
-
-    /**
-     * @brief Converts bytes to decimal prefix size and notation.
-     *
-     * @param[in] sizeInBytes
-     *
-     * @returns A pair containing the numeric file size, and the associated units.
-     */
-    std::pair<double, std::wstring> ConvertToDecimalPrefix(double sizeInBytes)
-    {
-        using namespace Literals::Numeric::Decimal;
-
-        if (sizeInBytes < 1_KB) {
-            return std::make_pair(sizeInBytes, std::wstring{ bytesLabel });
-        }
-
-        if (sizeInBytes < 1_MB) {
-            return std::make_pair(sizeInBytes / 1_KB, L" KB");
-        }
-
-        if (sizeInBytes < 1_GB) {
-            return std::make_pair(sizeInBytes / 1_MB, L" MB");
-        }
-
-        if (sizeInBytes < 1_TB) {
-            return std::make_pair(sizeInBytes / 1_GB, L" GB");
-        }
-
-        return std::make_pair(sizeInBytes / 1_TB, L" TB");
-    }
-
     /**
      * @returns The full path to the JSON file that contains the color mapping.
      */
@@ -289,16 +227,16 @@ void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
 
         const auto message = fmt::format(
             L"Files Scanned: {}  |  {:03.2f}% Complete",
-            Utilities::StringifyWithDigitSeparators(filesScanned), fraction * 100);
+            Utilities::ToStringWithNumericGrouping(filesScanned), fraction * 100);
 
         m_view->SetStatusBarMessage(message);
     } else {
         const auto prefix = m_settingsManager.GetActiveNumericPrefix();
-        const auto [size, units] = Controller::ConvertFileSizeToNumericPrefix(sizeInBytes, prefix);
+        const auto [size, units] = Utilities::ConvertFileSizeToNumericPrefix(sizeInBytes, prefix);
 
         const auto message = fmt::format(
             L"Files Scanned: {}  |  {:03.2f} {} and counting...",
-            Utilities::StringifyWithDigitSeparators(filesScanned), size, units);
+            Utilities::ToStringWithNumericGrouping(filesScanned), size, units);
 
         m_view->SetStatusBarMessage(message);
     }
@@ -365,8 +303,8 @@ void Controller::SelectNodeAndUpdateStatusBar(
 
     const auto fileSize = node->file.size;
     const auto prefix = m_settingsManager.GetActiveNumericPrefix();
-    const auto [prefixedSize, units] = ConvertFileSizeToNumericPrefix(fileSize, prefix);
-    const auto isInBytes = (units == bytesLabel);
+    const auto [prefixedSize, units] = Utilities::ConvertFileSizeToNumericPrefix(fileSize, prefix);
+    const auto isInBytes = (units == Utilities::Detail::bytesLabel);
 
     const auto path = Controller::ResolveCompleteFilePath(node).wstring();
 
@@ -426,8 +364,9 @@ void Controller::DisplaySelectionDetails()
     }
 
     const auto prefix = m_settingsManager.GetActiveNumericPrefix();
-    const auto [prefixedSize, units] = ConvertFileSizeToNumericPrefix(totalBytes, prefix);
-    const auto isInBytes = (units == bytesLabel);
+    const auto [prefixedSize, units] =
+        Utilities::ConvertFileSizeToNumericPrefix(totalBytes, prefix);
+    const auto isInBytes = (units == Utilities::Detail::bytesLabel);
 
     std::wstringstream message;
     message.imbue(std::locale{ "" });
@@ -554,21 +493,6 @@ void Controller::SearchTreeMap(
     };
 
     ProcessHighlightedNodes(selector, selectionCallback);
-}
-
-std::pair<double, std::wstring> Controller::ConvertFileSizeToNumericPrefix(
-    std::uintmax_t sizeInBytes, Constants::FileSize::Prefix prefix)
-{
-    switch (prefix) {
-        case Constants::FileSize::Prefix::BINARY: {
-            return ConvertToBinaryPrefix(sizeInBytes);
-        }
-        case Constants::FileSize::Prefix::DECIMAL: {
-            return ConvertToDecimalPrefix(sizeInBytes);
-        }
-    }
-
-    GSL_ASSUME(false);
 }
 
 std::filesystem::path Controller::ResolveCompleteFilePath(const Tree<VizBlock>::Node& node)

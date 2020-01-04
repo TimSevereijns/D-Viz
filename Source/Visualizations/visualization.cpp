@@ -452,10 +452,10 @@ void VisualizationModel::HighlightAncestors(const Tree<VizBlock>::Node& node)
 }
 
 void VisualizationModel::HighlightDescendants(
-    const Tree<VizBlock>::Node& node, const Settings::VisualizationParameters& parameters)
+    const Tree<VizBlock>::Node& root, const Settings::VisualizationParameters& parameters)
 {
     std::for_each(
-        Tree<VizBlock>::LeafIterator{ &node }, Tree<VizBlock>::LeafIterator{},
+        Tree<VizBlock>::LeafIterator{ &root }, Tree<VizBlock>::LeafIterator{},
         [&](const auto& node) {
             if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY) ||
                 node->file.size < parameters.minimumFileSize) {
@@ -681,8 +681,8 @@ void VisualizationModel::UpdateAncestorSizes(Tree<VizBlock>::Node* node)
         if (parent) {
             const auto totalSize = std::accumulate(
                 Tree<VizBlock>::SiblingIterator{ parent->GetFirstChild() },
-                Tree<VizBlock>::SiblingIterator{},
-                std::uintmax_t{ 0 }, [](const auto runningTotal, const auto& node) noexcept {
+                Tree<VizBlock>::SiblingIterator{}, std::uintmax_t{ 0 },
+                [](const auto runningTotal, const auto& node) noexcept {
                     Expects(node->file.size > 0);
                     return runningTotal + node->file.size;
                 });
