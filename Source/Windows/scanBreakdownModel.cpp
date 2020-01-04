@@ -58,9 +58,9 @@ QVariant ScanBreakdownModel::data(const QModelIndex& index, int role) const
             case 0:
                 return QString::fromStdWString(data.fileExtension);
             case 1:
-                return data.totalSize;
+                return static_cast<qulonglong>(data.totalSize);
             case 2:
-                return data.itemCount;
+                return static_cast<qulonglong>(data.itemCount);
         }
     }
 
