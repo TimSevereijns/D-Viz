@@ -468,6 +468,10 @@ void GLCanvas::ShowGamepadContextMenu()
 
 void GLCanvas::ShowContextMenu(const QPoint& point)
 {
+    if (!m_controller.HasModelBeenLoaded()) {
+        return;
+    }
+
     const auto thereExistHighlightedNodes = !m_controller.GetHighlightedNodes().empty();
     const auto* const selectedNode = m_controller.GetSelectedNode();
 

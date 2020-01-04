@@ -100,7 +100,7 @@ namespace
                                             /* near   = */ maxZ,
                                             /* far    = */ minZ };
 
-            boundingBoxes.emplace_back(std::move(boundingBox));
+            boundingBoxes.emplace_back(boundingBox);
         }
 
         return boundingBoxes;
@@ -117,7 +117,7 @@ namespace
         const std::vector<Light>& lights, const Settings::Manager& settings,
         QOpenGLShaderProgram& shader)
     {
-        for (auto index{ 0u }; index < lights.size(); ++index) {
+        for (std::size_t index = 0u; index < lights.size(); ++index) {
             const auto indexAsString = std::to_string(index);
 
             const auto position = "allLights[" + indexAsString + "].position";
@@ -380,9 +380,9 @@ namespace Assets
         m_mainShader.bind();
 
         const auto shaderID = m_mainShader.programId();
-
         const auto cascadeBounds = FrustumUtilities::GetCascadeDistances();
-        for (auto index{ 0u }; index < cascadeBounds.size(); ++index) {
+
+        for (std::size_t index = 0u; index < cascadeBounds.size(); ++index) {
             const auto indexAsString = std::to_string(index);
 
             auto variableName = "cascadeBounds[" + indexAsString + "]";
@@ -541,10 +541,10 @@ namespace Assets
         const auto view = ComputeLightViewMatrix();
         const auto boundingBoxes = ComputeFrustumSplitBoundingBoxes(camera, view, m_cascadeCount);
 
-        constexpr auto nearPlane{ 200 };
-        constexpr auto farPlane{ 1500 };
+        constexpr auto nearPlane = 200;
+        constexpr auto farPlane = 1500;
 
-        for (auto index{ 0u }; index < static_cast<std::size_t>(m_cascadeCount); ++index) {
+        for (std::size_t index = 0u; index < static_cast<std::size_t>(m_cascadeCount); ++index) {
             const auto& boundingBox = boundingBoxes[index];
             const auto worldUnitsPerTexel = ComputeWorldUnitsPerTexel(boundingBox);
 
@@ -574,7 +574,7 @@ namespace Assets
         m_shadowMapShader.bind();
         m_VAO.bind();
 
-        for (auto index{ 0u }; index < static_cast<std::size_t>(m_cascadeCount); ++index) {
+        for (std::size_t index = 0u; index < static_cast<std::size_t>(m_cascadeCount); ++index) {
             m_shadowMaps[index].framebuffer->bind();
 
             m_shadowMapShader.setUniformValue(
@@ -610,11 +610,13 @@ namespace Assets
 
         m_mainShader.setUniformValue(
             "cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());
+
         m_mainShader.setUniformValue("cameraPosition", camera.GetPosition());
 
         // @todo The following variables don't need to be set with every pass...
         m_mainShader.setUniformValue(
             "materialShininess", static_cast<float>(m_settingsManager.GetMaterialShininess()));
+
         m_mainShader.setUniformValue("shouldShowCascadeSplits", shouldShowCascadeSplits);
         m_mainShader.setUniformValue("shouldShowShadows", shouldRenderShadows);
 
@@ -623,13 +625,14 @@ namespace Assets
         if (shouldRenderShadows) {
             Expects(m_shadowMaps.size() == static_cast<std::size_t>(m_cascadeCount));
 
-            for (auto index{ 0u }; index < static_cast<std::size_t>(m_cascadeCount); ++index) {
+            for (int index = 0; index < m_cascadeCount; ++index) {
                 const auto matrix = "lightProjectionViewMatrices[" + std::to_string(index) + "]";
-                m_mainShader.setUniformValue(
-                    matrix.data(), m_shadowMaps[index].projectionViewMatrix);
+                const auto& shadowMap = m_shadowMaps[static_cast<std::size_t>(index)];
 
-                m_openGL.glActiveTexture(GL_TEXTURE0 + index);
-                m_openGL.glBindTexture(GL_TEXTURE_2D, m_shadowMaps[index].framebuffer->texture());
+                m_mainShader.setUniformValue(matrix.data(), shadowMap.projectionViewMatrix);
+
+                m_openGL.glActiveTexture(GL_TEXTURE0 + static_cast<GLenum>(index));
+                m_openGL.glBindTexture(GL_TEXTURE_2D, shadowMap.framebuffer->texture());
             }
         }
 

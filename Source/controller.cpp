@@ -383,8 +383,6 @@ void Controller::SelectNodeViaRay(
     const std::function<void(const Tree<VizBlock>::Node&)>& deselectionCallback,
     const std::function<void(const Tree<VizBlock>::Node&)>& selectionCallback)
 {
-    Expects(m_model);
-
     if (!HasModelBeenLoaded() || !IsUserAllowedToInteractWithModel()) {
         return;
     }
@@ -535,8 +533,6 @@ void Controller::SearchTreeMap(
     const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& selectionCallback,
     bool shouldSearchFiles, bool shouldSearchDirectories)
 {
-    Expects(m_model);
-
     if (searchQuery.empty() || !HasModelBeenLoaded() ||
         (!shouldSearchFiles && !shouldSearchDirectories)) {
         return;
