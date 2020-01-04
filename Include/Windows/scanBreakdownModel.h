@@ -28,8 +28,8 @@ struct RowModel
     std::wstring formattedSize;
     std::wstring formattedCount;
 
-    std::uintmax_t totalSize = 0;
-    std::uintmax_t itemCount = 0;
+    std::uintmax_t totalSize{ 0 };
+    std::uintmax_t itemCount{ 0 };
 
     RowModel() = default;
 
@@ -46,13 +46,13 @@ struct RowModel
     }
 };
 
+Q_DECLARE_METATYPE(RowModel)
+
 struct ExtensionCountAndSize
 {
-    std::uintmax_t count = 0;
-    std::uintmax_t totalSize = 0;
+    std::uintmax_t count{ 0 };
+    std::uintmax_t totalSize{ 0 };
 };
-
-Q_DECLARE_METATYPE(RowModel);
 
 class ScanBreakdownModel final : public QAbstractTableModel
 {
