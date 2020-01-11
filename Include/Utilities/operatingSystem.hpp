@@ -67,10 +67,11 @@ namespace OS
 
     inline void CopyPathToClipboard(const Tree<VizBlock>::Node& node)
     {
-        QClipboard* clipboard = QApplication::clipboard();
+        const auto filePath = Controller::ResolveCompleteFilePath(node);
+        const auto text = QString::fromStdString(filePath.string());
 
-        const std::wstring filePath = Controller::ResolveCompleteFilePath(node);
-        clipboard->setText(QString::fromStdWString(filePath));
+        QClipboard* clipboard = QApplication::clipboard();
+        clipboard->setText(text);
     }
 } // namespace OS
 

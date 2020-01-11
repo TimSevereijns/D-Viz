@@ -92,6 +92,11 @@ class ModelTests : public QObject
     void ComputeBoundingBoxes();
 
     /**
+     * @brief Verifies that the path to the selected node is correctly copied to the clipboard.
+     */
+    void CopyPathToClipboard();
+
+    /**
      * @brief Verifies that the correct node is found when the camera is in front of the targeted
      * node.
      */

@@ -117,7 +117,7 @@ void ModelTests::init()
 
 void ModelTests::ProgressCallbackIsInvoked()
 {
-    QVERIFY(m_progressCallbackInvocations > 0); //< Scanning time determines exact count.
+    QVERIFY(m_progressCallbackInvocations > 0); ///< Scanning time determines exact count.
 }
 
 void ModelTests::ModelIsPopulated()
@@ -286,6 +286,22 @@ void ModelTests::ComputeBoundingBoxes()
     QCOMPARE(itr->GetData().block.GetWidth(), itr->GetData().boundingBox.GetWidth());
     QCOMPARE(itr->GetData().block.GetDepth(), itr->GetData().boundingBox.GetDepth());
     QCOMPARE(itr->GetData().block.GetHeight(), itr->GetData().boundingBox.GetHeight());
+}
+
+void ModelTests::CopyPathToClipboard()
+{
+    const std::wstring targetName = L"socket_ops.ipp";
+
+    const auto targetNode = std::find_if(
+        Tree<VizBlock>::LeafIterator{ m_tree->GetRoot() }, Tree<VizBlock>::LeafIterator{},
+        [&](const auto& node) { return (node->file.name + node->file.extension) == targetName; });
+
+    OS::CopyPathToClipboard(*targetNode);
+
+    QClipboard* clipboard = QApplication::clipboard();
+    const auto text = clipboard->text();
+
+    QCOMPARE(text.toStdString(), Controller::ResolveCompleteFilePath(*targetNode).string());
 }
 
 void ModelTests::FindNearestNodeFromFront()
