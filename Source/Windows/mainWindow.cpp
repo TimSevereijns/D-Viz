@@ -2,7 +2,7 @@
 #include "Scanner/scanningProgress.hpp"
 #include "Settings/settings.h"
 #include "Settings/settingsManager.h"
-#include "Utilities/operatingSystemSpecific.hpp"
+#include "Utilities/operatingSystem.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Utilities/utilities.hpp"
 #include "Viewport/glCanvas.h"

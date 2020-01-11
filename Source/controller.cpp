@@ -2,7 +2,7 @@
 
 #include "Settings/settingsManager.h"
 #include "Utilities/ignoreUnused.hpp"
-#include "Utilities/operatingSystemSpecific.hpp"
+#include "Utilities/operatingSystem.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Visualizations/squarifiedTreemap.h"
 #include "Windows/mainWindow.h"

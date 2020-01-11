@@ -2,7 +2,7 @@
 
 #include <Scanner/scanningParameters.h>
 #include <Scanner/scanningProgress.hpp>
-#include <Utilities/operatingSystemSpecific.hpp>
+#include <Utilities/operatingSystem.hpp>
 #include <constants.h>
 
 #include "testUtilities.hpp"

@@ -34,10 +34,10 @@ class ScanBreakdownFilterProxyModel final : public QSortFilterProxyModel
                 return lhsSize < rhsSize;
             }
             case 2: {
-                const auto lhsSize = lhsData.value<std::uintmax_t>();
-                const auto rhsSize = rhsData.value<std::uintmax_t>();
+                const auto lhsCount = lhsData.value<std::uintmax_t>();
+                const auto rhsCount = rhsData.value<std::uintmax_t>();
 
-                return lhsSize < rhsSize;
+                return lhsCount < rhsCount;
             }
         }
 

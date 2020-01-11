@@ -1,6 +1,8 @@
 #ifndef OPERATINGSYSTEMSPECIFIC_HPP
 #define OPERATINGSYSTEMSPECIFIC_HPP
 
+#include <QClipboard>
+
 #include "Utilities/ignoreUnused.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "controller.h"
@@ -62,6 +64,14 @@ namespace OS
     }
 
 #endif
+
+    inline void CopyPathToClipboard(const Tree<VizBlock>::Node& node)
+    {
+        QClipboard* clipboard = QApplication::clipboard();
+
+        const std::wstring filePath = Controller::ResolveCompleteFilePath(node);
+        clipboard->setText(QString::fromStdWString(filePath));
+    }
 } // namespace OS
 
 #endif // OPERATINGSYSTEMSPECIFIC_HPP

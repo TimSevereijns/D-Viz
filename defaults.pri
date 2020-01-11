@@ -81,7 +81,7 @@ HEADERS += \
    $$PWD/Include/Settings/settings.h \
    $$PWD/Include/Settings/settingsManager.h \
    $$PWD/Include/Utilities/ignoreUnused.hpp \
-   $$PWD/Include/Utilities/operatingSystemSpecific.hpp \
+   $$PWD/Include/Utilities/operatingSystem.hpp \
    $$PWD/Include/Utilities/scopeExit.hpp \
    $$PWD/Include/Utilities/threadSafeQueue.hpp \
    $$PWD/Include/Utilities/utilities.hpp \

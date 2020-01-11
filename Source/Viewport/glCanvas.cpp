@@ -1,7 +1,7 @@
 #include "Viewport/glCanvas.h"
 
 #include "Stopwatch/Stopwatch.hpp"
-#include "Utilities/operatingSystemSpecific.hpp"
+#include "Utilities/operatingSystem.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Viewport/gamepadContextMenu.h"
 #include "Viewport/mouseContextMenu.h"
@@ -518,6 +518,7 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
         menu.addSeparator();
 
+        menu.addAction("Copy Path", [&] { OS::CopyPathToClipboard(*selectedNode); });
         menu.addAction("Show in Explorer", [&] { OS::LaunchFileExplorer(*selectedNode); });
     }
 
