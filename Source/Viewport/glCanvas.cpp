@@ -63,6 +63,23 @@ namespace
 
         return QString::fromStdWString(L"Highlight All " + extension + L" Files");
     }
+
+    /**
+     * @brief Locates the node associated with a given file event notification.
+     *
+     * @param[in] notification      The file event notification to process.
+     * @param[in] controller        The controller containing the treemap.
+     */
+    Tree<VizBlock>::Node* LocateNode(const FileEvent& notification, Controller& controller)
+    {
+        if (notification.path.is_absolute()) {
+            return Utilities::FindNodeViaAbsolutePath(
+                controller.GetTree().GetRoot(), notification.path);
+        }
+
+        return Utilities::FindNodeViaRelativePath(
+            controller.GetTree().GetRoot(), notification.path);
+    }
 } // namespace
 
 GLCanvas::GLCanvas(Controller& controller, QWidget* parent)
@@ -754,15 +771,7 @@ void GLCanvas::VisualizeFilesystemActivity()
             notification = m_controller.FetchFileModification();
         };
 
-        Tree<VizBlock>::Node* affectedNode = nullptr;
-
-        if (notification->path.is_absolute()) {
-            affectedNode = Utilities::FindNodeViaAbsolutePath(
-                m_controller.GetTree().GetRoot(), notification->path);
-        } else {
-            affectedNode = Utilities::FindNodeViaRelativePath(
-                m_controller.GetTree().GetRoot(), notification->path);
-        }
+        const Tree<VizBlock>::Node* const affectedNode = LocateNode(*notification, m_controller);
 
         if (affectedNode == nullptr) {
             // @note Since files may have been created after the latest scan, it is possible for an

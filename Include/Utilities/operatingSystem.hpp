@@ -40,6 +40,7 @@ namespace OS
             return character == L'/'; //< Certain Windows API functions can't deal with this slash.
         }));
 
+        // @todo Use `SHParseDisplayName(...)` instead.
         auto* const idList = ILCreateFromPath(filePath.c_str());
         if (idList) {
             SHOpenFolderAndSelectItems(idList, 0, nullptr, 0);
