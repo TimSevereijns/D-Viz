@@ -53,8 +53,10 @@ build-D-Viz-*
 
 *.tlog
 
+# D-Viz specific
 ThirdParty/
 Output/*
 Build/*
 Tests/Sandbox*
 Conan/
+Installer/packages/ics.component/data*

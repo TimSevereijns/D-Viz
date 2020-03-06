@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>D-Viz</DisplayName>
+    <Description>A 3D directory visualizer</Description>
+    <Version>0.2.5</Version>
+    <ReleaseDate>2020-03-05</ReleaseDate>
+    <Default>true</Default>
+    <Script>installscript.qs</Script>
+</Package>

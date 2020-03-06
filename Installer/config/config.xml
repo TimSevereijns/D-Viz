@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>D-Viz</Name>
+    <Version>0.2.5</Version>
+    <Title>D-Viz</Title>
+    <Publisher>Tim Severeijns</Publisher>
+    <WizardStyle>Aero</WizardStyle>
+    <!-- Directory name is used in package.xml -->
+    <StartMenuDir>D-Viz</StartMenuDir>
+    <TargetDir>@HomeDir@/D-Viz</TargetDir>
+</Installer>
