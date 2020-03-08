@@ -16,3 +16,4 @@ SUBDIRS += \
 
 App.depends = Source
 Tests.depends = Source
+Installer.depends = App

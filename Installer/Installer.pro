@@ -16,20 +16,20 @@ DISTFILES += \
     packages/ics.component/meta/package.xml \
     packages/ics.component/meta/installscript.qs
 
-INSTALLER = d-viz-installer
+INSTALLER = offlineInstaller
 
 INPUT = $$PWD/config/config.xml $$PWD/packages
 
-d-viz-installer.input = INPUT
-d-viz-installer.output = $$INSTALLER
-d-viz-installer.CONFIG += target_predeps no_link combine
-d-viz-installer.commands = \
+offlineInstaller.input = INPUT
+offlineInstaller.output = $$INSTALLER
+offlineInstaller.CONFIG += target_predeps no_link combine
+offlineInstaller.commands = \
     $$QT_INSTALL_FRAMEWORK_PATH/bin/binarycreator \
     --offline-only \
     -t $$QT_INSTALL_FRAMEWORK_PATH/bin/installerbase.exe \
     -c $$PWD/config/config.xml \
     -p $$PWD/packages \
     -v \
-    C:\Users\Tim\Desktop\D-Viz-Installer.exe
+    $$PWD/../Output/D-Viz-Installer.exe
 
-QMAKE_EXTRA_COMPILERS += d-viz-installer
+QMAKE_EXTRA_COMPILERS += offlineInstaller

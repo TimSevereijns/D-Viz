@@ -167,7 +167,7 @@ unix: CONFIG(debug, debug|release) {
 CONFIG(debug, debug|release) {
     DESTDIR = $$PWD/Output/Debug
 } else {
-    DESTDIR = $$PWD/Installer/packages/ics.component/data
+    DESTDIR = $$PWD/Output/Release
 }
 
 OBJECTS_DIR = $$DESTDIR/.obj
