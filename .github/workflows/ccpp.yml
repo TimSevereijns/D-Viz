@@ -1,4 +1,4 @@
-name: Coverage
+name: Run Tests and Collect Coverage
 
 on: [push]
 
