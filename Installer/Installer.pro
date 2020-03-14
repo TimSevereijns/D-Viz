@@ -5,6 +5,33 @@ requires(BUILD_INSTALLER)
 TEMPLATE = aux
 
 win32: CONFIG(release, debug|release) {
+    # Utility function to copy files from one location to another.
+    defineTest(copyToDestDir) {
+        files = $$1
+        dir = $$2
+        # Replace slashes in destination path for Windows
+        win32:dir ~= s,/,\\,g
+
+        for (file, files) {
+            # Replace slashes in source path for Windows
+            win32:file ~= s,/,\\,g
+
+            QMAKE_POST_LINK += $$QMAKE_COPY \
+                $$shell_quote($$file) \
+                $$shell_quote($$dir) \
+                $$escape_expand(\\n\\t)
+        }
+
+        export(QMAKE_POST_LINK)
+    }
+
+    FILES_TO_COPY += \
+        $$PWD/../Output/Release/D-Viz.exe \
+        $$PWD/../Output/Release/D-Viz.lib \
+        $$PWD/../Output/Release/D-Viz.pdb
+
+    copyToDestDir($$FILES_TO_COPY, $$PWD/packages/ics.component/data/)
+
     QT_INSTALL_FRAMEWORK_PATH = C:/Qt/Tools/QtInstallerFramework/3.2
     QT_WIN_DEPLOY_PATH = C:/Qt/5.14.1/msvc2017_64
 
