@@ -49,6 +49,15 @@ jobs:
  
       - name: Install Conan
         run: pip install conan
+      
+      - name: Prep for Qt Install
+        run: |
+          cd ~/.local/share
+          sudo mkdir Qt && cd Qt
+          echo "[QtAccount]" >> qtaccount.ini
+          echo "email=${{ secrets.qt_email }}" >> qtaccount.ini
+          echo "jwt=${{ secrets.qt_jwt }}" >> qtaccount.ini
+          echo "u=${{ secrets.qt_u }}" >> qtaccount.ini
 
       - name: Install Qt
         run: |
@@ -86,12 +95,25 @@ jobs:
           
       - name: Collect Coverage
         run: |
-          lcov --capture --directory . --output-file coverage.info \
+          lcov \
+            --capture \
+            --directory . \
+            --output-file coverage.info \
             --base-directory ${GITHUB_WORKSPACE}/Source
-          lcov --remove coverage.info \
-            '/usr/*' '*/conan/*' '*/Tests/*' '*/QtCore/*' '*/QtGui/*' '*/QtTest/*' \
-            '*/QtWidgets/*' '*/ThirdParty/*' '*/.moc/*' --output-file coverage.info
-          lcov --list coverage.info
+          lcov \
+            --remove coverage.info \
+            '/usr/*' \
+            '*/conan/*' \
+            '*/Tests/*' \
+            '*/QtCore/*' \
+            '*/QtGui/*' \
+            '*/QtTest/*' \
+            '*/QtWidgets/*' \
+            '*/ThirdParty/*' \
+            '*/.moc/*' \
+            --output-file coverage.info
+          lcov \
+            --list coverage.info
           
       - name: Upload Coverage Report
         run: |
