@@ -57,12 +57,13 @@ jobs:
           sudo bash -c 'echo "email=${{ secrets.qt_email }}" >> qtaccount.ini'
           sudo bash -c 'echo "jwt=${{ secrets.qt_jwt }}" >> qtaccount.ini'
           sudo bash -c 'echo "u=${{ secrets.qt_u }}" >> qtaccount.ini'
+          cd ~
 
       - name: Install Qt
         run: |
           sudo apt-get install -y python3-setuptools
           pip3 install cuteci
-          cuteci \
+          sudo cuteci \
               --installer http://download.qt.io/official_releases/qt/5.13/5.13.1/qt-opensource-linux-x64-5.13.1.run \
               install \
               --verbose \
