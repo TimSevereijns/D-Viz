@@ -52,8 +52,8 @@ jobs:
       
       - name: Prep for Qt Install
         run: |
-          cd ~/.local/share
-          sudo mkdir Qt && cd Qt
+          ls ~/.local
+          sudo mkdir -p ~/.local/share/Qt && cd ~/.local/share/Qt
           echo "[QtAccount]" >> qtaccount.ini
           echo "email=${{ secrets.qt_email }}" >> qtaccount.ini
           echo "jwt=${{ secrets.qt_jwt }}" >> qtaccount.ini
