@@ -10,6 +10,6 @@ Component.prototype.createOperations = function()
         component.addOperation("CreateShortcut",
             "@TargetDir@/D-Viz.exe", "@StartMenuDir@/D-Viz.lnk",
             "workingDirectory=@TargetDir@",
-            "iconId=2", "description=Awesome World Executable");
+            "iconId=2", "description=A 3D directory visualizer");
     }
 }
