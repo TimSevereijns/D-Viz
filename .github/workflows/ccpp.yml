@@ -53,10 +53,10 @@ jobs:
       - name: Prep for Qt Install
         run: |
           sudo mkdir -p ~/.local/share/Qt && cd ~/.local/share/Qt
-          sudo echo "[QtAccount]" >> qtaccount.ini
-          sudo echo "email=${{ secrets.qt_email }}" >> qtaccount.ini
-          sudo echo "jwt=${{ secrets.qt_jwt }}" >> qtaccount.ini
-          sudo echo "u=${{ secrets.qt_u }}" >> qtaccount.ini
+          sudo bash -c 'echo "[QtAccount]" >> qtaccount.ini'
+          sudo bash -c 'echo "email=${{ secrets.qt_email }}" >> qtaccount.ini'
+          sudo bash -c 'echo "jwt=${{ secrets.qt_jwt }}" >> qtaccount.ini'
+          sudo bash -c 'echo "u=${{ secrets.qt_u }}" >> qtaccount.ini'
 
       - name: Install Qt
         run: |
