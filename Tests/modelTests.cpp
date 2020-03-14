@@ -66,6 +66,8 @@ void ModelTests::initTestCase()
         std::filesystem::absolute("../../Tests/Data/boost-asio.zip"),
         std::filesystem::absolute("../../Tests/Sandbox"));
 
+    std::this_thread::sleep_for(std::chrono::seconds{ 1 });
+
     const auto progressCallback = [&](const ScanningProgress& /*progress*/) {
         ++m_progressCallbackInvocations;
     };
@@ -186,6 +188,8 @@ void ModelTests::HighlightAncestors()
         [](const auto& node) {
             return (node->file.name + node->file.extension) == L"endpoint.ipp";
         });
+
+    QVERIFY(target != Tree<VizBlock>::SiblingIterator{});
 
     m_model->HighlightAncestors(*target);
 
