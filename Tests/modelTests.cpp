@@ -58,7 +58,53 @@ namespace
 
         return allEvents;
     }
+
+    /**
+     * For whatever reason, std::filesystem::absolute(...) will strip out parent directory and
+     * current directory tokens on Windows, but will not on Unix platforms. That means that we'll
+     * have to do it ourselves, since the scanning algorithm doesn't like these tokens.
+     *
+     * @param[in] unsanitizedPath   A potentially unsanitary path.
+     *
+     * @returns A path without parent or currently directory elements.
+     */
+    std::filesystem::path SanitizePath(const std::filesystem::path& unsanitizedPath)
+    {
+#if defined(Q_OS_WIN)
+        constexpr auto& currentDirectory = L".";
+        constexpr auto& parentDirectory = L"..";
+#elif defined(Q_OS_LINUX)
+        constexpr auto& currentDirectory = ".";
+        constexpr auto& parentDirectory = "..";
+#endif
+
+        std::vector<std::string> queue;
+        for (const auto& token : unsanitizedPath) {
+            if (token == parentDirectory && !queue.empty()) {
+                queue.pop_back();
+                continue;
+            }
+
+            if (token == currentDirectory) {
+                continue;
+            }
+
+            queue.push_back(token);
+        }
+
+        std::filesystem::path sanitizedPath;
+        for (const auto& token : queue) {
+            sanitizedPath /= token;
+        }
+
+        return sanitizedPath;
+    }
 } // namespace
+
+ModelTests::ModelTests()
+{
+    m_sampleDirectory = SanitizePath(m_sampleDirectory);
+}
 
 void ModelTests::initTestCase()
 {
@@ -66,7 +112,8 @@ void ModelTests::initTestCase()
         std::filesystem::absolute("../../Tests/Data/boost-asio.zip"),
         std::filesystem::absolute("../../Tests/Sandbox"));
 
-    std::this_thread::sleep_for(std::chrono::seconds{ 1 });
+    // Let's wait briefly for things to settle down (probably not necessary).
+    std::this_thread::sleep_for(std::chrono::milliseconds{ 100 });
 
     const auto progressCallback = [&](const ScanningProgress& /*progress*/) {
         ++m_progressCallbackInvocations;
@@ -142,7 +189,7 @@ void ModelTests::GetRootPath()
 {
     const auto path = m_model->GetRootPath();
 
-    const auto expectation = std::filesystem::absolute("../../Tests/Sandbox/asio");
+    const auto expectation = SanitizePath(std::filesystem::absolute("../../Tests/Sandbox/asio"));
     QCOMPARE(expectation.wstring(), path);
 }
 

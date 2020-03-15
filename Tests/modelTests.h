@@ -16,6 +16,8 @@
 class ModelTests : public QObject
 {
     Q_OBJECT
+  public:
+    ModelTests();
 
   private slots:
 
