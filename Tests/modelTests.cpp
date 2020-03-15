@@ -78,7 +78,7 @@ namespace
         constexpr auto& parentDirectory = "..";
 #endif
 
-        std::vector<std::string> queue;
+        std::vector<std::filesystem::path::string_type> queue;
         for (const auto& token : unsanitizedPath) {
             if (token == parentDirectory && !queue.empty()) {
                 queue.pop_back();

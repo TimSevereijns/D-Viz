@@ -2,8 +2,8 @@
 <Package>
     <DisplayName>D-Viz</DisplayName>
     <Description>A 3D directory visualizer</Description>
-    <Version>0.2.5</Version>
-    <ReleaseDate>2020-03-05</ReleaseDate>
+    <Version>0.3.0</Version>
+    <ReleaseDate>2020-03-15</ReleaseDate>
     <Default>true</Default>
     <Script>installscript.qs</Script>
 </Package>
