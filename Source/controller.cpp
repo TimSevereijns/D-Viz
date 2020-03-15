@@ -23,9 +23,9 @@
 #include <QWinTaskbarButton>
 #include <QWinTaskbarProgress>
 
-#include "Scanner/Monitor/windowsFileMonitor.h"
+#include "Monitor/windowsFileMonitor.h"
 #elif defined(Q_OS_LINUX)
-#include "Scanner/Monitor/linuxFileMonitor.h"
+#include "Monitor/linuxFileMonitor.h"
 #include "Windows/nullTaskbarButton.h"
 #endif // Q_OS_LINUX
 

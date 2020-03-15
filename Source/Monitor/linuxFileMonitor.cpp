@@ -1,4 +1,4 @@
-#include "Scanner/Monitor/linuxFileMonitor.h"
+#include "Monitor/linuxFileMonitor.h"
 
 #ifdef Q_OS_LINUX
 

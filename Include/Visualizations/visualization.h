@@ -13,8 +13,8 @@
 
 #include <Tree/Tree.hpp>
 
-#include "Scanner/Monitor/fileChangeNotification.hpp"
-#include "Scanner/Monitor/fileSystemObserver.h"
+#include "Monitor/fileChangeNotification.hpp"
+#include "Monitor/fileSystemObserver.h"
 #include "Settings/settings.h"
 #include "Utilities/threadSafeQueue.hpp"
 #include "Viewport/camera.h"
