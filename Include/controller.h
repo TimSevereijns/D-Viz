@@ -3,7 +3,7 @@
 
 #include "constants.h"
 
-#include "Scanner/Monitor/fileChangeNotification.hpp"
+#include "Monitor/fileChangeNotification.hpp"
 #include "Scanner/driveScanner.h"
 #include "Scene/light.h"
 #include "Settings/settingsManager.h"

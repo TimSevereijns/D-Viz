@@ -1,4 +1,4 @@
-#include "Scanner/Monitor/fileSystemObserver.h"
+#include "Monitor/fileSystemObserver.h"
 #include "Utilities/utilities.hpp"
 #include "constants.h"
 
