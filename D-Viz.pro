@@ -11,7 +11,9 @@ CONFIG += \
 SUBDIRS += \
    Source \
    Tests \
-   App
+   App \
+   Installer
 
 App.depends = Source
 Tests.depends = Source
+Installer.depends = App

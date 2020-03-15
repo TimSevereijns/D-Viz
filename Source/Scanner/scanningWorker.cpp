@@ -68,8 +68,32 @@ namespace
     }
 
     /**
-     * @returns True if the directory should be processed.
+     * @brief Detects path elements that will cause infinite looping.
+     *
+     * During testing, I ran across a directory that contained a files whose path contained either
+     * a single dot (interpreted as the current directory), or two dots (interpreted as the parent
+     * directory). The presense of these path elements caused the scanning logic to loop
+     * indefinitely.
+     *
+     * @param[in] path              The path to test.
+     *
+     * @returns True if a problematic element is detected.
      */
+    bool ContainsProblematicPathElements(const std::filesystem::path& path) noexcept
+    {
+        for (const auto& entry : path) {
+            const auto& data = entry.native();
+#if defined(Q_OS_WIN)
+            if (data == L".." || data == L".") {
+#elif defined(Q_OS_LINUX)
+            if (data == ".." || data == ".") {
+#endif // Q_OS_LINUX
+                return true;
+            }
+        }
+
+        return false;
+    }
 
 } // namespace
 
@@ -107,9 +131,13 @@ void ScanningWorker::ProcessFile(
     treeNode.AppendChild(VizBlock{ std::move(fileInfo) });
 }
 
-void ScanningWorker::ProcessDirectory(
+void ScanningWorker::ProcessPath(
     const std::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept
 {
+    if (ContainsProblematicPathElements(path)) {
+        return;
+    }
+
     auto isRegularFile{ false };
     try {
         // In certain cases, this function can, apparently, raise exceptions, although it isn't
@@ -157,7 +185,7 @@ void ScanningWorker::AddSubDirectoriesToQueue(
 
     while (itr != end) {
         boost::asio::post(
-            m_threadPool, [&, path = itr->path() ]() noexcept { ProcessDirectory(path, node); });
+            m_threadPool, [&, path = itr->path() ]() noexcept { ProcessPath(path, node); });
 
         ++itr;
     }
