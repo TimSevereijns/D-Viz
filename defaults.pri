@@ -13,14 +13,14 @@ SOURCES += \
    $$PWD/Source/controller.cpp \
    $$PWD/Source/HID/gamepad.cpp \
    $$PWD/Source/HID/keyboardManager.cpp \
+   $$PWD/Source/Monitor/fileSystemObserver.cpp \
+   $$PWD/Source/Monitor/linuxFileMonitor.cpp \
+   $$PWD/Source/Monitor/windowsFileMonitor.cpp \
    $$PWD/Source/Scanner/driveScanner.cpp \
    $$PWD/Source/Scanner/fileInfo.cpp \
    $$PWD/Source/Scanner/scanningParameters.cpp \
    $$PWD/Source/Scanner/scanningUtilities.cpp \
    $$PWD/Source/Scanner/scanningWorker.cpp \
-   $$PWD/Source/Scanner/Monitor/fileSystemObserver.cpp \
-   $$PWD/Source/Scanner/Monitor/linuxFileMonitor.cpp \
-   $$PWD/Source/Scanner/Monitor/windowsFileMonitor.cpp \
    $$PWD/Source/Scene/light.cpp \
    $$PWD/Source/Scene/Assets/baseAsset.cpp \
    $$PWD/Source/Scene/Assets/crosshairAsset.cpp \
@@ -57,16 +57,16 @@ HEADERS += \
    $$PWD/Include/HID/gamepad.h \
    $$PWD/Include/HID/keyboardManager.h \
    $$PWD/Include/literals.h \
+   $$PWD/Include/Monitor/fileMonitorBase.h \
+   $$PWD/Include/Monitor/fileSystemObserver.h \
+   $$PWD/Include/Monitor/linuxFileMonitor.h \
+   $$PWD/Include/Monitor/windowsFileMonitor.h \
    $$PWD/Include/Scanner/driveScanner.h \
    $$PWD/Include/Scanner/fileInfo.h \
    $$PWD/Include/Scanner/scanningParameters.h \
    $$PWD/Include/Scanner/scanningProgress.hpp \
    $$PWD/Include/Scanner/scanningUtilities.h \
    $$PWD/Include/Scanner/scanningWorker.h \
-   $$PWD/Include/Scanner/Monitor/fileMonitorBase.h \
-   $$PWD/Include/Scanner/Monitor/fileSystemObserver.h \
-   $$PWD/Include/Scanner/Monitor/linuxFileMonitor.h \
-   $$PWD/Include/Scanner/Monitor/windowsFileMonitor.h \
    $$PWD/Include/Scene/light.h \
    $$PWD/Include/Scene/Assets/baseAsset.h \
    $$PWD/Include/Scene/Assets/crosshairAsset.h \

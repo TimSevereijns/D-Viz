@@ -1,5 +1,5 @@
 #include "Visualizations/visualization.h"
-#include "Scanner/Monitor/fileChangeNotification.hpp"
+#include "Monitor/fileChangeNotification.hpp"
 #include "Scanner/scanningUtilities.h"
 #include "Utilities/utilities.hpp"
 #include "Visualizations/ray.h"
