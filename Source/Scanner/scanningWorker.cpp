@@ -60,8 +60,8 @@ namespace
             return nullptr;
         }
 
-        FileInfo fileInfo{ path.wstring(),
-                           /* extension = */ L"", ScanningWorker::SIZE_UNDEFINED,
+        constexpr auto noExtension = L"";
+        FileInfo fileInfo{ path.wstring(), noExtension, ScanningWorker::SIZE_UNDEFINED,
                            FileType::DIRECTORY };
 
         return std::make_shared<Tree<VizBlock>>(VizBlock{ std::move(fileInfo) });
@@ -70,8 +70,8 @@ namespace
     /**
      * @brief Detects path elements that will cause infinite looping.
      *
-     * During testing, I ran across a directory that contained a files whose path contained either
-     * a single dot (interpreted as the current directory), or two dots (interpreted as the parent
+     * During testing, I ran across a directory containing files whose path contained either
+     * a single dot (representing the current directory), or two dots (representing the parent
      * directory). The presense of these path elements caused the scanning logic to loop
      * indefinitely.
      *
@@ -195,18 +195,18 @@ void ScanningWorker::Start()
 {
     emit ProgressUpdate();
 
-    Stopwatch<std::chrono::seconds>(
-        [&]() noexcept {
-            boost::asio::post(m_threadPool, [&]() noexcept {
-                AddSubDirectoriesToQueue(m_parameters.path, *m_fileTree->GetRoot());
-            });
-
-            m_threadPool.join();
-        },
-        [](const auto& elapsed, const auto& units) noexcept {
-            spdlog::get(Constants::Logging::DefaultLog)
-                ->info(fmt::format("Scanned Drive in: {} {}", elapsed.count(), units));
+    const auto stopwatch = Stopwatch<std::chrono::seconds>([&]() noexcept {
+        boost::asio::post(m_threadPool, [&]() noexcept {
+            AddSubDirectoriesToQueue(m_parameters.path, *m_fileTree->GetRoot());
         });
+
+        m_threadPool.join();
+    });
+
+    spdlog::get(Constants::Logging::DefaultLog)
+        ->info(fmt::format(
+            "Scanned Drive in: {} {}", stopwatch.GetElapsedTime().count(),
+            stopwatch.GetUnitsAsCharacterArray()));
 
     Scanner::ComputeDirectorySizes(*m_fileTree);
     PruneEmptyFilesAndDirectories(*m_fileTree);

@@ -91,7 +91,7 @@ void ScanBreakdownModel::ClearData()
     m_fileTypeVector.clear();
 }
 
-void ScanBreakdownModel::FinalizeInsertion(Constants::FileSize::Prefix sizePrefix)
+void ScanBreakdownModel::Process(Constants::FileSize::Prefix sizePrefix)
 {
     Expects(!m_fileTypeMap.empty() && m_fileTypeVector.empty());
 

@@ -402,6 +402,11 @@ void GLCanvas::RestoreSelectedNode(const Tree<VizBlock>::Node& node)
 {
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
 
+    // @todo IsBlockVisible probably doesn't belong on the Settings Manager...
+    if (!m_controller.GetSettingsManager().IsBlockVisible(node.GetData())) {
+        return;
+    }
+
     const auto restorationColor = m_controller.DetermineNodeColor(node);
     treemap->SetNodeColor(node, restorationColor);
 }
@@ -420,6 +425,12 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizBlock>::Node*>&
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
 
     for (const auto* const node : nodes) {
+        // @todo IsBlockVisible probably doesn't belong on the Settings Manager...
+        if (!m_controller.GetSettingsManager().IsBlockVisible(node->GetData())) {
+            continue;
+        }
+
+        // @todo Is the color cleared appropriately in all cases...?
         const auto restorationColor = m_controller.DetermineNodeColor(*node);
         treemap->SetNodeColor(*node, restorationColor);
     }
