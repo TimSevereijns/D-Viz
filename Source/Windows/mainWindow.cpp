@@ -1,7 +1,7 @@
 #include "Windows/mainWindow.h"
 #include "Scanner/scanningProgress.hpp"
+#include "Settings/persistentSettings.h"
 #include "Settings/settings.h"
-#include "Settings/settingsManager.h"
 #include "Utilities/operatingSystem.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "Utilities/utilities.hpp"
@@ -125,7 +125,7 @@ void MainWindow::SetupSidebar()
     SetupColorSchemeDropdown();
     SetupFileSizePruningDropdown();
 
-    auto& settingsManager = m_controller.GetSettingsManager();
+    auto& sessionSettings = m_controller.GetSessionSettings();
 
     connect(
         m_ui.directoriesOnlyCheckBox, &QCheckBox::stateChanged, this,
@@ -146,37 +146,37 @@ void MainWindow::SetupSidebar()
         &MainWindow::OnShowBreakdownButtonPressed);
 
     connect(
-        m_ui.searchDirectoriesCheckBox, &QCheckBox::stateChanged, &settingsManager,
-        &Settings::Manager::OnShouldSearchDirectoriesChanged);
+        m_ui.searchDirectoriesCheckBox, &QCheckBox::stateChanged, &sessionSettings,
+        &Settings::SessionSettings::OnShouldSearchDirectoriesChanged);
 
     connect(
-        m_ui.searchFilesCheckBox, &QCheckBox::stateChanged, &settingsManager,
-        &Settings::Manager::OnShouldSearchFilesChanged);
+        m_ui.searchFilesCheckBox, &QCheckBox::stateChanged, &sessionSettings,
+        &Settings::SessionSettings::OnShouldSearchFilesChanged);
 
     connect(
         m_ui.cameraSpeedSpinner,
         static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-        &settingsManager, &Settings::Manager::OnCameraSpeedChanged);
+        &sessionSettings, &Settings::SessionSettings::OnCameraSpeedChanged);
 
     connect(
         m_ui.mouseSensitivitySpinner,
         static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-        &settingsManager, &Settings::Manager::OnMouseSensitivityChanged);
+        &sessionSettings, &Settings::SessionSettings::OnMouseSensitivityChanged);
 
     connect(
         m_ui.ambientCoefficientSpinner,
         static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-        &settingsManager, &Settings::Manager::OnAmbientLightCoefficientChanged);
+        &sessionSettings, &Settings::SessionSettings::OnAmbientLightCoefficientChanged);
 
     connect(
         m_ui.attenuationSpinner,
         static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-        &settingsManager, &Settings::Manager::OnLightAttenuationChanged);
+        &sessionSettings, &Settings::SessionSettings::OnLightAttenuationChanged);
 
     connect(
         m_ui.attachLightToCameraCheckBox,
-        static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), &settingsManager,
-        &Settings::Manager::OnAttachLightToCameraStateChanged);
+        static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), &sessionSettings,
+        &Settings::SessionSettings::OnAttachLightToCameraStateChanged);
 }
 
 void MainWindow::SetupColorSchemeDropdown()
@@ -186,7 +186,7 @@ void MainWindow::SetupColorSchemeDropdown()
     const auto& defaultScheme = QString::fromStdWString(Constants::ColorScheme::Default);
     m_ui.colorSchemeComboBox->addItem(defaultScheme, defaultScheme);
 
-    const auto& colorMap = m_controller.GetSettingsManager().GetFileColorMap();
+    const auto& colorMap = m_controller.GetPersistentSettings().GetFileColorMap();
     for (const auto& extensionMap : colorMap) {
         const auto& categoryName = QString::fromStdWString(extensionMap.first);
         m_ui.colorSchemeComboBox->addItem(categoryName, categoryName);
@@ -225,7 +225,7 @@ void MainWindow::SetupMenus()
     SetupFileMenu();
     SetupOptionsMenu();
 
-    const auto& preferenceMap = m_controller.GetSettingsManager().GetPreferenceMap();
+    const auto& preferenceMap = m_controller.GetPersistentSettings().GetPreferenceMap();
     if (preferenceMap.GetValueOrDefault(L"showDebuggingMenu", false)) {
         SetupDebuggingMenu();
     }
@@ -269,12 +269,12 @@ void MainWindow::SetupOptionsMenu()
                                                                  "changes");
     m_optionsMenuWrapper.enableFileSystemMonitoring.setCheckable(true);
 
-    const auto isMonitoringEnabled = m_controller.GetSettingsManager().ShouldMonitorFileSystem();
+    const auto isMonitoringEnabled = m_controller.GetPersistentSettings().ShouldMonitorFileSystem();
     m_optionsMenuWrapper.enableFileSystemMonitoring.setChecked(isMonitoringEnabled);
 
     connect(
         &m_optionsMenuWrapper.enableFileSystemMonitoring, &QAction::toggled,
-        &m_controller.GetSettingsManager(), &Settings::Manager::OnMonitoringOptionToggled);
+        &m_controller.GetPersistentSettings(), &Settings::PersistentSettings::OnMonitoringOptionToggled);
 
     m_optionsMenu.setTitle("Options");
     m_optionsMenu.addAction(&m_optionsMenuWrapper.toggleFrameTime);
@@ -356,11 +356,11 @@ void MainWindow::SetupDebuggingMenu()
     auto& lightingMenuWrapper = m_debuggingMenuWrapper.lightingMenuWrapper;
     auto& lightingMenu = m_debuggingMenuWrapper.lightingMenu;
 
-    const auto& preferences = m_controller.GetSettingsManager().GetPreferenceMap();
+    const auto& preferences = m_controller.GetPersistentSettings().GetPreferenceMap();
     const auto shouldShowCascadeSplits =
         preferences.GetValueOrDefault(Constants::Preferences::ShowCascadeSplits, true);
 
-    m_controller.GetSettingsManager().SetShowCascadeSplits(shouldShowCascadeSplits);
+    m_controller.GetPersistentSettings().SetShowCascadeSplits(shouldShowCascadeSplits);
 
     lightingMenuWrapper.showCascadeSplits.setText("Show Cascade Splits");
     lightingMenuWrapper.showCascadeSplits.setCheckable(true);
@@ -373,7 +373,7 @@ void MainWindow::SetupDebuggingMenu()
     const auto shouldShowShadows =
         preferences.GetValueOrDefault(Constants::Preferences::ShowShadows, true);
 
-    m_controller.GetSettingsManager().SetShowShadows(shouldShowShadows);
+    m_controller.GetPersistentSettings().SetShowShadows(shouldShowShadows);
 
     lightingMenuWrapper.showShadows.setText("Show Shadows");
     lightingMenuWrapper.showShadows.setCheckable(true);
@@ -414,7 +414,7 @@ void MainWindow::SetDebuggingMenuState()
 {
     auto& renderMenuWrapper = m_debuggingMenuWrapper.renderMenuWrapper;
 
-    const auto& preferences = m_controller.GetSettingsManager().GetPreferenceMap();
+    const auto& preferences = m_controller.GetPersistentSettings().GetPreferenceMap();
 
     const auto shouldShowOrigin =
         preferences.GetValueOrDefault(Constants::Preferences::ShowOrigin, true);
@@ -464,7 +464,7 @@ void MainWindow::OnFileMenuNewScan()
     parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
     auto& savedParameters =
-        m_controller.GetSettingsManager().SetVisualizationParameters(parameters);
+        m_controller.GetSessionSettings().SetVisualizationParameters(parameters);
 
     m_controller.ScanDrive(savedParameters);
 }
@@ -490,7 +490,7 @@ bool MainWindow::AskUserToLimitFileSize(
     switch (election) {
         case QMessageBox::Yes: {
             parameters.minimumFileSize = 1_MiB;
-            m_controller.GetSettingsManager().SetVisualizationParameters(std::move(parameters));
+            m_controller.GetSessionSettings().SetVisualizationParameters(std::move(parameters));
             SetFilePruningComboBoxValue(1_MiB);
 
             return true;
@@ -531,7 +531,7 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
     menuWrapper.binaryPrefix.setChecked(true);
     menuWrapper.decimalPrefix.setChecked(false);
 
-    m_controller.GetSettingsManager().SetActiveNumericPrefix(Constants::FileSize::Prefix::BINARY);
+    m_controller.GetSessionSettings().SetActiveNumericPrefix(Constants::FileSize::Prefix::BINARY);
     m_fileSizeOptions = GeneratePruningMenuEntries(Constants::FileSize::Prefix::BINARY);
 
     SetupFileSizePruningDropdown();
@@ -541,7 +541,7 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
         return;
     }
 
-    auto& parameters = m_controller.GetSettingsManager().GetVisualizationParameters();
+    auto& parameters = m_controller.GetSessionSettings().GetVisualizationParameters();
     parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
     m_glCanvas->ReloadVisualization();
@@ -565,7 +565,7 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
     menuWrapper.binaryPrefix.setChecked(false);
     menuWrapper.decimalPrefix.setChecked(true);
 
-    m_controller.GetSettingsManager().SetActiveNumericPrefix(Constants::FileSize::Prefix::DECIMAL);
+    m_controller.GetSessionSettings().SetActiveNumericPrefix(Constants::FileSize::Prefix::DECIMAL);
     m_fileSizeOptions = GeneratePruningMenuEntries(Constants::FileSize::Prefix::DECIMAL);
 
     SetupFileSizePruningDropdown();
@@ -575,7 +575,7 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
         return;
     }
 
-    auto& parameters = m_controller.GetSettingsManager().GetVisualizationParameters();
+    auto& parameters = m_controller.GetSessionSettings().GetVisualizationParameters();
     parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
     m_glCanvas->ReloadVisualization();
@@ -628,7 +628,7 @@ void MainWindow::PruneTree()
     parameters.forceNewScan = false;
     parameters.minimumFileSize = minimumSize;
 
-    m_controller.GetSettingsManager().SetVisualizationParameters(parameters);
+    m_controller.GetSessionSettings().SetVisualizationParameters(parameters);
 
     if (!m_controller.GetRootPath().empty()) {
         m_glCanvas->ReloadVisualization();
@@ -642,7 +642,7 @@ void MainWindow::PruneTree()
 void MainWindow::ApplyColorScheme()
 {
     const auto colorScheme = m_ui.colorSchemeComboBox->currentText().toStdWString();
-    m_controller.GetSettingsManager().SetColorScheme(colorScheme);
+    m_controller.GetPersistentSettings().SetColorScheme(colorScheme);
 
     m_glCanvas->ApplyColorScheme();
 }
@@ -670,7 +670,7 @@ void MainWindow::OnRenderOriginToggled(bool shouldShow)
 {
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::OriginMarker>(shouldShow);
 
-    m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
+    m_controller.GetPersistentSettings().SavePreferenceChangeToDisk(
         Constants::Preferences::ShowOrigin, shouldShow);
 }
 
@@ -678,7 +678,7 @@ void MainWindow::OnRenderGridToggled(bool shouldShow)
 {
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::Grid>(shouldShow);
 
-    m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
+    m_controller.GetPersistentSettings().SavePreferenceChangeToDisk(
         Constants::Preferences::ShowGrid, shouldShow);
 }
 
@@ -686,7 +686,7 @@ void MainWindow::OnRenderLightMarkersToggled(bool shouldShow)
 {
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::LightMarker>(shouldShow);
 
-    m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
+    m_controller.GetPersistentSettings().SavePreferenceChangeToDisk(
         Constants::Preferences::ShowLights, shouldShow);
 }
 
@@ -694,13 +694,13 @@ void MainWindow::OnRenderFrustumToggled(bool shouldShow)
 {
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::Frustum>(shouldShow);
 
-    m_controller.GetSettingsManager().SavePreferenceChangeToDisk(
+    m_controller.GetPersistentSettings().SavePreferenceChangeToDisk(
         Constants::Preferences::ShowFrusta, shouldShow);
 }
 
 void MainWindow::OnShowShadowsToggled(bool shouldShow)
 {
-    auto& settingsManager = m_controller.GetSettingsManager();
+    auto& settingsManager = m_controller.GetPersistentSettings();
 
     settingsManager.SetShowShadows(shouldShow);
     settingsManager.SavePreferenceChangeToDisk(Constants::Preferences::ShowShadows, shouldShow);
@@ -708,7 +708,7 @@ void MainWindow::OnShowShadowsToggled(bool shouldShow)
 
 void MainWindow::OnShowCascadeSplitsToggled(bool shouldShow)
 {
-    auto& settingsManager = m_controller.GetSettingsManager();
+    auto& settingsManager = m_controller.GetPersistentSettings();
 
     settingsManager.SetShowCascadeSplits(shouldShow);
     settingsManager.SavePreferenceChangeToDisk(Constants::Preferences::ShowCascadeSplits,

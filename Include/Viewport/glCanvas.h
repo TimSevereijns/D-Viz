@@ -12,7 +12,7 @@
 #include "Scene/Assets/originMarkerAsset.h"
 #include "Scene/Assets/treemapAsset.h"
 #include "Scene/light.h"
-#include "Settings/settingsManager.h"
+#include "Settings/persistentSettings.h"
 #include "Visualizations/visualization.h"
 #include "camera.h"
 #include "constants.h"

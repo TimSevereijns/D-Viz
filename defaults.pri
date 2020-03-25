@@ -31,8 +31,9 @@ SOURCES += \
    $$PWD/Source/Scene/Assets/lineAsset.cpp \
    $$PWD/Source/Scene/Assets/originMarkerAsset.cpp \
    $$PWD/Source/Scene/Assets/treemapAsset.cpp \
+   $$PWD/Source/Settings/persistentSettings.cpp \
    $$PWD/Source/Settings/settings.cpp \
-   $$PWD/Source/Settings/settingsManager.cpp \
+   $$PWD/Source/Settings/sessionSettings.cpp \
    $$PWD/Source/Utilities/scopedHandle.cpp \
    $$PWD/Source/Viewport/camera.cpp \
    $$PWD/Source/Viewport/gamepadContextMenu.cpp \
@@ -77,9 +78,10 @@ HEADERS += \
    $$PWD/Include/Scene/Assets/lineAsset.h \
    $$PWD/Include/Scene/Assets/originMarkerAsset.h \
    $$PWD/Include/Scene/Assets/treemapAsset.h \
+   $$PWD/Include/Settings/persistentSettings.h \
    $$PWD/Include/Settings/preferencesMap.hpp \
    $$PWD/Include/Settings/settings.h \
-   $$PWD/Include/Settings/settingsManager.h \
+   $$PWD/Include/Settings/sessionSettings.h \
    $$PWD/Include/Utilities/ignoreUnused.hpp \
    $$PWD/Include/Utilities/operatingSystem.hpp \
    $$PWD/Include/Utilities/scopeExit.hpp \

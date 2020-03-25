@@ -3,7 +3,7 @@
 
 #include <QAbstractTableModel>
 
-#include "Settings/settingsManager.h"
+#include "Settings/persistentSettings.h"
 #include "Utilities/utilities.hpp"
 #include "Visualizations/vizBlock.h"
 #include "constants.h"
@@ -19,7 +19,7 @@
 
 namespace Settings
 {
-    class Manager;
+    class PersistentSettings;
 }
 
 struct RowModel

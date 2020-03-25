@@ -10,7 +10,9 @@
 namespace Assets
 {
     AssetBase::AssetBase(const Controller& controller, QOpenGLExtraFunctions& openGL)
-        : m_openGL{ openGL }, m_settingsManager{ controller.GetSettingsManager() }
+        : m_openGL{ openGL },
+          m_persistentSettings{ controller.GetPersistentSettings() },
+          m_sessionSettings{ controller.GetSessionSettings() }
     {
     }
 
@@ -52,7 +54,7 @@ namespace Assets
 
     bool AssetBase::DetermineVisibilityFromPreferences(std::wstring_view preferenceName)
     {
-        const auto& preferences = m_settingsManager.GetPreferenceMap();
+        const auto& preferences = m_persistentSettings.GetPreferenceMap();
         const auto shouldRender = preferences.GetValueOrDefault(preferenceName, true);
 
         return shouldRender;

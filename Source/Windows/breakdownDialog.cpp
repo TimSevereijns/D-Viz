@@ -36,7 +36,7 @@ void BreakdownDialog::ReloadData()
         return;
     }
 
-    const auto& parameters = controller.GetSettingsManager().GetVisualizationParameters();
+    const auto& parameters = controller.GetSessionSettings().GetVisualizationParameters();
 
     const auto stopwatch = Stopwatch<std::chrono::milliseconds>([&] {
         for (const auto& node : tree) {
@@ -56,7 +56,7 @@ void BreakdownDialog::ReloadData()
             "Built break-down model in: {} {}", stopwatch.GetElapsedTime().count(),
             stopwatch.GetUnitsAsCharacterArray()));
 
-    m_model.Process(controller.GetSettingsManager().GetActiveNumericPrefix());
+    m_model.Process(controller.GetSessionSettings().GetActiveNumericPrefix());
 
     m_proxyModel.invalidate();
     m_proxyModel.setSourceModel(&m_model);

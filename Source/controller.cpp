@@ -1,6 +1,6 @@
 #include "controller.h"
 
-#include "Settings/settingsManager.h"
+#include "Settings/persistentSettings.h"
 #include "Utilities/ignoreUnused.hpp"
 #include "Utilities/operatingSystem.hpp"
 #include "Utilities/scopeExit.hpp"
@@ -86,7 +86,7 @@ namespace
 } // namespace
 
 Controller::Controller()
-    : m_settingsManager{ GetColorJsonPath(), GetPreferencesJsonPath() },
+    : m_persistentSettings{ GetColorJsonPath(), GetPreferencesJsonPath() },
       m_view{ std::make_unique<MainWindow>(*this) }
 {
 }
@@ -196,8 +196,8 @@ QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
         return Constants::Colors::SlateGray;
     }
 
-    if (m_settingsManager.GetActiveColorScheme() != Constants::ColorScheme::Default) {
-        const auto fileColor = m_settingsManager.DetermineColorFromExtension(node);
+    if (m_persistentSettings.GetActiveColorScheme() != Constants::ColorScheme::Default) {
+        const auto fileColor = m_persistentSettings.DetermineColorFromExtension(node);
         if (fileColor) {
             return *fileColor;
         }
@@ -231,7 +231,7 @@ void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
 
         m_view->SetStatusBarMessage(message);
     } else {
-        const auto prefix = m_settingsManager.GetActiveNumericPrefix();
+        const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
         const auto [size, units] = Utilities::ConvertFileSizeToNumericPrefix(sizeInBytes, prefix);
 
         const auto message = fmt::format(
@@ -302,7 +302,7 @@ void Controller::SelectNodeAndUpdateStatusBar(
     SelectNode(node, selectorCallback);
 
     const auto fileSize = node->file.size;
-    const auto prefix = m_settingsManager.GetActiveNumericPrefix();
+    const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
     const auto [prefixedSize, units] = Utilities::ConvertFileSizeToNumericPrefix(fileSize, prefix);
     const auto isInBytes = (units == Utilities::Detail::bytesLabel);
 
@@ -332,7 +332,7 @@ void Controller::SelectNodeViaRay(
         m_model->ClearSelectedNode();
     }
 
-    const auto& parameters = m_settingsManager.GetVisualizationParameters();
+    const auto& parameters = m_sessionSettings.GetVisualizationParameters();
     const auto* node = m_model->FindNearestIntersection(camera, ray, parameters);
 
     if (node) {
@@ -363,7 +363,7 @@ void Controller::DisplaySelectionDetails()
         totalBytes += node->GetData().file.size;
     }
 
-    const auto prefix = m_settingsManager.GetActiveNumericPrefix();
+    const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
     const auto [prefixedSize, units] =
         Utilities::ConvertFileSizeToNumericPrefix(totalBytes, prefix);
     const auto isInBytes = (units == Utilities::Detail::bytesLabel);
@@ -448,7 +448,7 @@ void Controller::HighlightDescendants(
     Expects(m_model);
 
     const auto selector = [&] {
-        m_model->HighlightDescendants(node, m_settingsManager.GetVisualizationParameters());
+        m_model->HighlightDescendants(node, m_sessionSettings.GetVisualizationParameters());
     };
 
     ProcessHighlightedNodes(selector, callback);
@@ -460,7 +460,7 @@ void Controller::HighlightAllMatchingExtensions(
 {
     Expects(m_model);
 
-    const auto& parameters = m_settingsManager.GetVisualizationParameters();
+    const auto& parameters = m_sessionSettings.GetVisualizationParameters();
     const auto selector = [&] { m_model->HighlightMatchingFileExtensions(extension, parameters); };
 
     ProcessHighlightedNodes(selector, callback);
@@ -482,7 +482,7 @@ void Controller::SearchTreeMap(
     const auto selector = [&] {
         const auto stopwatch = Stopwatch<std::chrono::milliseconds>([&]() noexcept {
             m_model->HighlightMatchingFileNames(
-                searchQuery, m_settingsManager.GetVisualizationParameters(), shouldSearchFiles,
+                searchQuery, m_sessionSettings.GetVisualizationParameters(), shouldSearchFiles,
                 shouldSearchDirectories);
         });
 
@@ -527,14 +527,24 @@ std::filesystem::path Controller::ResolveCompleteFilePath(const Tree<VizBlock>::
     return finalPath;
 }
 
-Settings::Manager& Controller::GetSettingsManager()
+Settings::PersistentSettings& Controller::GetPersistentSettings()
 {
-    return m_settingsManager;
+    return m_persistentSettings;
 }
 
-const Settings::Manager& Controller::GetSettingsManager() const
+const Settings::PersistentSettings& Controller::GetPersistentSettings() const
 {
-    return m_settingsManager;
+    return m_persistentSettings;
+}
+
+Settings::SessionSettings& Controller::GetSessionSettings()
+{
+    return m_sessionSettings;
+}
+
+const Settings::SessionSettings& Controller::GetSessionSettings() const
+{
+    return m_sessionSettings;
 }
 
 std::filesystem::path Controller::GetRootPath() const

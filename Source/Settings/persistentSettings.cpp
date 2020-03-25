@@ -1,4 +1,4 @@
-#include "Settings/settingsManager.h"
+#include "Settings/persistentSettings.h"
 #include <Visualizations/vizBlock.h>
 #include <constants.h>
 
@@ -111,7 +111,7 @@ namespace
 
 namespace Settings
 {
-    Manager::Manager(
+    PersistentSettings::PersistentSettings(
         const std::filesystem::path& colorFile, const std::filesystem::path& preferencesFile)
         : m_preferencesPath{ preferencesFile }, m_fileColorMapPath{ colorFile }
     {
@@ -125,7 +125,7 @@ namespace Settings
         PopulatePreferencesMapFromJsonDocument(m_preferencesDocument, m_preferencesMap);
     }
 
-    JsonDocument Manager::CreatePreferencesDocument()
+    JsonDocument PersistentSettings::CreatePreferencesDocument()
     {
         JsonDocument document;
         document.SetObject();
@@ -146,67 +146,58 @@ namespace Settings
         return document;
     }
 
-    void Manager::OnCameraSpeedChanged(double speed)
+    const ColorMap& PersistentSettings::GetFileColorMap() const
     {
-        m_cameraSpeed = speed;
+        return m_colorMap;
     }
 
-    void Manager::OnMouseSensitivityChanged(double sensitivity)
+    const PreferencesMap& PersistentSettings::GetPreferenceMap() const
     {
-        m_mouseSensitivity = sensitivity;
+        return m_preferencesMap;
     }
 
-    void Manager::OnAmbientLightCoefficientChanged(double coefficient)
+    const std::wstring& PersistentSettings::GetActiveColorScheme() const
     {
-        m_ambientLightCoefficient = coefficient;
+        return m_colorScheme;
     }
 
-    void Manager::OnLightAttenuationChanged(double attenuation)
+    void PersistentSettings::SetColorScheme(const std::wstring& scheme)
     {
-        m_lightAttenuationFactor = attenuation;
+        m_colorScheme = scheme;
     }
 
-    void Manager::OnAttachLightToCameraStateChanged(bool attached)
+    bool PersistentSettings::ShouldShowCascadeSplits() const
     {
-        m_isLightAttachedToCamera = attached;
+        return m_showCascadeSplits;
     }
 
-    void Manager::OnFieldOfViewChanged(int fieldOfView)
+    void PersistentSettings::SetShowCascadeSplits(bool isEnabled)
     {
-        m_fieldOfView = fieldOfView;
+        m_showCascadeSplits = isEnabled;
     }
 
-    void Manager::OnShouldSearchFilesChanged(bool state)
+    bool PersistentSettings::ShouldRenderShadows() const
     {
-        m_shouldSearchFiles = state;
+        return m_shouldShowShadows;
     }
 
-    void Manager::OnShouldSearchDirectoriesChanged(bool state)
+    void PersistentSettings::SetShowShadows(bool isEnabled)
     {
-        m_shouldSearchDirectories = state;
+        m_shouldShowShadows = isEnabled;
     }
 
-    void Manager::OnMonitoringOptionToggled(bool isEnabled)
+    bool PersistentSettings::ShouldMonitorFileSystem() const
+    {
+        return m_shouldMonitorFileSystem;
+    }
+
+    void PersistentSettings::OnMonitoringOptionToggled(bool isEnabled)
     {
         m_shouldMonitorFileSystem = isEnabled;
     }
 
-    bool Manager::IsBlockVisible(const VizBlock& block)
-    {
-        if (block.file.size < m_visualizationParameters.minimumFileSize) {
-            return false;
-        }
-
-        if (block.file.type != FileType::DIRECTORY &&
-            m_visualizationParameters.onlyShowDirectories) {
-            return false;
-        }
-
-        return true;
-    }
-
     std::optional<QVector3D>
-    Manager::DetermineColorFromExtension(const Tree<VizBlock>::Node& node) const
+    PersistentSettings::DetermineColorFromExtension(const Tree<VizBlock>::Node& node) const
     {
         const auto categoryItr = m_colorMap.find(m_colorScheme);
         if (categoryItr == std::end(m_colorMap)) {
@@ -219,117 +210,5 @@ namespace Settings
         }
 
         return extensionItr->second;
-    }
-
-    double Manager::GetCameraSpeed() const
-    {
-        return m_cameraSpeed;
-    }
-
-    void Manager::SetCameraSpeed(double speed)
-    {
-        m_cameraSpeed = speed;
-    }
-
-    double Manager::GetMouseSensitivity() const
-    {
-        return m_mouseSensitivity;
-    }
-
-    double Manager::GetLightAttentuationFactor() const
-    {
-        return m_lightAttenuationFactor;
-    }
-
-    double Manager::GetAmbientLightCoefficient() const
-    {
-        return m_ambientLightCoefficient;
-    }
-
-    double Manager::GetMaterialShininess() const
-    {
-        return m_materialShininess;
-    }
-
-    QVector3D Manager::GetSpecularColor() const
-    {
-        return Constants::Colors::White;
-    }
-
-    bool Manager::IsPrimaryLightAttachedToCamera() const
-    {
-        return m_isLightAttachedToCamera;
-    }
-
-    const ColorMap& Manager::GetFileColorMap() const
-    {
-        return m_colorMap;
-    }
-
-    const PreferencesMap& Manager::GetPreferenceMap() const
-    {
-        return m_preferencesMap;
-    }
-
-    const std::wstring& Manager::GetActiveColorScheme() const
-    {
-        return m_colorScheme;
-    }
-
-    void Manager::SetColorScheme(const std::wstring& scheme)
-    {
-        m_colorScheme = scheme;
-    }
-
-    const VisualizationParameters& Manager::GetVisualizationParameters() const
-    {
-        return m_visualizationParameters;
-    }
-
-    VisualizationParameters& Manager::GetVisualizationParameters()
-    {
-        return m_visualizationParameters;
-    }
-
-    VisualizationParameters&
-    Manager::SetVisualizationParameters(const VisualizationParameters& parameters)
-    {
-        m_visualizationParameters = parameters;
-        return m_visualizationParameters;
-    }
-
-    void Manager::SetActiveNumericPrefix(Constants::FileSize::Prefix prefix)
-    {
-        m_activeNumericPrefix = prefix;
-    }
-
-    Constants::FileSize::Prefix Manager::GetActiveNumericPrefix() const
-    {
-        return m_activeNumericPrefix;
-    }
-
-    void Manager::SetShowCascadeSplits(bool isEnabled)
-    {
-        m_showCascadeSplits = isEnabled;
-    }
-
-    bool Manager::ShouldShowCascadeSplits() const
-    {
-        return m_showCascadeSplits;
-    }
-
-    void Manager::SetShowShadows(bool isEnabled)
-    {
-        m_shouldShowShadows = isEnabled;
-    }
-
-    bool Manager::ShouldRenderShadows() const
-    {
-        return m_shouldShowShadows;
-    }
-
-    bool Manager::ShouldMonitorFileSystem() const
-    {
-        return m_shouldMonitorFileSystem;
     }
 } // namespace Settings
