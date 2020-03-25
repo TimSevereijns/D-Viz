@@ -70,7 +70,7 @@ class ScanBreakdownModel final : public QAbstractTableModel
     void insert(const Tree<VizBlock>::Node& node);
 
   private:
-    void FinalizeInsertion(Constants::FileSize::Prefix sizePrefix);
+    void Process(Constants::FileSize::Prefix sizePrefix);
 
     void ClearData();
 

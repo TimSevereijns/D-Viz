@@ -56,8 +56,9 @@ void BreakdownDialog::ReloadData()
             "Built break-down model in: {} {}", stopwatch.GetElapsedTime().count(),
             stopwatch.GetUnitsAsCharacterArray()));
 
-    m_model.FinalizeInsertion(controller.GetSettingsManager().GetActiveNumericPrefix());
+    m_model.Process(controller.GetSettingsManager().GetActiveNumericPrefix());
 
+    m_proxyModel.invalidate();
     m_proxyModel.setSourceModel(&m_model);
 
     m_ui.tableView->setModel(&m_proxyModel);

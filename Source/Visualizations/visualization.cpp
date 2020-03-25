@@ -356,29 +356,29 @@ Tree<VizBlock>::Node* VisualizationModel::FindNearestIntersection(
 
     Tree<VizBlock>::Node* nearestIntersection = nullptr;
 
-    Stopwatch<std::chrono::microseconds>(
-        [&]() noexcept {
-            const auto root = m_fileTree->GetRoot();
-            const auto intersections = FindAllIntersections(ray, camera, parameters, root);
+    const auto stopwatch = Stopwatch<std::chrono::microseconds>([&]() noexcept {
+        const auto root = m_fileTree->GetRoot();
+        const auto intersections = FindAllIntersections(ray, camera, parameters, root);
 
-            if (intersections.empty()) {
-                return;
-            }
+        if (intersections.empty()) {
+            return;
+        }
 
-            const auto closest = std::min_element(
-                std::begin(intersections),
-                std::end(intersections), [&ray](const auto& lhs, const auto& rhs) noexcept {
-                    return (
-                        ray.Origin().distanceToPoint(lhs.point) <
-                        ray.Origin().distanceToPoint(rhs.point));
-                });
+        const auto closest = std::min_element(
+            std::begin(intersections),
+            std::end(intersections), [&ray](const auto& lhs, const auto& rhs) noexcept {
+                return (
+                    ray.Origin().distanceToPoint(lhs.point) <
+                    ray.Origin().distanceToPoint(rhs.point));
+            });
 
-            nearestIntersection = closest->node;
-        },
-        [](const auto& elapsed, const auto& units) noexcept {
-            spdlog::get(Constants::Logging::DefaultLog)
-                ->info(fmt::format("Selected node in: {} {}", elapsed.count(), units));
-        });
+        nearestIntersection = closest->node;
+    });
+
+    spdlog::get(Constants::Logging::DefaultLog)
+        ->info(fmt::format(
+            "Selected node in: {} {}", stopwatch.GetElapsedTime().count(),
+            stopwatch.GetUnitsAsCharacterArray()));
 
     return nearestIntersection;
 }

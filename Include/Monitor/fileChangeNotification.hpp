@@ -10,46 +10,7 @@
 #include <Tree/Tree.hpp>
 #include <spdlog/spdlog.h>
 
-enum class FileModification
-{
-    NONE,
-    CREATED,
-    DELETED,
-    TOUCHED,
-    RENAMED
-};
-
 struct VizBlock;
-
-/**
- * @brief The FileEvent struct
- *
- * @todo File size should probably be added to the FileEvent struct. This will make
- * it far easier to unit test, since I can then more easily fake notifications.
- */
-// struct FileEvent
-//{
-//    FileEvent() = default;
-
-//    FileEvent(std::experimental::filesystem::path path, FileModification status)
-//        : path{ std::move(path) }, status{ status }
-//    {
-//    }
-
-//    // The relative path from the root of the visualization to the node that changed.
-//    std::experimental::filesystem::path path;
-
-//    // The type of change that occurred.
-//    FileModification status{ FileModification::NONE };
-
-//    // A pointer to the corresponding node in the tree, should it exist.
-//    typename Tree<VizBlock>::Node* node{ nullptr }; //< @todo Should this be const?
-
-//    friend bool operator==(const FileEvent& lhs, const FileEvent& rhs)
-//    {
-//        return lhs.node == rhs.node && lhs.path == rhs.path && lhs.status == rhs.status;
-//    }
-//};
 
 enum class FileEventType
 {
