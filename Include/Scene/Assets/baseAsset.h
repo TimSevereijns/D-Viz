@@ -7,6 +7,8 @@
 #include "Viewport/camera.h"
 #include "Visualizations/visualization.h"
 
+#include <string_view>
+
 #include <QOpenGLBuffer>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLShaderProgram>

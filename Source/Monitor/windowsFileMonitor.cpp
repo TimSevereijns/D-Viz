@@ -3,7 +3,9 @@
 #ifdef Q_OS_WIN
 
 #include <Utilities/scopeExit.hpp>
+
 #include <exception>
+#include <string_view>
 
 #include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>

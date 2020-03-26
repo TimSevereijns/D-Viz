@@ -3,6 +3,7 @@
 
 #include <filesystem>
 #include <memory>
+#include <string>
 
 #include <rapidjson/document.h>
 #include <rapidjson/encodings.h>

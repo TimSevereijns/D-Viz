@@ -1,6 +1,8 @@
 #ifndef SESSIONSETTINGS_H
 #define SESSIONSETTINGS_H
 
+#include <string_view>
+
 #include "Settings/settings.h"
 #include "Visualizations/vizBlock.h"
 #include "constants.h"

@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <mutex>
 #include <sstream>
+#include <string_view>
 
 #include "Visualizations/vizBlock.h"
 #include "constants.h"
