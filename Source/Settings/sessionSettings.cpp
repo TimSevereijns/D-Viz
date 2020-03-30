@@ -17,7 +17,7 @@ namespace Settings
         return m_mouseSensitivity;
     }
 
-    double SessionSettings::GetLightAttentuationFactor() const
+    double SessionSettings::GetLightAttenuationFactor() const
     {
         return m_lightAttenuationFactor;
     }

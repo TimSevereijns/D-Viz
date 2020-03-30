@@ -128,7 +128,7 @@ namespace
 
             const auto attenuation = "allLights[" + indexAsString + "].attenuation";
             shader.setUniformValue(
-                attenuation.data(), static_cast<float>(settings.GetLightAttentuationFactor()));
+                attenuation.data(), static_cast<float>(settings.GetLightAttenuationFactor()));
 
             const auto ambientCoefficient = "allLights[" + indexAsString + "].ambientCoefficient";
             shader.setUniformValue(

@@ -670,32 +670,32 @@ void MainWindow::OnRenderOriginToggled(bool shouldShow)
 {
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::OriginMarker>(shouldShow);
 
-    m_controller.GetPersistentSettings().SavePreferenceChangeToDisk(
-        Constants::Preferences::ShowOrigin, shouldShow);
+    m_controller.GetPersistentSettings().SaveSettingToDisk(Constants::Preferences::ShowOrigin,
+        shouldShow);
 }
 
 void MainWindow::OnRenderGridToggled(bool shouldShow)
 {
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::Grid>(shouldShow);
 
-    m_controller.GetPersistentSettings().SavePreferenceChangeToDisk(
-        Constants::Preferences::ShowGrid, shouldShow);
+    m_controller.GetPersistentSettings().SaveSettingToDisk(Constants::Preferences::ShowGrid,
+        shouldShow);
 }
 
 void MainWindow::OnRenderLightMarkersToggled(bool shouldShow)
 {
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::LightMarker>(shouldShow);
 
-    m_controller.GetPersistentSettings().SavePreferenceChangeToDisk(
-        Constants::Preferences::ShowLights, shouldShow);
+    m_controller.GetPersistentSettings().SaveSettingToDisk(Constants::Preferences::ShowLights,
+        shouldShow);
 }
 
 void MainWindow::OnRenderFrustumToggled(bool shouldShow)
 {
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::Frustum>(shouldShow);
 
-    m_controller.GetPersistentSettings().SavePreferenceChangeToDisk(
-        Constants::Preferences::ShowFrusta, shouldShow);
+    m_controller.GetPersistentSettings().SaveSettingToDisk(Constants::Preferences::ShowFrusta,
+        shouldShow);
 }
 
 void MainWindow::OnShowShadowsToggled(bool shouldShow)
@@ -703,7 +703,7 @@ void MainWindow::OnShowShadowsToggled(bool shouldShow)
     auto& settingsManager = m_controller.GetPersistentSettings();
 
     settingsManager.SetShowShadows(shouldShow);
-    settingsManager.SavePreferenceChangeToDisk(Constants::Preferences::ShowShadows, shouldShow);
+    settingsManager.SaveSettingToDisk(Constants::Preferences::ShowShadows, shouldShow);
 }
 
 void MainWindow::OnShowCascadeSplitsToggled(bool shouldShow)
@@ -711,8 +711,7 @@ void MainWindow::OnShowCascadeSplitsToggled(bool shouldShow)
     auto& settingsManager = m_controller.GetPersistentSettings();
 
     settingsManager.SetShowCascadeSplits(shouldShow);
-    settingsManager.SavePreferenceChangeToDisk(Constants::Preferences::ShowCascadeSplits,
-                                               shouldShow);
+    settingsManager.SaveSettingToDisk(Constants::Preferences::ShowCascadeSplits, shouldShow);
 }
 
 bool MainWindow::ShouldShowFrameTime() const

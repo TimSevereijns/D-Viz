@@ -22,6 +22,8 @@ HEADERS += \
    filesystemObserverTests.h \
    modelTests.h \
    multiTestHarness.h \
+   sessionSettingsTests.h \
+   sessionSettingsTests.h \
    testUtilities.hpp \
    Mocks\mockFileMonitor.h
 
@@ -29,7 +31,9 @@ SOURCES += \
    cameraTests.cpp \
    filesystemObserverTests.cpp \
    mainTest.cpp \
-   modelTests.cpp
+   modelTests.cpp \
+    sessionSettingsTests.cpp \
+   sessionSettingsTests.cpp \
 
 win32: CONFIG(release, debug|release) {
     QMAKE_CXXFLAGS += /Zi

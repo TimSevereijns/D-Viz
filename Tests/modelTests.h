@@ -5,7 +5,6 @@
 #include <QtTest>
 
 #include "Mocks/mockFileMonitor.h"
-#include "multiTestHarness.h"
 
 #include <Monitor/fileChangeNotification.hpp>
 #include <Scanner/driveScanner.h>

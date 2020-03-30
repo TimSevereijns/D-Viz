@@ -91,15 +91,13 @@ namespace Settings
         /**
          * @brief Saves preferences to a JSON file on disk.
          *
-         * @todo Make private (will have to move some other functionality around as well).
-         *
          * @param[in] property        The name of the property to be saved or modified.
          * @param[in] value           The value to be associated with the property name.
          *
          * @returns True if the save action succeeded.
          */
         template <typename PropertyValueType>
-        bool SavePreferenceChangeToDisk(std::wstring_view property, const PropertyValueType& value)
+        bool SaveSettingToDisk(std::wstring_view property, const PropertyValueType& value)
         {
             if (m_preferencesDocument.HasMember(property.data())) {
                 m_preferencesDocument[property.data()] = value;

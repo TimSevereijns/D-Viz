@@ -36,7 +36,7 @@ namespace Settings
         /**
          * @return Gets the current light attentuation factor.
          */
-        double GetLightAttentuationFactor() const;
+        double GetLightAttenuationFactor() const;
 
         /**
          * @returns Gets the current ambient light coefficient.
@@ -169,6 +169,6 @@ namespace Settings
 
         Constants::FileSize::Prefix m_activeNumericPrefix{ Constants::FileSize::Prefix::BINARY };
     };
-}
+} // namespace Settings
 
 #endif // SESSIONSETTINGS_H
