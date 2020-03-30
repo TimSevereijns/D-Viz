@@ -2,7 +2,6 @@
 
 #include <Settings/sessionSettings.h>
 
-#include "multiTestHarness.h"
 #include "testUtilities.hpp"
 
 void SessionSettingsTests::initTestCase()

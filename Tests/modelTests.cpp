@@ -5,7 +5,6 @@
 #include <Utilities/operatingSystem.hpp>
 #include <constants.h>
 
-#include "multiTestHarness.h"
 #include "testUtilities.hpp"
 
 namespace
