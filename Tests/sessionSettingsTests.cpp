@@ -2,8 +2,6 @@
 
 #include <Settings/sessionSettings.h>
 
-#include "testUtilities.hpp"
-
 void SessionSettingsTests::initTestCase()
 {
 }
