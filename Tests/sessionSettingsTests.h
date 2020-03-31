@@ -66,6 +66,11 @@ class SessionSettingsTests : public QObject
     void ModifyDirectorySearchingPreference() const;
 
     /**
+     * @brief Verify that the active numeric prefix can be set and retrieved correctly.
+     */
+    void ModifyNumericPrefix() const;
+
+    /**
      * @brief Verify visualization parameters can correctly set and retrieved.
      */
     void ModifyVisualizationParameters() const;

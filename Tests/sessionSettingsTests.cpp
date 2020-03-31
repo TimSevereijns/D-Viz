@@ -84,6 +84,16 @@ void SessionSettingsTests::ModifyDirectorySearchingPreference() const
     QVERIFY(manager.ShouldSearchDirectories() == searchDirectories);
 }
 
+void SessionSettingsTests::ModifyNumericPrefix() const
+{
+    const auto numericPrefix = Constants::FileSize::Prefix::BINARY;
+
+    Settings::SessionSettings manager;
+    manager.SetActiveNumericPrefix(Constants::FileSize::Prefix::BINARY);
+
+    QVERIFY(manager.GetActiveNumericPrefix() == numericPrefix);
+}
+
 void SessionSettingsTests::ModifyVisualizationParameters() const
 {
     using namespace Literals::Numeric::Binary;
