@@ -145,6 +145,27 @@ void SessionSettingsTests::VerifyFilesUnderLimitAreNotDisplayed() const
     QVERIFY(shouldDisplay == false);
 }
 
+void SessionSettingsTests::VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed() const
+{
+    using namespace Literals::Numeric::Binary;
+
+    Settings::VisualizationParameters parameters;
+    parameters.minimumFileSize = 10_MiB;
+    parameters.onlyShowDirectories = true;
+
+    VizBlock sample;
+    sample.file.name = L"Bar";
+    sample.file.extension = L"";
+    sample.file.size = 10_GiB;
+    sample.file.type = FileType::REGULAR;
+
+    Settings::SessionSettings manager;
+    manager.SetVisualizationParameters(parameters);
+    const auto shouldDisplay = manager.IsBlockVisible(sample);
+
+    QVERIFY(shouldDisplay == false);
+}
+
 void SessionSettingsTests::VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed() const
 {
     using namespace Literals::Numeric::Binary;

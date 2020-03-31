@@ -82,6 +82,11 @@ class SessionSettingsTests : public QObject
     void VerifyFilesUnderLimitAreNotDisplayed() const;
 
     /**
+     * @brief Verifies that files are not displayed when only directories are allowed to be shown.
+     */
+    void VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed() const;
+
+    /**
      * @brief Verifies that directories should not be shown when the size of that directory is too
      * small.
      */
