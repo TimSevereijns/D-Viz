@@ -67,11 +67,6 @@ namespace Settings
         m_isLightAttachedToCamera = attached;
     }
 
-    void SessionSettings::OnFieldOfViewChanged(int fieldOfView)
-    {
-        m_fieldOfView = fieldOfView;
-    }
-
     void SessionSettings::OnShouldSearchFilesChanged(bool state)
     {
         m_shouldSearchFiles = state;
@@ -94,6 +89,16 @@ namespace Settings
         }
 
         return true;
+    }
+
+    bool SessionSettings::ShouldSearchFiles() const
+    {
+        return m_shouldSearchFiles;
+    }
+
+    bool SessionSettings::ShouldSearchDirectories() const
+    {
+        return m_shouldSearchDirectories;
     }
 
     const Settings::VisualizationParameters& SessionSettings::GetVisualizationParameters() const

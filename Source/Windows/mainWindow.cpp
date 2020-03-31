@@ -591,8 +591,9 @@ void MainWindow::OnNewSearchQuery()
 
     const auto selectionCallback = [&](auto& nodes) { m_glCanvas->HighlightNodes(nodes); };
 
-    const auto shouldSearchFiles = m_ui.searchFilesCheckBox->isChecked();
-    const auto shouldSearchDirectories = m_ui.searchDirectoriesCheckBox->isChecked();
+    const auto shouldSearchFiles = m_controller.GetSessionSettings().ShouldSearchFiles();
+    const auto shouldSearchDirectories =
+        m_controller.GetSessionSettings().ShouldSearchDirectories();
 
     const ScopedCursor waitCursor{ Qt::WaitCursor };
     IgnoreUnused(waitCursor);

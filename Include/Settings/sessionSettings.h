@@ -63,6 +63,16 @@ namespace Settings
          */
         bool IsBlockVisible(const VizBlock& block);
 
+        /**
+         * @returns True if files should be searched.
+         */
+        bool ShouldSearchFiles() const;
+
+        /**
+         * @returns True if directories should be searched.
+         */
+        bool ShouldSearchDirectories() const;
+
       public slots:
 
         /**
@@ -99,13 +109,6 @@ namespace Settings
          * @param[in] attached        Pass in true to attach light number one to the camera.
          */
         void OnAttachLightToCameraStateChanged(bool attached);
-
-        /**
-         * @brief Handles changes in the field of view.
-         *
-         * @param[in] fieldOfView     Field of view in degrees.
-         */
-        void OnFieldOfViewChanged(int fieldOfView);
 
         /**
          * @brief Handles toggling of whether regular files should be searched.
@@ -158,8 +161,6 @@ namespace Settings
         double m_ambientLightCoefficient{ 0.2 };
         double m_lightAttenuationFactor{ 0.000 };
         double m_materialShininess{ 80.0 };
-
-        int m_fieldOfView{ 45 };
 
         bool m_isLightAttachedToCamera{ false };
         bool m_shouldSearchDirectories{ false };
