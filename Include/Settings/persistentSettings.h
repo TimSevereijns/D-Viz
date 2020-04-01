@@ -89,6 +89,13 @@ namespace Settings
         DetermineColorFromExtension(const Tree<VizBlock>::Node& node) const;
 
         /**
+         * @brief Handles toggling of whether the file system should be monitored for changes.
+         *
+         * @param[in] isEnabled       Pass in true to enable monitoring.
+         */
+        void OnMonitoringOptionToggled(bool isEnabled);
+
+        /**
          * @brief Saves preferences to a JSON file on disk.
          *
          * @param[in] property        The name of the property to be saved or modified.
@@ -113,11 +120,20 @@ namespace Settings
         }
 
         /**
-         * @brief Handles toggling of whether the file system should be monitored for changes.
-         *
-         * @param[in] isEnabled       Pass in true to enable monitoring.
+         * @returns The full path to the JSON file that contains the color mapping.
          */
-        void OnMonitoringOptionToggled(bool isEnabled);
+        static std::filesystem::path GetColorJsonPath()
+        {
+            return std::filesystem::current_path().append(L"colors.json");
+        }
+
+        /**
+         * @returns The full path to the JSON file that contains the user preferences.
+         */
+        static std::filesystem::path GetPreferencesJsonPath()
+        {
+            return std::filesystem::current_path().append(L"preferences.json");
+        }
 
       private:
         JsonDocument CreatePreferencesDocument();

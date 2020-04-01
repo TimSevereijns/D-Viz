@@ -40,22 +40,6 @@ namespace
 #endif // Q_OS_LINUX
 
     /**
-     * @returns The full path to the JSON file that contains the color mapping.
-     */
-    std::filesystem::path GetColorJsonPath()
-    {
-        return std::filesystem::current_path().append(L"colors.json");
-    }
-
-    /**
-     * @returns The full path to the JSON file that contains the user preferences.
-     */
-    std::filesystem::path GetPreferencesJsonPath()
-    {
-        return std::filesystem::current_path().append(L"preferences.json");
-    }
-
-    /**
      * @brief Helper function to be called once scanning completes.
      *
      * @param[in] progress           The final results from the scan.
@@ -86,7 +70,8 @@ namespace
 } // namespace
 
 Controller::Controller()
-    : m_persistentSettings{ GetColorJsonPath(), GetPreferencesJsonPath() },
+    : m_persistentSettings{ Settings::PersistentSettings::GetColorJsonPath(),
+                            Settings::PersistentSettings::GetPreferencesJsonPath() },
       m_view{ std::make_unique<MainWindow>(*this) }
 {
 }

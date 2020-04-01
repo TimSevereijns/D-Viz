@@ -22,6 +22,7 @@ HEADERS += \
    filesystemObserverTests.h \
    modelTests.h \
    multiTestHarness.h \
+   persistentSettingsTests.h \
    sessionSettingsTests.h \
    testUtilities.hpp \
    Mocks\mockFileMonitor.h
@@ -31,6 +32,7 @@ SOURCES += \
    filesystemObserverTests.cpp \
    mainTest.cpp \
    modelTests.cpp \
+   persistentSettingsTests.cpp \
    sessionSettingsTests.cpp \
 
 win32: CONFIG(release, debug|release) {
