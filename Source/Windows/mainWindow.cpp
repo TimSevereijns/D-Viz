@@ -274,7 +274,7 @@ void MainWindow::SetupOptionsMenu()
 
     connect(
         &m_optionsMenuWrapper.enableFileSystemMonitoring, &QAction::toggled,
-        &m_controller.GetPersistentSettings(), &Settings::PersistentSettings::OnMonitoringOptionToggled);
+        &m_controller.GetPersistentSettings(), &Settings::PersistentSettings::MonitorFileSystem);
 
     m_optionsMenu.setTitle("Options");
     m_optionsMenu.addAction(&m_optionsMenuWrapper.toggleFrameTime);
@@ -360,7 +360,7 @@ void MainWindow::SetupDebuggingMenu()
     const auto shouldShowCascadeSplits =
         preferences.GetValueOrDefault(Constants::Preferences::ShowCascadeSplits, true);
 
-    m_controller.GetPersistentSettings().SetShowCascadeSplits(shouldShowCascadeSplits);
+    m_controller.GetPersistentSettings().RenderCascadeSplits(shouldShowCascadeSplits);
 
     lightingMenuWrapper.showCascadeSplits.setText("Show Cascade Splits");
     lightingMenuWrapper.showCascadeSplits.setCheckable(true);
@@ -373,7 +373,7 @@ void MainWindow::SetupDebuggingMenu()
     const auto shouldShowShadows =
         preferences.GetValueOrDefault(Constants::Preferences::ShowShadows, true);
 
-    m_controller.GetPersistentSettings().SetShowShadows(shouldShowShadows);
+    m_controller.GetPersistentSettings().RenderShadows(shouldShowShadows);
 
     lightingMenuWrapper.showShadows.setText("Show Shadows");
     lightingMenuWrapper.showShadows.setCheckable(true);
@@ -703,7 +703,7 @@ void MainWindow::OnShowShadowsToggled(bool shouldShow)
 {
     auto& settingsManager = m_controller.GetPersistentSettings();
 
-    settingsManager.SetShowShadows(shouldShow);
+    settingsManager.RenderShadows(shouldShow);
     settingsManager.SaveSettingToDisk(Constants::Preferences::ShowShadows, shouldShow);
 }
 
@@ -711,7 +711,7 @@ void MainWindow::OnShowCascadeSplitsToggled(bool shouldShow)
 {
     auto& settingsManager = m_controller.GetPersistentSettings();
 
-    settingsManager.SetShowCascadeSplits(shouldShow);
+    settingsManager.RenderCascadeSplits(shouldShow);
     settingsManager.SaveSettingToDisk(Constants::Preferences::ShowCascadeSplits, shouldShow);
 }
 

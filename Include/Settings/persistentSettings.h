@@ -30,7 +30,8 @@ namespace Settings
 
       public:
         PersistentSettings(
-            const std::filesystem::path& colorFile, const std::filesystem::path& preferencesFile);
+            const std::filesystem::path& colorFile = DefaultColoringFilePath(),
+            const std::filesystem::path& preferencesFile = DefaultPreferencesFilePath());
 
         /**
          * @returns The map that associates colors with file extensions.
@@ -55,12 +56,12 @@ namespace Settings
         /**
          * @returns True if shadow cascade splits should be visualized.
          */
-        bool ShouldShowCascadeSplits() const;
+        bool ShouldRenderCascadeSplits() const;
 
         /**
          * @brief Passing in `true` will render the cascade splits overlay.
          */
-        void SetShowCascadeSplits(bool isEnabled);
+        void RenderCascadeSplits(bool isEnabled);
 
         /**
          * @returns True if shadow rendering is enabled.
@@ -70,7 +71,7 @@ namespace Settings
         /**
          * @brief Passing in `true` will enable the rendering of shadows.
          */
-        void SetShowShadows(bool isEnabled);
+        void RenderShadows(bool isEnabled);
 
         /**
          * @returns True if the file system monitor is enabled;
@@ -93,7 +94,7 @@ namespace Settings
          *
          * @param[in] isEnabled       Pass in true to enable monitoring.
          */
-        void OnMonitoringOptionToggled(bool isEnabled);
+        void MonitorFileSystem(bool isEnabled);
 
         /**
          * @brief Saves preferences to a JSON file on disk.
@@ -120,9 +121,19 @@ namespace Settings
         }
 
         /**
+         * @returns The current file coloring path.
+         */
+        const std::filesystem::path& GetColoringFilePath() const;
+
+        /**
+         * @returns The current preferences path.
+         */
+        const std::filesystem::path& GetPreferencesFilePath() const;
+
+        /**
          * @returns The full path to the JSON file that contains the color mapping.
          */
-        static std::filesystem::path GetColorJsonPath()
+        static std::filesystem::path DefaultColoringFilePath()
         {
             return std::filesystem::current_path().append(L"colors.json");
         }
@@ -130,7 +141,7 @@ namespace Settings
         /**
          * @returns The full path to the JSON file that contains the user preferences.
          */
-        static std::filesystem::path GetPreferencesJsonPath()
+        static std::filesystem::path DefaultPreferencesFilePath()
         {
             return std::filesystem::current_path().append(L"preferences.json");
         }
@@ -138,8 +149,8 @@ namespace Settings
       private:
         JsonDocument CreatePreferencesDocument();
 
-        bool m_showCascadeSplits{ false };
-        bool m_shouldShowShadows{ true };
+        bool m_shouldRenderCascadeSplits{ false };
+        bool m_shouldRenderShadows{ true };
         bool m_shouldMonitorFileSystem{ true };
 
         JsonDocument m_fileColorMapDocument;

@@ -70,8 +70,8 @@ namespace
 } // namespace
 
 Controller::Controller()
-    : m_persistentSettings{ Settings::PersistentSettings::GetColorJsonPath(),
-                            Settings::PersistentSettings::GetPreferencesJsonPath() },
+    : m_persistentSettings{ Settings::PersistentSettings::DefaultColoringFilePath(),
+                            Settings::PersistentSettings::DefaultPreferencesFilePath() },
       m_view{ std::make_unique<MainWindow>(*this) }
 {
 }

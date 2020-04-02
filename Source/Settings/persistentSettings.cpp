@@ -166,24 +166,24 @@ namespace Settings
         m_colorScheme = scheme;
     }
 
-    bool PersistentSettings::ShouldShowCascadeSplits() const
+    bool PersistentSettings::ShouldRenderCascadeSplits() const
     {
-        return m_showCascadeSplits;
+        return m_shouldRenderCascadeSplits;
     }
 
-    void PersistentSettings::SetShowCascadeSplits(bool isEnabled)
+    void PersistentSettings::RenderCascadeSplits(bool isEnabled)
     {
-        m_showCascadeSplits = isEnabled;
+        m_shouldRenderCascadeSplits = isEnabled;
     }
 
     bool PersistentSettings::ShouldRenderShadows() const
     {
-        return m_shouldShowShadows;
+        return m_shouldRenderShadows;
     }
 
-    void PersistentSettings::SetShowShadows(bool isEnabled)
+    void PersistentSettings::RenderShadows(bool isEnabled)
     {
-        m_shouldShowShadows = isEnabled;
+        m_shouldRenderShadows = isEnabled;
     }
 
     bool PersistentSettings::ShouldMonitorFileSystem() const
@@ -191,9 +191,19 @@ namespace Settings
         return m_shouldMonitorFileSystem;
     }
 
-    void PersistentSettings::OnMonitoringOptionToggled(bool isEnabled)
+    void PersistentSettings::MonitorFileSystem(bool isEnabled)
     {
         m_shouldMonitorFileSystem = isEnabled;
+    }
+
+    const std::filesystem::path& PersistentSettings::GetColoringFilePath() const
+    {
+        return m_fileColorMapPath;
+    }
+
+    const std::filesystem::path& PersistentSettings::GetPreferencesFilePath() const
+    {
+        return m_preferencesPath;
     }
 
     std::optional<QVector3D>

@@ -614,14 +614,14 @@ namespace Assets
         m_mainShader.setUniformValue(
             "materialShininess", static_cast<float>(m_sessionSettings.GetMaterialShininess()));
 
-        const auto shouldRenderShadows = m_persistentSettings.ShouldRenderShadows();
-        const auto shouldShowCascadeSplits = m_persistentSettings.ShouldShowCascadeSplits();
+        const auto shouldShowShadows = m_persistentSettings.ShouldRenderShadows();
+        const auto shouldShowCascadeSplits = m_persistentSettings.ShouldRenderCascadeSplits();
         m_mainShader.setUniformValue("shouldShowCascadeSplits", shouldShowCascadeSplits);
-        m_mainShader.setUniformValue("shouldShowShadows", shouldRenderShadows);
+        m_mainShader.setUniformValue("shouldShowShadows", shouldShowShadows);
 
         SetUniformLights(lights, m_sessionSettings, m_mainShader);
 
-        if (shouldRenderShadows) {
+        if (shouldShowShadows) {
             Expects(m_shadowMaps.size() == static_cast<std::size_t>(m_cascadeCount));
 
             for (int index = 0; index < m_cascadeCount; ++index) {

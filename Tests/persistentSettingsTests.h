@@ -30,12 +30,27 @@ class PersistentSettingsTests : public QObject
     /**
      * @brief Verifies that the missing preference files are created if they don't already exist.
      */
-    void VerifyFilesAreCreatedWhenMissing() const;
+    void VerifyFilesAreCreatedWhenAbsent() const;
 
     /**
      * @brief SavingSettingsToDisk
      */
     void SavingSettingsToDisk() const;
+
+    /**
+     * @brief Verifies that filesystem monitoring can be correctly toggled on and off.
+     */
+    void ToggleFileMonitoring() const;
+
+    /**
+     * @brief ToggleShadowRendering
+     */
+    void ToggleShadowRendering() const;
+
+    /**
+     * @brief ToggleCascadeSplitRendering
+     */
+    void ToggleCascadeSplitRendering() const;
 };
 
 #endif // PERSISTENTSETTINGSTESTS_H
