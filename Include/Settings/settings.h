@@ -2,7 +2,6 @@
 #define SETTINGS_H
 
 #include <filesystem>
-#include <memory>
 #include <string>
 
 #include <rapidjson/document.h>

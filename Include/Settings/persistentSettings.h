@@ -1,13 +1,15 @@
 #ifndef SETTINGSMANAGER_H
 #define SETTINGSMANAGER_H
 
-#include "settings.h"
-
+#include <algorithm>
+#include <filesystem>
 #include <optional>
-#include <string_view>
-#include <type_traits>
+#include <string>
 #include <unordered_map>
-#include <variant>
+
+// @note Pull this header in after the STL headers to avoid a weird compiler error related to
+// Qt and a GCC macro in the STL library.
+#include "settings.h"
 
 #include <Tree/Tree.hpp>
 
