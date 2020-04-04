@@ -31,16 +31,16 @@ namespace
         QVERIFY((manager.*getter)() == true);
     }
 
-    template <typename EvaluatorType>
+    template <typename VerifierType>
     void ToggleIntegralSetting(
         void (Settings::PersistentSettings::*setter)(int),
         int (Settings::PersistentSettings::*getter)(void) const, int value,
-        const EvaluatorType& evaluator)
+        const VerifierType& verifier)
     {
         Settings::PersistentSettings manager;
 
         (manager.*setter)(value);
-        evaluator((manager.*getter)());
+        verifier((manager.*getter)());
     }
 } // namespace
 

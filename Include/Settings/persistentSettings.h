@@ -1,7 +1,6 @@
 #ifndef SETTINGSMANAGER_H
 #define SETTINGSMANAGER_H
 
-#include "preferencesMap.hpp"
 #include "settings.h"
 
 #include <optional>

@@ -33,7 +33,7 @@ class PersistentSettingsTests : public QObject
     void VerifyFilesAreCreatedWhenAbsent() const;
 
     /**
-     * @brief SavingSettingsToDisk
+     * @brief Verifies that settings can be correctly saved to disk and read back.
      */
     void SavingSettingsToDisk() const;
 
@@ -43,52 +43,54 @@ class PersistentSettingsTests : public QObject
     void ToggleFileMonitoring() const;
 
     /**
-     * @brief ToggleShadowRendering
+     * @brief Verifies that the shadowing setting can be correctly toggled.
      */
     void ToggleShadowRendering() const;
 
     /**
-     * @brief ToggleCascadeSplitRendering
+     * @brief Verifies that the cascade split rendering setting can be correctly toggled.
      */
     void ToggleCascadeSplitRendering() const;
 
     /**
-     * @brief ToggleOriginRendering
+     * @brief Verifies that the origin rendering setting can be correctly toggled.
      */
     void ToggleOriginRendering() const;
 
     /**
-     * @brief ToggleGridRendering
+     * @brief Verifies that the grid rendering setting can be correctly toggled.
      */
     void ToggleGridRendering() const;
 
     /**
-     * @brief ToggleLightMarkerRendering
+     * @brief Verifies that the light marker rendering setting can be correctly toggled.
      */
     void ToggleLightMarkerRendering() const;
 
     /**
-     * @brief ToggleFrustaRendering
+     * @brief Verifies that the frusta rendering setting can be correctly toggled.
      */
     void ToggleFrustaRendering() const;
 
     /**
-     * @brief ModifyShadowMapCascadeCount
+     * @brief Verifies that the shadow map cascade counts can be correctly modified.
      */
     void ModifyShadowMapCascadeCount() const;
 
     /**
-     * @brief VerifyClampingOfShadowMapCascadeCount
+     * @brief Verifies that the shadow map cascade counts can be correctly modified, and that
+     * the value remains within a certain range.
      */
     void VerifyClampingOfShadowMapCascadeCount() const;
 
     /**
-     * @brief ModifyShadowMapQuality
+     * @brief Verifies that the shadow map qualtiy can be correctly modified.
      */
     void ModifyShadowMapQuality() const;
 
     /**
-     * @brief VerifyClampingOfShadowMapQuality
+     * @brief Verifies that the shadow map qualtiy can be correctly modified, and that
+     * the value remains within a certain range.
      */
     void VerifyClampingOfShadowMapQuality() const;
 };
