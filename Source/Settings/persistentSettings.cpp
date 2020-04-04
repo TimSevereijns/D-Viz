@@ -84,9 +84,9 @@ namespace
             return itr->value.GetBool();
         } else if constexpr (std::is_same_v<DataType, int>) {
             return itr->value.GetInt();
+        } else {
+            GSL_ASSUME(false);
         }
-
-        GSL_ASSUME(false);
     }
 
     template <typename DataType>
@@ -99,15 +99,17 @@ namespace
 
             rapidjson::GenericValue<rapidjson::UTF16<>> key{ preference.data(), allocator };
             document.AddMember(key.Move(), value, allocator);
+
+            return;
         }
 
         if constexpr (std::is_same_v<DataType, bool>) {
             itr->value.SetBool(value);
         } else if constexpr (std::is_same_v<DataType, int>) {
             itr->value.SetInt(value);
+        } else {
+            GSL_ASSUME(false);
         }
-
-        GSL_ASSUME(false);
     }
 } // namespace
 
