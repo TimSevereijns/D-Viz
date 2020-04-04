@@ -138,7 +138,7 @@ void PersistentSettingsTests::ModifyShadowMapCascadeCount() const
         [&](auto value) { QVERIFY(value == desired); });
 }
 
-void PersistentSettingsTests::VerifyClampingOfShadowMapCascadeCount() const
+void PersistentSettingsTests::ClampShadowMapCascadeCount() const
 {
     constexpr auto desired = 20;
     constexpr auto max = 4;
@@ -159,7 +159,7 @@ void PersistentSettingsTests::ModifyShadowMapQuality() const
         [&](auto value) { QVERIFY(value == desired); });
 }
 
-void PersistentSettingsTests::VerifyClampingOfShadowMapQuality() const
+void PersistentSettingsTests::ClampShadowMapQuality() const
 {
     constexpr auto desired = 20;
     constexpr auto max = 4;
@@ -168,6 +168,26 @@ void PersistentSettingsTests::VerifyClampingOfShadowMapQuality() const
         &Settings::PersistentSettings::SetShadowMapQuality,
         &Settings::PersistentSettings::GetShadowMapQuality, desired,
         [&](auto value) { QVERIFY(value == max); });
+}
+
+void PersistentSettingsTests::DebugMenuIsOffByDefault() const
+{
+    constexpr auto defaultState = false;
+
+    Settings::PersistentSettings manager;
+    QVERIFY(manager.ShouldShowDebuggingMenu() == defaultState);
+}
+
+void PersistentSettingsTests::LoadSettingsFromDisk() const
+{
+    Settings::PersistentSettings firstManager; //< Will create the document.
+    firstManager.RenderGrid(false);
+    firstManager.RenderShadows(false);
+    firstManager.SaveAllPreferencesToDisk();
+
+    Settings::PersistentSettings secondManager;
+    QVERIFY(secondManager.ShouldRenderGrid() == false);
+    QVERIFY(secondManager.ShouldRenderShadows() == false);
 }
 
 REGISTER_TEST(PersistentSettingsTests)

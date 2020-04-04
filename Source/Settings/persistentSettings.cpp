@@ -67,16 +67,6 @@ namespace
         const auto itr = document.FindMember(preference.data());
 
         if (itr == document.MemberEnd()) {
-            if constexpr (std::is_same_v<DataType, bool>) {
-                if (!itr->value.IsBool()) {
-                    return defaultValue;
-                }
-            } else if constexpr (std::is_same_v<DataType, int>) {
-                if (!itr->value.IsInt()) {
-                    return defaultValue;
-                }
-            }
-
             return defaultValue;
         }
 

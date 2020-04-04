@@ -81,7 +81,7 @@ class PersistentSettingsTests : public QObject
      * @brief Verifies that the shadow map cascade counts can be correctly modified, and that
      * the value remains within a certain range.
      */
-    void VerifyClampingOfShadowMapCascadeCount() const;
+    void ClampShadowMapCascadeCount() const;
 
     /**
      * @brief Verifies that the shadow map qualtiy can be correctly modified.
@@ -92,7 +92,18 @@ class PersistentSettingsTests : public QObject
      * @brief Verifies that the shadow map qualtiy can be correctly modified, and that
      * the value remains within a certain range.
      */
-    void VerifyClampingOfShadowMapQuality() const;
+    void ClampShadowMapQuality() const;
+
+    /**
+     * @brief Verifies that the debugging menu can be correctly turned on and off.
+     */
+    void DebugMenuIsOffByDefault() const;
+
+    /**
+     * @brief Verifies that existing settings will be read from disk when the PersistentSettings
+     * manager class is created.
+     */
+    void LoadSettingsFromDisk() const;
 };
 
 #endif // PERSISTENTSETTINGSTESTS_H
