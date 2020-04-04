@@ -225,8 +225,7 @@ void MainWindow::SetupMenus()
     SetupFileMenu();
     SetupOptionsMenu();
 
-    const auto& preferenceMap = m_controller.GetPersistentSettings().GetPreferenceMap();
-    if (preferenceMap.GetValueOrDefault(L"showDebuggingMenu", false)) {
+    if (m_controller.GetPersistentSettings().ShouldShowDebuggingMenu()) {
         SetupDebuggingMenu();
     }
 
@@ -344,7 +343,7 @@ void MainWindow::SetupDebuggingMenu()
     renderMenuWrapper.frustum.setChecked(false);
 
     connect(
-        &renderMenuWrapper.frustum, &QAction::toggled, this, &MainWindow::OnRenderFrustumToggled);
+        &renderMenuWrapper.frustum, &QAction::toggled, this, &MainWindow::OnRenderFrustaToggled);
 
     renderMenu.setTitle("Render Asset");
     renderMenu.setStatusTip("Toggle scene assets on or off");
@@ -356,11 +355,8 @@ void MainWindow::SetupDebuggingMenu()
     auto& lightingMenuWrapper = m_debuggingMenuWrapper.lightingMenuWrapper;
     auto& lightingMenu = m_debuggingMenuWrapper.lightingMenu;
 
-    const auto& preferences = m_controller.GetPersistentSettings().GetPreferenceMap();
     const auto shouldShowCascadeSplits =
-        preferences.GetValueOrDefault(Constants::Preferences::ShowCascadeSplits, true);
-
-    m_controller.GetPersistentSettings().RenderCascadeSplits(shouldShowCascadeSplits);
+        m_controller.GetPersistentSettings().ShouldRenderCascadeSplits();
 
     lightingMenuWrapper.showCascadeSplits.setText("Show Cascade Splits");
     lightingMenuWrapper.showCascadeSplits.setCheckable(true);
@@ -370,10 +366,7 @@ void MainWindow::SetupDebuggingMenu()
         &lightingMenuWrapper.showCascadeSplits, &QAction::toggled, this,
         &MainWindow::OnShowCascadeSplitsToggled);
 
-    const auto shouldShowShadows =
-        preferences.GetValueOrDefault(Constants::Preferences::ShowShadows, true);
-
-    m_controller.GetPersistentSettings().RenderShadows(shouldShowShadows);
+    const auto shouldShowShadows = m_controller.GetPersistentSettings().ShouldRenderShadows();
 
     lightingMenuWrapper.showShadows.setText("Show Shadows");
     lightingMenuWrapper.showShadows.setCheckable(true);
@@ -414,34 +407,22 @@ void MainWindow::SetDebuggingMenuState()
 {
     auto& renderMenuWrapper = m_debuggingMenuWrapper.renderMenuWrapper;
 
-    const auto& preferences = m_controller.GetPersistentSettings().GetPreferenceMap();
-
-    const auto shouldShowOrigin =
-        preferences.GetValueOrDefault(Constants::Preferences::ShowOrigin, true);
+    const auto& preferences = m_controller.GetPersistentSettings();
 
     renderMenuWrapper.origin.blockSignals(true);
-    renderMenuWrapper.origin.setChecked(shouldShowOrigin);
+    renderMenuWrapper.origin.setChecked(preferences.ShouldRenderOrigin());
     renderMenuWrapper.origin.blockSignals(false);
 
-    const auto shouldShowGrid =
-        preferences.GetValueOrDefault(Constants::Preferences::ShowGrid, true);
-
     renderMenuWrapper.grid.blockSignals(true);
-    renderMenuWrapper.grid.setChecked(shouldShowGrid);
+    renderMenuWrapper.grid.setChecked(preferences.ShouldRenderGrid());
     renderMenuWrapper.grid.blockSignals(false);
 
-    const auto shouldShowLightMarkers =
-        preferences.GetValueOrDefault(Constants::Preferences::ShowLights, true);
-
     renderMenuWrapper.lightMarkers.blockSignals(true);
-    renderMenuWrapper.lightMarkers.setChecked(shouldShowLightMarkers);
+    renderMenuWrapper.lightMarkers.setChecked(preferences.ShouldRenderLightMarkers());
     renderMenuWrapper.lightMarkers.blockSignals(false);
 
-    const auto shouldShowFrustum =
-        preferences.GetValueOrDefault(Constants::Preferences::ShowFrusta, true);
-
     renderMenuWrapper.frustum.blockSignals(true);
-    renderMenuWrapper.frustum.setChecked(shouldShowFrustum);
+    renderMenuWrapper.frustum.setChecked(preferences.ShouldRenderFrusta());
     renderMenuWrapper.frustum.blockSignals(false);
 }
 
@@ -670,49 +651,35 @@ void MainWindow::OnShowBreakdownButtonPressed()
 void MainWindow::OnRenderOriginToggled(bool shouldShow)
 {
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::OriginMarker>(shouldShow);
-
-    m_controller.GetPersistentSettings().SaveSettingToDisk(Constants::Preferences::ShowOrigin,
-        shouldShow);
+    m_controller.GetPersistentSettings().RenderOrigin(shouldShow);
 }
 
 void MainWindow::OnRenderGridToggled(bool shouldShow)
 {
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::Grid>(shouldShow);
-
-    m_controller.GetPersistentSettings().SaveSettingToDisk(Constants::Preferences::ShowGrid,
-        shouldShow);
+    m_controller.GetPersistentSettings().RenderGrid(shouldShow);
 }
 
 void MainWindow::OnRenderLightMarkersToggled(bool shouldShow)
 {
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::LightMarker>(shouldShow);
-
-    m_controller.GetPersistentSettings().SaveSettingToDisk(Constants::Preferences::ShowLights,
-        shouldShow);
+    m_controller.GetPersistentSettings().RenderLightMarkers(shouldShow);
 }
 
-void MainWindow::OnRenderFrustumToggled(bool shouldShow)
+void MainWindow::OnRenderFrustaToggled(bool shouldShow)
 {
     m_glCanvas->ToggleAssetVisibility<Assets::Tag::Frustum>(shouldShow);
-
-    m_controller.GetPersistentSettings().SaveSettingToDisk(Constants::Preferences::ShowFrusta,
-        shouldShow);
+    m_controller.GetPersistentSettings().RenderFrusta(shouldShow);
 }
 
 void MainWindow::OnShowShadowsToggled(bool shouldShow)
 {
-    auto& settingsManager = m_controller.GetPersistentSettings();
-
-    settingsManager.RenderShadows(shouldShow);
-    settingsManager.SaveSettingToDisk(Constants::Preferences::ShowShadows, shouldShow);
+    m_controller.GetPersistentSettings().RenderShadows(shouldShow);
 }
 
 void MainWindow::OnShowCascadeSplitsToggled(bool shouldShow)
 {
-    auto& settingsManager = m_controller.GetPersistentSettings();
-
-    settingsManager.RenderCascadeSplits(shouldShow);
-    settingsManager.SaveSettingToDisk(Constants::Preferences::ShowCascadeSplits, shouldShow);
+    m_controller.GetPersistentSettings().RenderCascadeSplits(shouldShow);
 }
 
 bool MainWindow::ShouldShowFrameTime() const

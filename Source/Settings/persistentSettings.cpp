@@ -1,7 +1,11 @@
 #include "Settings/persistentSettings.h"
+
 #include <Visualizations/vizBlock.h>
 #include <constants.h>
 
+#include <algorithm>
+
+#include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
 
 #ifdef Q_OS_WIN
@@ -56,56 +60,54 @@ namespace
         }
     }
 
-    /**
-     * @brief Populates the passed in map with the content of the JSON document.
-     *
-     * @param[in] json               The JSON document containing the file color information.
-     * @param[out] map               The map that is to contain the flattened JSON data.
-     */
-    void PopulatePreferencesMapFromJsonDocument(
-        const Settings::JsonDocument& json, Settings::PreferencesMap& map)
+    template <typename DataType>
+    auto GetValueOrDefault(
+        const Settings::JsonDocument& document, std::wstring_view preference, DataType defaultValue)
     {
-        if (!json.IsObject()) {
-            return;
+        const auto itr = document.FindMember(preference.data());
+
+        if (itr == document.MemberEnd()) {
+            if constexpr (std::is_same_v<DataType, bool>) {
+                if (!itr->value.IsBool()) {
+                    return defaultValue;
+                }
+            } else if constexpr (std::is_same_v<DataType, int>) {
+                if (!itr->value.IsInt()) {
+                    return defaultValue;
+                }
+            }
+
+            return defaultValue;
         }
 
-        auto encounteredError{ false };
-
-        for (const auto& setting : json.GetObject()) {
-            if (setting.value.IsBool()) {
-                map.Emplace(setting.name.GetString(), setting.value.GetBool());
-                continue;
-            }
-
-            if (setting.value.IsInt()) {
-                map.Emplace(setting.name.GetString(), setting.value.GetInt());
-                continue;
-            }
-
-            if (setting.value.IsFloat()) {
-                map.Emplace(setting.name.GetString(), setting.value.GetFloat());
-                continue;
-            }
-
-            if (setting.value.IsString()) {
-                map.Emplace(setting.name.GetString(), setting.value.GetString());
-                continue;
-            }
-
-            if (setting.value.IsArray()) {
-                const auto colorArray = setting.value.GetArray();
-                QVector3D colorVector{ colorArray[0].GetFloat() / 255.0f,
-                                       colorArray[1].GetFloat() / 255.0f,
-                                       colorArray[2].GetFloat() / 255.0f };
-
-                map.Emplace(setting.name.GetString(), colorVector);
-            }
+        if constexpr (std::is_same_v<DataType, bool>) {
+            return itr->value.GetBool();
+        } else if constexpr (std::is_same_v<DataType, int>) {
+            return itr->value.GetInt();
         }
 
-        if (encounteredError) {
-            const auto& log = spdlog::get(Constants::Logging::DefaultLog);
-            log->error("Encountered unsupported type while parsing the configuration JSON file.");
+        GSL_ASSUME(false);
+    }
+
+    template <typename DataType>
+    void SaveValue(Settings::JsonDocument& document, std::wstring_view preference, DataType value)
+    {
+        const auto itr = document.FindMember(preference.data());
+
+        if (itr == document.MemberEnd()) {
+            auto& allocator = document.GetAllocator();
+
+            rapidjson::GenericValue<rapidjson::UTF16<>> key{ preference.data(), allocator };
+            document.AddMember(key.Move(), value, allocator);
         }
+
+        if constexpr (std::is_same_v<DataType, bool>) {
+            itr->value.SetBool(value);
+        } else if constexpr (std::is_same_v<DataType, int>) {
+            itr->value.SetInt(value);
+        }
+
+        GSL_ASSUME(false);
     }
 } // namespace
 
@@ -122,38 +124,11 @@ namespace Settings
         }
 
         PopulateColorMapFromJsonDocument(m_fileColorMapDocument, m_colorMap);
-        PopulatePreferencesMapFromJsonDocument(m_preferencesDocument, m_preferencesMap);
-    }
-
-    JsonDocument PersistentSettings::CreatePreferencesDocument()
-    {
-        JsonDocument document;
-        document.SetObject();
-
-        auto& allocator = document.GetAllocator();
-
-        document.AddMember(Constants::Preferences::ShowGrid, true, allocator);
-        document.AddMember(Constants::Preferences::ShowOrigin, false, allocator);
-        document.AddMember(Constants::Preferences::ShowFrusta, false, allocator);
-        document.AddMember(Constants::Preferences::ShowLights, false, allocator);
-        document.AddMember(Constants::Preferences::ShowShadows, true, allocator);
-        document.AddMember(Constants::Preferences::ShowCascadeSplits, false, allocator);
-        document.AddMember(Constants::Preferences::ShadowMapQuality, 4, allocator);
-        document.AddMember(Constants::Preferences::ShowDebuggingMenu, false, allocator);
-
-        SaveToDisk(document, m_preferencesPath);
-
-        return document;
     }
 
     const ColorMap& PersistentSettings::GetFileColorMap() const
     {
         return m_colorMap;
-    }
-
-    const PreferencesMap& PersistentSettings::GetPreferenceMap() const
-    {
-        return m_preferencesMap;
     }
 
     const std::wstring& PersistentSettings::GetActiveColorScheme() const
@@ -168,32 +143,140 @@ namespace Settings
 
     bool PersistentSettings::ShouldRenderCascadeSplits() const
     {
-        return m_shouldRenderCascadeSplits;
+        constexpr auto defaultValue = false;
+
+        return GetValueOrDefault(
+            m_preferencesDocument, Constants::Preferences::ShowCascadeSplits, defaultValue);
     }
 
     void PersistentSettings::RenderCascadeSplits(bool isEnabled)
     {
-        m_shouldRenderCascadeSplits = isEnabled;
+        SaveValue(m_preferencesDocument, Constants::Preferences::ShowCascadeSplits, isEnabled);
     }
 
     bool PersistentSettings::ShouldRenderShadows() const
     {
-        return m_shouldRenderShadows;
+        constexpr auto defaultValue = true;
+
+        return GetValueOrDefault(
+            m_preferencesDocument, Constants::Preferences::ShowShadows, defaultValue);
     }
 
     void PersistentSettings::RenderShadows(bool isEnabled)
     {
-        m_shouldRenderShadows = isEnabled;
+        SaveValue(m_preferencesDocument, Constants::Preferences::ShowShadows, isEnabled);
     }
 
     bool PersistentSettings::ShouldMonitorFileSystem() const
     {
-        return m_shouldMonitorFileSystem;
+        constexpr auto defaultValue = false;
+
+        return GetValueOrDefault(
+            m_preferencesDocument, Constants::Preferences::MonitorFileSystem, defaultValue);
     }
 
     void PersistentSettings::MonitorFileSystem(bool isEnabled)
     {
-        m_shouldMonitorFileSystem = isEnabled;
+        SaveValue(m_preferencesDocument, Constants::Preferences::MonitorFileSystem, isEnabled);
+    }
+
+    bool PersistentSettings::ShouldRenderOrigin() const
+    {
+        constexpr auto defaultValue = true;
+
+        return GetValueOrDefault(
+            m_preferencesDocument, Constants::Preferences::ShowOrigin, defaultValue);
+    }
+
+    void PersistentSettings::RenderOrigin(bool isEnabled)
+    {
+        SaveValue(m_preferencesDocument, Constants::Preferences::ShowOrigin, isEnabled);
+    }
+
+    bool PersistentSettings::ShouldRenderGrid() const
+    {
+        constexpr auto defaultValue = true;
+
+        return GetValueOrDefault(
+            m_preferencesDocument, Constants::Preferences::ShowGrid, defaultValue);
+    }
+
+    void PersistentSettings::RenderGrid(bool isEnabled)
+    {
+        SaveValue(m_preferencesDocument, Constants::Preferences::ShowGrid, isEnabled);
+    }
+
+    bool PersistentSettings::ShouldRenderLightMarkers() const
+    {
+        constexpr auto defaultValue = false;
+
+        return GetValueOrDefault(
+            m_preferencesDocument, Constants::Preferences::ShowLightMarkers, defaultValue);
+    }
+
+    void PersistentSettings::RenderLightMarkers(bool isEnabled)
+    {
+        SaveValue(m_preferencesDocument, Constants::Preferences::ShowLightMarkers, isEnabled);
+    }
+
+    bool PersistentSettings::ShouldRenderFrusta() const
+    {
+        constexpr auto defaultValue = false;
+
+        return GetValueOrDefault(
+            m_preferencesDocument, Constants::Preferences::ShowFrusta, defaultValue);
+    }
+
+    void PersistentSettings::RenderFrusta(bool isEnabled)
+    {
+        SaveValue(m_preferencesDocument, Constants::Preferences::ShowFrusta, isEnabled);
+    }
+
+    int PersistentSettings::GetShadowMapCascadeCount() const
+    {
+        constexpr auto defaultValue = 4;
+
+        const auto count = GetValueOrDefault(
+            m_preferencesDocument, Constants::Preferences::ShadowMapCascadeCount, defaultValue);
+
+        return std::clamp(count, 1, 4);
+    }
+
+    void PersistentSettings::SetShadowMapCascadeCount(int count)
+    {
+        SaveValue(
+            m_preferencesDocument, Constants::Preferences::ShadowMapCascadeCount,
+            std::clamp(count, 1, 4));
+    }
+
+    int PersistentSettings::GetShadowMapQuality() const
+    {
+        constexpr auto defaultValue = 4;
+
+        const auto quality = GetValueOrDefault(
+            m_preferencesDocument, Constants::Preferences::ShadowMapQuality, defaultValue);
+
+        return std::clamp(quality, 1, 4);
+    }
+
+    void PersistentSettings::SetShadowMapQuality(int quality)
+    {
+        SaveValue(
+            m_preferencesDocument, Constants::Preferences::ShadowMapQuality,
+            std::clamp(quality, 1, 4));
+    }
+
+    bool PersistentSettings::ShouldShowDebuggingMenu() const
+    {
+        constexpr auto defaultValue = false;
+
+        return GetValueOrDefault(
+            m_preferencesDocument, Constants::Preferences::ShowDebuggingMenu, defaultValue);
+    }
+
+    bool PersistentSettings::SaveAllPreferencesToDisk()
+    {
+        return SaveToDisk(m_preferencesDocument, m_preferencesPath);
     }
 
     const std::filesystem::path& PersistentSettings::GetColoringFilePath() const
@@ -220,5 +303,27 @@ namespace Settings
         }
 
         return extensionItr->second;
+    }
+
+    JsonDocument PersistentSettings::CreatePreferencesDocument()
+    {
+        JsonDocument document;
+        document.SetObject();
+
+        auto& allocator = document.GetAllocator();
+
+        document.AddMember(Constants::Preferences::ShowGrid, true, allocator);
+        document.AddMember(Constants::Preferences::ShowOrigin, false, allocator);
+        document.AddMember(Constants::Preferences::ShowFrusta, false, allocator);
+        document.AddMember(Constants::Preferences::ShowLightMarkers, false, allocator);
+        document.AddMember(Constants::Preferences::ShowShadows, true, allocator);
+        document.AddMember(Constants::Preferences::ShowCascadeSplits, false, allocator);
+        document.AddMember(Constants::Preferences::ShadowMapQuality, 4, allocator);
+        document.AddMember(Constants::Preferences::ShowDebuggingMenu, false, allocator);
+        document.AddMember(Constants::Preferences::MonitorFileSystem, false, allocator);
+
+        SaveToDisk(document, m_preferencesPath);
+
+        return document;
     }
 } // namespace Settings

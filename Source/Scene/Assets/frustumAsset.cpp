@@ -167,7 +167,7 @@ namespace Assets
     Frustum::Frustum(const Controller& controller, QOpenGLExtraFunctions& openGL)
         : Line{ controller, openGL }
     {
-        m_shouldRender = DetermineVisibilityFromPreferences(Constants::Preferences::ShowFrusta);
+        m_shouldRender = m_persistentSettings.ShouldRenderFrusta();
     }
 
     void Frustum::Render(const Camera& camera, const std::vector<Light>& /*lights*/)

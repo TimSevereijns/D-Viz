@@ -39,11 +39,6 @@ namespace Settings
         const ColorMap& GetFileColorMap() const;
 
         /**
-         * @returns The preference map.
-         */
-        const PreferencesMap& GetPreferenceMap() const;
-
-        /**
          * @returns The currently active file extension coloring scheme.
          */
         const std::wstring& GetActiveColorScheme() const;
@@ -79,6 +74,95 @@ namespace Settings
         bool ShouldMonitorFileSystem() const;
 
         /**
+         * @brief Handles toggling of whether the filesystem should be monitored for changes.
+         *
+         * @param[in] isEnabled       Pass in true to enable monitoring.
+         */
+        void MonitorFileSystem(bool isEnabled);
+
+        /**
+         * @returns True if origin of the coordinate system should be visualized.
+         */
+        bool ShouldRenderOrigin() const;
+
+        /**
+         * @brief Toggles the display of an coordinate system origin marker.
+         *
+         * @param[in] isEnabled       Pass in true to enable visualization.
+         */
+        void RenderOrigin(bool isEnabled);
+
+        /**
+         * @returns True if the grid should be rendered.
+         */
+        bool ShouldRenderGrid() const;
+
+        /**
+         * @brief Toggles the display of the grid.
+         *
+         * @param[in] isEnabled       Pass in true to enable grid.
+         */
+        void RenderGrid(bool isEnabled);
+
+        /**
+         * @returns True if the location of the lights should be marked. Useful for debugging.
+         */
+        bool ShouldRenderLightMarkers() const;
+
+        /**
+         * @brief Toggles the display of light markers.
+         *
+         * @param[in] isEnabled       Pass in true to display markers.
+         */
+        void RenderLightMarkers(bool isEnabled);
+
+        /**
+         * @returns True if a static view frustum should be show. Useful for debugging.
+         */
+        bool ShouldRenderFrusta() const;
+
+        /**
+         * @brief Toggles the display of debugging frusta.
+         *
+         * @param[in] isEnabled       Pass in true to enable frusta.
+         */
+        void RenderFrusta(bool isEnabled);
+
+        /**
+         * @returns The number of cascade counts, clamped between 1 and 4, inclusive.
+         */
+        int GetShadowMapCascadeCount() const;
+
+        /**
+         * @brief Sets the number of cascade splits to use.
+         *
+         * @param[in] count         A value between 1 and 4, inclusive.
+         */
+        void SetShadowMapCascadeCount(int count);
+
+        /**
+         * @returns The quality (i.e., resolution) of the shadow map, clamped between 1 and 4,
+         * inclusive.
+         *
+         * 1 is equivalent to 1024 by 1024 pixels, while 4 is equivalent to 4096 by 4096 pixels.
+         */
+        int GetShadowMapQuality() const;
+
+        /**
+         * @brief Sets the shadow map quality.
+         *
+         * 1 is equivalent to 1024 by 1024 pixels, while 4 is equivalent to 4096 by 4096 pixels.
+         *
+         * @param[in] quality       A value between 1 and 4, inclusive.
+         */
+        void SetShadowMapQuality(int quality);
+
+        /**
+         * @returns True if the debugging menu should be shown.
+         */
+        bool ShouldShowDebuggingMenu() const;
+
+        /**
          * @brief Determines the appropriate color for the file based on the user-configurable color
          * set in the color.json file.
          *
@@ -90,35 +174,11 @@ namespace Settings
         DetermineColorFromExtension(const Tree<VizBlock>::Node& node) const;
 
         /**
-         * @brief Handles toggling of whether the file system should be monitored for changes.
+         * @brief Saves all settings to disk.
          *
-         * @param[in] isEnabled       Pass in true to enable monitoring.
+         * @returns True if the operation succeeded.
          */
-        void MonitorFileSystem(bool isEnabled);
-
-        /**
-         * @brief Saves preferences to a JSON file on disk.
-         *
-         * @param[in] property        The name of the property to be saved or modified.
-         * @param[in] value           The value to be associated with the property name.
-         *
-         * @returns True if the save action succeeded.
-         */
-        template <typename PropertyValueType>
-        bool SaveSettingToDisk(std::wstring_view property, const PropertyValueType& value)
-        {
-            if (m_preferencesDocument.HasMember(property.data())) {
-                m_preferencesDocument[property.data()] = value;
-            } else {
-                auto& allocator = m_preferencesDocument.GetAllocator();
-
-                rapidjson::GenericValue<rapidjson::UTF16<wchar_t>> key{ property.data(),
-                                                                        allocator };
-                m_preferencesDocument.AddMember(key.Move(), value, allocator);
-            }
-
-            return Settings::SaveToDisk(m_preferencesDocument, m_preferencesPath);
-        }
+        bool SaveAllPreferencesToDisk();
 
         /**
          * @returns The current file coloring path.
@@ -149,10 +209,6 @@ namespace Settings
       private:
         JsonDocument CreatePreferencesDocument();
 
-        bool m_shouldRenderCascadeSplits{ false };
-        bool m_shouldRenderShadows{ true };
-        bool m_shouldMonitorFileSystem{ true };
-
         JsonDocument m_fileColorMapDocument;
         JsonDocument m_preferencesDocument;
 
@@ -160,7 +216,6 @@ namespace Settings
         std::filesystem::path m_fileColorMapPath;
 
         ColorMap m_colorMap;
-        PreferencesMap m_preferencesMap;
 
         std::wstring m_colorScheme{ L"Default" };
     };

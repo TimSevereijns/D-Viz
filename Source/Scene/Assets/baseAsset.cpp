@@ -52,14 +52,6 @@ namespace Assets
         return true;
     }
 
-    bool AssetBase::DetermineVisibilityFromPreferences(std::wstring_view preferenceName)
-    {
-        const auto& preferences = m_persistentSettings.GetPreferenceMap();
-        const auto shouldRender = preferences.GetValueOrDefault(preferenceName, true);
-
-        return shouldRender;
-    }
-
     bool AssetBase::IsAssetLoaded() const
     {
         return !(m_rawVertices.empty() && m_rawColors.empty());

@@ -51,6 +51,46 @@ class PersistentSettingsTests : public QObject
      * @brief ToggleCascadeSplitRendering
      */
     void ToggleCascadeSplitRendering() const;
+
+    /**
+     * @brief ToggleOriginRendering
+     */
+    void ToggleOriginRendering() const;
+
+    /**
+     * @brief ToggleGridRendering
+     */
+    void ToggleGridRendering() const;
+
+    /**
+     * @brief ToggleLightMarkerRendering
+     */
+    void ToggleLightMarkerRendering() const;
+
+    /**
+     * @brief ToggleFrustaRendering
+     */
+    void ToggleFrustaRendering() const;
+
+    /**
+     * @brief ModifyShadowMapCascadeCount
+     */
+    void ModifyShadowMapCascadeCount() const;
+
+    /**
+     * @brief VerifyClampingOfShadowMapCascadeCount
+     */
+    void VerifyClampingOfShadowMapCascadeCount() const;
+
+    /**
+     * @brief ModifyShadowMapQuality
+     */
+    void ModifyShadowMapQuality() const;
+
+    /**
+     * @brief VerifyClampingOfShadowMapQuality
+     */
+    void VerifyClampingOfShadowMapQuality() const;
 };
 
 #endif // PERSISTENTSETTINGSTESTS_H

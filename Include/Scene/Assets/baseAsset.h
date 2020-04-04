@@ -162,8 +162,6 @@ namespace Assets
          */
         bool LoadShaders(const QString& vertexShaderName, const QString& fragmentShaderName);
 
-        bool DetermineVisibilityFromPreferences(std::wstring_view preferenceName);
-
         QOpenGLBuffer m_vertexBuffer;
         QOpenGLBuffer m_colorBuffer;
 

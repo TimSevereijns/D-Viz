@@ -30,72 +30,74 @@ namespace Constants
 
     namespace Colors
     {
-        constexpr static auto Red = Detail::RGB(255, 0, 0);
-        constexpr static auto Green = Detail::RGB(0, 255, 0);
-        constexpr static auto Blue = Detail::RGB(0, 0, 255);
-        constexpr static auto BabyBlue = Detail::RGB(137, 207, 240);
-        constexpr static auto CanaryYellow = Detail::RGB(255, 239, 0);
-        constexpr static auto HotPink = Detail::RGB(255, 105, 180);
-        constexpr static auto FileGreen = Detail::RGB(128, 255, 128);
-        constexpr static auto SlateGray = Detail::RGB(112, 128, 144);
-        constexpr static auto White = Detail::RGB(255, 255, 255);
-        constexpr static auto Coral = Detail::RGB(255, 127, 80);
+        constexpr auto Red = Detail::RGB(255, 0, 0);
+        constexpr auto Green = Detail::RGB(0, 255, 0);
+        constexpr auto Blue = Detail::RGB(0, 0, 255);
+        constexpr auto BabyBlue = Detail::RGB(137, 207, 240);
+        constexpr auto CanaryYellow = Detail::RGB(255, 239, 0);
+        constexpr auto HotPink = Detail::RGB(255, 105, 180);
+        constexpr auto FileGreen = Detail::RGB(128, 255, 128);
+        constexpr auto SlateGray = Detail::RGB(112, 128, 144);
+        constexpr auto White = Detail::RGB(255, 255, 255);
+        constexpr auto Coral = Detail::RGB(255, 127, 80);
     } // namespace Colors
 
     namespace ColorScheme
     {
-        constexpr static auto& Default = L"Default";
+        constexpr auto& Default = L"Default";
     }
 
     namespace Graphics
     {
-        constexpr static auto DesiredTimeBetweenFrames = 20;
+        constexpr auto DesiredTimeBetweenFrames = 20;
     }
 
     namespace Input
     {
-        constexpr static auto MovementAmplification = 10.0;
-        constexpr static auto TriggerActuationThreshold = 0.2;
+        constexpr auto MovementAmplification = 10.0;
+        constexpr auto TriggerActuationThreshold = 0.2;
     } // namespace Input
 
     namespace Concurrency
     {
-        constexpr static auto ThreadLimit = 4u;
+        constexpr auto ThreadLimit = 4u;
     }
 
     namespace Logging
     {
-        static std::string DefaultLog = "D-Viz";
-        static std::string FilesystemLog = "Filesystem";
+        constexpr auto& DefaultLog = "D-Viz";
+        constexpr auto& FilesystemLog = "Filesystem";
     } // namespace Logging
 
     namespace Math
     {
-        constexpr static auto Pi = 3.14159265358979323846;
-        constexpr static auto RadiansToDegrees = 180.0 / Pi;
-        constexpr static auto DegreesToRadians = Pi / 180.0;
+        constexpr auto Pi = 3.14159265358979323846;
+        constexpr auto RadiansToDegrees = 180.0 / Pi;
+        constexpr auto DegreesToRadians = Pi / 180.0;
     } // namespace Math
 
     namespace Preferences
     {
-        constexpr static auto& ShowOrigin = L"showOrigin";
-        constexpr static auto& ShowGrid = L"showGrid";
-        constexpr static auto& ShowLights = L"showLights";
-        constexpr static auto& ShowFrusta = L"showFrusta";
-        constexpr static auto& ShowShadows = L"showShadows";
-        constexpr static auto& ShowCascadeSplits = L"showCascadeSplits";
-        constexpr static auto& ShadowMapQuality = L"shadowMapQuality";
-        constexpr static auto& ShowDebuggingMenu = L"showDebuggingMenu";
+        constexpr auto& ShowOrigin = L"showOrigin";
+        constexpr auto& ShowGrid = L"showGrid";
+        constexpr auto& ShowLightMarkers = L"showLights";
+        constexpr auto& ShowFrusta = L"showFrusta";
+        constexpr auto& ShowShadows = L"showShadows";
+        constexpr auto& ShowCascadeSplits = L"showCascadeSplits";
+        constexpr auto& ShadowMapCascadeCount = L"shadowMapCascadeCount";
+        constexpr auto& ShadowMapQuality = L"shadowMapQuality";
+        constexpr auto& ShowDebuggingMenu = L"showDebuggingMenu";
+        constexpr auto& MonitorFileSystem = L"monitorFileSystem";
     } // namespace Preferences
 
     namespace Visualization
     {
-        constexpr static const double PaddingRatio = 0.9;
-        constexpr static const double MaxPadding = 0.75;
+        constexpr auto PaddingRatio = 0.9;
+        constexpr auto MaxPadding = 0.75;
 
-        constexpr static const float BlockHeight = 2.0f;
-        constexpr static const float RootBlockWidth = 1000.0f;
-        constexpr static const float RootBlockDepth = 1000.0f;
+        constexpr auto BlockHeight = 2.0f;
+        constexpr auto RootBlockWidth = 1000.0f;
+        constexpr auto RootBlockDepth = 1000.0f;
     } // namespace Visualization
 } // namespace Constants
 

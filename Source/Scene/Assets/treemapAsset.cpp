@@ -184,9 +184,8 @@ namespace Assets
     {
         m_shouldRender = true;
 
-        const auto& preferences = m_persistentSettings.GetPreferenceMap();
-        m_cascadeCount = preferences.GetValueOrDefault(L"shadowMapCascadeCount", 4);
-        m_shadowMapResolution = preferences.GetValueOrDefault(L"shadowMapQuality", 4) * 1024;
+        m_cascadeCount = m_persistentSettings.GetShadowMapCascadeCount();
+        m_shadowMapResolution = m_persistentSettings.GetShadowMapQuality() * 1024;
 
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->info("Shadow map width & height is set at {} pixels.", m_shadowMapResolution);

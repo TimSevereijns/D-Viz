@@ -121,7 +121,7 @@ class MainWindow final : public QMainWindow
 
     void OnRenderLightMarkersToggled(bool shouldShow);
 
-    void OnRenderFrustumToggled(bool shouldShow);
+    void OnRenderFrustaToggled(bool shouldShow);
 
     void OnShowShadowsToggled(bool shouldShow);
 

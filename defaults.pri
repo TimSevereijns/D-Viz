@@ -79,7 +79,6 @@ HEADERS += \
    $$PWD/Include/Scene/Assets/originMarkerAsset.h \
    $$PWD/Include/Scene/Assets/treemapAsset.h \
    $$PWD/Include/Settings/persistentSettings.h \
-   $$PWD/Include/Settings/preferencesMap.hpp \
    $$PWD/Include/Settings/settings.h \
    $$PWD/Include/Settings/sessionSettings.h \
    $$PWD/Include/Utilities/ignoreUnused.hpp \
