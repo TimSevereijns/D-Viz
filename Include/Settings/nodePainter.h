@@ -1,8 +1,10 @@
 #ifndef NODEPAINTER_H
 #define NODEPAINTER_H
 
+#include <algorithm>
 #include <filesystem>
 #include <optional>
+#include <string>
 #include <unordered_map>
 
 // @note Pull this header in after the STL headers to avoid a weird compiler error related to
