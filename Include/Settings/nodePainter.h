@@ -3,6 +3,7 @@
 
 #include <filesystem>
 #include <optional>
+#include <unordered_map>
 
 // @note Pull this header in after the STL headers to avoid a weird compiler error related to
 // Qt and a GCC macro in the STL library.
@@ -75,6 +76,6 @@ namespace Settings
         std::filesystem::path m_fileColorMapPath;
     };
 
-}
+} // namespace Settings
 
 #endif // NODEPAINTER_H
