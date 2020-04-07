@@ -67,7 +67,7 @@ QVariant ScanBreakdownModel::data(const QModelIndex& index, int role) const
     return {};
 }
 
-void ScanBreakdownModel::insert(const Tree<VizBlock>::Node& node)
+void ScanBreakdownModel::Insert(const Tree<VizBlock>::Node& node)
 {
     const auto& file = node->file;
     if (file.type != FileType::REGULAR) {

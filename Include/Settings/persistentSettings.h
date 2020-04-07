@@ -20,8 +20,6 @@ struct VizBlock;
 
 namespace Settings
 {
-    using ColorMap = std::unordered_map<std::wstring, std::unordered_map<std::wstring, QVector3D>>;
-
     /**
      * @brief The central class responsible for run-time settings.
      */
@@ -31,23 +29,7 @@ namespace Settings
 
       public:
         PersistentSettings(
-            const std::filesystem::path& colorFile = DefaultColoringFilePath(),
             const std::filesystem::path& preferencesFile = DefaultPreferencesFilePath());
-
-        /**
-         * @returns The map that associates colors with file extensions.
-         */
-        const ColorMap& GetFileColorMap() const;
-
-        /**
-         * @returns The currently active file extension coloring scheme.
-         */
-        const std::wstring& GetActiveColorScheme() const;
-
-        /**
-         * @brief Sets the current color scheme.
-         */
-        void SetColorScheme(const std::wstring& scheme);
 
         /**
          * @returns True if shadow cascade splits should be visualized.
@@ -164,17 +146,6 @@ namespace Settings
         bool ShouldShowDebuggingMenu() const;
 
         /**
-         * @brief Determines the appropriate color for the file based on the user-configurable color
-         * set in the color.json file.
-         *
-         * @param[in] node               The node whose color needs to be restored.
-         *
-         * @returns The appropriate color found in the color map.
-         */
-        std::optional<QVector3D>
-        DetermineColorFromExtension(const Tree<VizBlock>::Node& node) const;
-
-        /**
          * @brief Saves all settings to disk.
          *
          * @returns True if the operation succeeded.
@@ -182,22 +153,9 @@ namespace Settings
         bool SaveAllPreferencesToDisk();
 
         /**
-         * @returns The current file coloring path.
-         */
-        const std::filesystem::path& GetColoringFilePath() const;
-
-        /**
          * @returns The current preferences path.
          */
         const std::filesystem::path& GetPreferencesFilePath() const;
-
-        /**
-         * @returns The full path to the JSON file that contains the color mapping.
-         */
-        static std::filesystem::path DefaultColoringFilePath()
-        {
-            return std::filesystem::current_path().append(L"colors.json");
-        }
 
         /**
          * @returns The full path to the JSON file that contains the user preferences.
@@ -210,15 +168,9 @@ namespace Settings
       private:
         JsonDocument CreatePreferencesDocument();
 
-        JsonDocument m_fileColorMapDocument;
         JsonDocument m_preferencesDocument;
 
         std::filesystem::path m_preferencesPath;
-        std::filesystem::path m_fileColorMapPath;
-
-        ColorMap m_colorMap;
-
-        std::wstring m_colorScheme{ L"Default" };
     };
 } // namespace Settings
 

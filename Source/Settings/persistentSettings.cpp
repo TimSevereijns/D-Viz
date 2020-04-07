@@ -8,58 +8,8 @@
 #include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
 
-#ifdef Q_OS_WIN
-#undef GetObject
-#endif // Q_OS_WIN
-
 namespace
 {
-    /**
-     * @brief Populates the passed in map with the flattened content of the JSON document.
-     *
-     * @param[in] json               The JSON document containing the file color information.
-     * @param[out] map               The map that is to contain the flattened JSON data.
-     */
-    void
-    PopulateColorMapFromJsonDocument(const Settings::JsonDocument& json, Settings::ColorMap& map)
-    {
-        if (!json.IsObject()) {
-            return;
-        }
-
-        auto encounteredError{ false };
-
-        for (const auto& category : json.GetObject()) {
-            if (!category.value.IsObject()) {
-                encounteredError = true;
-                continue;
-            }
-
-            std::unordered_map<std::wstring, QVector3D> extensionMap;
-
-            for (const auto& extension : category.value.GetObject()) {
-                if (!extension.value.IsArray()) {
-                    encounteredError = true;
-                    continue;
-                }
-
-                const auto colorArray = extension.value.GetArray();
-                QVector3D colorVector{ colorArray[0].GetFloat() / 255.0f,
-                                       colorArray[1].GetFloat() / 255.0f,
-                                       colorArray[2].GetFloat() / 255.0f };
-
-                extensionMap.emplace(extension.name.GetString(), colorVector);
-            }
-
-            map.emplace(category.name.GetString(), std::move(extensionMap));
-        }
-
-        if (encounteredError) {
-            const auto& log = spdlog::get(Constants::Logging::DefaultLog);
-            log->error("Encountered an error converting JSON document to file color map.");
-        }
-    }
-
     template <typename DataType>
     auto GetValueOrDefault(
         const Settings::JsonDocument& document, std::wstring_view preference, DataType defaultValue)
@@ -86,7 +36,6 @@ namespace
 
         if (itr == document.MemberEnd()) {
             auto& allocator = document.GetAllocator();
-
             rapidjson::GenericValue<rapidjson::UTF16<>> key{ preference.data(), allocator };
             document.AddMember(key.Move(), value, allocator);
 
@@ -105,32 +54,14 @@ namespace
 
 namespace Settings
 {
-    PersistentSettings::PersistentSettings(
-        const std::filesystem::path& colorFile, const std::filesystem::path& preferencesFile)
-        : m_preferencesPath{ preferencesFile }, m_fileColorMapPath{ colorFile }
+    PersistentSettings::PersistentSettings(const std::filesystem::path& preferencesFile)
+        : m_preferencesPath{ preferencesFile }
     {
         if (!std::filesystem::exists(m_preferencesPath)) {
             m_preferencesDocument = CreatePreferencesDocument();
         } else {
             m_preferencesDocument = LoadFromDisk(m_preferencesPath);
         }
-
-        PopulateColorMapFromJsonDocument(m_fileColorMapDocument, m_colorMap);
-    }
-
-    const ColorMap& PersistentSettings::GetFileColorMap() const
-    {
-        return m_colorMap;
-    }
-
-    const std::wstring& PersistentSettings::GetActiveColorScheme() const
-    {
-        return m_colorScheme;
-    }
-
-    void PersistentSettings::SetColorScheme(const std::wstring& scheme)
-    {
-        m_colorScheme = scheme;
     }
 
     bool PersistentSettings::ShouldRenderCascadeSplits() const
@@ -271,30 +202,9 @@ namespace Settings
         return SaveToDisk(m_preferencesDocument, m_preferencesPath);
     }
 
-    const std::filesystem::path& PersistentSettings::GetColoringFilePath() const
-    {
-        return m_fileColorMapPath;
-    }
-
     const std::filesystem::path& PersistentSettings::GetPreferencesFilePath() const
     {
         return m_preferencesPath;
-    }
-
-    std::optional<QVector3D>
-    PersistentSettings::DetermineColorFromExtension(const Tree<VizBlock>::Node& node) const
-    {
-        const auto categoryItr = m_colorMap.find(m_colorScheme);
-        if (categoryItr == std::end(m_colorMap)) {
-            return std::nullopt;
-        }
-
-        const auto extensionItr = categoryItr->second.find(node->file.extension);
-        if (extensionItr == std::end(categoryItr->second)) {
-            return std::nullopt;
-        }
-
-        return extensionItr->second;
     }
 
     JsonDocument PersistentSettings::CreatePreferencesDocument()

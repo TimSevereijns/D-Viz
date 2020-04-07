@@ -67,7 +67,7 @@ class ScanBreakdownModel final : public QAbstractTableModel
 
     QVariant data(const QModelIndex& index, int role) const override;
 
-    void insert(const Tree<VizBlock>::Node& node);
+    void Insert(const Tree<VizBlock>::Node& node);
 
   private:
     void Process(Constants::FileSize::Prefix sizePrefix);

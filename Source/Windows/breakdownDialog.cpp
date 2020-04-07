@@ -46,7 +46,7 @@ void BreakdownDialog::ReloadData()
             }
 
             if (node->file.type != FileType::DIRECTORY) {
-                m_model.insert(node);
+                m_model.Insert(node);
             }
         }
     });

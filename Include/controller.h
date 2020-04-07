@@ -6,6 +6,7 @@
 #include "Monitor/fileChangeNotification.hpp"
 #include "Scanner/driveScanner.h"
 #include "Scene/light.h"
+#include "Settings/nodePainter.h"
 #include "Settings/persistentSettings.h"
 #include "Settings/sessionSettings.h"
 #include "Visualizations/vizBlock.h"
@@ -231,6 +232,16 @@ class Controller
     const Settings::SessionSettings& GetSessionSettings() const;
 
     /**
+     * @returns Settings needed to determine node colors.
+     */
+    Settings::NodePainter& GetNodePainter();
+
+    /**
+     * @overload
+     */
+    const Settings::NodePainter& GetNodePainter() const;
+
+    /**
      * @returns The filesystem path belonging to the root of the visualization.
      */
     std::filesystem::path GetRootPath() const;
@@ -290,9 +301,9 @@ class Controller
 
     Settings::PersistentSettings m_persistentSettings;
     Settings::SessionSettings m_sessionSettings;
+    Settings::NodePainter m_nodePainter;
 
     std::unique_ptr<MainWindow> m_view{ nullptr };
-
     std::unique_ptr<VisualizationModel> m_model{ nullptr };
 
     DriveScanner m_scanner;

@@ -70,8 +70,7 @@ namespace
 } // namespace
 
 Controller::Controller()
-    : m_persistentSettings{ Settings::PersistentSettings::DefaultColoringFilePath(),
-                            Settings::PersistentSettings::DefaultPreferencesFilePath() },
+    : m_persistentSettings{ Settings::PersistentSettings::DefaultPreferencesFilePath() },
       m_view{ std::make_unique<MainWindow>(*this) }
 {
 }
@@ -181,8 +180,8 @@ QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
         return Constants::Colors::SlateGray;
     }
 
-    if (m_persistentSettings.GetActiveColorScheme() != Constants::ColorScheme::Default) {
-        const auto fileColor = m_persistentSettings.DetermineColorFromExtension(node);
+    if (m_nodePainter.GetActiveColorScheme() != Constants::ColorScheme::Default) {
+        const auto fileColor = m_nodePainter.DetermineColorFromExtension(node);
         if (fileColor) {
             return *fileColor;
         }
@@ -520,6 +519,16 @@ Settings::PersistentSettings& Controller::GetPersistentSettings()
 const Settings::PersistentSettings& Controller::GetPersistentSettings() const
 {
     return m_persistentSettings;
+}
+
+Settings::NodePainter& Controller::GetNodePainter()
+{
+    return m_nodePainter;
+}
+
+const Settings::NodePainter& Controller::GetNodePainter() const
+{
+    return m_nodePainter;
 }
 
 Settings::SessionSettings& Controller::GetSessionSettings()

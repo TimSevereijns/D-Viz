@@ -186,7 +186,7 @@ void MainWindow::SetupColorSchemeDropdown()
     const auto& defaultScheme = QString::fromStdWString(Constants::ColorScheme::Default);
     m_ui.colorSchemeComboBox->addItem(defaultScheme, defaultScheme);
 
-    const auto& colorMap = m_controller.GetPersistentSettings().GetFileColorMap();
+    const auto& colorMap = m_controller.GetNodePainter().GetFileColorMap();
     for (const auto& extensionMap : colorMap) {
         const auto& categoryName = QString::fromStdWString(extensionMap.first);
         m_ui.colorSchemeComboBox->addItem(categoryName, categoryName);
@@ -624,7 +624,7 @@ void MainWindow::PruneTree()
 void MainWindow::ApplyColorScheme()
 {
     const auto colorScheme = m_ui.colorSchemeComboBox->currentText().toStdWString();
-    m_controller.GetPersistentSettings().SetColorScheme(colorScheme);
+    m_controller.GetNodePainter().SetColorScheme(colorScheme);
 
     m_glCanvas->ApplyColorScheme();
 }

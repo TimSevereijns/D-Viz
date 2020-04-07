@@ -1,5 +1,6 @@
 #include "persistentSettingsTests.h"
 
+#include <Settings/nodePainter.h>
 #include <Settings/persistentSettings.h>
 #include <constants.h>
 
@@ -7,7 +8,7 @@ namespace
 {
     void CleanUpWorkspace()
     {
-        const auto colorMapPath = Settings::PersistentSettings::DefaultColoringFilePath();
+        const auto colorMapPath = Settings::NodePainter::DefaultColoringFilePath();
         if (std::filesystem::exists(colorMapPath)) {
             std::filesystem::remove(colorMapPath);
         }
@@ -62,7 +63,6 @@ void PersistentSettingsTests::VerifyFilesAreCreatedWhenAbsent() const
 {
     Settings::PersistentSettings manager;
 
-    QVERIFY(std::filesystem::exists(manager.GetColoringFilePath()) == false);
     QVERIFY(std::filesystem::exists(manager.GetPreferencesFilePath()) == true);
 }
 
