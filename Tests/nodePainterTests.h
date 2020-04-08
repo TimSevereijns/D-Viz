@@ -30,7 +30,12 @@ class NodePainterTests : public QObject
     /**
      * @brief Verify that the serialized colors can be read from disk correctly.
      */
-    void ReadColorsFromDisk() const;
+    void DetermineColorsFromSettingsOnDisk() const;
+
+    /**
+     * @brief Verify that retrieving a non-existant mapping returns an empty optional.
+     */
+    void GetBackEmptyOptionalOnEmptyMapping() const;
 
     /**
      * @brief Verify that color scheme names can be set the retrieved.

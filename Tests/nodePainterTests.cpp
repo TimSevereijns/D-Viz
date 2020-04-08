@@ -31,13 +31,27 @@ void NodePainterTests::init()
     Settings::SaveToDisk(document, std::filesystem::current_path() / L"colors.json");
 }
 
-void NodePainterTests::ReadColorsFromDisk() const
+void NodePainterTests::DetermineColorsFromSettingsOnDisk() const
 {
     Settings::NodePainter painter;
     painter.SetColorScheme(L"Default");
     const auto color = painter.DetermineColorFromExtension(L".jpg");
 
     QVERIFY(color.has_value());
+}
+
+void NodePainterTests::GetBackEmptyOptionalOnEmptyMapping() const
+{
+    Settings::NodePainter painter;
+    painter.SetColorScheme(L"Default");
+    const auto validMapping = painter.DetermineColorFromExtension(L".foo");
+
+    QCOMPARE(validMapping.has_value(), false);
+
+    painter.SetColorScheme(L"Nonexistent");
+    const auto absentMapping = painter.DetermineColorFromExtension(L".png");
+
+    QCOMPARE(absentMapping.has_value(), false);
 }
 
 void NodePainterTests::ModifyActiveColorScheme() const
