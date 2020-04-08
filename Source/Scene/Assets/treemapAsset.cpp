@@ -613,9 +613,10 @@ namespace Assets
         m_mainShader.setUniformValue(
             "materialShininess", static_cast<float>(m_sessionSettings.GetMaterialShininess()));
 
-        const auto shouldShowShadows = m_persistentSettings.ShouldRenderShadows();
         const auto shouldShowCascadeSplits = m_persistentSettings.ShouldRenderCascadeSplits();
         m_mainShader.setUniformValue("shouldShowCascadeSplits", shouldShowCascadeSplits);
+
+        const auto shouldShowShadows = m_persistentSettings.ShouldRenderShadows();
         m_mainShader.setUniformValue("shouldShowShadows", shouldShowShadows);
 
         SetUniformLights(lights, m_sessionSettings, m_mainShader);

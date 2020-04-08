@@ -19,7 +19,7 @@ void SessionSettingsTests::ModifyCameraSpeed() const
     const auto desiredSpeed = 50;
 
     Settings::SessionSettings manager;
-    manager.OnCameraSpeedChanged(desiredSpeed);
+    manager.SetCameraSpeed(desiredSpeed);
 
     QCOMPARE(manager.GetCameraSpeed(), desiredSpeed);
 }
@@ -29,7 +29,7 @@ void SessionSettingsTests::ModifyMouseSensitivity() const
     const auto desiredSensitivity = 50;
 
     Settings::SessionSettings manager;
-    manager.OnMouseSensitivityChanged(desiredSensitivity);
+    manager.SetMouseSensitivity(desiredSensitivity);
 
     QCOMPARE(manager.GetMouseSensitivity(), desiredSensitivity);
 }
@@ -39,7 +39,7 @@ void SessionSettingsTests::ModifyLightAttenuationFactor() const
     const auto desiredFactor = 50;
 
     Settings::SessionSettings manager;
-    manager.OnLightAttenuationChanged(desiredFactor);
+    manager.SetLightAttenuation(desiredFactor);
 
     QCOMPARE(manager.GetLightAttenuationFactor(), desiredFactor);
 }
@@ -49,7 +49,7 @@ void SessionSettingsTests::ModifyAmbientLightCoefficient() const
     const auto desiredCoefficient = 50;
 
     Settings::SessionSettings manager;
-    manager.OnAmbientLightCoefficientChanged(desiredCoefficient);
+    manager.SetAmbientLightCoefficient(desiredCoefficient);
 
     QCOMPARE(manager.GetAmbientLightCoefficient(), desiredCoefficient);
 }
@@ -59,7 +59,7 @@ void SessionSettingsTests::ModifyPrimaryLightAttachmentToCamera() const
     const auto desiredAttachment = true;
 
     Settings::SessionSettings manager;
-    manager.OnAttachLightToCameraStateChanged(desiredAttachment);
+    manager.AttachLightToCamera(desiredAttachment);
 
     QCOMPARE(manager.IsPrimaryLightAttachedToCamera(), desiredAttachment);
 }
@@ -69,7 +69,7 @@ void SessionSettingsTests::ModifyFileSearchingPreference() const
     const auto searchFiles = true;
 
     Settings::SessionSettings manager;
-    manager.OnShouldSearchFilesChanged(searchFiles);
+    manager.SearchFiles(searchFiles);
 
     QCOMPARE(manager.ShouldSearchFiles(), searchFiles);
 }
@@ -79,7 +79,7 @@ void SessionSettingsTests::ModifyDirectorySearchingPreference() const
     const auto searchDirectories = false;
 
     Settings::SessionSettings manager;
-    manager.OnShouldSearchDirectoriesChanged(searchDirectories);
+    manager.SearchDirectories(searchDirectories);
 
     QCOMPARE(manager.ShouldSearchDirectories(), searchDirectories);
 }

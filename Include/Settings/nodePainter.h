@@ -11,8 +11,6 @@
 // Qt and a GCC macro in the STL library.
 #include "settings.h"
 
-#include <Tree/Tree.hpp>
-
 #include <QObject>
 #include <QVector3D>
 

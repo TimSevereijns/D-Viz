@@ -147,36 +147,36 @@ void MainWindow::SetupSidebar()
 
     connect(
         m_ui.searchDirectoriesCheckBox, &QCheckBox::stateChanged, &sessionSettings,
-        &Settings::SessionSettings::OnShouldSearchDirectoriesChanged);
+        &Settings::SessionSettings::SearchDirectories);
 
     connect(
         m_ui.searchFilesCheckBox, &QCheckBox::stateChanged, &sessionSettings,
-        &Settings::SessionSettings::OnShouldSearchFilesChanged);
+        &Settings::SessionSettings::SearchFiles);
 
     connect(
         m_ui.cameraSpeedSpinner,
         static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-        &sessionSettings, &Settings::SessionSettings::OnCameraSpeedChanged);
+        &sessionSettings, &Settings::SessionSettings::SetCameraSpeed);
 
     connect(
         m_ui.mouseSensitivitySpinner,
         static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-        &sessionSettings, &Settings::SessionSettings::OnMouseSensitivityChanged);
+        &sessionSettings, &Settings::SessionSettings::SetMouseSensitivity);
 
     connect(
         m_ui.ambientCoefficientSpinner,
         static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-        &sessionSettings, &Settings::SessionSettings::OnAmbientLightCoefficientChanged);
+        &sessionSettings, &Settings::SessionSettings::SetAmbientLightCoefficient);
 
     connect(
         m_ui.attenuationSpinner,
         static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-        &sessionSettings, &Settings::SessionSettings::OnLightAttenuationChanged);
+        &sessionSettings, &Settings::SessionSettings::SetLightAttenuation);
 
     connect(
         m_ui.attachLightToCameraCheckBox,
         static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), &sessionSettings,
-        &Settings::SessionSettings::OnAttachLightToCameraStateChanged);
+        &Settings::SessionSettings::AttachLightToCamera);
 }
 
 void MainWindow::SetupColorSchemeDropdown()

@@ -42,37 +42,32 @@ namespace Settings
         return m_isLightAttachedToCamera;
     }
 
-    void SessionSettings::OnCameraSpeedChanged(double speed)
-    {
-        m_cameraSpeed = speed;
-    }
-
-    void SessionSettings::OnMouseSensitivityChanged(double sensitivity)
+    void SessionSettings::SetMouseSensitivity(double sensitivity)
     {
         m_mouseSensitivity = sensitivity;
     }
 
-    void SessionSettings::OnAmbientLightCoefficientChanged(double coefficient)
+    void SessionSettings::SetAmbientLightCoefficient(double coefficient)
     {
         m_ambientLightCoefficient = coefficient;
     }
 
-    void SessionSettings::OnLightAttenuationChanged(double attenuation)
+    void SessionSettings::SetLightAttenuation(double attenuation)
     {
         m_lightAttenuationFactor = attenuation;
     }
 
-    void SessionSettings::OnAttachLightToCameraStateChanged(bool attached)
+    void SessionSettings::AttachLightToCamera(bool attached)
     {
         m_isLightAttachedToCamera = attached;
     }
 
-    void SessionSettings::OnShouldSearchFilesChanged(bool state)
+    void SessionSettings::SearchFiles(bool state)
     {
         m_shouldSearchFiles = state;
     }
 
-    void SessionSettings::OnShouldSearchDirectoriesChanged(bool state)
+    void SessionSettings::SearchDirectories(bool state)
     {
         m_shouldSearchDirectories = state;
     }

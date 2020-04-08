@@ -41,9 +41,9 @@ namespace
                 }
 
                 const auto colorArray = extension.value.GetArray();
-                QVector3D colorVector{ colorArray[0].GetFloat() / 255.0f,
-                                       colorArray[1].GetFloat() / 255.0f,
-                                       colorArray[2].GetFloat() / 255.0f };
+                QVector3D colorVector{ colorArray[0].GetInt() / 255.0f,
+                                       colorArray[1].GetInt() / 255.0f,
+                                       colorArray[2].GetInt() / 255.0f };
 
                 extensionMap.emplace(extension.name.GetString(), colorVector);
             }
