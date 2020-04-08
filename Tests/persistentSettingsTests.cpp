@@ -26,10 +26,10 @@ namespace
         Settings::PersistentSettings manager;
 
         (manager.*setter)(false);
-        QVERIFY((manager.*getter)() == false);
+        QCOMPARE((manager.*getter)(), false);
 
         (manager.*setter)(true);
-        QVERIFY((manager.*getter)() == true);
+        QCOMPARE((manager.*getter)(), true);
     }
 
     template <typename VerifierType>
@@ -63,7 +63,7 @@ void PersistentSettingsTests::VerifyFilesAreCreatedWhenAbsent() const
 {
     Settings::PersistentSettings manager;
 
-    QVERIFY(std::filesystem::exists(manager.GetPreferencesFilePath()) == true);
+    QVERIFY(std::filesystem::exists(manager.GetPreferencesFilePath()));
 }
 
 void PersistentSettingsTests::SavingSettingsToDisk() const
@@ -75,9 +75,9 @@ void PersistentSettingsTests::SavingSettingsToDisk() const
     manager.SaveAllPreferencesToDisk();
 
     const auto jsonDocument = Settings::LoadFromDisk(manager.GetPreferencesFilePath());
-    QVERIFY(jsonDocument.HasMember(Constants::Preferences::ShowOrigin));
-    QVERIFY(jsonDocument[Constants::Preferences::ShowOrigin].IsBool());
-    QVERIFY(jsonDocument[Constants::Preferences::ShowOrigin].GetBool() == shouldShowOrigin);
+    QCOMPARE(jsonDocument.HasMember(Constants::Preferences::ShowOrigin), true);
+    QCOMPARE(jsonDocument[Constants::Preferences::ShowOrigin].IsBool(), true);
+    QCOMPARE(jsonDocument[Constants::Preferences::ShowOrigin].GetBool(), shouldShowOrigin);
 }
 
 void PersistentSettingsTests::ToggleFileMonitoring() const
@@ -135,7 +135,7 @@ void PersistentSettingsTests::ModifyShadowMapCascadeCount() const
     ToggleIntegralSetting(
         &Settings::PersistentSettings::SetShadowMapCascadeCount,
         &Settings::PersistentSettings::GetShadowMapCascadeCount, desired,
-        [&](auto value) { QVERIFY(value == desired); });
+        [&](auto value) { QCOMPARE(value, desired); });
 }
 
 void PersistentSettingsTests::ClampShadowMapCascadeCount() const
@@ -146,7 +146,7 @@ void PersistentSettingsTests::ClampShadowMapCascadeCount() const
     ToggleIntegralSetting(
         &Settings::PersistentSettings::SetShadowMapCascadeCount,
         &Settings::PersistentSettings::GetShadowMapCascadeCount, desired,
-        [&](auto value) { QVERIFY(value == max); });
+        [&](auto value) { QCOMPARE(value, max); });
 }
 
 void PersistentSettingsTests::ModifyShadowMapQuality() const
@@ -156,7 +156,7 @@ void PersistentSettingsTests::ModifyShadowMapQuality() const
     ToggleIntegralSetting(
         &Settings::PersistentSettings::SetShadowMapQuality,
         &Settings::PersistentSettings::GetShadowMapQuality, desired,
-        [&](auto value) { QVERIFY(value == desired); });
+        [&](auto value) { QCOMPARE(value, desired); });
 }
 
 void PersistentSettingsTests::ClampShadowMapQuality() const
@@ -167,7 +167,7 @@ void PersistentSettingsTests::ClampShadowMapQuality() const
     ToggleIntegralSetting(
         &Settings::PersistentSettings::SetShadowMapQuality,
         &Settings::PersistentSettings::GetShadowMapQuality, desired,
-        [&](auto value) { QVERIFY(value == max); });
+        [&](auto value) { QCOMPARE(value, max); });
 }
 
 void PersistentSettingsTests::DebugMenuIsOffByDefault() const
@@ -175,7 +175,7 @@ void PersistentSettingsTests::DebugMenuIsOffByDefault() const
     constexpr auto defaultState = false;
 
     Settings::PersistentSettings manager;
-    QVERIFY(manager.ShouldShowDebuggingMenu() == defaultState);
+    QCOMPARE(manager.ShouldShowDebuggingMenu(), defaultState);
 }
 
 void PersistentSettingsTests::LoadSettingsFromDisk() const
@@ -186,8 +186,8 @@ void PersistentSettingsTests::LoadSettingsFromDisk() const
     firstManager.SaveAllPreferencesToDisk();
 
     Settings::PersistentSettings secondManager;
-    QVERIFY(secondManager.ShouldRenderGrid() == false);
-    QVERIFY(secondManager.ShouldRenderShadows() == false);
+    QCOMPARE(secondManager.ShouldRenderGrid(), false);
+    QCOMPARE(secondManager.ShouldRenderShadows(), false);
 }
 
 REGISTER_TEST(PersistentSettingsTests)

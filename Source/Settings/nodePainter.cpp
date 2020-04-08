@@ -63,6 +63,10 @@ namespace Settings
     NodePainter::NodePainter(const std::filesystem::path& colorFile)
         : m_fileColorMapPath{ colorFile }
     {
+        if (std::filesystem::exists(m_fileColorMapPath)) {
+            m_fileColorMapDocument = LoadFromDisk(m_fileColorMapPath);
+        }
+
         PopulateColorMapFromJsonDocument(m_fileColorMapDocument, m_colorMap);
     }
 
@@ -76,29 +80,24 @@ namespace Settings
         return m_colorScheme;
     }
 
-    void NodePainter::SetColorScheme(const std::wstring& scheme)
+    void NodePainter::SetColorScheme(std::wstring_view scheme)
     {
         m_colorScheme = scheme;
     }
 
     std::optional<QVector3D>
-    NodePainter::DetermineColorFromExtension(const Tree<VizBlock>::Node& node) const
+    NodePainter::DetermineColorFromExtension(std::wstring_view extension) const
     {
         const auto categoryItr = m_colorMap.find(m_colorScheme);
         if (categoryItr == std::end(m_colorMap)) {
             return std::nullopt;
         }
 
-        const auto extensionItr = categoryItr->second.find(node->file.extension);
+        const auto extensionItr = categoryItr->second.find(extension.data());
         if (extensionItr == std::end(categoryItr->second)) {
             return std::nullopt;
         }
 
         return extensionItr->second;
-    }
-
-    const std::filesystem::path& NodePainter::GetColoringFilePath() const
-    {
-        return m_fileColorMapPath;
     }
 } // namespace Settings

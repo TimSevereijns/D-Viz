@@ -181,7 +181,9 @@ QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
     }
 
     if (m_nodePainter.GetActiveColorScheme() != Constants::ColorScheme::Default) {
-        const auto fileColor = m_nodePainter.DetermineColorFromExtension(node);
+        const auto fileColor =
+            m_nodePainter.DetermineColorFromExtension(node.GetData().file.extension);
+
         if (fileColor) {
             return *fileColor;
         }

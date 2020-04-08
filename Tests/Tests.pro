@@ -22,6 +22,7 @@ HEADERS += \
    filesystemObserverTests.h \
    modelTests.h \
    multiTestHarness.h \
+   nodePainterTests.h \
    persistentSettingsTests.h \
    sessionSettingsTests.h \
    testUtilities.hpp \
@@ -32,6 +33,7 @@ SOURCES += \
    filesystemObserverTests.cpp \
    mainTest.cpp \
    modelTests.cpp \
+   nodePainterTests.cpp \
    persistentSettingsTests.cpp \
    sessionSettingsTests.cpp \
 

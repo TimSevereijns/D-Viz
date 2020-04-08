@@ -42,23 +42,17 @@ namespace Settings
         /**
          * @brief Sets the current color scheme.
          */
-        void SetColorScheme(const std::wstring& scheme);
+        void SetColorScheme(std::wstring_view scheme);
 
         /**
          * @brief Determines the appropriate color for the file based on the user-configurable color
          * set in the color.json file.
          *
-         * @param[in] node               The node whose color needs to be restored.
+         * @param[in] extension     The extension to be painted.
          *
          * @returns The appropriate color found in the color map.
          */
-        std::optional<QVector3D>
-        DetermineColorFromExtension(const Tree<VizBlock>::Node& node) const;
-
-        /**
-         * @returns The current file coloring path.
-         */
-        const std::filesystem::path& GetColoringFilePath() const;
+        std::optional<QVector3D> DetermineColorFromExtension(std::wstring_view extension) const;
 
         /**
          * @returns The full path to the JSON file that contains the color mapping.

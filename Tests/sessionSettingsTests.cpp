@@ -21,7 +21,7 @@ void SessionSettingsTests::ModifyCameraSpeed() const
     Settings::SessionSettings manager;
     manager.OnCameraSpeedChanged(desiredSpeed);
 
-    QVERIFY(manager.GetCameraSpeed() == desiredSpeed);
+    QCOMPARE(manager.GetCameraSpeed(), desiredSpeed);
 }
 
 void SessionSettingsTests::ModifyMouseSensitivity() const
@@ -31,7 +31,7 @@ void SessionSettingsTests::ModifyMouseSensitivity() const
     Settings::SessionSettings manager;
     manager.OnMouseSensitivityChanged(desiredSensitivity);
 
-    QVERIFY(manager.GetMouseSensitivity() == desiredSensitivity);
+    QCOMPARE(manager.GetMouseSensitivity(), desiredSensitivity);
 }
 
 void SessionSettingsTests::ModifyLightAttenuationFactor() const
@@ -41,7 +41,7 @@ void SessionSettingsTests::ModifyLightAttenuationFactor() const
     Settings::SessionSettings manager;
     manager.OnLightAttenuationChanged(desiredFactor);
 
-    QVERIFY(manager.GetLightAttenuationFactor() == desiredFactor);
+    QCOMPARE(manager.GetLightAttenuationFactor(), desiredFactor);
 }
 
 void SessionSettingsTests::ModifyAmbientLightCoefficient() const
@@ -51,7 +51,7 @@ void SessionSettingsTests::ModifyAmbientLightCoefficient() const
     Settings::SessionSettings manager;
     manager.OnAmbientLightCoefficientChanged(desiredCoefficient);
 
-    QVERIFY(manager.GetAmbientLightCoefficient() == desiredCoefficient);
+    QCOMPARE(manager.GetAmbientLightCoefficient(), desiredCoefficient);
 }
 
 void SessionSettingsTests::ModifyPrimaryLightAttachmentToCamera() const
@@ -61,7 +61,7 @@ void SessionSettingsTests::ModifyPrimaryLightAttachmentToCamera() const
     Settings::SessionSettings manager;
     manager.OnAttachLightToCameraStateChanged(desiredAttachment);
 
-    QVERIFY(manager.IsPrimaryLightAttachedToCamera() == desiredAttachment);
+    QCOMPARE(manager.IsPrimaryLightAttachedToCamera(), desiredAttachment);
 }
 
 void SessionSettingsTests::ModifyFileSearchingPreference() const
@@ -71,7 +71,7 @@ void SessionSettingsTests::ModifyFileSearchingPreference() const
     Settings::SessionSettings manager;
     manager.OnShouldSearchFilesChanged(searchFiles);
 
-    QVERIFY(manager.ShouldSearchFiles() == searchFiles);
+    QCOMPARE(manager.ShouldSearchFiles(), searchFiles);
 }
 
 void SessionSettingsTests::ModifyDirectorySearchingPreference() const
@@ -81,7 +81,7 @@ void SessionSettingsTests::ModifyDirectorySearchingPreference() const
     Settings::SessionSettings manager;
     manager.OnShouldSearchDirectoriesChanged(searchDirectories);
 
-    QVERIFY(manager.ShouldSearchDirectories() == searchDirectories);
+    QCOMPARE(manager.ShouldSearchDirectories(), searchDirectories);
 }
 
 void SessionSettingsTests::ModifyNumericPrefix() const
@@ -91,7 +91,7 @@ void SessionSettingsTests::ModifyNumericPrefix() const
     Settings::SessionSettings manager;
     manager.SetActiveNumericPrefix(Constants::FileSize::Prefix::BINARY);
 
-    QVERIFY(manager.GetActiveNumericPrefix() == numericPrefix);
+    QCOMPARE(manager.GetActiveNumericPrefix(), numericPrefix);
 }
 
 void SessionSettingsTests::ModifyVisualizationParameters() const
@@ -107,10 +107,10 @@ void SessionSettingsTests::ModifyVisualizationParameters() const
 
     const auto& retreivedManager = manager.GetVisualizationParameters();
 
-    QVERIFY(retreivedManager.forceNewScan == parameters.forceNewScan);
-    QVERIFY(retreivedManager.rootDirectory == parameters.rootDirectory);
-    QVERIFY(retreivedManager.minimumFileSize == parameters.minimumFileSize);
-    QVERIFY(retreivedManager.onlyShowDirectories == parameters.onlyShowDirectories);
+    QCOMPARE(retreivedManager.forceNewScan, parameters.forceNewScan);
+    QCOMPARE(retreivedManager.rootDirectory, parameters.rootDirectory);
+    QCOMPARE(retreivedManager.minimumFileSize, parameters.minimumFileSize);
+    QCOMPARE(retreivedManager.onlyShowDirectories, parameters.onlyShowDirectories);
 }
 
 void SessionSettingsTests::VerifyFilesOverLimitAreDisplayed() const
@@ -131,7 +131,7 @@ void SessionSettingsTests::VerifyFilesOverLimitAreDisplayed() const
     manager.SetVisualizationParameters(parameters);
     const auto shouldDisplay = manager.IsBlockVisible(sample);
 
-    QVERIFY(shouldDisplay == true);
+    QCOMPARE(shouldDisplay, true);
 }
 
 void SessionSettingsTests::VerifyFilesUnderLimitAreNotDisplayed() const
@@ -152,7 +152,7 @@ void SessionSettingsTests::VerifyFilesUnderLimitAreNotDisplayed() const
     manager.SetVisualizationParameters(parameters);
     const auto shouldDisplay = manager.IsBlockVisible(sample);
 
-    QVERIFY(shouldDisplay == false);
+    QCOMPARE(shouldDisplay, false);
 }
 
 void SessionSettingsTests::VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed() const
@@ -173,7 +173,7 @@ void SessionSettingsTests::VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed(
     manager.SetVisualizationParameters(parameters);
     const auto shouldDisplay = manager.IsBlockVisible(sample);
 
-    QVERIFY(shouldDisplay == false);
+    QCOMPARE(shouldDisplay, false);
 }
 
 void SessionSettingsTests::VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed() const
@@ -194,7 +194,7 @@ void SessionSettingsTests::VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed(
     manager.SetVisualizationParameters(parameters);
     const auto shouldDisplay = manager.IsBlockVisible(sample);
 
-    QVERIFY(shouldDisplay == true);
+    QCOMPARE(shouldDisplay, true);
 }
 
 void SessionSettingsTests::VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed() const
@@ -215,7 +215,7 @@ void SessionSettingsTests::VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed()
     manager.SetVisualizationParameters(parameters);
     const auto shouldDisplay = manager.IsBlockVisible(sample);
 
-    QVERIFY(shouldDisplay == false);
+    QCOMPARE(shouldDisplay, false);
 }
 
 REGISTER_TEST(SessionSettingsTests)
