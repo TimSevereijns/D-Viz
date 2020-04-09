@@ -2,6 +2,7 @@
 
 #include <Settings/nodePainter.h>
 #include <Settings/settings.h>
+#include <constants.h>
 
 void NodePainterTests::initTestCase()
 {
@@ -39,7 +40,7 @@ void NodePainterTests::DetermineColorsFromSettingsOnDisk() const
     const auto color = painter.DetermineColorFromExtension(L".jpg");
     QVERIFY(color.has_value());
 
-    constexpr auto expectedColor = QVector3D{ 128 / 255.0f, 128 / 255.0f, 128 / 255.0f };
+    constexpr auto expectedColor = Detail::RGB(128, 128, 128);
     QCOMPARE(*color, expectedColor);
 }
 

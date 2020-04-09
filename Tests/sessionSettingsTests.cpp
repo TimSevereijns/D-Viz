@@ -129,9 +129,8 @@ void SessionSettingsTests::VerifyFilesOverLimitAreDisplayed() const
 
     Settings::SessionSettings manager;
     manager.SetVisualizationParameters(parameters);
-    const auto shouldDisplay = manager.IsBlockVisible(sample);
 
-    QCOMPARE(shouldDisplay, true);
+    QCOMPARE(manager.IsBlockVisible(sample), true);
 }
 
 void SessionSettingsTests::VerifyFilesUnderLimitAreNotDisplayed() const
@@ -150,9 +149,8 @@ void SessionSettingsTests::VerifyFilesUnderLimitAreNotDisplayed() const
 
     Settings::SessionSettings manager;
     manager.SetVisualizationParameters(parameters);
-    const auto shouldDisplay = manager.IsBlockVisible(sample);
 
-    QCOMPARE(shouldDisplay, false);
+    QCOMPARE(manager.IsBlockVisible(sample), false);
 }
 
 void SessionSettingsTests::VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed() const
@@ -171,9 +169,8 @@ void SessionSettingsTests::VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed(
 
     Settings::SessionSettings manager;
     manager.SetVisualizationParameters(parameters);
-    const auto shouldDisplay = manager.IsBlockVisible(sample);
 
-    QCOMPARE(shouldDisplay, false);
+    QCOMPARE(manager.IsBlockVisible(sample), false);
 }
 
 void SessionSettingsTests::VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed() const
@@ -192,9 +189,8 @@ void SessionSettingsTests::VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed(
 
     Settings::SessionSettings manager;
     manager.SetVisualizationParameters(parameters);
-    const auto shouldDisplay = manager.IsBlockVisible(sample);
 
-    QCOMPARE(shouldDisplay, true);
+    QCOMPARE(manager.IsBlockVisible(sample), true);
 }
 
 void SessionSettingsTests::VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed() const
@@ -213,9 +209,8 @@ void SessionSettingsTests::VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed()
 
     Settings::SessionSettings manager;
     manager.SetVisualizationParameters(parameters);
-    const auto shouldDisplay = manager.IsBlockVisible(sample);
 
-    QCOMPARE(shouldDisplay, false);
+    QCOMPARE(manager.IsBlockVisible(sample), false);
 }
 
 REGISTER_TEST(SessionSettingsTests)
