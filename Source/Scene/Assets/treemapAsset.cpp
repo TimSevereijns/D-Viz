@@ -114,7 +114,7 @@ namespace
      * @param[out] shader            The shader program to load the light data into.
      */
     void SetUniformLights(
-        const std::vector<Light>& lights, const Settings::Manager& settings,
+        const std::vector<Light>& lights, const Settings::SessionSettings& settings,
         QOpenGLShaderProgram& shader)
     {
         for (std::size_t index = 0u; index < lights.size(); ++index) {
@@ -128,7 +128,7 @@ namespace
 
             const auto attenuation = "allLights[" + indexAsString + "].attenuation";
             shader.setUniformValue(
-                attenuation.data(), static_cast<float>(settings.GetLightAttentuationFactor()));
+                attenuation.data(), static_cast<float>(settings.GetLightAttenuationFactor()));
 
             const auto ambientCoefficient = "allLights[" + indexAsString + "].ambientCoefficient";
             shader.setUniformValue(
@@ -184,9 +184,8 @@ namespace Assets
     {
         m_shouldRender = true;
 
-        const auto& preferences = m_settingsManager.GetPreferenceMap();
-        m_cascadeCount = preferences.GetValueOrDefault(L"shadowMapCascadeCount", 4);
-        m_shadowMapResolution = preferences.GetValueOrDefault(L"shadowMapQuality", 4) * 1024;
+        m_cascadeCount = m_persistentSettings.GetShadowMapCascadeCount();
+        m_shadowMapResolution = m_persistentSettings.GetShadowMapQuality() * 1024;
 
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->info("Shadow map width & height is set at {} pixels.", m_shadowMapResolution);
@@ -430,7 +429,7 @@ namespace Assets
 
         m_blockCount = 0;
 
-        const auto& parameters = m_settingsManager.GetVisualizationParameters();
+        const auto& parameters = m_sessionSettings.GetVisualizationParameters();
 
         for (auto& node : tree) {
             const auto fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
@@ -473,7 +472,7 @@ namespace Assets
     {
         m_blockColors.clear();
 
-        const auto& parameters = m_settingsManager.GetVisualizationParameters();
+        const auto& parameters = m_sessionSettings.GetVisualizationParameters();
 
         for (const auto& node : tree) {
             const auto fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
@@ -605,9 +604,6 @@ namespace Assets
     {
         m_mainShader.bind();
 
-        const auto shouldRenderShadows = m_settingsManager.ShouldRenderShadows();
-        const auto shouldShowCascadeSplits = m_settingsManager.ShouldShowCascadeSplits();
-
         m_mainShader.setUniformValue(
             "cameraProjectionViewMatrix", camera.GetProjectionViewMatrix());
 
@@ -615,14 +611,17 @@ namespace Assets
 
         // @todo The following variables don't need to be set with every pass...
         m_mainShader.setUniformValue(
-            "materialShininess", static_cast<float>(m_settingsManager.GetMaterialShininess()));
+            "materialShininess", static_cast<float>(m_sessionSettings.GetMaterialShininess()));
 
+        const auto shouldShowCascadeSplits = m_persistentSettings.ShouldRenderCascadeSplits();
         m_mainShader.setUniformValue("shouldShowCascadeSplits", shouldShowCascadeSplits);
-        m_mainShader.setUniformValue("shouldShowShadows", shouldRenderShadows);
 
-        SetUniformLights(lights, m_settingsManager, m_mainShader);
+        const auto shouldShowShadows = m_persistentSettings.ShouldRenderShadows();
+        m_mainShader.setUniformValue("shouldShowShadows", shouldShowShadows);
 
-        if (shouldRenderShadows) {
+        SetUniformLights(lights, m_sessionSettings, m_mainShader);
+
+        if (shouldShowShadows) {
             Expects(m_shadowMaps.size() == static_cast<std::size_t>(m_cascadeCount));
 
             for (int index = 0; index < m_cascadeCount; ++index) {
@@ -655,7 +654,7 @@ namespace Assets
             return;
         }
 
-        if (m_settingsManager.ShouldRenderShadows()) {
+        if (m_persistentSettings.ShouldRenderShadows()) {
             RenderShadowPass(camera);
         }
 

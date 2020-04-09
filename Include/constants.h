@@ -65,8 +65,8 @@ namespace Constants
 
     namespace Logging
     {
-        static std::string DefaultLog = "D-Viz";
-        static std::string FilesystemLog = "Filesystem";
+        constexpr static auto& DefaultLog = "D-Viz";
+        constexpr static auto& FilesystemLog = "Filesystem";
     } // namespace Logging
 
     namespace Math
@@ -80,22 +80,24 @@ namespace Constants
     {
         constexpr static auto& ShowOrigin = L"showOrigin";
         constexpr static auto& ShowGrid = L"showGrid";
-        constexpr static auto& ShowLights = L"showLights";
+        constexpr static auto& ShowLightMarkers = L"showLights";
         constexpr static auto& ShowFrusta = L"showFrusta";
         constexpr static auto& ShowShadows = L"showShadows";
         constexpr static auto& ShowCascadeSplits = L"showCascadeSplits";
+        constexpr static auto& ShadowMapCascadeCount = L"shadowMapCascadeCount";
         constexpr static auto& ShadowMapQuality = L"shadowMapQuality";
         constexpr static auto& ShowDebuggingMenu = L"showDebuggingMenu";
+        constexpr static auto& MonitorFileSystem = L"monitorFileSystem";
     } // namespace Preferences
 
     namespace Visualization
     {
-        constexpr static const double PaddingRatio = 0.9;
-        constexpr static const double MaxPadding = 0.75;
+        constexpr static auto PaddingRatio = 0.9;
+        constexpr static auto MaxPadding = 0.75;
 
-        constexpr static const float BlockHeight = 2.0f;
-        constexpr static const float RootBlockWidth = 1000.0f;
-        constexpr static const float RootBlockDepth = 1000.0f;
+        constexpr static auto BlockHeight = 2.0f;
+        constexpr static auto RootBlockWidth = 1000.0f;
+        constexpr static auto RootBlockDepth = 1000.0f;
     } // namespace Visualization
 } // namespace Constants
 

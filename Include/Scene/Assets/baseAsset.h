@@ -2,9 +2,12 @@
 #define BASEASSET_H
 
 #include "Scene/light.h"
-#include "Settings/settingsManager.h"
+#include "Settings/persistentSettings.h"
+#include "Settings/sessionSettings.h"
 #include "Viewport/camera.h"
 #include "Visualizations/visualization.h"
+
+#include <string_view>
 
 #include <QOpenGLBuffer>
 #include <QOpenGLExtraFunctions>
@@ -159,8 +162,6 @@ namespace Assets
          */
         bool LoadShaders(const QString& vertexShaderName, const QString& fragmentShaderName);
 
-        bool DetermineVisibilityFromPreferences(std::wstring_view preferenceName);
-
         QOpenGLBuffer m_vertexBuffer;
         QOpenGLBuffer m_colorBuffer;
 
@@ -173,7 +174,8 @@ namespace Assets
 
         QOpenGLExtraFunctions& m_openGL;
 
-        const Settings::Manager& m_settingsManager;
+        const Settings::PersistentSettings& m_persistentSettings;
+        const Settings::SessionSettings& m_sessionSettings;
 
         bool m_shouldRender{ true };
     };

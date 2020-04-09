@@ -3,7 +3,7 @@
 
 #include <QAbstractTableModel>
 
-#include "Settings/settingsManager.h"
+#include "Settings/persistentSettings.h"
 #include "Utilities/utilities.hpp"
 #include "Visualizations/vizBlock.h"
 #include "constants.h"
@@ -19,7 +19,7 @@
 
 namespace Settings
 {
-    class Manager;
+    class PersistentSettings;
 }
 
 struct RowModel
@@ -67,7 +67,7 @@ class ScanBreakdownModel final : public QAbstractTableModel
 
     QVariant data(const QModelIndex& index, int role) const override;
 
-    void insert(const Tree<VizBlock>::Node& node);
+    void Insert(const Tree<VizBlock>::Node& node);
 
   private:
     void Process(Constants::FileSize::Prefix sizePrefix);

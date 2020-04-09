@@ -6,7 +6,9 @@
 #include "Monitor/fileChangeNotification.hpp"
 #include "Scanner/driveScanner.h"
 #include "Scene/light.h"
-#include "Settings/settingsManager.h"
+#include "Settings/nodePainter.h"
+#include "Settings/persistentSettings.h"
+#include "Settings/sessionSettings.h"
 #include "Visualizations/vizBlock.h"
 #include "Windows/mainWindow.h"
 
@@ -210,14 +212,34 @@ class Controller
     void SaveScanMetadata(const ScanningProgress& progress);
 
     /**
-     * @returns The options manager.
+     * @returns Settings that persist between application usages.
      */
-    Settings::Manager& GetSettingsManager();
+    Settings::PersistentSettings& GetPersistentSettings();
 
     /**
      * @overload
      */
-    const Settings::Manager& GetSettingsManager() const;
+    const Settings::PersistentSettings& GetPersistentSettings() const;
+
+    /**
+     * @returns Settings that expire when the application ends.
+     */
+    Settings::SessionSettings& GetSessionSettings();
+
+    /**
+     * @overload
+     */
+    const Settings::SessionSettings& GetSessionSettings() const;
+
+    /**
+     * @returns Settings needed to determine node colors.
+     */
+    Settings::NodePainter& GetNodePainter();
+
+    /**
+     * @overload
+     */
+    const Settings::NodePainter& GetNodePainter() const;
 
     /**
      * @returns The filesystem path belonging to the root of the visualization.
@@ -277,10 +299,11 @@ class Controller
 
     bool m_allowInteractionWithModel{ false };
 
-    Settings::Manager m_settingsManager;
+    Settings::PersistentSettings m_persistentSettings;
+    Settings::SessionSettings m_sessionSettings;
+    Settings::NodePainter m_nodePainter;
 
     std::unique_ptr<MainWindow> m_view{ nullptr };
-
     std::unique_ptr<VisualizationModel> m_model{ nullptr };
 
     DriveScanner m_scanner;

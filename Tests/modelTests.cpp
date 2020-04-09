@@ -522,7 +522,7 @@ void ModelTests::TrackMultipleDeletions()
         const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now() - startTime);
 
-        if (elapsedTime > std::chrono::milliseconds(500)) {
+        if (elapsedTime > std::chrono::milliseconds{ 500 }) {
             break;
         }
     }

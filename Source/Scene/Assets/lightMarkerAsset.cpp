@@ -5,7 +5,7 @@ namespace Assets
     LightMarker::LightMarker(const Controller& controller, QOpenGLExtraFunctions& openGL)
         : Line{ controller, openGL }
     {
-        m_shouldRender = DetermineVisibilityFromPreferences(Constants::Preferences::ShowLights);
+        m_shouldRender = m_persistentSettings.ShouldRenderLightMarkers();
     }
 
     void LightMarker::Render(const Camera& camera, const std::vector<Light>&)
