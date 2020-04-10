@@ -70,7 +70,7 @@ QVariant ScanBreakdownModel::data(const QModelIndex& index, int role) const
 void ScanBreakdownModel::Insert(const Tree<VizBlock>::Node& node)
 {
     const auto& file = node->file;
-    if (file.type != FileType::REGULAR) {
+    if (file.type != FileType::Regular) {
         return;
     }
 
@@ -91,7 +91,7 @@ void ScanBreakdownModel::ClearData()
     m_fileTypeVector.clear();
 }
 
-void ScanBreakdownModel::Process(Constants::FileSize::Prefix sizePrefix)
+void ScanBreakdownModel::Process(Constants::SizePrefix sizePrefix)
 {
     Expects(!m_fileTypeMap.empty() && m_fileTypeVector.empty());
 

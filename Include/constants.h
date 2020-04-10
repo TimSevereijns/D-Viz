@@ -19,14 +19,11 @@ namespace Detail
 
 namespace Constants
 {
-    namespace FileSize
+    enum struct SizePrefix
     {
-        enum struct Prefix
-        {
-            BINARY,
-            DECIMAL
-        };
-    }
+        Binary,
+        Decimal
+    };
 
     namespace Colors
     {

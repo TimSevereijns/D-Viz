@@ -294,15 +294,15 @@ void WindowsFileMonitor::ProcessNotification()
 
         switch (notificationInfo->Action) {
             case FILE_ACTION_ADDED: {
-                m_notificationCallback(FileEvent{ fileName, FileEventType::CREATED });
+                m_notificationCallback(FileEvent{ fileName, FileEventType::Created });
                 break;
             }
             case FILE_ACTION_REMOVED: {
-                m_notificationCallback(FileEvent{ fileName, FileEventType::DELETED });
+                m_notificationCallback(FileEvent{ fileName, FileEventType::Deleted });
                 break;
             }
             case FILE_ACTION_MODIFIED: {
-                m_notificationCallback(FileEvent{ fileName, FileEventType::TOUCHED });
+                m_notificationCallback(FileEvent{ fileName, FileEventType::Touched });
                 break;
             }
             case FILE_ACTION_RENAMED_OLD_NAME: {
@@ -310,7 +310,7 @@ void WindowsFileMonitor::ProcessNotification()
                 break;
             }
             case FILE_ACTION_RENAMED_NEW_NAME: {
-                m_notificationCallback(FileEvent{ fileName, FileEventType::RENAMED });
+                m_notificationCallback(FileEvent{ fileName, FileEventType::Renamed });
                 break;
             }
             default: {

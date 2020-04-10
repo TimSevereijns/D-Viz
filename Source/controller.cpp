@@ -169,7 +169,7 @@ std::optional<FileEvent> Controller::FetchFileModification()
 
 QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
 {
-    Expects(node.GetData().offsetIntoVBO != VizBlock::INVALID_OFFSET);
+    Expects(node.GetData().offsetIntoVBO != VizBlock::NotInVBO);
 
     const auto nodeColor = m_nodeColorMap.find(node.GetData().offsetIntoVBO);
     if (nodeColor != std::end(m_nodeColorMap)) {
@@ -189,11 +189,11 @@ QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
         }
     }
 
-    if (node->file.type == FileType::DIRECTORY) {
+    if (node->file.type == FileType::Directory) {
         return Constants::Colors::White;
     }
 
-    Expects(node->file.type == FileType::REGULAR);
+    Expects(node->file.type == FileType::Regular);
     return Constants::Colors::FileGreen;
 }
 
@@ -550,7 +550,7 @@ std::filesystem::path Controller::GetRootPath() const
 
 void Controller::RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVector3D& color)
 {
-    Expects(node.GetData().offsetIntoVBO != VizBlock::INVALID_OFFSET);
+    Expects(node.GetData().offsetIntoVBO != VizBlock::NotInVBO);
     m_nodeColorMap.insert_or_assign(node.GetData().offsetIntoVBO, color);
 }
 

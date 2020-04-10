@@ -467,7 +467,7 @@ void GLCanvas::ShowGamepadContextMenu()
             m_controller.HighlightDescendants(*selectedNode, highlightCallback);
         });
 
-        if (selectedNode->GetData().file.type == FileType::REGULAR) {
+        if (selectedNode->GetData().file.type == FileType::Regular) {
             const auto message = GetHighlightExtensionLabel(*selectedNode);
 
             m_gamepadContextMenu->AddEntry(message, [=] {
@@ -530,7 +530,7 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
             m_controller.HighlightDescendants(*selectedNode, highlightCallback);
         });
 
-        if (selectedNode->GetData().file.type == FileType::REGULAR) {
+        if (selectedNode->GetData().file.type == FileType::Regular) {
             const auto message = GetHighlightExtensionLabel(*selectedNode);
 
             menu.addAction(message, [&] {
@@ -789,10 +789,10 @@ void GLCanvas::VisualizeFilesystemActivity()
             continue;
         }
 
-        if (notification->eventType == FileEventType::TOUCHED) {
+        if (notification->eventType == FileEventType::Touched) {
             markNode(*affectedNode, Constants::Colors::BabyBlue);
-        } else if (notification->eventType == FileEventType::DELETED) {
-            if (affectedNode->GetData().file.type == FileType::DIRECTORY) {
+        } else if (notification->eventType == FileEventType::Deleted) {
+            if (affectedNode->GetData().file.type == FileType::Directory) {
                 // @todo If a directory is deleted via the Windows File Explorer, no notifications
                 // are sent for any file that resides below that directory. Investigate if this
                 // behavior is Windows specific.

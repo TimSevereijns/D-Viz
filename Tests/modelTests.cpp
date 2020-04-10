@@ -452,7 +452,7 @@ void ModelTests::FindNearestNodeWithSizeLimitations()
 
 void ModelTests::ToggleFileMonitoring()
 {
-    m_sampleNotifications = std::vector<FileEvent>{ { "spawn.hpp", FileEventType::TOUCHED } };
+    m_sampleNotifications = std::vector<FileEvent>{ { "spawn.hpp", FileEventType::Touched } };
 
     QCOMPARE(m_model->IsFileSystemBeingMonitored(), false);
     m_model->StartMonitoringFileSystem();
@@ -483,24 +483,24 @@ void ModelTests::TestSingleNotification(FileEventType eventType)
 
 void ModelTests::TrackSingleFileModification()
 {
-    TestSingleNotification(FileEventType::TOUCHED);
+    TestSingleNotification(FileEventType::Touched);
 }
 
 void ModelTests::TrackSingleFileDeletion()
 {
-    TestSingleNotification(FileEventType::DELETED);
+    TestSingleNotification(FileEventType::Deleted);
 }
 
 void ModelTests::TrackSingleFileRename()
 {
-    TestSingleNotification(FileEventType::RENAMED);
+    TestSingleNotification(FileEventType::Renamed);
 }
 
 void ModelTests::TrackMultipleDeletions()
 {
     QVERIFY(m_tree != nullptr);
 
-    m_sampleNotifications = SelectAllFiles(*m_tree->GetRoot(), L".ipp", FileEventType::DELETED);
+    m_sampleNotifications = SelectAllFiles(*m_tree->GetRoot(), L".ipp", FileEventType::Deleted);
 
     m_model->StartMonitoringFileSystem();
 
@@ -515,7 +515,7 @@ void ModelTests::TrackMultipleDeletions()
         if (notification) {
             ++processedNotifications;
 
-            QCOMPARE(notification->eventType, FileEventType::DELETED);
+            QCOMPARE(notification->eventType, FileEventType::Deleted);
             QCOMPARE(notification->path.extension(), L".ipp");
         }
 
@@ -538,7 +538,7 @@ void ModelTests::ApplyFileDeletion()
     std::filesystem::path targetFile = absolutePathToRoot / "basic_socket.hpp";
 
     m_sampleNotifications =
-        std::vector<FileEvent>{ { targetFile.string(), FileEventType::DELETED } };
+        std::vector<FileEvent>{ { targetFile.string(), FileEventType::Deleted } };
 
     const auto foundTargetNode = std::any_of(
         Tree<VizBlock>::PostOrderIterator{ m_model->GetTree().GetRoot() },
@@ -565,7 +565,7 @@ void ModelTests::ApplyFileCreation()
     std::filesystem::path absolutePathToRoot = m_model->GetTree().GetRoot()->GetData().file.name;
     std::filesystem::path targetFile = absolutePathToRoot / "fake_file.hpp";
 
-    m_sampleNotifications = std::vector<FileEvent>{ { targetFile, FileEventType::CREATED } };
+    m_sampleNotifications = std::vector<FileEvent>{ { targetFile, FileEventType::Created } };
 
     const auto nodeDoesNotExist = std::none_of(
         Tree<VizBlock>::PostOrderIterator{ m_model->GetTree().GetRoot() },

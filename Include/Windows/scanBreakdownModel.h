@@ -34,7 +34,7 @@ struct RowModel
     RowModel() = default;
 
     RowModel(
-        std::wstring extension, Constants::FileSize::Prefix prefix, std::uintmax_t size,
+        std::wstring extension, Constants::SizePrefix prefix, std::uintmax_t size,
         std::uintmax_t count)
         : fileExtension{ std::move(extension) }, totalSize{ size }, itemCount{ count }
     {
@@ -70,7 +70,7 @@ class ScanBreakdownModel final : public QAbstractTableModel
     void Insert(const Tree<VizBlock>::Node& node);
 
   private:
-    void Process(Constants::FileSize::Prefix sizePrefix);
+    void Process(Constants::SizePrefix sizePrefix);
 
     void ClearData();
 
