@@ -61,7 +61,7 @@ namespace
         }
 
         constexpr auto noExtension = L"";
-        FileInfo fileInfo{ path.wstring(), noExtension, ScanningWorker::SIZE_UNDEFINED,
+        FileInfo fileInfo{ path.wstring(), noExtension, ScanningWorker::UndefinedFileSize,
                            FileType::Directory };
 
         return std::make_shared<Tree<VizBlock>>(VizBlock{ std::move(fileInfo) });
@@ -104,7 +104,7 @@ ScanningWorker::ScanningWorker(const ScanningParameters& parameters, ScanningPro
 {
 }
 
-bool ScanningWorker::ShouldProcess(const std::filesystem::path& path) noexcept
+bool ScanningWorker::IsScannable(const std::filesystem::path& path) noexcept
 {
 #if defined(Q_OS_WIN)
     return !Scanner::IsReparsePoint(path);
@@ -149,7 +149,7 @@ void ScanningWorker::ProcessPath(
 
     if (isRegularFile) {
         ProcessFile(path, node);
-    } else if (std::filesystem::is_directory(path) && ShouldProcess(path)) {
+    } else if (std::filesystem::is_directory(path) && IsScannable(path)) {
         try {
             // In some edge-cases, the Windows operating system doesn't allow anyone to access
             // certain directories, and attempts to do so will result in exceptional behaviour---pun
@@ -165,7 +165,7 @@ void ScanningWorker::ProcessPath(
 
         constexpr auto emptyExtension = L"";
         FileInfo directoryInfo{ path.filename().wstring(), emptyExtension,
-                                ScanningWorker::SIZE_UNDEFINED, FileType::Directory };
+                                ScanningWorker::UndefinedFileSize, FileType::Directory };
 
         std::unique_lock<decltype(m_mutex)> lock{ m_mutex };
         auto* const lastChild = node.AppendChild(VizBlock{ std::move(directoryInfo) });

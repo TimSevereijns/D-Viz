@@ -1,8 +1,6 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include "constants.h"
-
 #include "Monitor/fileChangeNotification.hpp"
 #include "Scanner/driveScanner.h"
 #include "Scene/light.h"
@@ -11,6 +9,13 @@
 #include "Settings/sessionSettings.h"
 #include "Visualizations/vizBlock.h"
 #include "Windows/mainWindow.h"
+#include "constants.h"
+
+#if defined(Q_OS_WIN)
+#include "Monitor/windowsFileMonitor.h"
+#elif defined(Q_OS_LINUX)
+#include "Monitor/linuxFileMonitor.h"
+#endif // Q_OS_LINUX
 
 #include <Tree/Tree.hpp>
 
@@ -23,12 +28,30 @@
 struct FileEvent;
 struct ScanningProgress;
 
+class Controller;
+class BaseModel;
+class BaseView;
 class GLCanvas;
+
+struct ControllerParameters
+{
+    std::function<std::shared_ptr<BaseModel>(
+        std::unique_ptr<FileMonitorBase> fileMonitor, const std::filesystem::path& path)>
+        createModel;
+
+    std::function<std::shared_ptr<BaseView>(Controller&)> createView;
+};
 
 class Controller
 {
   public:
-    Controller();
+#if defined(Q_OS_WIN)
+    using FileSystemMonitor = WindowsFileMonitor;
+#elif defined(Q_OS_LINUX)
+    using FileSystemMonitor = LinuxFileMonitor;
+#endif // Q_OS_LINUX
+
+    Controller(const ControllerParameters& parameters);
 
     /**
      * @brief Starts the UI.
@@ -297,14 +320,16 @@ class Controller
         const Settings::VisualizationParameters& parameters, const ScanningProgress& progress,
         const std::shared_ptr<Tree<VizBlock>>& scanningResults);
 
+    ControllerParameters m_controllerParameters;
+
     bool m_allowInteractionWithModel{ false };
 
     Settings::PersistentSettings m_persistentSettings;
     Settings::SessionSettings m_sessionSettings;
     Settings::NodePainter m_nodePainter;
 
-    std::unique_ptr<MainWindow> m_view{ nullptr };
-    std::unique_ptr<VisualizationModel> m_model{ nullptr };
+    std::shared_ptr<BaseView> m_view{ nullptr };
+    std::shared_ptr<BaseModel> m_model{ nullptr };
 
     DriveScanner m_scanner;
 

@@ -95,13 +95,14 @@ HEADERS += \
    $$PWD/Include/Viewport/gamepadContextMenu.h \
    $$PWD/Include/Viewport/glCanvas.h \
    $$PWD/Include/Viewport/mouseContextMenu.h \
+   $$PWD/Include/Visualizations/baseModel.h \
    $$PWD/Include/Visualizations/block.h \
    $$PWD/Include/Visualizations/precisePoint.h \
    $$PWD/Include/Visualizations/ray.h \
    $$PWD/Include/Visualizations/squarifiedTreemap.h \
-   $$PWD/Include/Visualizations/visualization.h \
    $$PWD/Include/Visualizations/vizBlock.h \
    $$PWD/Include/Windows/aboutDialog.h \
+   $$PWD/Include/Windows/baseView.h \
    $$PWD/Include/Windows/breakdownDialog.h \
    $$PWD/Include/Windows/mainWindow.h \
    $$PWD/Include/Windows/nullTaskbarButton.h \

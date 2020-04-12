@@ -1,12 +1,12 @@
 #ifndef SQUARIFIEDTREEMAP_H
 #define SQUARIFIEDTREEMAP_H
 
-#include "visualization.h"
+#include "baseModel.h"
 
 /**
  * @brief Represents the Squarified tree map visualization.
  */
-class SquarifiedTreeMap final : public VisualizationModel
+class SquarifiedTreeMap final : public BaseModel
 {
   public:
     /**
@@ -16,8 +16,7 @@ class SquarifiedTreeMap final : public VisualizationModel
      * @param[in] path            The path representing the root directory of the tree map.
      */
     SquarifiedTreeMap(
-        std::unique_ptr<FileMonitorBase> fileMonitor,
-        const std::filesystem::path& path);
+        std::unique_ptr<FileMonitorBase> fileMonitor, const std::filesystem::path& path);
 
     /**
      * @brief Parses the file system tree into the model.

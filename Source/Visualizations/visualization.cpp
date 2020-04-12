@@ -1,4 +1,4 @@
-#include "Visualizations/visualization.h"
+#include "Visualizations/baseModel.h"
 #include "Monitor/fileChangeNotification.hpp"
 #include "Scanner/scanningUtilities.h"
 #include "Utilities/utilities.hpp"
@@ -304,18 +304,18 @@ namespace
     }
 } // namespace
 
-VisualizationModel::VisualizationModel(
+BaseModel::BaseModel(
     std::unique_ptr<FileMonitorBase> fileMonitor, const std::filesystem::path& path)
     : m_rootPath{ path }, m_fileSystemObserver{ std::move(fileMonitor), path }
 {
 }
 
-VisualizationModel::~VisualizationModel()
+BaseModel::~BaseModel()
 {
     StopMonitoringFileSystem();
 }
 
-void VisualizationModel::UpdateBoundingBoxes()
+void BaseModel::UpdateBoundingBoxes()
 {
     Expects(m_hasDataBeenParsed == true);
     Expects(m_fileTree != nullptr);
@@ -347,7 +347,7 @@ void VisualizationModel::UpdateBoundingBoxes()
     });
 }
 
-Tree<VizBlock>::Node* VisualizationModel::FindNearestIntersection(
+Tree<VizBlock>::Node* BaseModel::FindNearestIntersection(
     const Camera& camera, const Ray& ray, const Settings::VisualizationParameters& parameters) const
 {
     if (!m_hasDataBeenParsed) {
@@ -383,31 +383,31 @@ Tree<VizBlock>::Node* VisualizationModel::FindNearestIntersection(
     return nearestIntersection;
 }
 
-Tree<VizBlock>& VisualizationModel::GetTree()
+Tree<VizBlock>& BaseModel::GetTree()
 {
     Expects(m_fileTree != nullptr);
 
     return *m_fileTree;
 }
 
-const Tree<VizBlock>& VisualizationModel::GetTree() const
+const Tree<VizBlock>& BaseModel::GetTree() const
 {
     Expects(m_fileTree != nullptr);
 
     return *m_fileTree;
 }
 
-const std::vector<const Tree<VizBlock>::Node*>& VisualizationModel::GetHighlightedNodes() const
+const std::vector<const Tree<VizBlock>::Node*>& BaseModel::GetHighlightedNodes() const
 {
     return m_highlightedNodes;
 }
 
-std::vector<const Tree<VizBlock>::Node*>& VisualizationModel::GetHighlightedNodes()
+std::vector<const Tree<VizBlock>::Node*>& BaseModel::GetHighlightedNodes()
 {
     return m_highlightedNodes;
 }
 
-void VisualizationModel::ClearHighlightedNodes()
+void BaseModel::ClearHighlightedNodes()
 {
     if (m_highlightedNodes.size() == 0) {
         return;
@@ -416,32 +416,32 @@ void VisualizationModel::ClearHighlightedNodes()
     m_highlightedNodes.clear();
 }
 
-void VisualizationModel::SelectNode(const Tree<VizBlock>::Node& node)
+void BaseModel::SelectNode(const Tree<VizBlock>::Node& node)
 {
     m_selectedNode = &node;
 }
 
-const Tree<VizBlock>::Node* VisualizationModel::GetSelectedNode()
+const Tree<VizBlock>::Node* BaseModel::GetSelectedNode()
 {
     return m_selectedNode;
 }
 
-void VisualizationModel::ClearSelectedNode()
+void BaseModel::ClearSelectedNode()
 {
     m_selectedNode = nullptr;
 }
 
-TreemapMetadata VisualizationModel::GetTreemapMetadata()
+TreemapMetadata BaseModel::GetTreemapMetadata()
 {
     return m_metadata;
 }
 
-void VisualizationModel::SetTreemapMetadata(TreemapMetadata&& data)
+void BaseModel::SetTreemapMetadata(TreemapMetadata&& data)
 {
     m_metadata = data;
 }
 
-void VisualizationModel::HighlightAncestors(const Tree<VizBlock>::Node& node)
+void BaseModel::HighlightAncestors(const Tree<VizBlock>::Node& node)
 {
     auto* currentNode = node.GetParent();
     while (currentNode) {
@@ -451,7 +451,7 @@ void VisualizationModel::HighlightAncestors(const Tree<VizBlock>::Node& node)
     }
 }
 
-void VisualizationModel::HighlightDescendants(
+void BaseModel::HighlightDescendants(
     const Tree<VizBlock>::Node& root, const Settings::VisualizationParameters& parameters)
 {
     std::for_each(
@@ -466,7 +466,7 @@ void VisualizationModel::HighlightDescendants(
         });
 }
 
-void VisualizationModel::HighlightMatchingFileExtensions(
+void BaseModel::HighlightMatchingFileExtensions(
     const std::wstring& extension, const Settings::VisualizationParameters& parameters)
 {
     std::for_each(
@@ -481,7 +481,7 @@ void VisualizationModel::HighlightMatchingFileExtensions(
         });
 }
 
-void VisualizationModel::HighlightMatchingFileNames(
+void BaseModel::HighlightMatchingFileNames(
     const std::wstring& searchQuery, const Settings::VisualizationParameters& parameters,
     bool shouldSearchFiles, bool shouldSearchDirectories)
 {
@@ -516,14 +516,14 @@ void VisualizationModel::HighlightMatchingFileNames(
         });
 }
 
-void VisualizationModel::HighlightNode(const Tree<VizBlock>::Node* const node)
+void BaseModel::HighlightNode(const Tree<VizBlock>::Node* const node)
 {
     Expects(node != nullptr);
 
     m_highlightedNodes.emplace_back(node);
 }
 
-void VisualizationModel::StartMonitoringFileSystem()
+void BaseModel::StartMonitoringFileSystem()
 {
     const auto callback = [&](FileEvent && event) noexcept
     {
@@ -534,7 +534,7 @@ void VisualizationModel::StartMonitoringFileSystem()
     m_fileSystemNotificationProcessor = std::thread{ [&] { ProcessChanges(); } };
 }
 
-void VisualizationModel::StopMonitoringFileSystem()
+void BaseModel::StopMonitoringFileSystem()
 {
     m_fileSystemObserver.StopMonitoring();
 
@@ -546,7 +546,7 @@ void VisualizationModel::StopMonitoringFileSystem()
     }
 }
 
-void VisualizationModel::ProcessChanges()
+void BaseModel::ProcessChanges()
 {
     while (m_shouldKeepProcessingNotifications) {
         const auto event = m_fileEvents.WaitAndPop();
@@ -568,13 +568,13 @@ void VisualizationModel::ProcessChanges()
     }
 }
 
-void VisualizationModel::WaitForNextModelChange()
+void BaseModel::WaitForNextModelChange()
 {
     std::unique_lock<std::mutex> lock{ m_eventNotificationMutex };
     m_eventNotificationReady.wait(lock, [&]() { return !m_pendingModelUpdates.IsEmpty(); });
 }
 
-void VisualizationModel::RefreshTreemap()
+void BaseModel::RefreshTreemap()
 {
     auto fileEvent = FetchNextModelChange();
 
@@ -587,7 +587,7 @@ void VisualizationModel::RefreshTreemap()
     // @todo Update all sizes.
 }
 
-void VisualizationModel::UpdateAffectedNodes(const FileEvent& event)
+void BaseModel::UpdateAffectedNodes(const FileEvent& event)
 {
     const auto absolutePath = event.path;
 
@@ -628,7 +628,7 @@ void VisualizationModel::UpdateAffectedNodes(const FileEvent& event)
     }
 }
 
-void VisualizationModel::OnFileCreation(const FileEvent& event)
+void BaseModel::OnFileCreation(const FileEvent& event)
 {
     auto* node =
         Utilities::FindNodeViaAbsolutePath(m_fileTree->GetRoot(), event.path.parent_path());
@@ -645,7 +645,7 @@ void VisualizationModel::OnFileCreation(const FileEvent& event)
     node->AppendChild(VizBlock{ std::move(fileInfo) });
 }
 
-void VisualizationModel::OnFileDeletion(const FileEvent& event)
+void BaseModel::OnFileDeletion(const FileEvent& event)
 {
     auto* node = Utilities::FindNodeViaAbsolutePath(m_fileTree->GetRoot(), event.path);
 
@@ -655,7 +655,7 @@ void VisualizationModel::OnFileDeletion(const FileEvent& event)
     }
 }
 
-void VisualizationModel::OnFileModification(const FileEvent& event)
+void BaseModel::OnFileModification(const FileEvent& event)
 {
     if (std::filesystem::is_regular_file(event.path)) {
         auto* node = Utilities::FindNodeViaAbsolutePath(m_fileTree->GetRoot(), event.path);
@@ -668,12 +668,12 @@ void VisualizationModel::OnFileModification(const FileEvent& event)
     }
 }
 
-void VisualizationModel::OnFileNameChange(const FileEvent& /*event*/)
+void BaseModel::OnFileNameChange(const FileEvent& /*event*/)
 {
     // @todo Need to associate new file names with old file names in order to resolve rename events.
 }
 
-void VisualizationModel::UpdateAncestorSizes(Tree<VizBlock>::Node* node)
+void BaseModel::UpdateAncestorSizes(Tree<VizBlock>::Node* node)
 {
     while (node) {
         auto* parent = node->GetParent();
@@ -695,12 +695,12 @@ void VisualizationModel::UpdateAncestorSizes(Tree<VizBlock>::Node* node)
     }
 }
 
-bool VisualizationModel::IsFileSystemBeingMonitored() const
+bool BaseModel::IsFileSystemBeingMonitored() const
 {
     return m_fileSystemObserver.IsActive();
 }
 
-std::optional<FileEvent> VisualizationModel::FetchNextVisualChange()
+std::optional<FileEvent> BaseModel::FetchNextVisualChange()
 {
     FileEvent notification;
 
@@ -712,7 +712,7 @@ std::optional<FileEvent> VisualizationModel::FetchNextVisualChange()
     return notification;
 }
 
-std::optional<FileEvent> VisualizationModel::FetchNextModelChange()
+std::optional<FileEvent> BaseModel::FetchNextModelChange()
 {
     FileEvent notification;
 
@@ -724,12 +724,12 @@ std::optional<FileEvent> VisualizationModel::FetchNextModelChange()
     return notification;
 }
 
-std::filesystem::path VisualizationModel::GetRootPath() const
+std::filesystem::path BaseModel::GetRootPath() const
 {
     return m_rootPath;
 }
 
-void VisualizationModel::SortNodes(Tree<VizBlock>& tree)
+void BaseModel::SortNodes(Tree<VizBlock>& tree)
 {
     for (auto& node : tree) {
         node.SortChildren([](const auto& lhs, const auto& rhs) noexcept {

@@ -374,7 +374,7 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
 
 SquarifiedTreeMap::SquarifiedTreeMap(
     std::unique_ptr<FileMonitorBase> fileMonitor, const std::filesystem::path& path)
-    : VisualizationModel{ std::move(fileMonitor), path }
+    : BaseModel{ std::move(fileMonitor), path }
 {
 }
 
@@ -388,7 +388,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
     m_fileTree = theTree;
 
     const auto sortingStopwatch =
-        Stopwatch<std::chrono::milliseconds>([&]() { VisualizationModel::SortNodes(*m_fileTree); });
+        Stopwatch<std::chrono::milliseconds>([&]() { BaseModel::SortNodes(*m_fileTree); });
 
     spdlog::get(Constants::Logging::DefaultLog)
         ->info(fmt::format(
