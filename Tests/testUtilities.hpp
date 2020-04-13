@@ -30,7 +30,7 @@ namespace TestUtilities
                                     " --output " + outputDirectory.string();
 #endif // Q_OS_LINUX
 
-        std::system(command.c_str());
+        [[maybe_unused]] const auto result = std::system(command.c_str());
     }
 } // namespace TestUtilities
 

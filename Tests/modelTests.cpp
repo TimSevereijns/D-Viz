@@ -155,7 +155,7 @@ void ModelTests::init()
         auto nextNotification = m_sampleNotifications.back();
         m_sampleNotifications.pop_back();
 
-        return std::move(nextNotification);
+        return nextNotification;
     };
 
     m_model = std::make_unique<SquarifiedTreeMap>(

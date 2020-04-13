@@ -77,6 +77,7 @@ class WinTaskbarButton : public BaseTaskbarButton
 
 class UnixTaskbarButton : public BaseTaskbarButton
 {
+  public:
     UnixTaskbarButton(QObject*)
     {
     }

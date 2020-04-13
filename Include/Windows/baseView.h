@@ -16,6 +16,8 @@ class QObject;
 class BaseTaskbarButton
 {
   public:
+    virtual ~BaseTaskbarButton() noexcept = default;
+
     virtual void SetWindow(QObject* /*window*/)
     {
     }
@@ -48,6 +50,8 @@ class BaseTaskbarButton
 class BaseView
 {
   public:
+    virtual ~BaseView() noexcept = default;
+
     /**
      * @brief Show
      */

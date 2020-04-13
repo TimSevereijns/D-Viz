@@ -60,8 +60,7 @@ namespace OS
         // @todo Look into adding support for other popular file browsers, like Nautilus.
 
         const auto message = "nemo \"" + std::string{ path.c_str() } + "\" &";
-        const auto result = std::system(message.c_str());
-        IgnoreUnused(result);
+        [[maybe_unused]] const auto result = std::system(message.c_str());
     }
 
 #endif
