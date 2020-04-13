@@ -5,9 +5,12 @@
 #include <QLabel>
 #include <QMainWindow>
 #include <QMenu>
+#include <QWindow>
+
+#if defined(Q_OS_WIN)
 #include <QWinTaskbarButton>
 #include <QWinTaskbarProgress>
-#include <QWindow>
+#endif
 
 #include <string_view>
 
