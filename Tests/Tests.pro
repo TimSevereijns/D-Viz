@@ -17,7 +17,9 @@ DEFINES += \
 LIBS += -L$$DESTDIR -lD-Viz
 
 HEADERS += \
+   Mocks/mockView.h \
    cameraTests.h \
+   controllerTests.h \
    fileSizeLiterals.hpp \
    filesystemObserverTests.h \
    modelTests.h \
@@ -30,6 +32,7 @@ HEADERS += \
 
 SOURCES += \
    cameraTests.cpp \
+   controllerTests.cpp \
    filesystemObserverTests.cpp \
    mainTest.cpp \
    modelTests.cpp \
