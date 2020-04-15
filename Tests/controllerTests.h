@@ -30,7 +30,12 @@ class ControllerTests : public QObject
     /**
      * @brief Foo
      */
-    void Foo() const;
+    void LaunchMainWindow() const;
+
+    /**
+     * @brief ScanDrive
+     */
+    void ScanDrive() const;
 };
 
 #endif // CONTROLLERTESTS_H

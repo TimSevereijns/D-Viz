@@ -129,8 +129,6 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
 
             button->ResetProgress();
             button->HideProgress();
-
-            button.reset();
         };
 
     spdlog::get(Constants::Logging::DefaultLog)

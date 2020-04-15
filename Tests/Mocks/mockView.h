@@ -1,9 +1,22 @@
 #ifndef MOCKVIEW_H
 #define MOCKVIEW_H
 
-#include <HID/gamepad.h>
-#include <Viewport/glCanvas.h>
 #include <Windows/baseView.h>
+
+#include <QtTest>
+
+#include "trompeloeilAdapter.h"
+
+class BaseTaskbarButton;
+class Controller;
+class Gamepad;
+class GLCanvas;
+class QWidget;
+
+namespace Settings
+{
+    struct VisualizationParameters;
+}
 
 class MockView : public BaseView
 {
@@ -12,159 +25,25 @@ class MockView : public BaseView
     {
     }
 
-    /**
-     * @brief Show
-     */
-    void Show(){};
-
-    /**
-     * @brief GetWindowHandle
-     */
-    QWindow* GetWindowHandle()
-    {
-        return nullptr;
-    }
-
-    /**
-     * @brief Sets the field of view.
-     *
-     * @note This function will update both the UI as well as the backing value.
-     *
-     * @param[in] fieldOfView     The new value to set the field of view to.
-     */
-    void SetFieldOfViewSlider(int /*fieldOfView*/)
-    {
-    }
-
-    /**
-     * @brief Sets the camera movement speed.
-     *
-     * @note This function will update both the UI as well as the backing value.
-     *
-     * @param[in] speed           The new value to set the camera's speed to.
-     */
-    void SetCameraSpeedSpinner(double /*speed*/)
-    {
-    }
-
-    /**
-     * @brief Sets a temporary message in the status bar.
-     *
-     * @param[in] message         The message to display.
-     * @param[in] timeout         Duration of the message in milliseconds.
-     */
-    void SetStatusBarMessage(const std::wstring& /*message*/, int /*timeout*/ = 0)
-    {
-    }
-
-    /**
-     * @brief ReloadVisualization
-     */
-    void ReloadVisualization()
-    {
-    }
-
-    /**
-     * @returns True if the frame time readout should be shown in the titlebar.
-     */
-    bool ShouldShowFrameTime() const
-    {
-        return false;
-    }
-
-    /**
-     * @returns The current search query.
-     */
-    std::wstring GetSearchQuery() const
-    {
-        return {};
-    }
-
-    /**
-     * @returns A reference to the model controller for the treemap visualization.
-     */
-    Controller& GetController()
-    {
-        return m_controller;
-    }
-
-    /**
-     * @returns A reference to the OpenGL canvas.
-     */
-    GLCanvas& GetCanvas()
-    {
-        static GLCanvas canvas{ m_controller };
-        return canvas;
-    }
-
-    /**
-     * @returns A reference to the gamepad instance.
-     */
-    Gamepad& GetGamepad()
-    {
-        static Gamepad gamepad;
-        return gamepad;
-    }
-
-    /**
-     * @brief AskUserToLimitFileSize
-     *
-     * @param numberOfFilesScanned
-     * @param parameters
-     *
-     * @return
-     */
-    bool AskUserToLimitFileSize(
-        std::uintmax_t /*numberOfFilesScanned*/, Settings::VisualizationParameters /*parameters*/)
-    {
-        return false;
-    }
-
-    /**
-     * @brief DisplayErrorDialog
-     *
-     * @param message
-     */
-    void DisplayErrorDialog(std::string_view /*message*/)
-    {
-    }
-
-    /**
-     * @brief SetWaitCursor
-     */
-    void SetWaitCursor()
-    {
-    }
-
-    /**
-     * @brief RestoreDefaultCursor
-     */
-    void RestoreDefaultCursor()
-    {
-    }
-
-    /**
-     * @brief OnScanStarted
-     */
-    void OnScanStarted()
-    {
-    }
-
-    /**
-     * @brief OnScanCompleted
-     */
-    void OnScanCompleted()
-    {
-    }
-
-    /**
-     * @brief GetTaskbarButton
-     * @return
-     */
-    std::shared_ptr<BaseTaskbarButton> GetTaskbarButton()
-    {
-        return nullptr;
-    }
+    MAKE_MOCK0(Show, void(), override);
+    MAKE_MOCK0(GetWindowHandle, QWindow*(), override);
+    MAKE_MOCK1(SetFieldOfViewSlider, void(int), override);
+    MAKE_MOCK1(SetCameraSpeedSpinner, void(double), override);
+    MAKE_MOCK2(SetStatusBarMessage, void(const std::wstring&, int), override);
+    MAKE_MOCK0(ReloadVisualization, void(), override);
+    MAKE_CONST_MOCK0(ShouldShowFrameTime, bool(), override);
+    MAKE_CONST_MOCK0(GetSearchQuery, std::wstring(), override);
+    MAKE_MOCK0(GetController, Controller&(), override);
+    MAKE_MOCK0(GetCanvas, GLCanvas&(), override);
+    MAKE_MOCK0(GetGamepad, Gamepad&(), override);
+    MAKE_MOCK2(
+        AskUserToLimitFileSize, bool(std::uintmax_t, Settings::VisualizationParameters), override);
+    MAKE_MOCK1(DisplayErrorDialog, void(std::string_view), override);
+    MAKE_MOCK0(SetWaitCursor, void(), override);
+    MAKE_MOCK0(RestoreDefaultCursor, void(), override);
+    MAKE_MOCK0(OnScanStarted, void(), override);
+    MAKE_MOCK0(OnScanCompleted, void(), override);
+    MAKE_MOCK0(GetTaskbarButton, std::shared_ptr<BaseTaskbarButton>(), override);
 
   private:
     Controller& m_controller;

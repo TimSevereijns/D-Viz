@@ -42,8 +42,12 @@ struct ControllerParameters
     std::function<std::shared_ptr<BaseView>(Controller&)> createView;
 };
 
+class ControllerTests;
+
 class Controller
 {
+    friend ControllerTests;
+
   public:
 #if defined(Q_OS_WIN)
     using FileSystemMonitor = WindowsFileMonitor;

@@ -13,3 +13,6 @@
 [submodule "ThirdParty/GSL"]
 	path = ThirdParty/GSL
 	url = https://github.com/Microsoft/GSL.git
+[submodule "ThirdParty/Trompeloeil"]
+	path = ThirdParty/Trompeloeil
+	url = https://github.com/rollbear/trompeloeil.git
