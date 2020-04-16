@@ -23,10 +23,10 @@ struct ScanningParameters
     using ScanCompleteCallback =
         std::function<void(const ScanningProgress&, std::shared_ptr<Tree<VizBlock>> fileTree)>;
 
-    std::filesystem::path path{};
+    std::filesystem::path path;
 
-    ProgressCallback onProgressUpdateCallback{};
-    ScanCompleteCallback onScanCompletedCallback{};
+    ProgressCallback onProgressUpdateCallback;
+    ScanCompleteCallback onScanCompletedCallback;
 
     ScanningParameters() = default;
 

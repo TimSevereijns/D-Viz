@@ -28,7 +28,7 @@ HEADERS += \
    persistentSettingsTests.h \
    sessionSettingsTests.h \
    testUtilities.hpp \
-   Mocks\mockFileMonitor.h \
+   Mocks/mockFileMonitor.h \
    trompeloeilAdapter.h
 
 SOURCES += \
@@ -42,7 +42,7 @@ SOURCES += \
    sessionSettingsTests.cpp \
 
 INCLUDEPATH += \
-   $$PWD/../ThirdParty/trompeloeil/include \
+   $$PWD/../ThirdParty/Trompeloeil/include \
 
 win32: CONFIG(release, debug|release) {
     QMAKE_CXXFLAGS += /Zi

@@ -1,7 +1,7 @@
 #ifndef TROMPELOEILADAPTER_H
 #define TROMPELOEILADAPTER_H
 
-#ifndef QTTEST_VERSION_STR //** 1 **//
+#ifndef QTTEST_VERSION_STR
 #error "<QtTest> must be included before <trompeloeilAdapter.h>"
 #endif
 

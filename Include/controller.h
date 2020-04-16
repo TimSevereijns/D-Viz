@@ -44,9 +44,9 @@ struct ControllerParameters
 
 class ControllerTests;
 
-class Controller
+class Controller : public QObject
 {
-    friend ControllerTests;
+    Q_OBJECT
 
   public:
 #if defined(Q_OS_WIN)
@@ -56,6 +56,8 @@ class Controller
 #endif // Q_OS_LINUX
 
     Controller(const ControllerParameters& parameters);
+
+    virtual ~Controller() noexcept = default;
 
     /**
      * @brief Starts the UI.
@@ -308,6 +310,13 @@ class Controller
      * @param[in] color             The color that the node is to be assigned.
      */
     void RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVector3D& color);
+
+  signals:
+
+    /**
+     * @brief Signals that the drive scanning has finished.
+     */
+    void FinishedScanning();
 
   private:
     template <typename NodeSelectorType>

@@ -86,12 +86,17 @@ void Controller::OnScanComplete(
     m_view->OnScanCompleted();
 
     try {
-        m_model->StartMonitoringFileSystem();
+        const auto isMonitoringEnabled = GetPersistentSettings().ShouldMonitorFileSystem();
+        if (isMonitoringEnabled) {
+            m_model->StartMonitoringFileSystem();
+        }
     } catch (const std::exception& exception) {
         m_view->DisplayErrorDialog(exception.what());
     }
 
     AllowUserInteractionWithModel(true);
+
+    emit FinishedScanning();
 }
 
 void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)

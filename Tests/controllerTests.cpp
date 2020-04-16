@@ -32,12 +32,10 @@ namespace
     std::shared_ptr<BaseTaskbarButton> GetTaskbarButton()
     {
 #if defined(Q_OS_WIN)
-        using TaskbarButton = WinTaskbarButton;
+        return std::make_shared<WinTaskbarButton>(nullptr);
 #elif defined(Q_OS_LINUX)
-        using TaskbarButton = UnixTaskbarButton;
+        return std::make_shared<UnixTaskbarButton>(nullptr);
 #endif // Q_OS_LINUX
-
-        return std::make_shared<TaskbarButton>(nullptr);
     }
 
     std::filesystem::path GetSampleDirectory()
@@ -78,6 +76,7 @@ void ControllerTests::ScanDrive() const
     std::shared_ptr<MockView> view;
 
     Controller controller{ SetupControllerParameters(view) };
+    controller.GetPersistentSettings().MonitorFileSystem(false);
 
     REQUIRE_CALL(*view, AskUserToLimitFileSize(trompeloeil::_, trompeloeil::_)).RETURN(true);
     REQUIRE_CALL(*view, SetWaitCursor());
@@ -90,15 +89,16 @@ void ControllerTests::ScanDrive() const
         .WITH(_1.find(L"Files Scanned") != std::wstring::npos)
         .TIMES(AT_LEAST(1));
 
+    FORBID_CALL(*view, DisplayErrorDialog(trompeloeil::_));
+
     Settings::VisualizationParameters parameters;
     parameters.forceNewScan = true;
-    parameters.rootDirectory = GetSampleDirectory();
+    parameters.rootDirectory = GetSampleDirectory().wstring();
     parameters.minimumFileSize = 0;
     parameters.onlyShowDirectories = false;
 
+    QSignalSpy completionSpy{ &controller, &Controller::FinishedScanning };
     controller.ScanDrive(parameters);
-
-    QSignalSpy completionSpy{ &controller.m_scanner, &DriveScanner::Finished };
     completionSpy.wait(10'000);
 }
 
