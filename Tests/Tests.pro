@@ -22,6 +22,7 @@ HEADERS += \
    controllerTests.h \
    fileSizeLiterals.hpp \
    filesystemObserverTests.h \
+   Mocks\mockFileMonitor.h \
    modelTests.h \
    multiTestHarness.h \
    nodePainterTests.h \
@@ -39,7 +40,7 @@ SOURCES += \
    modelTests.cpp \
    nodePainterTests.cpp \
    persistentSettingsTests.cpp \
-   sessionSettingsTests.cpp \
+   sessionSettingsTests.cpp
 
 INCLUDEPATH += \
    $$PWD/../ThirdParty/Trompeloeil/include \

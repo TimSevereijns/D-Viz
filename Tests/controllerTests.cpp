@@ -78,15 +78,19 @@ void ControllerTests::ScanDrive() const
     Controller controller{ SetupControllerParameters(view) };
     controller.GetPersistentSettings().MonitorFileSystem(false);
 
-    REQUIRE_CALL(*view, AskUserToLimitFileSize(trompeloeil::_, trompeloeil::_)).RETURN(true);
-    REQUIRE_CALL(*view, SetWaitCursor());
-    REQUIRE_CALL(*view, RestoreDefaultCursor());
+    REQUIRE_CALL(*view, SetWaitCursor()).TIMES(1);
+    REQUIRE_CALL(*view, RestoreDefaultCursor()).TIMES(1);
     REQUIRE_CALL(*view, GetWindowHandle()).RETURN(nullptr);
     REQUIRE_CALL(*view, OnScanStarted()).TIMES(1);
     REQUIRE_CALL(*view, OnScanCompleted()).TIMES(1);
     REQUIRE_CALL(*view, GetTaskbarButton()).TIMES(1).RETURN(GetTaskbarButton());
+
+    REQUIRE_CALL(*view, AskUserToLimitFileSize(trompeloeil::_, trompeloeil::_))
+        .TIMES(1)
+        .RETURN(true);
+
     REQUIRE_CALL(*view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_))
-        .WITH(_1.find(L"Files Scanned") != std::wstring::npos)
+        .WITH(_1.find(L"Files Scanned") != std::wstring::npos && _2 == 0)
         .TIMES(AT_LEAST(1));
 
     FORBID_CALL(*view, DisplayErrorDialog(trompeloeil::_));
