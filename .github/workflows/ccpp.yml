@@ -26,13 +26,13 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
 
-      - name: Install GCC 9
+      - name: Install GCC 8
         run: |
-          sudo apt-get install -qq g++-9
-          sudo apt-get install -qq gcc-9
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 20
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 20
-          sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-9 20
+          sudo apt-get install -qq g++-8
+          sudo apt-get install -qq gcc-8
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 20
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 20
+          sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 20
           sudo update-alternatives --config gcc
           sudo update-alternatives --config g++
           sudo update-alternatives --config gcov
