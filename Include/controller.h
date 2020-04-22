@@ -1,6 +1,12 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
+#include <algorithm>
+#include <filesystem>
+#include <optional>
+#include <string>
+#include <unordered_map>
+
 #include "Monitor/fileChangeNotification.hpp"
 #include "Scanner/driveScanner.h"
 #include "Scene/light.h"
@@ -56,8 +62,6 @@ class Controller : public QObject
 #endif // Q_OS_LINUX
 
     Controller(const ControllerParameters& parameters);
-
-    virtual ~Controller() noexcept = default;
 
     /**
      * @brief Starts the UI.
