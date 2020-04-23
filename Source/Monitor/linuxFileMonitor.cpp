@@ -222,12 +222,12 @@ void LinuxFileMonitor::ProcessEvents(long bytesAvailable)
 
         switch (event->mask) {
             case IN_MODIFY:
-                m_notificationCallback(FileEvent{ path, FileEventType::TOUCHED });
+                m_notificationCallback(FileEvent{ path, FileEventType::Touched });
                 break;
             case IN_DELETE_SELF:
                 [[fallthrough]];
             case IN_DELETE:
-                m_notificationCallback(FileEvent{ path, FileEventType::DELETED });
+                m_notificationCallback(FileEvent{ path, FileEventType::Deleted });
                 break;
         }
 
