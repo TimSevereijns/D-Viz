@@ -434,10 +434,10 @@ namespace Assets
         for (auto& node : tree) {
             const auto fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
             const auto notTheRightFileType =
-                parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY;
+                parameters.onlyShowDirectories && node->file.type != FileType::Directory;
 
             if (notTheRightFileType || fileIsTooSmall) {
-                node->offsetIntoVBO = VizBlock::INVALID_OFFSET;
+                node->offsetIntoVBO = VizBlock::NotInVBO;
                 continue;
             }
 
@@ -477,7 +477,7 @@ namespace Assets
         for (const auto& node : tree) {
             const auto fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
             const auto notTheRightFileType =
-                parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY;
+                parameters.onlyShowDirectories && node->file.type != FileType::Directory;
 
             if (notTheRightFileType || fileIsTooSmall) {
                 continue;
@@ -492,7 +492,7 @@ namespace Assets
         std::uintmax_t largestDirectory = std::numeric_limits<std::uintmax_t>::min();
 
         for (auto& node : tree) {
-            if (node.GetData().file.type != FileType::DIRECTORY) {
+            if (node.GetData().file.type != FileType::Directory) {
                 continue;
             }
 

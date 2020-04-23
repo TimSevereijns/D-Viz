@@ -10,9 +10,9 @@
  */
 enum class FileType
 {
-    REGULAR,
-    DIRECTORY,
-    SYMLINK
+    Regular,
+    Directory,
+    Symlink
 };
 
 /**
@@ -25,7 +25,7 @@ struct FileInfo
 
     std::uintmax_t size{ 0 };
 
-    FileType type{ FileType::REGULAR };
+    FileType type{ FileType::Regular };
 
     FileInfo() = default;
 

@@ -89,12 +89,12 @@ namespace Settings
          *
          * @param[in] prefix          The new prefix selection.
          */
-        void SetActiveNumericPrefix(Constants::FileSize::Prefix prefix);
+        void SetActiveNumericPrefix(Constants::SizePrefix prefix);
 
         /**
          * @returns The currently active prefix to be used for file sizes; e.g., MB vs MiB.
          */
-        Constants::FileSize::Prefix GetActiveNumericPrefix() const;
+        Constants::SizePrefix GetActiveNumericPrefix() const;
 
       public slots:
 
@@ -161,7 +161,7 @@ namespace Settings
 
         Settings::VisualizationParameters m_visualizationParameters;
 
-        Constants::FileSize::Prefix m_activeNumericPrefix{ Constants::FileSize::Prefix::BINARY };
+        Constants::SizePrefix m_activeNumericPrefix{ Constants::SizePrefix::Binary };
     };
 } // namespace Settings
 

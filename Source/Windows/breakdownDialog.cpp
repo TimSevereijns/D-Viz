@@ -45,7 +45,7 @@ void BreakdownDialog::ReloadData()
                 continue;
             }
 
-            if (node->file.type != FileType::DIRECTORY) {
+            if (node->file.type != FileType::Directory) {
                 m_model.Insert(node);
             }
         }

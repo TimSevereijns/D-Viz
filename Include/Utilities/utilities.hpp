@@ -165,13 +165,13 @@ namespace Utilities
      * string.
      */
     inline std::pair<double, std::wstring>
-    ConvertFileSizeToNumericPrefix(std::uintmax_t sizeInBytes, Constants::FileSize::Prefix prefix)
+    ConvertFileSizeToNumericPrefix(std::uintmax_t sizeInBytes, Constants::SizePrefix prefix)
     {
         switch (prefix) {
-            case Constants::FileSize::Prefix::BINARY: {
+            case Constants::SizePrefix::Binary: {
                 return ConvertToBinaryPrefix(sizeInBytes);
             }
-            case Constants::FileSize::Prefix::DECIMAL: {
+            case Constants::SizePrefix::Decimal: {
                 return ConvertToDecimalPrefix(sizeInBytes);
             }
         }

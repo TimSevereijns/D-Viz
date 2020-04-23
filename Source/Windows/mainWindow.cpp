@@ -30,10 +30,10 @@ namespace
      * @returns A pointer to a const static vector containing the menu values.
      */
     const std::vector<std::pair<std::uintmax_t, QString>>*
-    GeneratePruningMenuEntries(Constants::FileSize::Prefix prefix)
+    GeneratePruningMenuEntries(Constants::SizePrefix prefix)
     {
         switch (prefix) {
-            case Constants::FileSize::Prefix::DECIMAL: {
+            case Constants::SizePrefix::Decimal: {
                 using namespace Literals::Numeric::Decimal;
 
                 // clang-format off
@@ -53,7 +53,7 @@ namespace
 
                 return &decimal;
             }
-            case Constants::FileSize::Prefix::BINARY: {
+            case Constants::SizePrefix::Binary: {
                 using namespace Literals::Numeric::Binary;
 
                 // clang-format off
@@ -106,7 +106,7 @@ MainWindow::MainWindow(Controller& controller, QWidget* parent /* = nullptr */)
     : QMainWindow{ parent },
       m_controller{ controller },
       m_ui{},
-      m_fileSizeOptions{ GeneratePruningMenuEntries(Constants::FileSize::Prefix::BINARY) }
+      m_fileSizeOptions{ GeneratePruningMenuEntries(Constants::SizePrefix::Binary) }
 {
     m_ui.setupUi(this);
 
@@ -512,8 +512,8 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
     menuWrapper.binaryPrefix.setChecked(true);
     menuWrapper.decimalPrefix.setChecked(false);
 
-    m_controller.GetSessionSettings().SetActiveNumericPrefix(Constants::FileSize::Prefix::BINARY);
-    m_fileSizeOptions = GeneratePruningMenuEntries(Constants::FileSize::Prefix::BINARY);
+    m_controller.GetSessionSettings().SetActiveNumericPrefix(Constants::SizePrefix::Binary);
+    m_fileSizeOptions = GeneratePruningMenuEntries(Constants::SizePrefix::Binary);
 
     SetupFileSizePruningDropdown();
 
@@ -546,8 +546,8 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
     menuWrapper.binaryPrefix.setChecked(false);
     menuWrapper.decimalPrefix.setChecked(true);
 
-    m_controller.GetSessionSettings().SetActiveNumericPrefix(Constants::FileSize::Prefix::DECIMAL);
-    m_fileSizeOptions = GeneratePruningMenuEntries(Constants::FileSize::Prefix::DECIMAL);
+    m_controller.GetSessionSettings().SetActiveNumericPrefix(Constants::SizePrefix::Decimal);
+    m_fileSizeOptions = GeneratePruningMenuEntries(Constants::SizePrefix::Decimal);
 
     SetupFileSizePruningDropdown();
 

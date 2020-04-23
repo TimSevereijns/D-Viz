@@ -12,14 +12,14 @@
  */
 struct VizBlock
 {
-    constexpr static auto INVALID_OFFSET = std::numeric_limits<std::uint32_t>::max();
+    constexpr static auto NotInVBO = std::numeric_limits<std::uint32_t>::max();
 
     FileInfo file{};     ///< The file that the block represents.
     Block block{};       ///< The actual block as rendered to the OpenGL canvas.
     Block boundingBox{}; ///< Minimum axis-aligned bounding box for node and all descendents.
 
     /** The offset of this node into the VBO once the visualization has been generated */
-    std::uint32_t offsetIntoVBO{ VizBlock::INVALID_OFFSET };
+    std::uint32_t offsetIntoVBO{ VizBlock::NotInVBO };
 
     VizBlock() = default;
 

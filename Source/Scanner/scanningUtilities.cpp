@@ -107,7 +107,7 @@ namespace Scanner
             }
 
             auto& parentInfo = parent->GetData().file;
-            if (parentInfo.type == FileType::DIRECTORY) {
+            if (parentInfo.type == FileType::Directory) {
                 parentInfo.size += fileInfo.size;
             }
         }

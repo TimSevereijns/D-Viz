@@ -14,11 +14,11 @@ struct VizBlock;
 
 enum class FileEventType
 {
-    NONE,
-    CREATED,
-    DELETED,
-    TOUCHED,
-    RENAMED
+    None,
+    Created,
+    Deleted,
+    Touched,
+    Renamed
 };
 
 struct FileEvent

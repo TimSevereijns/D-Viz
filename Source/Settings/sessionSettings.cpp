@@ -78,7 +78,7 @@ namespace Settings
             return false;
         }
 
-        if (block.file.type != FileType::DIRECTORY &&
+        if (block.file.type != FileType::Directory &&
             m_visualizationParameters.onlyShowDirectories) {
             return false;
         }
@@ -113,12 +113,12 @@ namespace Settings
         return m_visualizationParameters;
     }
 
-    void SessionSettings::SetActiveNumericPrefix(Constants::FileSize::Prefix prefix)
+    void SessionSettings::SetActiveNumericPrefix(Constants::SizePrefix prefix)
     {
         m_activeNumericPrefix = prefix;
     }
 
-    Constants::FileSize::Prefix SessionSettings::GetActiveNumericPrefix() const
+    Constants::SizePrefix SessionSettings::GetActiveNumericPrefix() const
     {
         return m_activeNumericPrefix;
     }

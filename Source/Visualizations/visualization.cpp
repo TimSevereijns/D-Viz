@@ -248,7 +248,7 @@ namespace
         std::vector<IntersectionInfo> allIntersections;
 
         const auto notTheRightFileType =
-            parameters.onlyShowDirectories && node->GetData().file.type != FileType::DIRECTORY;
+            parameters.onlyShowDirectories && node->GetData().file.type != FileType::Directory;
 
         while (node) {
             if (node->GetData().file.size < parameters.minimumFileSize || notTheRightFileType) {
@@ -282,19 +282,19 @@ namespace
     void LogFileSystemEvent(const FileEvent& event)
     {
         switch (event.eventType) {
-            case FileEventType::CREATED:
+            case FileEventType::Created:
                 spdlog::get(Constants::Logging::FilesystemLog)
                     ->info(fmt::format("Create: {}", event.path.string()));
                 break;
-            case FileEventType::DELETED:
+            case FileEventType::Deleted:
                 spdlog::get(Constants::Logging::FilesystemLog)
                     ->info(fmt::format("Deleted: {}", event.path.string()));
                 break;
-            case FileEventType::TOUCHED:
+            case FileEventType::Touched:
                 spdlog::get(Constants::Logging::FilesystemLog)
                     ->info(fmt::format("Modified: {}", event.path.string()));
                 break;
-            case FileEventType::RENAMED:
+            case FileEventType::Renamed:
                 spdlog::get(Constants::Logging::FilesystemLog)
                     ->info(fmt::format("Renamed: {}", event.path.string()));
                 break;
@@ -457,7 +457,7 @@ void VisualizationModel::HighlightDescendants(
     std::for_each(
         Tree<VizBlock>::LeafIterator{ &root }, Tree<VizBlock>::LeafIterator{},
         [&](const auto& node) {
-            if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY) ||
+            if ((parameters.onlyShowDirectories && node->file.type != FileType::Directory) ||
                 node->file.size < parameters.minimumFileSize) {
                 return;
             }
@@ -472,7 +472,7 @@ void VisualizationModel::HighlightMatchingFileExtensions(
     std::for_each(
         Tree<VizBlock>::LeafIterator{ GetTree().GetRoot() }, Tree<VizBlock>::LeafIterator{},
         [&](const auto& node) {
-            if ((parameters.onlyShowDirectories && node->file.type != FileType::DIRECTORY) ||
+            if ((parameters.onlyShowDirectories && node->file.type != FileType::Directory) ||
                 node->file.size < parameters.minimumFileSize || node->file.extension != extension) {
                 return;
             }
@@ -496,8 +496,8 @@ void VisualizationModel::HighlightMatchingFileNames(
             const auto& file = node->file;
 
             if (file.size < parameters.minimumFileSize ||
-                (!shouldSearchDirectories && file.type == FileType::DIRECTORY) ||
-                (!shouldSearchFiles && file.type == FileType::REGULAR)) {
+                (!shouldSearchDirectories && file.type == FileType::Directory) ||
+                (!shouldSearchFiles && file.type == FileType::Regular)) {
                 return;
             }
 
@@ -593,7 +593,7 @@ void VisualizationModel::UpdateAffectedNodes(const FileEvent& event)
 
     std::error_code errorCode;
 
-    if (event.eventType == FileEventType::TOUCHED && !std::filesystem::exists(absolutePath) &&
+    if (event.eventType == FileEventType::Touched && !std::filesystem::exists(absolutePath) &&
         !errorCode) {
         // @note The absence of a file may not necessarily indicate a bug, since there tend to be
         // a lot of transient files that may only exist for a fraction of a second. For example,
@@ -606,19 +606,19 @@ void VisualizationModel::UpdateAffectedNodes(const FileEvent& event)
     }
 
     switch (event.eventType) {
-        case FileEventType::CREATED: {
+        case FileEventType::Created: {
             OnFileCreation(event);
             break;
         }
-        case FileEventType::DELETED: {
+        case FileEventType::Deleted: {
             OnFileDeletion(event);
             break;
         }
-        case FileEventType::TOUCHED: {
+        case FileEventType::Touched: {
             OnFileModification(event);
             break;
         }
-        case FileEventType::RENAMED: {
+        case FileEventType::Renamed: {
             OnFileNameChange(event);
             break;
         }
@@ -640,7 +640,7 @@ void VisualizationModel::OnFileCreation(const FileEvent& event)
     FileInfo fileInfo{ /* name = */ event.path.stem().wstring(),
                        /* extension = */ event.path.extension().wstring(),
                        /* size = */ event.fileSize,
-                       /* type = */ FileType::REGULAR };
+                       /* type = */ FileType::Regular };
 
     node->AppendChild(VizBlock{ std::move(fileInfo) });
 }

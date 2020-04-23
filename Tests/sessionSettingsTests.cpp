@@ -86,10 +86,10 @@ void SessionSettingsTests::ModifyDirectorySearchingPreference() const
 
 void SessionSettingsTests::ModifyNumericPrefix() const
 {
-    const auto numericPrefix = Constants::FileSize::Prefix::BINARY;
+    const auto numericPrefix = Constants::SizePrefix::Binary;
 
     Settings::SessionSettings manager;
-    manager.SetActiveNumericPrefix(Constants::FileSize::Prefix::BINARY);
+    manager.SetActiveNumericPrefix(Constants::SizePrefix::Binary);
 
     QCOMPARE(manager.GetActiveNumericPrefix(), numericPrefix);
 }
@@ -125,7 +125,7 @@ void SessionSettingsTests::VerifyFilesOverLimitAreDisplayed() const
     sample.file.name = L"Foo";
     sample.file.extension = L".txt";
     sample.file.size = 16_KiB;
-    sample.file.type = FileType::REGULAR;
+    sample.file.type = FileType::Regular;
 
     Settings::SessionSettings manager;
     manager.SetVisualizationParameters(parameters);
@@ -145,7 +145,7 @@ void SessionSettingsTests::VerifyFilesUnderLimitAreNotDisplayed() const
     sample.file.name = L"Foo";
     sample.file.extension = L".txt";
     sample.file.size = 16_KiB;
-    sample.file.type = FileType::REGULAR;
+    sample.file.type = FileType::Regular;
 
     Settings::SessionSettings manager;
     manager.SetVisualizationParameters(parameters);
@@ -165,7 +165,7 @@ void SessionSettingsTests::VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed(
     sample.file.name = L"Bar";
     sample.file.extension = L"";
     sample.file.size = 10_GiB;
-    sample.file.type = FileType::REGULAR;
+    sample.file.type = FileType::Regular;
 
     Settings::SessionSettings manager;
     manager.SetVisualizationParameters(parameters);
@@ -185,7 +185,7 @@ void SessionSettingsTests::VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed(
     sample.file.name = L"Bar";
     sample.file.extension = L"";
     sample.file.size = 10_MiB;
-    sample.file.type = FileType::DIRECTORY;
+    sample.file.type = FileType::Directory;
 
     Settings::SessionSettings manager;
     manager.SetVisualizationParameters(parameters);
@@ -205,7 +205,7 @@ void SessionSettingsTests::VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed()
     sample.file.name = L"Bar";
     sample.file.extension = L"";
     sample.file.size = 1_MiB;
-    sample.file.type = FileType::DIRECTORY;
+    sample.file.type = FileType::Directory;
 
     Settings::SessionSettings manager;
     manager.SetVisualizationParameters(parameters);

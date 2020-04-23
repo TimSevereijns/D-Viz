@@ -57,7 +57,7 @@ class ScanningWorker final : public QObject
     Q_OBJECT
 
   public:
-    static constexpr std::uintmax_t SIZE_UNDEFINED{ 0 };
+    static constexpr std::uintmax_t UndefinedFileSize{ 0 };
 
     ScanningWorker(const ScanningParameters& parameters, ScanningProgress& progress);
 
