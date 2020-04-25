@@ -47,14 +47,14 @@ namespace
         LPSTR messageBuffer = nullptr;
         const ScopeExit onScopeExit = [&]() noexcept
         {
-            LocalFree(messageBuffer);
+            ::LocalFree(messageBuffer);
         };
 
         constexpr auto formattingOptions = FORMAT_MESSAGE_ALLOCATE_BUFFER |
                                            FORMAT_MESSAGE_FROM_SYSTEM |
                                            FORMAT_MESSAGE_IGNORE_INSERTS;
 
-        const auto characterCount = FormatMessageA(
+        const auto characterCount = ::FormatMessageA(
             /* dwFlags = */ formattingOptions,
             /* lpSource = */ nullptr,
             /* dwMessageId = */ errorMessageID,
@@ -121,7 +121,7 @@ void WindowsFileMonitor::Start(
     using namespace Literals::Numeric::Binary;
     m_notificationBuffer.resize(8_KiB, std::byte{ 0 });
 
-    m_fileHandle = CreateFileW(
+    m_fileHandle = ::CreateFileW(
         /* lpFileName = */ path.wstring().data(),
         /* dwDesiredAccess = */ FILE_LIST_DIRECTORY | STANDARD_RIGHTS_READ,
         /* dwShareMode = */ FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
@@ -137,7 +137,7 @@ void WindowsFileMonitor::Start(
         return;
     }
 
-    const auto exitThreadHandle = CreateEventW(
+    const auto exitThreadHandle = ::CreateEventW(
         /* lpEventAttributes = */ nullptr,
         /* bManualReset = */ true,
         /* bInitialState = */ false,
@@ -145,7 +145,7 @@ void WindowsFileMonitor::Start(
 
     m_events.SetExitHandle(exitThreadHandle);
 
-    const auto notificationHandle = CreateEventW(
+    const auto notificationHandle = ::CreateEventW(
         /* lpEventAttributes = */ nullptr,
         /* bManualReset = */ false,
         /* bInitialState = */ false,
@@ -162,7 +162,7 @@ void WindowsFileMonitor::Start(
 
 void WindowsFileMonitor::Stop()
 {
-    SetEvent(m_events.GetExitHandle());
+    ::SetEvent(m_events.GetExitHandle());
 
     if (m_monitoringThread.joinable()) {
         m_monitoringThread.join();
@@ -171,7 +171,7 @@ void WindowsFileMonitor::Stop()
     Expects(m_isActive == false);
 
     if (m_fileHandle && m_fileHandle != INVALID_HANDLE_VALUE) {
-        CloseHandle(m_fileHandle);
+        ::CloseHandle(m_fileHandle);
     }
 }
 
@@ -187,7 +187,7 @@ void WindowsFileMonitor::ShutdownThread()
         return;
     }
 
-    CancelIo(m_fileHandle);
+    ::CancelIo(m_fileHandle);
 
     while (!HasOverlappedIoCompleted(&m_ioBuffer)) {
         SleepEx(50, TRUE);
@@ -209,7 +209,7 @@ void WindowsFileMonitor::AwaitNotification()
                                           FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_SIZE |
                                           FILE_NOTIFY_CHANGE_CREATION;
 
-    const bool successfullyQueued = ReadDirectoryChangesW(
+    const bool successfullyQueued = ::ReadDirectoryChangesW(
         /* hDirectory = */ m_fileHandle,
         /* lpBuffer = */ m_notificationBuffer.data(),
         /* nBufferLength = */ static_cast<DWORD>(m_notificationBuffer.size()),
@@ -223,7 +223,7 @@ void WindowsFileMonitor::AwaitNotification()
         LogLastError("Encountered error queuing filesytem changes.");
     }
 
-    const auto waitResult = WaitForMultipleObjects(
+    const auto waitResult = ::WaitForMultipleObjects(
         /* nCount = */ m_events.Size(),
         /* lpHandles = */ m_events.Data(),
         /* bWaitAll = */ false,
@@ -252,7 +252,7 @@ void WindowsFileMonitor::RetrieveNotification()
 {
     DWORD bytesTransferred{ 0 };
 
-    const bool successfullyRead = GetOverlappedResult(
+    const bool successfullyRead = ::GetOverlappedResult(
         /* hFile = */ m_fileHandle,
         /* lpOverlapped = */ &m_ioBuffer,
         /* lpNumberOfBytesTransferred = */ &bytesTransferred,
