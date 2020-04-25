@@ -22,12 +22,15 @@
 
 namespace
 {
-    constexpr QVector3D POSITIVE_X_NORMAL{ 1.0f, 0.0f, 0.0f };
-    constexpr QVector3D POSITIVE_Y_NORMAL{ 0.0f, 1.0f, 0.0f };
-    constexpr QVector3D POSITIVE_Z_NORMAL{ 0.0f, 0.0f, 1.0f };
-    constexpr QVector3D NEGATIVE_X_NORMAL{ -1.0f, 0.0f, 0.0f };
-    constexpr QVector3D NEGATIVE_Y_NORMAL{ 0.0f, -1.0f, 0.0f };
-    constexpr QVector3D NEGATIVE_Z_NORMAL{ 0.0f, 0.0f, -1.0f };
+    namespace Normals
+    {
+        constexpr QVector3D PositiveX{ 1.0f, 0.0f, 0.0f };
+        constexpr QVector3D PositiveY{ 0.0f, 1.0f, 0.0f };
+        constexpr QVector3D PositiveZ{ 0.0f, 0.0f, 1.0f };
+        constexpr QVector3D NegativeX{ -1.0f, 0.0f, 0.0f };
+        constexpr QVector3D NegativeY{ 0.0f, -1.0f, 0.0f };
+        constexpr QVector3D NegativeZ{ 0.0f, 0.0f, -1.0f };
+    } // namespace Normals
 
     /**
      * @brief Calculates whether the specified ray hits the specified plane, given a margin of
@@ -111,7 +114,7 @@ namespace
                                           static_cast<float>(randomPointOnTopFace.z()) };
 
             const std::optional<QVector3D> intersectionPoint =
-                DoesRayIntersectPlane(ray, pointOnPlane, POSITIVE_Y_NORMAL);
+                DoesRayIntersectPlane(ray, pointOnPlane, Normals::PositiveY);
 
             // clang-format off
             if (intersectionPoint && blockOrigin.xAsFloat()             < intersectionPoint->x() &&
@@ -130,7 +133,7 @@ namespace
                                           static_cast<float>(randomPointOnFrontFace.z()) };
 
             const std::optional<QVector3D> intersectionPoint =
-                DoesRayIntersectPlane(ray, pointOnPlane, POSITIVE_Z_NORMAL);
+                DoesRayIntersectPlane(ray, pointOnPlane, Normals::PositiveZ);
 
             // clang-format off
             if (intersectionPoint && blockOrigin.xAsFloat()              < intersectionPoint->x() &&
@@ -149,7 +152,7 @@ namespace
                                           static_cast<float>(randomPointOnBackFace.z()) };
 
             const std::optional<QVector3D> intersectionPoint =
-                DoesRayIntersectPlane(ray, pointOnPlane, NEGATIVE_Z_NORMAL);
+                DoesRayIntersectPlane(ray, pointOnPlane, Normals::NegativeZ);
 
             // clang-format off
             if (intersectionPoint && blockOrigin.xAsFloat()              < intersectionPoint->x() &&
@@ -168,7 +171,7 @@ namespace
                                           static_cast<float>(randomPointOnLeftFace.z()) };
 
             const std::optional<QVector3D> intersectionPoint =
-                DoesRayIntersectPlane(ray, pointOnPlane, NEGATIVE_X_NORMAL);
+                DoesRayIntersectPlane(ray, pointOnPlane, Normals::NegativeX);
 
             // clang-format off
             if (intersectionPoint && blockOrigin.zAsFloat()              > intersectionPoint->z() &&
@@ -187,7 +190,7 @@ namespace
                                           static_cast<float>(randomPointOnRightFace.z()) };
 
             const std::optional<QVector3D> intersectionPoint =
-                DoesRayIntersectPlane(ray, pointOnPlane, POSITIVE_X_NORMAL);
+                DoesRayIntersectPlane(ray, pointOnPlane, Normals::PositiveX);
 
             // clang-format off
             if (intersectionPoint && blockOrigin.zAsFloat()              > intersectionPoint->z() &&
