@@ -7,6 +7,7 @@
 #include "Utilities/utilities.hpp"
 #include "Viewport/glCanvas.h"
 #include "constants.h"
+#include "controller.h"
 #include "literals.h"
 
 #include <gsl/gsl_assert>
@@ -734,9 +735,9 @@ void MainWindow::OnScanCompleted()
 std::shared_ptr<BaseTaskbarButton> MainWindow::GetTaskbarButton()
 {
 #if defined(Q_OS_WIN)
-return std::make_shared<WinTaskbarButton>(this);
+    return std::make_shared<WinTaskbarButton>(this);
 #elif defined(Q_OS_LINUX)
-return std::make_shared<UnixTaskbarButton>(this);
+    return std::make_shared<UnixTaskbarButton>(this);
 #endif // Q_OS_LINUX
 }
 

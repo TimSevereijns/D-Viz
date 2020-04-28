@@ -51,10 +51,11 @@ namespace
     }
 } // namespace
 
-Controller::Controller(const ControllerParameters& parameters)
-    : m_controllerParameters{ parameters },
+Controller::Controller(ViewFactoryInterface& viewFactory, ModelFactoryInterface& modelFactory)
+    : m_viewFactory{ viewFactory },
+      m_modelFactory{ modelFactory },
       m_persistentSettings{ Settings::PersistentSettings::DefaultPreferencesFilePath() },
-      m_view{ parameters.createView(*this) }
+      m_view{ viewFactory.CreateView(*this) }
 {
 }
 
@@ -109,7 +110,7 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
 
     AllowUserInteractionWithModel(false);
 
-    m_model = m_controllerParameters.createModel(std::make_unique<FileSystemMonitor>(), root);
+    m_model = m_modelFactory.CreateModel(std::make_unique<FileSystemMonitor>(), root);
     m_view->OnScanStarted();
 
     const auto spaceInfo = std::filesystem::space(root);

@@ -40,11 +40,11 @@ SOURCES += \
    $$PWD/Source/Viewport/gamepadContextMenu.cpp \
    $$PWD/Source/Viewport/glCanvas.cpp \
    $$PWD/Source/Viewport/mouseContextMenu.cpp \
+   $$PWD/Source/Visualizations/baseModel.cpp \
    $$PWD/Source/Visualizations/block.cpp \
    $$PWD/Source/Visualizations/precisePoint.cpp \
    $$PWD/Source/Visualizations/ray.cpp \
    $$PWD/Source/Visualizations/squarifiedTreemap.cpp \
-   $$PWD/Source/Visualizations/visualization.cpp \
    $$PWD/Source/Visualizations/vizBlock.cpp \
    $$PWD/Source/Windows/aboutDialog.cpp \
    $$PWD/Source/Windows/breakdownDialog.cpp \
@@ -58,6 +58,7 @@ HEADERS += \
    $$PWD/Include/controller.h \
    $$PWD/Include/HID/gamepad.h \
    $$PWD/Include/HID/keyboardManager.h \
+   $$PWD/Include/factories.hpp \
    $$PWD/Include/literals.h \
    $$PWD/Include/Monitor/fileMonitorBase.h \
    $$PWD/Include/Monitor/fileSystemObserver.h \

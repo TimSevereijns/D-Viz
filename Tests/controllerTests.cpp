@@ -6,28 +6,40 @@
 #include <Monitor/fileMonitorBase.h>
 #include <Visualizations/squarifiedTreemap.h>
 #include <controller.h>
+#include <factories.hpp>
 
 #include <filesystem>
 #include <memory>
 
 namespace
 {
-    ControllerParameters SetupControllerParameters(std::shared_ptr<MockView>& view)
+    class TestViewFactory final : public ViewFactoryInterface
     {
-        ControllerParameters parameters;
+      public:
+        TestViewFactory(std::shared_ptr<MockView>& view) : m_view{ view }
+        {
+        }
 
-        parameters.createView = [&](Controller& controller) {
-            view = std::make_shared<MockView>(controller);
-            return view;
-        };
+        auto CreateView(Controller& controller) const -> std::shared_ptr<BaseView> override
+        {
+            m_view = std::make_shared<MockView>(controller);
+            return m_view;
+        }
 
-        parameters.createModel = [](std::unique_ptr<FileMonitorBase> fileMonitor,
-                                    const std::filesystem::path& path) {
+      private:
+        std::shared_ptr<MockView>& m_view;
+    };
+
+    class TestModelFactory final : public ModelFactoryInterface
+    {
+      public:
+        auto CreateModel(
+            std::unique_ptr<FileMonitorBase> fileMonitor, const std::filesystem::path& path) const
+            -> std::shared_ptr<BaseModel> override
+        {
             return std::make_shared<SquarifiedTreeMap>(std::move(fileMonitor), path);
-        };
-
-        return parameters;
-    }
+        }
+    };
 
     std::shared_ptr<BaseTaskbarButton> GetTaskbarButton()
     {
@@ -64,7 +76,10 @@ void ControllerTests::LaunchMainWindow() const
 {
     std::shared_ptr<MockView> view;
 
-    Controller controller{ SetupControllerParameters(view) };
+    auto viewFactory = TestViewFactory{ view };
+    auto modelFactory = TestModelFactory{};
+
+    Controller controller{ viewFactory, modelFactory };
 
     REQUIRE_CALL(*view, Show()).TIMES(1);
 
@@ -75,7 +90,10 @@ void ControllerTests::ScanDrive() const
 {
     std::shared_ptr<MockView> view;
 
-    Controller controller{ SetupControllerParameters(view) };
+    auto viewFactory = TestViewFactory{ view };
+    auto modelFactory = TestModelFactory{};
+
+    Controller controller{ viewFactory, modelFactory };
     controller.GetPersistentSettings().MonitorFileSystem(false);
 
     REQUIRE_CALL(*view, SetWaitCursor()).TIMES(1);

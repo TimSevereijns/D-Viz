@@ -10,6 +10,7 @@
 class Controller;
 class Gamepad;
 class GLCanvas;
+class QWidget;
 class QWindow;
 class QObject;
 
@@ -50,6 +51,10 @@ class BaseTaskbarButton
 class BaseView
 {
   public:
+    BaseView(QWidget* /*parent*/ = nullptr)
+    {
+    }
+
     virtual ~BaseView() noexcept = default;
 
     /**

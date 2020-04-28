@@ -1,6 +1,7 @@
 #include "Windows/breakdownDialog.h"
 
 #include "Windows/mainWindow.h"
+#include "controller.h"
 
 #include <Stopwatch/Stopwatch.hpp>
 #include <spdlog/spdlog.h>

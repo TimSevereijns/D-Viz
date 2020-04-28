@@ -3,9 +3,11 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "Monitor/fileChangeNotification.hpp"
 #include "Scanner/driveScanner.h"
@@ -16,6 +18,7 @@
 #include "Visualizations/vizBlock.h"
 #include "Windows/mainWindow.h"
 #include "constants.h"
+#include "factories.hpp"
 
 #if defined(Q_OS_WIN)
 #include "Monitor/windowsFileMonitor.h"
@@ -25,30 +28,12 @@
 
 #include <Tree/Tree.hpp>
 
-#include <filesystem>
-#include <memory>
-#include <vector>
-
 #include <QVector3D>
 
 struct FileEvent;
 struct ScanningProgress;
 
-class Controller;
-class BaseModel;
-class BaseView;
 class GLCanvas;
-
-struct ControllerParameters
-{
-    std::function<std::shared_ptr<BaseModel>(
-        std::unique_ptr<FileMonitorBase> fileMonitor, const std::filesystem::path& path)>
-        createModel;
-
-    std::function<std::shared_ptr<BaseView>(Controller&)> createView;
-};
-
-class ControllerTests;
 
 class Controller : public QObject
 {
@@ -61,7 +46,7 @@ class Controller : public QObject
     using FileSystemMonitor = LinuxFileMonitor;
 #endif // Q_OS_LINUX
 
-    Controller(const ControllerParameters& parameters);
+    Controller(ViewFactoryInterface& viewFactory, ModelFactoryInterface& modelFactory);
 
     /**
      * @brief Starts the UI.
@@ -337,7 +322,8 @@ class Controller : public QObject
         const Settings::VisualizationParameters& parameters, const ScanningProgress& progress,
         const std::shared_ptr<Tree<VizBlock>>& scanningResults);
 
-    ControllerParameters m_controllerParameters;
+    ViewFactoryInterface& m_viewFactory;
+    ModelFactoryInterface& m_modelFactory;
 
     bool m_allowInteractionWithModel{ false };
 

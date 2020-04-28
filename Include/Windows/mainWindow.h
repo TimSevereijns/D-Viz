@@ -20,8 +20,9 @@
 #include "baseView.h"
 #include "breakdownDialog.h"
 #include "constants.h"
-#include "controller.h"
 #include "ui_mainWindow.h"
+
+class Controller;
 
 struct ScanningProgress;
 

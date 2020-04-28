@@ -23,18 +23,10 @@ int main(int argc, char* argv[])
     application.setWindowIcon(QIcon{ "Icons/Linux/32x32/D-Viz.png" });
 #endif
 
-    ControllerParameters parameters;
+    auto viewFactory = ViewFactory{};
+    auto modelFactory = ModelFactory{};
 
-    parameters.createView = [](Controller& controller) {
-        return std::make_shared<MainWindow>(controller);
-    };
-
-    parameters.createModel = [](std::unique_ptr<FileMonitorBase> fileMonitor,
-                                const std::filesystem::path& path) {
-        return std::make_shared<SquarifiedTreeMap>(std::move(fileMonitor), path);
-    };
-
-    Controller controller{ parameters };
+    Controller controller{ viewFactory, modelFactory };
     controller.LaunchUI();
 
     const auto exitCode = QApplication::exec();
