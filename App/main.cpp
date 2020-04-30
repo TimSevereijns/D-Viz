@@ -1,11 +1,8 @@
-#include "Monitor/fileMonitorBase.h"
-#include "Visualizations/squarifiedTreemap.h"
+#include "Factories/modelFactory.h"
+#include "Factories/viewFactory.h"
 #include "bootstrapper.hpp"
+#include "constants.h"
 #include "controller.h"
-
-#include <filesystem>
-#include <memory>
-#include <string>
 
 #include <QApplication>
 #include <spdlog/spdlog.h>
@@ -23,8 +20,8 @@ int main(int argc, char* argv[])
     application.setWindowIcon(QIcon{ "Icons/Linux/32x32/D-Viz.png" });
 #endif
 
-    auto viewFactory = ViewFactory{};
-    auto modelFactory = ModelFactory{};
+    ViewFactory viewFactory;
+    ModelFactory modelFactory;
 
     Controller controller{ viewFactory, modelFactory };
     controller.LaunchUI();
