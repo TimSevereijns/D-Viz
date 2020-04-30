@@ -10,13 +10,13 @@
 namespace trompeloeil
 {
     template <>
-    inline void
-    reporter<specialized>::send(severity s, const char* file, unsigned long line, const char* msg)
+    inline void reporter<specialized>::send(
+        severity severity, const char* file, unsigned long line, const char* message)
     {
-        if (s == severity::fatal) {
-            qt_assert(msg, file, line);
+        if (severity == severity::fatal) {
+            qt_assert(message, file, line);
         } else {
-            qt_assert(msg, file, line);
+            qt_assert(message, file, line);
         }
     }
 } // namespace trompeloeil

@@ -9,6 +9,10 @@
 #include <unordered_map>
 #include <vector>
 
+#include "Factories/modelFactory.h"
+#include "Factories/modelFactoryInterface.h"
+#include "Factories/viewFactory.h"
+#include "Factories/viewFactoryInterface.h"
 #include "Monitor/fileChangeNotification.hpp"
 #include "Scanner/driveScanner.h"
 #include "Scene/light.h"
@@ -18,7 +22,6 @@
 #include "Visualizations/vizBlock.h"
 #include "Windows/mainWindow.h"
 #include "constants.h"
-#include "factories.hpp"
 
 #if defined(Q_OS_WIN)
 #include "Monitor/windowsFileMonitor.h"

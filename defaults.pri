@@ -56,9 +56,12 @@ HEADERS += \
    $$PWD/Include/bootstrapper.hpp \
    $$PWD/Include/constants.h \
    $$PWD/Include/controller.h \
+   $$PWD/Include/Factories/modelFactory.h \
+   $$PWD/Include/Factories/modelFactoryInterface.h \
+   $$PWD/Include/Factories/viewFactory.h \
+   $$PWD/Include/Factories/viewFactoryInterface.h \
    $$PWD/Include/HID/gamepad.h \
    $$PWD/Include/HID/keyboardManager.h \
-   $$PWD/Include/factories.hpp \
    $$PWD/Include/literals.h \
    $$PWD/Include/Monitor/fileMonitorBase.h \
    $$PWD/Include/Monitor/fileSystemObserver.h \

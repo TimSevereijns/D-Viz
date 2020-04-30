@@ -3,10 +3,11 @@
 #include "Mocks/mockView.h"
 #include "testUtilities.hpp"
 
+#include <Factories/modelFactoryInterface.h>
+#include <Factories/viewFactoryInterface.h>
 #include <Monitor/fileMonitorBase.h>
 #include <Visualizations/squarifiedTreemap.h>
 #include <controller.h>
-#include <factories.hpp>
 
 #include <filesystem>
 #include <memory>
