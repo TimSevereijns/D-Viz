@@ -1,6 +1,6 @@
 #include "controllerTests.h"
 
-#include "testUtilities.hpp"
+#include "Utilities/testUtilities.hpp"
 
 #include <controller.h>
 

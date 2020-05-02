@@ -3,7 +3,7 @@
 
 #include <QTest>
 
-#include "multiTestHarness.h"
+#include "Utilities/multiTestHarness.h"
 
 class CameraTests : public QObject
 {

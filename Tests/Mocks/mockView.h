@@ -5,7 +5,7 @@
 
 #include <QtTest>
 
-#include "trompeloeilAdapter.h"
+#include "Utilities/trompeloeilAdapter.h"
 
 class BaseTaskbarButton;
 class Controller;

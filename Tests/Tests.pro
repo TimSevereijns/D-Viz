@@ -22,20 +22,20 @@ HEADERS += \
    fileSizeLiterals.hpp \
    filesystemObserverTests.h \
    modelTests.h \
-   multiTestHarness.h \
    nodePainterTests.h \
    persistentSettingsTests.h \
    sessionSettingsTests.h \
-   testUtilities.hpp \
-   trompeloeilAdapter.h \
    Mocks/mockView.h \
-   Mocks/mockFileMonitor.h
+   Mocks/mockFileMonitor.h \
+   Utilities/multiTestHarness.h \
+   Utilities/testUtilities.hpp \
+   Utilities/trompeloeilAdapter.h
 
 SOURCES += \
    cameraTests.cpp \
    controllerTests.cpp \
    filesystemObserverTests.cpp \
-   mainTest.cpp \
+   main.cpp \
    modelTests.cpp \
    nodePainterTests.cpp \
    persistentSettingsTests.cpp \

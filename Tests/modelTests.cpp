@@ -5,7 +5,7 @@
 #include <Utilities/operatingSystem.hpp>
 #include <constants.h>
 
-#include "testUtilities.hpp"
+#include "Utilities/testUtilities.hpp"
 
 namespace
 {

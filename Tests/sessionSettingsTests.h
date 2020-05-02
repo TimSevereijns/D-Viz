@@ -3,7 +3,7 @@
 
 #include <QtTest>
 
-#include "multiTestHarness.h"
+#include "Utilities/multiTestHarness.h"
 
 class SessionSettingsTests : public QObject
 {

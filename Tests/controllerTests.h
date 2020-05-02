@@ -10,7 +10,7 @@
 #include <Windows/baseView.h>
 
 #include "Mocks/mockView.h"
-#include "multiTestHarness.h"
+#include "Utilities/multiTestHarness.h"
 
 class Controller;
 class MockView;

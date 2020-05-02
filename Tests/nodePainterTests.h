@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "multiTestHarness.h"
+#include "Utilities/multiTestHarness.h"
 
 class NodePainterTests : public QObject
 {
