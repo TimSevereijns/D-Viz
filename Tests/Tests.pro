@@ -35,11 +35,11 @@ SOURCES += \
    cameraTests.cpp \
    controllerTests.cpp \
    filesystemObserverTests.cpp \
-   main.cpp \
    modelTests.cpp \
    nodePainterTests.cpp \
    persistentSettingsTests.cpp \
-   sessionSettingsTests.cpp
+   sessionSettingsTests.cpp \
+   testMain.cpp
 
 INCLUDEPATH += \
    $$PWD/../ThirdParty/Trompeloeil/include \
