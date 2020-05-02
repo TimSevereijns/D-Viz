@@ -57,10 +57,14 @@ namespace OS
         const std::wstring rawPath = Controller::ResolveCompleteFilePath(node).wstring();
         const std::filesystem::path path{ rawPath };
 
-        // @todo Look into adding support for other popular file browsers, like Nautilus.
+        const auto command =
+            "dbus-send --session --print-reply --dest=org.freedesktop.FileManager1 "
+            "--type=method_call /org/freedesktop/FileManager1 "
+            "org.freedesktop.FileManager1.ShowItems "
+            "array:string:\"file://" +
+            std::string{ path.c_str() } + "\" string:\"\"";
 
-        const auto message = "nemo \"" + std::string{ path.c_str() } + "\" &";
-        [[maybe_unused]] const auto result = std::system(message.c_str());
+        [[maybe_unused]] const auto result = std::system(command.c_str());
     }
 
 #endif

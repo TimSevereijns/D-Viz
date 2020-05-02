@@ -17,7 +17,6 @@ SOURCES += \
    $$PWD/Source/Monitor/linuxFileMonitor.cpp \
    $$PWD/Source/Monitor/windowsFileMonitor.cpp \
    $$PWD/Source/Scanner/driveScanner.cpp \
-   $$PWD/Source/Scanner/fileInfo.cpp \
    $$PWD/Source/Scanner/scanningParameters.cpp \
    $$PWD/Source/Scanner/scanningUtilities.cpp \
    $$PWD/Source/Scanner/scanningWorker.cpp \

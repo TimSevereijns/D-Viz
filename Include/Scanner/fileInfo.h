@@ -5,7 +5,7 @@
 #include <string>
 
 /**
- * @brief The FILE_TYPE enum represents the three basic file types: non-directory files,
+ * @brief The FileType enum represents the three basic file types: non-directory files,
  * directories, and symbolic links (which includes junctions).
  */
 enum class FileType
@@ -20,16 +20,20 @@ enum class FileType
  */
 struct FileInfo
 {
-    std::wstring name{};
-    std::wstring extension{};
+    FileInfo() noexcept = default;
 
+    FileInfo(std::wstring name, std::wstring extension, std::uintmax_t size, FileType type) noexcept
+        : name{ std::move(name) }, extension{ std::move(extension) }, size{ size }, type{ type }
+    {
+    }
+
+    std::wstring name;
+    std::wstring extension;
+
+    std::uint32_t identifier{ 0 };
     std::uintmax_t size{ 0 };
 
     FileType type{ FileType::Regular };
-
-    FileInfo() = default;
-
-    FileInfo(std::wstring name, std::wstring extension, std::uintmax_t size, FileType type);
 };
 
 #endif // FILEINFO_H
