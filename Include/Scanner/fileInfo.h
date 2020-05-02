@@ -20,7 +20,7 @@ enum class FileType
  */
 struct FileInfo
 {
-    FileInfo() noexcept = default;
+    FileInfo() = default;
 
     FileInfo(std::wstring name, std::wstring extension, std::uintmax_t size, FileType type) noexcept
         : name{ std::move(name) }, extension{ std::move(extension) }, size{ size }, type{ type }
