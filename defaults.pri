@@ -49,7 +49,6 @@ SOURCES += \
    $$PWD/Source/Windows/aboutDialog.cpp \
    $$PWD/Source/Windows/breakdownDialog.cpp \
    $$PWD/Source/Windows/mainWindow.cpp \
-   $$PWD/Source/Windows/nullTaskbarButton.cpp \
    $$PWD/Source/Windows/scanBreakdownModel.cpp
 
 HEADERS += \
@@ -109,7 +108,6 @@ HEADERS += \
    $$PWD/Include/Windows/baseView.h \
    $$PWD/Include/Windows/breakdownDialog.h \
    $$PWD/Include/Windows/mainWindow.h \
-   $$PWD/Include/Windows/nullTaskbarButton.h \
    $$PWD/Include/Windows/scanBreakdownModel.h
 
 FORMS += \
