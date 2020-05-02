@@ -18,6 +18,7 @@ LIBS += -L$$DESTDIR -lD-Viz
 
 HEADERS += \
    cameraTests.h \
+   controllerTests.h \
    fileSizeLiterals.hpp \
    filesystemObserverTests.h \
    modelTests.h \
@@ -26,16 +27,22 @@ HEADERS += \
    persistentSettingsTests.h \
    sessionSettingsTests.h \
    testUtilities.hpp \
-   Mocks\mockFileMonitor.h
+   trompeloeilAdapter.h \
+   Mocks/mockView.h \
+   Mocks/mockFileMonitor.h
 
 SOURCES += \
    cameraTests.cpp \
+   controllerTests.cpp \
    filesystemObserverTests.cpp \
    mainTest.cpp \
    modelTests.cpp \
    nodePainterTests.cpp \
    persistentSettingsTests.cpp \
-   sessionSettingsTests.cpp \
+   sessionSettingsTests.cpp
+
+INCLUDEPATH += \
+   $$PWD/../ThirdParty/Trompeloeil/include \
 
 win32: CONFIG(release, debug|release) {
     QMAKE_CXXFLAGS += /Zi

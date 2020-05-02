@@ -40,11 +40,11 @@ SOURCES += \
    $$PWD/Source/Viewport/gamepadContextMenu.cpp \
    $$PWD/Source/Viewport/glCanvas.cpp \
    $$PWD/Source/Viewport/mouseContextMenu.cpp \
+   $$PWD/Source/Visualizations/baseModel.cpp \
    $$PWD/Source/Visualizations/block.cpp \
    $$PWD/Source/Visualizations/precisePoint.cpp \
    $$PWD/Source/Visualizations/ray.cpp \
    $$PWD/Source/Visualizations/squarifiedTreemap.cpp \
-   $$PWD/Source/Visualizations/visualization.cpp \
    $$PWD/Source/Visualizations/vizBlock.cpp \
    $$PWD/Source/Windows/aboutDialog.cpp \
    $$PWD/Source/Windows/breakdownDialog.cpp \
@@ -56,6 +56,10 @@ HEADERS += \
    $$PWD/Include/bootstrapper.hpp \
    $$PWD/Include/constants.h \
    $$PWD/Include/controller.h \
+   $$PWD/Include/Factories/modelFactory.h \
+   $$PWD/Include/Factories/modelFactoryInterface.h \
+   $$PWD/Include/Factories/viewFactory.h \
+   $$PWD/Include/Factories/viewFactoryInterface.h \
    $$PWD/Include/HID/gamepad.h \
    $$PWD/Include/HID/keyboardManager.h \
    $$PWD/Include/literals.h \
@@ -95,13 +99,14 @@ HEADERS += \
    $$PWD/Include/Viewport/gamepadContextMenu.h \
    $$PWD/Include/Viewport/glCanvas.h \
    $$PWD/Include/Viewport/mouseContextMenu.h \
+   $$PWD/Include/Visualizations/baseModel.h \
    $$PWD/Include/Visualizations/block.h \
    $$PWD/Include/Visualizations/precisePoint.h \
    $$PWD/Include/Visualizations/ray.h \
    $$PWD/Include/Visualizations/squarifiedTreemap.h \
-   $$PWD/Include/Visualizations/visualization.h \
    $$PWD/Include/Visualizations/vizBlock.h \
    $$PWD/Include/Windows/aboutDialog.h \
+   $$PWD/Include/Windows/baseView.h \
    $$PWD/Include/Windows/breakdownDialog.h \
    $$PWD/Include/Windows/mainWindow.h \
    $$PWD/Include/Windows/nullTaskbarButton.h \

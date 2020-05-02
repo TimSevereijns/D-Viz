@@ -1,4 +1,7 @@
+#include "Factories/modelFactory.h"
+#include "Factories/viewFactory.h"
 #include "bootstrapper.hpp"
+#include "constants.h"
 #include "controller.h"
 
 #include <QApplication>
@@ -17,7 +20,10 @@ int main(int argc, char* argv[])
     application.setWindowIcon(QIcon{ "Icons/Linux/32x32/D-Viz.png" });
 #endif
 
-    Controller controller{};
+    ViewFactory viewFactory;
+    ModelFactory modelFactory;
+
+    Controller controller{ viewFactory, modelFactory };
     controller.LaunchUI();
 
     const auto exitCode = QApplication::exec();

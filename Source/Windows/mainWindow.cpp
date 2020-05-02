@@ -7,6 +7,7 @@
 #include "Utilities/utilities.hpp"
 #include "Viewport/glCanvas.h"
 #include "constants.h"
+#include "controller.h"
 #include "literals.h"
 
 #include <gsl/gsl_assert>
@@ -118,6 +119,16 @@ MainWindow::MainWindow(Controller& controller, QWidget* parent /* = nullptr */)
     SetupSidebar();
 
     SetDebuggingMenuState();
+}
+
+void MainWindow::Show()
+{
+    this->show();
+}
+
+QWindow* MainWindow::GetWindowHandle()
+{
+    return this->windowHandle();
 }
 
 void MainWindow::SetupSidebar()
@@ -719,6 +730,15 @@ void MainWindow::OnScanCompleted()
     ReloadVisualization();
 
     m_ui.showBreakdownButton->setEnabled(true);
+}
+
+std::shared_ptr<BaseTaskbarButton> MainWindow::GetTaskbarButton()
+{
+#if defined(Q_OS_WIN)
+    return std::make_shared<WinTaskbarButton>(this);
+#elif defined(Q_OS_LINUX)
+    return std::make_shared<UnixTaskbarButton>(this);
+#endif // Q_OS_LINUX
 }
 
 void MainWindow::LaunchAboutDialog()

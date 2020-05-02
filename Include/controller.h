@@ -1,8 +1,18 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include "constants.h"
+#include <algorithm>
+#include <filesystem>
+#include <memory>
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
+#include "Factories/modelFactory.h"
+#include "Factories/modelFactoryInterface.h"
+#include "Factories/viewFactory.h"
+#include "Factories/viewFactoryInterface.h"
 #include "Monitor/fileChangeNotification.hpp"
 #include "Scanner/driveScanner.h"
 #include "Scene/light.h"
@@ -11,12 +21,15 @@
 #include "Settings/sessionSettings.h"
 #include "Visualizations/vizBlock.h"
 #include "Windows/mainWindow.h"
+#include "constants.h"
+
+#if defined(Q_OS_WIN)
+#include "Monitor/windowsFileMonitor.h"
+#elif defined(Q_OS_LINUX)
+#include "Monitor/linuxFileMonitor.h"
+#endif // Q_OS_LINUX
 
 #include <Tree/Tree.hpp>
-
-#include <filesystem>
-#include <memory>
-#include <vector>
 
 #include <QVector3D>
 
@@ -25,10 +38,18 @@ struct ScanningProgress;
 
 class GLCanvas;
 
-class Controller
+class Controller : public QObject
 {
+    Q_OBJECT
+
   public:
-    Controller();
+#if defined(Q_OS_WIN)
+    using FileSystemMonitor = WindowsFileMonitor;
+#elif defined(Q_OS_LINUX)
+    using FileSystemMonitor = LinuxFileMonitor;
+#endif // Q_OS_LINUX
+
+    Controller(ViewFactoryInterface& viewFactory, ModelFactoryInterface& modelFactory);
 
     /**
      * @brief Starts the UI.
@@ -282,6 +303,13 @@ class Controller
      */
     void RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVector3D& color);
 
+  signals:
+
+    /**
+     * @brief Signals that the drive scanning has finished.
+     */
+    void FinishedScanning();
+
   private:
     template <typename NodeSelectorType>
     void ProcessHighlightedNodes(
@@ -297,14 +325,17 @@ class Controller
         const Settings::VisualizationParameters& parameters, const ScanningProgress& progress,
         const std::shared_ptr<Tree<VizBlock>>& scanningResults);
 
+    ViewFactoryInterface& m_viewFactory;
+    ModelFactoryInterface& m_modelFactory;
+
     bool m_allowInteractionWithModel{ false };
 
     Settings::PersistentSettings m_persistentSettings;
     Settings::SessionSettings m_sessionSettings;
     Settings::NodePainter m_nodePainter;
 
-    std::unique_ptr<MainWindow> m_view{ nullptr };
-    std::unique_ptr<VisualizationModel> m_model{ nullptr };
+    std::shared_ptr<BaseView> m_view{ nullptr };
+    std::shared_ptr<BaseModel> m_model{ nullptr };
 
     DriveScanner m_scanner;
 

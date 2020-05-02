@@ -30,19 +30,18 @@ struct TreemapMetadata
 /**
  * @brief Base class for the visualization model.
  */
-class VisualizationModel
+class BaseModel
 {
   public:
-    VisualizationModel(
-        std::unique_ptr<FileMonitorBase> fileMonitor, const std::filesystem::path& path);
+    BaseModel(std::unique_ptr<FileMonitorBase> fileMonitor, const std::filesystem::path& path);
 
-    virtual ~VisualizationModel();
+    virtual ~BaseModel();
 
-    VisualizationModel(const VisualizationModel&) = delete;
-    VisualizationModel& operator=(const VisualizationModel&) = delete;
+    BaseModel(const BaseModel&) = delete;
+    BaseModel& operator=(const BaseModel&) = delete;
 
-    VisualizationModel(VisualizationModel&&) = delete;
-    VisualizationModel& operator=(VisualizationModel&&) = delete;
+    BaseModel(BaseModel&&) = delete;
+    BaseModel& operator=(BaseModel&&) = delete;
 
     /**
      * @brief Parses the specified directory scan into vertex and color data.

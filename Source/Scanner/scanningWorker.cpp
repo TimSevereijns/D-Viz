@@ -104,7 +104,7 @@ ScanningWorker::ScanningWorker(const ScanningParameters& parameters, ScanningPro
 {
 }
 
-bool ScanningWorker::ShouldProcess(const std::filesystem::path& path) noexcept
+bool ScanningWorker::IsScannable(const std::filesystem::path& path) noexcept
 {
 #if defined(Q_OS_WIN)
     return !Scanner::IsReparsePoint(path);
@@ -149,7 +149,7 @@ void ScanningWorker::ProcessPath(
 
     if (isRegularFile) {
         ProcessFile(path, node);
-    } else if (std::filesystem::is_directory(path) && ShouldProcess(path)) {
+    } else if (std::filesystem::is_directory(path) && IsScannable(path)) {
         try {
             // In some edge-cases, the Windows operating system doesn't allow anyone to access
             // certain directories, and attempts to do so will result in exceptional behaviour---pun

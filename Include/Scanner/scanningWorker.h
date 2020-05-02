@@ -29,8 +29,8 @@
 #include "Scanner/fileInfo.h"
 #include "Scanner/scanningParameters.h"
 #include "Scanner/scanningProgress.hpp"
+#include "Visualizations/baseModel.h"
 #include "Visualizations/block.h"
-#include "Visualizations/visualization.h"
 #include "Visualizations/vizBlock.h"
 
 /**
@@ -61,7 +61,7 @@ class ScanningWorker final : public QObject
 
     ScanningWorker(const ScanningParameters& parameters, ScanningProgress& progress);
 
-    static bool ShouldProcess(const std::filesystem::path& path) noexcept;
+    static bool IsScannable(const std::filesystem::path& path) noexcept;
 
   public slots:
 

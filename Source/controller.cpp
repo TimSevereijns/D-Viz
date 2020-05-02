@@ -19,26 +19,8 @@
 
 #include <QCursor>
 
-#if defined(Q_OS_WIN)
-#include <QWinTaskbarButton>
-#include <QWinTaskbarProgress>
-
-#include "Monitor/windowsFileMonitor.h"
-#elif defined(Q_OS_LINUX)
-#include "Monitor/linuxFileMonitor.h"
-#include "Windows/nullTaskbarButton.h"
-#endif // Q_OS_LINUX
-
 namespace
 {
-#if defined(Q_OS_WIN)
-    using FileSystemMonitor = WindowsFileMonitor;
-    using TaskbarButton = QWinTaskbarButton;
-#elif defined(Q_OS_LINUX)
-    using FileSystemMonitor = LinuxFileMonitor;
-    using TaskbarButton = NullTaskbarButton;
-#endif // Q_OS_LINUX
-
     /**
      * @brief Helper function to be called once scanning completes.
      *
@@ -69,15 +51,17 @@ namespace
     }
 } // namespace
 
-Controller::Controller()
-    : m_persistentSettings{ Settings::PersistentSettings::DefaultPreferencesFilePath() },
-      m_view{ std::make_unique<MainWindow>(*this) }
+Controller::Controller(ViewFactoryInterface& viewFactory, ModelFactoryInterface& modelFactory)
+    : m_viewFactory{ viewFactory },
+      m_modelFactory{ modelFactory },
+      m_persistentSettings{ Settings::PersistentSettings::DefaultPreferencesFilePath() },
+      m_view{ viewFactory.CreateView(*this) }
 {
 }
 
 void Controller::LaunchUI()
 {
-    m_view->show();
+    m_view->Show();
 }
 
 void Controller::OnScanComplete(
@@ -88,8 +72,8 @@ void Controller::OnScanComplete(
     ReportProgressToStatusBar(progress);
 
     m_view->AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
-
     m_view->SetWaitCursor();
+
     const ScopeExit onScopeExit = [&]() noexcept
     {
         m_view->RestoreDefaultCursor();
@@ -103,36 +87,39 @@ void Controller::OnScanComplete(
     m_view->OnScanCompleted();
 
     try {
-        m_model->StartMonitoringFileSystem();
+        if (GetPersistentSettings().ShouldMonitorFileSystem()) {
+            m_model->StartMonitoringFileSystem();
+        }
     } catch (const std::exception& exception) {
         m_view->DisplayErrorDialog(exception.what());
     }
 
     AllowUserInteractionWithModel(true);
+
+    emit FinishedScanning();
 }
 
 void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
 {
-    if (parameters.rootDirectory.empty() ||
-        !ScanningWorker::ShouldProcess(parameters.rootDirectory)) {
+    const auto& root = parameters.rootDirectory;
+
+    if (root.empty() || !ScanningWorker::IsScannable(root)) {
         return;
     }
 
     AllowUserInteractionWithModel(false);
 
-    m_model = std::make_unique<SquarifiedTreeMap>(
-        std::make_unique<FileSystemMonitor>(), parameters.rootDirectory);
-
+    m_model = m_modelFactory.CreateModel(std::make_unique<FileSystemMonitor>(), root);
     m_view->OnScanStarted();
 
-    const auto spaceInfo = std::filesystem::space(parameters.rootDirectory);
+    const auto spaceInfo = std::filesystem::space(root);
     LogDiskStatistics(spaceInfo);
 
     m_occupiedDiskSpace = spaceInfo.capacity - spaceInfo.free;
     Expects(m_occupiedDiskSpace > 0u);
 
-    auto button = std::make_shared<TaskbarButton>(m_view.get());
-    button->setWindow(m_view->windowHandle());
+    auto button = m_view->GetTaskbarButton();
+    button->SetWindow(m_view->GetWindowHandle());
 
     const auto progressHandler = [&, button](const ScanningProgress& progress) {
         ReportProgressToStatusBar(progress);
@@ -145,16 +132,14 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
             const std::shared_ptr<Tree<VizBlock>>& scanningResults) mutable {
             OnScanComplete(parameters, progress, scanningResults);
 
-            button->progress()->reset();
-            button->progress()->hide();
-            button.reset();
+            button->ResetProgress();
+            button->HideProgress();
         };
 
     spdlog::get(Constants::Logging::DefaultLog)
         ->info(fmt::format("Started a new scan at: \"{}\"", m_model->GetRootPath().string()));
 
-    m_scanner.StartScanning(
-        ScanningParameters{ parameters.rootDirectory, progressHandler, completionHandler });
+    m_scanner.StartScanning(ScanningParameters{ root, progressHandler, completionHandler });
 }
 
 bool Controller::IsFileSystemBeingMonitored() const
@@ -565,17 +550,16 @@ void Controller::ReportProgressToTaskbar(ButtonType& button, const ScanningProgr
     const auto rootPath = m_model->GetRootPath();
     const auto doesPathRepresentEntireDrive{ rootPath == rootPath.root_path() };
 
-    QWinTaskbarProgress* const progressOverlay = button.progress();
-    progressOverlay->setVisible(true);
+    button.SetVisible(true);
 
     if (doesPathRepresentEntireDrive) {
         const auto progressValue =
             (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
 
-        progressOverlay->setValue(static_cast<int>(100.0 * progressValue));
+        button.SetValue(static_cast<int>(100.0 * progressValue));
     } else {
-        progressOverlay->setMinimum(0);
-        progressOverlay->setMaximum(0);
+        button.SetMinimum(0);
+        button.SetMaximum(0);
     }
 #endif // Q_OS_WIN
 }

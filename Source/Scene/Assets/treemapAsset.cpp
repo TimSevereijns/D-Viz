@@ -2,7 +2,7 @@
 #include "Settings/settings.h"
 #include "Utilities/scopeExit.hpp"
 #include "Utilities/viewFrustum.hpp"
-#include "Visualizations/visualization.h"
+#include "Visualizations/baseModel.h"
 #include "Visualizations/vizBlock.h"
 #include "constants.h"
 #include "controller.h"

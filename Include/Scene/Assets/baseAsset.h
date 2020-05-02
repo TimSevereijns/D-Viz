@@ -5,7 +5,7 @@
 #include "Settings/persistentSettings.h"
 #include "Settings/sessionSettings.h"
 #include "Viewport/camera.h"
-#include "Visualizations/visualization.h"
+#include "Visualizations/baseModel.h"
 
 #include <string_view>
 

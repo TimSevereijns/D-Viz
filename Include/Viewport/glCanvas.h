@@ -13,7 +13,7 @@
 #include "Scene/Assets/treemapAsset.h"
 #include "Scene/light.h"
 #include "Settings/persistentSettings.h"
-#include "Visualizations/visualization.h"
+#include "Visualizations/baseModel.h"
 #include "camera.h"
 #include "constants.h"
 #include "gamepadContextMenu.h"

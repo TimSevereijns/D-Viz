@@ -5,24 +5,90 @@
 #include <QLabel>
 #include <QMainWindow>
 #include <QMenu>
+#include <QWindow>
+
+#if defined(Q_OS_WIN)
+#include <QWinTaskbarButton>
+#include <QWinTaskbarProgress>
+#endif
 
 #include <string_view>
 
 #include "HID/gamepad.h"
 #include "Viewport/glCanvas.h"
 #include "aboutDialog.h"
+#include "baseView.h"
 #include "breakdownDialog.h"
 #include "constants.h"
-#include "controller.h"
 #include "ui_mainWindow.h"
+
+class Controller;
 
 struct ScanningProgress;
 
-class MainWindow final : public QMainWindow
+#if defined(Q_OS_WIN)
+
+class WinTaskbarButton : public BaseTaskbarButton
+{
+  public:
+    WinTaskbarButton(QObject* parent) : m_button{ parent }
+    {
+    }
+
+    void SetWindow(QObject* window) override
+    {
+        m_button.setWindow(static_cast<QWindow*>(window));
+    }
+
+    void HideProgress() override
+    {
+        m_button.progress()->hide();
+    };
+
+    void ResetProgress() override
+    {
+        m_button.progress()->reset();
+    }
+
+    void SetValue(int value) override
+    {
+        m_button.progress()->setValue(value);
+    }
+
+    void SetMaximum(int value) override
+    {
+        m_button.progress()->setMaximum(value);
+    }
+
+    void SetMinimum(int value) override
+    {
+        m_button.progress()->setMinimum(value);
+    }
+
+    void SetVisible(bool value) override
+    {
+        m_button.progress()->setVisible(value);
+    }
+
+  private:
+    QWinTaskbarButton m_button;
+};
+
+#elif defined(Q_OS_LINUX)
+
+class UnixTaskbarButton : public BaseTaskbarButton
+{
+  public:
+    UnixTaskbarButton(QObject*)
+    {
+    }
+};
+
+#endif // Q_OS_LINUX
+
+class MainWindow final : public QMainWindow, public BaseView
 {
     Q_OBJECT
-
-    friend class Controller;
 
   public:
     /**
@@ -34,13 +100,23 @@ class MainWindow final : public QMainWindow
     MainWindow(Controller& controller, QWidget* parent = nullptr);
 
     /**
+     * @brief Show
+     */
+    void Show() override;
+
+    /**
+     * @brief GetWindowHandle
+     */
+    QWindow* GetWindowHandle() override;
+
+    /**
      * @brief Sets the field of view.
      *
      * @note This function will update both the UI as well as the backing value.
      *
      * @param[in] fieldOfView     The new value to set the field of view to.
      */
-    void SetFieldOfViewSlider(int fieldOfView);
+    void SetFieldOfViewSlider(int fieldOfView) override;
 
     /**
      * @brief Sets the camera movement speed.
@@ -49,7 +125,7 @@ class MainWindow final : public QMainWindow
      *
      * @param[in] speed           The new value to set the camera's speed to.
      */
-    void SetCameraSpeedSpinner(double speed);
+    void SetCameraSpeedSpinner(double speed) override;
 
     /**
      * @brief Sets a temporary message in the status bar.
@@ -57,44 +133,83 @@ class MainWindow final : public QMainWindow
      * @param[in] message         The message to display.
      * @param[in] timeout         Duration of the message in milliseconds.
      */
-    void SetStatusBarMessage(const std::wstring& message, int timeout = 0);
+    void SetStatusBarMessage(const std::wstring& message, int timeout = 0) override;
 
     /**
      * @brief ReloadVisualization
      */
-    void ReloadVisualization();
+    void ReloadVisualization() override;
 
     /**
      * @returns True if the frame time readout should be shown in the titlebar.
      */
-    bool ShouldShowFrameTime() const;
+    bool ShouldShowFrameTime() const override;
 
     /**
      * @returns The current search query.
      */
-    std::wstring GetSearchQuery() const;
+    std::wstring GetSearchQuery() const override;
 
     /**
      * @returns A reference to the model controller for the treemap visualization.
      */
-    Controller& GetController();
+    Controller& GetController() override;
 
     /**
      * @returns A reference to the OpenGL canvas.
      */
-    GLCanvas& GetCanvas();
+    GLCanvas& GetCanvas() override;
 
     /**
      * @returns A reference to the gamepad instance.
      */
-    Gamepad& GetGamepad();
+    Gamepad& GetGamepad() override;
+
+    /**
+     * @brief AskUserToLimitFileSize
+     *
+     * @param numberOfFilesScanned
+     * @param parameters
+     *
+     * @return
+     */
+    bool AskUserToLimitFileSize(
+        std::uintmax_t numberOfFilesScanned, Settings::VisualizationParameters parameters) override;
+
+    /**
+     * @brief DisplayErrorDialog
+     *
+     * @param message
+     */
+    void DisplayErrorDialog(std::string_view message) override;
+
+    /**
+     * @brief SetWaitCursor
+     */
+    void SetWaitCursor() override;
+
+    /**
+     * @brief RestoreDefaultCursor
+     */
+    void RestoreDefaultCursor() override;
+
+    /**
+     * @brief OnScanStarted
+     */
+    void OnScanStarted() override;
+
+    /**
+     * @brief OnScanCompleted
+     */
+    void OnScanCompleted() override;
+
+    /**
+     * @brief GetTaskbarButton
+     * @return
+     */
+    std::shared_ptr<BaseTaskbarButton> GetTaskbarButton() override;
 
   private slots:
-
-    void OnScanStarted();
-
-    void OnScanCompleted();
-
     void OnFileMenuNewScan();
 
     void OnFPSReadoutToggled(bool isEnabled);
@@ -128,15 +243,6 @@ class MainWindow final : public QMainWindow
     void OnShowCascadeSplitsToggled(bool shouldShow);
 
   private:
-    bool AskUserToLimitFileSize(
-        std::uintmax_t numberOfFilesScanned, Settings::VisualizationParameters parameters);
-
-    void DisplayErrorDialog(std::string_view message);
-
-    void SetWaitCursor();
-
-    void RestoreDefaultCursor();
-
     void SetFilePruningComboBoxValue(std::uintmax_t minimum);
 
     void PruneTree();
