@@ -17,20 +17,19 @@ DEFINES += \
 LIBS += -L$$DESTDIR -lD-Viz
 
 HEADERS += \
-   Mocks/mockView.h \
    cameraTests.h \
    controllerTests.h \
    fileSizeLiterals.hpp \
    filesystemObserverTests.h \
-   Mocks\mockFileMonitor.h \
    modelTests.h \
    multiTestHarness.h \
    nodePainterTests.h \
    persistentSettingsTests.h \
    sessionSettingsTests.h \
    testUtilities.hpp \
-   Mocks/mockFileMonitor.h \
-   trompeloeilAdapter.h
+   trompeloeilAdapter.h \
+   Mocks/mockView.h \
+   Mocks/mockFileMonitor.h
 
 SOURCES += \
    cameraTests.cpp \

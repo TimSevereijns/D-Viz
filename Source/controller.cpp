@@ -87,8 +87,7 @@ void Controller::OnScanComplete(
     m_view->OnScanCompleted();
 
     try {
-        const auto isMonitoringEnabled = GetPersistentSettings().ShouldMonitorFileSystem();
-        if (isMonitoringEnabled) {
+        if (GetPersistentSettings().ShouldMonitorFileSystem()) {
             m_model->StartMonitoringFileSystem();
         }
     } catch (const std::exception& exception) {

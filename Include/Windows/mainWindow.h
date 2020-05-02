@@ -83,6 +83,7 @@ class UnixTaskbarButton : public BaseTaskbarButton
     {
     }
 };
+
 #endif // Q_OS_LINUX
 
 class MainWindow final : public QMainWindow, public BaseView

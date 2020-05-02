@@ -11,9 +11,9 @@ namespace trompeloeil
 {
     template <>
     inline void reporter<specialized>::send(
-        severity severity, const char* file, unsigned long line, const char* message)
+        severity severityLevel, const char* file, unsigned long line, const char* message)
     {
-        if (severity == severity::fatal) {
+        if (severityLevel == severity::fatal) {
             qt_assert(message, file, line);
         } else {
             qt_assert(message, file, line);
