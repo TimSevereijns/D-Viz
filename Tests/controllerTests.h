@@ -66,22 +66,23 @@ class ControllerTests : public QObject
     void init();
 
     /**
-     * @brief Foo
+     * @brief Verify that the appropriate functions are called to launch the view.
      */
     void LaunchMainWindow() const;
 
     /**
-     * @brief ScanDrive
+     * @brief Verify that the appropriate view and model functions are called when a scan is
+     * performed.
      */
     void ScanDrive() const;
 
     /**
-     * @brief HasModelBeenLoaded
+     * @brief Verify that the model is correctly reported as having been loaded.
      */
     void HasModelBeenLoaded() const;
 
     /**
-     * @brief SelectingANode
+     * @brief Verify that single node can be selected and retrieved.
      */
     void SelectingANode();
 
