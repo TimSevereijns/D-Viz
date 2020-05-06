@@ -283,8 +283,8 @@ void MainWindow::SetupOptionsMenu()
     m_optionsMenuWrapper.enableFileSystemMonitoring.setChecked(isMonitoringEnabled);
 
     connect(
-        &m_optionsMenuWrapper.enableFileSystemMonitoring, &QAction::toggled,
-        &m_controller.GetPersistentSettings(), &Settings::PersistentSettings::MonitorFileSystem);
+        &m_optionsMenuWrapper.enableFileSystemMonitoring, &QAction::toggled, this,
+        &MainWindow::OnFileMonitoringToggled);
 
     m_optionsMenu.setTitle("Options");
     m_optionsMenu.addAction(&m_optionsMenuWrapper.toggleFrameTime);
@@ -435,6 +435,14 @@ void MainWindow::SetDebuggingMenuState()
     renderMenuWrapper.frustum.blockSignals(true);
     renderMenuWrapper.frustum.setChecked(preferences.ShouldRenderFrusta());
     renderMenuWrapper.frustum.blockSignals(false);
+}
+
+void MainWindow::OnFileMonitoringToggled(bool shouldEnable)
+{
+    auto& settings = m_controller.GetPersistentSettings();
+    settings.MonitorFileSystem(shouldEnable);
+
+    m_controller.MonitorFileSystem(shouldEnable);
 }
 
 void MainWindow::OnFileMenuNewScan()

@@ -765,12 +765,11 @@ void GLCanvas::VisualizeFilesystemActivity()
     Assets::Treemap* treemap = notification ? GetAsset<Assets::Tag::Treemap>() : nullptr;
 
     const auto markNode = [&](const Tree<VizBlock>::Node& node, const QVector3D& color) {
-        if (!m_controller.GetSessionSettings().IsBlockVisible(node.GetData())) {
-            return;
-        }
-
         m_controller.RegisterNodeColor(node, color);
-        treemap->SetNodeColor(node, color);
+
+        if (m_controller.GetSessionSettings().IsBlockVisible(node.GetData())) {
+            treemap->SetNodeColor(node, color);
+        }
     };
 
     const auto startTime = std::chrono::high_resolution_clock::now();

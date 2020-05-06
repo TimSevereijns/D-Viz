@@ -242,6 +242,8 @@ class MainWindow final : public QMainWindow, public BaseView
 
     void OnShowCascadeSplitsToggled(bool shouldShow);
 
+    void OnFileMonitoringToggled(bool shouldEnable);
+
   private:
     void SetFilePruningComboBoxValue(std::uintmax_t minimum);
 

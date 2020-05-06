@@ -87,9 +87,8 @@ void Controller::OnScanComplete(
     m_view->OnScanCompleted();
 
     try {
-        if (GetPersistentSettings().ShouldMonitorFileSystem()) {
-            m_model->StartMonitoringFileSystem();
-        }
+        const auto shouldEnable = GetPersistentSettings().ShouldMonitorFileSystem();
+        MonitorFileSystem(shouldEnable);
     } catch (const std::exception& exception) {
         m_view->DisplayErrorDialog(exception.what());
     }
@@ -97,6 +96,15 @@ void Controller::OnScanComplete(
     AllowUserInteractionWithModel(true);
 
     emit FinishedScanning();
+}
+
+void Controller::MonitorFileSystem(bool shouldEnable)
+{
+    if (shouldEnable) {
+        m_model->StartMonitoringFileSystem();
+    } else {
+        m_model->StopMonitoringFileSystem();
+    }
 }
 
 void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
@@ -154,9 +162,7 @@ std::optional<FileEvent> Controller::FetchFileModification()
 
 QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
 {
-    Expects(node.GetData().offsetIntoVBO != VizBlock::NotInVBO);
-
-    const auto nodeColor = m_nodeColorMap.find(node.GetData().offsetIntoVBO);
+    const auto nodeColor = m_nodeColorMap.find(reinterpret_cast<std::uintptr_t>(&node));
     if (nodeColor != std::end(m_nodeColorMap)) {
         return nodeColor->second;
     }
@@ -535,8 +541,9 @@ std::filesystem::path Controller::GetRootPath() const
 
 void Controller::RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVector3D& color)
 {
-    Expects(node.GetData().offsetIntoVBO != VizBlock::NotInVBO);
-    m_nodeColorMap.insert_or_assign(node.GetData().offsetIntoVBO, color);
+    // @note This tracking only works if we assume that nodes are never copied; this may prove to be
+    // a bad assumption. Consider using an ID on the node instead.
+    m_nodeColorMap.insert_or_assign(reinterpret_cast<std::uintptr_t>(&node), color);
 }
 
 template <typename ButtonType>

@@ -134,7 +134,7 @@ void WindowsFileMonitor::Start(
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->error("Could not acquire handle to: {}.", path.string());
 
-        return;
+        throw std::runtime_error{ "File monitoring failed to start." };
     }
 
     const auto exitThreadHandle = ::CreateEventW(
@@ -190,7 +190,7 @@ void WindowsFileMonitor::ShutdownThread()
     ::CancelIo(m_fileHandle);
 
     while (!HasOverlappedIoCompleted(&m_ioBuffer)) {
-        SleepEx(50, TRUE);
+        ::SleepEx(50, TRUE);
     }
 }
 

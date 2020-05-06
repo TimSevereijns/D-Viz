@@ -57,6 +57,13 @@ class Controller : public QObject
     void LaunchUI();
 
     /**
+     * @brief Enables or disables the monitoring of the filesystem.
+     *
+     * @param[in] shouldEnable      The new state of the monitor.
+     */
+    void MonitorFileSystem(bool shouldEnable);
+
+    /**
      * @brief Scans the drive.
      *
      * @param[in] parameters      Drive scanning parameters; where to start, et cetera.
@@ -270,7 +277,7 @@ class Controller : public QObject
     /**
      * @brief Starts monitoring the file system. This is only possible after the first scan.
      */
-    void StartMonitoringFileSystem();
+    void MonitorFileSystem();
 
     /**
      * @returns True if filesystem monitoring is enabled; false otherwise.
@@ -342,7 +349,7 @@ class Controller : public QObject
     std::uint64_t m_occupiedDiskSpace{ 0u };
 
     // @todo Move this onto the model.
-    std::unordered_map<std::uint32_t, QVector3D> m_nodeColorMap;
+    std::unordered_map<std::uintptr_t, QVector3D> m_nodeColorMap;
 };
 
 #endif // CONTROLLER_H

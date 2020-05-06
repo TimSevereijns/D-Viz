@@ -533,6 +533,9 @@ void BaseModel::StartMonitoringFileSystem()
         m_fileEvents.Emplace(std::move(event));
     };
 
+    m_fileEvents.ResetWaitingPrivileges();
+    m_shouldKeepProcessingNotifications.store(true, std::memory_order::memory_order_relaxed);
+
     m_fileSystemObserver.StartMonitoring(callback);
     m_fileSystemNotificationProcessor = std::thread{ [&] { ProcessChanges(); } };
 }
@@ -551,7 +554,7 @@ void BaseModel::StopMonitoringFileSystem()
 
 void BaseModel::ProcessChanges()
 {
-    while (m_shouldKeepProcessingNotifications) {
+    while (m_shouldKeepProcessingNotifications.load()) {
         const auto event = m_fileEvents.WaitAndPop();
         if (!event) {
             // @note If we got here, it may indicates that the wait operation has probably been
