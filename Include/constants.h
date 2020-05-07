@@ -33,6 +33,7 @@ namespace Constants
         constexpr static auto BabyBlue = Detail::RGB(137, 207, 240);
         constexpr static auto CanaryYellow = Detail::RGB(255, 239, 0);
         constexpr static auto HotPink = Detail::RGB(255, 105, 180);
+        constexpr static auto DeepPink = Detail::RGB(255, 20, 147);
         constexpr static auto FileGreen = Detail::RGB(128, 255, 128);
         constexpr static auto SlateGray = Detail::RGB(112, 128, 144);
         constexpr static auto White = Detail::RGB(255, 255, 255);

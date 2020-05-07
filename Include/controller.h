@@ -287,7 +287,7 @@ class Controller : public QObject
     /**
      * @brief Fetches oldest, unprocessed file system change notification.
      */
-    std::optional<FileEvent> FetchFileModification();
+    std::optional<FileEvent> FetchNextFileModification();
 
     /**
      * @brief Determines the color a given node should be.

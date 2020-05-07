@@ -755,54 +755,86 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
     m_mainWindow.setWindowTitle(QString::fromStdWString(label));
 }
 
+void GLCanvas::MarkNode(
+    Assets::Treemap* const treemap, const Tree<VizBlock>::Node& node, const QVector3D& fileColor,
+    const QVector3D& directoryColor)
+{
+    const auto fileType = node.GetData().file.type;
+
+    if (fileType == FileType::Regular) {
+        m_controller.RegisterNodeColor(node, fileColor);
+    } else {
+        m_controller.RegisterNodeColor(node, directoryColor);
+    }
+
+    if (!m_controller.GetSessionSettings().IsBlockVisible(node.GetData())) {
+        return;
+    }
+
+    if (fileType == FileType::Regular) {
+        treemap->SetNodeColor(node, fileColor);
+    } else {
+        treemap->SetNodeColor(node, directoryColor);
+    }
+}
+
+void GLCanvas::ProcessSingleFileEvent(
+    const FileEvent& notification, Assets::Treemap* const treemap, const Tree<VizBlock>::Node& node)
+{
+    switch (notification.eventType) {
+        case FileEventType::Touched: {
+            MarkNode(treemap, node, Constants::Colors::BabyBlue, Constants::Colors::BabyBlue);
+            break;
+        }
+        case FileEventType::Deleted: {
+            if (node.GetData().file.type == FileType::Directory) {
+                // @todo If a directory is deleted via the Windows File Explorer, no
+                // notifications are sent for any file that resides below that directory.
+                // Investigate if this behavior is Windows specific.
+                std::for_each(
+                    Tree<VizBlock>::PostOrderIterator{ &node }, Tree<VizBlock>::PostOrderIterator{},
+                    [&](const auto& child) {
+                        MarkNode(
+                            treemap, child, Constants::Colors::DeepPink,
+                            Constants::Colors::HotPink);
+                    });
+            } else {
+                MarkNode(treemap, node, Constants::Colors::DeepPink, Constants::Colors::HotPink);
+            }
+
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
 void GLCanvas::VisualizeFilesystemActivity()
 {
     if (!m_controller.HasModelBeenLoaded() || !m_controller.IsFileSystemBeingMonitored()) {
         return;
     }
 
-    auto notification = m_controller.FetchFileModification();
+    auto notification = m_controller.FetchNextFileModification();
     Assets::Treemap* treemap = notification ? GetAsset<Assets::Tag::Treemap>() : nullptr;
-
-    const auto markNode = [&](const Tree<VizBlock>::Node& node, const QVector3D& color) {
-        m_controller.RegisterNodeColor(node, color);
-
-        if (m_controller.GetSessionSettings().IsBlockVisible(node.GetData())) {
-            treemap->SetNodeColor(node, color);
-        }
-    };
 
     const auto startTime = std::chrono::high_resolution_clock::now();
 
     while (notification) {
         const ScopeExit onScopeExit = [&]() noexcept
         {
-            notification = m_controller.FetchFileModification();
+            notification = m_controller.FetchNextFileModification();
         };
 
-        const Tree<VizBlock>::Node* const affectedNode = LocateNode(*notification, m_controller);
-
-        if (affectedNode == nullptr) {
+        const Tree<VizBlock>::Node* const node = LocateNode(*notification, m_controller);
+        if (node == nullptr) {
             // @note Since files may have been created after the latest scan, it is possible for an
             // event to not have an associated node in the tree.
             continue;
         }
 
-        if (notification->eventType == FileEventType::Touched) {
-            markNode(*affectedNode, Constants::Colors::BabyBlue);
-        } else if (notification->eventType == FileEventType::Deleted) {
-            if (affectedNode->GetData().file.type == FileType::Directory) {
-                // @todo If a directory is deleted via the Windows File Explorer, no notifications
-                // are sent for any file that resides below that directory. Investigate if this
-                // behavior is Windows specific.
-                std::for_each(
-                    Tree<VizBlock>::PostOrderIterator{ affectedNode },
-                    Tree<VizBlock>::PostOrderIterator{},
-                    [&](const auto& node) { markNode(node, Constants::Colors::HotPink); });
-            } else {
-                markNode(*affectedNode, Constants::Colors::HotPink);
-            }
-        }
+        ProcessSingleFileEvent(*notification, treemap, *node);
 
         const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now() - startTime);

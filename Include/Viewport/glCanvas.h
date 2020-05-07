@@ -304,6 +304,29 @@ class GLCanvas final : public QOpenGLWidget
     template <typename AssetTag> void RegisterAsset();
 
     /**
+     * @brief Helper function to paint a node a particular color.
+     *
+     * @param[in] treemap           The treemap visualization asset.
+     * @param[in] node              The node that needs painting.
+     * @param[in] fileColor         The color to paint the node if it's a regular file.
+     * @param[in] directoryColor    The color to paint the node if it's a directory.
+     */
+    void MarkNode(
+        Assets::Treemap* const treemap, const Tree<VizBlock>::Node& node,
+        const QVector3D& fileColor, const QVector3D& directoryColor);
+
+    /**
+     * @brief Helper function to process a single file change event.
+     *
+     * @param[in] notification      The notification to handle.
+     * @param[in] treemap           The treemap visualization asset.
+     * @param[in] node              The node that needs painting.
+     */
+    void ProcessSingleFileEvent(
+        const FileEvent& notification, Assets::Treemap* const treemap,
+        const Tree<VizBlock>::Node& node);
+
+    /**
      * @brief Updates the UI to reflect changes that have been made to the file system that we
      * might want to reflect in the visualization.
      */
