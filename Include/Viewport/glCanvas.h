@@ -102,6 +102,12 @@ namespace Assets
     } // namespace Tag
 } // namespace Assets
 
+struct TagAndAsset
+{
+    std::unique_ptr<Assets::Tag::Base> tag;
+    std::unique_ptr<Assets::AssetBase> asset;
+};
+
 /**
  * @brief The GLCanvas class represents the canvas object on which the visualization is to be drawn.
  *
@@ -304,16 +310,32 @@ class GLCanvas final : public QOpenGLWidget
     template <typename AssetTag> void RegisterAsset();
 
     /**
-     * @brief Helper function to paint a node a particular color.
+     * @brief Helper function that paints a node a particular color.
      *
      * @param[in] treemap           The treemap visualization asset.
      * @param[in] node              The node that needs painting.
      * @param[in] fileColor         The color to paint the node if it's a regular file.
      * @param[in] directoryColor    The color to paint the node if it's a directory.
      */
-    void MarkNode(
+    void PaintNode(
         Assets::Treemap* const treemap, const Tree<VizBlock>::Node& node,
         const QVector3D& fileColor, const QVector3D& directoryColor);
+
+    /**
+     * @brief Helper function that handles the painting of node representing modified files.
+     *
+     * @param[in] treemap           The treemap visualization asset.
+     * @param[in] node              The node that needs painting.
+     */
+    void HandleFileModification(Assets::Treemap* const treemap, const Tree<VizBlock>::Node& node);
+
+    /**
+     * @brief Helper function that handles the painting of node representing deleted files.
+     *
+     * @param[in] treemap           The treemap visualization asset.
+     * @param[in] node              The node that needs painting.
+     */
+    void HandleFileDeletion(Assets::Treemap* const treemap, const Tree<VizBlock>::Node& node);
 
     /**
      * @brief Helper function to process a single file change event.
@@ -327,8 +349,7 @@ class GLCanvas final : public QOpenGLWidget
         const Tree<VizBlock>::Node& node);
 
     /**
-     * @brief Updates the UI to reflect changes that have been made to the file system that we
-     * might want to reflect in the visualization.
+     * @brief Updates the visualization to reflect recent filesystem activity.
      */
     void VisualizeFilesystemActivity();
 
@@ -359,13 +380,7 @@ class GLCanvas final : public QOpenGLWidget
         std::chrono::system_clock::now()
     };
 
-    std::vector<Light> m_lights{
-        Light{}, Light{ QVector3D{ -200.0f, 250.0f, 200.0f } },
-        Light{ QVector3D{ 0.0f, 80.0f, -Constants::Visualization::RootBlockDepth } },
-        Light{ QVector3D{ Constants::Visualization::RootBlockWidth, 80.0f, 0.0f } },
-        Light{ QVector3D{ Constants::Visualization::RootBlockWidth, 80.0f,
-                          -Constants::Visualization::RootBlockDepth } }
-    };
+    std::vector<Light> m_lights;
 
     Camera m_camera;
 
@@ -374,12 +389,6 @@ class GLCanvas final : public QOpenGLWidget
     QMatrix4x4 m_projectionMatrix;
 
     QPoint m_lastMousePosition;
-
-    struct TagAndAsset
-    {
-        std::unique_ptr<Assets::Tag::Base> tag;
-        std::unique_ptr<Assets::AssetBase> asset;
-    };
 
     // @note Using an unsorted, linear container to store and retrieve assets is likely to
     // outperform std::unordered_map for a small number of assets. Should the asset count ever

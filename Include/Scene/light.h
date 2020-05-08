@@ -9,11 +9,6 @@
  */
 struct Light
 {
-    QVector3D position{ 0.0f, 0.0f, 0.0f };  ///< The position of the light in 3D space.
-    QVector3D intensity{ 1.0f, 1.0f, 1.0f }; ///< The light color.
-    float attenuation{ 0.75f };        ///< The factor with which the light falls off with distance.
-    float ambientCoefficient{ 0.01f }; ///< The light's contribution to ambient.
-
     Light() = default;
 
     Light(
@@ -21,6 +16,12 @@ struct Light
         const float lightAttenuation, const float lightAmbientCoefficient);
 
     explicit Light(const QVector3D& lightPosition);
+
+    QVector3D position{ 0.0f, 0.0f, 0.0f };
+    QVector3D intensity{ 1.0f, 1.0f, 1.0f }; //< Think color
+
+    float attenuation{ 0.75f };
+    float ambientCoefficient{ 0.01f }; //< The light's contribution to ambient.
 };
 
 #endif // LIGHT_H

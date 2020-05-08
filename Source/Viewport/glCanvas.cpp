@@ -19,6 +19,28 @@
 namespace
 {
     /**
+     * @brief Sets up the default scene lighting.
+     *
+     * @returns A vector of lights.
+     */
+    std::vector<Light> GetDefaultLights()
+    {
+        constexpr auto rootWidth = Constants::Visualization::RootBlockWidth;
+        constexpr auto rootDepth = Constants::Visualization::RootBlockDepth;
+
+        auto primaryLight =
+            Light{ QVector3D{ 0, 400, 0 }, QVector3D{ 1.0f, 1.0f, 1.0f }, 0.75f, 0.01f };
+
+        std::vector<Light> lights = { std::move(primaryLight),
+                                      Light{ QVector3D{ -200.0f, 250.0f, 200.0f } },
+                                      Light{ QVector3D{ 0.0f, 80.0f, -rootDepth } },
+                                      Light{ QVector3D{ rootWidth, 80.0f, 0.0f } },
+                                      Light{ QVector3D{ rootWidth, 80.0f, -rootDepth } } };
+
+        return lights;
+    }
+
+    /**
      * @brief Computes and sets the vertex and color data for the light markers.
      *
      * @param[in] lights                   The lights in the scene to be marked.
@@ -85,13 +107,11 @@ namespace
 GLCanvas::GLCanvas(Controller& controller, QWidget* parent)
     : QOpenGLWidget{ parent },
       m_controller{ controller },
-      m_mainWindow{ *(dynamic_cast<MainWindow*>(parent)) }
+      m_mainWindow{ *(dynamic_cast<MainWindow*>(parent)) },
+      m_lights{ GetDefaultLights() }
 {
-    m_camera.SetPosition(QVector3D{ 500, 100, 0 });
+    m_camera.SetPosition({ 500, 100, 0 });
     m_camera.SetFarPlane(10'000.0f);
-
-    // @note The first light is the one most associated with the "sun."
-    m_lights.front().position = QVector3D{ 0, 400, 0 };
 
     setFocusPolicy(Qt::StrongFocus);
 
@@ -755,7 +775,7 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
     m_mainWindow.setWindowTitle(QString::fromStdWString(label));
 }
 
-void GLCanvas::MarkNode(
+void GLCanvas::PaintNode(
     Assets::Treemap* const treemap, const Tree<VizBlock>::Node& node, const QVector3D& fileColor,
     const QVector3D& directoryColor)
 {
@@ -778,30 +798,39 @@ void GLCanvas::MarkNode(
     }
 }
 
+void GLCanvas::HandleFileModification(
+    Assets::Treemap* const treemap, const Tree<VizBlock>::Node& node)
+{
+    PaintNode(treemap, node, Constants::Colors::BabyBlue, Constants::Colors::BabyBlue);
+}
+
+void GLCanvas::HandleFileDeletion(Assets::Treemap* const treemap, const Tree<VizBlock>::Node& node)
+{
+    if (node.GetData().file.type == FileType::Directory) {
+        // @todo If a directory is deleted via the Windows File Explorer, no
+        // notifications are sent for any file that resides below that directory.
+        // Investigate if this behavior is Windows specific.
+
+        std::for_each(
+            Tree<VizBlock>::PostOrderIterator{ &node }, Tree<VizBlock>::PostOrderIterator{},
+            [&](const auto& child) {
+                PaintNode(treemap, child, Constants::Colors::DeepPink, Constants::Colors::HotPink);
+            });
+    } else {
+        PaintNode(treemap, node, Constants::Colors::DeepPink, Constants::Colors::HotPink);
+    }
+}
+
 void GLCanvas::ProcessSingleFileEvent(
     const FileEvent& notification, Assets::Treemap* const treemap, const Tree<VizBlock>::Node& node)
 {
     switch (notification.eventType) {
         case FileEventType::Touched: {
-            MarkNode(treemap, node, Constants::Colors::BabyBlue, Constants::Colors::BabyBlue);
+            HandleFileModification(treemap, node);
             break;
         }
         case FileEventType::Deleted: {
-            if (node.GetData().file.type == FileType::Directory) {
-                // @todo If a directory is deleted via the Windows File Explorer, no
-                // notifications are sent for any file that resides below that directory.
-                // Investigate if this behavior is Windows specific.
-                std::for_each(
-                    Tree<VizBlock>::PostOrderIterator{ &node }, Tree<VizBlock>::PostOrderIterator{},
-                    [&](const auto& child) {
-                        MarkNode(
-                            treemap, child, Constants::Colors::DeepPink,
-                            Constants::Colors::HotPink);
-                    });
-            } else {
-                MarkNode(treemap, node, Constants::Colors::DeepPink, Constants::Colors::HotPink);
-            }
-
+            HandleFileDeletion(treemap, node);
             break;
         }
         default: {
@@ -817,7 +846,7 @@ void GLCanvas::VisualizeFilesystemActivity()
     }
 
     auto notification = m_controller.FetchNextFileModification();
-    Assets::Treemap* treemap = notification ? GetAsset<Assets::Tag::Treemap>() : nullptr;
+    Assets::Treemap* const treemap = notification ? GetAsset<Assets::Tag::Treemap>() : nullptr;
 
     const auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -827,7 +856,7 @@ void GLCanvas::VisualizeFilesystemActivity()
             notification = m_controller.FetchNextFileModification();
         };
 
-        const Tree<VizBlock>::Node* const node = LocateNode(*notification, m_controller);
+        const auto* const node = LocateNode(*notification, m_controller);
         if (node == nullptr) {
             // @note Since files may have been created after the latest scan, it is possible for an
             // event to not have an associated node in the tree.
@@ -839,8 +868,9 @@ void GLCanvas::VisualizeFilesystemActivity()
         const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now() - startTime);
 
-        constexpr auto timeoutValue = Constants::Graphics::DesiredTimeBetweenFrames / 2;
-        constexpr auto timeLimit = std::chrono::milliseconds{ timeoutValue };
+        constexpr auto timeLimit =
+            std::chrono::milliseconds{ Constants::Graphics::DesiredTimeBetweenFrames / 2 };
+
         if (elapsedTime >= timeLimit) {
             // @note Since this processing is happening on the UI thread, we'll want to make sure
             // that we don't exceed a reasonable fraction of the total allotted frame time.
