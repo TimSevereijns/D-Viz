@@ -86,6 +86,34 @@ class ControllerTests : public QObject
      */
     void SelectingANode();
 
+    /**
+     * @brief Verifies that files smaller than the minimum file size are not reported as
+     * displayable.
+     */
+    void VerifyFilesOverLimitAreDisplayed() const;
+
+    /**
+     * @brief Verifies that files under the limit are not displayed.
+     */
+    void VerifyFilesUnderLimitAreNotDisplayed() const;
+
+    /**
+     * @brief Verifies that files are not displayed when only directories are allowed to be shown.
+     */
+    void VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed() const;
+
+    /**
+     * @brief Verifies that directories should not be shown when the size of that directory is too
+     * small.
+     */
+    void VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed() const;
+
+    /**
+     * @brief Verifies that directories should not be shown when the size of that directory is
+     * sufficiently large.
+     */
+    void VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed() const;
+
   private:
     std::shared_ptr<TestViewFactory> m_viewFactory;
     std::shared_ptr<TestModelFactory> m_modelFactory;

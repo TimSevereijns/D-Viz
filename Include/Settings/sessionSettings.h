@@ -52,11 +52,6 @@ namespace Settings
         bool IsPrimaryLightAttachedToCamera() const;
 
         /**
-         * @returns True if the block in question is visible to the end-user.
-         */
-        bool IsBlockVisible(const VizBlock& block);
-
-        /**
          * @returns True if files should be searched.
          */
         bool ShouldSearchFiles() const;

@@ -72,20 +72,6 @@ namespace Settings
         m_shouldSearchDirectories = state;
     }
 
-    bool SessionSettings::IsBlockVisible(const VizBlock& block)
-    {
-        if (block.file.size < m_visualizationParameters.minimumFileSize) {
-            return false;
-        }
-
-        if (block.file.type != FileType::Directory &&
-            m_visualizationParameters.onlyShowDirectories) {
-            return false;
-        }
-
-        return true;
-    }
-
     bool SessionSettings::ShouldSearchFiles() const
     {
         return m_shouldSearchFiles;

@@ -310,6 +310,11 @@ class Controller : public QObject
      */
     void RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVector3D& color);
 
+    /**
+     * @returns True if the node in question is visible to the end-user.
+     */
+    bool IsNodeVisible(const VizBlock& block);
+
   signals:
 
     /**

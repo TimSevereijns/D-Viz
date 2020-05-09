@@ -103,4 +103,104 @@ void ControllerTests::SelectingANode()
     QCOMPARE(m_controller->GetSelectedNode(), targetNode);
 }
 
+void ControllerTests::VerifyFilesOverLimitAreDisplayed() const
+{
+    using namespace Literals::Numeric::Binary;
+
+    Settings::VisualizationParameters parameters;
+    parameters.minimumFileSize = 1_KiB;
+    parameters.onlyShowDirectories = false;
+
+    VizBlock sample;
+    sample.file.name = L"Foo";
+    sample.file.extension = L".txt";
+    sample.file.size = 16_KiB;
+    sample.file.type = FileType::Regular;
+
+    auto& settings = m_controller->GetSessionSettings();
+    settings.SetVisualizationParameters(parameters);
+
+    QCOMPARE(m_controller->IsNodeVisible(sample), true);
+}
+
+void ControllerTests::VerifyFilesUnderLimitAreNotDisplayed() const
+{
+    using namespace Literals::Numeric::Binary;
+
+    Settings::VisualizationParameters parameters;
+    parameters.minimumFileSize = 32_KiB;
+    parameters.onlyShowDirectories = false;
+
+    VizBlock sample;
+    sample.file.name = L"Foo";
+    sample.file.extension = L".txt";
+    sample.file.size = 16_KiB;
+    sample.file.type = FileType::Regular;
+
+    auto& settings = m_controller->GetSessionSettings();
+    settings.SetVisualizationParameters(parameters);
+
+    QCOMPARE(m_controller->IsNodeVisible(sample), false);
+}
+
+void ControllerTests::VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed() const
+{
+    using namespace Literals::Numeric::Binary;
+
+    Settings::VisualizationParameters parameters;
+    parameters.minimumFileSize = 10_MiB;
+    parameters.onlyShowDirectories = true;
+
+    VizBlock sample;
+    sample.file.name = L"Bar";
+    sample.file.extension = L"";
+    sample.file.size = 10_GiB;
+    sample.file.type = FileType::Regular;
+
+    auto& settings = m_controller->GetSessionSettings();
+    settings.SetVisualizationParameters(parameters);
+
+    QCOMPARE(m_controller->IsNodeVisible(sample), false);
+}
+
+void ControllerTests::VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed() const
+{
+    using namespace Literals::Numeric::Binary;
+
+    Settings::VisualizationParameters parameters;
+    parameters.minimumFileSize = 1_MiB;
+    parameters.onlyShowDirectories = true;
+
+    VizBlock sample;
+    sample.file.name = L"Bar";
+    sample.file.extension = L"";
+    sample.file.size = 10_MiB;
+    sample.file.type = FileType::Directory;
+
+    auto& settings = m_controller->GetSessionSettings();
+    settings.SetVisualizationParameters(parameters);
+
+    QCOMPARE(m_controller->IsNodeVisible(sample), true);
+}
+
+void ControllerTests::VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed() const
+{
+    using namespace Literals::Numeric::Binary;
+
+    Settings::VisualizationParameters parameters;
+    parameters.minimumFileSize = 10_MiB;
+    parameters.onlyShowDirectories = true;
+
+    VizBlock sample;
+    sample.file.name = L"Bar";
+    sample.file.extension = L"";
+    sample.file.size = 1_MiB;
+    sample.file.type = FileType::Directory;
+
+    auto& settings = m_controller->GetSessionSettings();
+    settings.SetVisualizationParameters(parameters);
+
+    QCOMPARE(m_controller->IsNodeVisible(sample), false);
+}
+
 REGISTER_TEST(ControllerTests)

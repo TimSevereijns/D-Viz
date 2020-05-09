@@ -546,6 +546,21 @@ void Controller::RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVect
     m_nodeColorMap.insert_or_assign(reinterpret_cast<std::uintptr_t>(&node), color);
 }
 
+bool Controller::IsNodeVisible(const VizBlock& block)
+{
+    const auto& parameters = m_sessionSettings.GetVisualizationParameters();
+
+    if (block.file.size < parameters.minimumFileSize) {
+        return false;
+    }
+
+    if (block.file.type != FileType::Directory && parameters.onlyShowDirectories) {
+        return false;
+    }
+
+    return true;
+}
+
 template <typename ButtonType>
 void Controller::ReportProgressToTaskbar(ButtonType& button, const ScanningProgress& progress)
 {

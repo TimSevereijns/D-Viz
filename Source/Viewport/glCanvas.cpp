@@ -422,7 +422,7 @@ void GLCanvas::RestoreSelectedNode(const Tree<VizBlock>::Node& node)
 {
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
 
-    if (!m_controller.GetSessionSettings().IsBlockVisible(node.GetData())) {
+    if (!m_controller.IsNodeVisible(node.GetData())) {
         return;
     }
 
@@ -444,8 +444,7 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizBlock>::Node*>&
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
 
     for (const auto* const node : nodes) {
-        // @todo IsBlockVisible probably doesn't belong on the Settings Manager...
-        if (!m_controller.GetSessionSettings().IsBlockVisible(node->GetData())) {
+        if (!m_controller.IsNodeVisible(node->GetData())) {
             continue;
         }
 
@@ -787,7 +786,7 @@ void GLCanvas::PaintNode(
         m_controller.RegisterNodeColor(node, directoryColor);
     }
 
-    if (!m_controller.GetSessionSettings().IsBlockVisible(node.GetData())) {
+    if (!m_controller.IsNodeVisible(node.GetData())) {
         return;
     }
 
