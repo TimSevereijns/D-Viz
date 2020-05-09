@@ -19,7 +19,7 @@ LIBS += -L$$DESTDIR -lD-Viz
 HEADERS += \
    cameraTests.h \
    controllerTests.h \
-   fileSizeLiterals.hpp \
+   fileSizeLiteralTests.h \
    filesystemObserverTests.h \
    modelTests.h \
    nodePainterTests.h \
@@ -34,6 +34,7 @@ HEADERS += \
 SOURCES += \
    cameraTests.cpp \
    controllerTests.cpp \
+   fileSizeLiteralTests.cpp \
    filesystemObserverTests.cpp \
    modelTests.cpp \
    nodePainterTests.cpp \
