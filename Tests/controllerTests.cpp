@@ -111,14 +111,14 @@ void ControllerTests::VerifyFilesOverLimitAreDisplayed() const
     parameters.minimumFileSize = 1_KiB;
     parameters.onlyShowDirectories = false;
 
+    auto& settings = m_controller->GetSessionSettings();
+    settings.SetVisualizationParameters(parameters);
+
     VizBlock sample;
     sample.file.name = L"Foo";
     sample.file.extension = L".txt";
     sample.file.size = 16_KiB;
     sample.file.type = FileType::Regular;
-
-    auto& settings = m_controller->GetSessionSettings();
-    settings.SetVisualizationParameters(parameters);
 
     QCOMPARE(m_controller->IsNodeVisible(sample), true);
 }
@@ -131,14 +131,14 @@ void ControllerTests::VerifyFilesUnderLimitAreNotDisplayed() const
     parameters.minimumFileSize = 32_KiB;
     parameters.onlyShowDirectories = false;
 
+    auto& settings = m_controller->GetSessionSettings();
+    settings.SetVisualizationParameters(parameters);
+
     VizBlock sample;
     sample.file.name = L"Foo";
     sample.file.extension = L".txt";
     sample.file.size = 16_KiB;
     sample.file.type = FileType::Regular;
-
-    auto& settings = m_controller->GetSessionSettings();
-    settings.SetVisualizationParameters(parameters);
 
     QCOMPARE(m_controller->IsNodeVisible(sample), false);
 }
@@ -151,14 +151,14 @@ void ControllerTests::VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed() con
     parameters.minimumFileSize = 10_MiB;
     parameters.onlyShowDirectories = true;
 
+    auto& settings = m_controller->GetSessionSettings();
+    settings.SetVisualizationParameters(parameters);
+
     VizBlock sample;
     sample.file.name = L"Bar";
     sample.file.extension = L"";
     sample.file.size = 10_GiB;
     sample.file.type = FileType::Regular;
-
-    auto& settings = m_controller->GetSessionSettings();
-    settings.SetVisualizationParameters(parameters);
 
     QCOMPARE(m_controller->IsNodeVisible(sample), false);
 }
@@ -171,14 +171,14 @@ void ControllerTests::VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed() con
     parameters.minimumFileSize = 1_MiB;
     parameters.onlyShowDirectories = true;
 
+    auto& settings = m_controller->GetSessionSettings();
+    settings.SetVisualizationParameters(parameters);
+
     VizBlock sample;
     sample.file.name = L"Bar";
     sample.file.extension = L"";
     sample.file.size = 10_MiB;
     sample.file.type = FileType::Directory;
-
-    auto& settings = m_controller->GetSessionSettings();
-    settings.SetVisualizationParameters(parameters);
 
     QCOMPARE(m_controller->IsNodeVisible(sample), true);
 }
@@ -191,14 +191,14 @@ void ControllerTests::VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed() cons
     parameters.minimumFileSize = 10_MiB;
     parameters.onlyShowDirectories = true;
 
+    auto& settings = m_controller->GetSessionSettings();
+    settings.SetVisualizationParameters(parameters);
+
     VizBlock sample;
     sample.file.name = L"Bar";
     sample.file.extension = L"";
     sample.file.size = 1_MiB;
     sample.file.type = FileType::Directory;
-
-    auto& settings = m_controller->GetSessionSettings();
-    settings.SetVisualizationParameters(parameters);
 
     QCOMPARE(m_controller->IsNodeVisible(sample), false);
 }

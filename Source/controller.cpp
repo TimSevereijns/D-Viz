@@ -546,7 +546,7 @@ void Controller::RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVect
     m_nodeColorMap.insert_or_assign(reinterpret_cast<std::uintptr_t>(&node), color);
 }
 
-bool Controller::IsNodeVisible(const VizBlock& block)
+bool Controller::IsNodeVisible(const VizBlock& block) const
 {
     const auto& parameters = m_sessionSettings.GetVisualizationParameters();
 

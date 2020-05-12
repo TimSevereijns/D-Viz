@@ -313,7 +313,7 @@ class Controller : public QObject
     /**
      * @returns True if the node in question is visible to the end-user.
      */
-    bool IsNodeVisible(const VizBlock& block);
+    bool IsNodeVisible(const VizBlock& block) const;
 
   signals:
 
