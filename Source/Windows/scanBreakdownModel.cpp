@@ -11,7 +11,7 @@ int ScanBreakdownModel::rowCount(const QModelIndex& /*parent*/) const
 
 int ScanBreakdownModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return 3;
+    return 5;
 }
 
 QVariant ScanBreakdownModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -25,13 +25,28 @@ QVariant ScanBreakdownModel::headerData(int section, Qt::Orientation orientation
             case 0:
                 return QString{ "File Type" };
             case 1:
-                return QString{ "Cumulative Size" };
+                return QString{ "Size of Visible Files" };
             case 2:
-                return QString{ "Item Count" };
+                return QString{ "Size of All Files" };
+            case 3:
+                return QString{ "Visible File Count" };
+            case 4:
+                return QString{ "Total File Count" };
         }
     }
 
     return QString::number(section);
+}
+
+QString ScanBreakdownModel::FormatVisibleNodeSize(const RowModel& data) const
+{
+    const auto [size, units] = Utilities::ToPrefixedSize(data.visibleSize, m_prefix);
+    return QString::fromStdWString(fmt::format(L"{:03.2f} {}", size, units));
+}
+
+QString ScanBreakdownModel::FormatVisibleNodeCount(const RowModel& data) const
+{
+    return QString::fromStdWString(fmt::format(L"{:n}", data.visibleCount));
 }
 
 QVariant ScanBreakdownModel::data(const QModelIndex& index, int role) const
@@ -47,9 +62,13 @@ QVariant ScanBreakdownModel::data(const QModelIndex& index, int role) const
             case 0:
                 return QString::fromStdWString(data.fileExtension);
             case 1:
-                return QString::fromStdWString(data.formattedSize);
+                return FormatVisibleNodeSize(data);
             case 2:
-                return QString::fromStdWString(data.formattedCount);
+                return QString::fromStdWString(data.formattedTotalSize);
+            case 3:
+                return FormatVisibleNodeCount(data);
+            case 4:
+                return QString::fromStdWString(data.formattedTotalCount);
         }
     }
 
@@ -58,16 +77,20 @@ QVariant ScanBreakdownModel::data(const QModelIndex& index, int role) const
             case 0:
                 return QString::fromStdWString(data.fileExtension);
             case 1:
-                return static_cast<qulonglong>(data.totalSize);
+                return static_cast<qulonglong>(data.visibleSize);
             case 2:
-                return static_cast<qulonglong>(data.itemCount);
+                return static_cast<qulonglong>(data.totalSize);
+            case 3:
+                return static_cast<qulonglong>(data.visibleCount);
+            case 4:
+                return static_cast<qulonglong>(data.totalCount);
         }
     }
 
     return {};
 }
 
-void ScanBreakdownModel::Insert(const Tree<VizBlock>::Node& node)
+void ScanBreakdownModel::Insert(const Tree<VizBlock>::Node& node, bool isVisible)
 {
     const auto& file = node->file;
     if (file.type != FileType::Regular) {
@@ -76,12 +99,16 @@ void ScanBreakdownModel::Insert(const Tree<VizBlock>::Node& node)
 
     if (file.extension.empty()) {
         auto& fileType = m_fileTypeMap[L"No Extension"];
+        fileType.visibleSize += isVisible ? file.size : 0;
+        fileType.visibleCount += isVisible ? 1 : 0;
         fileType.totalSize += file.size;
-        fileType.count += 1;
+        fileType.totalCount += 1;
     } else {
         auto& fileType = m_fileTypeMap[file.extension];
+        fileType.visibleSize += isVisible ? file.size : 0;
+        fileType.visibleCount += isVisible ? 1 : 0;
         fileType.totalSize += file.size;
-        fileType.count += 1;
+        fileType.totalCount += 1;
     }
 }
 
@@ -91,17 +118,16 @@ void ScanBreakdownModel::ClearData()
     m_fileTypeVector.clear();
 }
 
-void ScanBreakdownModel::Process(Constants::SizePrefix sizePrefix)
+void ScanBreakdownModel::BuildModel(Constants::SizePrefix sizePrefix)
 {
     Expects(!m_fileTypeMap.empty() && m_fileTypeVector.empty());
+
+    m_prefix = sizePrefix;
 
     std::transform(
         std::begin(m_fileTypeMap), std::end(m_fileTypeMap), std::back_inserter(m_fileTypeVector),
         [&](const auto& entry) {
-            const auto& extension = entry.first;
-            const auto& itemCount = entry.second.count;
-            const auto& totalSize = entry.second.totalSize;
-
-            return RowModel{ extension, sizePrefix, totalSize, itemCount };
+            const auto& [extension, tally] = entry;
+            return RowModel{ extension, tally, sizePrefix };
         });
 }

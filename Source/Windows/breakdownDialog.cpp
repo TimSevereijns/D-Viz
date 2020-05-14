@@ -37,27 +37,21 @@ void BreakdownDialog::ReloadData()
         return;
     }
 
-    const auto& parameters = controller.GetSessionSettings().GetVisualizationParameters();
-
     const auto stopwatch = Stopwatch<std::chrono::milliseconds>([&] {
+        // @todo Use a leaf iterator instead...
         for (const auto& node : tree) {
-            const auto fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
-            if (fileIsTooSmall) {
-                continue;
-            }
-
-            if (node->file.type != FileType::Directory) {
-                m_model.Insert(node);
+            if (node->file.type == FileType::Regular) {
+                m_model.Insert(node, controller.IsNodeVisible(node.GetData()));
             }
         }
+
+        m_model.BuildModel(controller.GetSessionSettings().GetActiveNumericPrefix());
     });
 
     spdlog::get(Constants::Logging::DefaultLog)
         ->info(fmt::format(
             "Built break-down model in: {} {}", stopwatch.GetElapsedTime().count(),
             stopwatch.GetUnitsAsCharacterArray()));
-
-    m_model.Process(controller.GetSessionSettings().GetActiveNumericPrefix());
 
     m_proxyModel.invalidate();
     m_proxyModel.setSourceModel(&m_model);
@@ -83,9 +77,10 @@ void BreakdownDialog::AdjustColumnWidthsToFitViewport()
 
     const auto tableWidth = m_ui.tableView->width() - headerWidth - scrollbarWidth;
 
-    m_ui.tableView->setColumnWidth(0, tableWidth / 3);
-    m_ui.tableView->setColumnWidth(1, tableWidth / 3);
-    m_ui.tableView->setColumnWidth(2, tableWidth / 3);
+    const auto columnCount = m_model.columnCount(QModelIndex{});
+    for (int index = 0; index < columnCount; ++index) {
+        m_ui.tableView->setColumnWidth(index, tableWidth / columnCount);
+    }
 }
 
 void BreakdownDialog::resizeEvent(QResizeEvent* /*event*/)

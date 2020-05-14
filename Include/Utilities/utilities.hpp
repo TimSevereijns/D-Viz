@@ -165,7 +165,7 @@ namespace Utilities
      * string.
      */
     inline std::pair<double, std::wstring>
-    ConvertFileSizeToNumericPrefix(std::uintmax_t sizeInBytes, Constants::SizePrefix prefix)
+    ToPrefixedSize(std::uintmax_t sizeInBytes, Constants::SizePrefix prefix)
     {
         switch (prefix) {
             case Constants::SizePrefix::Binary: {

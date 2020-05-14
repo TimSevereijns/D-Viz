@@ -209,7 +209,7 @@ void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
         m_view->SetStatusBarMessage(message);
     } else {
         const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
-        const auto [size, units] = Utilities::ConvertFileSizeToNumericPrefix(sizeInBytes, prefix);
+        const auto [size, units] = Utilities::ToPrefixedSize(sizeInBytes, prefix);
 
         const auto message = fmt::format(
             L"Files Scanned: {}  |  {:03.2f} {} and counting...",
@@ -280,7 +280,7 @@ void Controller::SelectNodeAndUpdateStatusBar(
 
     const auto fileSize = node->file.size;
     const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
-    const auto [prefixedSize, units] = Utilities::ConvertFileSizeToNumericPrefix(fileSize, prefix);
+    const auto [prefixedSize, units] = Utilities::ToPrefixedSize(fileSize, prefix);
     const auto isInBytes = (units == Utilities::Detail::bytesLabel);
 
     const auto path = Controller::ResolveCompleteFilePath(node).wstring();
@@ -341,8 +341,7 @@ void Controller::DisplaySelectionDetails()
     }
 
     const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
-    const auto [prefixedSize, units] =
-        Utilities::ConvertFileSizeToNumericPrefix(totalBytes, prefix);
+    const auto [prefixedSize, units] = Utilities::ToPrefixedSize(totalBytes, prefix);
     const auto isInBytes = (units == Utilities::Detail::bytesLabel);
 
     std::wstringstream message;
