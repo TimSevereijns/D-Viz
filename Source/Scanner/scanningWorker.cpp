@@ -44,7 +44,7 @@ namespace
         }
 
         spdlog::get(Constants::Logging::DefaultLog)
-            ->info(fmt::format("Number of Sizeless Files Removed: {}", nodesRemoved));
+            ->info(fmt::format("Number of Sizeless Files Removed: {:n}", nodesRemoved));
     }
 
     /**
@@ -205,7 +205,7 @@ void ScanningWorker::Start()
 
     spdlog::get(Constants::Logging::DefaultLog)
         ->info(fmt::format(
-            "Scanned Drive in: {} {}", stopwatch.GetElapsedTime().count(),
+            "Scanned Drive in: {:n} {}", stopwatch.GetElapsedTime().count(),
             stopwatch.GetUnitsAsCharacterArray()));
 
     Scanner::ComputeDirectorySizes(*m_fileTree);

@@ -380,7 +380,7 @@ Tree<VizBlock>::Node* BaseModel::FindNearestIntersection(
 
     spdlog::get(Constants::Logging::DefaultLog)
         ->info(fmt::format(
-            "Selected node in: {} {}", stopwatch.GetElapsedTime().count(),
+            "Selected node in: {:n} {}", stopwatch.GetElapsedTime().count(),
             stopwatch.GetUnitsAsCharacterArray()));
 
     return nearestIntersection;

@@ -31,7 +31,7 @@ namespace
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
 
         log->info(fmt::format(
-            "Scanned: {} directories and {} files, representing {} bytes",
+            "Scanned: {:n} directories and {:n} files, representing {:n} bytes",
             progress.directoriesScanned.load(), progress.filesScanned.load(),
             progress.bytesProcessed.load()));
 
@@ -46,8 +46,8 @@ namespace
     void LogDiskStatistics(const std::filesystem::space_info& spaceInfo)
     {
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
-        log->info(fmt::format("Disk Size:  {} bytes", spaceInfo.capacity));
-        log->info(fmt::format("Free Space: {} bytes", spaceInfo.free));
+        log->info(fmt::format("Disk Size:  {:n} bytes", spaceInfo.capacity));
+        log->info(fmt::format("Free Space: {:n} bytes", spaceInfo.free));
     }
 } // namespace
 
@@ -203,8 +203,7 @@ void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
             (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
 
         const auto message = fmt::format(
-            L"Files Scanned: {}  |  {:03.2f}% Complete",
-            Utilities::ToStringWithNumericGrouping(filesScanned), fraction * 100);
+            L"Files Scanned: {:n}  |  {:03.2f}% Complete", filesScanned, fraction * 100);
 
         m_view->SetStatusBarMessage(message);
     } else {
@@ -212,8 +211,7 @@ void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
         const auto [size, units] = Utilities::ToPrefixedSize(sizeInBytes, prefix);
 
         const auto message = fmt::format(
-            L"Files Scanned: {}  |  {:03.2f} {} and counting...",
-            Utilities::ToStringWithNumericGrouping(filesScanned), size, units);
+            L"Files Scanned: {:n}  |  {:03.2f} {} and counting...", filesScanned, size, units);
 
         m_view->SetStatusBarMessage(message);
     }
@@ -464,7 +462,7 @@ void Controller::SearchTreeMap(
 
         spdlog::get(Constants::Logging::DefaultLog)
             ->info(fmt::format(
-                "Search Completed in: {} {}", stopwatch.GetElapsedTime().count(),
+                "Search Completed in: {:n} {}", stopwatch.GetElapsedTime().count(),
                 stopwatch.GetUnitsAsCharacterArray()));
     };
 

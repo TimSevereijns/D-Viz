@@ -21,25 +21,6 @@ namespace Utilities
     }
 
     /**
-     * @brief Turns a number into a string, complete with numeric digit grouping delimiters.
-     *
-     * @param[in] number            The number to be converted into a string.
-     */
-    template <typename NumericType> static auto ToStringWithNumericGrouping(NumericType number)
-    {
-        static_assert(std::is_arithmetic_v<NumericType>, "Please pass in a numeric type.");
-
-        std::wstringstream stream;
-        stream.imbue(std::locale{ "" });
-
-        stream.str(std::wstring{});
-        stream.clear();
-
-        stream << number;
-        return stream.str();
-    }
-
-    /**
      * @brief Locates the matching tree node that matches the given a relative filesystem path.
      *
      * @param[in] rootNode          The node at which to start the search.
