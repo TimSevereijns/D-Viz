@@ -2,6 +2,7 @@
 #define DISTRIBUTIONGRAPHMODEL_H
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <string>
 #include <unordered_map>
