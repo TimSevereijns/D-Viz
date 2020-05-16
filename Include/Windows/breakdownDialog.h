@@ -6,6 +6,7 @@
 
 #include <functional>
 
+#include "Windows/distributionGraphModel.h"
 #include "scanBreakdownModel.h"
 #include "ui_breakdownDialog.h"
 
@@ -71,7 +72,9 @@ class BreakdownDialog final : public QDialog
 
     Ui::breakdownDialog m_ui;
 
-    ScanBreakdownModel m_model;
+    DistributionGraphModel m_graphModel;
+
+    ScanBreakdownModel m_tableModel;
     ScanBreakdownFilterProxyModel m_proxyModel;
 };
 

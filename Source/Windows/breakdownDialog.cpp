@@ -6,8 +6,10 @@
 #include <Stopwatch/Stopwatch.hpp>
 #include <spdlog/spdlog.h>
 
+#include <QBrush>
 #include <QResizeEvent>
 #include <QScrollBar>
+#include <QtCharts/QLineSeries>
 
 #include <functional>
 #include <vector>
@@ -28,7 +30,7 @@ BreakdownDialog::BreakdownDialog(QWidget* parent)
 
 void BreakdownDialog::ReloadData()
 {
-    m_model.ClearData();
+    m_tableModel.ClearData();
 
     const auto& controller = m_mainWindow.GetController();
     const auto& tree = controller.GetTree();
@@ -41,11 +43,14 @@ void BreakdownDialog::ReloadData()
         // @todo Use a leaf iterator instead...
         for (const auto& node : tree) {
             if (node->file.type == FileType::Regular) {
-                m_model.Insert(node, controller.IsNodeVisible(node.GetData()));
+                m_tableModel.Insert(node, controller.IsNodeVisible(node.GetData()));
             }
+
+            m_graphModel.AddDatapoint(node->file.extension, node->file.size);
         }
 
-        m_model.BuildModel(controller.GetSessionSettings().GetActiveNumericPrefix());
+        m_tableModel.BuildModel(controller.GetSessionSettings().GetActiveNumericPrefix());
+        m_graphModel.BuildModel();
     });
 
     spdlog::get(Constants::Logging::DefaultLog)
@@ -54,7 +59,7 @@ void BreakdownDialog::ReloadData()
             stopwatch.GetUnitsAsCharacterArray()));
 
     m_proxyModel.invalidate();
-    m_proxyModel.setSourceModel(&m_model);
+    m_proxyModel.setSourceModel(&m_tableModel);
 
     m_ui.tableView->setModel(&m_proxyModel);
     m_ui.tableView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -63,6 +68,30 @@ void BreakdownDialog::ReloadData()
     m_ui.tableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_ui.tableView->setSortingEnabled(true);
     m_ui.tableView->sortByColumn(1, Qt::SortOrder::DescendingOrder);
+
+    auto* series = new QtCharts::QLineSeries();
+    const auto& distribution = m_graphModel.GetDistribution(L".pdb");
+    const auto& buckets = distribution.GetBuckets();
+
+    for (std::size_t index{ 0 }; index < buckets.size(); ++index) {
+        series->append(index, buckets[index]);
+    }
+
+    auto* chart = new QtCharts::QChart();
+    chart->legend()->hide();
+    chart->addSeries(series);
+    chart->createDefaultAxes();
+
+    QFont font;
+    font.setPixelSize(18);
+    chart->setTitleFont(font);
+    chart->setTitleBrush(QBrush{ Qt::black });
+    chart->setTitle("Size Distribution");
+
+    // auto* axisX = new QtCharts::QCategoryAxis();
+
+    m_ui.graphView->setChart(chart);
+    m_ui.graphView->setRenderHint(QPainter::Antialiasing);
 
     AdjustColumnWidthsToFitViewport();
 }
@@ -77,7 +106,7 @@ void BreakdownDialog::AdjustColumnWidthsToFitViewport()
 
     const auto tableWidth = m_ui.tableView->width() - headerWidth - scrollbarWidth;
 
-    const auto columnCount = m_model.columnCount(QModelIndex{});
+    const auto columnCount = m_tableModel.columnCount(QModelIndex{});
     for (int index = 0; index < columnCount; ++index) {
         m_ui.tableView->setColumnWidth(index, tableWidth / columnCount);
     }
