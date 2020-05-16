@@ -2,8 +2,10 @@
 #define DISTRIBUTIONGRAPHMODEL_H
 
 #include <algorithm>
+#include <cstdint>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 class ExtensionDistribution
 {
