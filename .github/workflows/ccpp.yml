@@ -65,13 +65,10 @@ jobs:
           sudo pip3 install cuteci
           sudo cuteci \
               --installer http://download.qt.io/official_releases/qt/5.13/5.13.1/qt-opensource-linux-x64-5.13.1.run \
-              list 
-          sudo cuteci \
-              --installer http://download.qt.io/official_releases/qt/5.13/5.13.1/qt-opensource-linux-x64-5.13.1.run \
               install \
               --verbose \
               --destdir ~/Qt \
-              --packages qt.qt5.5131.gcc_64 \
+              --packages qt.qt5.5131.gcc_64,qt.qt5.5131.qtcharts \
               --keep-tools
 
       - name: Download Conan Packages
