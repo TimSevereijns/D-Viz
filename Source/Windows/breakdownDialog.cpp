@@ -9,6 +9,7 @@
 #include <QBrush>
 #include <QResizeEvent>
 #include <QScrollBar>
+#include <QtCharts/QCategoryAxis>
 #include <QtCharts/QLineSeries>
 
 #include <functional>
@@ -24,6 +25,10 @@ BreakdownDialog::BreakdownDialog(QWidget* parent)
     connect(
         m_ui.tableView, SIGNAL(customContextMenuRequested(QPoint)),
         SLOT(DisplayContextMenu(QPoint)));
+
+    connect(
+        m_ui.tableView, SIGNAL(doubleClicked(const QModelIndex&)),
+        SLOT(HandleDoubleClick(const QModelIndex&)));
 
     ReloadData();
 }
@@ -68,30 +73,6 @@ void BreakdownDialog::ReloadData()
     m_ui.tableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_ui.tableView->setSortingEnabled(true);
     m_ui.tableView->sortByColumn(1, Qt::SortOrder::DescendingOrder);
-
-    auto* series = new QtCharts::QLineSeries();
-    const auto& distribution = m_graphModel.GetDistribution(L".pdb");
-    const auto& buckets = distribution.GetBuckets();
-
-    for (std::size_t index{ 0 }; index < buckets.size(); ++index) {
-        series->append(index, buckets[index]);
-    }
-
-    auto* chart = new QtCharts::QChart();
-    chart->legend()->hide();
-    chart->addSeries(series);
-    chart->createDefaultAxes();
-
-    QFont font;
-    font.setPixelSize(18);
-    chart->setTitleFont(font);
-    chart->setTitleBrush(QBrush{ Qt::black });
-    chart->setTitle("Size Distribution");
-
-    // auto* axisX = new QtCharts::QCategoryAxis();
-
-    m_ui.graphView->setChart(chart);
-    m_ui.graphView->setRenderHint(QPainter::Antialiasing);
 
     AdjustColumnWidthsToFitViewport();
 }
@@ -143,4 +124,32 @@ void BreakdownDialog::DisplayContextMenu(const QPoint& point)
 
     const QPoint globalPoint = m_ui.tableView->viewport()->mapToGlobal(point);
     menu.exec(globalPoint);
+}
+
+void BreakdownDialog::HandleDoubleClick(const QModelIndex& index)
+{
+    const auto extensionVariant = m_proxyModel.index(index.row(), 0).data(Qt::UserRole);
+    const auto extension = extensionVariant.toString().toStdWString();
+
+    auto* series = new QtCharts::QLineSeries();
+    const auto& distribution = m_graphModel.GetDistribution(extension);
+    const auto& buckets = distribution.GetBuckets();
+
+    for (std::size_t index{ 0 }; index < buckets.size(); ++index) {
+        series->append(index, buckets[index]);
+    }
+
+    auto* chart = new QtCharts::QChart();
+    chart->legend()->hide();
+    chart->addSeries(series);
+    chart->createDefaultAxes();
+
+    QFont font;
+    font.setPixelSize(18);
+    chart->setTitleFont(font);
+    chart->setTitleBrush(QBrush{ Qt::black });
+    chart->setTitle("Size Distribution");
+
+    m_ui.graphView->setChart(chart);
+    m_ui.graphView->setRenderHint(QPainter::Antialiasing);
 }

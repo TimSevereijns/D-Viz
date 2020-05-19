@@ -29,21 +29,34 @@ class ScanBreakdownFilterProxyModel final : public QSortFilterProxyModel
                 return lhsExtension < rhsExtension;
             }
             case 1: {
-                const auto lhsSize = lhsData.value<std::uintmax_t>();
-                const auto rhsSize = rhsData.value<std::uintmax_t>();
+                const auto lhsVisibleSize = lhsData.value<std::uintmax_t>();
+                const auto rhsVisibleSize = rhsData.value<std::uintmax_t>();
 
-                return lhsSize < rhsSize;
+                return lhsVisibleSize < rhsVisibleSize;
             }
             case 2: {
-                const auto lhsCount = lhsData.value<std::uintmax_t>();
-                const auto rhsCount = rhsData.value<std::uintmax_t>();
+                const auto lhsTotalSize = lhsData.value<std::uintmax_t>();
+                const auto rhsTotalSize = rhsData.value<std::uintmax_t>();
 
-                return lhsCount < rhsCount;
+                return lhsTotalSize < rhsTotalSize;
+            }
+            case 3: {
+                const auto lhsVisibleCount = lhsData.value<std::uintmax_t>();
+                const auto rhsVisibleCount = rhsData.value<std::uintmax_t>();
+
+                return lhsVisibleCount < rhsVisibleCount;
+            }
+            case 4: {
+                const auto lhsTotalCount = lhsData.value<std::uintmax_t>();
+                const auto rhsTotalCount = rhsData.value<std::uintmax_t>();
+
+                return lhsTotalCount < rhsTotalCount;
+            }
+            default: {
+                Expects(false);
+                return false;
             }
         }
-
-        Expects(false);
-        return false;
     }
 };
 
@@ -64,6 +77,8 @@ class BreakdownDialog final : public QDialog
 
   private slots:
     void DisplayContextMenu(const QPoint& point);
+
+    void HandleDoubleClick(const QModelIndex& index);
 
   private:
     void AdjustColumnWidthsToFitViewport();
