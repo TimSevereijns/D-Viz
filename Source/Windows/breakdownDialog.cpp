@@ -186,7 +186,7 @@ void BreakdownDialog::GenerateGraph(const std::wstring& extension)
     chart->addAxis(axisX, Qt::AlignBottom);
 
     auto* axisY = new QtCharts::QValueAxis();
-    axisY->setRange(0, std::min(256ull, distribution.GetMaximumValueY()));
+    axisY->setRange(0, std::min(static_cast<std::uintmax_t>(256), distribution.GetMaximumValueY()));
     axisY->setLabelFormat("%d");
     axisY->setTitleText("Count");
     chart->addAxis(axisY, Qt::AlignLeft);
