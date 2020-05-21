@@ -17,13 +17,30 @@ class ExtensionDistribution
 
     const std::vector<std::uint32_t>& GetBuckets() const;
 
+    std::uintmax_t GetMaximumValueX() const
+    {
+        return m_maximumX;
+    }
+
+    std::uintmax_t GetMinimumValueX() const
+    {
+        return m_minimumX;
+    }
+
+    std::uintmax_t GetMaximumValueY() const;
+
+    constexpr static int GetBucketCount()
+    {
+        return bucketCount;
+    }
+
   private:
     static constexpr auto bucketCount = 512;
 
     bool m_insuffientData{ false };
 
-    long double m_minimum{ 0 };
-    long double m_maximum{ 0 };
+    std::uintmax_t m_minimumX{ 0 };
+    std::uintmax_t m_maximumX{ 0 };
     std::vector<std::uintmax_t> m_datapoints;
     std::vector<std::uint32_t> m_buckets;
 };

@@ -83,6 +83,8 @@ class BreakdownDialog final : public QDialog
   private:
     void AdjustColumnWidthsToFitViewport();
 
+    void GenerateGraph(const std::wstring& extension);
+
     MainWindow& m_mainWindow;
 
     Ui::breakdownDialog m_ui;

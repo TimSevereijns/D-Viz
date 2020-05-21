@@ -7,10 +7,12 @@
 #include <spdlog/spdlog.h>
 
 #include <QBrush>
+#include <QGraphicsLayout>
 #include <QResizeEvent>
 #include <QScrollBar>
 #include <QtCharts/QCategoryAxis>
 #include <QtCharts/QLineSeries>
+#include <QtCharts/QLogValueAxis>
 
 #include <functional>
 #include <vector>
@@ -71,10 +73,15 @@ void BreakdownDialog::ReloadData()
     m_ui.tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_ui.tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_ui.tableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_ui.tableView->setSortingEnabled(true);
     m_ui.tableView->sortByColumn(1, Qt::SortOrder::DescendingOrder);
+    m_ui.tableView->setSortingEnabled(true);
+    m_ui.tableView->selectRow(0);
 
     AdjustColumnWidthsToFitViewport();
+
+    const auto extensionVariant = m_proxyModel.index(0, 0).data(Qt::UserRole);
+    const auto extension = extensionVariant.toString().toStdWString();
+    GenerateGraph(extension);
 }
 
 void BreakdownDialog::AdjustColumnWidthsToFitViewport()
@@ -131,25 +138,63 @@ void BreakdownDialog::HandleDoubleClick(const QModelIndex& index)
     const auto extensionVariant = m_proxyModel.index(index.row(), 0).data(Qt::UserRole);
     const auto extension = extensionVariant.toString().toStdWString();
 
-    auto* series = new QtCharts::QLineSeries();
+    GenerateGraph(extension);
+}
+
+void BreakdownDialog::GenerateGraph(const std::wstring& extension)
+{
+    auto* series = new QtCharts::QLineSeries{};
     const auto& distribution = m_graphModel.GetDistribution(extension);
     const auto& buckets = distribution.GetBuckets();
 
-    for (std::size_t index{ 0 }; index < buckets.size(); ++index) {
+    for (std::size_t index = 0; index < buckets.size(); ++index) {
         series->append(index, buckets[index]);
     }
 
-    auto* chart = new QtCharts::QChart();
-    chart->legend()->hide();
+    auto* chart = new QtCharts::QChart{};
     chart->addSeries(series);
-    chart->createDefaultAxes();
+    chart->layout()->setContentsMargins(0, 0, 16, 0); //< Add space on the right for last label.
+    chart->legend()->hide();
+    chart->setBackgroundRoundness(0);
 
     QFont font;
-    font.setPixelSize(18);
+    font.setPixelSize(12);
     chart->setTitleFont(font);
     chart->setTitleBrush(QBrush{ Qt::black });
     chart->setTitle("Size Distribution");
 
+    auto* axisX = new QtCharts::QCategoryAxis{};
+    axisX->setLabelsPosition(QtCharts::QCategoryAxis::AxisLabelsPositionOnValue);
+    axisX->setTitleText("Size");
+
+    const auto tickCount = axisX->tickCount();
+    const auto tickInterval = distribution.GetBucketCount() / tickCount;
+    axisX->setTickInterval(tickInterval);
+
+    const auto prefix = m_mainWindow.GetController().GetSessionSettings().GetActiveNumericPrefix();
+
+    axisX->append("0", 0);
+
+    for (int index = 1; index <= tickCount; ++index) {
+        const auto value = index / static_cast<double>(tickCount) * distribution.GetMaximumValueX();
+        const auto [size, units] = Utilities::ToPrefixedSize(value, prefix);
+        const auto label = QString::fromStdWString(fmt::format(L"{:.0f} {}", size, units));
+
+        axisX->append(label, index * tickInterval);
+    }
+
+    chart->addAxis(axisX, Qt::AlignBottom);
+
+    auto* axisY = new QtCharts::QValueAxis();
+    axisY->setRange(0, std::min(256ull, distribution.GetMaximumValueY()));
+    axisY->setLabelFormat("%d");
+    axisY->setTitleText("Count");
+    chart->addAxis(axisY, Qt::AlignLeft);
+
+    series->attachAxis(axisX);
+    series->attachAxis(axisY);
+
     m_ui.graphView->setChart(chart);
+    m_ui.graphView->setBackgroundBrush(Qt::white);
     m_ui.graphView->setRenderHint(QPainter::Antialiasing);
 }
