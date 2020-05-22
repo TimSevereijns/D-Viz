@@ -3,6 +3,8 @@
 
 #include <QDialog>
 #include <QSortFilterProxyModel>
+#include <QtCharts/QCategoryAxis>
+#include <QtCharts/QLogValueAxis>
 
 #include <functional>
 
@@ -82,6 +84,12 @@ class BreakdownDialog final : public QDialog
 
   private:
     void AdjustColumnWidthsToFitViewport();
+
+    std::unique_ptr<QtCharts::QCategoryAxis>
+    SetupAxisX(const ExtensionDistribution& distribution) const;
+
+    std::unique_ptr<QtCharts::QLogValueAxis>
+    SetupAxisY(const ExtensionDistribution& distribution) const;
 
     void GenerateGraph(const std::wstring& extension);
 

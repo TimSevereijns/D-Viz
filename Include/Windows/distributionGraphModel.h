@@ -35,9 +35,7 @@ class ExtensionDistribution
     }
 
   private:
-    static constexpr auto bucketCount = 512;
-
-    bool m_insuffientData{ false };
+    static constexpr auto bucketCount = 128;
 
     std::uintmax_t m_minimumX{ 0 };
     std::uintmax_t m_maximumX{ 0 };
@@ -53,6 +51,8 @@ class DistributionGraphModel
     void AddDatapoint(const std::wstring& extension, std::uintmax_t fileSize);
 
     void BuildModel();
+
+    void ClearData();
 
   private:
     std::unordered_map<std::wstring, ExtensionDistribution> m_map;

@@ -17,6 +17,11 @@ void DistributionGraphModel::BuildModel()
     }
 }
 
+void DistributionGraphModel::ClearData()
+{
+    m_map.clear();
+}
+
 void ExtensionDistribution::AddDatapoint(std::uintmax_t datum)
 {
     m_datapoints.emplace_back(datum);
@@ -33,7 +38,9 @@ void ExtensionDistribution::AnalyzeDistribution()
     m_maximumX = *max;
 
     if (m_maximumX - m_minimumX == 0) {
-        m_insuffientData = true;
+        m_buckets.clear();
+        m_buckets.push_back(m_datapoints.size());
+
         return;
     }
 
