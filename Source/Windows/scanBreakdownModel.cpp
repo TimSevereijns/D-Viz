@@ -25,13 +25,13 @@ QVariant ScanBreakdownModel::headerData(int section, Qt::Orientation orientation
             case 0:
                 return QString{ "File Type" };
             case 1:
-                return QString{ "Size of Visible Files" };
+                return QString{ "Visible Size" };
             case 2:
-                return QString{ "Size of All Files" };
+                return QString{ "Total Size" };
             case 3:
-                return QString{ "Visible File Count" };
+                return QString{ "Visible Count" };
             case 4:
-                return QString{ "Total File Count" };
+                return QString{ "Total Count" };
         }
     }
 

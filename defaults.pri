@@ -4,7 +4,7 @@ CONFIG += \
 
 include(Conan/conanbuildinfo.pri)
 
-QT += opengl gamepad
+QT += opengl gamepad charts
 win32: QT += winextras
 
 INCLUDEPATH += $$PWD/Include
@@ -47,6 +47,7 @@ SOURCES += \
    $$PWD/Source/Visualizations/vizBlock.cpp \
    $$PWD/Source/Windows/aboutDialog.cpp \
    $$PWD/Source/Windows/breakdownDialog.cpp \
+   $$PWD/Source/Windows/distributionGraphModel.cpp \
    $$PWD/Source/Windows/mainWindow.cpp \
    $$PWD/Source/Windows/scanBreakdownModel.cpp
 
@@ -106,6 +107,7 @@ HEADERS += \
    $$PWD/Include/Windows/aboutDialog.h \
    $$PWD/Include/Windows/baseView.h \
    $$PWD/Include/Windows/breakdownDialog.h \
+   $$PWD/Include/Windows/distributionGraphModel.h \
    $$PWD/Include/Windows/mainWindow.h \
    $$PWD/Include/Windows/scanBreakdownModel.h
 
