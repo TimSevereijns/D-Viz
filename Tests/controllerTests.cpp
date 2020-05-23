@@ -90,6 +90,8 @@ void ControllerTests::HasModelBeenLoaded() const
 
 void ControllerTests::SelectingANode()
 {
+    QVERIFY(m_controller);
+
     ScanDrive();
 
     QCOMPARE(m_controller->GetSelectedNode(), nullptr);
@@ -105,6 +107,7 @@ void ControllerTests::SelectingANode()
 
 void ControllerTests::VerifyFilesOverLimitAreDisplayed() const
 {
+    QVERIFY(m_controller);
     using namespace Literals::Numeric::Binary;
 
     Settings::VisualizationParameters parameters;
@@ -125,6 +128,7 @@ void ControllerTests::VerifyFilesOverLimitAreDisplayed() const
 
 void ControllerTests::VerifyFilesUnderLimitAreNotDisplayed() const
 {
+    QVERIFY(m_controller);
     using namespace Literals::Numeric::Binary;
 
     Settings::VisualizationParameters parameters;
@@ -145,6 +149,7 @@ void ControllerTests::VerifyFilesUnderLimitAreNotDisplayed() const
 
 void ControllerTests::VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed() const
 {
+    QVERIFY(m_controller);
     using namespace Literals::Numeric::Binary;
 
     Settings::VisualizationParameters parameters;
@@ -165,6 +170,7 @@ void ControllerTests::VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed() con
 
 void ControllerTests::VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed() const
 {
+    QVERIFY(m_controller);
     using namespace Literals::Numeric::Binary;
 
     Settings::VisualizationParameters parameters;
@@ -185,6 +191,7 @@ void ControllerTests::VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed() con
 
 void ControllerTests::VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed() const
 {
+    QVERIFY(m_controller);
     using namespace Literals::Numeric::Binary;
 
     Settings::VisualizationParameters parameters;
@@ -201,6 +208,70 @@ void ControllerTests::VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed() cons
     sample.file.type = FileType::Directory;
 
     QCOMPARE(m_controller->IsNodeVisible(sample), false);
+}
+
+void ControllerTests::SearchTreemapWithoutPriorSelection() const
+{
+    QVERIFY(m_controller);
+
+    constexpr auto query = L".hpp";
+
+    const auto deselectionCallback = [](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+        QCOMPARE(nodes.empty(), true);
+    };
+
+    const auto selectionCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+        QCOMPARE(nodes.empty(), false);
+        QVERIFY(std::all_of(std::begin(nodes), std::end(nodes), [&](const auto* node) {
+            return node->GetData().file.extension == query;
+        }));
+    };
+
+    REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
+
+    constexpr auto shouldSearchFiles = true;
+    constexpr auto shouldSearchDirectories = false;
+
+    ScanDrive();
+    m_controller->SearchTreeMap(
+        query, deselectionCallback, selectionCallback, shouldSearchFiles, shouldSearchDirectories);
+}
+
+void ControllerTests::SearchTreemapWithPriorSelection() const
+{
+    QVERIFY(m_controller);
+
+    constexpr auto query = L".hpp";
+    constexpr auto prior = L".ipp";
+
+    const auto deselectionCallback = [](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+        QCOMPARE(nodes.empty(), false);
+    };
+
+    const auto selectionCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+        QCOMPARE(nodes.empty(), false);
+        QVERIFY(std::all_of(std::begin(nodes), std::end(nodes), [&](const auto* node) {
+            return node->GetData().file.extension == query;
+        }));
+    };
+
+    const auto highlightCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+        QCOMPARE(nodes.empty(), false);
+        QVERIFY(std::all_of(std::begin(nodes), std::end(nodes), [&](const auto* node) {
+            return node->GetData().file.extension == prior;
+        }));
+    };
+
+    REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(2);
+
+    ScanDrive();
+    m_controller->HighlightAllMatchingExtensions(prior, highlightCallback);
+
+    constexpr auto shouldSearchFiles = true;
+    constexpr auto shouldSearchDirectories = false;
+
+    m_controller->SearchTreeMap(
+        query, deselectionCallback, selectionCallback, shouldSearchFiles, shouldSearchDirectories);
 }
 
 REGISTER_TEST(ControllerTests)

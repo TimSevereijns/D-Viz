@@ -114,6 +114,18 @@ class ControllerTests : public QObject
      */
     void VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed() const;
 
+    /**
+     * @brief Verifies that searching the treemap returns the expected results and calls the
+     * expected UI update functions.
+     */
+    void SearchTreemapWithoutPriorSelection() const;
+
+    /**
+     * @brief Verifies that searching the treemap returns the expected results and calls the
+     * expected UI update functions when a prior highlight already exists.
+     */
+    void SearchTreemapWithPriorSelection() const;
+
   private:
     std::shared_ptr<TestViewFactory> m_viewFactory;
     std::shared_ptr<TestModelFactory> m_modelFactory;
