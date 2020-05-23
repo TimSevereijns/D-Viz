@@ -88,7 +88,7 @@ void ControllerTests::HasModelBeenLoaded() const
     QCOMPARE(m_controller->HasModelBeenLoaded(), true);
 }
 
-void ControllerTests::SelectingANode()
+void ControllerTests::SelectNode()
 {
     QVERIFY(m_controller);
 
@@ -103,6 +103,14 @@ void ControllerTests::SelectingANode()
 
     m_controller->SelectNode(*targetNode, callback);
     QCOMPARE(m_controller->GetSelectedNode(), targetNode);
+}
+
+void ControllerTests::ClearSelectedNode()
+{
+    SelectNode();
+
+    m_controller->ClearSelectedNode();
+    QCOMPARE(m_controller->GetSelectedNode(), nullptr);
 }
 
 void ControllerTests::VerifyFilesOverLimitAreDisplayed() const
@@ -272,6 +280,73 @@ void ControllerTests::SearchTreemapWithPriorSelection() const
 
     m_controller->SearchTreeMap(
         query, deselectionCallback, selectionCallback, shouldSearchFiles, shouldSearchDirectories);
+}
+
+void ControllerTests::HighlightAncestors() const
+{
+    ScanDrive();
+
+    const auto selectionCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+        QCOMPARE(nodes.size(), 3);
+    };
+
+    REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
+
+    const auto* firstChild = m_controller->GetTree().GetRoot()->GetFirstChild();
+    const auto* firstGrandchild = firstChild->GetFirstChild();
+    const auto* firstGreatGrandchild = firstGrandchild->GetFirstChild();
+    m_controller->HighlightAncestors(*firstGreatGrandchild, selectionCallback);
+}
+
+void ControllerTests::HighlightDescendants() const
+{
+    ScanDrive();
+
+    const auto selectionCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+        QCOMPARE(nodes.size(), 469); //< As seeen in File Explorer
+    };
+
+    REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
+
+    const auto* rootNode = m_controller->GetTree().GetRoot();
+    m_controller->HighlightDescendants(*rootNode, selectionCallback);
+}
+
+void ControllerTests::SelectNodeViaRay() const
+{
+    ScanDrive();
+
+    const std::wstring targetName = L"socket_ops.ipp";
+
+    const auto* root = m_controller->GetTree().GetRoot();
+
+    const auto targetNode = std::find_if(
+        Tree<VizBlock>::LeafIterator{ root }, Tree<VizBlock>::LeafIterator{},
+        [&](const auto& node) { return (node->file.name + node->file.extension) == targetName; });
+
+    QVERIFY(targetNode != Tree<VizBlock>::LeafIterator{});
+
+    const auto targetBlock = targetNode->GetData().block;
+    const auto x = static_cast<float>(targetBlock.GetOrigin().x() + targetBlock.GetWidth() / 2.0);
+    const auto y = static_cast<float>(targetBlock.GetOrigin().y() + targetBlock.GetHeight());
+    const auto z = static_cast<float>(targetBlock.GetOrigin().z() - targetBlock.GetDepth() / 2.0);
+
+    Camera camera;
+    camera.SetPosition(QVector3D{ 300, 300, -300 });
+    camera.LookAt(QVector3D{ x, y, z });
+
+    const Ray ray{ camera.GetPosition(), camera.Forward() };
+
+    const auto deselectionCallback = [](const Tree<VizBlock>::Node&) { QVERIFY(false); };
+
+    const auto selectionCallback = [&](const Tree<VizBlock>::Node& node) {
+        QCOMPARE(node->file.name, L"socket_ops");
+        QCOMPARE(node->file.extension, L".ipp");
+    };
+
+    REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
+
+    m_controller->SelectNodeViaRay(camera, ray, deselectionCallback, selectionCallback);
 }
 
 REGISTER_TEST(ControllerTests)

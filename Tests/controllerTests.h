@@ -84,7 +84,12 @@ class ControllerTests : public QObject
     /**
      * @brief Verify that single node can be selected and retrieved.
      */
-    void SelectingANode();
+    void SelectNode();
+
+    /**
+     * @brief Verifies that a selected node can be cleared.
+     */
+    void ClearSelectedNode();
 
     /**
      * @brief Verifies that files smaller than the minimum file size are not reported as
@@ -125,6 +130,21 @@ class ControllerTests : public QObject
      * expected UI update functions when a prior highlight already exists.
      */
     void SearchTreemapWithPriorSelection() const;
+
+    /**
+     * @brief Verifies that ancestor nodes are correctly highlighted.
+     */
+    void HighlightAncestors() const;
+
+    /**
+     * @brief Verifies that descendant nodes are correctly highlighted.
+     */
+    void HighlightDescendants() const;
+
+    /**
+     * @brief Verifies that a node can be selected via a picking ray.
+     */
+    void SelectNodeViaRay() const;
 
   private:
     std::shared_ptr<TestViewFactory> m_viewFactory;
