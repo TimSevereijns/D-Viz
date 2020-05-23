@@ -14,7 +14,6 @@
 #include <spdlog/spdlog.h>
 
 #include <algorithm>
-#include <sstream>
 #include <utility>
 
 #include <QCursor>
@@ -31,7 +30,7 @@ namespace
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
 
         log->info(fmt::format(
-            "Scanned: {:n} directories and {:n} files, representing {:n} bytes",
+            "Scanned: {:n} directories and {:n} files, representing {:n} bytes.",
             progress.directoriesScanned.load(), progress.filesScanned.load(),
             progress.bytesProcessed.load()));
 
@@ -46,8 +45,8 @@ namespace
     void LogDiskStatistics(const std::filesystem::space_info& spaceInfo)
     {
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
-        log->info(fmt::format("Disk Size:  {:n} bytes", spaceInfo.capacity));
-        log->info(fmt::format("Free Space: {:n} bytes", spaceInfo.free));
+        log->info(fmt::format("Disk Size:  {:n} bytes.", spaceInfo.capacity));
+        log->info(fmt::format("Free Space: {:n} bytes.", spaceInfo.free));
     }
 } // namespace
 
@@ -145,7 +144,7 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
         };
 
     spdlog::get(Constants::Logging::DefaultLog)
-        ->info(fmt::format("Started a new scan at: \"{}\"", m_model->GetRootPath().string()));
+        ->info(fmt::format("Started a new scan at \"{}\".", m_model->GetRootPath().string()));
 
     m_scanner.StartScanning(ScanningParameters{ root, progressHandler, completionHandler });
 }
@@ -279,16 +278,14 @@ void Controller::SelectNodeAndUpdateStatusBar(
     const auto fileSize = node->file.size;
     const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
     const auto [prefixedSize, units] = Utilities::ToPrefixedSize(fileSize, prefix);
-    const auto isInBytes = (units == Utilities::Detail::bytesLabel);
+    const auto isSmall = (units == Utilities::Detail::bytesLabel);
 
     const auto path = Controller::ResolveCompleteFilePath(node).wstring();
 
-    std::wstringstream message;
-    message.imbue(std::locale{ "" });
-    message.precision(isInBytes ? 0 : 2);
-    message << std::fixed << path << L"  |  " << prefixedSize << units;
+    const auto message = isSmall ? fmt::format(L"{}  |  {:.0f} {}", path, prefixedSize, units)
+                                 : fmt::format(L"{}  |  {:.2f} {}", path, prefixedSize, units);
 
-    m_view->SetStatusBarMessage(message.str());
+    m_view->SetStatusBarMessage(message);
 }
 
 void Controller::SelectNodeViaRay(
@@ -320,36 +317,34 @@ void Controller::SelectNodeViaRay(
 void Controller::PrintMetadataToStatusBar()
 {
     const auto metadata = m_model->GetTreemapMetadata();
+    const auto message = fmt::format(
+        L"Scanned {:n} files and {:n} directories.", metadata.FileCount, metadata.DirectoryCount);
 
-    std::wstringstream message;
-    message.imbue(std::locale{ "" });
-    message << std::fixed << L"Scanned " << metadata.FileCount << L" files and "
-            << metadata.DirectoryCount << L" directories.";
-
-    m_view->SetStatusBarMessage(message.str());
+    m_view->SetStatusBarMessage(message);
 }
 
 void Controller::DisplaySelectionDetails()
 {
     const auto& highlightedNodes = m_model->GetHighlightedNodes();
 
-    std::uintmax_t totalBytes{ 0 };
+    std::uintmax_t totalBytes = 0;
     for (const auto* const node : highlightedNodes) {
         totalBytes += node->GetData().file.size;
     }
 
     const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
     const auto [prefixedSize, units] = Utilities::ToPrefixedSize(totalBytes, prefix);
-    const auto isInBytes = (units == Utilities::Detail::bytesLabel);
+    const auto isSmall = (units == Utilities::Detail::bytesLabel);
 
-    std::wstringstream message;
-    message.imbue(std::locale{ "" });
-    message.precision(isInBytes ? 0 : 2);
-    message << std::fixed << L"Highlighted " << highlightedNodes.size()
-            << (highlightedNodes.size() == 1 ? L" node" : L" nodes") << L", representing "
-            << prefixedSize << units;
+    const std::wstring nodes = highlightedNodes.size() == 1 ? L" node" : L" nodes";
+    const auto message = isSmall ? fmt::format(
+                                       L"Highlighted {:n} " + nodes + L", presenting {:.0f} {}.",
+                                       highlightedNodes.size(), prefixedSize, units)
+                                 : fmt::format(
+                                       L"Highlighted {:n} " + nodes + L", presenting {:.2f} {}.",
+                                       highlightedNodes.size(), prefixedSize, units);
 
-    m_view->SetStatusBarMessage(message.str());
+    m_view->SetStatusBarMessage(message);
 }
 
 void Controller::AllowUserInteractionWithModel(bool allowInteraction)
@@ -462,7 +457,7 @@ void Controller::SearchTreeMap(
 
         spdlog::get(Constants::Logging::DefaultLog)
             ->info(fmt::format(
-                "Search Completed in: {:n} {}", stopwatch.GetElapsedTime().count(),
+                "Search Completed in: {:n} {}.", stopwatch.GetElapsedTime().count(),
                 stopwatch.GetUnitsAsCharacterArray()));
     };
 

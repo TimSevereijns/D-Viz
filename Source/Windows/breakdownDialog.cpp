@@ -12,7 +12,6 @@
 #include <QResizeEvent>
 #include <QScrollBar>
 #include <QtCharts/QBarSeries>
-#include <QtCharts/QLineSeries>
 
 #include <functional>
 #include <vector>
