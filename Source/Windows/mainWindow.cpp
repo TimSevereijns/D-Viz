@@ -15,7 +15,6 @@
 
 #include <limits>
 #include <memory>
-#include <sstream>
 
 #include <QFileDialog>
 #include <QMenuBar>
@@ -595,8 +594,7 @@ void MainWindow::OnNewSearchQuery()
     const auto shouldSearchDirectories =
         m_controller.GetSessionSettings().ShouldSearchDirectories();
 
-    const ScopedCursor waitCursor{ Qt::WaitCursor };
-    IgnoreUnused(waitCursor);
+    [[maybe_unused]] const ScopedCursor waitCursor{ Qt::WaitCursor };
 
     m_controller.SearchTreeMap(
         searchQuery, deselectionCallback, selectionCallback, shouldSearchFiles,

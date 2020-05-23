@@ -4,7 +4,6 @@
 
 #include "constants.h"
 
-#include <sstream>
 #include <system_error>
 
 #include <unistd.h>

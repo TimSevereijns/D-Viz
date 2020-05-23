@@ -3,7 +3,6 @@
 
 #include <QClipboard>
 
-#include "Utilities/ignoreUnused.hpp"
 #include "Utilities/scopeExit.hpp"
 #include "controller.h"
 

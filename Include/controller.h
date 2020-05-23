@@ -218,7 +218,7 @@ class Controller : public QObject
     /**
      * @brief Prints selection details to the main window's status bar.
      */
-    void DisplaySelectionDetails();
+    void DisplayHighlightDetails();
 
     /**
      * @brief Whether to allow the user to interact with the UI.

@@ -261,9 +261,7 @@ void GLCanvas::SetFieldOfView(int fieldOfView)
 
 void GLCanvas::keyPressEvent(QKeyEvent* const event)
 {
-    if (!event) {
-        return;
-    }
+    Expects(event);
 
     if (event->isAutoRepeat()) {
         event->ignore();
@@ -278,9 +276,7 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
 
 void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
 {
-    if (!event) {
-        return;
-    }
+    Expects(event);
 
     if (event->isAutoRepeat()) {
         event->ignore();
@@ -295,9 +291,7 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
 
 void GLCanvas::mousePressEvent(QMouseEvent* const event)
 {
-    if (!event) {
-        return;
-    }
+    Expects(event);
 
     m_lastMousePosition = event->pos();
 
@@ -319,9 +313,7 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
 
 void GLCanvas::mouseReleaseEvent(QMouseEvent* const event)
 {
-    if (!event) {
-        return;
-    }
+    Expects(event);
 
     if (event->button() == Qt::LeftButton) {
         m_isLeftMouseButtonDown = false;
@@ -338,9 +330,7 @@ void GLCanvas::mouseReleaseEvent(QMouseEvent* const event)
 
 void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 {
-    if (!event) {
-        return;
-    }
+    Expects(event);
 
     const auto deltaX = event->x() - m_lastMousePosition.x();
     const auto deltaY = event->y() - m_lastMousePosition.y();
@@ -382,9 +372,7 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 
 void GLCanvas::wheelEvent(QWheelEvent* const event)
 {
-    if (!event) {
-        return;
-    }
+    Expects(event);
 
     event->accept();
 

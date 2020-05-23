@@ -198,9 +198,7 @@ void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
     const auto doesPathRepresentEntireDrive{ rootPath == rootPath.root_path() };
 
     if (doesPathRepresentEntireDrive) {
-        const auto fraction =
-            (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
-
+        const auto fraction = sizeInBytes / static_cast<double>(m_occupiedDiskSpace);
         const auto message = fmt::format(
             L"Files Scanned: {:n}  |  {:03.2f}% Complete", filesScanned, fraction * 100);
 
@@ -278,12 +276,12 @@ void Controller::SelectNodeAndUpdateStatusBar(
     const auto fileSize = node->file.size;
     const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
     const auto [prefixedSize, units] = Utilities::ToPrefixedSize(fileSize, prefix);
-    const auto isSmall = (units == Utilities::Detail::bytesLabel);
+    const auto lessThanKilo = (units == Utilities::Detail::bytesLabel);
 
     const auto path = Controller::ResolveCompleteFilePath(node).wstring();
 
-    const auto message = isSmall ? fmt::format(L"{}  |  {:.0f} {}", path, prefixedSize, units)
-                                 : fmt::format(L"{}  |  {:.2f} {}", path, prefixedSize, units);
+    const auto message = lessThanKilo ? fmt::format(L"{}  |  {:.0f} {}", path, prefixedSize, units)
+                                      : fmt::format(L"{}  |  {:.2f} {}", path, prefixedSize, units);
 
     m_view->SetStatusBarMessage(message);
 }
@@ -323,7 +321,7 @@ void Controller::PrintMetadataToStatusBar()
     m_view->SetStatusBarMessage(message);
 }
 
-void Controller::DisplaySelectionDetails()
+void Controller::DisplayHighlightDetails()
 {
     const auto& highlightedNodes = m_model->GetHighlightedNodes();
 
@@ -337,14 +335,16 @@ void Controller::DisplaySelectionDetails()
     const auto isSmall = (units == Utilities::Detail::bytesLabel);
 
     const std::wstring nodes = highlightedNodes.size() == 1 ? L" node" : L" nodes";
-    const auto message = isSmall ? fmt::format(
-                                       L"Highlighted {:n} " + nodes + L", presenting {:.0f} {}.",
-                                       highlightedNodes.size(), prefixedSize, units)
-                                 : fmt::format(
-                                       L"Highlighted {:n} " + nodes + L", presenting {:.2f} {}.",
-                                       highlightedNodes.size(), prefixedSize, units);
 
-    m_view->SetStatusBarMessage(message);
+    if (isSmall) {
+        m_view->SetStatusBarMessage(fmt::format(
+            L"Highlighted {:n} " + nodes + L", presenting {:.0f} {}.", highlightedNodes.size(),
+            prefixedSize, units));
+    } else {
+        m_view->SetStatusBarMessage(fmt::format(
+            L"Highlighted {:n} " + nodes + L", presenting {:.2f} {}.", highlightedNodes.size(),
+            prefixedSize, units));
+    }
 }
 
 void Controller::AllowUserInteractionWithModel(bool allowInteraction)
@@ -396,7 +396,7 @@ void Controller::ProcessHighlightedNodes(
     auto& nodes = m_model->GetHighlightedNodes();
     callback(nodes);
 
-    DisplaySelectionDetails();
+    DisplayHighlightDetails();
 }
 
 void Controller::HighlightAncestors(
@@ -567,9 +567,7 @@ void Controller::ReportProgressToTaskbar(ButtonType& button, const ScanningProgr
     button.SetVisible(true);
 
     if (doesPathRepresentEntireDrive) {
-        const auto progressValue =
-            (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
-
+        const auto progressValue = sizeInBytes / static_cast<double>(m_occupiedDiskSpace);
         button.SetValue(static_cast<int>(100.0 * progressValue));
     } else {
         button.SetMinimum(0);

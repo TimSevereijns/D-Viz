@@ -47,14 +47,14 @@ void BreakdownDialog::ReloadData()
     }
 
     const auto stopwatch = Stopwatch<std::chrono::milliseconds>([&] {
-        // @todo Use a leaf iterator instead...
-        for (const auto& node : tree) {
-            if (node->file.type == FileType::Regular) {
-                m_tableModel.Insert(node, controller.IsNodeVisible(node.GetData()));
-            }
-
-            m_graphModel.AddDatapoint(node->file.extension, node->file.size);
-        }
+        std::for_each(
+            Tree<VizBlock>::LeafIterator{ tree.GetRoot() }, Tree<VizBlock>::LeafIterator{},
+            [&](const auto& node) {
+                if (node->file.type == FileType::Regular) {
+                    m_tableModel.Insert(node, controller.IsNodeVisible(node.GetData()));
+                    m_graphModel.AddDatapoint(node->file.extension, node->file.size);
+                }
+            });
 
         m_tableModel.BuildModel(controller.GetSessionSettings().GetActiveNumericPrefix());
         m_graphModel.BuildModel();

@@ -48,12 +48,13 @@ namespace
         std::for_each(
             Tree<VizBlock>::LeafIterator{ &rootNode }, Tree<VizBlock>::LeafIterator{},
             [&](const auto& node) {
-                if (node->file.extension == fileExtension) {
-                    const auto path = PathFromRootToNode(node);
-
-                    allEvents.emplace_back(
-                        FileEvent{ path.wstring() + node->file.extension, eventType });
+                if (node->file.extension != fileExtension) {
+                    return;
                 }
+
+                const auto path = PathFromRootToNode(node);
+                allEvents.emplace_back(
+                    FileEvent{ path.wstring() + node->file.extension, eventType });
             });
 
         return allEvents;
