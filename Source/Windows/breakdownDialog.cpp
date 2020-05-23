@@ -175,7 +175,7 @@ std::unique_ptr<QtCharts::QLogValueAxis>
 BreakdownDialog::SetupAxisY(const ExtensionDistribution& distribution) const
 {
     auto axisY = std::make_unique<QtCharts::QLogValueAxis>();
-    axisY->setRange(0, distribution.GetMaximumValueY());
+    axisY->setRange(0.5, distribution.GetMaximumValueY());
     axisY->setLabelFormat("%d");
     axisY->setTitleText("Count");
 
@@ -190,10 +190,8 @@ void BreakdownDialog::GenerateGraph(const std::wstring& extension)
     auto set = std::make_unique<QtCharts::QBarSet>("Distribution");
     set->setColor(Qt::blue);
 
-    for (std::size_t index = 0; index < buckets.size(); ++index) {
-        // Since the log axis won't let us start at 0, we'll need to work around the fact that we'd
-        // still like to visualize bars of height one. We'll cheat a little by adding half a unit.
-        set->append(buckets[index] == 1 ? 1.5 : buckets[index]);
+    for (const auto& count : buckets) {
+        set->append(count);
     }
 
     auto series = std::make_unique<QtCharts::QBarSeries>();
@@ -238,7 +236,6 @@ void BreakdownDialog::GenerateGraph(const std::wstring& extension)
         std::unique_ptr<QtCharts::QChart>(m_ui.graphView->chart());
 
     m_ui.graphView->setChart(chart.release());
-
     m_ui.graphView->setBackgroundBrush(Qt::white);
     m_ui.graphView->setRenderHint(QPainter::Antialiasing);
 }
