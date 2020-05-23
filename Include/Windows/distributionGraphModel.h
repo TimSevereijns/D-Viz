@@ -29,13 +29,13 @@ class ExtensionDistribution
 
     std::uintmax_t GetMaximumValueY() const;
 
-    constexpr static int GetBucketCount()
+    std::size_t GetBucketCount() const
     {
-        return bucketCount;
+        return m_buckets.size();
     }
 
   private:
-    static constexpr auto bucketCount = 128;
+    static constexpr std::size_t defaultBucketCount = 128;
 
     std::uintmax_t m_minimumX{ 0 };
     std::uintmax_t m_maximumX{ 0 };

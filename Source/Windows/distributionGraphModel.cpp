@@ -39,16 +39,16 @@ void ExtensionDistribution::AnalyzeDistribution()
 
     if (m_maximumX - m_minimumX == 0) {
         m_buckets.clear();
-        m_buckets.push_back(m_datapoints.size());
+        m_buckets.push_back(static_cast<std::uint32_t>(m_datapoints.size()));
 
         return;
     }
 
-    std::vector<std::uint32_t> bins(bucketCount, 0);
+    std::vector<std::uint32_t> bins(defaultBucketCount, 0);
     for (const auto& fileSize : m_datapoints) {
         const auto index = static_cast<std::size_t>(std::floor(
             (fileSize - m_minimumX) / static_cast<long double>(m_maximumX - m_minimumX) *
-            (bucketCount - 1)));
+            (defaultBucketCount - 1)));
 
         ++bins[index];
     }

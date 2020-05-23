@@ -149,16 +149,16 @@ BreakdownDialog::SetupAxisX(const ExtensionDistribution& distribution) const
     axisX->setLabelsPosition(QtCharts::QCategoryAxis::AxisLabelsPositionOnValue);
     axisX->setTitleText("Size");
 
-    constexpr auto tickCount = 4;
+    const auto bucketCount = static_cast<int>(distribution.GetBucketCount());
+
+    const auto tickCount = std::min(4, bucketCount);
     axisX->setTickCount(tickCount);
 
-    const auto tickInterval = distribution.GetBucketCount() / tickCount;
+    const auto tickInterval = bucketCount / tickCount;
     axisX->setTickInterval(tickInterval);
 
     const auto prefix = m_mainWindow.GetController().GetSessionSettings().GetActiveNumericPrefix();
     const auto largestFile = distribution.GetMaximumValueX();
-
-    axisX->append("0", 0);
 
     for (int index = 1; index < tickCount + 1; ++index) {
         const auto value = index / static_cast<double>(tickCount) * largestFile;
@@ -191,8 +191,9 @@ void BreakdownDialog::GenerateGraph(const std::wstring& extension)
     set->setColor(Qt::blue);
 
     for (std::size_t index = 0; index < buckets.size(); ++index) {
+        // Since the log axis won't let us start at 0, we'll need to work around the fact that we'd
+        // still like to visualize bars of height one. We'll cheat a little by adding half a unit.
         set->append(buckets[index] == 1 ? 1.5 : buckets[index]);
-        // series->append(index, buckets[index]); //< For QLineSeries
     }
 
     auto series = std::make_unique<QtCharts::QBarSeries>();
@@ -208,22 +209,26 @@ void BreakdownDialog::GenerateGraph(const std::wstring& extension)
 
     QFont font;
     font.setPixelSize(12);
+    font.setBold(true);
     chart->setTitleFont(font);
     chart->setTitleBrush(QBrush{ Qt::black });
     chart->setTitle("Size Distribution");
 
     auto axisX = SetupAxisX(distribution);
     chart->addAxis(axisX.get(), Qt::AlignBottom);
-    series->attachAxis(axisX.release());
+    series->attachAxis(axisX.get());
 
     auto axisY = SetupAxisY(distribution);
     chart->addAxis(axisY.get(), Qt::AlignLeft);
-    series->attachAxis(axisY.release());
+    series->attachAxis(axisY.get());
 
     // Since `QChart::addSeries(...)` takes ownership of the series resource, one would reasonably
-    // assume the `chart->addSeries(series.release())` call could be moved down after the last use
-    // of `series` pointer. Unfortunately, if one were to do that, and axis labels no longer
-    // render. This seems like a bug in the Qt API design. As a work-around, we'll release here:
+    // assume that the `chart->addSeries(series.release())` call could be moved down after the last
+    // use of the `series` pointer. Unfortunately, if one were to do that, and axis labels no longer
+    // render. This seems like a bug in the Qt API design. As a work-around, we'll release here. The
+    // other resources suffer from similar bizarre behavior.
+    axisX.release();
+    axisY.release();
     series.release();
 
     // Another quirk in the API stems from the fact that while the documentation claims "the
@@ -231,6 +236,7 @@ void BreakdownDialog::GenerateGraph(const std::wstring& extension)
     // up the previous chart.
     [[maybe_unused]] const auto previousChart =
         std::unique_ptr<QtCharts::QChart>(m_ui.graphView->chart());
+
     m_ui.graphView->setChart(chart.release());
 
     m_ui.graphView->setBackgroundBrush(Qt::white);
