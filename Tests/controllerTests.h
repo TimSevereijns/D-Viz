@@ -137,6 +137,11 @@ class ControllerTests : public QObject
     void HighlightAncestors() const;
 
     /**
+     * @brief Verifies that a highlighted node is indeed reported as being highlighted.
+     */
+    void IsNodeHighlighted() const;
+
+    /**
      * @brief Verifies that descendant nodes are correctly highlighted.
      */
     void HighlightDescendants() const;
@@ -145,6 +150,21 @@ class ControllerTests : public QObject
      * @brief Verifies that a node can be selected via a picking ray.
      */
     void SelectNodeViaRay() const;
+
+    /**
+     * @brief Verifies that the default color of an unhighlighted/unselected node is what we expect.
+     */
+    void DetermineDefaultLeafNodeColor() const;
+
+    /**
+     * @brief Verifies that the default color of highlighted node is what we expect it to be.
+     */
+    void DetermineDefaultColorOfHighlightedNode() const;
+
+    /**
+     * @brief Verifies a non-default node color is properly tracked.
+     */
+    void DetermineCustomColorOfRegisteredNode() const;
 
   private:
     std::shared_ptr<TestViewFactory> m_viewFactory;

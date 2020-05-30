@@ -298,6 +298,22 @@ void ControllerTests::HighlightAncestors() const
     m_controller->HighlightAncestors(*firstGreatGrandchild, selectionCallback);
 }
 
+void ControllerTests::IsNodeHighlighted() const
+{
+    ScanDrive();
+
+    const auto selectionCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+        QCOMPARE(nodes.size(), m_controller->GetHighlightedNodes().size());
+    };
+
+    REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
+
+    const auto* firstChild = m_controller->GetTree().GetRoot()->GetFirstChild();
+    m_controller->HighlightAncestors(*firstChild, selectionCallback);
+
+    m_controller->IsNodeHighlighted(*firstChild);
+}
+
 void ControllerTests::HighlightDescendants() const
 {
     ScanDrive();
@@ -347,6 +363,57 @@ void ControllerTests::SelectNodeViaRay() const
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
 
     m_controller->SelectNodeViaRay(camera, ray, deselectionCallback, selectionCallback);
+}
+
+void ControllerTests::DetermineDefaultLeafNodeColor() const
+{
+    ScanDrive();
+
+    const std::wstring targetName = L"async_result.hpp";
+
+    const auto* root = m_controller->GetTree().GetRoot();
+
+    const auto targetNode = std::find_if(
+        Tree<VizBlock>::LeafIterator{ root }, Tree<VizBlock>::LeafIterator{},
+        [&](const auto& node) { return (node->file.name + node->file.extension) == targetName; });
+
+    const auto& nodeColor = m_controller->DetermineNodeColor(*targetNode);
+    QCOMPARE(nodeColor, Constants::Colors::FileGreen);
+}
+
+void ControllerTests::DetermineDefaultColorOfHighlightedNode() const
+{
+    SearchTreemapWithoutPriorSelection();
+
+    const std::wstring targetName = L"async_result.hpp";
+
+    const auto* root = m_controller->GetTree().GetRoot();
+
+    const auto targetNode = std::find_if(
+        Tree<VizBlock>::LeafIterator{ root }, Tree<VizBlock>::LeafIterator{},
+        [&](const auto& node) { return (node->file.name + node->file.extension) == targetName; });
+
+    const auto& nodeColor = m_controller->DetermineNodeColor(*targetNode);
+    QCOMPARE(nodeColor, Constants::Colors::SlateGray);
+}
+
+void ControllerTests::DetermineCustomColorOfRegisteredNode() const
+{
+    ScanDrive();
+
+    const std::wstring targetName = L"async_result.hpp";
+
+    const auto* root = m_controller->GetTree().GetRoot();
+
+    const auto targetNode = std::find_if(
+        Tree<VizBlock>::LeafIterator{ root }, Tree<VizBlock>::LeafIterator{},
+        [&](const auto& node) { return (node->file.name + node->file.extension) == targetName; });
+
+    constexpr auto customColor = QVector3D{ 0.1f, 0.2f, 0.3f };
+    m_controller->RegisterNodeColor(*targetNode, customColor);
+    const auto& nodeColor = m_controller->DetermineNodeColor(*targetNode);
+
+    QCOMPARE(nodeColor, customColor);
 }
 
 REGISTER_TEST(ControllerTests)
