@@ -138,7 +138,9 @@ void BreakdownDialog::HandleDoubleClick(const QModelIndex& index)
     const auto extensionVariant = m_proxyModel.index(index.row(), 0).data(Qt::UserRole);
     const auto extension = extensionVariant.toString().toStdWString();
 
-    GenerateGraph(extension);
+    if (extension != L"No Extension") {
+        GenerateGraph(extension);
+    }
 }
 
 std::unique_ptr<QtCharts::QCategoryAxis>
@@ -170,15 +172,46 @@ BreakdownDialog::SetupAxisX(const ExtensionDistribution& distribution) const
     return axisX;
 }
 
-std::unique_ptr<QtCharts::QLogValueAxis>
-BreakdownDialog::SetupAxisY(const ExtensionDistribution& distribution) const
+std::unique_ptr<QtCharts::QValueAxis>
+BreakdownDialog::SetupLinearAxisY(const ExtensionDistribution& distribution) const
 {
+    const auto tallestBarHeight = distribution.GetMaximumValueY();
+
+    constexpr auto minimumTickCount = 2;
+    const auto tickCount = tallestBarHeight <= 2
+                               ? minimumTickCount
+                               : (std::min(static_cast<int>(tallestBarHeight), 4));
+
+    auto axisY = std::make_unique<QtCharts::QValueAxis>();
+    axisY->setRange(0, tallestBarHeight);
+    axisY->setLabelFormat("%.1f");
+    axisY->setTitleText("Count");
+    axisY->setTickCount(tickCount);
+
+    return axisY;
+}
+
+std::unique_ptr<QtCharts::QLogValueAxis>
+BreakdownDialog::SetupLogarithmAxisY(const ExtensionDistribution& distribution) const
+{
+    const auto tallestBarHeight = distribution.GetMaximumValueY();
+
     auto axisY = std::make_unique<QtCharts::QLogValueAxis>();
-    axisY->setRange(0.5, distribution.GetMaximumValueY());
+    axisY->setRange(0.5, tallestBarHeight);
     axisY->setLabelFormat("%d");
     axisY->setTitleText("Count");
 
     return axisY;
+}
+
+std::unique_ptr<QtCharts::QAbstractAxis>
+BreakdownDialog::SetupAxisY(const ExtensionDistribution& distribution) const
+{
+    if (distribution.GetMaximumValueY() > 32) {
+        return SetupLogarithmAxisY(distribution);
+    }
+
+    return SetupLinearAxisY(distribution);
 }
 
 void BreakdownDialog::GenerateGraph(const std::wstring& extension)

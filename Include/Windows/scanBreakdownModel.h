@@ -3,7 +3,6 @@
 
 #include <QAbstractTableModel>
 
-#include "Settings/persistentSettings.h"
 #include "Utilities/utilities.hpp"
 #include "Visualizations/vizBlock.h"
 #include "constants.h"

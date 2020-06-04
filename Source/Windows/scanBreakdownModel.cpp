@@ -1,4 +1,5 @@
 #include "Windows/scanBreakdownModel.h"
+#include "Settings/persistentSettings.h"
 
 #include <gsl/gsl_assert>
 

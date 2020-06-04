@@ -88,7 +88,13 @@ class BreakdownDialog final : public QDialog
     std::unique_ptr<QtCharts::QCategoryAxis>
     SetupAxisX(const ExtensionDistribution& distribution) const;
 
+    std::unique_ptr<QtCharts::QValueAxis>
+    SetupLinearAxisY(const ExtensionDistribution& distribution) const;
+
     std::unique_ptr<QtCharts::QLogValueAxis>
+    SetupLogarithmAxisY(const ExtensionDistribution& distribution) const;
+
+    std::unique_ptr<QtCharts::QAbstractAxis>
     SetupAxisY(const ExtensionDistribution& distribution) const;
 
     void GenerateGraph(const std::wstring& extension);
