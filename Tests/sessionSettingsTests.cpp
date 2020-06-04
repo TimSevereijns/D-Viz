@@ -16,7 +16,7 @@ void SessionSettingsTests::init()
 
 void SessionSettingsTests::ModifyCameraSpeed() const
 {
-    const auto desiredSpeed = 50;
+    constexpr auto desiredSpeed = 50;
 
     Settings::SessionSettings manager;
     manager.SetCameraSpeed(desiredSpeed);
@@ -26,7 +26,7 @@ void SessionSettingsTests::ModifyCameraSpeed() const
 
 void SessionSettingsTests::ModifyMouseSensitivity() const
 {
-    const auto desiredSensitivity = 50;
+    constexpr auto desiredSensitivity = 50;
 
     Settings::SessionSettings manager;
     manager.SetMouseSensitivity(desiredSensitivity);
@@ -36,7 +36,7 @@ void SessionSettingsTests::ModifyMouseSensitivity() const
 
 void SessionSettingsTests::ModifyLightAttenuationFactor() const
 {
-    const auto desiredFactor = 50;
+    constexpr auto desiredFactor = 50;
 
     Settings::SessionSettings manager;
     manager.SetLightAttenuation(desiredFactor);
@@ -46,7 +46,7 @@ void SessionSettingsTests::ModifyLightAttenuationFactor() const
 
 void SessionSettingsTests::ModifyAmbientLightCoefficient() const
 {
-    const auto desiredCoefficient = 50;
+    constexpr auto desiredCoefficient = 50;
 
     Settings::SessionSettings manager;
     manager.SetAmbientLightCoefficient(desiredCoefficient);
@@ -56,7 +56,7 @@ void SessionSettingsTests::ModifyAmbientLightCoefficient() const
 
 void SessionSettingsTests::ModifyPrimaryLightAttachmentToCamera() const
 {
-    const auto desiredAttachment = true;
+    constexpr auto desiredAttachment = true;
 
     Settings::SessionSettings manager;
     manager.AttachLightToCamera(desiredAttachment);
@@ -66,7 +66,7 @@ void SessionSettingsTests::ModifyPrimaryLightAttachmentToCamera() const
 
 void SessionSettingsTests::ModifyFileSearchingPreference() const
 {
-    const auto searchFiles = true;
+    constexpr auto searchFiles = true;
 
     Settings::SessionSettings manager;
     manager.SearchFiles(searchFiles);
@@ -76,7 +76,7 @@ void SessionSettingsTests::ModifyFileSearchingPreference() const
 
 void SessionSettingsTests::ModifyDirectorySearchingPreference() const
 {
-    const auto searchDirectories = false;
+    constexpr auto searchDirectories = false;
 
     Settings::SessionSettings manager;
     manager.SearchDirectories(searchDirectories);
@@ -86,10 +86,10 @@ void SessionSettingsTests::ModifyDirectorySearchingPreference() const
 
 void SessionSettingsTests::ModifyNumericPrefix() const
 {
-    const auto numericPrefix = Constants::SizePrefix::Binary;
+    constexpr auto numericPrefix = Constants::SizePrefix::Binary;
 
     Settings::SessionSettings manager;
-    manager.SetActiveNumericPrefix(Constants::SizePrefix::Binary);
+    manager.SetActiveNumericPrefix(numericPrefix);
 
     QCOMPARE(manager.GetActiveNumericPrefix(), numericPrefix);
 }

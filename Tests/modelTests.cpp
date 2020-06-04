@@ -127,7 +127,7 @@ void ModelTests::init()
 
 void ModelTests::ProgressCallbackIsInvoked()
 {
-    QVERIFY(m_progressCallbackInvocations > 0); ///< Scanning time determines exact count.
+    QVERIFY(m_progressCallbackInvocations > 0); //< Scanning time determines exact count.
 }
 
 void ModelTests::ModelIsPopulated()
@@ -334,8 +334,8 @@ void ModelTests::FindNearestNodeFromFront()
     const auto z = static_cast<float>(targetBlock.GetOrigin().z() - targetBlock.GetDepth() / 2.0);
 
     Camera camera;
-    camera.SetPosition(QVector3D{ -300, 300, 300 });
-    camera.LookAt(QVector3D{ x, y, z });
+    camera.SetPosition({ -300, 300, 300 });
+    camera.LookAt({ x, y, z });
 
     const Ray ray{ camera.GetPosition(), camera.Forward() };
 
@@ -365,8 +365,8 @@ void ModelTests::FindNearestNodeFromBack()
     const auto z = static_cast<float>(targetBlock.GetOrigin().z() - targetBlock.GetDepth() / 2.0);
 
     Camera camera;
-    camera.SetPosition(QVector3D{ 300, 300, -300 });
-    camera.LookAt(QVector3D{ x, y, z });
+    camera.SetPosition({ 300, 300, -300 });
+    camera.LookAt({ x, y, z });
 
     const Ray ray{ camera.GetPosition(), camera.Forward() };
 
@@ -396,8 +396,8 @@ void ModelTests::FindNearestNodeWithSizeLimitations()
     const auto z = static_cast<float>(targetBlock.GetOrigin().z() - targetBlock.GetDepth() / 2.0);
 
     Camera camera;
-    camera.SetPosition(QVector3D{ -300, 300, 300 });
-    camera.LookAt(QVector3D{ x, y, z });
+    camera.SetPosition({ -300, 300, 300 });
+    camera.LookAt({ x, y, z });
 
     const Ray ray{ camera.GetPosition(), camera.Forward() };
 
