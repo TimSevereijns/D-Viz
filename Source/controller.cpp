@@ -1,11 +1,11 @@
 #include "controller.h"
 
+#include "Model/squarifiedTreemap.h"
 #include "Settings/persistentSettings.h"
 #include "Utilities/ignoreUnused.hpp"
 #include "Utilities/operatingSystem.hpp"
 #include "Utilities/scopeExit.hpp"
-#include "Visualizations/squarifiedTreemap.h"
-#include "Windows/mainWindow.h"
+#include "View/mainWindow.h"
 #include "constants.h"
 #include "literals.h"
 

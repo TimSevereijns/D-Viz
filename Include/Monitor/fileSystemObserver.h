@@ -2,7 +2,7 @@
 #define FILESYSEMOBSERVER_H
 
 #include "Utilities/threadSafeQueue.hpp"
-#include "Visualizations/vizBlock.h"
+#include "Model/vizBlock.h"
 #include "fileChangeNotification.hpp"
 #include "fileMonitorBase.h"
 

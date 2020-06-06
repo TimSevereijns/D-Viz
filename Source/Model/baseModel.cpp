@@ -1,8 +1,8 @@
-#include "Visualizations/baseModel.h"
+#include "Model/baseModel.h"
 #include "Monitor/fileChangeNotification.hpp"
 #include "Scanner/scanningUtilities.h"
 #include "Utilities/utilities.hpp"
-#include "Visualizations/ray.h"
+#include "Model/ray.h"
 #include "constants.h"
 
 #include <boost/algorithm/string/case_conv.hpp>

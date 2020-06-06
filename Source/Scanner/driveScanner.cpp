@@ -1,6 +1,6 @@
 #include "Scanner/driveScanner.h"
 
-#include "Visualizations/precisePoint.h"
+#include "Model/precisePoint.h"
 
 #include <QMessageBox>
 

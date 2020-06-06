@@ -1,12 +1,12 @@
-#include "Viewport/glCanvas.h"
+#include "View/Viewport/glCanvas.h"
 
+#include "Model/squarifiedTreemap.h"
 #include "Stopwatch/Stopwatch.hpp"
 #include "Utilities/operatingSystem.hpp"
 #include "Utilities/scopeExit.hpp"
-#include "Viewport/gamepadContextMenu.h"
-#include "Viewport/mouseContextMenu.h"
-#include "Visualizations/squarifiedTreemap.h"
-#include "Windows/mainWindow.h"
+#include "View/Viewport/gamepadContextMenu.h"
+#include "View/Viewport/mouseContextMenu.h"
+#include "View/mainWindow.h"
 #include "constants.h"
 #include "controller.h"
 

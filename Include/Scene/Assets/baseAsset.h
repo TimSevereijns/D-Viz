@@ -1,11 +1,11 @@
 #ifndef BASEASSET_H
 #define BASEASSET_H
 
+#include "Model/baseModel.h"
 #include "Scene/light.h"
 #include "Settings/persistentSettings.h"
 #include "Settings/sessionSettings.h"
-#include "Viewport/camera.h"
-#include "Visualizations/baseModel.h"
+#include "View/Viewport/camera.h"
 
 #include <string_view>
 

@@ -2,7 +2,7 @@
 #define MODELFACTORY_H
 
 #include "Factories/modelFactoryInterface.h"
-#include "Visualizations/squarifiedTreemap.h"
+#include "Model/squarifiedTreemap.h"
 
 class ModelFactory final : public ModelFactoryInterface
 {

@@ -1,4 +1,4 @@
-#include "Visualizations/ray.h"
+#include "Model/ray.h"
 
 Ray::Ray(const QVector3D& origin, const QVector3D& direction)
     : m_origin{ origin }, m_direction{ direction }

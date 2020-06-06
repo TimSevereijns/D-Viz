@@ -1,4 +1,4 @@
-#include "Visualizations/squarifiedTreemap.h"
+#include "Model/squarifiedTreemap.h"
 #include "constants.h"
 
 #include <algorithm>

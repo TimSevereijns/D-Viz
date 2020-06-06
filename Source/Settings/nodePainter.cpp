@@ -1,6 +1,6 @@
 #include "Settings/nodePainter.h"
 
-#include <Visualizations/vizBlock.h>
+#include <Model/vizBlock.h>
 #include <constants.h>
 
 #include <spdlog/spdlog.h>

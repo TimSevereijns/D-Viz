@@ -4,7 +4,7 @@
 #include <limits>
 
 #include "Scanner/fileInfo.h"
-#include "Visualizations/block.h"
+#include "Model/block.h"
 
 /**
  * @brief The VizNode struct represents everything needed to parse, render, and perform hit

@@ -1,6 +1,6 @@
 #include "Scanner/scanningUtilities.h"
 #include "Utilities/ignoreUnused.hpp"
-#include "Visualizations/vizBlock.h"
+#include "Model/vizBlock.h"
 
 #include <QtGlobal>
 

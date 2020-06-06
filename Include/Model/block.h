@@ -1,7 +1,7 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
-#include "Visualizations/precisePoint.h"
+#include "Model/precisePoint.h"
 
 #include <QVector3D>
 #include <QVector>

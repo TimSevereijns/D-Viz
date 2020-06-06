@@ -1,7 +1,7 @@
 #ifndef MOCKVIEW_H
 #define MOCKVIEW_H
 
-#include <Windows/baseView.h>
+#include <View/baseView.h>
 
 #include <QtTest>
 

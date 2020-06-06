@@ -1,4 +1,4 @@
-#include "Windows/distributionGraphModel.h"
+#include "View/distributionGraphModel.h"
 
 ExtensionDistribution& DistributionGraphModel::GetDistribution(const std::wstring& extension)
 {

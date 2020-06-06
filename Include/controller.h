@@ -13,14 +13,14 @@
 #include "Factories/modelFactoryInterface.h"
 #include "Factories/viewFactory.h"
 #include "Factories/viewFactoryInterface.h"
+#include "Model/vizBlock.h"
 #include "Monitor/fileChangeNotification.hpp"
 #include "Scanner/driveScanner.h"
 #include "Scene/light.h"
 #include "Settings/nodePainter.h"
 #include "Settings/persistentSettings.h"
 #include "Settings/sessionSettings.h"
-#include "Visualizations/vizBlock.h"
-#include "Windows/mainWindow.h"
+#include "View/mainWindow.h"
 #include "constants.h"
 
 #if defined(Q_OS_WIN)

@@ -29,9 +29,9 @@
 #include "Scanner/fileInfo.h"
 #include "Scanner/scanningParameters.h"
 #include "Scanner/scanningProgress.hpp"
-#include "Visualizations/baseModel.h"
-#include "Visualizations/block.h"
-#include "Visualizations/vizBlock.h"
+#include "Model/baseModel.h"
+#include "Model/block.h"
+#include "Model/vizBlock.h"
 
 /**
  * @brief The NodeAndPath struct

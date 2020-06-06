@@ -8,7 +8,7 @@
 
 #include <functional>
 
-#include "Windows/distributionGraphModel.h"
+#include "View/distributionGraphModel.h"
 #include "scanBreakdownModel.h"
 #include "ui_breakdownDialog.h"
 

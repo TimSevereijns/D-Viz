@@ -1,7 +1,7 @@
 #ifndef VIEWFRUSTUM_HPP
 #define VIEWFRUSTUM_HPP
 
-#include "Viewport/camera.h"
+#include "View/Viewport/camera.h"
 
 #include <cmath>
 #include <utility>

@@ -1,4 +1,4 @@
-#include "Visualizations/block.h"
+#include "Model/block.h"
 
 Block::Block(
     const PrecisePoint& origin, const double blockWidth, const double blockHeight,

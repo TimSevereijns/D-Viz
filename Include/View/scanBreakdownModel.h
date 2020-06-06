@@ -4,7 +4,7 @@
 #include <QAbstractTableModel>
 
 #include "Utilities/utilities.hpp"
-#include "Visualizations/vizBlock.h"
+#include "Model/vizBlock.h"
 #include "constants.h"
 
 #include <Tree/Tree.hpp>
