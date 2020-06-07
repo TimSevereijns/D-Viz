@@ -25,7 +25,7 @@ namespace Assets
     bool AssetBase::LoadShaders(const QString& vertexShaderName, const QString& fragmentShaderName)
     {
         if (!m_mainShader.addShaderFromSourceFile(
-                QOpenGLShader::Vertex, ":/Shaders/" + vertexShaderName + ".vert")) {
+                QOpenGLShader::Vertex, ":/View/Shaders/" + vertexShaderName + ".vert")) {
             const auto& log = spdlog::get(Constants::Logging::DefaultLog);
             log->error("Failed to load vertex shader: " + vertexShaderName.toStdString() + ".vert");
 
@@ -33,7 +33,7 @@ namespace Assets
         }
 
         if (!m_mainShader.addShaderFromSourceFile(
-                QOpenGLShader::Fragment, ":/Shaders/" + fragmentShaderName + ".frag")) {
+                QOpenGLShader::Fragment, ":/View/Shaders/" + fragmentShaderName + ".frag")) {
             const auto& log = spdlog::get(Constants::Logging::DefaultLog);
             log->error(
                 "Failed to load fragment shader: " + fragmentShaderName.toStdString() + ".frag");

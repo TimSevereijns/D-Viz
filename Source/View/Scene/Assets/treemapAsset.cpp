@@ -1,9 +1,9 @@
 #include "View/Scene/Assets/treemapAsset.h"
+#include "Model/baseModel.h"
+#include "Model/vizBlock.h"
 #include "Settings/settings.h"
 #include "Utilities/scopeExit.hpp"
 #include "Utilities/viewFrustum.hpp"
-#include "Model/baseModel.h"
-#include "Model/vizBlock.h"
 #include "constants.h"
 #include "controller.h"
 
@@ -204,10 +204,10 @@ namespace Assets
     bool Treemap::LoadShaders()
     {
         m_shadowMapShader.addShaderFromSourceFile(
-            QOpenGLShader::Vertex, ":/Shaders/shadowMapping.vert");
+            QOpenGLShader::Vertex, ":/View/Shaders/shadowMapping.vert");
 
         m_shadowMapShader.addShaderFromSourceFile(
-            QOpenGLShader::Fragment, ":/Shaders/shadowMapping.frag");
+            QOpenGLShader::Fragment, ":/View/Shaders/shadowMapping.frag");
 
         auto success = m_shadowMapShader.link();
 
