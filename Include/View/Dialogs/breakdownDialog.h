@@ -8,8 +8,8 @@
 
 #include <functional>
 
-#include "View/distributionGraphModel.h"
-#include "scanBreakdownModel.h"
+#include "View/Dialogs/distributionGraphModel.h"
+#include "View/Dialogs/scanBreakdownModel.h"
 #include "ui_breakdownDialog.h"
 
 #include <gsl/gsl_assert>

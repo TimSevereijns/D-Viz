@@ -28,13 +28,13 @@ SOURCES += \
     $$PWD/Source/Settings/sessionSettings.cpp \
     $$PWD/Source/Settings/settings.cpp \
     $$PWD/Source/Utilities/scopedHandle.cpp \
-    $$PWD/Source/View/aboutDialog.cpp \
-    $$PWD/Source/View/breakdownDialog.cpp \
-    $$PWD/Source/View/distributionGraphModel.cpp \
+    $$PWD/Source/View/Dialogs/aboutDialog.cpp \
+    $$PWD/Source/View/Dialogs/breakdownDialog.cpp \
+    $$PWD/Source/View/Dialogs/distributionGraphModel.cpp \
     $$PWD/Source/View/HID/gamepad.cpp \
     $$PWD/Source/View/HID/keyboardManager.cpp \
     $$PWD/Source/View/mainWindow.cpp \
-    $$PWD/Source/View/scanBreakdownModel.cpp \
+    $$PWD/Source/View/Dialogs/scanBreakdownModel.cpp \
     $$PWD/Source/View/Scene/Assets/baseAsset.cpp \
     $$PWD/Source/View/Scene/Assets/crosshairAsset.cpp \
     $$PWD/Source/View/Scene/Assets/debuggingRayAsset.cpp \
@@ -87,10 +87,10 @@ HEADERS += \
     $$PWD/Include/Utilities/threadSafeQueue.hpp \
     $$PWD/Include/Utilities/utilities.hpp \
     $$PWD/Include/Utilities/viewFrustum.hpp \
-    $$PWD/Include/View/aboutDialog.h \
+    $$PWD/Include/View/Dialogs/aboutDialog.h \
     $$PWD/Include/View/baseView.h \
-    $$PWD/Include/View/breakdownDialog.h \
-    $$PWD/Include/View/distributionGraphModel.h \
+    $$PWD/Include/View/Dialogs/breakdownDialog.h \
+    $$PWD/Include/View/Dialogs/distributionGraphModel.h \
     $$PWD/Include/View/HID/gamepad.h \
     $$PWD/Include/View/HID/keyboardManager.h \
     $$PWD/Include/View/mainWindow.h \
@@ -112,8 +112,8 @@ HEADERS += \
     $$PWD/Include/bootstrapper.hpp
 
 FORMS += \
-    $$PWD/Source/View/aboutDialog.ui \
-    $$PWD/Source/View/breakdownDialog.ui \
+    $$PWD/Source/View/Dialogs/aboutDialog.ui \
+    $$PWD/Source/View/Dialogs/breakdownDialog.ui \
     $$PWD/Source/View/mainWindow.ui
 
 INCLUDEPATH += \

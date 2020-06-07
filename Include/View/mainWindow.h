@@ -14,11 +14,11 @@
 
 #include <string_view>
 
+#include "Dialogs/aboutDialog.h"
+#include "Dialogs/breakdownDialog.h"
 #include "View/HID/gamepad.h"
 #include "Viewport/glCanvas.h"
-#include "aboutDialog.h"
 #include "baseView.h"
-#include "breakdownDialog.h"
 #include "constants.h"
 #include "ui_mainWindow.h"
 

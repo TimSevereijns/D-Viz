@@ -1,4 +1,4 @@
-#include "View/breakdownDialog.h"
+#include "View/Dialogs/breakdownDialog.h"
 
 #include "View/mainWindow.h"
 #include "controller.h"
