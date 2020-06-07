@@ -1,12 +1,12 @@
 <RCC>
     <qresource prefix="/">
-        <file>Shaders/simpleLineFragmentShader.frag</file>
-        <file>Shaders/simpleLineVertexShader.vert</file>
-        <file>Shaders/visualizationFragmentShader.frag</file>
-        <file>Shaders/visualizationVertexShader.vert</file>
-        <file>Shaders/shadowMapping.frag</file>
-        <file>Shaders/shadowMapping.vert</file>
-        <file>Shaders/texturePreview.frag</file>
-        <file>Shaders/texturePreview.vert</file>
+        <file>View/Shaders/simpleLineFragmentShader.frag</file>
+        <file>View/Shaders/simpleLineVertexShader.vert</file>
+        <file>View/Shaders/visualizationFragmentShader.frag</file>
+        <file>View/Shaders/visualizationVertexShader.vert</file>
+        <file>View/Shaders/shadowMapping.frag</file>
+        <file>View/Shaders/shadowMapping.vert</file>
+        <file>View/Shaders/texturePreview.frag</file>
+        <file>View/Shaders/texturePreview.vert</file>
     </qresource>
 </RCC>

@@ -1,4 +1,4 @@
-#include "Scene/Assets/lineAsset.h"
+#include "View/Scene/Assets/lineAsset.h"
 
 namespace Assets
 {

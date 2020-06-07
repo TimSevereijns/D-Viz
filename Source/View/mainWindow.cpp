@@ -1,5 +1,5 @@
 #include "View/mainWindow.h"
-#include "Scanner/scanningProgress.hpp"
+#include "Model/Scanner/scanningProgress.hpp"
 #include "Settings/persistentSettings.h"
 #include "Settings/settings.h"
 #include "Utilities/operatingSystem.hpp"

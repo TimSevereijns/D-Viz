@@ -1,6 +1,6 @@
-#include "Scanner/scanningWorker.h"
-#include "Scanner/driveScanner.h"
-#include "Scanner/scanningUtilities.h"
+#include "Model/Scanner/scanningWorker.h"
+#include "Model/Scanner/driveScanner.h"
+#include "Model/Scanner/scanningUtilities.h"
 #include "constants.h"
 
 #ifdef Q_OS_WIN

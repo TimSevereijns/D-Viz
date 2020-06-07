@@ -1,4 +1,4 @@
-#include "Scanner/scanningUtilities.h"
+#include "Model/Scanner/scanningUtilities.h"
 #include "Utilities/ignoreUnused.hpp"
 #include "Model/vizBlock.h"
 

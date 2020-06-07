@@ -1,7 +1,7 @@
 #ifndef CANVASCONTEXTMENU_H
 #define CANVASCONTEXTMENU_H
 
-#include "HID/keyboardManager.h"
+#include "View/HID/keyboardManager.h"
 
 #include <QMenu>
 

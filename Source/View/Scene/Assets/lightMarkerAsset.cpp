@@ -1,14 +1,14 @@
-#include "Scene/Assets/debuggingRayAsset.h"
+#include "View/Scene/Assets/lightMarkerAsset.h"
 
 namespace Assets
 {
-    DebuggingRay::DebuggingRay(const Controller& controller, QOpenGLExtraFunctions& openGL)
+    LightMarker::LightMarker(const Controller& controller, QOpenGLExtraFunctions& openGL)
         : Line{ controller, openGL }
     {
-        m_shouldRender = false;
+        m_shouldRender = m_persistentSettings.ShouldRenderLightMarkers();
     }
 
-    void DebuggingRay::Render(const Camera& camera, const std::vector<Light>&)
+    void LightMarker::Render(const Camera& camera, const std::vector<Light>&)
     {
         if (!m_shouldRender) {
             return;
@@ -19,7 +19,7 @@ namespace Assets
 
         m_VAO.bind();
 
-        m_openGL.glLineWidth(3);
+        m_openGL.glLineWidth(2);
 
         m_openGL.glDrawArrays(
             /* mode = */ GL_LINES,

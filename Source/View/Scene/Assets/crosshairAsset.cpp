@@ -1,4 +1,4 @@
-#include "Scene/Assets/crosshairAsset.h"
+#include "View/Scene/Assets/crosshairAsset.h"
 
 namespace
 {

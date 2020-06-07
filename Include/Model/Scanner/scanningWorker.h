@@ -26,9 +26,9 @@
 
 #include <Tree/Tree.hpp>
 
-#include "Scanner/fileInfo.h"
-#include "Scanner/scanningParameters.h"
-#include "Scanner/scanningProgress.hpp"
+#include "Model/Scanner/fileInfo.h"
+#include "Model/Scanner/scanningParameters.h"
+#include "Model/Scanner/scanningProgress.hpp"
 #include "Model/baseModel.h"
 #include "Model/block.h"
 #include "Model/vizBlock.h"

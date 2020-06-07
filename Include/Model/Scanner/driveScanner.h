@@ -9,9 +9,9 @@
 #include <memory>
 #include <string>
 
-#include "Scanner/scanningParameters.h"
-#include "Scanner/scanningProgress.hpp"
-#include "Scanner/scanningWorker.h"
+#include "Model/Scanner/scanningParameters.h"
+#include "Model/Scanner/scanningProgress.hpp"
+#include "Model/Scanner/scanningWorker.h"
 
 /**
  * @brief The Drive Scanner class uses a dedicate thread to scan the specified drive or part

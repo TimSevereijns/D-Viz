@@ -14,9 +14,9 @@
 #include "Factories/viewFactory.h"
 #include "Factories/viewFactoryInterface.h"
 #include "Model/vizBlock.h"
-#include "Monitor/fileChangeNotification.hpp"
-#include "Scanner/driveScanner.h"
-#include "Scene/light.h"
+#include "Model/Monitor/fileChangeNotification.hpp"
+#include "Model/Scanner/driveScanner.h"
+#include "View/Scene/light.h"
 #include "Settings/nodePainter.h"
 #include "Settings/persistentSettings.h"
 #include "Settings/sessionSettings.h"
@@ -24,9 +24,9 @@
 #include "constants.h"
 
 #if defined(Q_OS_WIN)
-#include "Monitor/windowsFileMonitor.h"
+#include "Model/Monitor/windowsFileMonitor.h"
 #elif defined(Q_OS_LINUX)
-#include "Monitor/linuxFileMonitor.h"
+#include "Model/Monitor/linuxFileMonitor.h"
 #endif // Q_OS_LINUX
 
 #include <Tree/Tree.hpp>

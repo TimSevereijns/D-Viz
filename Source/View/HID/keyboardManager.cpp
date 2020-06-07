@@ -1,4 +1,4 @@
-#include "HID/keyboardManager.h"
+#include "View/HID/keyboardManager.h"
 
 bool KeyboardManager::IsKeyDown(const Qt::Key key)
 {

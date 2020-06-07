@@ -5,8 +5,8 @@
 
 #include <Factories/modelFactoryInterface.h>
 #include <Factories/viewFactoryInterface.h>
+#include <Model/Monitor/fileMonitorBase.h>
 #include <Model/squarifiedTreemap.h>
-#include <Monitor/fileMonitorBase.h>
 #include <View/baseView.h>
 
 #include "Mocks/mockView.h"

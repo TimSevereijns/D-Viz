@@ -1,4 +1,4 @@
-#include "Scanner/scanningParameters.h"
+#include "Model/Scanner/scanningParameters.h"
 
 #include <utility>
 

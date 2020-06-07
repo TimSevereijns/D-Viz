@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "Scene/Assets/baseAsset.h"
+#include "View/Scene/Assets/baseAsset.h"
 
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLTexture>

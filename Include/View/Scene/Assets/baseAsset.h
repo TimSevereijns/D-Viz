@@ -2,7 +2,7 @@
 #define BASEASSET_H
 
 #include "Model/baseModel.h"
-#include "Scene/light.h"
+#include "View/Scene/light.h"
 #include "Settings/persistentSettings.h"
 #include "Settings/sessionSettings.h"
 #include "View/Viewport/camera.h"

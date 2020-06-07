@@ -14,7 +14,7 @@
 
 #include <string_view>
 
-#include "HID/gamepad.h"
+#include "View/HID/gamepad.h"
 #include "Viewport/glCanvas.h"
 #include "aboutDialog.h"
 #include "baseView.h"

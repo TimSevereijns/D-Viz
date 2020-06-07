@@ -1,4 +1,4 @@
-#include "Scene/Assets/frustumAsset.h"
+#include "View/Scene/Assets/frustumAsset.h"
 #include "Utilities/viewFrustum.hpp"
 #include "constants.h"
 

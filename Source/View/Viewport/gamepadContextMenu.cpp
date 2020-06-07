@@ -1,5 +1,5 @@
 #include "View/Viewport/gamepadContextMenu.h"
-#include "HID/gamepad.h"
+#include "View/HID/gamepad.h"
 #include "constants.h"
 
 #include <cmath>

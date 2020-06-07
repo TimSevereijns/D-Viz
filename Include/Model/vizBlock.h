@@ -3,7 +3,7 @@
 
 #include <limits>
 
-#include "Scanner/fileInfo.h"
+#include "Model/Scanner/fileInfo.h"
 #include "Model/block.h"
 
 /**

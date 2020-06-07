@@ -1,4 +1,4 @@
-#include "Scene/Assets/baseAsset.h"
+#include "View/Scene/Assets/baseAsset.h"
 
 #include "constants.h"
 #include "controller.h"

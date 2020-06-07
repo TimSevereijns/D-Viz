@@ -1,4 +1,4 @@
-#include "Scene/Assets/treemapAsset.h"
+#include "View/Scene/Assets/treemapAsset.h"
 #include "Settings/settings.h"
 #include "Utilities/scopeExit.hpp"
 #include "Utilities/viewFrustum.hpp"

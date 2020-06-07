@@ -1,4 +1,4 @@
-#include "Scene/light.h"
+#include "View/Scene/light.h"
 
 Light::Light(
     const QVector3D& lightPosition, const QVector3D& lightIntensity, const float lightAttenuation,
