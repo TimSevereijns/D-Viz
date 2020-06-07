@@ -1,11 +1,11 @@
 #include "filesystemObserverTests.h"
 
-#include <Monitor/fileSystemObserver.h>
+#include <Model/Monitor/fileSystemObserver.h>
 
 #if defined(Q_OS_WIN)
-#include <Monitor/windowsFileMonitor.h>
+#include <Model/Monitor/windowsFileMonitor.h>
 #elif defined(Q_OS_LINUX)
-#include <Monitor/linuxFileMonitor.h>
+#include <Model/Monitor/linuxFileMonitor.h>
 #endif // Q_OS_LINUX
 
 #include "Utilities/testUtilities.hpp"

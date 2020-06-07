@@ -1,7 +1,7 @@
 #include "modelTests.h"
 
-#include <Scanner/scanningParameters.h>
-#include <Scanner/scanningProgress.hpp>
+#include <Model/Scanner/scanningParameters.h>
+#include <Model/Scanner/scanningProgress.hpp>
 #include <Utilities/operatingSystem.hpp>
 #include <constants.h>
 

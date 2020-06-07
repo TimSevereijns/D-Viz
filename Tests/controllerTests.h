@@ -5,9 +5,9 @@
 
 #include <Factories/modelFactoryInterface.h>
 #include <Factories/viewFactoryInterface.h>
-#include <Monitor/fileMonitorBase.h>
-#include <Visualizations/squarifiedTreemap.h>
-#include <Windows/baseView.h>
+#include <Model/Monitor/fileMonitorBase.h>
+#include <Model/squarifiedTreemap.h>
+#include <View/baseView.h>
 
 #include "Mocks/mockView.h"
 #include "Utilities/multiTestHarness.h"

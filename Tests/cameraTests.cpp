@@ -1,6 +1,6 @@
 #include "cameraTests.h"
 
-#include <Viewport/camera.h>
+#include <View/Viewport/camera.h>
 
 void CameraTests::initTestCase()
 {

@@ -287,7 +287,7 @@ void ControllerTests::HighlightAncestors() const
     ScanDrive();
 
     const auto selectionCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
-        QCOMPARE(nodes.size(), 3);
+        QCOMPARE(nodes.size(), 3ul);
     };
 
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
@@ -319,7 +319,7 @@ void ControllerTests::HighlightDescendants() const
     ScanDrive();
 
     const auto selectionCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
-        QCOMPARE(nodes.size(), 469); //< As seeen in File Explorer
+        QCOMPARE(nodes.size(), 469ul); //< As seeen in File Explorer
     };
 
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);

@@ -5,7 +5,7 @@
 #include <mutex>
 #include <string_view>
 
-#include "Visualizations/vizBlock.h"
+#include "Model/vizBlock.h"
 #include "constants.h"
 #include "literals.h"
 
