@@ -38,16 +38,18 @@ namespace
 
                 // clang-format off
                 const static auto decimal = std::vector<std::pair<std::uintmax_t, QString>>{
-                    { 0u, "Show All" },
-                    { 1_KB, "< 1 KB" },
-                    { 1_MB, "< 1 MB" },
-                    { 10_MB, "< 10 MB" },
-                    { 100_MB, "< 100 MB" },
-                    { 250_MB, "< 250 MB" },
-                    { 500_MB, "< 500 MB" },
-                    { 1_GB, "< 1 GB" },
-                    { 5_GB, "< 5 GB" },
-                    { 10_GB, "< 10 GB" }
+                    { 0u,       "Show All" },
+                    { 1_KB,     "1 KB" },
+                    { 10_KB,    "10 KB" },
+                    { 100_KB,   "100 KB" },
+                    { 1_MB,     "1 MB" },
+                    { 10_MB,    "10 MB" },
+                    { 100_MB,   "100 MB" },
+                    { 250_MB,   "250 MB" },
+                    { 500_MB,   "500 MB" },
+                    { 1_GB,     "1 GB" },
+                    { 5_GB,     "5 GB" },
+                    { 10_GB,    "10 GB" }
                 };
                 // clang-format on
 
@@ -58,16 +60,18 @@ namespace
 
                 // clang-format off
                 const static auto binary = std::vector<std::pair<std::uintmax_t, QString>>{
-                    { 0u, "Show All" },
-                    { 1_KiB, "< 1 KiB" },
-                    { 1_MiB, "< 1 MiB" },
-                    { 10_MiB, "< 10 MiB" },
-                    { 100_MiB, "< 100 MiB" },
-                    { 250_MiB, "< 250 MiB" },
-                    { 500_MiB, "< 500 MiB" },
-                    { 1_GiB, "< 1 GiB" },
-                    { 5_GiB, "< 5 GiB" },
-                    { 10_GiB, "< 10 GiB" }
+                    { 0u,       "Show All" },
+                    { 1_KiB,    "1 KiB" },
+                    { 10_KiB,   "10 KiB" },
+                    { 100_KiB,  "100 KiB" },
+                    { 1_MiB,    "1 MiB" },
+                    { 10_MiB,   "10 MiB" },
+                    { 100_MiB,  "100 MiB" },
+                    { 250_MiB,  "250 MiB" },
+                    { 500_MiB,  "500 MiB" },
+                    { 1_GiB,    "1 GiB" },
+                    { 5_GiB,    "5 GiB" },
+                    { 10_GiB,   "10 GiB" }
                 };
                 // clang-format om
 
@@ -205,16 +209,17 @@ void MainWindow::SetupColorSchemeDropdown()
 
 void MainWindow::SetupFileSizePruningDropdown()
 {
-    const auto previousIndex = m_ui.pruneSizeComboBox->currentIndex();
+    const auto previousIndex = m_ui.minimumSizeComboBox->currentIndex();
 
-    m_ui.pruneSizeComboBox->clear();
+    m_ui.minimumSizeComboBox->clear();
 
     for (const auto& fileSizeAndUnits : *m_fileSizeOptions) {
-        m_ui.pruneSizeComboBox->addItem(
+        m_ui.minimumSizeComboBox->addItem(
             fileSizeAndUnits.second, static_cast<qulonglong>(fileSizeAndUnits.first));
     }
 
-    m_ui.pruneSizeComboBox->setCurrentIndex(previousIndex == -1 ? 0 : previousIndex);
+    m_ui.minimumSizeComboBox->setMaxVisibleItems(static_cast<int>(m_fileSizeOptions->size()));
+    m_ui.minimumSizeComboBox->setCurrentIndex(previousIndex == -1 ? 0 : previousIndex);
 
     statusBar()->clearMessage();
 }
@@ -454,7 +459,7 @@ void MainWindow::OnFileMenuNewScan()
         return;
     }
 
-    const auto fileSizeIndex = static_cast<std::size_t>(m_ui.pruneSizeComboBox->currentIndex());
+    const auto fileSizeIndex = static_cast<std::size_t>(m_ui.minimumSizeComboBox->currentIndex());
 
     Settings::VisualizationParameters parameters;
     parameters.rootDirectory = selectedDirectory.toStdWString();
@@ -535,7 +540,7 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
 
     SetupFileSizePruningDropdown();
 
-    const auto fileSizeIndex = static_cast<std::size_t>(m_ui.pruneSizeComboBox->currentIndex());
+    const auto fileSizeIndex = static_cast<std::size_t>(m_ui.minimumSizeComboBox->currentIndex());
     if (fileSizeIndex < 1) {
         return;
     }
@@ -569,7 +574,7 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
 
     SetupFileSizePruningDropdown();
 
-    const auto fileSizeIndex = static_cast<std::size_t>(m_ui.pruneSizeComboBox->currentIndex());
+    const auto fileSizeIndex = static_cast<std::size_t>(m_ui.minimumSizeComboBox->currentIndex());
     if (fileSizeIndex < 1) {
         return;
     }
@@ -618,7 +623,7 @@ void MainWindow::OnApplyButtonPressed()
 
 void MainWindow::PruneTree()
 {
-    const auto pruneSizeIndex = static_cast<std::size_t>(m_ui.pruneSizeComboBox->currentIndex());
+    const auto pruneSizeIndex = static_cast<std::size_t>(m_ui.minimumSizeComboBox->currentIndex());
     const auto minimumSize = m_fileSizeOptions->at(pruneSizeIndex).first;
 
     Settings::VisualizationParameters parameters;
@@ -778,10 +783,11 @@ void MainWindow::SetFilePruningComboBoxValue(std::uintmax_t minimum)
         return;
     }
 
-    const int targetIndex = m_ui.pruneSizeComboBox->findData(static_cast<qulonglong>(match->first));
+    const int targetIndex =
+        m_ui.minimumSizeComboBox->findData(static_cast<qulonglong>(match->first));
 
     if (targetIndex != -1) {
-        m_ui.pruneSizeComboBox->setCurrentIndex(targetIndex);
+        m_ui.minimumSizeComboBox->setCurrentIndex(targetIndex);
     }
 }
 

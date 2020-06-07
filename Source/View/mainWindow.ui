@@ -90,12 +90,12 @@
      <item>
       <widget class="QLabel" name="pruneTreeLabel">
        <property name="text">
-        <string>Prune Tree:</string>
+        <string>Minimum Renderable Size:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="pruneSizeComboBox">
+      <widget class="QComboBox" name="minimumSizeComboBox">
        <property name="whatsThis">
         <string>Only those items larger than this size will be shown.</string>
        </property>
