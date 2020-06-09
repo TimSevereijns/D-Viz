@@ -10,6 +10,7 @@ win32: QT += winextras
 INCLUDEPATH += $$PWD/Include
 
 SOURCES += \
+    $$PWD/Source/controller.cpp \
     $$PWD/Source/Model/baseModel.cpp \
     $$PWD/Source/Model/block.cpp \
     $$PWD/Source/Model/Monitor/fileSystemObserver.cpp \
@@ -31,10 +32,10 @@ SOURCES += \
     $$PWD/Source/View/Dialogs/aboutDialog.cpp \
     $$PWD/Source/View/Dialogs/breakdownDialog.cpp \
     $$PWD/Source/View/Dialogs/distributionGraphModel.cpp \
+    $$PWD/Source/View/Dialogs/scanBreakdownModel.cpp \
     $$PWD/Source/View/HID/gamepad.cpp \
     $$PWD/Source/View/HID/keyboardManager.cpp \
     $$PWD/Source/View/mainWindow.cpp \
-    $$PWD/Source/View/Dialogs/scanBreakdownModel.cpp \
     $$PWD/Source/View/Scene/Assets/baseAsset.cpp \
     $$PWD/Source/View/Scene/Assets/crosshairAsset.cpp \
     $$PWD/Source/View/Scene/Assets/debuggingRayAsset.cpp \
@@ -48,10 +49,10 @@ SOURCES += \
     $$PWD/Source/View/Viewport/camera.cpp \
     $$PWD/Source/View/Viewport/gamepadContextMenu.cpp \
     $$PWD/Source/View/Viewport/glCanvas.cpp \
-    $$PWD/Source/View/Viewport/mouseContextMenu.cpp \
-    $$PWD/Source/controller.cpp
+    $$PWD/Source/View/Viewport/mouseContextMenu.cpp
 
 HEADERS += \
+    $$PWD/Include/bootstrapper.hpp \
     $$PWD/Include/constants.h \
     $$PWD/Include/controller.h \
     $$PWD/Include/Factories/modelFactory.h \
@@ -82,13 +83,14 @@ HEADERS += \
     $$PWD/Include/Utilities/ignoreUnused.hpp \
     $$PWD/Include/Utilities/operatingSystem.hpp \
     $$PWD/Include/Utilities/reparsePointDeclarations.hpp \
+    $$PWD/Include/Utilities/scopedCursor.h \
     $$PWD/Include/Utilities/scopedHandle.h \
     $$PWD/Include/Utilities/scopeExit.hpp \
     $$PWD/Include/Utilities/threadSafeQueue.hpp \
     $$PWD/Include/Utilities/utilities.hpp \
     $$PWD/Include/Utilities/viewFrustum.hpp \
-    $$PWD/Include/View/Dialogs/aboutDialog.h \
     $$PWD/Include/View/baseView.h \
+    $$PWD/Include/View/Dialogs/aboutDialog.h \
     $$PWD/Include/View/Dialogs/breakdownDialog.h \
     $$PWD/Include/View/Dialogs/distributionGraphModel.h \
     $$PWD/Include/View/HID/gamepad.h \
@@ -108,8 +110,7 @@ HEADERS += \
     $$PWD/Include/View/Viewport/camera.h \
     $$PWD/Include/View/Viewport/gamepadContextMenu.h \
     $$PWD/Include/View/Viewport/glCanvas.h \
-    $$PWD/Include/View/Viewport/mouseContextMenu.h \
-    $$PWD/Include/bootstrapper.hpp
+    $$PWD/Include/View/Viewport/mouseContextMenu.h
 
 FORMS += \
     $$PWD/Source/View/Dialogs/aboutDialog.ui \

@@ -4,6 +4,7 @@
 #include "Settings/settings.h"
 #include "Utilities/operatingSystem.hpp"
 #include "Utilities/scopeExit.hpp"
+#include "Utilities/scopedCursor.h"
 #include "Utilities/utilities.hpp"
 #include "View/Viewport/glCanvas.h"
 #include "constants.h"
@@ -81,29 +82,6 @@ namespace
 
         GSL_ASSUME(false);
     }
-
-    /**
-     * @brief The Scoped Cursor struct provides an easy wait to set a specific cursor for the
-     * duration of the resulting variable.
-     */
-    struct ScopedCursor
-    {
-        ScopedCursor(Qt::CursorShape desiredCursor)
-        {
-            QApplication::setOverrideCursor(desiredCursor);
-        }
-
-        ScopedCursor(const ScopedCursor& other) = default;
-        ScopedCursor(ScopedCursor&& other) = default;
-
-        ScopedCursor& operator=(const ScopedCursor&) = default;
-        ScopedCursor& operator=(ScopedCursor&&) = default;
-
-        ~ScopedCursor() noexcept
-        {
-            QApplication::restoreOverrideCursor();
-        }
-    };
 } // namespace
 
 MainWindow::MainWindow(Controller& controller, QWidget* parent /* = nullptr */)
