@@ -93,10 +93,10 @@ HEADERS += \
     $$PWD/Include/View/Dialogs/aboutDialog.h \
     $$PWD/Include/View/Dialogs/breakdownDialog.h \
     $$PWD/Include/View/Dialogs/distributionGraphModel.h \
+    $$PWD/Include/View/Dialogs/scanBreakdownModel.h \
     $$PWD/Include/View/HID/gamepad.h \
     $$PWD/Include/View/HID/keyboardManager.h \
     $$PWD/Include/View/mainWindow.h \
-    $$PWD/Include/View/scanBreakdownModel.h \
     $$PWD/Include/View/Scene/Assets/baseAsset.h \
     $$PWD/Include/View/Scene/Assets/crosshairAsset.h \
     $$PWD/Include/View/Scene/Assets/debuggingRayAsset.h \

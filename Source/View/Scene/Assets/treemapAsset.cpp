@@ -703,13 +703,13 @@ namespace Assets
     bool Treemap::LoadTexturePreviewShaders()
     {
         if (!m_texturePreviewShader.addShaderFromSourceFile(
-                QOpenGLShader::Vertex, ":/Shaders/texturePreview.vert")) {
+                QOpenGLShader::Vertex, ":/View/Shaders/texturePreview.vert")) {
             const auto& log = spdlog::get(Constants::Logging::DefaultLog);
             log->error("Error loading vertex shader!");
         }
 
         if (!m_texturePreviewShader.addShaderFromSourceFile(
-                QOpenGLShader::Fragment, ":/Shaders/texturePreview.frag")) {
+                QOpenGLShader::Fragment, ":/View/Shaders/texturePreview.frag")) {
             const auto& log = spdlog::get(Constants::Logging::DefaultLog);
             log->error("Error loading fragment shader!");
         }
