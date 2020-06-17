@@ -565,15 +565,14 @@ void GLCanvas::HandleUserInput()
     const auto now = std::chrono::system_clock::now();
     const ScopeExit onScopeExit = [&]() noexcept
     {
-        m_lastCameraPositionUpdatelTime = now;
+        m_lastFrameUpdateTimestamp = now;
     };
 
-    const auto millisecondsElapsedSinceLastUpdate =
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            now - m_lastCameraPositionUpdatelTime);
+    const auto millisecondsSinceLastFrame =
+        std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastFrameUpdateTimestamp);
 
-    HandleGamepadInput(millisecondsElapsedSinceLastUpdate);
-    HandleKeyboardInput(millisecondsElapsedSinceLastUpdate);
+    HandleGamepadInput(millisecondsSinceLastFrame);
+    HandleKeyboardInput(millisecondsSinceLastFrame);
 }
 
 void GLCanvas::HandleKeyboardInput(const std::chrono::milliseconds& elapsedTime)
@@ -589,35 +588,32 @@ void GLCanvas::HandleKeyboardInput(const std::chrono::milliseconds& elapsedTime)
 
     const auto millisecondsElapsed = elapsedTime.count();
     const auto cameraSpeed = m_controller.GetSessionSettings().GetCameraSpeed();
+    const auto distance = static_cast<float>(millisecondsElapsed * cameraSpeed);
 
     if (isWKeyDown) {
-        m_camera.OffsetPosition(
-            static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Forward());
+        m_camera.OffsetPosition(distance * m_camera.Forward());
     }
 
     if (isAKeyDown) {
-        m_camera.OffsetPosition(
-            static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Left());
+        m_camera.OffsetPosition(distance * m_camera.Left());
     }
 
     if (isSKeyDown) {
-        m_camera.OffsetPosition(
-            static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Backward());
+        m_camera.OffsetPosition(distance * m_camera.Backward());
     }
 
     if (isDKeyDown) {
-        m_camera.OffsetPosition(
-            static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Right());
+        m_camera.OffsetPosition(distance * m_camera.Right());
     }
 }
 
 void GLCanvas::HandleGamepadInput(const std::chrono::milliseconds& elapsedTime)
 {
-    if (!m_mainWindow.GetGamepad().isConnected()) {
+    const auto& gamepad = m_mainWindow.GetGamepad();
+
+    if (!gamepad.isConnected()) {
         return;
     }
-
-    const auto& gamepad = m_mainWindow.GetGamepad();
 
     HandleGamepadButtonInput(gamepad, elapsedTime);
     HandleGamepadThumbstickInput(gamepad);
@@ -631,34 +627,30 @@ void GLCanvas::HandleGamepadButtonInput(
     const auto cameraSpeed = m_controller.GetSessionSettings().GetCameraSpeed() /
                              Constants::Input::MovementAmplification;
 
+    const auto distance = static_cast<float>(millisecondsElapsed * cameraSpeed);
+
     if (gamepad.buttonUp()) {
-        m_camera.OffsetPosition(
-            static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Forward());
+        m_camera.OffsetPosition(distance * m_camera.Forward());
     }
 
     if (gamepad.buttonLeft()) {
-        m_camera.OffsetPosition(
-            static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Left());
+        m_camera.OffsetPosition(distance * m_camera.Left());
     }
 
     if (gamepad.buttonDown()) {
-        m_camera.OffsetPosition(
-            static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Backward());
+        m_camera.OffsetPosition(distance * m_camera.Backward());
     }
 
     if (gamepad.buttonRight()) {
-        m_camera.OffsetPosition(
-            static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Right());
+        m_camera.OffsetPosition(distance * m_camera.Right());
     }
 
     if (gamepad.buttonL1()) {
-        m_camera.OffsetPosition(
-            static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Down());
+        m_camera.OffsetPosition(distance * m_camera.Down());
     }
 
     if (gamepad.buttonR1()) {
-        m_camera.OffsetPosition(
-            static_cast<float>(millisecondsElapsed * cameraSpeed) * m_camera.Up());
+        m_camera.OffsetPosition(distance * m_camera.Up());
     }
 
     if (!m_gamepadContextMenu && gamepad.buttonA()) {
@@ -677,32 +669,27 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
         return;
     }
 
-    if (gamepad.axisRightX() > 0.0 || gamepad.axisRightY() > 0.0) {
-        const auto pitch = Constants::Input::MovementAmplification *
-                           m_controller.GetSessionSettings().GetMouseSensitivity() *
-                           gamepad.axisRightY();
+    if (gamepad.axisRightX() != 0.0 || gamepad.axisRightY() != 0.0) {
+        const auto sensitivity = Constants::Input::MovementAmplification *
+                                 m_controller.GetSessionSettings().GetMouseSensitivity();
 
-        const auto yaw = Constants::Input::MovementAmplification *
-                         m_controller.GetSessionSettings().GetMouseSensitivity() *
-                         gamepad.axisRightX();
+        const auto pitch = sensitivity * gamepad.axisRightY();
+        const auto yaw = sensitivity * gamepad.axisRightX();
 
         m_camera.OffsetOrientation(pitch, yaw);
     }
 
-    if (gamepad.axisLeftY() > 0.0) {
-        m_camera.OffsetPosition(
-            static_cast<float>(
-                Constants::Input::MovementAmplification *
-                m_controller.GetSessionSettings().GetCameraSpeed() * -gamepad.axisLeftY()) *
-            m_camera.Forward());
+    const auto cameraSpeed = Constants::Input::MovementAmplification *
+                             m_controller.GetSessionSettings().GetCameraSpeed();
+
+    if (gamepad.axisLeftY() != 0.0) {
+        const auto distance = static_cast<float>(cameraSpeed * -gamepad.axisLeftY());
+        m_camera.OffsetPosition(distance * m_camera.Forward());
     }
 
-    if (gamepad.axisLeftX() > 0.0) {
-        m_camera.OffsetPosition(
-            static_cast<float>(
-                Constants::Input::MovementAmplification *
-                m_controller.GetSessionSettings().GetCameraSpeed() * gamepad.axisLeftX()) *
-            m_camera.Right());
+    if (gamepad.axisLeftX() != 0.0) {
+        const auto distance = static_cast<float>(cameraSpeed * gamepad.axisLeftX());
+        m_camera.OffsetPosition(distance * m_camera.Right());
     }
 }
 

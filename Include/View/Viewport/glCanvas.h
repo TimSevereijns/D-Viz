@@ -372,7 +372,7 @@ class GLCanvas final : public QOpenGLWidget
 
     std::chrono::system_clock::time_point m_lastFrameDrawTime{ std::chrono::system_clock::now() };
 
-    std::chrono::system_clock::time_point m_lastCameraPositionUpdatelTime{
+    std::chrono::system_clock::time_point m_lastFrameUpdateTimestamp{
         std::chrono::system_clock::now()
     };
 
