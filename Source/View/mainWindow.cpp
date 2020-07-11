@@ -481,7 +481,7 @@ bool MainWindow::AskUserToLimitFileSize(
             return false;
         }
         default: {
-            assert(false);
+            GSL_ASSUME(false);
         }
     }
 

@@ -44,7 +44,7 @@ namespace Assets
     OriginMarker::OriginMarker(const Controller& controller, QOpenGLExtraFunctions& openGL)
         : Line{ controller, openGL }
     {
-        m_shouldRender = m_persistentSettings.ShouldRenderGrid();
+        m_shouldRender = m_persistentSettings.ShouldRenderOrigin();
         m_rawVertices = CreateMarkerVertices();
         m_rawColors = CreateMarkerColors();
     }
