@@ -70,6 +70,8 @@ void Controller::OnScanComplete(
     LogScanCompletion(progress);
     ReportProgressToStatusBar(progress);
 
+    m_nodeColorMap.clear();
+
     m_view->AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
     m_view->SetWaitCursor();
 
