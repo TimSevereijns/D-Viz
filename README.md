@@ -8,13 +8,13 @@ For information on how to set up and build the project, please see the Wiki.
 
 ## Screenshots
 
-![Example 1](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/D-Viz-1.png)
+![Example 1](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/2020/D-Viz-1.png)
 
-![Example 2](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/D-Viz-2.png)
+![Example 2](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/2020/D-Viz-2.png)
 
-![Example 3](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/D-Viz-3.png)
+![Example 3](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/2020/D-Viz-3.png)
 
-![Example 4](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/D-Viz-5.png)
+![Example 4](https://github.com/TimSevereijns/D-Viz/blob/master/Screenshots/2020/D-Viz-5.png)
 
 ## Technical Notes
 
