@@ -726,7 +726,7 @@ void GLCanvas::SelectNodeViaRay(const QPoint& rayOrigin)
     m_controller.SelectNodeViaRay(m_camera, ray, deselectionCallback, selectionCallback);
 }
 
-void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
+void GLCanvas::UpdateFrameTime(const std::chrono::milliseconds& elapsedTime)
 {
     constexpr auto movingAverageWindowSize = 64;
     if (m_frameTimeDeque.size() > movingAverageWindowSize) {
@@ -745,7 +745,7 @@ void GLCanvas::UpdateFrameTime(const std::chrono::microseconds& elapsedTime)
     Expects(m_frameTimeDeque.empty() == false);
     const auto averageFrameTime = total / static_cast<int>(m_frameTimeDeque.size());
 
-    const auto label = L"D-Viz @ " + std::to_wstring(averageFrameTime) + L" \xB5s / frame";
+    const auto label = L"D-Viz @ " + std::to_wstring(averageFrameTime) + L" ms / frame";
     m_mainWindow.setWindowTitle(QString::fromStdWString(label));
 }
 
@@ -859,23 +859,27 @@ void GLCanvas::paintGL()
         return;
     }
 
-    const auto stopwatch = Stopwatch<std::chrono::microseconds>([&]() noexcept {
-        VisualizeFilesystemActivity();
+    VisualizeFilesystemActivity();
 
-        m_openGLContext.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    m_openGLContext.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if (m_controller.GetSessionSettings().IsPrimaryLightAttachedToCamera()) {
-            Expects(m_lights.empty() == false);
-            m_lights.front().position = m_camera.GetPosition();
-        }
+    if (m_controller.GetSessionSettings().IsPrimaryLightAttachedToCamera()) {
+        Expects(m_lights.empty() == false);
+        m_lights.front().position = m_camera.GetPosition();
+    }
 
-        for (const auto& tagAndAsset : m_sceneAssets) {
-            tagAndAsset.asset->Render(m_camera, m_lights);
-        }
-    });
+    for (const auto& tagAndAsset : m_sceneAssets) {
+        tagAndAsset.asset->Render(m_camera, m_lights);
+    }
 
     if (m_mainWindow.ShouldShowFrameTime()) {
-        UpdateFrameTime(stopwatch.GetElapsedTime());
+        const auto now = std::chrono::system_clock::now();
+        const auto elapsedTime =
+            std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastFrameDrawTime);
+
+        m_lastFrameDrawTime = now;
+
+        UpdateFrameTime(elapsedTime);
     }
 }
 

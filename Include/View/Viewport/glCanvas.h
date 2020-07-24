@@ -1,8 +1,10 @@
 #ifndef GLCANVAS_H
 #define GLCANVAS_H
 
-#include "View/HID/keyboardManager.h"
 #include "Model/Scanner/driveScanner.h"
+#include "Model/baseModel.h"
+#include "Settings/persistentSettings.h"
+#include "View/HID/keyboardManager.h"
 #include "View/Scene/Assets/baseAsset.h"
 #include "View/Scene/Assets/crosshairAsset.h"
 #include "View/Scene/Assets/debuggingRayAsset.h"
@@ -12,8 +14,6 @@
 #include "View/Scene/Assets/originMarkerAsset.h"
 #include "View/Scene/Assets/treemapAsset.h"
 #include "View/Scene/light.h"
-#include "Settings/persistentSettings.h"
-#include "Model/baseModel.h"
 #include "camera.h"
 #include "constants.h"
 #include "gamepadContextMenu.h"
@@ -208,7 +208,7 @@ class GLCanvas final : public QOpenGLWidget
     /**
      * @brief Records the elapsed frame time.
      */
-    void UpdateFrameTime(const std::chrono::microseconds& elapsedTime);
+    void UpdateFrameTime(const std::chrono::milliseconds& elapsedTime);
 
     /**
      * @brief Generates and displays the context menu.
