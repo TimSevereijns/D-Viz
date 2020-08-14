@@ -13,20 +13,20 @@
 #include "Factories/modelFactoryInterface.h"
 #include "Factories/viewFactory.h"
 #include "Factories/viewFactoryInterface.h"
-#include "Monitor/fileChangeNotification.hpp"
-#include "Scanner/driveScanner.h"
-#include "Scene/light.h"
+#include "Model/vizBlock.h"
+#include "Model/Monitor/fileChangeNotification.hpp"
+#include "Model/Scanner/driveScanner.h"
+#include "View/Scene/light.h"
 #include "Settings/nodePainter.h"
 #include "Settings/persistentSettings.h"
 #include "Settings/sessionSettings.h"
-#include "Visualizations/vizBlock.h"
-#include "Windows/mainWindow.h"
+#include "View/mainWindow.h"
 #include "constants.h"
 
 #if defined(Q_OS_WIN)
-#include "Monitor/windowsFileMonitor.h"
+#include "Model/Monitor/windowsFileMonitor.h"
 #elif defined(Q_OS_LINUX)
-#include "Monitor/linuxFileMonitor.h"
+#include "Model/Monitor/linuxFileMonitor.h"
 #endif // Q_OS_LINUX
 
 #include <Tree/Tree.hpp>
@@ -55,6 +55,13 @@ class Controller : public QObject
      * @brief Starts the UI.
      */
     void LaunchUI();
+
+    /**
+     * @brief Enables or disables the monitoring of the filesystem.
+     *
+     * @param[in] shouldEnable      The new state of the monitor.
+     */
+    void MonitorFileSystem(bool shouldEnable);
 
     /**
      * @brief Scans the drive.
@@ -211,7 +218,7 @@ class Controller : public QObject
     /**
      * @brief Prints selection details to the main window's status bar.
      */
-    void DisplaySelectionDetails();
+    void DisplayHighlightDetails();
 
     /**
      * @brief Whether to allow the user to interact with the UI.
@@ -270,7 +277,7 @@ class Controller : public QObject
     /**
      * @brief Starts monitoring the file system. This is only possible after the first scan.
      */
-    void StartMonitoringFileSystem();
+    void MonitorFileSystem();
 
     /**
      * @returns True if filesystem monitoring is enabled; false otherwise.
@@ -280,7 +287,7 @@ class Controller : public QObject
     /**
      * @brief Fetches oldest, unprocessed file system change notification.
      */
-    std::optional<FileEvent> FetchFileModification();
+    std::optional<FileEvent> FetchNextFileModification();
 
     /**
      * @brief Determines the color a given node should be.
@@ -302,6 +309,11 @@ class Controller : public QObject
      * @param[in] color             The color that the node is to be assigned.
      */
     void RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVector3D& color);
+
+    /**
+     * @returns True if the node in question is visible to the end-user.
+     */
+    bool IsNodeVisible(const VizBlock& block) const;
 
   signals:
 
@@ -342,7 +354,7 @@ class Controller : public QObject
     std::uint64_t m_occupiedDiskSpace{ 0u };
 
     // @todo Move this onto the model.
-    std::unordered_map<std::uint32_t, QVector3D> m_nodeColorMap;
+    std::unordered_map<std::uintptr_t, QVector3D> m_nodeColorMap;
 };
 
 #endif // CONTROLLER_H

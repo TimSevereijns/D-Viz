@@ -1,11 +1,11 @@
 #include "controller.h"
 
+#include "Model/squarifiedTreemap.h"
 #include "Settings/persistentSettings.h"
 #include "Utilities/ignoreUnused.hpp"
 #include "Utilities/operatingSystem.hpp"
 #include "Utilities/scopeExit.hpp"
-#include "Visualizations/squarifiedTreemap.h"
-#include "Windows/mainWindow.h"
+#include "View/mainWindow.h"
 #include "constants.h"
 #include "literals.h"
 
@@ -14,7 +14,6 @@
 #include <spdlog/spdlog.h>
 
 #include <algorithm>
-#include <sstream>
 #include <utility>
 
 #include <QCursor>
@@ -31,7 +30,7 @@ namespace
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
 
         log->info(fmt::format(
-            "Scanned: {} directories and {} files, representing {} bytes",
+            "Scanned: {:n} directories and {:n} files, representing {:n} bytes.",
             progress.directoriesScanned.load(), progress.filesScanned.load(),
             progress.bytesProcessed.load()));
 
@@ -46,8 +45,8 @@ namespace
     void LogDiskStatistics(const std::filesystem::space_info& spaceInfo)
     {
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
-        log->info(fmt::format("Disk Size:  {} bytes", spaceInfo.capacity));
-        log->info(fmt::format("Free Space: {} bytes", spaceInfo.free));
+        log->info(fmt::format("Disk Size:  {:n} bytes.", spaceInfo.capacity));
+        log->info(fmt::format("Free Space: {:n} bytes.", spaceInfo.free));
     }
 } // namespace
 
@@ -71,6 +70,8 @@ void Controller::OnScanComplete(
     LogScanCompletion(progress);
     ReportProgressToStatusBar(progress);
 
+    m_nodeColorMap.clear();
+
     m_view->AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
     m_view->SetWaitCursor();
 
@@ -87,9 +88,8 @@ void Controller::OnScanComplete(
     m_view->OnScanCompleted();
 
     try {
-        if (GetPersistentSettings().ShouldMonitorFileSystem()) {
-            m_model->StartMonitoringFileSystem();
-        }
+        const auto shouldEnable = GetPersistentSettings().ShouldMonitorFileSystem();
+        MonitorFileSystem(shouldEnable);
     } catch (const std::exception& exception) {
         m_view->DisplayErrorDialog(exception.what());
     }
@@ -97,6 +97,15 @@ void Controller::OnScanComplete(
     AllowUserInteractionWithModel(true);
 
     emit FinishedScanning();
+}
+
+void Controller::MonitorFileSystem(bool shouldEnable)
+{
+    if (shouldEnable) {
+        m_model->StartMonitoringFileSystem();
+    } else {
+        m_model->StopMonitoringFileSystem();
+    }
 }
 
 void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
@@ -137,7 +146,7 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
         };
 
     spdlog::get(Constants::Logging::DefaultLog)
-        ->info(fmt::format("Started a new scan at: \"{}\"", m_model->GetRootPath().string()));
+        ->info(fmt::format("Started a new scan at \"{}\".", m_model->GetRootPath().string()));
 
     m_scanner.StartScanning(ScanningParameters{ root, progressHandler, completionHandler });
 }
@@ -147,16 +156,14 @@ bool Controller::IsFileSystemBeingMonitored() const
     return m_model->IsFileSystemBeingMonitored();
 }
 
-std::optional<FileEvent> Controller::FetchFileModification()
+std::optional<FileEvent> Controller::FetchNextFileModification()
 {
     return m_model->FetchNextVisualChange();
 }
 
 QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
 {
-    Expects(node.GetData().offsetIntoVBO != VizBlock::NotInVBO);
-
-    const auto nodeColor = m_nodeColorMap.find(node.GetData().offsetIntoVBO);
+    const auto nodeColor = m_nodeColorMap.find(reinterpret_cast<std::uintptr_t>(&node));
     if (nodeColor != std::end(m_nodeColorMap)) {
         return nodeColor->second;
     }
@@ -193,21 +200,17 @@ void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
     const auto doesPathRepresentEntireDrive{ rootPath == rootPath.root_path() };
 
     if (doesPathRepresentEntireDrive) {
-        const auto fraction =
-            (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
-
+        const auto fraction = sizeInBytes / static_cast<double>(m_occupiedDiskSpace);
         const auto message = fmt::format(
-            L"Files Scanned: {}  |  {:03.2f}% Complete",
-            Utilities::ToStringWithNumericGrouping(filesScanned), fraction * 100);
+            L"Files Scanned: {:n}  |  {:03.2f}% Complete", filesScanned, fraction * 100);
 
         m_view->SetStatusBarMessage(message);
     } else {
         const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
-        const auto [size, units] = Utilities::ConvertFileSizeToNumericPrefix(sizeInBytes, prefix);
+        const auto [size, units] = Utilities::ToPrefixedSize(sizeInBytes, prefix);
 
         const auto message = fmt::format(
-            L"Files Scanned: {}  |  {:03.2f} {} and counting...",
-            Utilities::ToStringWithNumericGrouping(filesScanned), size, units);
+            L"Files Scanned: {:n}  |  {:03.2f} {} and counting...", filesScanned, size, units);
 
         m_view->SetStatusBarMessage(message);
     }
@@ -274,17 +277,15 @@ void Controller::SelectNodeAndUpdateStatusBar(
 
     const auto fileSize = node->file.size;
     const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
-    const auto [prefixedSize, units] = Utilities::ConvertFileSizeToNumericPrefix(fileSize, prefix);
-    const auto isInBytes = (units == Utilities::Detail::bytesLabel);
+    const auto [prefixedSize, units] = Utilities::ToPrefixedSize(fileSize, prefix);
+    const auto lessThanKilo = (units == Utilities::Detail::bytesLabel);
 
     const auto path = Controller::ResolveCompleteFilePath(node).wstring();
 
-    std::wstringstream message;
-    message.imbue(std::locale{ "" });
-    message.precision(isInBytes ? 0 : 2);
-    message << std::fixed << path << L"  |  " << prefixedSize << units;
+    const auto message = lessThanKilo ? fmt::format(L"{}  |  {:.0f} {}", path, prefixedSize, units)
+                                      : fmt::format(L"{}  |  {:.2f} {}", path, prefixedSize, units);
 
-    m_view->SetStatusBarMessage(message.str());
+    m_view->SetStatusBarMessage(message);
 }
 
 void Controller::SelectNodeViaRay(
@@ -316,37 +317,36 @@ void Controller::SelectNodeViaRay(
 void Controller::PrintMetadataToStatusBar()
 {
     const auto metadata = m_model->GetTreemapMetadata();
+    const auto message = fmt::format(
+        L"Scanned {:n} files and {:n} directories.", metadata.FileCount, metadata.DirectoryCount);
 
-    std::wstringstream message;
-    message.imbue(std::locale{ "" });
-    message << std::fixed << L"Scanned " << metadata.FileCount << L" files and "
-            << metadata.DirectoryCount << L" directories.";
-
-    m_view->SetStatusBarMessage(message.str());
+    m_view->SetStatusBarMessage(message);
 }
 
-void Controller::DisplaySelectionDetails()
+void Controller::DisplayHighlightDetails()
 {
     const auto& highlightedNodes = m_model->GetHighlightedNodes();
 
-    std::uintmax_t totalBytes{ 0 };
+    std::uintmax_t totalBytes = 0;
     for (const auto* const node : highlightedNodes) {
         totalBytes += node->GetData().file.size;
     }
 
     const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
-    const auto [prefixedSize, units] =
-        Utilities::ConvertFileSizeToNumericPrefix(totalBytes, prefix);
-    const auto isInBytes = (units == Utilities::Detail::bytesLabel);
+    const auto [prefixedSize, units] = Utilities::ToPrefixedSize(totalBytes, prefix);
+    const auto isSmall = (units == Utilities::Detail::bytesLabel);
 
-    std::wstringstream message;
-    message.imbue(std::locale{ "" });
-    message.precision(isInBytes ? 0 : 2);
-    message << std::fixed << L"Highlighted " << highlightedNodes.size()
-            << (highlightedNodes.size() == 1 ? L" node" : L" nodes") << L", representing "
-            << prefixedSize << units;
+    const std::wstring nodes = highlightedNodes.size() == 1 ? L" node" : L" nodes";
 
-    m_view->SetStatusBarMessage(message.str());
+    if (isSmall) {
+        m_view->SetStatusBarMessage(fmt::format(
+            L"Highlighted {:n} " + nodes + L", presenting {:.0f} {}.", highlightedNodes.size(),
+            prefixedSize, units));
+    } else {
+        m_view->SetStatusBarMessage(fmt::format(
+            L"Highlighted {:n} " + nodes + L", presenting {:.2f} {}.", highlightedNodes.size(),
+            prefixedSize, units));
+    }
 }
 
 void Controller::AllowUserInteractionWithModel(bool allowInteraction)
@@ -398,7 +398,7 @@ void Controller::ProcessHighlightedNodes(
     auto& nodes = m_model->GetHighlightedNodes();
     callback(nodes);
 
-    DisplaySelectionDetails();
+    DisplayHighlightDetails();
 }
 
 void Controller::HighlightAncestors(
@@ -459,7 +459,7 @@ void Controller::SearchTreeMap(
 
         spdlog::get(Constants::Logging::DefaultLog)
             ->info(fmt::format(
-                "Search Completed in: {} {}", stopwatch.GetElapsedTime().count(),
+                "Search Completed in: {:n} {}.", stopwatch.GetElapsedTime().count(),
                 stopwatch.GetUnitsAsCharacterArray()));
     };
 
@@ -535,8 +535,24 @@ std::filesystem::path Controller::GetRootPath() const
 
 void Controller::RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVector3D& color)
 {
-    Expects(node.GetData().offsetIntoVBO != VizBlock::NotInVBO);
-    m_nodeColorMap.insert_or_assign(node.GetData().offsetIntoVBO, color);
+    // @note This tracking only works if we assume that nodes are never copied; this may prove to be
+    // a bad assumption. Consider using an ID on the node instead.
+    m_nodeColorMap.insert_or_assign(reinterpret_cast<std::uintptr_t>(&node), color);
+}
+
+bool Controller::IsNodeVisible(const VizBlock& block) const
+{
+    const auto& parameters = m_sessionSettings.GetVisualizationParameters();
+
+    if (block.file.size < parameters.minimumFileSize) {
+        return false;
+    }
+
+    if (block.file.type != FileType::Directory && parameters.onlyShowDirectories) {
+        return false;
+    }
+
+    return true;
 }
 
 template <typename ButtonType>
@@ -553,9 +569,7 @@ void Controller::ReportProgressToTaskbar(ButtonType& button, const ScanningProgr
     button.SetVisible(true);
 
     if (doesPathRepresentEntireDrive) {
-        const auto progressValue =
-            (static_cast<double>(sizeInBytes) / static_cast<double>(m_occupiedDiskSpace));
-
+        const auto progressValue = sizeInBytes / static_cast<double>(m_occupiedDiskSpace);
         button.SetValue(static_cast<int>(100.0 * progressValue));
     } else {
         button.SetMinimum(0);

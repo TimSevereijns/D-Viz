@@ -2,7 +2,7 @@
 #define VIEWFACTORY_H
 
 #include "Factories/viewFactoryInterface.h"
-#include "Windows/mainWindow.h"
+#include "View/mainWindow.h"
 #include "controller.h"
 
 class ViewFactory final : public ViewFactoryInterface

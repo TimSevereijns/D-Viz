@@ -4,8 +4,8 @@
 #include <filesystem>
 #include <memory>
 
-#include "Monitor/fileMonitorBase.h"
-#include "Visualizations/baseModel.h"
+#include "Model/Monitor/fileMonitorBase.h"
+#include "Model/baseModel.h"
 
 class ModelFactoryInterface
 {

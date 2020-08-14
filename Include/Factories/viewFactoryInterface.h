@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "Windows/baseView.h"
+#include "View/baseView.h"
 
 class Controller;
 

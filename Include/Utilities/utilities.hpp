@@ -3,10 +3,9 @@
 
 #include <filesystem>
 #include <mutex>
-#include <sstream>
 #include <string_view>
 
-#include "Visualizations/vizBlock.h"
+#include "Model/vizBlock.h"
 #include "constants.h"
 #include "literals.h"
 
@@ -18,25 +17,6 @@ namespace Utilities
     namespace Detail
     {
         constexpr const std::wstring_view bytesLabel = L" bytes";
-    }
-
-    /**
-     * @brief Turns a number into a string, complete with numeric digit grouping delimiters.
-     *
-     * @param[in] number            The number to be converted into a string.
-     */
-    template <typename NumericType> static auto ToStringWithNumericGrouping(NumericType number)
-    {
-        static_assert(std::is_arithmetic_v<NumericType>, "Please pass in a numeric type.");
-
-        std::wstringstream stream;
-        stream.imbue(std::locale{ "" });
-
-        stream.str(std::wstring{});
-        stream.clear();
-
-        stream << number;
-        return stream.str();
     }
 
     /**
@@ -165,7 +145,7 @@ namespace Utilities
      * string.
      */
     inline std::pair<double, std::wstring>
-    ConvertFileSizeToNumericPrefix(std::uintmax_t sizeInBytes, Constants::SizePrefix prefix)
+    ToPrefixedSize(std::uintmax_t sizeInBytes, Constants::SizePrefix prefix)
     {
         switch (prefix) {
             case Constants::SizePrefix::Binary: {

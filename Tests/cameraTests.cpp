@@ -1,6 +1,6 @@
 #include "cameraTests.h"
 
-#include <Viewport/camera.h>
+#include <View/Viewport/camera.h>
 
 void CameraTests::initTestCase()
 {
@@ -79,7 +79,7 @@ void CameraTests::PointIsNotInFrontOfCamera()
     Camera camera;
 
     camera.SetPosition({ 100, 100, 100 });
-    camera.LookAt(QVector3D{ 99, 100, 100 });
+    camera.LookAt({ 99, 100, 100 });
 
     QCOMPARE(camera.IsPointInFrontOfCamera({ 128, 100, 100 }), false);
 }

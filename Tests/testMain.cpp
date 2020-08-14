@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
     QApplication app{ argc, argv };
 
     Bootstrapper::RegisterMetaTypes();
-    Bootstrapper::InitializeLogs("-debug");
+    Bootstrapper::InitializeLogs("-unit-testing");
 
     const auto failedTests = MultiTest::RunAllTests(argc, argv);
     return failedTests;

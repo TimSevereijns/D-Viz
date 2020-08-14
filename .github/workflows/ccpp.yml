@@ -68,7 +68,7 @@ jobs:
               install \
               --verbose \
               --destdir ~/Qt \
-              --packages qt.qt5.5131.gcc_64 \
+              --packages qt.qt5.5131.gcc_64,qt.qt5.5131.qtcharts \
               --keep-tools
 
       - name: Download Conan Packages

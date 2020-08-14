@@ -4,7 +4,7 @@
 #include <string_view>
 
 #include "Settings/settings.h"
-#include "Visualizations/vizBlock.h"
+#include "Model/vizBlock.h"
 #include "constants.h"
 
 #include <QObject>
@@ -50,11 +50,6 @@ namespace Settings
          * @returns True if the primary scene light source is attached to the camera.
          */
         bool IsPrimaryLightAttachedToCamera() const;
-
-        /**
-         * @returns True if the block in question is visible to the end-user.
-         */
-        bool IsBlockVisible(const VizBlock& block);
 
         /**
          * @returns True if files should be searched.

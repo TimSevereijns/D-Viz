@@ -5,9 +5,9 @@
 
 #include <Factories/modelFactoryInterface.h>
 #include <Factories/viewFactoryInterface.h>
-#include <Monitor/fileMonitorBase.h>
-#include <Visualizations/squarifiedTreemap.h>
-#include <Windows/baseView.h>
+#include <Model/Monitor/fileMonitorBase.h>
+#include <Model/squarifiedTreemap.h>
+#include <View/baseView.h>
 
 #include "Mocks/mockView.h"
 #include "Utilities/multiTestHarness.h"
@@ -66,24 +66,105 @@ class ControllerTests : public QObject
     void init();
 
     /**
-     * @brief Foo
+     * @brief Verify that the appropriate functions are called to launch the view.
      */
     void LaunchMainWindow() const;
 
     /**
-     * @brief ScanDrive
+     * @brief Verify that the appropriate view and model functions are called when a scan is
+     * performed.
      */
     void ScanDrive() const;
 
     /**
-     * @brief HasModelBeenLoaded
+     * @brief Verify that the model is correctly reported as having been loaded.
      */
     void HasModelBeenLoaded() const;
 
     /**
-     * @brief SelectingANode
+     * @brief Verify that single node can be selected and retrieved.
      */
-    void SelectingANode();
+    void SelectNode();
+
+    /**
+     * @brief Verifies that a selected node can be cleared.
+     */
+    void ClearSelectedNode();
+
+    /**
+     * @brief Verifies that files smaller than the minimum file size are not reported as
+     * displayable.
+     */
+    void VerifyFilesOverLimitAreDisplayed() const;
+
+    /**
+     * @brief Verifies that files under the limit are not displayed.
+     */
+    void VerifyFilesUnderLimitAreNotDisplayed() const;
+
+    /**
+     * @brief Verifies that files are not displayed when only directories are allowed to be shown.
+     */
+    void VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed() const;
+
+    /**
+     * @brief Verifies that directories should not be shown when the size of that directory is too
+     * small.
+     */
+    void VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed() const;
+
+    /**
+     * @brief Verifies that directories should not be shown when the size of that directory is
+     * sufficiently large.
+     */
+    void VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed() const;
+
+    /**
+     * @brief Verifies that searching the treemap returns the expected results and calls the
+     * expected UI update functions.
+     */
+    void SearchTreemapWithoutPriorSelection() const;
+
+    /**
+     * @brief Verifies that searching the treemap returns the expected results and calls the
+     * expected UI update functions when a prior highlight already exists.
+     */
+    void SearchTreemapWithPriorSelection() const;
+
+    /**
+     * @brief Verifies that ancestor nodes are correctly highlighted.
+     */
+    void HighlightAncestors() const;
+
+    /**
+     * @brief Verifies that a highlighted node is indeed reported as being highlighted.
+     */
+    void IsNodeHighlighted() const;
+
+    /**
+     * @brief Verifies that descendant nodes are correctly highlighted.
+     */
+    void HighlightDescendants() const;
+
+    /**
+     * @brief Verifies that a node can be selected via a picking ray.
+     */
+    void SelectNodeViaRay() const;
+
+    /**
+     * @brief Verifies that the default color of an unhighlighted/unselected node is what we expect.
+     */
+    void DetermineDefaultLeafNodeColor() const;
+
+    /**
+     * @brief Verifies that the default color of highlighted node is what we expect it to be.
+     */
+    void DetermineDefaultColorOfHighlightedNode() const;
+
+    /**
+     * @brief Verifies a non-default node color is properly tracked.
+     */
+    void DetermineCustomColorOfRegisteredNode() const;
 
   private:
     std::shared_ptr<TestViewFactory> m_viewFactory;

@@ -1,6 +1,6 @@
 #include "Settings/persistentSettings.h"
 
-#include <Visualizations/vizBlock.h>
+#include <Model/vizBlock.h>
 #include <constants.h>
 
 #include <algorithm>
