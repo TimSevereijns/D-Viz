@@ -348,8 +348,8 @@ void ControllerTests::SelectNodeViaRay() const
     const auto z = static_cast<float>(targetBlock.GetOrigin().z() - targetBlock.GetDepth() / 2.0);
 
     Camera camera;
-    camera.SetPosition(QVector3D{ 300, 300, -300 });
-    camera.LookAt(QVector3D{ x, y, z });
+    camera.SetPosition({ 300, 300, -300 });
+    camera.LookAt({ x, y, z });
 
     const Ray ray{ camera.GetPosition(), camera.Forward() };
 

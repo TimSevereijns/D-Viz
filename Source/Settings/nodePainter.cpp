@@ -56,6 +56,53 @@ namespace
             log->error("Encountered an error converting JSON document to file color map.");
         }
     }
+
+    void AddVideoColors(
+        Settings::JsonDocument& document, Settings::JsonDocument::AllocatorType& allocator)
+    {
+        using JsonValue = rapidjson::GenericValue<rapidjson::UTF16<>>;
+        constexpr std::array<std::wstring_view, 10> fileTypes = { L".mp4", L".avi", L".mkv",
+                                                                  L".mov", L".vob", L".gifv",
+                                                                  L".wmv", L".mpg", L".mpeg",
+                                                                  L".m4v" };
+
+        JsonValue array{ rapidjson::kArrayType };
+        array.PushBack(static_cast<int>(Constants::Colors::GrayBlue[0] * 255), allocator);
+        array.PushBack(static_cast<int>(Constants::Colors::GrayBlue[1] * 255), allocator);
+        array.PushBack(static_cast<int>(Constants::Colors::GrayBlue[2] * 255), allocator);
+
+        JsonValue object{ rapidjson::kObjectType };
+        for (const auto& type : fileTypes) {
+            object.AddMember(
+                JsonValue{ type.data(), allocator }, JsonValue{}.CopyFrom(array, allocator),
+                allocator);
+        }
+
+        document.AddMember(L"Videos", object.Move(), allocator);
+    }
+
+    void AddImageColors(
+        Settings::JsonDocument& document, Settings::JsonDocument::AllocatorType& allocator)
+    {
+        using JsonValue = rapidjson::GenericValue<rapidjson::UTF16<>>;
+        constexpr std::array<std::wstring_view, 8> fileTypes = { L".jpg", L".jpeg", L".tiff",
+                                                                 L".png", L".psd",  L".gif",
+                                                                 L".bmp", L".svg" };
+
+        JsonValue array{ rapidjson::kArrayType };
+        array.PushBack(static_cast<int>(Constants::Colors::GrayBlue[0] * 255), allocator);
+        array.PushBack(static_cast<int>(Constants::Colors::GrayBlue[1] * 255), allocator);
+        array.PushBack(static_cast<int>(Constants::Colors::GrayBlue[2] * 255), allocator);
+
+        JsonValue object{ rapidjson::kObjectType };
+        for (const auto& type : fileTypes) {
+            object.AddMember(
+                JsonValue{ type.data(), allocator }, JsonValue{}.CopyFrom(array, allocator),
+                allocator);
+        }
+
+        document.AddMember(L"Images", object.Move(), allocator);
+    }
 } // namespace
 
 namespace Settings
@@ -63,7 +110,9 @@ namespace Settings
     NodePainter::NodePainter(const std::filesystem::path& colorFile)
         : m_fileColorMapPath{ colorFile }
     {
-        if (std::filesystem::exists(m_fileColorMapPath)) {
+        if (!std::filesystem::exists(m_fileColorMapPath)) {
+            m_fileColorMapDocument = CreatePreferencesDocument();
+        } else {
             m_fileColorMapDocument = LoadFromDisk(m_fileColorMapPath);
         }
 
@@ -99,5 +148,20 @@ namespace Settings
         }
 
         return extensionItr->second;
+    }
+
+    JsonDocument NodePainter::CreatePreferencesDocument()
+    {
+        Settings::JsonDocument document;
+        document.SetObject();
+
+        auto& allocator = document.GetAllocator();
+
+        AddVideoColors(document, allocator);
+        AddImageColors(document, allocator);
+
+        Settings::SaveToDisk(document, std::filesystem::current_path() / L"colors.json");
+
+        return document;
     }
 } // namespace Settings

@@ -38,6 +38,7 @@ namespace Constants
         constexpr static auto SlateGray = Detail::RGB(112, 128, 144);
         constexpr static auto White = Detail::RGB(255, 255, 255);
         constexpr static auto Coral = Detail::RGB(255, 127, 80);
+        constexpr static auto GrayBlue = Detail::RGB(64, 128, 191);
     } // namespace Colors
 
     namespace ColorScheme

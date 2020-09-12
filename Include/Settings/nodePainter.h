@@ -61,6 +61,8 @@ namespace Settings
         }
 
       private:
+        JsonDocument CreatePreferencesDocument();
+
         ColorMap m_colorMap;
 
         JsonDocument m_fileColorMapDocument;
