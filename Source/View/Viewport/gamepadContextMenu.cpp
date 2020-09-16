@@ -139,7 +139,7 @@ void GamepadContextMenu::ProcessInput()
     repaint();
 }
 
-void GamepadContextMenu::AddEntry(const QString& label, const std::function<void()>& action)
+void GamepadContextMenu::addAction(const QString& label, const std::function<void()>& action)
 {
     Entry entry{ label, QPoint{}, QColor{ Qt::green }, action };
 

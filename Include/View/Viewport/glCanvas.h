@@ -353,6 +353,11 @@ class GLCanvas final : public QOpenGLWidget
      */
     void VisualizeFilesystemActivity();
 
+    /**
+     * @brief Helper function populate the context menus.
+     */
+    template <typename MenuType> void PopulateContextMenu(MenuType& menu);
+
     bool m_isPaintingSuspended{ false };
     bool m_isVisualizationLoaded{ false };
     bool m_isLeftTriggerDown{ false };

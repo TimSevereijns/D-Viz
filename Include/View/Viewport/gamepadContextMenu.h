@@ -17,7 +17,8 @@ class GamepadContextMenu : public QWidget
     Q_OBJECT
 
   public:
-    struct Entry {
+    struct Entry
+    {
         QString Label;
         QPoint Position;
         QColor Color;
@@ -26,7 +27,12 @@ class GamepadContextMenu : public QWidget
 
     GamepadContextMenu(const Gamepad& gamepad, QWidget* parent = nullptr);
 
-    void AddEntry(const QString& label, const std::function<void()>& action);
+    void addAction(const QString& label, const std::function<void()>& action);
+
+    void addSeparator(){
+        // This function is a deliberate no-op, and exists so that both the mouse context menu and
+        // the gamepad menu can be used as a templated parameter in the same function.
+    };
 
     void ComputeLayout();
 

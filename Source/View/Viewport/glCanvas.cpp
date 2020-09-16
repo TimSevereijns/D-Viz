@@ -442,54 +442,67 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizBlock>::Node*>&
     }
 }
 
-void GLCanvas::ShowGamepadContextMenu()
+template <typename MenuType> void GLCanvas::PopulateContextMenu(MenuType& menu)
 {
-    const auto thereExistHighlightedNodes = !m_controller.GetHighlightedNodes().empty();
-    const auto* const selectedNode = m_controller.GetSelectedNode();
+    const auto unhighlightCallback = [&](auto& nodes) {
+        RestoreHighlightedNodes(nodes);
 
-    if (!thereExistHighlightedNodes && !selectedNode) {
-        return;
-    }
+        // Make sure to re-select the already selected node in case it was also part of the
+        // highlighted set:
+        const auto* const selectedNode = m_controller.GetSelectedNode();
+        if (selectedNode) {
+            SelectNode(*selectedNode);
+        }
+    };
 
-    const auto unhighlightCallback = [&](auto& nodes) { RestoreHighlightedNodes(nodes); };
     const auto highlightCallback = [&](auto& nodes) { HighlightNodes(nodes); };
     const auto selectionCallback = [&](auto& node) { SelectNode(node); };
 
-    // @note Qt will manage the lifetime of this object:
-    m_gamepadContextMenu = new GamepadContextMenu{ m_mainWindow.GetGamepad(), this };
-
+    const auto thereExistHighlightedNodes = !m_controller.GetHighlightedNodes().empty();
     if (thereExistHighlightedNodes) {
-        m_gamepadContextMenu->AddEntry(
+        menu.addAction(
             "Clear Highlights", [=] { m_controller.ClearHighlightedNodes(unhighlightCallback); });
     }
 
-    if (selectedNode) {
-        m_gamepadContextMenu->AddEntry("Highlight Ancestors", [=] {
-            m_controller.ClearHighlightedNodes(unhighlightCallback);
-            m_controller.HighlightAncestors(*selectedNode, highlightCallback);
-        });
-
-        m_gamepadContextMenu->AddEntry("Highlight Descendants", [=] {
-            m_controller.ClearHighlightedNodes(unhighlightCallback);
-            m_controller.HighlightDescendants(*selectedNode, highlightCallback);
-        });
-
-        if (selectedNode->GetData().file.type == FileType::Regular) {
-            const auto message = GetHighlightExtensionLabel(*selectedNode);
-
-            m_gamepadContextMenu->AddEntry(message, [=] {
-                m_controller.ClearHighlightedNodes(unhighlightCallback);
-
-                m_controller.HighlightAllMatchingExtensions(
-                    selectedNode->GetData().file.extension, highlightCallback);
-
-                m_controller.SelectNode(*selectedNode, selectionCallback);
-            });
-        }
-
-        m_gamepadContextMenu->AddEntry(
-            "Show in Explorer", [=] { OS::LaunchFileExplorer(*selectedNode); });
+    const auto* const selection = m_controller.GetSelectedNode();
+    if (!selection) {
+        return;
     }
+
+    menu.addAction("Highlight Ancestors", [=] {
+        m_controller.ClearHighlightedNodes(unhighlightCallback);
+        m_controller.HighlightAncestors(*selection, highlightCallback);
+    });
+
+    menu.addAction("Highlight Descendants", [=] {
+        m_controller.ClearHighlightedNodes(unhighlightCallback);
+        m_controller.HighlightDescendants(*selection, highlightCallback);
+    });
+
+    if (selection->GetData().file.type == FileType::Regular) {
+        const auto message = GetHighlightExtensionLabel(*selection);
+        menu.addAction(message, [=] {
+            m_controller.ClearHighlightedNodes(unhighlightCallback);
+
+            m_controller.HighlightAllMatchingExtensions(
+                selection->GetData().file.extension, highlightCallback);
+
+            m_controller.SelectNode(*selection, selectionCallback);
+        });
+    }
+
+    menu.addSeparator();
+    menu.addAction("Copy File Path", [selection] { OS::CopyPathToClipboard(*selection); });
+
+    menu.addSeparator();
+    menu.addAction("Show in Explorer", [selection] { OS::LaunchFileExplorer(*selection); });
+}
+
+void GLCanvas::ShowGamepadContextMenu()
+{
+    // @note Qt will manage the lifetime of this object:
+    m_gamepadContextMenu = new GamepadContextMenu{ m_mainWindow.GetGamepad(), this };
+    PopulateContextMenu(*m_gamepadContextMenu);
 
     m_gamepadContextMenu->move(mapToGlobal(QPoint{ 0, 0 }));
     m_gamepadContextMenu->resize(width(), height());
@@ -502,59 +515,8 @@ void GLCanvas::ShowGamepadContextMenu()
 
 void GLCanvas::ShowContextMenu(const QPoint& point)
 {
-    if (!m_controller.HasModelBeenLoaded()) {
-        return;
-    }
-
-    const auto thereExistHighlightedNodes = !m_controller.GetHighlightedNodes().empty();
-    const auto* const selectedNode = m_controller.GetSelectedNode();
-
-    if (!thereExistHighlightedNodes && !selectedNode) {
-        return;
-    }
-
-    const auto unhighlightCallback = [&](auto& nodes) { RestoreHighlightedNodes(nodes); };
-    const auto highlightCallback = [&](auto& nodes) { HighlightNodes(nodes); };
-    const auto selectionCallback = [&](auto& node) { SelectNode(node); };
-
     MouseContextMenu menu{ m_keyboardManager };
-
-    if (thereExistHighlightedNodes) {
-        menu.addAction(
-            "Clear Highlights", [&] { m_controller.ClearHighlightedNodes(unhighlightCallback); });
-
-        menu.addSeparator();
-    }
-
-    if (selectedNode) {
-        menu.addAction("Highlight Ancestors", [&] {
-            m_controller.ClearHighlightedNodes(unhighlightCallback);
-            m_controller.HighlightAncestors(*selectedNode, highlightCallback);
-        });
-
-        menu.addAction("Highlight Descendants", [&] {
-            m_controller.ClearHighlightedNodes(unhighlightCallback);
-            m_controller.HighlightDescendants(*selectedNode, highlightCallback);
-        });
-
-        if (selectedNode->GetData().file.type == FileType::Regular) {
-            const auto message = GetHighlightExtensionLabel(*selectedNode);
-
-            menu.addAction(message, [&] {
-                m_controller.ClearHighlightedNodes(unhighlightCallback);
-
-                m_controller.HighlightAllMatchingExtensions(
-                    selectedNode->GetData().file.extension, highlightCallback);
-
-                m_controller.SelectNode(*selectedNode, selectionCallback);
-            });
-        }
-
-        menu.addSeparator();
-
-        menu.addAction("Copy Path", [&] { OS::CopyPathToClipboard(*selectedNode); });
-        menu.addAction("Show in Explorer", [&] { OS::LaunchFileExplorer(*selectedNode); });
-    }
+    PopulateContextMenu(menu);
 
     const QPoint globalPoint = mapToGlobal(point);
     menu.exec(globalPoint);
