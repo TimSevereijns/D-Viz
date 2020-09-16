@@ -429,15 +429,8 @@ namespace Assets
 
         m_blockCount = 0;
 
-        const auto& parameters = m_sessionSettings.GetVisualizationParameters();
-
         for (auto& node : tree) {
-            const auto fileIsTooSmall = (node->file.size < parameters.minimumFileSize);
-            const auto notTheRightFileType =
-                parameters.onlyShowDirectories && node->file.type != FileType::Directory;
-
-            if (notTheRightFileType || fileIsTooSmall) {
-                node->offsetIntoVBO = VizBlock::NotInVBO;
+            if (!m_controller.IsNodeVisible(node.GetData())) {
                 continue;
             }
 
