@@ -68,6 +68,15 @@ namespace OS
 
 #endif
 
+    inline void CopyFileNameToClipboard(const Tree<VizBlock>::Node& node)
+    {
+        const auto& file = node.GetData().file;
+        const auto fileName = file.name + file.extension;
+
+        QClipboard* clipboard = QApplication::clipboard();
+        clipboard->setText(QString::fromStdWString(fileName));
+    }
+
     inline void CopyPathToClipboard(const Tree<VizBlock>::Node& node)
     {
         const auto filePath = Controller::ResolveCompleteFilePath(node);

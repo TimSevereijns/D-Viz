@@ -492,6 +492,7 @@ template <typename MenuType> void GLCanvas::PopulateContextMenu(MenuType& menu)
     }
 
     menu.addSeparator();
+    menu.addAction("Copy File Name", [selection] { OS::CopyFileNameToClipboard(*selection); });
     menu.addAction("Copy File Path", [selection] { OS::CopyPathToClipboard(*selection); });
 
     menu.addSeparator();
