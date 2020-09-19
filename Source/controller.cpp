@@ -169,7 +169,7 @@ QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
     }
 
     if (IsNodeHighlighted(node)) {
-        return Constants::Colors::SlateGray;
+        return Constants::Colors::Default::Highlighted;
     }
 
     if (m_nodePainter.GetActiveColorScheme() != Constants::ColorScheme::Default) {
@@ -182,11 +182,11 @@ QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
     }
 
     if (node->file.type == FileType::Directory) {
-        return Constants::Colors::White;
+        return Constants::Colors::Default::Directory;
     }
 
     Expects(node->file.type == FileType::Regular);
-    return Constants::Colors::FileGreen;
+    return Constants::Colors::Default::File;
 }
 
 void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
@@ -278,12 +278,12 @@ void Controller::SelectNodeAndUpdateStatusBar(
     const auto fileSize = node->file.size;
     const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
     const auto [prefixedSize, units] = Utilities::ToPrefixedSize(fileSize, prefix);
-    const auto lessThanKilo = (units == Utilities::Detail::bytesLabel);
+    const auto isSmallFile = (units == Utilities::Detail::bytesLabel);
 
     const auto path = Controller::ResolveCompleteFilePath(node).wstring();
 
-    const auto message = lessThanKilo ? fmt::format(L"{}  |  {:.0f} {}", path, prefixedSize, units)
-                                      : fmt::format(L"{}  |  {:.2f} {}", path, prefixedSize, units);
+    const auto message = isSmallFile ? fmt::format(L"{}  |  {:.0f} {}", path, prefixedSize, units)
+                                     : fmt::format(L"{}  |  {:.2f} {}", path, prefixedSize, units);
 
     m_view->SetStatusBarMessage(message);
 }
@@ -334,11 +334,11 @@ void Controller::DisplayHighlightDetails()
 
     const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
     const auto [prefixedSize, units] = Utilities::ToPrefixedSize(totalBytes, prefix);
-    const auto isSmall = (units == Utilities::Detail::bytesLabel);
+    const auto isSmallFile = (units == Utilities::Detail::bytesLabel);
 
     const std::wstring nodes = highlightedNodes.size() == 1 ? L" node" : L" nodes";
 
-    if (isSmall) {
+    if (isSmallFile) {
         m_view->SetStatusBarMessage(fmt::format(
             L"Highlighted {:n} " + nodes + L", presenting {:.0f} {}.", highlightedNodes.size(),
             prefixedSize, units));

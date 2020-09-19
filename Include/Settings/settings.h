@@ -44,7 +44,6 @@ namespace Settings
          * @brief Determines whether a node is visible in the visualization.
          *
          * @param[in] block             The node whose visibility is to be checked.
-         * @param[in] parameters        The parameters to use during the checking.
          *
          * @returns True if the node in question is visible to the end-user.
          */

@@ -403,7 +403,7 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 void GLCanvas::SelectNode(const Tree<VizBlock>::Node& node)
 {
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
-    treemap->SetNodeColor(node, Constants::Colors::CanaryYellow);
+    treemap->SetNodeColor(node, Constants::Colors::Default::Selected);
 }
 
 void GLCanvas::RestoreSelectedNode(const Tree<VizBlock>::Node& node)
@@ -423,7 +423,7 @@ void GLCanvas::HighlightNodes(std::vector<const Tree<VizBlock>::Node*>& nodes)
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
 
     for (const auto* const node : nodes) {
-        treemap->SetNodeColor(*node, Constants::Colors::SlateGray);
+        treemap->SetNodeColor(*node, Constants::Colors::Default::Highlighted);
     }
 }
 
@@ -740,7 +740,9 @@ void GLCanvas::PaintNode(
 void GLCanvas::HandleFileModification(
     Assets::Treemap* const treemap, const Tree<VizBlock>::Node& node)
 {
-    PaintNode(treemap, node, Constants::Colors::BabyBlue, Constants::Colors::BabyBlue);
+    PaintNode(
+        treemap, node, Constants::Colors::Default::ModifiedFile,
+        Constants::Colors::Default::ModifiedDirectory);
 }
 
 void GLCanvas::HandleFileDeletion(Assets::Treemap* const treemap, const Tree<VizBlock>::Node& node)
@@ -753,10 +755,14 @@ void GLCanvas::HandleFileDeletion(Assets::Treemap* const treemap, const Tree<Viz
         std::for_each(
             Tree<VizBlock>::PostOrderIterator{ &node }, Tree<VizBlock>::PostOrderIterator{},
             [&](const auto& child) {
-                PaintNode(treemap, child, Constants::Colors::DeepPink, Constants::Colors::HotPink);
+                PaintNode(
+                    treemap, child, Constants::Colors::Default::DeletedFile,
+                    Constants::Colors::Default::DeletedDirectory);
             });
     } else {
-        PaintNode(treemap, node, Constants::Colors::DeepPink, Constants::Colors::HotPink);
+        PaintNode(
+            treemap, node, Constants::Colors::Default::DeletedFile,
+            Constants::Colors::Default::DeletedDirectory);
     }
 }
 

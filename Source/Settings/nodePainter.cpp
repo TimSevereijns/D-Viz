@@ -66,10 +66,12 @@ namespace
                                                                   L".wmv", L".mpg", L".mpeg",
                                                                   L".m4v" };
 
+        constexpr auto color = Constants::Colors::Default::SchemeHighlight;
+
         JsonValue array{ rapidjson::kArrayType };
-        array.PushBack(static_cast<int>(Constants::Colors::GrayBlue[0] * 255), allocator);
-        array.PushBack(static_cast<int>(Constants::Colors::GrayBlue[1] * 255), allocator);
-        array.PushBack(static_cast<int>(Constants::Colors::GrayBlue[2] * 255), allocator);
+        array.PushBack(static_cast<int>(color[0] * 255), allocator);
+        array.PushBack(static_cast<int>(color[1] * 255), allocator);
+        array.PushBack(static_cast<int>(color[2] * 255), allocator);
 
         JsonValue object{ rapidjson::kObjectType };
         for (const auto& type : fileTypes) {
@@ -85,14 +87,16 @@ namespace
         Settings::JsonDocument& document, Settings::JsonDocument::AllocatorType& allocator)
     {
         using JsonValue = rapidjson::GenericValue<rapidjson::UTF16<>>;
-        constexpr std::array<std::wstring_view, 8> fileTypes = { L".jpg", L".jpeg", L".tiff",
+        constexpr std::array<std::wstring_view, 9> fileTypes = { L".jpg", L".jpeg", L".tiff",
                                                                  L".png", L".psd",  L".gif",
-                                                                 L".bmp", L".svg" };
+                                                                 L".bmp", L".svg",  L".dng" };
+
+        constexpr auto color = Constants::Colors::Default::SchemeHighlight;
 
         JsonValue array{ rapidjson::kArrayType };
-        array.PushBack(static_cast<int>(Constants::Colors::GrayBlue[0] * 255), allocator);
-        array.PushBack(static_cast<int>(Constants::Colors::GrayBlue[1] * 255), allocator);
-        array.PushBack(static_cast<int>(Constants::Colors::GrayBlue[2] * 255), allocator);
+        array.PushBack(static_cast<int>(color[0] * 255), allocator);
+        array.PushBack(static_cast<int>(color[1] * 255), allocator);
+        array.PushBack(static_cast<int>(color[2] * 255), allocator);
 
         JsonValue object{ rapidjson::kObjectType };
         for (const auto& type : fileTypes) {
