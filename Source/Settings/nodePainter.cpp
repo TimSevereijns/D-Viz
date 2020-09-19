@@ -87,9 +87,12 @@ namespace
         Settings::JsonDocument& document, Settings::JsonDocument::AllocatorType& allocator)
     {
         using JsonValue = rapidjson::GenericValue<rapidjson::UTF16<>>;
-        constexpr std::array<std::wstring_view, 9> fileTypes = { L".jpg", L".jpeg", L".tiff",
-                                                                 L".png", L".psd",  L".gif",
-                                                                 L".bmp", L".svg",  L".dng" };
+        constexpr std::array<std::wstring_view, 28> fileTypes = {
+            L".jpg", L".jpeg", L".tiff", L".png", L".psd", L".gif", L".bmp",
+            L".svg", L".dng",  L".RAF",  L".crw", L".cr2", L".cr3", L".cap",
+            L".erf", L".fff",  L".gpr",  L".mef", L".mdc", L".mrw", L".nef",
+            L".nrw", L".orf",  L".orf",  L".pef", L".ptx", L".x3f", L".srw"
+        };
 
         constexpr auto color = Constants::Colors::Default::SchemeHighlight;
 

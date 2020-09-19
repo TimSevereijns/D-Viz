@@ -2,6 +2,7 @@
 #define CONSTANTS
 
 #include <QVector3D>
+#include <QVersionNumber>
 
 #include "literals.h"
 
@@ -114,6 +115,8 @@ namespace Constants
         [[maybe_unused]] constexpr static auto RootBlockWidth = 1000.0f;
         [[maybe_unused]] constexpr static auto RootBlockDepth = 1000.0f;
     } // namespace Visualization
+
+    static QVersionNumber Version{ 0, 3, 0 };
 } // namespace Constants
 
 #endif // CONSTANTS
