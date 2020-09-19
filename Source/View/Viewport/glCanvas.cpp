@@ -408,13 +408,13 @@ void GLCanvas::SelectNode(const Tree<VizBlock>::Node& node)
 
 void GLCanvas::RestoreSelectedNode(const Tree<VizBlock>::Node& node)
 {
-    auto* const treemap = GetAsset<Assets::Tag::Treemap>();
-
-    if (!m_controller.IsNodeVisible(node.GetData())) {
+    const auto& parameters = m_controller.GetSessionSettings().GetVisualizationParameters();
+    if (!parameters.IsNodeVisible(node.GetData())) {
         return;
     }
 
     const auto restorationColor = m_controller.DetermineNodeColor(node);
+    auto* const treemap = GetAsset<Assets::Tag::Treemap>();
     treemap->SetNodeColor(node, restorationColor);
 }
 
@@ -430,9 +430,10 @@ void GLCanvas::HighlightNodes(std::vector<const Tree<VizBlock>::Node*>& nodes)
 void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizBlock>::Node*>& nodes)
 {
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
+    const auto& parameters = m_controller.GetSessionSettings().GetVisualizationParameters();
 
     for (const auto* const node : nodes) {
-        if (!m_controller.IsNodeVisible(node->GetData())) {
+        if (!parameters.IsNodeVisible(node->GetData())) {
             continue;
         }
 
@@ -724,7 +725,8 @@ void GLCanvas::PaintNode(
         m_controller.RegisterNodeColor(node, directoryColor);
     }
 
-    if (!m_controller.IsNodeVisible(node.GetData())) {
+    const auto& parameters = m_controller.GetSessionSettings().GetVisualizationParameters();
+    if (!parameters.IsNodeVisible(node.GetData())) {
         return;
     }
 

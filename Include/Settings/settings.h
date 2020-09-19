@@ -7,6 +7,8 @@
 #include <rapidjson/document.h>
 #include <rapidjson/encodings.h>
 
+struct VizBlock;
+
 namespace Settings
 {
     using JsonDocument = rapidjson::GenericDocument<rapidjson::UTF16<wchar_t>>;
@@ -35,8 +37,19 @@ namespace Settings
      * that can be set to control when visualization updates occur, as well as what nodes get
      * included.
      */
-    struct VisualizationParameters
+    class VisualizationParameters
     {
+      public:
+        /**
+         * @brief Determines whether a node is visible in the visualization.
+         *
+         * @param[in] block             The node whose visibility is to be checked.
+         * @param[in] parameters        The parameters to use during the checking.
+         *
+         * @returns True if the node in question is visible to the end-user.
+         */
+        bool IsNodeVisible(const VizBlock& block) const;
+
         std::wstring rootDirectory{ L"" }; ///< The path to the root directory
 
         // The minimum size a file should be before it shows up.

@@ -11,6 +11,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include <Model/vizBlock.h>
+
 namespace Settings
 {
     JsonDocument LoadFromDisk(const std::filesystem::path& path)
@@ -47,5 +49,18 @@ namespace Settings
         }
 
         return success;
+    }
+
+    bool VisualizationParameters::IsNodeVisible(const VizBlock& block) const
+    {
+        if (block.file.size < minimumFileSize) {
+            return false;
+        }
+
+        if (block.file.type != FileType::Directory && onlyShowDirectories) {
+            return false;
+        }
+
+        return true;
     }
 } // namespace Settings

@@ -46,14 +46,18 @@ void BreakdownDialog::ReloadData()
         return;
     }
 
+    const auto& parameters = controller.GetSessionSettings().GetVisualizationParameters();
+
     const auto stopwatch = Stopwatch<std::chrono::milliseconds>([&] {
         std::for_each(
             Tree<VizBlock>::LeafIterator{ tree.GetRoot() }, Tree<VizBlock>::LeafIterator{},
             [&](const auto& node) {
-                if (node->file.type == FileType::Regular) {
-                    m_tableModel.Insert(node, controller.IsNodeVisible(node.GetData()));
-                    m_graphModel.AddDatapoint(node->file.extension, node->file.size);
+                if (node->file.type != FileType::Regular) {
+                    return;
                 }
+
+                m_tableModel.Insert(node, parameters.IsNodeVisible(node.GetData()));
+                m_graphModel.AddDatapoint(node->file.extension, node->file.size);
             });
 
         m_tableModel.BuildModel(controller.GetSessionSettings().GetActiveNumericPrefix());
@@ -246,19 +250,16 @@ void BreakdownDialog::GenerateGraph(const std::wstring& extension)
 
     auto axisX = SetupAxisX(distribution);
     chart->addAxis(axisX.get(), Qt::AlignBottom);
-    series->attachAxis(axisX.get());
+    series->attachAxis(axisX.release());
 
     auto axisY = SetupAxisY(distribution);
     chart->addAxis(axisY.get(), Qt::AlignLeft);
-    series->attachAxis(axisY.get());
+    series->attachAxis(axisY.release());
 
     // Since `QChart::addSeries(...)` takes ownership of the series resource, one would reasonably
     // assume that the `chart->addSeries(series.release())` call could be moved down after the last
     // use of the `series` pointer. Unfortunately, if one were to do that, and axis labels no longer
-    // render. This seems like a bug in the Qt API design. As a work-around, we'll release here. The
-    // other resources suffer from similar bizarre behavior.
-    axisX.release();
-    axisY.release();
+    // render. This seems like a quirk in the Qt API design.
     series.release();
 
     // Another quirk in the API stems from the fact that while the documentation claims "the

@@ -250,11 +250,8 @@ namespace
 
         std::vector<IntersectionInfo> allIntersections;
 
-        const auto notTheRightFileType =
-            parameters.onlyShowDirectories && node->GetData().file.type != FileType::Directory;
-
         while (node) {
-            if (node->GetData().file.size < parameters.minimumFileSize || notTheRightFileType) {
+            if (!parameters.IsNodeVisible(node->GetData())) {
                 AdvanceToNextNonDescendant(node);
                 continue;
             }
