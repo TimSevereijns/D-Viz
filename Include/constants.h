@@ -43,7 +43,7 @@ namespace Constants
         [[maybe_unused]] constexpr static auto DarkRed = Detail::RGB(139, 0, 0);
         [[maybe_unused]] constexpr static auto BloodOrange = Detail::RGB(204, 17, 0);
 
-        namespace Default
+        inline namespace Alias
         {
             [[maybe_unused]] constexpr static auto File = Colors::FileGreen;
             [[maybe_unused]] constexpr static auto Directory = Colors::White;
@@ -54,7 +54,7 @@ namespace Constants
             [[maybe_unused]] constexpr static auto Selected = Colors::CanaryYellow;
             [[maybe_unused]] constexpr static auto Highlighted = Colors::SlateGray;
             [[maybe_unused]] constexpr static auto SchemeHighlight = Colors::GrayBlue;
-        } // namespace Default
+        } // namespace Alias
 
     } // namespace Colors
 

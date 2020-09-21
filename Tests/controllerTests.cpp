@@ -363,7 +363,7 @@ void ControllerTests::DetermineDefaultLeafNodeColor() const
         [&](const auto& node) { return (node->file.name + node->file.extension) == targetName; });
 
     const auto& nodeColor = m_controller->DetermineNodeColor(*targetNode);
-    QCOMPARE(nodeColor, Constants::Colors::Default::File);
+    QCOMPARE(nodeColor, Constants::Colors::File);
 }
 
 void ControllerTests::DetermineDefaultColorOfHighlightedNode() const
@@ -379,7 +379,7 @@ void ControllerTests::DetermineDefaultColorOfHighlightedNode() const
         [&](const auto& node) { return (node->file.name + node->file.extension) == targetName; });
 
     const auto& nodeColor = m_controller->DetermineNodeColor(*targetNode);
-    QCOMPARE(nodeColor, Constants::Colors::Default::Highlighted);
+    QCOMPARE(nodeColor, Constants::Colors::Highlighted);
 }
 
 void ControllerTests::DetermineCustomColorOfRegisteredNode() const

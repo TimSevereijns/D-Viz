@@ -66,7 +66,7 @@ namespace
                                                                   L".wmv", L".mpg", L".mpeg",
                                                                   L".m4v" };
 
-        constexpr auto color = Constants::Colors::Default::SchemeHighlight;
+        constexpr auto color = Constants::Colors::SchemeHighlight;
 
         JsonValue array{ rapidjson::kArrayType };
         array.PushBack(static_cast<int>(color[0] * 255), allocator);
@@ -94,7 +94,7 @@ namespace
             L".nrw", L".orf",  L".orf",  L".pef", L".ptx", L".x3f", L".srw"
         };
 
-        constexpr auto color = Constants::Colors::Default::SchemeHighlight;
+        constexpr auto color = Constants::Colors::SchemeHighlight;
 
         JsonValue array{ rapidjson::kArrayType };
         array.PushBack(static_cast<int>(color[0] * 255), allocator);

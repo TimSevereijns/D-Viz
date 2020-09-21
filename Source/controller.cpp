@@ -169,7 +169,7 @@ QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
     }
 
     if (IsNodeHighlighted(node)) {
-        return Constants::Colors::Default::Highlighted;
+        return Constants::Colors::Highlighted;
     }
 
     if (m_nodePainter.GetActiveColorScheme() != Constants::ColorScheme::Default) {
@@ -182,11 +182,11 @@ QVector3D Controller::DetermineNodeColor(const Tree<VizBlock>::Node& node) const
     }
 
     if (node->file.type == FileType::Directory) {
-        return Constants::Colors::Default::Directory;
+        return Constants::Colors::Directory;
     }
 
     Expects(node->file.type == FileType::Regular);
-    return Constants::Colors::Default::File;
+    return Constants::Colors::File;
 }
 
 void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
