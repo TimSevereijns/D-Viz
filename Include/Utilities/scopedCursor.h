@@ -9,7 +9,7 @@
  */
 struct ScopedCursor
 {
-    ScopedCursor(Qt::CursorShape desiredCursor)
+    explicit ScopedCursor(Qt::CursorShape desiredCursor)
     {
         QApplication::setOverrideCursor(desiredCursor);
     }

@@ -40,15 +40,15 @@ namespace Constants
         [[maybe_unused]] constexpr static auto SlateGray = Detail::RGB(112, 128, 144);
         [[maybe_unused]] constexpr static auto White = Detail::RGB(255, 255, 255);
         [[maybe_unused]] constexpr static auto GrayBlue = Detail::RGB(64, 128, 191);
-        [[maybe_unused]] constexpr static auto DarkRed = Detail::RGB(139, 0, 0);
-        [[maybe_unused]] constexpr static auto BloodOrange = Detail::RGB(204, 17, 0);
+        [[maybe_unused]] constexpr static auto PalePastelRed = Detail::RGB(255, 153, 148);
+        [[maybe_unused]] constexpr static auto PastelRed = Detail::RGB(255, 105, 97);
 
         inline namespace Alias
         {
             [[maybe_unused]] constexpr static auto File = Colors::FileGreen;
             [[maybe_unused]] constexpr static auto Directory = Colors::White;
-            [[maybe_unused]] constexpr static auto DeletedFile = Colors::BloodOrange;
-            [[maybe_unused]] constexpr static auto DeletedDirectory = Colors::DarkRed;
+            [[maybe_unused]] constexpr static auto DeletedFile = Colors::PastelRed;
+            [[maybe_unused]] constexpr static auto DeletedDirectory = Colors::PalePastelRed;
             [[maybe_unused]] constexpr static auto ModifiedFile = Colors::BabyBlue;
             [[maybe_unused]] constexpr static auto ModifiedDirectory = Colors::SteelBlue;
             [[maybe_unused]] constexpr static auto Selected = Colors::CanaryYellow;

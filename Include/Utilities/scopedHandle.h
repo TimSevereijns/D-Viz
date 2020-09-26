@@ -10,7 +10,7 @@ using HANDLE = void*;
 class ScopedHandle
 {
   public:
-    ScopedHandle(HANDLE handle);
+    explicit ScopedHandle(HANDLE handle);
     ~ScopedHandle() noexcept;
 
     ScopedHandle(const ScopedHandle& other);
