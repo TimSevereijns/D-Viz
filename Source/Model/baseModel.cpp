@@ -24,12 +24,12 @@ namespace
 {
     namespace Normals
     {
-        constexpr QVector3D PositiveX{ 1.0f, 0.0f, 0.0f };
-        constexpr QVector3D PositiveY{ 0.0f, 1.0f, 0.0f };
-        constexpr QVector3D PositiveZ{ 0.0f, 0.0f, 1.0f };
-        constexpr QVector3D NegativeX{ -1.0f, 0.0f, 0.0f };
-        constexpr QVector3D NegativeY{ 0.0f, -1.0f, 0.0f };
-        constexpr QVector3D NegativeZ{ 0.0f, 0.0f, -1.0f };
+        [[maybe_unused]] constexpr QVector3D PositiveX{ 1.0f, 0.0f, 0.0f };
+        [[maybe_unused]] constexpr QVector3D PositiveY{ 0.0f, 1.0f, 0.0f };
+        [[maybe_unused]] constexpr QVector3D PositiveZ{ 0.0f, 0.0f, 1.0f };
+        [[maybe_unused]] constexpr QVector3D NegativeX{ -1.0f, 0.0f, 0.0f };
+        [[maybe_unused]] constexpr QVector3D NegativeY{ 0.0f, -1.0f, 0.0f };
+        [[maybe_unused]] constexpr QVector3D NegativeZ{ 0.0f, 0.0f, -1.0f };
     } // namespace Normals
 
     /**
