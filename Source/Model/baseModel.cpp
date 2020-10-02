@@ -310,7 +310,7 @@ BaseModel::BaseModel(
 {
 }
 
-BaseModel::~BaseModel()
+BaseModel::~BaseModel() noexcept
 {
     StopMonitoringFileSystem();
 }
@@ -537,7 +537,8 @@ void BaseModel::StartMonitoringFileSystem()
     m_fileSystemNotificationProcessor = std::thread{ [&] { ProcessChanges(); } };
 }
 
-void BaseModel::StopMonitoringFileSystem()
+void BaseModel::StopMonitoringFileSystem() noexcept
+
 {
     m_fileSystemObserver.StopMonitoring();
 

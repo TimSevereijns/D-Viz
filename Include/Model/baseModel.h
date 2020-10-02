@@ -15,10 +15,10 @@
 
 #include "Model/Monitor/fileChangeNotification.hpp"
 #include "Model/Monitor/fileSystemObserver.h"
+#include "Model/vizBlock.h"
 #include "Settings/settings.h"
 #include "Utilities/threadSafeQueue.hpp"
 #include "View/Viewport/camera.h"
-#include "Model/vizBlock.h"
 
 struct TreemapMetadata
 {
@@ -35,7 +35,7 @@ class BaseModel
   public:
     BaseModel(std::unique_ptr<FileMonitorBase> fileMonitor, const std::filesystem::path& path);
 
-    virtual ~BaseModel();
+    virtual ~BaseModel() noexcept;
 
     BaseModel(const BaseModel&) = delete;
     BaseModel& operator=(const BaseModel&) = delete;
@@ -185,7 +185,7 @@ class BaseModel
     /**
      * @brief Stops monitoring the file system for changes.
      */
-    void StopMonitoringFileSystem();
+    void StopMonitoringFileSystem() noexcept;
 
     /**
      * @returns True if the file system monitor is turned on.

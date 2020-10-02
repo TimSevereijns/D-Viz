@@ -79,8 +79,7 @@ class SquarifiedTreeMap final : public BaseModel
 
     /**
      * @brief Computes the outer bounds (including the necessary boundary padding) needed to
-     * properly
-     * contain the row once laid out on top of its parent node.
+     * properly contain the row once laid out on top of its parent node.
      *
      * @param[in] bytesInRow         The total size of the row in bytes.
      * @param[in, out] parentNode    The node on top of which the new row is to be placed.

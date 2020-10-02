@@ -268,7 +268,7 @@ void GLCanvas::keyPressEvent(QKeyEvent* const event)
         return;
     }
 
-    constexpr auto state = KeyboardManager::KEY_STATE::DOWN;
+    constexpr auto state = KeyboardManager::KeyState::Down;
     m_keyboardManager.UpdateKeyState(static_cast<Qt::Key>(event->key()), state);
 
     event->accept();
@@ -283,7 +283,7 @@ void GLCanvas::keyReleaseEvent(QKeyEvent* const event)
         return;
     }
 
-    constexpr auto state = KeyboardManager::KEY_STATE::UP;
+    constexpr auto state = KeyboardManager::KeyState::Up;
     m_keyboardManager.UpdateKeyState(static_cast<Qt::Key>(event->key()), state);
 
     event->accept();

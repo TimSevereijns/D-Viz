@@ -12,7 +12,11 @@
 class KeyboardManager
 {
   public:
-    enum class KEY_STATE { UP, DOWN };
+    enum class KeyState
+    {
+        Up,
+        Down
+    };
 
     /**
      * @brief Indicates whether the key in question is currently in a pressed state (according to
@@ -39,13 +43,13 @@ class KeyboardManager
      * @param key[in]                The key to be updated.
      * @param state[in]              The state of the key.
      */
-    void UpdateKeyState(const Qt::Key, const KEY_STATE state);
+    void UpdateKeyState(const Qt::Key, const KeyState state);
 
   private:
-    std::unordered_map<Qt::Key, KEY_STATE> m_keyMap{
-        { Qt::Key_A, KEY_STATE::UP },     { Qt::Key_D, KEY_STATE::UP },
-        { Qt::Key_S, KEY_STATE::UP },     { Qt::Key_W, KEY_STATE::UP },
-        { Qt::Key_Shift, KEY_STATE::UP }, { Qt::Key_Control, KEY_STATE::UP }
+    std::unordered_map<Qt::Key, KeyState> m_keyMap{
+        { Qt::Key_A, KeyState::Up },     { Qt::Key_D, KeyState::Up },
+        { Qt::Key_S, KeyState::Up },     { Qt::Key_W, KeyState::Up },
+        { Qt::Key_Shift, KeyState::Up }, { Qt::Key_Control, KeyState::Up }
     };
 };
 

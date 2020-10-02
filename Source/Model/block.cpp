@@ -1,8 +1,8 @@
 #include "Model/block.h"
 
 Block::Block(
-    const PrecisePoint& origin, const double blockWidth, const double blockHeight,
-    const double blockDepth, const bool generateVertices /* = false */)
+    const PrecisePoint& origin, double blockWidth, double blockHeight, double blockDepth,
+    bool generateVertices /* = false */) noexcept
     : m_origin{ origin },
       m_nextRowOrigin{ origin.x(), origin.y() + blockHeight, origin.z() },
       m_percentCovered{ 0.0 },
@@ -14,16 +14,16 @@ Block::Block(
         return;
     }
 
-    const auto x = static_cast<float>(origin.x());
-    const auto y = static_cast<float>(origin.y());
-    const auto z = static_cast<float>(origin.z());
+    const auto x = origin.xAsFloat();
+    const auto y = origin.yAsFloat();
+    const auto z = origin.zAsFloat();
 
     const auto width = static_cast<float>(blockWidth);
     const auto height = static_cast<float>(blockHeight);
     const auto depth = static_cast<float>(blockDepth);
 
     // clang-format off
-    m_vertices.reserve(VERTICES_PER_BLOCK * 2);
+    m_vertices.reserve(VerticesPerBlock * 2);
     m_vertices
         // Front:                                        // Vertex Normals:               // Index
         << QVector3D{ x, y, z }                          << QVector3D{ 0.0f, 0.0f, 1.0f } // 0
@@ -67,57 +67,57 @@ Block::Block(
     // clang-format on
 }
 
-bool Block::HasVolume() const
+bool Block::HasVolume() const noexcept
 {
     return (m_width != 0.0 && m_height != 0.0 && m_depth != 0.0);
 }
 
-PrecisePoint Block::ComputeNextChildOrigin() const
+PrecisePoint Block::ComputeNextChildOrigin() const noexcept
 {
     return m_origin + PrecisePoint{ 0, m_height, 0 };
 }
 
-double Block::GetWidth() const
+double Block::GetWidth() const noexcept
 {
     return m_width;
 }
 
-double Block::GetHeight() const
+double Block::GetHeight() const noexcept
 {
     return m_height;
 }
 
-double Block::GetDepth() const
+double Block::GetDepth() const noexcept
 {
     return m_depth;
 }
 
-PrecisePoint Block::GetOrigin() const
+PrecisePoint Block::GetOrigin() const noexcept
 {
     return m_origin;
 }
 
-PrecisePoint Block::GetNextRowOrigin() const
+PrecisePoint Block::GetNextRowOrigin() const noexcept
 {
     return m_nextRowOrigin;
 }
 
-void Block::SetNextRowOrigin(const PrecisePoint& origin)
+void Block::SetNextRowOrigin(const PrecisePoint& origin) noexcept
 {
     m_nextRowOrigin = origin;
 }
 
-double Block::GetCoverage() const
+double Block::GetCoverage() const noexcept
 {
     return m_percentCovered;
 }
 
-void Block::IncreaseCoverageBy(double additionalCoverage)
+void Block::IncreaseCoverageBy(double additionalCoverage) noexcept
 {
     m_percentCovered += additionalCoverage;
 }
 
-const QVector<QVector3D>& Block::GetVerticesAndNormals() const
+const QVector<QVector3D>& Block::GetVerticesAndNormals() const noexcept
 {
     return m_vertices;
 }

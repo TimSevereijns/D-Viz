@@ -16,7 +16,7 @@ void MouseContextMenu::keyReleaseEvent(QKeyEvent* event)
         return;
     }
 
-    const auto state = KeyboardManager::KEY_STATE::UP;
+    const auto state = KeyboardManager::KeyState::Up;
     m_keyboardManager.UpdateKeyState(static_cast<Qt::Key>(event->key()), state);
 
     event->accept();

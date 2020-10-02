@@ -180,7 +180,7 @@ void WindowsFileMonitor::ShutdownThread()
     m_keepMonitoring.store(false);
 
     if (!std::filesystem::exists(m_pathBeingMonitored)) {
-        // @note If the path being monitored now longer exists (for whatever reason), then we can't
+        // @note If the path being monitored no longer exists (for whatever reason), then we can't
         // cancel I/O operations on it. So, if that happens, we'll just bail.
 
         Expects(false);
@@ -263,9 +263,9 @@ void WindowsFileMonitor::RetrieveNotification()
     } else if (GetLastError() == ERROR_NOTIFY_ENUM_DIR && bytesTransferred == 0) {
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->error(
-            "Detected a file change notification buffer overflow. This means that too many file "
-            "changes occurred at once, and some change notifications may have been missed as a "
-            "result.");
+            "Detected a file change notification buffer overflow. This likely means that too many "
+            "file changes occurred at once, and some change notifications may have been missed as "
+            "a result.");
     } else {
         LogLastError("Encountered error retrieving filesystem change details.");
     }
@@ -294,15 +294,15 @@ void WindowsFileMonitor::ProcessNotification()
 
         switch (notificationInfo->Action) {
             case FILE_ACTION_ADDED: {
-                m_notificationCallback(FileEvent{ fileName, FileEventType::Created });
+                m_notificationCallback({ fileName, FileEventType::Created });
                 break;
             }
             case FILE_ACTION_REMOVED: {
-                m_notificationCallback(FileEvent{ fileName, FileEventType::Deleted });
+                m_notificationCallback({ fileName, FileEventType::Deleted });
                 break;
             }
             case FILE_ACTION_MODIFIED: {
-                m_notificationCallback(FileEvent{ fileName, FileEventType::Touched });
+                m_notificationCallback({ fileName, FileEventType::Touched });
                 break;
             }
             case FILE_ACTION_RENAMED_OLD_NAME: {
@@ -310,7 +310,7 @@ void WindowsFileMonitor::ProcessNotification()
                 break;
             }
             case FILE_ACTION_RENAMED_NEW_NAME: {
-                m_notificationCallback(FileEvent{ fileName, FileEventType::Renamed });
+                m_notificationCallback({ fileName, FileEventType::Renamed });
                 break;
             }
             default: {

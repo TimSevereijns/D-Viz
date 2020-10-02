@@ -12,15 +12,15 @@ class PrecisePoint
 
     PrecisePoint(double x, double y, double z);
 
-    double x() const;
-    double y() const;
-    double z() const;
+    double x() const noexcept;
+    double y() const noexcept;
+    double z() const noexcept;
 
-    float xAsFloat() const;
-    float yAsFloat() const;
-    float zAsFloat() const;
+    float xAsFloat() const noexcept;
+    float yAsFloat() const noexcept;
+    float zAsFloat() const noexcept;
 
-    friend inline auto operator+(const PrecisePoint& lhs, const PrecisePoint& rhs)
+    friend inline auto operator+(const PrecisePoint& lhs, const PrecisePoint& rhs) noexcept
     {
         return PrecisePoint{ lhs.m_x + rhs.m_x, lhs.m_y + rhs.m_y, lhs.m_z + rhs.m_z };
     }

@@ -24,12 +24,13 @@
 namespace Detail
 {
     /**
-     * @brief Wrapper around the two event handles that we care when monitoring the filesystem.
+     * @brief Wrapper around the two event handles that we care about when monitoring the
+     * filesystem.
      */
     class FileMonitorEventHandles
     {
       public:
-        ~FileMonitorEventHandles()
+        ~FileMonitorEventHandles() noexcept
         {
             for (auto& handle : m_handles) {
                 if (handle != nullptr && handle != INVALID_HANDLE_VALUE) {
@@ -81,7 +82,6 @@ class WindowsFileMonitor : public FileMonitorBase
 {
   public:
     WindowsFileMonitor() = default;
-
     ~WindowsFileMonitor() noexcept override;
 
     // @note Atomics can't be copied or moved...

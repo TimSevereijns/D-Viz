@@ -12,7 +12,7 @@
 namespace
 {
     /**
-     * @brief Ccomputes the total disk space represented by the nodes in the row.
+     * @brief Computes the total disk space represented by the nodes in the row.
      *
      * @param[in] row                The nodes in the whose size is to contribute to total row size.
      * @param[in] candidateItem      An optional additional item to be included in the row.
@@ -155,7 +155,7 @@ double SquarifiedTreeMap::ComputeShortestEdgeOfRemainingBounds(const VizBlock& n
     const auto shortestEdge = std::min(
         std::abs(remainingRealEstate.GetDepth()), std::abs(remainingRealEstate.GetWidth()));
 
-    assert(shortestEdge > 0.0);
+    Expects(shortestEdge > 0.0);
     return shortestEdge;
 }
 
@@ -346,8 +346,6 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
 
     const auto nodeCount = row.size();
 
-    double additionalCoverage = 0.0;
-
     for (auto* const node : row) {
         VizBlock& data = node->GetData();
 
@@ -357,10 +355,10 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
             return;
         }
 
-        const double percentageOfParent =
+        const auto percentageOfParent =
             static_cast<double>(nodeFileSize) / static_cast<double>(bytesInRow);
 
-        additionalCoverage =
+        const auto additionalCoverage =
             (land.GetWidth() > std::abs(land.GetDepth()))
                 ? SlicePerpendicularToWidth(land, percentageOfParent, data, nodeCount)
                 : SlicePerpendicularToDepth(land, percentageOfParent, data, nodeCount);

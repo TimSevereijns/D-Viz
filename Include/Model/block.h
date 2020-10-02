@@ -33,8 +33,8 @@ class Block
      * @param[in] depth              The desired block depth; depth grows along negative z-axis.
      */
     Block(
-        const PrecisePoint& origin, const double width, const double height, const double depth,
-        const bool generateVertices = false);
+        const PrecisePoint& origin, double width, double height, double depth,
+        bool generateVertices = false) noexcept;
 
     /**
      * @brief Checks if width, height, and depth are all non-zero. It does not check to see if the
@@ -42,43 +42,43 @@ class Block
      *
      * @returns True if the block is properly defined.
      */
-    bool HasVolume() const;
+    bool HasVolume() const noexcept;
 
     /**
      * @returns The width of the block. The width increases along the positive X axis.
      */
-    double GetWidth() const;
+    double GetWidth() const noexcept;
 
     /**
      * @returns The height of the block. The height increases along the positive Y axis.
      */
-    double GetHeight() const;
+    double GetHeight() const noexcept;
 
     /**
      * @returns The depth of the block. The depth increases along the negative Z axis.
      */
-    double GetDepth() const;
+    double GetDepth() const noexcept;
 
     /**
      * @returns The origin of the block, defined as the bottom left corner of the block that is
      * closest to the origin assuming that no part of the block exists in the positive Z-space or
      * the negative X- and Y-space.
      */
-    PrecisePoint GetOrigin() const;
+    PrecisePoint GetOrigin() const noexcept;
 
     /**
      * @returns The current percentage of the block's surface that is covered.
      */
-    double GetCoverage() const;
+    double GetCoverage() const noexcept;
 
     /**
      * @returns All the vertices and corresponding normals that make up the block. See the
      * implementation for the exact layout.
      */
-    const QVector<QVector3D>& GetVerticesAndNormals() const;
+    const QVector<QVector3D>& GetVerticesAndNormals() const noexcept;
 
-    constexpr static auto FACES_PER_BLOCK{ 5 };
-    constexpr static auto VERTICES_PER_BLOCK{ 30 };
+    constexpr static auto FacesPerBlock{ 5 };
+    constexpr static auto VerticesPerBlock{ 30 };
 
   private:
     /**
@@ -86,19 +86,19 @@ class Block
      *
      * @returns The coordinates of the block's origin offset by the height of the block.
      */
-    PrecisePoint ComputeNextChildOrigin() const;
+    PrecisePoint ComputeNextChildOrigin() const noexcept;
 
     /**
      * @returns The location at which to place the next child block.
      */
-    PrecisePoint GetNextRowOrigin() const;
+    PrecisePoint GetNextRowOrigin() const noexcept;
 
     /**
      * @brief Stores the point at which the next child block should be placed.
      *
      * @param[in] origin          The origin at which to place the next child.
      */
-    void SetNextRowOrigin(const PrecisePoint& origin);
+    void SetNextRowOrigin(const PrecisePoint& origin) noexcept;
 
     /**
      * @brief Increases the percentage of the block that is covered.
@@ -106,7 +106,7 @@ class Block
      * @param[in] additionalCoverage    The percentage amount by which to increase the coverage,
      *                                  expressed as a normalized val
      */
-    void IncreaseCoverageBy(double additionalCoverage);
+    void IncreaseCoverageBy(double additionalCoverage) noexcept;
 
     QVector<QVector3D> m_vertices;
 
