@@ -375,14 +375,14 @@ class GLCanvas final : public QOpenGLWidget
 
     QTimer m_frameRedrawTimer{ nullptr };
 
-    std::chrono::system_clock::time_point m_lastFrameDrawTime{ std::chrono::system_clock::now() };
+    std::chrono::steady_clock::time_point m_lastFrameDrawTime{ std::chrono::steady_clock::now() };
 
-    std::chrono::system_clock::time_point m_lastFrameUpdateTimestamp{
-        std::chrono::system_clock::now()
+    std::chrono::steady_clock::time_point m_lastFrameUpdateTimestamp{
+        std::chrono::steady_clock::now()
     };
 
-    std::chrono::system_clock::time_point m_startOfMouseLookEvent{
-        std::chrono::system_clock::now()
+    std::chrono::steady_clock::time_point m_startOfMouseLookEvent{
+        std::chrono::steady_clock::now()
     };
 
     std::vector<Light> m_lights;

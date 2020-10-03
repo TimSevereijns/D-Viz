@@ -304,7 +304,7 @@ void GLCanvas::mousePressEvent(QMouseEvent* const event)
     } else if (event->button() == Qt::LeftButton) {
         if (!m_isLeftMouseButtonDown) {
             m_isLeftMouseButtonDown = true;
-            m_startOfMouseLookEvent = std::chrono::system_clock::now();
+            m_startOfMouseLookEvent = std::chrono::steady_clock::now();
         }
     }
 
@@ -350,7 +350,7 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
         // that messes up the delta computation. @todo Investigate...
 
         const auto timeSinceStartOfLookEvent = std::chrono::duration_cast<std::chrono::seconds>(
-            std::chrono::system_clock::now() - m_startOfMouseLookEvent);
+            std::chrono::steady_clock::now() - m_startOfMouseLookEvent);
 
         if (timeSinceStartOfLookEvent >= std::chrono::seconds{ 2 }) {
             if (!m_isCursorHidden) {
@@ -526,7 +526,7 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 
 void GLCanvas::HandleUserInput()
 {
-    const auto now = std::chrono::system_clock::now();
+    const auto now = std::chrono::steady_clock::now();
     const ScopeExit onScopeExit = [&]() noexcept
     {
         m_lastFrameUpdateTimestamp = now;
@@ -790,7 +790,7 @@ void GLCanvas::VisualizeFilesystemActivity()
     auto notification = m_controller.FetchNextFileModification();
     Assets::Treemap* const treemap = notification ? GetAsset<Assets::Tag::Treemap>() : nullptr;
 
-    const auto startTime = std::chrono::high_resolution_clock::now();
+    const auto startTime = std::chrono::steady_clock::now();
 
     while (notification) {
         const ScopeExit onScopeExit = [&]() noexcept
@@ -808,7 +808,7 @@ void GLCanvas::VisualizeFilesystemActivity()
         ProcessSingleFileEvent(*notification, treemap, *node);
 
         const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::high_resolution_clock::now() - startTime);
+            std::chrono::steady_clock::now() - startTime);
 
         constexpr auto timeLimit =
             std::chrono::milliseconds{ Constants::Graphics::DesiredTimeBetweenFrames / 2 };
@@ -841,7 +841,7 @@ void GLCanvas::paintGL()
     }
 
     if (m_mainWindow.ShouldShowFrameTime()) {
-        const auto now = std::chrono::system_clock::now();
+        const auto now = std::chrono::steady_clock::now();
         const auto elapsedTime =
             std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastFrameDrawTime);
 
