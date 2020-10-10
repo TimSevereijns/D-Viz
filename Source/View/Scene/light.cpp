@@ -2,7 +2,7 @@
 
 Light::Light(
     const QVector3D& lightPosition, const QVector3D& lightIntensity, const float lightAttenuation,
-    const float lightAmbientCoefficient)
+    const float lightAmbientCoefficient) noexcept
     : position{ lightPosition },
       intensity{ lightIntensity },
       attenuation{ lightAttenuation },
@@ -10,7 +10,7 @@ Light::Light(
 {
 }
 
-Light::Light(const QVector3D& lightPosition)
+Light::Light(const QVector3D& lightPosition) noexcept
     : position{ lightPosition },
       intensity{ QVector3D{ 0.1f, 0.1f, 0.1f } },
       attenuation{ 0.1f },

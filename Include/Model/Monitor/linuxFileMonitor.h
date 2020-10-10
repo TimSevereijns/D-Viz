@@ -17,7 +17,7 @@
 #include <sys/inotify.h>
 
 /**
- * @brief The LinuxFileMonitor class
+ * @brief A Linux-specific file monitor.
  *
  * @note Inspired by: https://github.com/erikzenker/inotify-cpp
  */

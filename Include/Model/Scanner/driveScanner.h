@@ -14,8 +14,8 @@
 #include "Model/Scanner/scanningWorker.h"
 
 /**
- * @brief The Drive Scanner class uses a dedicate thread to scan the specified drive or part
- * thereof.
+ * @brief Walks the filesystem using a dedicate thread to build a tree that represents said file
+ * system.
  */
 class DriveScanner final : public QObject
 {

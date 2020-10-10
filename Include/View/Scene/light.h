@@ -5,17 +5,18 @@
 #include <QVector>
 
 /**
- * @brief The Light struct represents a single point light.
+ * @brief Represents a single point light.
  */
-struct Light
+class Light
 {
-    Light() = default;
+  public:
+    Light() noexcept = default;
 
     Light(
         const QVector3D& lightPosition, const QVector3D& lightIntensity,
-        const float lightAttenuation, const float lightAmbientCoefficient);
+        const float lightAttenuation, const float lightAmbientCoefficient) noexcept;
 
-    explicit Light(const QVector3D& lightPosition);
+    explicit Light(const QVector3D& lightPosition) noexcept;
 
     QVector3D position{ 0.0f, 0.0f, 0.0f };
     QVector3D intensity{ 1.0f, 1.0f, 1.0f }; //< Think color

@@ -16,7 +16,7 @@
 #include <QObject>
 #include <QVector3D>
 
-struct VizBlock;
+class VizBlock;
 
 namespace Settings
 {
@@ -28,7 +28,7 @@ namespace Settings
         Q_OBJECT
 
       public:
-        PersistentSettings(
+        explicit PersistentSettings(
             const std::filesystem::path& preferencesFile = DefaultPreferencesFilePath());
 
         /**

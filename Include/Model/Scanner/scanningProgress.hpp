@@ -4,9 +4,13 @@
 #include <atomic>
 #include <cstdint>
 
-struct ScanningProgress
+/**
+ * @brief Various pieces of metadata to track file system scan progress.
+ */
+class ScanningProgress
 {
-    void Reset()
+  public:
+    void Reset() noexcept
     {
         filesScanned.store(0);
         directoriesScanned.store(0);

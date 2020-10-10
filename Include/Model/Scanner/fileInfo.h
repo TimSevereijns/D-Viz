@@ -5,8 +5,8 @@
 #include <string>
 
 /**
- * @brief The FileType enum represents the three basic file types: non-directory files,
- * directories, and symbolic links (which includes junctions).
+ * @brief Represents the three basic file types: non-directory files,
+ * directories, and symbolic links (which includes reparse points on Windows).
  */
 enum class FileType
 {
@@ -16,7 +16,7 @@ enum class FileType
 };
 
 /**
- * @brief The FileInfo struct
+ * @brief A wrapper around various pieces of file metadata.
  */
 struct FileInfo
 {

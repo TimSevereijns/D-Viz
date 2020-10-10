@@ -23,15 +23,14 @@
 #include "ui_mainWindow.h"
 
 class Controller;
-
-struct ScanningProgress;
+class ScanningProgress;
 
 #if defined(Q_OS_WIN)
 
 class WinTaskbarButton : public BaseTaskbarButton
 {
   public:
-    WinTaskbarButton(QObject* parent) : m_button{ parent }
+    explicit WinTaskbarButton(QObject* parent) : m_button{ parent }
     {
     }
 
@@ -79,7 +78,7 @@ class WinTaskbarButton : public BaseTaskbarButton
 class UnixTaskbarButton : public BaseTaskbarButton
 {
   public:
-    UnixTaskbarButton(QObject*)
+    explicit UnixTaskbarButton(QObject*)
     {
     }
 };
@@ -100,7 +99,7 @@ class MainWindow final : public QMainWindow, public BaseView
     MainWindow(Controller& controller, QWidget* parent = nullptr);
 
     /**
-     * @brief Show
+     * @brief Shows the main window.
      */
     void Show() override;
 
@@ -166,46 +165,46 @@ class MainWindow final : public QMainWindow, public BaseView
     Gamepad& GetGamepad() override;
 
     /**
-     * @brief AskUserToLimitFileSize
+     * @brief Asks the user to consider limiting the number of files to display, and then saves the
+     * response to the relevant setting.
      *
-     * @param numberOfFilesScanned
-     * @param parameters
+     * @param[in] numberOfFilesScanned  The number of files scanned.
+     * @param[in] parameters            The parameters to modify.
      *
-     * @return
+     * @returns True if the user opted to change the parameters.
      */
     bool AskUserToLimitFileSize(
         std::uintmax_t numberOfFilesScanned, Settings::VisualizationParameters parameters) override;
 
     /**
-     * @brief DisplayErrorDialog
+     * @brief Displays an error dialog.
      *
-     * @param message
+     * @param[in] message           The message to be displayed in the dialog.
      */
     void DisplayErrorDialog(std::string_view message) override;
 
     /**
-     * @brief SetWaitCursor
+     * @brief Sets the cursor to a wait symbol.
      */
     void SetWaitCursor() override;
 
     /**
-     * @brief RestoreDefaultCursor
+     * @brief Restores the cursor back to the default symbol.
      */
     void RestoreDefaultCursor() override;
 
     /**
-     * @brief OnScanStarted
+     * @brief Called when a scan starts.
      */
     void OnScanStarted() override;
 
     /**
-     * @brief OnScanCompleted
+     * @brief Called when a scan completes.
      */
     void OnScanCompleted() override;
 
     /**
-     * @brief GetTaskbarButton
-     * @return
+     * @returns The platform-specific taskbar button.
      */
     std::shared_ptr<BaseTaskbarButton> GetTaskbarButton() override;
 

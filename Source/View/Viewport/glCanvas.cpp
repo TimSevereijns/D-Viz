@@ -241,7 +241,6 @@ void GLCanvas::ReloadVisualization()
 void GLCanvas::ApplyColorScheme()
 {
     const auto deselectionCallback = [&](auto& nodes) { RestoreHighlightedNodes(nodes); };
-
     m_controller.ClearHighlightedNodes(deselectionCallback);
 
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
@@ -421,7 +420,6 @@ void GLCanvas::RestoreSelectedNode(const Tree<VizBlock>::Node& node)
 void GLCanvas::HighlightNodes(std::vector<const Tree<VizBlock>::Node*>& nodes)
 {
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
-
     for (const auto* const node : nodes) {
         treemap->SetNodeColor(*node, Constants::Colors::Highlighted);
     }

@@ -7,20 +7,12 @@
 #include "Model/block.h"
 
 /**
- * @brief The VizNode struct represents everything needed to parse, render, and perform hit
- * detection on an individual file as identified during the scanning process.
+ * @brief Represents everything needed to parse, render, and perform hit detection on an individual
+ * file as identified during the scanning process.
  */
-struct VizBlock
+class VizBlock
 {
-    constexpr static auto NotInVBO = std::numeric_limits<std::uint32_t>::max();
-
-    FileInfo file{};     ///< The file that the block represents.
-    Block block{};       ///< The actual block as rendered to the OpenGL canvas.
-    Block boundingBox{}; ///< Minimum axis-aligned bounding box for node and all descendents.
-
-    /** The offset of this node into the VBO once the visualization has been generated */
-    std::uint32_t offsetIntoVBO{ VizBlock::NotInVBO };
-
+  public:
     VizBlock() = default;
 
     /**
@@ -42,6 +34,15 @@ struct VizBlock
      * @param[in] block              The visual representation of the file in question.
      */
     VizBlock(FileInfo file, const Block& block);
+
+    constexpr static auto NotInVBO = std::numeric_limits<std::uint32_t>::max();
+
+    FileInfo file{};     ///< The file that the block represents.
+    Block block{};       ///< The actual block as rendered to the OpenGL canvas.
+    Block boundingBox{}; ///< Minimum axis-aligned bounding box for node and all descendents.
+
+    /** The offset of this node into the VBO once the visualization has been generated */
+    std::uint32_t offsetIntoVBO{ VizBlock::NotInVBO };
 };
 
 #endif // VIZNODE_H

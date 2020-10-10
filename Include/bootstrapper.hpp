@@ -13,8 +13,7 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 
 template <typename NodeDataType> class Tree;
-
-struct VizBlock;
+class VizBlock;
 
 namespace Bootstrapper
 {

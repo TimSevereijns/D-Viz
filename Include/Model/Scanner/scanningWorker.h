@@ -34,23 +34,7 @@
 #include "Model/vizBlock.h"
 
 /**
- * @brief The NodeAndPath struct
- */
-struct NodeAndPath
-{
-    std::unique_ptr<Tree<VizBlock>::Node> node;
-    std::filesystem::path path;
-
-    NodeAndPath(decltype(node) node, decltype(path) path)
-        : node{ std::move(node) }, path{ std::move(path) }
-    {
-    }
-
-    NodeAndPath() = default;
-};
-
-/**
- * @brief The ScanningWorker class
+ * @brief The worker that actually performs the drive scanning.
  */
 class ScanningWorker final : public QObject
 {
@@ -61,6 +45,10 @@ class ScanningWorker final : public QObject
 
     ScanningWorker(const ScanningParameters& parameters, ScanningProgress& progress);
 
+    /**
+     * @returns True if the path should be scanned. Symlinks and reparse points are examples of
+     * "files" that are not deemed scannable.
+     */
     static bool IsScannable(const std::filesystem::path& path) noexcept;
 
   public slots:

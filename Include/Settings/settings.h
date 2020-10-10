@@ -7,7 +7,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/encodings.h>
 
-struct VizBlock;
+class VizBlock;
 
 namespace Settings
 {
@@ -33,9 +33,8 @@ namespace Settings
     bool SaveToDisk(const JsonDocument& document, const std::filesystem::path& path);
 
     /**
-     * @brief The VisualizationParameters struct represents the gamut of visualization parameters
-     * that can be set to control when visualization updates occur, as well as what nodes get
-     * included.
+     * @brief Visualization parameters that can be set to control when visualization updates occur,
+     * as well as what nodes get included.
      */
     class VisualizationParameters
     {
@@ -47,7 +46,7 @@ namespace Settings
          *
          * @returns True if the node in question is visible to the end-user.
          */
-        bool IsNodeVisible(const VizBlock& block) const;
+        bool IsNodeVisible(const VizBlock& block) const noexcept;
 
         std::wstring rootDirectory{ L"" }; ///< The path to the root directory
 

@@ -43,7 +43,7 @@ namespace Assets
                 return 0;
             }
 
-            virtual ~Base() = default;
+            virtual ~Base() noexcept = default;
         };
 
         struct OriginMarker final : Base

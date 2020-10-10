@@ -577,7 +577,7 @@ void MainWindow::OnNewSearchQuery()
     const auto shouldSearchDirectories =
         m_controller.GetSessionSettings().ShouldSearchDirectories();
 
-    [[maybe_unused]] const ScopedCursor waitCursor{ Qt::WaitCursor };
+    const ScopedCursor waitCursor{ Qt::WaitCursor };
 
     m_controller.SearchTreeMap(
         searchQuery, deselectionCallback, selectionCallback, shouldSearchFiles,

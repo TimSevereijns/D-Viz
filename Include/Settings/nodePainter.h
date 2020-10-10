@@ -14,7 +14,7 @@
 #include <QObject>
 #include <QVector3D>
 
-struct VizBlock;
+class VizBlock;
 
 namespace Settings
 {
@@ -25,7 +25,7 @@ namespace Settings
         Q_OBJECT
 
       public:
-        NodePainter(const std::filesystem::path& colorFile = DefaultColoringFilePath());
+        explicit NodePainter(const std::filesystem::path& colorFile = DefaultColoringFilePath());
 
         /**
          * @returns The map that associates colors with file extensions.

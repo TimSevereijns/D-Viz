@@ -504,7 +504,7 @@ namespace Assets
         m_blockColors << m_controller.DetermineNodeColor(node);
     }
 
-    std::uint32_t Treemap::GetBlockCount() const
+    std::uint32_t Treemap::GetBlockCount() const noexcept
     {
         return m_blockCount;
     }

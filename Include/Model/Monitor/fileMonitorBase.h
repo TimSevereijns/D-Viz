@@ -6,11 +6,14 @@
 
 #include "fileChangeNotification.hpp"
 
+/**
+ * @brief Abstract base class for file monitoring classes.
+ */
 class FileMonitorBase
 {
   public:
     FileMonitorBase() = default;
-    virtual ~FileMonitorBase() = default;
+    virtual ~FileMonitorBase() noexcept = default;
 
     FileMonitorBase(FileMonitorBase& other) = delete;
     FileMonitorBase& operator=(FileMonitorBase& rhs) = delete;

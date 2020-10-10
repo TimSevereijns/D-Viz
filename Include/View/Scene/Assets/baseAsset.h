@@ -2,9 +2,9 @@
 #define BASEASSET_H
 
 #include "Model/baseModel.h"
-#include "View/Scene/light.h"
 #include "Settings/persistentSettings.h"
 #include "Settings/sessionSettings.h"
+#include "View/Scene/light.h"
 #include "View/Viewport/camera.h"
 
 #include <string_view>
@@ -14,11 +14,9 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 
-struct VizBlock;
-
-template <typename DataType> class TreeNode;
-
 class Controller;
+template <typename DataType> class TreeNode;
+class VizBlock;
 
 namespace Assets
 {
@@ -43,7 +41,7 @@ namespace Assets
         AssetBase(AssetBase&& other) = delete;
         AssetBase& operator=(AssetBase&& other) = delete;
 
-        virtual ~AssetBase() = default;
+        virtual ~AssetBase() noexcept = default;
 
         /**
          * @brief Loads the vertex and color data into the OpenGL buffers. Use

@@ -70,7 +70,7 @@ class BreakdownDialog final : public QDialog
     Q_OBJECT
 
   public:
-    BreakdownDialog(QWidget* parent = nullptr);
+    explicit BreakdownDialog(QWidget* parent = nullptr);
 
     void ReloadData();
 

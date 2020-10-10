@@ -8,14 +8,25 @@
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLTexture>
 
-struct VizBlock;
-
 template <typename DataType> class TreeNode;
+class VizBlock;
 
 struct BoundingBox;
 
 namespace Assets
 {
+    class ShadowMapMetadata
+    {
+      public:
+        explicit ShadowMapMetadata(std::unique_ptr<QOpenGLFramebufferObject> buffer) noexcept
+            : framebuffer{ std::move(buffer) }
+        {
+        }
+
+        std::unique_ptr<QOpenGLFramebufferObject> framebuffer;
+        QMatrix4x4 projectionViewMatrix;
+    };
+
     /**
      * @brief The Treemap class implements the functionality needed to render the treemap to the
      * OpenGL canvas.
@@ -54,7 +65,11 @@ namespace Assets
         bool IsAssetLoaded() const override;
 
         /**
-         * @todo
+         * @brief Updates the vertex buffer object (VBO) to paint a particular node a particular
+         * color.
+         *
+         * @param[in] node          The node to be located in the VBO and painted.
+         * @param[in] color         The color to point the node.
          */
         void SetNodeColor(const Tree<VizBlock>::Node& node, const QVector3D& color);
 
@@ -83,7 +98,7 @@ namespace Assets
         /**
          * @returns The number of blocks that are currently loaded into the visualization asset.
          */
-        std::uint32_t GetBlockCount() const;
+        std::uint32_t GetBlockCount() const noexcept;
 
       private:
         void UpdateVBO(const Tree<VizBlock>::Node& node, const QVector3D& color);
@@ -133,17 +148,6 @@ namespace Assets
 
         QOpenGLShaderProgram m_shadowMapShader;
         QOpenGLShaderProgram m_texturePreviewShader;
-
-        struct ShadowMapMetadata
-        {
-            ShadowMapMetadata(std::unique_ptr<QOpenGLFramebufferObject> buffer)
-                : framebuffer{ std::move(buffer) }
-            {
-            }
-
-            std::unique_ptr<QOpenGLFramebufferObject> framebuffer;
-            QMatrix4x4 projectionViewMatrix;
-        };
 
         std::vector<ShadowMapMetadata> m_shadowMaps;
 

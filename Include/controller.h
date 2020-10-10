@@ -33,10 +33,9 @@
 
 #include <QVector3D>
 
-struct FileEvent;
-struct ScanningProgress;
-
+class FileEvent;
 class GLCanvas;
+class ScanningProgress;
 
 class Controller : public QObject
 {

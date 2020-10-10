@@ -8,9 +8,9 @@
 class PrecisePoint
 {
   public:
-    PrecisePoint() = default;
+    PrecisePoint() noexcept = default;
 
-    PrecisePoint(double x, double y, double z);
+    PrecisePoint(double x, double y, double z) noexcept;
 
     double x() const noexcept;
     double y() const noexcept;

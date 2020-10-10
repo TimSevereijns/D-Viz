@@ -76,7 +76,7 @@ namespace Detail
 } // namespace Detail
 
 /**
- * @brief The WindowsFileMonitor class
+ * @brief A Windows-specific file monitor.
  */
 class WindowsFileMonitor : public FileMonitorBase
 {

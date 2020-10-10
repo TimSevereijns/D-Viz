@@ -10,7 +10,7 @@
 #include <Tree/Tree.hpp>
 #include <spdlog/spdlog.h>
 
-struct VizBlock;
+class VizBlock;
 
 enum class FileEventType
 {
@@ -21,11 +21,12 @@ enum class FileEventType
     Renamed
 };
 
-struct FileEvent
+class FileEvent
 {
-    FileEvent() = default;
+  public:
+    FileEvent() noexcept = default;
 
-    FileEvent(std::filesystem::path path, FileEventType eventType)
+    FileEvent(std::filesystem::path path, FileEventType eventType) noexcept
         : path{ std::move(path) }, eventType{ eventType }
     {
         try {

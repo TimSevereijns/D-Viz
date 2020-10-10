@@ -13,8 +13,7 @@
 #include <filesystem>
 
 template <typename T> class Tree;
-
-struct VizBlock;
+class VizBlock;
 
 namespace Scanner
 {
