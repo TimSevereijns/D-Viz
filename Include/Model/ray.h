@@ -8,9 +8,15 @@ class Ray
   public:
     Ray(const QVector3D& origin, const QVector3D& direction) noexcept;
 
-    QVector3D Origin() const noexcept;
+    /**
+     * @returns The coordinates of the ray's origin.
+     */
+    const QVector3D& Origin() const noexcept;
 
-    QVector3D Direction() const noexcept;
+    /**
+     * @returns The direction vector emitating from the origin.
+     */
+    const QVector3D& Direction() const noexcept;
 
   private:
     QVector3D m_origin;

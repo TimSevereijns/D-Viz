@@ -19,30 +19,51 @@ class BaseTaskbarButton
   public:
     virtual ~BaseTaskbarButton() noexcept = default;
 
+    /**
+     * @brief Sets the owner of the taskbar button.
+     */
     virtual void SetWindow(QObject* /*window*/)
     {
     }
 
+    /**
+     * @brief Hides the progress overlay.
+     */
     virtual void HideProgress()
     {
     }
 
+    /**
+     * @brief Resetse the progress overlay.
+     */
     virtual void ResetProgress()
     {
     }
 
+    /**
+     * @brief Sets the normalized progress value.
+     */
     virtual void SetValue(int)
     {
     }
 
+    /**
+     * @brief Sets the minimum for the progress range.
+     */
     virtual void SetMinimum(int)
     {
     }
 
+    /**
+     * @brief Sets the maximum for the progress range.
+     */
     virtual void SetMaximum(int)
     {
     }
 
+    /**
+     * @brief Sets the visibility of the progress overlay.
+     */
     virtual void SetVisible(bool)
     {
     }
@@ -63,7 +84,7 @@ class BaseView
     virtual void Show() = 0;
 
     /**
-     * @brief GetWindowHandle
+     * @returns The window handle.
      */
     virtual QWindow* GetWindowHandle() = 0;
 
@@ -94,7 +115,7 @@ class BaseView
     virtual void SetStatusBarMessage(const std::wstring& message, int timeout = 0) = 0;
 
     /**
-     * @brief ReloadVisualization
+     * @brief Reloads the visualization.
      */
     virtual void ReloadVisualization() = 0;
 
@@ -124,46 +145,46 @@ class BaseView
     virtual Gamepad& GetGamepad() = 0;
 
     /**
-     * @brief AskUserToLimitFileSize
+     * @brief Asks the user to consider limiting the number of files to display, and then saves the
+     * response to the relevant setting.
      *
-     * @param numberOfFilesScanned
-     * @param parameters
+     * @param[in] numberOfFilesScanned  The number of files scanned.
+     * @param[in] parameters            The parameters to modify.
      *
-     * @return
+     * @returns True if the user opted to change the parameters.
      */
     virtual bool AskUserToLimitFileSize(
         std::uintmax_t numberOfFilesScanned, Settings::VisualizationParameters parameters) = 0;
 
     /**
-     * @brief DisplayErrorDialog
+     * @brief Displays an error dialog.
      *
-     * @param message
+     * @param[in] message           The message to be displayed in the dialog.
      */
     virtual void DisplayErrorDialog(std::string_view message) = 0;
 
     /**
-     * @brief SetWaitCursor
+     * @brief Sets the cursor to a wait symbol.
      */
     virtual void SetWaitCursor() = 0;
 
     /**
-     * @brief RestoreDefaultCursor
+     * @brief Restores the cursor back to the default symbol.
      */
     virtual void RestoreDefaultCursor() = 0;
 
     /**
-     * @brief OnScanStarted
+     * @brief Called when a scan starts.
      */
     virtual void OnScanStarted() = 0;
 
     /**
-     * @brief OnScanCompleted
+     * @brief Called when a scan completes.
      */
     virtual void OnScanCompleted() = 0;
 
     /**
-     * @brief GetTaskbarButton
-     * @return
+     * @returns The platform-specific taskbar button.
      */
     virtual std::shared_ptr<BaseTaskbarButton> GetTaskbarButton() = 0;
 };

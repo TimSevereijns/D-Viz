@@ -5,12 +5,12 @@ Ray::Ray(const QVector3D& origin, const QVector3D& direction) noexcept
 {
 }
 
-QVector3D Ray::Origin() const noexcept
+const QVector3D& Ray::Origin() const noexcept
 {
     return m_origin;
 }
 
-QVector3D Ray::Direction() const noexcept
+const QVector3D& Ray::Direction() const noexcept
 {
     return m_direction;
 }

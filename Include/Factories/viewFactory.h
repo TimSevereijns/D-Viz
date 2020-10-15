@@ -8,7 +8,7 @@
 class ViewFactory final : public ViewFactoryInterface
 {
   public:
-    auto CreateView(Controller& controller) const -> std::shared_ptr<BaseView> override
+    std::shared_ptr<BaseView> CreateView(Controller& controller) const override
     {
         return std::make_shared<MainWindow>(controller);
     }

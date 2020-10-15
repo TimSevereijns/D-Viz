@@ -7,9 +7,9 @@
 class ModelFactory final : public ModelFactoryInterface
 {
   public:
-    auto CreateModel(
-        std::unique_ptr<FileMonitorBase> fileMonitor, const std::filesystem::path& path) const
-        -> std::shared_ptr<BaseModel> override
+    std::shared_ptr<BaseModel> CreateModel(
+        std::unique_ptr<FileMonitorBase> fileMonitor,
+        const std::filesystem::path& path) const override
     {
         return std::make_shared<SquarifiedTreeMap>(std::move(fileMonitor), path);
     }

@@ -21,12 +21,23 @@ class FileMonitorBase
     FileMonitorBase(FileMonitorBase&& other) = default;
     FileMonitorBase& operator=(FileMonitorBase&& rhs) = default;
 
+    /**
+     * @brief Starts file system monitoring.
+     *
+     * @param[in] callback          Callback to be invoked when a filesystem event occurs.
+     */
     virtual void Start(
         const std::filesystem::path& path,
         std::function<void(FileEvent&&)> onNotificationCallback) = 0;
 
+    /**
+     * @brief Stop file system monitoring.
+     */
     virtual void Stop() = 0;
 
+    /**
+     * @returns True if the file system observer is actively monitoring; false othwerise.
+     */
     virtual bool IsActive() const = 0;
 };
 

@@ -10,6 +10,9 @@
 class ScanningProgress
 {
   public:
+    /**
+     * @brief Resets the scanning progress metadata.
+     */
     void Reset() noexcept
     {
         filesScanned.store(0);

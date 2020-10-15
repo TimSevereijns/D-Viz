@@ -10,9 +10,9 @@
 class ModelFactoryInterface
 {
   public:
-    virtual auto CreateModel(
+    virtual std::shared_ptr<BaseModel> CreateModel(
         std::unique_ptr<FileMonitorBase> /*fileMonitor*/,
-        const std::filesystem::path& /*path*/) const -> std::shared_ptr<BaseModel>
+        const std::filesystem::path& /*path*/) const
     {
         return nullptr;
     };

@@ -165,46 +165,38 @@ class MainWindow final : public QMainWindow, public BaseView
     Gamepad& GetGamepad() override;
 
     /**
-     * @brief Asks the user to consider limiting the number of files to display, and then saves the
-     * response to the relevant setting.
-     *
-     * @param[in] numberOfFilesScanned  The number of files scanned.
-     * @param[in] parameters            The parameters to modify.
-     *
-     * @returns True if the user opted to change the parameters.
+     * @copydoc BaseView::AskUserToLimitFileSize
      */
     bool AskUserToLimitFileSize(
         std::uintmax_t numberOfFilesScanned, Settings::VisualizationParameters parameters) override;
 
     /**
-     * @brief Displays an error dialog.
-     *
-     * @param[in] message           The message to be displayed in the dialog.
+     * @copydoc BaseView::DisplayErrorDialog
      */
     void DisplayErrorDialog(std::string_view message) override;
 
     /**
-     * @brief Sets the cursor to a wait symbol.
+     * @copydoc BaseView::SetWaitCursor
      */
     void SetWaitCursor() override;
 
     /**
-     * @brief Restores the cursor back to the default symbol.
+     * @copydoc BaseView::RestoreDefaultCursor
      */
     void RestoreDefaultCursor() override;
 
     /**
-     * @brief Called when a scan starts.
+     * @copydoc BaseView::OnScanStarted
      */
     void OnScanStarted() override;
 
     /**
-     * @brief Called when a scan completes.
+     * @copydoc BaseView::OnScanCompleted
      */
     void OnScanCompleted() override;
 
     /**
-     * @returns The platform-specific taskbar button.
+     * @copydoc BaseView::GetTaskbarButton
      */
     std::shared_ptr<BaseTaskbarButton> GetTaskbarButton() override;
 

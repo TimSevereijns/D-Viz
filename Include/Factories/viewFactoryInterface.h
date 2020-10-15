@@ -10,7 +10,7 @@ class Controller;
 class ViewFactoryInterface
 {
   public:
-    virtual auto CreateView(Controller& /*controller*/) const -> std::shared_ptr<BaseView>
+    virtual std::shared_ptr<BaseView> CreateView(Controller& /*controller*/) const
     {
         return nullptr;
     }
