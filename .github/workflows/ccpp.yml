@@ -75,11 +75,11 @@ jobs:
 
       - name: Probe
         run: |
-          ls ${RUNNER_WORKSPACE}
+          ls ${RUNNER_WORKSPACE}/Qt/5.15.1
 
       - name: Build D-Viz
         run: |
-          ~/Qt/5.15.1/gcc_64/bin/qmake \
+          ${RUNNER_WORKSPACE}/Qt/5.15.1/gcc_64/bin/qmake \
             D-Viz.pro \
             CONFIG+=debug \
             QMAKE_CXXFLAGS+=-fno-inline \
