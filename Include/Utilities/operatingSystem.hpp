@@ -3,6 +3,7 @@
 
 #include <QClipboard>
 #include <QDesktopServices>
+#include <QFile>
 
 #include "Utilities/scopeExit.hpp"
 #include "controller.h"
@@ -89,6 +90,11 @@ namespace OS
 
         QClipboard* clipboard = QApplication::clipboard();
         clipboard->setText(text);
+    }
+
+    inline bool MoveToTrash(const std::filesystem::path& filePath)
+    {
+        return QFile::moveToTrash(QString::fromStdString(filePath.string()));
     }
 } // namespace OS
 
