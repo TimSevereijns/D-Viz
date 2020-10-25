@@ -75,8 +75,6 @@ jobs:
 
       - name: Probe
         run: |
-          ls ~/Qt/
-          ls ~/Qt/5.15.1
           ls ${RUNNER_WORKSPACE}
 
       - name: Build D-Viz
