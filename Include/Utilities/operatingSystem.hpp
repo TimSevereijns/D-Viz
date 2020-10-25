@@ -2,6 +2,7 @@
 #define OPERATINGSYSTEMSPECIFIC_HPP
 
 #include <QClipboard>
+#include <QDesktopServices>
 
 #include "Utilities/scopeExit.hpp"
 #include "controller.h"
@@ -24,7 +25,6 @@
 namespace OS
 {
 #ifdef Q_OS_WIN
-
     inline void LaunchFileExplorer(const Tree<VizBlock>::Node& node)
     {
         CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -66,6 +66,12 @@ namespace OS
     }
 
 #endif
+
+    inline void OpenFile(const Tree<VizBlock>::Node& node)
+    {
+        const auto filePath = Controller::ResolveCompleteFilePath(node);
+        QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(filePath.string())));
+    }
 
     inline void CopyFileNameToClipboard(const Tree<VizBlock>::Node& node)
     {

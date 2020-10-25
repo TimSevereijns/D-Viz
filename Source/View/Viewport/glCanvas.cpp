@@ -478,7 +478,8 @@ template <typename MenuType> void GLCanvas::PopulateContextMenu(MenuType& menu)
         m_controller.HighlightDescendants(*selection, highlightCallback);
     });
 
-    if (selection->GetData().file.type == FileType::Regular) {
+    const auto fileType = selection->GetData().file.type;
+    if (fileType == FileType::Regular) {
         const auto message = GetHighlightExtensionLabel(*selection);
         menu.addAction(message, [=] {
             m_controller.ClearHighlightedNodes(unhighlightCallback);
@@ -496,6 +497,10 @@ template <typename MenuType> void GLCanvas::PopulateContextMenu(MenuType& menu)
 
     menu.addSeparator();
     menu.addAction("Show in Explorer", [selection] { OS::LaunchFileExplorer(*selection); });
+
+    if (fileType == FileType::Regular) {
+        menu.addAction("Open File", [selection] { OS::OpenFile(*selection); });
+    }
 }
 
 void GLCanvas::ShowGamepadContextMenu()
