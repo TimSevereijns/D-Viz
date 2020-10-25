@@ -26,22 +26,22 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
 
-      - name: Install GCC 8
+      - name: Install GCC 9
         run: |
-          sudo apt-get install -qq g++-8
-          sudo apt-get install -qq gcc-8
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 20
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 20
-          sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 20
+          sudo apt-get install -qq g++-9
+          sudo apt-get install -qq gcc-9
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 20
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 20
+          sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-9 20
           sudo update-alternatives --config gcc
           sudo update-alternatives --config g++
           sudo update-alternatives --config gcov
           
       - name: Install LCov
         run: |
-          wget http://downloads.sourceforge.net/ltp/lcov-1.14.tar.gz
-          tar -xvf lcov-1.14.tar.gz
-          cd lcov-1.14 && sudo make install
+          wget https://github.com/linux-test-project/lcov/releases/download/v1.15/lcov-1.15.tar.gz
+          tar -xvf lcov-1.15.tar.gz
+          cd lcov-1.15 && sudo make install
           cd ..
           
       - name: Install OpenGL
@@ -60,16 +60,11 @@ jobs:
           cd ~
 
       - name: Install Qt
-        run: |
-          sudo apt-get install -y python3-setuptools
-          sudo pip3 install cuteci
-          sudo cuteci \
-              --installer http://download.qt.io/official_releases/qt/5.13/5.13.1/qt-opensource-linux-x64-5.13.1.run \
-              install \
-              --verbose \
-              --destdir ~/Qt \
-              --packages qt.qt5.5131.gcc_64,qt.qt5.5131.qtcharts \
-              --keep-tools
+        uses: jurplel/install-qt-action@v2.9.0
+        with:
+          version: 5.15.1
+          target: desktop
+          modules: qtcharts
 
       - name: Download Conan Packages
         run: |
@@ -80,7 +75,7 @@ jobs:
 
       - name: Build D-Viz
         run: |
-          ~/Qt/5.13.1/gcc_64/bin/qmake \
+          ${RUNNER_WORKSPACE}/Qt/5.15.1/gcc_64/bin/qmake \
             D-Viz.pro \
             CONFIG+=debug \
             QMAKE_CXXFLAGS+=-fno-inline \
@@ -110,6 +105,7 @@ jobs:
             '*/QtTest/*' \
             '*/QtWidgets/*' \
             '*/ThirdParty/*' \
+            '*/boost/*' \
             '*/.moc/*' \
             --output-file coverage.info
           lcov \
