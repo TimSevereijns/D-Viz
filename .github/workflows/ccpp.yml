@@ -73,9 +73,15 @@ jobs:
             conan install ..
             cd ${GITHUB_WORKSPACE}
 
+      - name: Probe
+        run: |
+          ls ~/Qt/
+          ls ~/Qt/5.15.1
+          ls ${RUNNER_WORKSPACE}
+
       - name: Build D-Viz
         run: |
-          ~/Qt/5.13.1/gcc_64/bin/qmake \
+          ~/Qt/5.15.1/gcc_64/bin/qmake \
             D-Viz.pro \
             CONFIG+=debug \
             QMAKE_CXXFLAGS+=-fno-inline \
