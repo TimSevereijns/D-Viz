@@ -60,16 +60,11 @@ jobs:
           cd ~
 
       - name: Install Qt
-        run: |
-          sudo apt-get install -y python3-setuptools
-          sudo pip3 install cuteci
-          sudo cuteci \
-              --installer http://download.qt.io/official_releases/qt/5.13/5.13.1/qt-opensource-linux-x64-5.13.1.run \
-              install \
-              --verbose \
-              --destdir ~/Qt \
-              --packages qt.qt5.5131.gcc_64,qt.qt5.5131.qtcharts \
-              --keep-tools
+        uses: jurplel/install-qt-action@v2.5.3
+        with:
+          version: 5.15.1
+          target: desktop
+          modules: qtcharts
 
       - name: Download Conan Packages
         run: |
