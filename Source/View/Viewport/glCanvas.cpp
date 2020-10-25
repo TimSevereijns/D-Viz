@@ -375,12 +375,12 @@ void GLCanvas::wheelEvent(QWheelEvent* const event)
 
     event->accept();
 
-    if (event->orientation() != Qt::Vertical) {
+    if (event->angleDelta().y() != 0) {
         return;
     }
 
     const auto cameraSpeed = m_controller.GetSessionSettings().GetCameraSpeed();
-    const auto delta = event->delta();
+    const auto delta = event->angleDelta().y();
 
     if (m_keyboardManager.IsKeyUp(Qt::Key_Shift)) {
         if (delta > 0 && cameraSpeed < 1.0) {

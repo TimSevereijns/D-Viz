@@ -20,6 +20,7 @@
 #include <QFileDialog>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QStandardPaths>
 
 namespace
 {
@@ -429,8 +430,10 @@ void MainWindow::OnFileMonitoringToggled(bool shouldEnable)
 
 void MainWindow::OnFileMenuNewScan()
 {
+    const auto locationList = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
+
     const auto selectedDirectory = QFileDialog::getExistingDirectory(
-        this, "Select a Directory to Visualize", "/home",
+        this, "Select a Directory to Visualize", locationList.front(),
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     if (selectedDirectory.isEmpty()) {
