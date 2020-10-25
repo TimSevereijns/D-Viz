@@ -491,6 +491,32 @@ bool MainWindow::AskUserToLimitFileSize(
     return false;
 }
 
+bool MainWindow::AskUserToConfirmDeletion(const std::filesystem::path& filePath)
+{
+    QMessageBox messageBox;
+    messageBox.setIcon(QMessageBox::Question);
+    messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    messageBox.setDefaultButton(QMessageBox::Yes);
+
+    const auto fileName = QString::fromStdString(filePath.filename().string());
+    messageBox.setText("Are you sure you want to delete " + fileName + "?");
+
+    const auto election = messageBox.exec();
+    switch (election) {
+        case QMessageBox::Yes: {
+            return true;
+        }
+        case QMessageBox::No: {
+            return false;
+        }
+        default: {
+            GSL_ASSUME(false);
+        }
+    }
+
+    return false;
+}
+
 void MainWindow::OnFPSReadoutToggled(bool isEnabled)
 {
     if (!isEnabled) {

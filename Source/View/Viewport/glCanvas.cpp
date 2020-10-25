@@ -500,6 +500,12 @@ template <typename MenuType> void GLCanvas::PopulateContextMenu(MenuType& menu)
 
     if (fileType == FileType::Regular) {
         menu.addAction("Open File", [selection] { OS::OpenFile(*selection); });
+        menu.addAction("Move to Trash", [&, selection] {
+            const auto filePath = Controller::ResolveCompleteFilePath(*selection);
+            if (m_mainWindow.AskUserToConfirmDeletion(filePath)) {
+                OS::MoveToTrash(filePath);
+            }
+        });
     }
 }
 

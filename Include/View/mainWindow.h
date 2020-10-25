@@ -171,6 +171,13 @@ class MainWindow final : public QMainWindow, public BaseView
         std::uintmax_t numberOfFilesScanned, Settings::VisualizationParameters parameters) override;
 
     /**
+     * @brief Ask the user to confirm file deletion.
+     *
+     * @param[in] filePath          The file to be deleted, pending confirmation.
+     */
+    bool AskUserToConfirmDeletion(const std::filesystem::path& filePath);
+
+    /**
      * @copydoc BaseView::DisplayErrorDialog
      */
     void DisplayErrorDialog(std::string_view message) override;
