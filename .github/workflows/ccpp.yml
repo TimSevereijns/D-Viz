@@ -39,7 +39,7 @@ jobs:
           
       - name: Install LCov
         run: |
-          wget http://downloads.sourceforge.net/ltp/lcov-1.15.tar.gz
+          wget https://github.com/linux-test-project/lcov/releases/download/v1.15/lcov-1.15.tar.gz
           tar -xvf lcov-1.15.tar.gz
           cd lcov-1.15 && sudo make install
           cd ..
