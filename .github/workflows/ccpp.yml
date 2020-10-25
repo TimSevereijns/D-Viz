@@ -110,6 +110,7 @@ jobs:
             '*/QtTest/*' \
             '*/QtWidgets/*' \
             '*/ThirdParty/*' \
+            '*/boost/*' \
             '*/.moc/*' \
             --output-file coverage.info
           lcov \
