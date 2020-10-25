@@ -26,22 +26,22 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
 
-      - name: Install GCC 8
+      - name: Install GCC 10
         run: |
-          sudo apt-get install -qq g++-8
-          sudo apt-get install -qq gcc-8
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 20
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 20
-          sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 20
+          sudo apt-get install -qq g++-10
+          sudo apt-get install -qq gcc-10
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 20
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 20
+          sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-10 20
           sudo update-alternatives --config gcc
           sudo update-alternatives --config g++
           sudo update-alternatives --config gcov
           
       - name: Install LCov
         run: |
-          wget http://downloads.sourceforge.net/ltp/lcov-1.14.tar.gz
-          tar -xvf lcov-1.14.tar.gz
-          cd lcov-1.14 && sudo make install
+          wget http://downloads.sourceforge.net/ltp/lcov-1.15.tar.gz
+          tar -xvf lcov-1.15.tar.gz
+          cd lcov-1.15 && sudo make install
           cd ..
           
       - name: Install OpenGL
