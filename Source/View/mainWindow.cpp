@@ -83,6 +83,17 @@ namespace
 
         GSL_ASSUME(false);
     }
+
+    QPoint ComputeMessageBoxPosition(QMessageBox& messageBox, const MainWindow& mainWindow) {
+        messageBox.show(); //< Force size computation.
+
+        const auto mainWindowPosition = mainWindow.pos();
+        const auto mainWindowSize = mainWindow.size();
+
+        return {
+            mainWindowPosition.x() + (mainWindowSize.width() / 2) - (messageBox.width() / 2),
+            mainWindowPosition.y() + (mainWindowSize.height() / 2) - (messageBox.height() / 2)};
+    }
 } // namespace
 
 MainWindow::MainWindow(Controller& controller, QWidget* parent /* = nullptr */)
@@ -471,6 +482,9 @@ bool MainWindow::AskUserToLimitFileSize(
                        "Would you like to limit the visualized files to those 1 MiB or larger in "
                        "order to reduce the load on the GPU and system memory?");
 
+    const auto position = ComputeMessageBoxPosition(messageBox, *this);
+    messageBox.move(position);
+
     const auto election = messageBox.exec();
     switch (election) {
         case QMessageBox::Yes: {
@@ -500,6 +514,9 @@ bool MainWindow::AskUserToConfirmDeletion(const std::filesystem::path& filePath)
 
     const auto fileName = QString::fromStdString(filePath.filename().string());
     messageBox.setText("Are you sure you want to delete " + fileName + "?");
+
+    const auto position = ComputeMessageBoxPosition(messageBox, *this);
+    messageBox.move(position);
 
     const auto election = messageBox.exec();
     switch (election) {
