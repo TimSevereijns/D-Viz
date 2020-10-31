@@ -9,31 +9,35 @@ For information on how to set up and build the project (on Linux), please see `.
 # Screenshots
 
 ![Example 1](/Screenshots/2020/D-Viz-1.png)
-<p style="text-align:center; margin:-5px 50px 32px 50px;">
+<p align="center">
     <em style="font-weight:bold; margin-right:10px;">Figure 1:</em>
-    The yellow tile is the currently selected file, whose path is shown in the status bar. Only those files that smaller than 1 mebibyte.
+    The yellow tile is the currently selected file, whose path is shown in the status bar. Only those files that are smaller than 1 mebibyte are rendered.
 </p>
+<br/>
 
 ![Example 2](/Screenshots/2020/D-Viz-2.png)
-<p style="text-align:center; margin:-5px 50px 32px 50px;">
-    <em style="font-weight:bold; margin-right:10px;">Figure 2:</em>
+<p align="center">
+    <em style="font-weight:bold">Figure 2:</em>
     The green tiles represent files, while the white nodes represent directories.
 </p>
+<br/>
 
 ![Example 3](/Screenshots/2020/D-Viz-3.png)
-<p style="text-align:center; margin:-5px 50px 32px 50px;">
+<p align="center">
     <em style="font-weight:bold; margin-right:10px;">Figure 3:</em>
-    The yellow tile is the currently selected file, whose path is shown in the status bar. Only those files that smaller than 1 mebibyte.
+    The yellow tile is currently selected, and all DLLs are highlighted in grey.
 </p>
+<br/>
 
 ![Example 4](/Screenshots/2020/D-Viz-4.png)
-<p style="text-align:center; margin:-5px 50px 32px 50px;">
+<p align="center">
     <em style="font-weight:bold; margin-right:10px;">Figure 4:</em>
-    No file is current selected, but all files of a particular type (i.e., with a identical file extension) are shows as grey highlights.
+    No file is current selected, but a particular file type is currently highlighted in grey.
 </p>
+<br/>
 
 ![Example 4](/Screenshots/2020/D-Viz-5.png)
-<p style="text-align:center; margin:-5px 50px 32px 50px;">
+<p align="center">
     <em style="font-weight:bold; margin-right:10px;">Figure 5:</em>
     The filesystem can also be actively monitored for changes. In this case, the files highlighted in pastel red have been deleted since the scan was performed.
 </p>
