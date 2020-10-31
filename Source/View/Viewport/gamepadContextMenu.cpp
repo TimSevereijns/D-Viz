@@ -174,7 +174,7 @@ void GamepadContextMenu::paintEvent(QPaintEvent* /*event*/)
 void GamepadContextMenu::RenderLabels(const QPoint& center)
 {
     m_painter.setFont(m_font);
-    m_painter.setBrush(QColor{ 0, 0, 0, 128 });
+    m_painter.setBrush(QColor{ 0, 0, 0, 200 });
 
     const QFontMetrics fontMetrics{ m_font };
 
@@ -182,7 +182,9 @@ void GamepadContextMenu::RenderLabels(const QPoint& center)
         const auto origin = AdjustTextOriginBasedOnLocation(entry, center, fontMetrics);
 
         auto labelRect = fontMetrics.boundingRect(entry.Label);
-        labelRect.moveTo(origin.x() - 4, origin.y() - fontMetrics.ascent() + 1);
+        constexpr auto margin = 4;
+        labelRect.adjust(-margin, 0, margin, 0);
+        labelRect.moveTo(origin.x() - margin, origin.y() - fontMetrics.ascent() + 1);
 
         m_painter.setPen(Qt::NoPen);
         m_painter.drawRect(labelRect);
