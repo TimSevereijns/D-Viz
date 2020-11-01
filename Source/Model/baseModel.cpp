@@ -284,7 +284,7 @@ namespace
         switch (event.eventType) {
             case FileEventType::Created:
                 spdlog::get(Constants::Logging::FilesystemLog)
-                    ->info(fmt::format("Create: {}", event.path.string()));
+                    ->info(fmt::format("Created: {}", event.path.string()));
                 break;
             case FileEventType::Deleted:
                 spdlog::get(Constants::Logging::FilesystemLog)

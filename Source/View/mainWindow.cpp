@@ -268,6 +268,7 @@ void MainWindow::SetupOptionsMenu()
         &m_optionsMenuWrapper.toggleFrameTime, &QAction::toggled, this,
         &MainWindow::OnFPSReadoutToggled);
 
+    m_optionsMenuWrapper.enableFileSystemMonitoring.setEnabled(false);
     m_optionsMenuWrapper.enableFileSystemMonitoring.setText("Monitor File System");
     m_optionsMenuWrapper.enableFileSystemMonitoring.setStatusTip("Monitors the file system for any "
                                                                  "changes");
@@ -765,6 +766,7 @@ void MainWindow::OnScanCompleted()
     ReloadVisualization();
 
     m_ui.showBreakdownButton->setEnabled(true);
+    m_optionsMenuWrapper.enableFileSystemMonitoring.setEnabled(true);
 }
 
 std::shared_ptr<BaseTaskbarButton> MainWindow::GetTaskbarButton()

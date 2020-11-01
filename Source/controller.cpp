@@ -101,6 +101,10 @@ void Controller::OnScanComplete(
 
 void Controller::MonitorFileSystem(bool shouldEnable)
 {
+    if (!HasModelBeenLoaded()) {
+        return;
+    }
+
     if (shouldEnable) {
         m_model->StartMonitoringFileSystem();
     } else {
