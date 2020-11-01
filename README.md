@@ -11,28 +11,28 @@ For information on how to set up and build the project (on Linux), please see `.
 ![Example 1](/Screenshots/2020/D-Viz-1.png)
 <p align="center">
     <em style="font-weight:bold; margin-right:10px;">Figure 1:</em>
-    The yellow tile is the currently selected file, whose path is shown in the status bar. Only those files that are smaller than 1 mebibyte are rendered.
+    The yellow tile is the currently selected file, whose path and size is shown in the status bar. Only those files that are smaller than 1 mebibyte are set to render.
 </p>
 <br/>
 
 ![Example 2](/Screenshots/2020/D-Viz-2.png)
 <p align="center">
     <em style="font-weight:bold">Figure 2:</em>
-    The green tiles represent files, while the white nodes represent directories.
+    The green tiles represent files, while the white tiles represent directories.
 </p>
 <br/>
 
 ![Example 3](/Screenshots/2020/D-Viz-3.png)
 <p align="center">
     <em style="font-weight:bold; margin-right:10px;">Figure 3:</em>
-    The yellow tile is currently selected, and all DLLs are highlighted in grey.
+    The yellow tile is currently selected, and all visible DLLs are highlighted in grey.
 </p>
 <br/>
 
 ![Example 4](/Screenshots/2020/D-Viz-4.png)
 <p align="center">
     <em style="font-weight:bold; margin-right:10px;">Figure 4:</em>
-    No file is current selected, but a particular file type is currently highlighted in grey.
+    No file is currently selected, but a particular file type is currently highlighted in grey.
 </p>
 <br/>
 
