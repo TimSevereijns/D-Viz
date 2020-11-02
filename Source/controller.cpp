@@ -284,8 +284,7 @@ void Controller::SelectNodeAndUpdateStatusBar(
     const auto [prefixedSize, units] = Utilities::ToPrefixedSize(fileSize, prefix);
     const auto isSmallFile = (units == Utilities::Detail::bytesLabel);
 
-    const auto path = Controller::ResolveCompleteFilePath(node).wstring();
-
+    const auto path = Controller::NodeToFilePath(node).wstring();
     const auto message = isSmallFile ? fmt::format(L"{}  |  {:.0f} {}", path, prefixedSize, units)
                                      : fmt::format(L"{}  |  {:.2f} {}", path, prefixedSize, units);
 
@@ -470,7 +469,7 @@ void Controller::SearchTreeMap(
     ProcessHighlightedNodes(selector, selectionCallback);
 }
 
-std::filesystem::path Controller::ResolveCompleteFilePath(const Tree<VizBlock>::Node& node)
+std::filesystem::path Controller::NodeToFilePath(const Tree<VizBlock>::Node& node)
 {
     std::vector<std::reference_wrapper<const std::wstring>> reversePath;
     reversePath.reserve(Tree<VizBlock>::Depth(node));
