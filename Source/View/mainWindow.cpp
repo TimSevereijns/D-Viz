@@ -840,6 +840,9 @@ void MainWindow::DisplayErrorDialog(std::string_view message)
     messageBox.setDefaultButton(QMessageBox::Ok);
     messageBox.setText(message.data());
 
+    const auto position = ComputeMessageBoxPosition(messageBox, *this);
+    messageBox.move(position);
+
     messageBox.exec();
 }
 
