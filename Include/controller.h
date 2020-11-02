@@ -212,7 +212,7 @@ class Controller : public QObject
      *
      * @returns The absolute file path.
      */
-    static std::filesystem::path ResolveCompleteFilePath(const Tree<VizBlock>::Node& node);
+    static std::filesystem::path NodeToFilePath(const Tree<VizBlock>::Node& node);
 
     /**
      * @brief Prints selection details to the main window's status bar.

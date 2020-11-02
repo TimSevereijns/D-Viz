@@ -9,7 +9,7 @@
 
 namespace
 {
-    std::filesystem::path PathFromRootToNode(const Tree<VizBlock>::Node& node)
+    std::filesystem::path PathToNode(const Tree<VizBlock>::Node& node)
     {
         std::vector<std::reference_wrapper<const std::wstring>> reversePath;
         reversePath.reserve(Tree<VizBlock>::Depth(node));
@@ -52,7 +52,7 @@ namespace
                     return;
                 }
 
-                const auto path = PathFromRootToNode(node);
+                const auto path = PathToNode(node);
                 allEvents.emplace_back(
                     FileEvent{ path.wstring() + node->file.extension, eventType });
             });
@@ -310,12 +310,13 @@ void ModelTests::CopyPathToClipboard()
         Tree<VizBlock>::LeafIterator{ m_tree->GetRoot() }, Tree<VizBlock>::LeafIterator{},
         [&](const auto& node) { return (node->file.name + node->file.extension) == targetName; });
 
-    OS::CopyPathToClipboard(*targetNode);
+    const auto path = Controller::NodeToFilePath(*targetNode);
+    OS::CopyPathToClipboard(path);
 
     QClipboard* clipboard = QApplication::clipboard();
     const auto text = clipboard->text();
 
-    QCOMPARE(text.toStdString(), Controller::ResolveCompleteFilePath(*targetNode).string());
+    QCOMPARE(text.toStdString(), path.string());
 }
 
 void ModelTests::FindNearestNodeFromFront()

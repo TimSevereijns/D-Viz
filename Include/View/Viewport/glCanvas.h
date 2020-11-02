@@ -354,9 +354,33 @@ class GLCanvas final : public QOpenGLWidget
     void VisualizeFilesystemActivity();
 
     /**
+     * @brief Helper function to add the OS options to the context menus.
+     *
+     * @param[in] menu              The menu that is to be populated.
+     * @param[in] fileType          The type of file currently selected; it is assumed one is
+     *                              selected.
+     * @param[in] selection         A pointer to the node that is currently selected; a valid
+     *                              selection is assumed.
+     */
+    template <typename MenuType>
+    void AddOperatingSystemOptionsToContextMenu(
+        MenuType& menu, FileType fileType, const Tree<VizBlock>::Node* const selection);
+
+    /**
      * @brief Helper function populate the context menus.
+     *
+     * @param[in] menu              The menu that is to be populated.
      */
     template <typename MenuType> void PopulateContextMenu(MenuType& menu);
+
+    /**
+     * @brief Displays an error message if the file is missing from disk.
+     *
+     * @param[in] path              The path to test.
+     *
+     * @returns True if the file is missing, and false if present.
+     */
+    bool AlertIfMissing(const std::filesystem::path& path);
 
     bool m_isPaintingSuspended{ false };
     bool m_isVisualizationLoaded{ false };
