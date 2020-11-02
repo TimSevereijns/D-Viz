@@ -26,7 +26,7 @@
 namespace OS
 {
 #ifdef Q_OS_WIN
-    inline void LaunchFileExplorer(const Tree<VizBlock>::Node& node)
+    inline bool LaunchFileExplorer(const std::filesystem::path& path)
     {
         CoInitializeEx(nullptr, COINIT_MULTITHREADED);
         const ScopeExit onScopeExit = [&]() noexcept
@@ -34,28 +34,29 @@ namespace OS
             CoUninitialize();
         };
 
-        const std::wstring filePath = Controller::ResolveCompleteFilePath(node);
+        const auto pathAsString = path.wstring();
+        Expects(std::none_of(
+            std::begin(pathAsString), std::end(pathAsString), [](const auto character) {
+                return character == L'/'; //< Certain WinAPI functions can't deal with this slash.
+            }));
 
-        Expects(std::none_of(std::begin(filePath), std::end(filePath), [](const auto character) {
-            return character == L'/'; //< Certain Windows API functions can't deal with this slash.
-        }));
+        bool openedSuccessfully = false;
 
-        auto* const idList = ILCreateFromPath(filePath.c_str());
+        auto* const idList = ILCreateFromPath(pathAsString.c_str());
         if (idList) {
-            SHOpenFolderAndSelectItems(idList, 0, nullptr, 0);
+            openedSuccessfully = (SHOpenFolderAndSelectItems(idList, 0, nullptr, 0) == S_OK);
             ILFree(idList);
         }
+
+        return openedSuccessfully;
     }
 
 #endif
 
 #ifdef Q_OS_LINUX
 
-    inline void LaunchFileExplorer(const Tree<VizBlock>::Node& node)
+    inline bool LaunchFileExplorer(const std::filesystem::path& path)
     {
-        const std::wstring rawPath = Controller::ResolveCompleteFilePath(node).wstring();
-        const std::filesystem::path path{ rawPath };
-
         const auto command =
             "dbus-send --session --print-reply --dest=org.freedesktop.FileManager1 "
             "--type=method_call /org/freedesktop/FileManager1 "
@@ -63,33 +64,32 @@ namespace OS
             "array:string:\"file://" +
             std::string{ path.c_str() } + "\" string:\"\"";
 
-        [[maybe_unused]] const auto result = std::system(command.c_str());
+        const auto exitCode = std::system(command.c_str());
+        return exitCode == 0;
     }
 
 #endif
 
-    inline void OpenFile(const Tree<VizBlock>::Node& node)
+    inline void OpenFile(const std::filesystem::path& path)
     {
-        const auto filePath = Controller::ResolveCompleteFilePath(node);
-        QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(filePath.string())));
+        QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(path.string())));
     }
 
-    inline void CopyFileNameToClipboard(const Tree<VizBlock>::Node& node)
+    inline void CopyFileNameToClipboard(const std::filesystem::path& path)
     {
-        const auto& file = node.GetData().file;
-        const auto fileName = file.name + file.extension;
+        const auto fileName =
+            QString::fromStdWString(path.filename().wstring() + path.extension().wstring());
 
         QClipboard* clipboard = QApplication::clipboard();
-        clipboard->setText(QString::fromStdWString(fileName));
+        clipboard->setText(fileName);
     }
 
-    inline void CopyPathToClipboard(const Tree<VizBlock>::Node& node)
+    inline void CopyPathToClipboard(const std::filesystem::path& path)
     {
-        const auto filePath = Controller::ResolveCompleteFilePath(node);
-        const auto text = QString::fromStdString(filePath.string());
+        const auto fileName = QString::fromStdWString(path.wstring());
 
         QClipboard* clipboard = QApplication::clipboard();
-        clipboard->setText(text);
+        clipboard->setText(fileName);
     }
 
     inline bool MoveToTrash(const std::filesystem::path& filePath)

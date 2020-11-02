@@ -441,6 +441,68 @@ void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizBlock>::Node*>&
     }
 }
 
+bool GLCanvas::AlertIfMissing(const std::filesystem::path& path)
+{
+    if (std::filesystem::exists(path)) {
+        return false;
+    }
+
+    m_mainWindow.DisplayErrorDialog("File no longer exists on disk.");
+    return true;
+}
+
+template <typename MenuType>
+void GLCanvas::AddOperatingSystemOptionsToContextMenu(
+    MenuType& menu, FileType fileType, const Tree<VizBlock>::Node* const selection)
+{
+    Expects(selection);
+
+    menu.addSeparator();
+
+    menu.addAction("Copy File Name", [selection] {
+        const auto path = Controller::NodeToFilePath(*selection);
+        OS::CopyFileNameToClipboard(path);
+    });
+
+    menu.addAction("Copy File Path", [selection] {
+        const auto path = Controller::NodeToFilePath(*selection);
+        OS::CopyPathToClipboard(path);
+    });
+
+    menu.addSeparator();
+
+    menu.addAction("Show in Explorer", [&, selection] {
+        const auto path = Controller::NodeToFilePath(*selection);
+        if (AlertIfMissing(path)) {
+            return;
+        }
+
+        OS::LaunchFileExplorer(path);
+    });
+
+    if (fileType == FileType::Regular) {
+        menu.addAction("Open File", [&, selection] {
+            const auto path = Controller::NodeToFilePath(*selection);
+            if (AlertIfMissing(path)) {
+                return;
+            }
+
+            OS::OpenFile(path);
+        });
+
+        menu.addAction("Move to Trash", [&, selection] {
+            const auto path = Controller::NodeToFilePath(*selection);
+            if (AlertIfMissing(path)) {
+                return;
+            }
+
+            if (m_mainWindow.AskUserToConfirmDeletion(path)) {
+                OS::MoveToTrash(path);
+            }
+        });
+    }
+}
+
 template <typename MenuType> void GLCanvas::PopulateContextMenu(MenuType& menu)
 {
     const auto unhighlightCallback = [&](auto& nodes) {
@@ -491,22 +553,7 @@ template <typename MenuType> void GLCanvas::PopulateContextMenu(MenuType& menu)
         });
     }
 
-    menu.addSeparator();
-    menu.addAction("Copy File Name", [selection] { OS::CopyFileNameToClipboard(*selection); });
-    menu.addAction("Copy File Path", [selection] { OS::CopyPathToClipboard(*selection); });
-
-    menu.addSeparator();
-    menu.addAction("Show in Explorer", [selection] { OS::LaunchFileExplorer(*selection); });
-
-    if (fileType == FileType::Regular) {
-        menu.addAction("Open File", [selection] { OS::OpenFile(*selection); });
-        menu.addAction("Move to Trash", [&, selection] {
-            const auto filePath = Controller::ResolveCompleteFilePath(*selection);
-            if (m_mainWindow.AskUserToConfirmDeletion(filePath)) {
-                OS::MoveToTrash(filePath);
-            }
-        });
-    }
+    AddOperatingSystemOptionsToContextMenu(menu, fileType, selection);
 }
 
 void GLCanvas::ShowGamepadContextMenu()
@@ -819,9 +866,7 @@ void GLCanvas::VisualizeFilesystemActivity()
         const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now() - startTime);
 
-        constexpr auto timeLimit =
-            std::chrono::milliseconds{ Constants::Graphics::DesiredTimeBetweenFrames / 2 };
-
+        constexpr auto timeLimit = std::chrono::milliseconds{ 16 };
         if (elapsedTime >= timeLimit) {
             // @note Since this processing is happening on the UI thread, we'll want to make sure
             // that we don't exceed a reasonable fraction of the total allotted frame time.
