@@ -4,7 +4,7 @@
 #include "Settings/persistentSettings.h"
 #include "Utilities/ignoreUnused.h"
 #include "Utilities/operatingSystem.h"
-#include "Utilities/scopeExit.hpp"
+#include "Utilities/scopeExit.h"
 #include "View/mainWindow.h"
 #include "constants.h"
 #include "literals.h"

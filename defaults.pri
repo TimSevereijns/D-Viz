@@ -52,7 +52,7 @@ SOURCES += \
     $$PWD/Source/View/Viewport/mouseContextMenu.cpp
 
 HEADERS += \
-    $$PWD/Include/bootstrapper.hpp \
+    $$PWD/Include/bootstrapper.h \
     $$PWD/Include/constants.h \
     $$PWD/Include/controller.h \
     $$PWD/Include/Factories/modelFactory.h \
@@ -62,6 +62,7 @@ HEADERS += \
     $$PWD/Include/literals.h \
     $$PWD/Include/Model/baseModel.h \
     $$PWD/Include/Model/block.h \
+    $$PWD/Include/Model/Monitor/fileChangeNotification.h \
     $$PWD/Include/Model/Monitor/fileMonitorBase.h \
     $$PWD/Include/Model/Monitor/fileSystemObserver.h \
     $$PWD/Include/Model/Monitor/linuxFileMonitor.h \
@@ -83,9 +84,9 @@ HEADERS += \
     $$PWD/Include/Utilities/ignoreUnused.h \
     $$PWD/Include/Utilities/operatingSystem.h \
     $$PWD/Include/Utilities/reparsePointDeclarations.h \
+    $$PWD/Include/Utilities/scopeExit.h \
     $$PWD/Include/Utilities/scopedCursor.h \
     $$PWD/Include/Utilities/scopedHandle.h \
-    $$PWD/Include/Utilities/scopeExit.hpp \
     $$PWD/Include/Utilities/threadSafeQueue.h \
     $$PWD/Include/Utilities/utilities.h \
     $$PWD/Include/Utilities/viewFrustum.h \

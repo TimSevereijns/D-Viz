@@ -3,7 +3,7 @@
 #include "Settings/persistentSettings.h"
 #include "Settings/settings.h"
 #include "Utilities/operatingSystem.h"
-#include "Utilities/scopeExit.hpp"
+#include "Utilities/scopeExit.h"
 #include "Utilities/scopedCursor.h"
 #include "Utilities/utilities.h"
 #include "View/Viewport/glCanvas.h"

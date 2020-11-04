@@ -13,7 +13,7 @@
 
 #include <Tree/Tree.hpp>
 
-#include "Model/Monitor/fileChangeNotification.hpp"
+#include "Model/Monitor/fileChangeNotification.h"
 #include "Model/Monitor/fileSystemObserver.h"
 #include "Model/vizBlock.h"
 #include "Settings/settings.h"
