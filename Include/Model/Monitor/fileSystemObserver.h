@@ -1,9 +1,9 @@
 #ifndef FILESYSEMOBSERVER_H
 #define FILESYSEMOBSERVER_H
 
-#include "Utilities/threadSafeQueue.hpp"
+#include "Utilities/threadSafeQueue.h"
 #include "Model/vizBlock.h"
-#include "fileChangeNotification.hpp"
+#include "fileChangeNotification.h"
 #include "fileMonitorBase.h"
 
 #include <atomic>

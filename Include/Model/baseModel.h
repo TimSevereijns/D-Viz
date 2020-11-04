@@ -17,7 +17,7 @@
 #include "Model/Monitor/fileSystemObserver.h"
 #include "Model/vizBlock.h"
 #include "Settings/settings.h"
-#include "Utilities/threadSafeQueue.hpp"
+#include "Utilities/threadSafeQueue.h"
 #include "View/Viewport/camera.h"
 
 struct TreemapMetadata

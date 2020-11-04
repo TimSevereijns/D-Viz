@@ -5,8 +5,8 @@
 
 #ifdef Q_OS_WIN
 
-#include "Utilities/threadSafeQueue.hpp"
-#include "fileChangeNotification.hpp"
+#include "Utilities/threadSafeQueue.h"
+#include "fileChangeNotification.h"
 #include "fileMonitorBase.h"
 
 #include <array>

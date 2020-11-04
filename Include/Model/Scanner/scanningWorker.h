@@ -28,7 +28,7 @@
 
 #include "Model/Scanner/fileInfo.h"
 #include "Model/Scanner/scanningParameters.h"
-#include "Model/Scanner/scanningProgress.hpp"
+#include "Model/Scanner/scanningProgress.h"
 #include "Model/baseModel.h"
 #include "Model/block.h"
 #include "Model/vizBlock.h"

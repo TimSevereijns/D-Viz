@@ -1,5 +1,5 @@
 #include "Model/Scanner/scanningUtilities.h"
-#include "Utilities/ignoreUnused.hpp"
+#include "Utilities/ignoreUnused.h"
 #include "Model/vizBlock.h"
 
 #include <QtGlobal>
@@ -8,7 +8,7 @@
 #include <fileapi.h>
 #include <winioctl.h>
 
-#include "Utilities/reparsePointDeclarations.hpp"
+#include "Utilities/reparsePointDeclarations.h"
 #endif // Q_OS_WIN
 
 #include "constants.h"

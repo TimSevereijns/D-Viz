@@ -174,12 +174,12 @@ namespace Settings
 
     int PersistentSettings::GetShadowMapQuality() const
     {
-        constexpr auto defaultValue = 4;
+        constexpr auto defaultValue = 8;
 
         const auto quality = GetValueOrDefault(
             m_preferencesDocument, Constants::Preferences::ShadowMapQuality, defaultValue);
 
-        return std::clamp(quality, 1, 4);
+        return std::clamp(quality, 1, 8);
     }
 
     void PersistentSettings::SetShadowMapQuality(int quality)

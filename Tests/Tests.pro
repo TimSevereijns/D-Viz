@@ -17,6 +17,7 @@ DEFINES += \
 LIBS += -L$$DESTDIR -lD-Viz
 
 HEADERS += \
+   Utilities/testUtilities.h \
    cameraTests.h \
    controllerTests.h \
    fileSizeLiteralTests.h \
@@ -28,7 +29,6 @@ HEADERS += \
    Mocks/mockView.h \
    Mocks/mockFileMonitor.h \
    Utilities/multiTestHarness.h \
-   Utilities/testUtilities.hpp \
    Utilities/trompeloeilAdapter.h
 
 SOURCES += \

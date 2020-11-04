@@ -13,7 +13,7 @@
 #include "Factories/modelFactoryInterface.h"
 #include "Factories/viewFactory.h"
 #include "Factories/viewFactoryInterface.h"
-#include "Model/Monitor/fileChangeNotification.hpp"
+#include "Model/Monitor/fileChangeNotification.h"
 #include "Model/Scanner/driveScanner.h"
 #include "Model/vizBlock.h"
 #include "Settings/nodePainter.h"

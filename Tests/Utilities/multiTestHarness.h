@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QTest>
 
-#include <Utilities/ignoreUnused.hpp>
+#include <Utilities/ignoreUnused.h>
 
 #include <memory>
 #include <unordered_map>

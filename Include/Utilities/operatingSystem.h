@@ -5,7 +5,7 @@
 #include <QDesktopServices>
 #include <QFile>
 
-#include "Utilities/scopeExit.hpp"
+#include "Utilities/scopeExit.h"
 #include "controller.h"
 
 #include <filesystem>

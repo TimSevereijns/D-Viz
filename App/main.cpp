@@ -1,6 +1,6 @@
 #include "Factories/modelFactory.h"
 #include "Factories/viewFactory.h"
-#include "bootstrapper.hpp"
+#include "bootstrapper.h"
 #include "constants.h"
 #include "controller.h"
 

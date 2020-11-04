@@ -1,5 +1,5 @@
 #include "View/Scene/Assets/frustumAsset.h"
-#include "Utilities/viewFrustum.hpp"
+#include "Utilities/viewFrustum.h"
 #include "constants.h"
 
 #include <algorithm>

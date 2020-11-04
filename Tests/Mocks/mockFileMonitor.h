@@ -1,7 +1,7 @@
 #ifndef MOCKFILEMONITOR_H
 #define MOCKFILEMONITOR_H
 
-#include <Model/Monitor/fileChangeNotification.hpp>
+#include <Model/Monitor/fileChangeNotification.h>
 #include <Model/Monitor/fileMonitorBase.h>
 
 #include <atomic>

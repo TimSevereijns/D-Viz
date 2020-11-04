@@ -1,5 +1,5 @@
 #include "Model/Monitor/fileSystemObserver.h"
-#include "Utilities/utilities.hpp"
+#include "Utilities/utilities.h"
 #include "constants.h"
 
 #include <gsl/gsl_assert>

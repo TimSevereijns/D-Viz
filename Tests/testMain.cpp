@@ -1,6 +1,6 @@
 #include <QApplication>
 
-#include <bootstrapper.hpp>
+#include <bootstrapper.h>
 
 #include "Utilities/multiTestHarness.h"
 

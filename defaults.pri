@@ -71,7 +71,7 @@ HEADERS += \
     $$PWD/Include/Model/Scanner/driveScanner.h \
     $$PWD/Include/Model/Scanner/fileInfo.h \
     $$PWD/Include/Model/Scanner/scanningParameters.h \
-    $$PWD/Include/Model/Scanner/scanningProgress.hpp \
+    $$PWD/Include/Model/Scanner/scanningProgress.h \
     $$PWD/Include/Model/Scanner/scanningUtilities.h \
     $$PWD/Include/Model/Scanner/scanningWorker.h \
     $$PWD/Include/Model/squarifiedTreemap.h \
@@ -80,15 +80,15 @@ HEADERS += \
     $$PWD/Include/Settings/persistentSettings.h \
     $$PWD/Include/Settings/sessionSettings.h \
     $$PWD/Include/Settings/settings.h \
-    $$PWD/Include/Utilities/ignoreUnused.hpp \
-    $$PWD/Include/Utilities/operatingSystem.hpp \
-    $$PWD/Include/Utilities/reparsePointDeclarations.hpp \
+    $$PWD/Include/Utilities/ignoreUnused.h \
+    $$PWD/Include/Utilities/operatingSystem.h \
+    $$PWD/Include/Utilities/reparsePointDeclarations.h \
     $$PWD/Include/Utilities/scopedCursor.h \
     $$PWD/Include/Utilities/scopedHandle.h \
     $$PWD/Include/Utilities/scopeExit.hpp \
-    $$PWD/Include/Utilities/threadSafeQueue.hpp \
-    $$PWD/Include/Utilities/utilities.hpp \
-    $$PWD/Include/Utilities/viewFrustum.hpp \
+    $$PWD/Include/Utilities/threadSafeQueue.h \
+    $$PWD/Include/Utilities/utilities.h \
+    $$PWD/Include/Utilities/viewFrustum.h \
     $$PWD/Include/View/baseView.h \
     $$PWD/Include/View/Dialogs/aboutDialog.h \
     $$PWD/Include/View/Dialogs/breakdownDialog.h \

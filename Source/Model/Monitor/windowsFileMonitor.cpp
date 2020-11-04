@@ -2,7 +2,7 @@
 
 #ifdef Q_OS_WIN
 
-#include <Utilities/scopeExit.hpp>
+#include <Utilities/scopeExit.h>
 
 #include <exception>
 #include <string_view>

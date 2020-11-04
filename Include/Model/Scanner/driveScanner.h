@@ -10,7 +10,7 @@
 #include <string>
 
 #include "Model/Scanner/scanningParameters.h"
-#include "Model/Scanner/scanningProgress.hpp"
+#include "Model/Scanner/scanningProgress.h"
 #include "Model/Scanner/scanningWorker.h"
 
 /**

@@ -7,7 +7,7 @@
 #include "Mocks/mockFileMonitor.h"
 #include "Utilities/multiTestHarness.h"
 
-#include <Model/Monitor/fileChangeNotification.hpp>
+#include <Model/Monitor/fileChangeNotification.h>
 #include <Model/Scanner/driveScanner.h>
 #include <Model/squarifiedTreemap.h>
 

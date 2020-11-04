@@ -2,7 +2,7 @@
 #include "Model/Monitor/fileChangeNotification.hpp"
 #include "Model/Scanner/scanningUtilities.h"
 #include "Model/ray.h"
-#include "Utilities/utilities.hpp"
+#include "Utilities/utilities.h"
 #include "constants.h"
 
 #include <boost/algorithm/string/case_conv.hpp>

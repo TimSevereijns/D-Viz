@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <functional>
 
-#include "fileChangeNotification.hpp"
+#include "fileChangeNotification.h"
 
 /**
  * @brief Abstract base class for file monitoring classes.

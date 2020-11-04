@@ -2,8 +2,8 @@
 
 #include "Model/squarifiedTreemap.h"
 #include "Stopwatch/Stopwatch.hpp"
-#include "Utilities/operatingSystem.hpp"
-#include "Utilities/scopeExit.hpp"
+#include "Utilities/operatingSystem.h"
+#include "Utilities/scopeExit.h"
 #include "View/Viewport/gamepadContextMenu.h"
 #include "View/Viewport/mouseContextMenu.h"
 #include "View/mainWindow.h"

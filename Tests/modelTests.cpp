@@ -1,11 +1,11 @@
 #include "modelTests.h"
 
 #include <Model/Scanner/scanningParameters.h>
-#include <Model/Scanner/scanningProgress.hpp>
-#include <Utilities/operatingSystem.hpp>
+#include <Model/Scanner/scanningProgress.h>
+#include <Utilities/operatingSystem.h>
 #include <constants.h>
 
-#include "Utilities/testUtilities.hpp"
+#include "Utilities/testUtilities.h"
 
 namespace
 {

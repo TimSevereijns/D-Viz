@@ -8,7 +8,7 @@
 #include <Model/Monitor/linuxFileMonitor.h>
 #endif // Q_OS_LINUX
 
-#include "Utilities/testUtilities.hpp"
+#include "Utilities/testUtilities.h"
 
 namespace
 {

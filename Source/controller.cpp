@@ -2,8 +2,8 @@
 
 #include "Model/squarifiedTreemap.h"
 #include "Settings/persistentSettings.h"
-#include "Utilities/ignoreUnused.hpp"
-#include "Utilities/operatingSystem.hpp"
+#include "Utilities/ignoreUnused.h"
+#include "Utilities/operatingSystem.h"
 #include "Utilities/scopeExit.hpp"
 #include "View/mainWindow.h"
 #include "constants.h"
