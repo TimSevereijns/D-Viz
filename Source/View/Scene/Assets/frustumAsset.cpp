@@ -147,7 +147,7 @@ namespace
         }
 
         for (auto& frustum : frusta) {
-            auto vertices = QVector<QVector3D>::fromStdVector(frustum);
+            auto vertices = QVector<QVector3D>(std::begin(frustum), std::end(frustum));
 
             QVector<QVector3D> colors;
             colors.reserve(vertices.size());
