@@ -197,6 +197,11 @@ namespace Settings
             m_preferencesDocument, Constants::Preferences::ShowDebuggingMenu, defaultValue);
     }
 
+    void PersistentSettings::UseDarkMode(bool isEnabled)
+    {
+        SaveValue(m_preferencesDocument, Constants::Preferences::UseDarkMode, isEnabled);
+    }
+
     bool PersistentSettings::ShouldUseDarkMode() const
     {
         constexpr auto defaultValue = false;

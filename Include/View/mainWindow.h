@@ -178,6 +178,11 @@ class MainWindow final : public QMainWindow, public BaseView
     bool AskUserToConfirmDeletion(const std::filesystem::path& filePath);
 
     /**
+     * @copydoc BaseView::DisplayInfoDialog
+     */
+    void DisplayInfoDialog(std::string_view message) override;
+
+    /**
      * @copydoc BaseView::DisplayErrorDialog
      */
     void DisplayErrorDialog(std::string_view message) override;
@@ -211,6 +216,8 @@ class MainWindow final : public QMainWindow, public BaseView
     void OnFileMenuNewScan();
 
     void OnFPSReadoutToggled(bool isEnabled);
+
+    void OnDarkThemeToggled(bool isEnabled);
 
     void SwitchToBinaryPrefix(bool useBinary);
 
@@ -300,8 +307,8 @@ class MainWindow final : public QMainWindow, public BaseView
 
     struct OptionsMenu
     {
+        QAction useDarkTheme{ nullptr };
         QAction enableFileSystemMonitoring{ nullptr };
-
         QAction toggleFrameTime{ nullptr };
 
         QMenu fileSizeMenu{ nullptr };

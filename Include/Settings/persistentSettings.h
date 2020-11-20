@@ -146,6 +146,11 @@ namespace Settings
         bool ShouldShowDebuggingMenu() const;
 
         /**
+         * @brief Toggled the use of the dark theme.
+         */
+        void UseDarkMode(bool isEnabled);
+
+        /**
          * @return True if the dark theme should be used.
          */
         bool ShouldUseDarkMode() const;

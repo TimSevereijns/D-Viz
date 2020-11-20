@@ -288,6 +288,17 @@ void MainWindow::SetupFileMenu()
 
 void MainWindow::SetupOptionsMenu()
 {
+    const auto& preferences = m_controller.GetPersistentSettings();
+
+    m_optionsMenuWrapper.useDarkTheme.setText("Use Dark Theme");
+    m_optionsMenuWrapper.useDarkTheme.setStatusTip("Toggles the use of a dark theme.");
+    m_optionsMenuWrapper.useDarkTheme.setCheckable(true);
+    m_optionsMenuWrapper.useDarkTheme.setChecked(preferences.ShouldUseDarkMode());
+
+    connect(
+        &m_optionsMenuWrapper.useDarkTheme, &QAction::toggled, this,
+        &MainWindow::OnDarkThemeToggled);
+
     m_optionsMenuWrapper.toggleFrameTime.setText("Show Frame Time");
     m_optionsMenuWrapper.toggleFrameTime.setStatusTip("Toggle frame-time readout in titlebar.");
     m_optionsMenuWrapper.toggleFrameTime.setCheckable(true);
@@ -310,6 +321,7 @@ void MainWindow::SetupOptionsMenu()
         &MainWindow::OnFileMonitoringToggled);
 
     m_optionsMenu.setTitle("Options");
+    m_optionsMenu.addAction(&m_optionsMenuWrapper.useDarkTheme);
     m_optionsMenu.addAction(&m_optionsMenuWrapper.toggleFrameTime);
     m_optionsMenu.addAction(&m_optionsMenuWrapper.enableFileSystemMonitoring);
 
@@ -568,6 +580,16 @@ void MainWindow::OnFPSReadoutToggled(bool isEnabled)
     if (!isEnabled) {
         setWindowTitle("D-Viz [*]");
     }
+}
+
+void MainWindow::OnDarkThemeToggled(bool isEnabled)
+{
+    auto& settings = m_controller.GetPersistentSettings();
+
+    settings.UseDarkMode(isEnabled);
+    settings.SaveAllPreferencesToDisk();
+
+    DisplayInfoDialog("Please restart D-Viz to complete theme switch.");
 }
 
 void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
@@ -858,6 +880,20 @@ void MainWindow::SetStatusBarMessage(const std::wstring& message, int timeout /*
 void MainWindow::ReloadVisualization()
 {
     m_glCanvas->ReloadVisualization();
+}
+
+void MainWindow::DisplayInfoDialog(std::string_view message)
+{
+    QMessageBox messageBox;
+    messageBox.setIcon(QMessageBox::Information);
+    messageBox.setStandardButtons(QMessageBox::Ok);
+    messageBox.setDefaultButton(QMessageBox::Ok);
+    messageBox.setText(message.data());
+
+    const auto position = ComputeMessageBoxPosition(messageBox, *this);
+    messageBox.move(position);
+
+    messageBox.exec();
 }
 
 void MainWindow::DisplayErrorDialog(std::string_view message)
