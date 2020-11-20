@@ -146,6 +146,11 @@ namespace Settings
         bool ShouldShowDebuggingMenu() const;
 
         /**
+         * @return True if the dark theme should be used.
+         */
+        bool ShouldUseDarkMode() const;
+
+        /**
          * @brief Saves all settings to disk.
          *
          * @returns True if the operation succeeded.

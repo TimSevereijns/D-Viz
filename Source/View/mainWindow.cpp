@@ -85,12 +85,12 @@ namespace
     }
 
     /**
-     * @brief ComputeMessageBoxPosition
+     * @brief Computes the coordinate needed to center the message box.
      *
-     * @param messageBox
-     * @param mainWindow
+     * @param[in] messageBox        The message box that is to be centered.
+     * @param[in] mainWindow        The window within which the dialog should be centered.
      *
-     * @return
+     * @return The top-left coordinate where the message box should be placed.
      */
     QPoint ComputeMessageBoxPosition(QMessageBox& messageBox, const MainWindow& mainWindow) {
         messageBox.show(); //< Force size computation.
@@ -104,7 +104,7 @@ namespace
     }
 
     /**
-     * @brief LoadAndApplyStyleSheet
+     * @brief Loads and applies a dark theme to the application.
      */
     void LoadAndApplyStyleSheet()
     {
@@ -140,7 +140,9 @@ MainWindow::MainWindow(Controller& controller, QWidget* parent /* = nullptr */)
 
 void MainWindow::Show()
 {
-    LoadAndApplyStyleSheet();
+    if (m_controller.GetPersistentSettings().ShouldUseDarkMode()) {
+        LoadAndApplyStyleSheet();
+    }
 
     this->show();
 }
@@ -540,7 +542,7 @@ bool MainWindow::AskUserToConfirmDeletion(const std::filesystem::path& filePath)
     messageBox.setDefaultButton(QMessageBox::Yes);
 
     const auto fileName = QString::fromStdString(filePath.filename().string());
-    messageBox.setText("Are you sure you want to delete " + fileName + "?");
+    messageBox.setText("Are you sure you want to delete the following file? \n\n" + fileName);
 
     const auto position = ComputeMessageBoxPosition(messageBox, *this);
     messageBox.move(position);
