@@ -16,3 +16,6 @@
 [submodule "ThirdParty/Trompeloeil"]
 	path = ThirdParty/Trompeloeil
 	url = https://github.com/rollbear/trompeloeil.git
+[submodule "ThirdParty/QDarkStyleSheet"]
+	path = ThirdParty/QDarkStyleSheet
+	url = https://github.com/ColinDuquesnoy/QDarkStyleSheet.git

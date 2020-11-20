@@ -84,9 +84,9 @@ HEADERS += \
     $$PWD/Include/Utilities/ignoreUnused.h \
     $$PWD/Include/Utilities/operatingSystem.h \
     $$PWD/Include/Utilities/reparsePointDeclarations.h \
-    $$PWD/Include/Utilities/scopeExit.h \
     $$PWD/Include/Utilities/scopedCursor.h \
     $$PWD/Include/Utilities/scopedHandle.h \
+    $$PWD/Include/Utilities/scopeExit.h \
     $$PWD/Include/Utilities/threadSafeQueue.h \
     $$PWD/Include/Utilities/utilities.h \
     $$PWD/Include/Utilities/viewFrustum.h \
@@ -136,7 +136,8 @@ DISTFILES += \
     $$PWD/Source/View/Shaders/texturePreview.frag
 
 RESOURCES += \
-    $$PWD/Source/resources.qrc
+    $$PWD/Source/resources.qrc \
+    $$PWD/Styling/Dark/style.qrc
 
 DEFINES += \
     BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE

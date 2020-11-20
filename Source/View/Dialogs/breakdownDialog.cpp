@@ -36,6 +36,33 @@ BreakdownDialog::BreakdownDialog(QWidget* parent)
 
 void BreakdownDialog::ReloadData()
 {
+    const auto stopwatch = Stopwatch<std::chrono::milliseconds>([&] { BuildModel(); });
+
+    spdlog::get(Constants::Logging::DefaultLog)
+        ->info(fmt::format(
+            "Built break-down model in: {:n} {}", stopwatch.GetElapsedTime().count(),
+            stopwatch.GetUnitsAsCharacterArray()));
+
+    m_proxyModel.invalidate();
+    m_proxyModel.setSourceModel(&m_tableModel);
+
+    m_ui.tableView->setModel(&m_proxyModel);
+    m_ui.tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+    m_ui.tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    m_ui.tableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_ui.tableView->sortByColumn(1, Qt::SortOrder::DescendingOrder);
+    m_ui.tableView->setSortingEnabled(true);
+    m_ui.tableView->selectRow(0);
+
+    AdjustColumnWidthsToFitViewport();
+
+    const auto extensionVariant = m_proxyModel.index(0, 0).data(Qt::UserRole);
+    const auto extension = extensionVariant.toString().toStdWString();
+    GenerateGraph(extension);
+}
+
+void BreakdownDialog::BuildModel()
+{
     m_tableModel.ClearData();
     m_graphModel.ClearData();
 
@@ -48,44 +75,19 @@ void BreakdownDialog::ReloadData()
 
     const auto& parameters = controller.GetSessionSettings().GetVisualizationParameters();
 
-    const auto stopwatch = Stopwatch<std::chrono::milliseconds>([&] {
-        std::for_each(
-            Tree<VizBlock>::LeafIterator{ tree.GetRoot() }, Tree<VizBlock>::LeafIterator{},
-            [&](const auto& node) {
-                if (node->file.type != FileType::Regular) {
-                    return;
-                }
+    std::for_each(
+        Tree<VizBlock>::LeafIterator{ tree.GetRoot() }, Tree<VizBlock>::LeafIterator{},
+        [&](const auto& node) {
+            if (node->file.type != FileType::Regular) {
+                return;
+            }
 
-                m_tableModel.Insert(node, parameters.IsNodeVisible(node.GetData()));
-                m_graphModel.AddDatapoint(node->file.extension, node->file.size);
-            });
+            m_tableModel.Insert(node, parameters.IsNodeVisible(node.GetData()));
+            m_graphModel.AddDatapoint(node->file.extension, node->file.size);
+        });
 
-        m_tableModel.BuildModel(controller.GetSessionSettings().GetActiveNumericPrefix());
-        m_graphModel.BuildModel();
-    });
-
-    spdlog::get(Constants::Logging::DefaultLog)
-        ->info(fmt::format(
-            "Built break-down model in: {:n} {}", stopwatch.GetElapsedTime().count(),
-            stopwatch.GetUnitsAsCharacterArray()));
-
-    m_proxyModel.invalidate();
-    m_proxyModel.setSourceModel(&m_tableModel);
-
-    m_ui.tableView->setModel(&m_proxyModel);
-    m_ui.tableView->setSelectionMode(QAbstractItemView::SingleSelection);
-    m_ui.tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    m_ui.tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    m_ui.tableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_ui.tableView->sortByColumn(1, Qt::SortOrder::DescendingOrder);
-    m_ui.tableView->setSortingEnabled(true);
-    m_ui.tableView->selectRow(0);
-
-    AdjustColumnWidthsToFitViewport();
-
-    const auto extensionVariant = m_proxyModel.index(0, 0).data(Qt::UserRole);
-    const auto extension = extensionVariant.toString().toStdWString();
-    GenerateGraph(extension);
+    m_tableModel.BuildModel(controller.GetSessionSettings().GetActiveNumericPrefix());
+    m_graphModel.BuildModel();
 }
 
 void BreakdownDialog::AdjustColumnWidthsToFitViewport()
@@ -153,6 +155,9 @@ BreakdownDialog::SetupAxisX(const ExtensionDistribution& distribution) const
     auto axisX = std::make_unique<QtCharts::QCategoryAxis>();
     axisX->setLabelsPosition(QtCharts::QCategoryAxis::AxisLabelsPositionOnValue);
     axisX->setTitleText("Size");
+    axisX->setTitleBrush(Qt::white);
+    axisX->setLinePenColor(Qt::white);
+    axisX->setLabelsBrush(Qt::white);
 
     const auto bucketCount = static_cast<int>(distribution.GetBucketCount());
 
@@ -182,15 +187,17 @@ BreakdownDialog::SetupLinearAxisY(const ExtensionDistribution& distribution) con
     const auto tallestBarHeight = distribution.GetMaximumValueY();
 
     constexpr auto minimumTickCount = 2;
-    const auto tickCount = tallestBarHeight <= 2
-                               ? minimumTickCount
-                               : (std::min(static_cast<int>(tallestBarHeight), 4));
+    const auto tickCount =
+        tallestBarHeight <= 2 ? minimumTickCount : std::min(static_cast<int>(tallestBarHeight), 4);
 
     auto axisY = std::make_unique<QtCharts::QValueAxis>();
     axisY->setRange(0, tallestBarHeight);
     axisY->setLabelFormat("%.1f");
     axisY->setTitleText("Count");
     axisY->setTickCount(tickCount);
+    axisY->setTitleBrush(Qt::white);
+    axisY->setLinePenColor(Qt::white);
+    axisY->setLabelsBrush(Qt::white);
 
     return axisY;
 }
@@ -204,6 +211,9 @@ BreakdownDialog::SetupLogarithmAxisY(const ExtensionDistribution& distribution) 
     axisY->setRange(0.5, tallestBarHeight);
     axisY->setLabelFormat("%d");
     axisY->setTitleText("Count");
+    axisY->setTitleBrush(Qt::white);
+    axisY->setLinePenColor(Qt::white);
+    axisY->setLabelsBrush(Qt::white);
 
     return axisY;
 }
@@ -224,7 +234,9 @@ void BreakdownDialog::GenerateGraph(const std::wstring& extension)
     const auto& buckets = distribution.GetBuckets();
 
     auto set = std::make_unique<QtCharts::QBarSet>("Distribution");
-    set->setColor(Qt::blue);
+
+    QColor barColor{ 20, 100, 160 };
+    set->setColor(barColor);
 
     for (const auto& count : buckets) {
         set->append(count);
@@ -245,8 +257,11 @@ void BreakdownDialog::GenerateGraph(const std::wstring& extension)
     font.setPixelSize(12);
     font.setBold(true);
     chart->setTitleFont(font);
-    chart->setTitleBrush(QBrush{ Qt::black });
+    chart->setTitleBrush(QBrush{ Qt::white });
     chart->setTitle("Size Distribution");
+
+    QBrush backgroundBrush{ QColor{ 50, 65, 75 } };
+    chart->setBackgroundBrush(backgroundBrush);
 
     auto axisX = SetupAxisX(distribution);
     chart->addAxis(axisX.get(), Qt::AlignBottom);
@@ -269,6 +284,6 @@ void BreakdownDialog::GenerateGraph(const std::wstring& extension)
         std::unique_ptr<QtCharts::QChart>(m_ui.graphView->chart());
 
     m_ui.graphView->setChart(chart.release());
-    m_ui.graphView->setBackgroundBrush(Qt::white);
+    m_ui.graphView->setBackgroundBrush(backgroundBrush);
     m_ui.graphView->setRenderHint(QPainter::Antialiasing);
 }

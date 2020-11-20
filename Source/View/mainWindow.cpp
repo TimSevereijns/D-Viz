@@ -84,6 +84,14 @@ namespace
         GSL_ASSUME(false);
     }
 
+    /**
+     * @brief ComputeMessageBoxPosition
+     *
+     * @param messageBox
+     * @param mainWindow
+     *
+     * @return
+     */
     QPoint ComputeMessageBoxPosition(QMessageBox& messageBox, const MainWindow& mainWindow) {
         messageBox.show(); //< Force size computation.
 
@@ -93,6 +101,22 @@ namespace
         return {
             mainWindowPosition.x() + (mainWindowSize.width() / 2) - (messageBox.width() / 2),
             mainWindowPosition.y() + (mainWindowSize.height() / 2) - (messageBox.height() / 2)};
+    }
+
+    /**
+     * @brief LoadAndApplyStyleSheet
+     */
+    void LoadAndApplyStyleSheet()
+    {
+        QFile styleSheetFile{ ":qdarkstyle/style.qss" };
+
+        if (!styleSheetFile.exists()) {
+            spdlog::get(Constants::Logging::DefaultLog)->error("Could not apply stylesheet.");
+        } else {
+            styleSheetFile.open(QFile::ReadOnly | QFile::Text);
+            QTextStream stream{ &styleSheetFile };
+            qApp->setStyleSheet(stream.readAll());
+        }
     }
 } // namespace
 
@@ -116,6 +140,8 @@ MainWindow::MainWindow(Controller& controller, QWidget* parent /* = nullptr */)
 
 void MainWindow::Show()
 {
+    LoadAndApplyStyleSheet();
+
     this->show();
 }
 

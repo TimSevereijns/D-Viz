@@ -83,6 +83,8 @@ class BreakdownDialog final : public QDialog
     void HandleDoubleClick(const QModelIndex& index);
 
   private:
+    void BuildModel();
+
     void AdjustColumnWidthsToFitViewport();
 
     std::unique_ptr<QtCharts::QCategoryAxis>
