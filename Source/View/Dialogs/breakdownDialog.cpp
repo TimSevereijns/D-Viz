@@ -150,14 +150,14 @@ void BreakdownDialog::HandleDoubleClick(const QModelIndex& index)
 }
 
 std::unique_ptr<QtCharts::QCategoryAxis>
-BreakdownDialog::SetupAxisX(const ExtensionDistribution& distribution) const
+BreakdownDialog::SetupAxisX(const ExtensionDistribution& distribution, const QColor& color) const
 {
     auto axisX = std::make_unique<QtCharts::QCategoryAxis>();
     axisX->setLabelsPosition(QtCharts::QCategoryAxis::AxisLabelsPositionOnValue);
     axisX->setTitleText("Size");
-    axisX->setTitleBrush(Qt::white);
-    axisX->setLinePenColor(Qt::white);
-    axisX->setLabelsBrush(Qt::white);
+    axisX->setTitleBrush(color);
+    axisX->setLinePenColor(color);
+    axisX->setLabelsBrush(color);
 
     const auto bucketCount = static_cast<int>(distribution.GetBucketCount());
 
@@ -181,8 +181,8 @@ BreakdownDialog::SetupAxisX(const ExtensionDistribution& distribution) const
     return axisX;
 }
 
-std::unique_ptr<QtCharts::QValueAxis>
-BreakdownDialog::SetupLinearAxisY(const ExtensionDistribution& distribution) const
+std::unique_ptr<QtCharts::QValueAxis> BreakdownDialog::SetupLinearAxisY(
+    const ExtensionDistribution& distribution, const QColor& color) const
 {
     const auto tallestBarHeight = distribution.GetMaximumValueY();
 
@@ -195,15 +195,15 @@ BreakdownDialog::SetupLinearAxisY(const ExtensionDistribution& distribution) con
     axisY->setLabelFormat("%.1f");
     axisY->setTitleText("Count");
     axisY->setTickCount(tickCount);
-    axisY->setTitleBrush(Qt::white);
-    axisY->setLinePenColor(Qt::white);
-    axisY->setLabelsBrush(Qt::white);
+    axisY->setTitleBrush(color);
+    axisY->setLinePenColor(color);
+    axisY->setLabelsBrush(color);
 
     return axisY;
 }
 
-std::unique_ptr<QtCharts::QLogValueAxis>
-BreakdownDialog::SetupLogarithmAxisY(const ExtensionDistribution& distribution) const
+std::unique_ptr<QtCharts::QLogValueAxis> BreakdownDialog::SetupLogarithmAxisY(
+    const ExtensionDistribution& distribution, const QColor& color) const
 {
     const auto tallestBarHeight = distribution.GetMaximumValueY();
 
@@ -211,25 +211,29 @@ BreakdownDialog::SetupLogarithmAxisY(const ExtensionDistribution& distribution) 
     axisY->setRange(0.5, tallestBarHeight);
     axisY->setLabelFormat("%d");
     axisY->setTitleText("Count");
-    axisY->setTitleBrush(Qt::white);
-    axisY->setLinePenColor(Qt::white);
-    axisY->setLabelsBrush(Qt::white);
+    axisY->setTitleBrush(color);
+    axisY->setLinePenColor(color);
+    axisY->setLabelsBrush(color);
 
     return axisY;
 }
 
 std::unique_ptr<QtCharts::QAbstractAxis>
-BreakdownDialog::SetupAxisY(const ExtensionDistribution& distribution) const
+BreakdownDialog::SetupAxisY(const ExtensionDistribution& distribution, const QColor& color) const
 {
     if (distribution.GetMaximumValueY() > 32) {
-        return SetupLogarithmAxisY(distribution);
+        return SetupLogarithmAxisY(distribution, color);
     }
 
-    return SetupLinearAxisY(distribution);
+    return SetupLinearAxisY(distribution, color);
 }
 
 void BreakdownDialog::GenerateGraph(const std::wstring& extension)
 {
+    const auto& settings = m_mainWindow.GetController().GetPersistentSettings();
+    const auto textColor = settings.ShouldUseDarkMode() ? Qt::white : Qt::black;
+    const auto backgroundColor = settings.ShouldUseDarkMode() ? QColor{ 50, 65, 75 } : Qt::white;
+
     const auto& distribution = m_graphModel.GetDistribution(extension);
     const auto& buckets = distribution.GetBuckets();
 
@@ -257,17 +261,17 @@ void BreakdownDialog::GenerateGraph(const std::wstring& extension)
     font.setPixelSize(12);
     font.setBold(true);
     chart->setTitleFont(font);
-    chart->setTitleBrush(QBrush{ Qt::white });
+    chart->setTitleBrush(QBrush{ textColor });
     chart->setTitle("Size Distribution");
 
-    QBrush backgroundBrush{ QColor{ 50, 65, 75 } };
+    QBrush backgroundBrush{ backgroundColor };
     chart->setBackgroundBrush(backgroundBrush);
 
-    auto axisX = SetupAxisX(distribution);
+    auto axisX = SetupAxisX(distribution, textColor);
     chart->addAxis(axisX.get(), Qt::AlignBottom);
     series->attachAxis(axisX.release());
 
-    auto axisY = SetupAxisY(distribution);
+    auto axisY = SetupAxisY(distribution, textColor);
     chart->addAxis(axisY.get(), Qt::AlignLeft);
     series->attachAxis(axisY.release());
 

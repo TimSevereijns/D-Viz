@@ -740,6 +740,8 @@ void MainWindow::OnShowBreakdownButtonPressed()
 {
     if (!m_breakdownDialog) {
         m_breakdownDialog = std::make_unique<BreakdownDialog>(this);
+    } else {
+        m_breakdownDialog->ReloadData();
     }
 
     m_breakdownDialog->show();
