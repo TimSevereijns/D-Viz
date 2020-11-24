@@ -437,7 +437,7 @@ void MainWindow::SetupDebuggingMenu()
 void MainWindow::SetupHelpMenu()
 {
     m_helpMenuWrapper.aboutDialog.setParent(this);
-    m_helpMenuWrapper.aboutDialog.setText("About");
+    m_helpMenuWrapper.aboutDialog.setText("About...");
     m_helpMenuWrapper.aboutDialog.setStatusTip("About D-Viz");
 
     connect(
@@ -500,8 +500,8 @@ void MainWindow::OnFileMenuNewScan()
     parameters.forceNewScan = true;
     parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
-    auto& savedParameters =
-        m_controller.GetSessionSettings().SetVisualizationParameters(parameters);
+    const auto& savedParameters =
+        m_controller.GetSessionSettings().SetVisualizationParameters(std::move(parameters));
 
     m_controller.ScanDrive(savedParameters);
 }
@@ -519,9 +519,8 @@ bool MainWindow::AskUserToLimitFileSize(
     messageBox.setIcon(QMessageBox::Warning);
     messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     messageBox.setDefaultButton(QMessageBox::Yes);
-    messageBox.setText("More than a quarter million files were scanned. "
-                       "Would you like to limit the visualized files to those 1 MiB or larger in "
-                       "order to reduce the load on the GPU and system memory?");
+    messageBox.setText("More than a quarter million files were scanned. Would you like to exclude "
+                       "files smaller than 1 MiB to ease GPU load?");
 
     const auto position = ComputeMessageBoxPosition(messageBox, *this);
     messageBox.move(position);

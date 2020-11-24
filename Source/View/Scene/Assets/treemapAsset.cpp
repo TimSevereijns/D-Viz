@@ -444,8 +444,7 @@ namespace Assets
 
             QMatrix4x4 instanceMatrix;
             instanceMatrix.translate(
-                static_cast<float>(blockOrigin.x()), static_cast<float>(blockOrigin.y()),
-                static_cast<float>(blockOrigin.z()));
+                blockOrigin.xAsFloat(), blockOrigin.yAsFloat(), blockOrigin.zAsFloat());
 
             instanceMatrix.scale(
                 static_cast<float>(block.GetWidth()), static_cast<float>(block.GetHeight()),
@@ -471,11 +470,9 @@ namespace Assets
         const auto& parameters = m_controller.GetSessionSettings().GetVisualizationParameters();
 
         for (const auto& node : tree) {
-            if (!parameters.IsNodeVisible(node.GetData())) {
-                continue;
+            if (parameters.IsNodeVisible(node.GetData())) {
+                ComputeAppropriateBlockColor(node);
             }
-
-            ComputeAppropriateBlockColor(node);
         }
     }
 
@@ -535,7 +532,7 @@ namespace Assets
         constexpr auto nearPlane = 200;
         constexpr auto farPlane = 1500;
 
-        for (std::size_t index = 0u; index < static_cast<std::size_t>(m_cascadeCount); ++index) {
+        for (int index = 0; index < m_cascadeCount; ++index) {
             const auto& boundingBox = boundingBoxes[index];
             const auto worldUnitsPerTexel = ComputeWorldUnitsPerTexel(boundingBox);
 
@@ -565,7 +562,7 @@ namespace Assets
         m_shadowMapShader.bind();
         m_VAO.bind();
 
-        for (std::size_t index = 0u; index < static_cast<std::size_t>(m_cascadeCount); ++index) {
+        for (int index = 0; index < m_cascadeCount; ++index) {
             m_shadowMaps[index].framebuffer->bind();
 
             m_shadowMapShader.setUniformValue(

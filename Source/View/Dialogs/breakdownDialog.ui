@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>720</width>
-    <height>500</height>
+    <width>1280</width>
+    <height>720</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>File Breakdown</string>
+   <string>Scan Breakdown</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
