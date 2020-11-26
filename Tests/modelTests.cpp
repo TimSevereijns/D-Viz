@@ -156,6 +156,27 @@ void ModelTests::GetRootPath()
     QCOMPARE(expectation.wstring(), path);
 }
 
+void ModelTests::GenerateReferenceBlock()
+{
+    const auto referenceBlock = Block{ PrecisePoint{ 0.0, 0.0, 0.0 },
+                                       /* width =  */ 1.0,
+                                       /* height = */ 1.0,
+                                       /* depth =  */ 1.0,
+                                       /* generateVertices = */ true };
+
+    const auto& vertices = referenceBlock.GetVerticesAndNormals();
+
+    // Front face:
+    QCOMPARE(vertices[0], QVector3D(0.0f, 0.0f, 0.0f));
+    QCOMPARE(vertices[6], QVector3D(1.0f, 1.0f, 0.0f));
+    QCOMPARE(vertices[10], QVector3D(1.0f, 0.0f, 0.0f));
+
+    // Top face:
+    QCOMPARE(vertices[48], QVector3D(0.0f, 1.0f, 0.0f));
+    QCOMPARE(vertices[54], QVector3D(1.0f, 1.0f, -1.0f));
+    QCOMPARE(vertices[58], QVector3D(1.0f, 1.0f, 0.0f));
+}
+
 void ModelTests::SelectingNodes()
 {
     QVERIFY(m_model->GetSelectedNode() == nullptr);

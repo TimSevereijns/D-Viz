@@ -41,6 +41,11 @@ class NodePainterTests : public QObject
      * @brief Verify that color scheme names can be set the retrieved.
      */
     void ModifyActiveColorScheme() const;
+
+    /**
+     * @brief GenerateDefaultColorSchemeFile
+     */
+    void GenerateDefaultColorSchemeFile() const;
 };
 
 #endif // NODEPAINTERTESTS_H

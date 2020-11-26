@@ -118,7 +118,7 @@ namespace Settings
         : m_fileColorMapPath{ colorFile }
     {
         if (!std::filesystem::exists(m_fileColorMapPath)) {
-            m_fileColorMapDocument = CreatePreferencesDocument();
+            m_fileColorMapDocument = CreateColorsDocument();
         } else {
             m_fileColorMapDocument = LoadFromDisk(m_fileColorMapPath);
         }
@@ -157,7 +157,7 @@ namespace Settings
         return extensionItr->second;
     }
 
-    JsonDocument NodePainter::CreatePreferencesDocument()
+    JsonDocument NodePainter::CreateColorsDocument()
     {
         Settings::JsonDocument document;
         document.SetObject();

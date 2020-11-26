@@ -69,4 +69,17 @@ void NodePainterTests::ModifyActiveColorScheme() const
     QCOMPARE(retrievedScheme, scheme);
 }
 
+void NodePainterTests::GenerateDefaultColorSchemeFile() const
+{
+    const auto path = std::filesystem::current_path() / L"colors.json";
+    if (std::filesystem::exists(path)) {
+        std::filesystem::remove(path);
+    }
+
+    Settings::NodePainter painter;
+    painter.SetColorScheme(L"Images");
+    const auto jpgMapping = painter.DetermineColorFromExtension(L".jpg");
+    QCOMPARE(jpgMapping.has_value(), true);
+}
+
 REGISTER_TEST(NodePainterTests)

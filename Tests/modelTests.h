@@ -59,6 +59,11 @@ class ModelTests : public QObject
     void GetRootPath();
 
     /**
+     * @brief Verifies that the unit-cube is correctly generated.
+     */
+    void GenerateReferenceBlock();
+
+    /**
      * @brief Verifies that the correct node is selected.
      */
     void SelectingNodes();
