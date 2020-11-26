@@ -83,19 +83,21 @@ class BreakdownDialog final : public QDialog
     void HandleDoubleClick(const QModelIndex& index);
 
   private:
+    void BuildModel();
+
     void AdjustColumnWidthsToFitViewport();
 
     std::unique_ptr<QtCharts::QCategoryAxis>
-    SetupAxisX(const ExtensionDistribution& distribution) const;
+    SetupAxisX(const ExtensionDistribution& distribution, const QColor& color) const;
 
     std::unique_ptr<QtCharts::QValueAxis>
-    SetupLinearAxisY(const ExtensionDistribution& distribution) const;
+    SetupLinearAxisY(const ExtensionDistribution& distribution, const QColor& color) const;
 
     std::unique_ptr<QtCharts::QLogValueAxis>
-    SetupLogarithmAxisY(const ExtensionDistribution& distribution) const;
+    SetupLogarithmAxisY(const ExtensionDistribution& distribution, const QColor& color) const;
 
     std::unique_ptr<QtCharts::QAbstractAxis>
-    SetupAxisY(const ExtensionDistribution& distribution) const;
+    SetupAxisY(const ExtensionDistribution& distribution, const QColor& color) const;
 
     void GenerateGraph(const std::wstring& extension);
 

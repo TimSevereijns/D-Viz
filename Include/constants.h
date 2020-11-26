@@ -104,6 +104,7 @@ namespace Constants
         [[maybe_unused]] inline constexpr auto& ShadowMapQuality = L"shadowMapQuality";
         [[maybe_unused]] inline constexpr auto& ShowDebuggingMenu = L"showDebuggingMenu";
         [[maybe_unused]] inline constexpr auto& MonitorFileSystem = L"monitorFileSystem";
+        [[maybe_unused]] inline constexpr auto& UseDarkMode = L"useDarkMode";
     } // namespace Preferences
 
     namespace Visualization

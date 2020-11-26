@@ -197,6 +197,19 @@ namespace Settings
             m_preferencesDocument, Constants::Preferences::ShowDebuggingMenu, defaultValue);
     }
 
+    void PersistentSettings::UseDarkMode(bool isEnabled)
+    {
+        SaveValue(m_preferencesDocument, Constants::Preferences::UseDarkMode, isEnabled);
+    }
+
+    bool PersistentSettings::ShouldUseDarkMode() const
+    {
+        constexpr auto defaultValue = false;
+
+        return GetValueOrDefault(
+            m_preferencesDocument, Constants::Preferences::UseDarkMode, defaultValue);
+    }
+
     bool PersistentSettings::SaveAllPreferencesToDisk()
     {
         return SaveToDisk(m_preferencesDocument, m_preferencesPath);
@@ -223,6 +236,7 @@ namespace Settings
         document.AddMember(Constants::Preferences::ShadowMapQuality, 4, allocator);
         document.AddMember(Constants::Preferences::ShowDebuggingMenu, false, allocator);
         document.AddMember(Constants::Preferences::MonitorFileSystem, false, allocator);
+        document.AddMember(Constants::Preferences::UseDarkMode, false, allocator);
 
         SaveToDisk(document, m_preferencesPath);
 

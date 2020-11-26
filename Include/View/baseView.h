@@ -157,6 +157,13 @@ class BaseView
         std::uintmax_t numberOfFilesScanned, Settings::VisualizationParameters parameters) = 0;
 
     /**
+     * @brief Displays an info dialog.
+     *
+     * @param[in] message           The message to be displayed in the dialog.
+     */
+    virtual void DisplayInfoDialog(std::string_view message) = 0;
+
+    /**
      * @brief Displays an error dialog.
      *
      * @param[in] message           The message to be displayed in the dialog.

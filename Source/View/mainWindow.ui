@@ -63,7 +63,7 @@
    <property name="minimumSize">
     <size>
      <width>228</width>
-     <height>781</height>
+     <height>500</height>
     </size>
    </property>
    <property name="features">
@@ -345,12 +345,6 @@
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
        </property>
       </spacer>
      </item>

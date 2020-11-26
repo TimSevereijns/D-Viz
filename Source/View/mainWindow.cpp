@@ -84,6 +84,14 @@ namespace
         GSL_ASSUME(false);
     }
 
+    /**
+     * @brief Computes the coordinate needed to center the message box.
+     *
+     * @param[in] messageBox        The message box that is to be centered.
+     * @param[in] mainWindow        The window within which the dialog should be centered.
+     *
+     * @return The top-left coordinate where the message box should be placed.
+     */
     QPoint ComputeMessageBoxPosition(QMessageBox& messageBox, const MainWindow& mainWindow) {
         messageBox.show(); //< Force size computation.
 
@@ -93,6 +101,22 @@ namespace
         return {
             mainWindowPosition.x() + (mainWindowSize.width() / 2) - (messageBox.width() / 2),
             mainWindowPosition.y() + (mainWindowSize.height() / 2) - (messageBox.height() / 2)};
+    }
+
+    /**
+     * @brief Loads and applies a dark theme to the application.
+     */
+    void LoadAndApplyStyleSheet()
+    {
+        QFile styleSheetFile{ ":qdarkstyle/style.qss" };
+
+        if (!styleSheetFile.exists()) {
+            spdlog::get(Constants::Logging::DefaultLog)->error("Could not apply stylesheet.");
+        } else {
+            styleSheetFile.open(QFile::ReadOnly | QFile::Text);
+            QTextStream stream{ &styleSheetFile };
+            qApp->setStyleSheet(stream.readAll());
+        }
     }
 } // namespace
 
@@ -116,6 +140,10 @@ MainWindow::MainWindow(Controller& controller, QWidget* parent /* = nullptr */)
 
 void MainWindow::Show()
 {
+    if (m_controller.GetPersistentSettings().ShouldUseDarkMode()) {
+        LoadAndApplyStyleSheet();
+    }
+
     this->show();
 }
 
@@ -260,6 +288,17 @@ void MainWindow::SetupFileMenu()
 
 void MainWindow::SetupOptionsMenu()
 {
+    const auto& preferences = m_controller.GetPersistentSettings();
+
+    m_optionsMenuWrapper.useDarkTheme.setText("Use Dark Theme");
+    m_optionsMenuWrapper.useDarkTheme.setStatusTip("Toggles the use of a dark theme.");
+    m_optionsMenuWrapper.useDarkTheme.setCheckable(true);
+    m_optionsMenuWrapper.useDarkTheme.setChecked(preferences.ShouldUseDarkMode());
+
+    connect(
+        &m_optionsMenuWrapper.useDarkTheme, &QAction::toggled, this,
+        &MainWindow::OnDarkThemeToggled);
+
     m_optionsMenuWrapper.toggleFrameTime.setText("Show Frame Time");
     m_optionsMenuWrapper.toggleFrameTime.setStatusTip("Toggle frame-time readout in titlebar.");
     m_optionsMenuWrapper.toggleFrameTime.setCheckable(true);
@@ -282,6 +321,7 @@ void MainWindow::SetupOptionsMenu()
         &MainWindow::OnFileMonitoringToggled);
 
     m_optionsMenu.setTitle("Options");
+    m_optionsMenu.addAction(&m_optionsMenuWrapper.useDarkTheme);
     m_optionsMenu.addAction(&m_optionsMenuWrapper.toggleFrameTime);
     m_optionsMenu.addAction(&m_optionsMenuWrapper.enableFileSystemMonitoring);
 
@@ -397,7 +437,7 @@ void MainWindow::SetupDebuggingMenu()
 void MainWindow::SetupHelpMenu()
 {
     m_helpMenuWrapper.aboutDialog.setParent(this);
-    m_helpMenuWrapper.aboutDialog.setText("About");
+    m_helpMenuWrapper.aboutDialog.setText("About...");
     m_helpMenuWrapper.aboutDialog.setStatusTip("About D-Viz");
 
     connect(
@@ -460,8 +500,8 @@ void MainWindow::OnFileMenuNewScan()
     parameters.forceNewScan = true;
     parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
-    auto& savedParameters =
-        m_controller.GetSessionSettings().SetVisualizationParameters(parameters);
+    const auto& savedParameters =
+        m_controller.GetSessionSettings().SetVisualizationParameters(std::move(parameters));
 
     m_controller.ScanDrive(savedParameters);
 }
@@ -479,9 +519,8 @@ bool MainWindow::AskUserToLimitFileSize(
     messageBox.setIcon(QMessageBox::Warning);
     messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     messageBox.setDefaultButton(QMessageBox::Yes);
-    messageBox.setText("More than a quarter million files were scanned. "
-                       "Would you like to limit the visualized files to those 1 MiB or larger in "
-                       "order to reduce the load on the GPU and system memory?");
+    messageBox.setText("More than a quarter million files were scanned. Would you like to exclude "
+                       "files smaller than 1 MiB to ease GPU load?");
 
     const auto position = ComputeMessageBoxPosition(messageBox, *this);
     messageBox.move(position);
@@ -514,7 +553,7 @@ bool MainWindow::AskUserToConfirmDeletion(const std::filesystem::path& filePath)
     messageBox.setDefaultButton(QMessageBox::Yes);
 
     const auto fileName = QString::fromStdString(filePath.filename().string());
-    messageBox.setText("Are you sure you want to delete " + fileName + "?");
+    messageBox.setText("Are you sure you want to delete the following file? \n\n" + fileName);
 
     const auto position = ComputeMessageBoxPosition(messageBox, *this);
     messageBox.move(position);
@@ -540,6 +579,16 @@ void MainWindow::OnFPSReadoutToggled(bool isEnabled)
     if (!isEnabled) {
         setWindowTitle("D-Viz [*]");
     }
+}
+
+void MainWindow::OnDarkThemeToggled(bool isEnabled)
+{
+    auto& settings = m_controller.GetPersistentSettings();
+
+    settings.UseDarkMode(isEnabled);
+    settings.SaveAllPreferencesToDisk();
+
+    DisplayInfoDialog("Please restart D-Viz to complete theme switch.");
 }
 
 void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
@@ -690,6 +739,8 @@ void MainWindow::OnShowBreakdownButtonPressed()
 {
     if (!m_breakdownDialog) {
         m_breakdownDialog = std::make_unique<BreakdownDialog>(this);
+    } else {
+        m_breakdownDialog->ReloadData();
     }
 
     m_breakdownDialog->show();
@@ -830,6 +881,20 @@ void MainWindow::SetStatusBarMessage(const std::wstring& message, int timeout /*
 void MainWindow::ReloadVisualization()
 {
     m_glCanvas->ReloadVisualization();
+}
+
+void MainWindow::DisplayInfoDialog(std::string_view message)
+{
+    QMessageBox messageBox;
+    messageBox.setIcon(QMessageBox::Information);
+    messageBox.setStandardButtons(QMessageBox::Ok);
+    messageBox.setDefaultButton(QMessageBox::Ok);
+    messageBox.setText(message.data());
+
+    const auto position = ComputeMessageBoxPosition(messageBox, *this);
+    messageBox.move(position);
+
+    messageBox.exec();
 }
 
 void MainWindow::DisplayErrorDialog(std::string_view message)

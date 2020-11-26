@@ -38,6 +38,7 @@ class MockView : public BaseView
     MAKE_MOCK0(GetGamepad, Gamepad&(), override);
     MAKE_MOCK2(
         AskUserToLimitFileSize, bool(std::uintmax_t, Settings::VisualizationParameters), override);
+    MAKE_MOCK1(DisplayInfoDialog, void(std::string_view), override);
     MAKE_MOCK1(DisplayErrorDialog, void(std::string_view), override);
     MAKE_MOCK0(SetWaitCursor, void(), override);
     MAKE_MOCK0(RestoreDefaultCursor, void(), override);
