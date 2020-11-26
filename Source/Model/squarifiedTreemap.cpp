@@ -52,12 +52,10 @@ namespace
         const auto ratioBasedPadding = ((land.GetWidth() * 0.1) / nodeCount) / 2.0;
 
         auto widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MaxPadding);
-        auto finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPaddingPerSide);
+        const auto finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPaddingPerSide);
 
         if (finalBlockWidth < 0.0) {
-            finalBlockWidth = blockWidthPlusPadding * Visualization::PaddingRatio;
-            widthPaddingPerSide =
-                (blockWidthPlusPadding * (1.0 - Visualization::PaddingRatio)) / 2.0;
+            assert(false);
         }
 
         const auto ratioBasedBlockDepth = std::abs(land.GetDepth() * Visualization::PaddingRatio);
@@ -101,12 +99,10 @@ namespace
         const auto ratioBasedPadding = (land.GetDepth() * 0.1) / nodeCount / 2.0;
 
         auto depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MaxPadding);
-        auto finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPaddingPerSide);
+        const auto finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPaddingPerSide);
 
         if (finalBlockDepth < 0) {
-            finalBlockDepth = blockDepthPlusPadding * Visualization::PaddingRatio;
-            depthPaddingPerSide =
-                (blockDepthPlusPadding * (1.0 - Visualization::PaddingRatio)) / 2.0;
+            assert(false);
         }
 
         const auto ratioBasedWidth = land.GetWidth() * Visualization::PaddingRatio;

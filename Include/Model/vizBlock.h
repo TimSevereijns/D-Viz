@@ -24,17 +24,6 @@ class VizBlock
      */
     explicit VizBlock(FileInfo file);
 
-    /**
-     * @brief Constructs a new VizNode to represent the specified file using the specified
-     * block.
-     *
-     * The bounding box will be initialized to the same size as the block.
-     *
-     * @param[in] file               The file that the VizNode represents.
-     * @param[in] block              The visual representation of the file in question.
-     */
-    VizBlock(FileInfo file, const Block& block);
-
     constexpr static auto NotInVBO = std::numeric_limits<std::uint32_t>::max();
 
     FileInfo file{};     ///< The file that the block represents.
