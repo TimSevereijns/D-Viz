@@ -75,7 +75,7 @@ namespace
                     { 5_GiB,    "5 GiB" },
                     { 10_GiB,   "10 GiB" }
                 };
-                // clang-format om
+                // clang-format on
 
                 return &binary;
             }
@@ -92,15 +92,17 @@ namespace
      *
      * @return The top-left coordinate where the message box should be placed.
      */
-    QPoint ComputeMessageBoxPosition(QMessageBox& messageBox, const MainWindow& mainWindow) {
+    QPoint ComputeMessageBoxPosition(QMessageBox& messageBox, const MainWindow& mainWindow)
+    {
         messageBox.show(); //< Force size computation.
 
-        const auto mainWindowPosition = mainWindow.pos();
-        const auto mainWindowSize = mainWindow.size();
+        const auto windowPosition = mainWindow.pos();
+        const auto windowSize = mainWindow.size();
 
-        return {
-            mainWindowPosition.x() + (mainWindowSize.width() / 2) - (messageBox.width() / 2),
-            mainWindowPosition.y() + (mainWindowSize.height() / 2) - (messageBox.height() / 2)};
+        const auto x = windowPosition.x() + (windowSize.width() / 2) - (messageBox.width() / 2);
+        const auto y = windowPosition.y() + (windowSize.height() / 2) - (messageBox.height() / 2);
+
+        return { x, y };
     }
 
     /**
@@ -309,8 +311,8 @@ void MainWindow::SetupOptionsMenu()
 
     m_optionsMenuWrapper.enableFileSystemMonitoring.setEnabled(false);
     m_optionsMenuWrapper.enableFileSystemMonitoring.setText("Monitor File System");
-    m_optionsMenuWrapper.enableFileSystemMonitoring.setStatusTip("Monitors the file system for any "
-                                                                 "changes");
+    m_optionsMenuWrapper.enableFileSystemMonitoring.setStatusTip(
+        "Monitors the file system for any changes");
     m_optionsMenuWrapper.enableFileSystemMonitoring.setCheckable(true);
 
     const auto isMonitoringEnabled = m_controller.GetPersistentSettings().ShouldMonitorFileSystem();
@@ -359,10 +361,9 @@ void MainWindow::SetupFileSizeSubMenu()
     m_optionsMenu.addMenu(&m_optionsMenuWrapper.fileSizeMenu);
 }
 
-void MainWindow::SetupDebuggingMenu()
+void MainWindow::SetupRenderSubMenu()
 {
     auto& renderMenuWrapper = m_debuggingMenuWrapper.renderMenuWrapper;
-    auto& renderMenu = m_debuggingMenuWrapper.renderMenu;
 
     renderMenuWrapper.origin.setText("Origin");
     renderMenuWrapper.origin.setCheckable(true);
@@ -391,15 +392,18 @@ void MainWindow::SetupDebuggingMenu()
     connect(
         &renderMenuWrapper.frustum, &QAction::toggled, this, &MainWindow::OnRenderFrustaToggled);
 
+    auto& renderMenu = m_debuggingMenuWrapper.renderMenu;
     renderMenu.setTitle("Render Asset");
     renderMenu.setStatusTip("Toggle scene assets on or off");
     renderMenu.addAction(&renderMenuWrapper.origin);
     renderMenu.addAction(&renderMenuWrapper.grid);
     renderMenu.addAction(&renderMenuWrapper.lightMarkers);
     renderMenu.addAction(&renderMenuWrapper.frustum);
+}
 
+void MainWindow::SetupLightingSubMenu()
+{
     auto& lightingMenuWrapper = m_debuggingMenuWrapper.lightingMenuWrapper;
-    auto& lightingMenu = m_debuggingMenuWrapper.lightingMenu;
 
     const auto shouldShowCascadeSplits =
         m_controller.GetPersistentSettings().ShouldRenderCascadeSplits();
@@ -422,14 +426,21 @@ void MainWindow::SetupDebuggingMenu()
         &lightingMenuWrapper.showShadows, &QAction::toggled, this,
         &MainWindow::OnShowShadowsToggled);
 
+    auto& lightingMenu = m_debuggingMenuWrapper.lightingMenu;
     lightingMenu.setTitle("Lighting");
     lightingMenu.setStatusTip("Toggle visualization aids");
     lightingMenu.addAction(&lightingMenuWrapper.showCascadeSplits);
     lightingMenu.addAction(&lightingMenuWrapper.showShadows);
+}
+
+void MainWindow::SetupDebuggingMenu()
+{
+    SetupRenderSubMenu();
+    SetupLightingSubMenu();
 
     m_debuggingMenu.setTitle("Debugging");
-    m_debuggingMenu.addMenu(&renderMenu);
-    m_debuggingMenu.addMenu(&lightingMenu);
+    m_debuggingMenu.addMenu(&m_debuggingMenuWrapper.renderMenu);
+    m_debuggingMenu.addMenu(&m_debuggingMenuWrapper.lightingMenu);
 
     menuBar()->addMenu(&m_debuggingMenu);
 }
@@ -519,8 +530,9 @@ bool MainWindow::AskUserToLimitFileSize(
     messageBox.setIcon(QMessageBox::Warning);
     messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     messageBox.setDefaultButton(QMessageBox::Yes);
-    messageBox.setText("More than a quarter million files were scanned. Would you like to exclude "
-                       "files smaller than 1 MiB to ease GPU load?");
+    messageBox.setText(
+        "More than a quarter million files were scanned. Would you like to exclude "
+        "files smaller than 1 MiB to ease GPU load?");
 
     const auto position = ComputeMessageBoxPosition(messageBox, *this);
     messageBox.move(position);

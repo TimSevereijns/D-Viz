@@ -264,6 +264,8 @@ class MainWindow final : public QMainWindow, public BaseView
     void SetupFileMenu();
     void SetupFileSizeSubMenu();
     void SetupOptionsMenu();
+    void SetupLightingSubMenu();
+    void SetupRenderSubMenu();
     void SetupDebuggingMenu();
     void SetupHelpMenu();
     void SetupSidebar();
