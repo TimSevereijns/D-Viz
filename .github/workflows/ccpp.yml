@@ -99,6 +99,7 @@ jobs:
             --remove coverage.info \
             '/usr/*' \
             '*/conan/*' \
+            '*/Output/*' \
             '*/Tests/*' \
             '*/QtCore/*' \
             '*/QtGui/*' \
