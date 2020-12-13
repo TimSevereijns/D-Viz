@@ -62,5 +62,5 @@ For information on how to set up and build the project (on Linux), please see `.
 
 * First off, this is a hobby project that should not be taken too seriously.
 * The project currently requires Qt 5.15 or higher.
-* Development and testing were done on Windows 10 and Ubuntu 18.04. An NVIDIA GeForce GTX 1070 was used for the majority of this work, and this is sufficient to visualize up to about one million files. For file systems that exceed this file count, the pruning menu can be used to filter out files smaller than a given amount.
+* Development and testing were done on Windows 10 and Ubuntu 18.04. An NVIDIA GeForce GTX 1070 was used for the majority of this work, and this is sufficient to visualize up to about one million files. For filesystems that exceed this file count, the pruning menu can be used to filter out files smaller than a given amount.
 
