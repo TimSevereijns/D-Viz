@@ -9,9 +9,9 @@
 #include "constants.h"
 #include "literals.h"
 
-#include <Stopwatch/Stopwatch.hpp>
 #include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
+#include <stopwatch.h>
 
 #include <algorithm>
 #include <utility>
@@ -463,7 +463,7 @@ void Controller::SearchTreeMap(
         spdlog::get(Constants::Logging::DefaultLog)
             ->info(fmt::format(
                 "Search Completed in: {:n} {}.", stopwatch.GetElapsedTime().count(),
-                stopwatch.GetUnitsAsCharacterArray()));
+                stopwatch.GetUnitsAsString()));
     };
 
     ProcessHighlightedNodes(selector, selectionCallback);

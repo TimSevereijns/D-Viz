@@ -5,9 +5,9 @@
 #include <limits>
 #include <numeric>
 
-#include <Stopwatch/Stopwatch.hpp>
 #include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
+#include <stopwatch.h>
 
 namespace
 {
@@ -387,7 +387,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
     spdlog::get(Constants::Logging::DefaultLog)
         ->info(fmt::format(
             "Sorted tree in: {:n} {}", sortingStopwatch.GetElapsedTime().count(),
-            sortingStopwatch.GetUnitsAsCharacterArray()));
+            sortingStopwatch.GetUnitsAsString()));
 
     m_fileTree->GetRoot()->GetData().block =
         Block{ PrecisePoint{}, static_cast<double>(Constants::Visualization::RootBlockWidth),
@@ -400,7 +400,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
     spdlog::get(Constants::Logging::DefaultLog)
         ->info(fmt::format(
             "Visualization Generated in: {:n} {}", squarificationStopwatch.GetElapsedTime().count(),
-            squarificationStopwatch.GetUnitsAsCharacterArray()));
+            squarificationStopwatch.GetUnitsAsString()));
 
     m_hasDataBeenParsed = true;
 }

@@ -8,9 +8,9 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <Stopwatch/Stopwatch.hpp>
 #include <gsl/gsl_assert>
 #include <spdlog/spdlog.h>
+#include <stopwatch.h>
 
 #include <algorithm>
 #include <chrono>
@@ -378,7 +378,7 @@ Tree<VizBlock>::Node* BaseModel::FindNearestIntersection(
     spdlog::get(Constants::Logging::DefaultLog)
         ->info(fmt::format(
             "Selected node in: {:n} {}", stopwatch.GetElapsedTime().count(),
-            stopwatch.GetUnitsAsCharacterArray()));
+            stopwatch.GetUnitsAsString()));
 
     return nearestIntersection;
 }

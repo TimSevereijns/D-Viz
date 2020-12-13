@@ -3,8 +3,8 @@
 #include "View/mainWindow.h"
 #include "controller.h"
 
-#include <Stopwatch/Stopwatch.hpp>
 #include <spdlog/spdlog.h>
+#include <stopwatch.h>
 
 #include <QBarSet>
 #include <QBrush>
@@ -41,7 +41,7 @@ void BreakdownDialog::ReloadData()
     spdlog::get(Constants::Logging::DefaultLog)
         ->info(fmt::format(
             "Built break-down model in: {:n} {}", stopwatch.GetElapsedTime().count(),
-            stopwatch.GetUnitsAsCharacterArray()));
+            stopwatch.GetUnitsAsString()));
 
     m_proxyModel.invalidate();
     m_proxyModel.setSourceModel(&m_tableModel);

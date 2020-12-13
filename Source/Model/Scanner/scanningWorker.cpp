@@ -14,8 +14,8 @@
 #pragma warning(pop)
 #endif // Q_OS_WIN
 
-#include <Stopwatch/Stopwatch.hpp>
 #include <spdlog/spdlog.h>
+#include <stopwatch.h>
 
 namespace
 {
@@ -206,7 +206,7 @@ void ScanningWorker::Start()
     spdlog::get(Constants::Logging::DefaultLog)
         ->info(fmt::format(
             "Scanned Drive in: {:n} {}", stopwatch.GetElapsedTime().count(),
-            stopwatch.GetUnitsAsCharacterArray()));
+            stopwatch.GetUnitsAsString()));
 
     Scanner::ComputeDirectorySizes(*m_fileTree);
     PruneEmptyFilesAndDirectories(*m_fileTree);

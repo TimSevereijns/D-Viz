@@ -1,7 +1,6 @@
 #include "View/Viewport/glCanvas.h"
 
 #include "Model/squarifiedTreemap.h"
-#include "Stopwatch/Stopwatch.hpp"
 #include "Utilities/operatingSystem.h"
 #include "Utilities/scopeExit.h"
 #include "View/Viewport/gamepadContextMenu.h"
@@ -15,6 +14,7 @@
 #include <QMessageBox>
 
 #include <gsl/gsl_assert>
+#include <stopwatch.h>
 
 namespace
 {
