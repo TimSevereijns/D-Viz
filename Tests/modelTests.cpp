@@ -73,9 +73,6 @@ void ModelTests::initTestCase()
         std::filesystem::absolute("../../Tests/Data/boost-asio.zip"),
         std::filesystem::absolute("../../Tests/Sandbox"));
 
-    // Let's wait briefly for things to settle down (probably not necessary).
-    std::this_thread::sleep_for(std::chrono::milliseconds{ 100 });
-
     const auto progressCallback = [&](const ScanningProgress& /*progress*/) {
         ++m_progressCallbackInvocations;
     };

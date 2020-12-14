@@ -9,6 +9,8 @@
 
 int main(int argc, char* argv[])
 {
+    [[maybe_unused]] const auto locale = std::locale::global(std::locale("en_US.UTF-8"));
+
     Bootstrapper::RegisterMetaTypes();
     Bootstrapper::InitializeLogs();
 
