@@ -251,7 +251,7 @@ void MainWindow::SetupGamepad()
         return;
     }
 
-    m_gamepad = std::make_unique<Gamepad>(*gamepads.begin(), this);
+    m_gamepad = std::make_unique<Gamepad>(*std::begin(gamepads), this);
     QGamepadManager::instance()->resetConfiguration(m_gamepad->deviceId());
 }
 
@@ -612,7 +612,7 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
     menuWrapper.binaryPrefix.blockSignals(true);
     menuWrapper.decimalPrefix.blockSignals(true);
 
-    const ScopeExit onScopeExit = [&]() noexcept
+    const ScopeExit unblockSignals = [&]() noexcept
     {
         m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.blockSignals(false);
         m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(false);
@@ -646,7 +646,7 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
     menuWrapper.binaryPrefix.blockSignals(true);
     menuWrapper.decimalPrefix.blockSignals(true);
 
-    const ScopeExit onScopeExit = [&]() noexcept
+    const ScopeExit unblockSignals = [&]() noexcept
     {
         m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.blockSignals(false);
         m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(false);

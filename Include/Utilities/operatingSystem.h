@@ -29,7 +29,7 @@ namespace OS
     inline bool LaunchFileExplorer(const std::filesystem::path& path)
     {
         CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-        const ScopeExit onScopeExit = [&]() noexcept
+        const ScopeExit closeCom = [&]() noexcept
         {
             CoUninitialize();
         };

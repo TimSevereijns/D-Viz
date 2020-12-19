@@ -45,7 +45,7 @@ namespace
         }
 
         LPSTR messageBuffer = nullptr;
-        const ScopeExit onScopeExit = [&]() noexcept
+        const ScopeExit freeBuffer = [&]() noexcept
         {
             ::LocalFree(messageBuffer);
         };

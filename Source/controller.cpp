@@ -75,7 +75,7 @@ void Controller::OnScanComplete(
     m_view->AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
     m_view->SetWaitCursor();
 
-    const ScopeExit onScopeExit = [&]() noexcept
+    const ScopeExit restoreCursor = [&]() noexcept
     {
         m_view->RestoreDefaultCursor();
     };

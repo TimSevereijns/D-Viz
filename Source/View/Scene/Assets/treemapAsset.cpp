@@ -2,7 +2,6 @@
 #include "Model/baseModel.h"
 #include "Model/vizBlock.h"
 #include "Settings/settings.h"
-#include "Utilities/scopeExit.h"
 #include "Utilities/viewFrustum.h"
 #include "constants.h"
 #include "controller.h"

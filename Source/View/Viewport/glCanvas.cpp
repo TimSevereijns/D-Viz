@@ -219,7 +219,7 @@ void GLCanvas::resizeGL(int width, int height)
 void GLCanvas::ReloadVisualization()
 {
     const auto previousSuspensionState = m_isPaintingSuspended;
-    const ScopeExit onScopeExit = [&]() noexcept
+    const ScopeExit resetSuspension = [&]() noexcept
     {
         m_isPaintingSuspended = previousSuspensionState;
     };
@@ -583,7 +583,7 @@ void GLCanvas::ShowContextMenu(const QPoint& point)
 void GLCanvas::HandleUserInput()
 {
     const auto now = std::chrono::steady_clock::now();
-    const ScopeExit onScopeExit = [&]() noexcept
+    const ScopeExit recordTimestamp = [&]() noexcept
     {
         m_lastFrameUpdateTimestamp = now;
     };
@@ -849,7 +849,7 @@ void GLCanvas::VisualizeFilesystemActivity()
     const auto startTime = std::chrono::steady_clock::now();
 
     while (notification) {
-        const ScopeExit onScopeExit = [&]() noexcept
+        const ScopeExit fetchNextNotification = [&]() noexcept
         {
             notification = m_controller.FetchNextFileModification();
         };
