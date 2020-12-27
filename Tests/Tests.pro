@@ -29,7 +29,8 @@ HEADERS += \
    Mocks/mockView.h \
    Mocks/mockFileMonitor.h \
    Utilities/multiTestHarness.h \
-   Utilities/trompeloeilAdapter.h
+   Utilities/trompeloeilAdapter.h \
+   uiTests.h
 
 SOURCES += \
    cameraTests.cpp \
@@ -40,7 +41,8 @@ SOURCES += \
    nodePainterTests.cpp \
    persistentSettingsTests.cpp \
    sessionSettingsTests.cpp \
-   testMain.cpp
+   testMain.cpp \
+   uiTests.cpp
 
 INCLUDEPATH += \
    $$PWD/../ThirdParty/Trompeloeil/include \
