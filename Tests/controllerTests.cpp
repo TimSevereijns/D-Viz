@@ -401,4 +401,25 @@ void ControllerTests::DetermineCustomColorOfRegisteredNode() const
     QCOMPARE(nodeColor, customColor);
 }
 
+void ControllerTests::PrintingMetadataToStatusBar() const
+{
+    REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_))
+        .WITH(_1.find(L"Scanned 469 files and 21 directories.") != std::wstring::npos && _2 == 0)
+        .TIMES(AT_LEAST(1));
+
+    ScanDrive();
+
+    m_controller->PrintMetadataToStatusBar();
+}
+
+void ControllerTests::GetRootPath() const
+{
+    ScanDrive();
+
+    const auto rootPath = m_controller->GetRootPath();
+    const auto rootFileName = m_controller->GetTree().GetRoot()->GetData().file.name;
+
+    QCOMPARE(rootPath, rootFileName);
+}
+
 REGISTER_TEST(ControllerTests)

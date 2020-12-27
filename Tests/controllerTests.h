@@ -166,6 +166,16 @@ class ControllerTests : public QObject
      */
     void DetermineCustomColorOfRegisteredNode() const;
 
+    /**
+     * @brief Verifies that scan metadata is correctly printed to the status bar.
+     */
+    void PrintingMetadataToStatusBar() const;
+
+    /**
+     * @brief Verifies that root path is consistently reported.
+     */
+    void GetRootPath() const;
+
   private:
     std::shared_ptr<TestViewFactory> m_viewFactory;
     std::shared_ptr<TestModelFactory> m_modelFactory;
