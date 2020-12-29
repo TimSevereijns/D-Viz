@@ -186,7 +186,7 @@ namespace Settings
     {
         SaveValue(
             m_preferencesDocument, Constants::Preferences::ShadowMapQuality,
-            std::clamp(quality, 1, 4));
+            std::clamp(quality, 1, 8));
     }
 
     bool PersistentSettings::ShouldShowDebuggingMenu() const

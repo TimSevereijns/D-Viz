@@ -405,7 +405,7 @@ void ControllerTests::PrintingMetadataToStatusBar() const
 {
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_))
         .WITH(_1.find(L"Scanned 469 files and 21 directories.") != std::wstring::npos && _2 == 0)
-        .TIMES(AT_LEAST(1));
+        .TIMES(1);
 
     ScanDrive();
 

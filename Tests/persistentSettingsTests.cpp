@@ -162,7 +162,7 @@ void PersistentSettingsTests::ModifyShadowMapQuality() const
 void PersistentSettingsTests::ClampShadowMapQuality() const
 {
     constexpr auto desired = 20;
-    constexpr auto max = 4;
+    constexpr auto max = 8;
 
     ToggleIntegralSetting(
         &Settings::PersistentSettings::SetShadowMapQuality,
@@ -185,7 +185,7 @@ void PersistentSettingsTests::LoadSettingsFromDisk() const
     firstManager.RenderShadows(false);
     firstManager.SaveAllPreferencesToDisk();
 
-    Settings::PersistentSettings secondManager;
+    Settings::PersistentSettings secondManager; //< Reads the altered settings from disk.
     QCOMPARE(secondManager.ShouldRenderGrid(), false);
     QCOMPARE(secondManager.ShouldRenderShadows(), false);
 }
