@@ -30,14 +30,16 @@ void DriveScanner::HandleMessageBox(const QString& message)
 void DriveScanner::StartScanning(const ScanningParameters& parameters)
 {
     m_progress.Reset();
+
     m_progressUpdateTimer = std::make_unique<QTimer>(this);
     connect(
         m_progressUpdateTimer.get(), &QTimer::timeout, this, &DriveScanner::HandleProgressUpdates);
 
     m_parameters = parameters;
+    m_cancellationToken.store(false);
 
     auto* thread = new QThread;
-    auto* worker = new ScanningWorker{ m_parameters, m_progress };
+    auto* worker = new ScanningWorker{ m_parameters, m_progress, m_cancellationToken };
     worker->moveToThread(thread);
 
     m_progressUpdateTimer->start(250);
@@ -53,4 +55,14 @@ void DriveScanner::StartScanning(const ScanningParameters& parameters)
     connect(thread, &QThread::started, worker, &ScanningWorker::Start);
 
     thread->start();
+}
+
+void DriveScanner::StopScanning()
+{
+    m_cancellationToken.store(true);
+}
+
+void DriveScanner::StopProgressReporting()
+{
+    m_progressUpdateTimer->stop();
 }

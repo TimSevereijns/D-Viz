@@ -249,6 +249,8 @@ class MainWindow final : public QMainWindow, public BaseView
 
     void OnFileMonitoringToggled(bool shouldEnable);
 
+    void OnClose();
+
   private:
     void SetFilePruningComboBoxValue(std::uintmax_t minimum);
 

@@ -131,28 +131,34 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
     m_occupiedDiskSpace = spaceInfo.capacity - spaceInfo.free;
     Expects(m_occupiedDiskSpace > 0u);
 
-    auto button = m_view->GetTaskbarButton();
-    button->SetWindow(m_view->GetWindowHandle());
+    m_taskbarProgress = m_view->GetTaskbarButton();
+    m_taskbarProgress->SetWindow(m_view->GetWindowHandle());
 
-    const auto progressHandler = [&, button](const ScanningProgress& progress) {
+    const auto progressHandler = [&](const ScanningProgress& progress) {
         ReportProgressToStatusBar(progress);
-        ReportProgressToTaskbar(*button, progress);
+        ReportProgressToTaskbar(*m_taskbarProgress, progress);
     };
 
     const auto completionHandler =
-        [&, button](
-            const ScanningProgress& progress,
+        [&](const ScanningProgress& progress,
             const std::shared_ptr<Tree<VizBlock>>& scanningResults) mutable {
             OnScanComplete(parameters, progress, scanningResults);
 
-            button->ResetProgress();
-            button->HideProgress();
+            m_taskbarProgress->HideProgress();
+            m_taskbarProgress->ResetProgress();
         };
 
     spdlog::get(Constants::Logging::DefaultLog)
         ->info(fmt::format("Started a new scan at \"{}\".", m_model->GetRootPath().string()));
 
-    m_scanner.StartScanning(ScanningParameters{ root, progressHandler, completionHandler });
+    const auto scanningParameters = ScanningParameters{ root, progressHandler, completionHandler };
+    m_scanner.StartScanning(scanningParameters);
+}
+
+void Controller::StopScanning()
+{
+    m_scanner.StopProgressReporting();
+    m_scanner.StopScanning();
 }
 
 bool Controller::IsFileSystemBeingMonitored() const

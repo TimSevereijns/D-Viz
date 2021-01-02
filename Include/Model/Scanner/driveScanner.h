@@ -30,6 +30,16 @@ class DriveScanner final : public QObject
      */
     void StartScanning(const ScanningParameters& parameters);
 
+    /**
+     * @brief Halts progress reporting for an active scan.
+     */
+    void StopProgressReporting();
+
+    /**
+     * @brief Stops scanning.
+     */
+    void StopScanning();
+
   public slots:
 
     /**
@@ -65,6 +75,8 @@ class DriveScanner final : public QObject
     ScanningParameters m_parameters;
 
     ScanningProgress m_progress;
+
+    std::atomic<bool> m_cancellationToken;
 
     std::unique_ptr<QTimer> m_progressUpdateTimer{ nullptr };
 };

@@ -43,7 +43,9 @@ class ScanningWorker final : public QObject
   public:
     static constexpr std::uintmax_t UndefinedFileSize{ 0 };
 
-    ScanningWorker(const ScanningParameters& parameters, ScanningProgress& progress);
+    ScanningWorker(
+        const ScanningParameters& parameters, ScanningProgress& progress,
+        std::atomic<bool>& cancellationToken);
 
     /**
      * @returns True if the path should be scanned. Symlinks and reparse points are examples of
@@ -117,6 +119,7 @@ class ScanningWorker final : public QObject
     ScanningParameters m_parameters;
 
     ScanningProgress& m_progress;
+    std::atomic<bool>& m_cancellationToken;
 
     std::shared_ptr<Tree<VizBlock>> m_fileTree{ nullptr };
 

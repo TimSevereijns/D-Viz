@@ -279,7 +279,7 @@ void MainWindow::SetupFileMenu()
     m_fileMenuWrapper.exit.setStatusTip("Exit the program.");
     m_fileMenuWrapper.exit.setShortcuts(QKeySequence::Quit);
 
-    connect(&m_fileMenuWrapper.exit, &QAction::triggered, this, &MainWindow::close);
+    connect(&m_fileMenuWrapper.exit, &QAction::triggered, this, &MainWindow::OnClose);
 
     m_fileMenu.setTitle("File");
     m_fileMenu.addAction(&m_fileMenuWrapper.newScan);
@@ -489,6 +489,12 @@ void MainWindow::OnFileMonitoringToggled(bool shouldEnable)
     settings.MonitorFileSystem(shouldEnable);
 
     m_controller.MonitorFileSystem(shouldEnable);
+}
+
+void MainWindow::OnClose()
+{
+    m_controller.StopScanning();
+    close();
 }
 
 void MainWindow::OnFileMenuNewScan()

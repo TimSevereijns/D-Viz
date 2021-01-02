@@ -70,6 +70,11 @@ class Controller : public QObject
     void ScanDrive(const Settings::VisualizationParameters& parameters);
 
     /**
+     * @brief Stops any active drive scanner.
+     */
+    void StopScanning();
+
+    /**
      * @returns True if the visualization is not null;
      */
     bool HasModelBeenLoaded() const;
@@ -344,6 +349,8 @@ class Controller : public QObject
     std::shared_ptr<BaseModel> m_model{ nullptr };
 
     DriveScanner m_scanner;
+
+    std::shared_ptr<BaseTaskbarButton> m_taskbarProgress;
 
     std::uint64_t m_occupiedDiskSpace{ 0u };
 

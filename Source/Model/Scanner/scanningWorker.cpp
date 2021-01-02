@@ -97,9 +97,12 @@ namespace
 
 } // namespace
 
-ScanningWorker::ScanningWorker(const ScanningParameters& parameters, ScanningProgress& progress)
+ScanningWorker::ScanningWorker(
+    const ScanningParameters& parameters, ScanningProgress& progress,
+    std::atomic<bool>& cancellationToken)
     : m_parameters{ parameters },
       m_progress{ progress },
+      m_cancellationToken{ cancellationToken },
       m_fileTree{ CreateTreeAndRootNode(parameters.path) }
 {
 }
@@ -134,7 +137,7 @@ void ScanningWorker::ProcessFile(
 void ScanningWorker::ProcessPath(
     const std::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept
 {
-    if (ContainsProblematicPathElements(path)) {
+    if (ContainsProblematicPathElements(path) || m_cancellationToken.load()) {
         return;
     }
 
