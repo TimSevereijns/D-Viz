@@ -20,7 +20,7 @@ class ScanningProgress
         directoriesScanned.store(0);
         bytesProcessed.store(0);
 
-        m_startTime.store(std::chrono::steady_clock::now());
+        m_startTime = std::chrono::steady_clock::now();
     }
 
     /**
@@ -29,7 +29,7 @@ class ScanningProgress
     std::chrono::seconds GetElapsedSeconds() const noexcept
     {
         return std::chrono::duration_cast<std::chrono::seconds>(
-            std::chrono::steady_clock::now() - m_startTime.load());
+            std::chrono::steady_clock::now() - m_startTime);
     }
 
     std::atomic<std::uintmax_t> filesScanned;
@@ -37,7 +37,7 @@ class ScanningProgress
     std::atomic<std::uintmax_t> bytesProcessed;
 
   private:
-    std::atomic<std::chrono::steady_clock::time_point> m_startTime;
+    std::chrono::steady_clock::time_point m_startTime;
 };
 
 #endif // SCANNINGPROGRESS_HPP
