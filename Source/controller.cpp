@@ -206,13 +206,19 @@ void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
     const auto filesScanned = progress.filesScanned.load();
     const auto sizeInBytes = progress.bytesProcessed.load();
 
+    const auto elapsedTime = progress.GetSecondsElapsed().count();
+    const auto hours = elapsedTime / 3600;
+    const auto minutes = elapsedTime / 60;
+    const auto seconds = elapsedTime % 60;
+
     const auto rootPath = m_model->GetRootPath();
     const auto doesPathRepresentEntireDrive{ rootPath == rootPath.root_path() };
 
     if (doesPathRepresentEntireDrive) {
         const auto fraction = sizeInBytes / static_cast<double>(m_occupiedDiskSpace);
         const auto message = fmt::format(
-            L"Files Scanned: {:n}  |  {:03.2f}% Complete", filesScanned, fraction * 100);
+            L"Time Elapsed: {:02n}:{:02n}:{:02n}  |  Files Scanned: {:n}  |  {:03.2f}% Complete",
+            hours, minutes, seconds, filesScanned, fraction * 100);
 
         m_view->SetStatusBarMessage(message);
     } else {
@@ -220,7 +226,9 @@ void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
         const auto [size, units] = Utilities::ToPrefixedSize(sizeInBytes, prefix);
 
         const auto message = fmt::format(
-            L"Files Scanned: {:n}  |  {:03.2f} {} and counting...", filesScanned, size, units);
+            L"Time Elapsed: {:02n}:{:02n}:{:02n}  |  Files Scanned: {:n}  |  {:03.2f} {} and "
+            L"counting...",
+            hours, minutes, seconds, filesScanned, size, units);
 
         m_view->SetStatusBarMessage(message);
     }
