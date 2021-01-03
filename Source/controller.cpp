@@ -206,7 +206,7 @@ void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
     const auto filesScanned = progress.filesScanned.load();
     const auto sizeInBytes = progress.bytesProcessed.load();
 
-    const auto elapsedTime = progress.GetSecondsElapsed().count();
+    const auto elapsedTime = progress.GetElapsedSeconds().count();
     const auto hours = elapsedTime / 3600;
     const auto minutes = elapsedTime / 60;
     const auto seconds = elapsedTime % 60;
