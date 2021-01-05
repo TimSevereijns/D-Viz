@@ -112,9 +112,9 @@ namespace Constants
         [[maybe_unused]] inline constexpr auto PaddingRatio = 0.9;
         [[maybe_unused]] inline constexpr auto MaxPadding = 0.75;
 
-        [[maybe_unused]] inline constexpr auto BlockHeight = 2.0f;
-        [[maybe_unused]] inline constexpr auto RootBlockWidth = 1000.0f;
-        [[maybe_unused]] inline constexpr auto RootBlockDepth = 1000.0f;
+        [[maybe_unused]] inline constexpr auto BlockHeight = 2.0;
+        [[maybe_unused]] inline constexpr auto RootBlockWidth = 1000.0;
+        [[maybe_unused]] inline constexpr auto RootBlockDepth = 1000.0;
     } // namespace Visualization
 
     const QVersionNumber Version{ 0, 3, 0 };

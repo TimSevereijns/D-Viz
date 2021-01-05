@@ -390,9 +390,8 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
             sortingStopwatch.GetUnitsAsString()));
 
     m_fileTree->GetRoot()->GetData().block =
-        Block{ PrecisePoint{}, static_cast<double>(Constants::Visualization::RootBlockWidth),
-               static_cast<double>(Constants::Visualization::BlockHeight),
-               static_cast<double>(Constants::Visualization::RootBlockDepth) };
+        Block{ PrecisePoint{}, Constants::Visualization::RootBlockWidth,
+               Constants::Visualization::BlockHeight, Constants::Visualization::RootBlockDepth };
 
     const auto squarificationStopwatch = Stopwatch<std::chrono::milliseconds>(
         [&]() { SquarifyRecursively(*m_fileTree->GetRoot()); });

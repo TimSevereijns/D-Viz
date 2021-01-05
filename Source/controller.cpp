@@ -208,7 +208,7 @@ void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
 
     const auto elapsedTime = progress.GetElapsedSeconds().count();
     const auto hours = elapsedTime / 3600;
-    const auto minutes = elapsedTime / 60;
+    const auto minutes = (elapsedTime / 60) % 60;
     const auto seconds = elapsedTime % 60;
 
     const auto rootPath = m_model->GetRootPath();
