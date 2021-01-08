@@ -11,7 +11,7 @@ For information on how to set up and build the project (on Linux), please see `.
 ![Example 1](/Screenshots/2020/D-Viz-1.png)
 <p align="center">
     <em style="font-weight:bold; margin-right:10px;">Figure 1:</em>
-    The yellow tile is the currently selected file, whose path and size is shown in the status bar. Only those files that are smaller than 1 mebibyte are set to render.
+    The yellow tile is the currently selected file, whose path and size is shown in the status bar. Only those files larger than one mebibyte are rendered, as per the settings.
 </p>
 <br/>
 
