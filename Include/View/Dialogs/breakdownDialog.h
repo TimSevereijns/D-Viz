@@ -63,7 +63,7 @@ class ScanBreakdownFilterProxyModel final : public QSortFilterProxyModel
 };
 
 /**
- * @brief The BreakdownDialog class
+ * @brief A pop-out dialog that displays scan metadata and statistics.
  */
 class BreakdownDialog final : public QDialog
 {

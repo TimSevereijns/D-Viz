@@ -6,7 +6,7 @@
 namespace Assets
 {
     /**
-     * @brief The frustumAsset class
+     * @brief Debugging asset that visualizes a sample view frustum.
      */
     class Frustum final : public Line
     {

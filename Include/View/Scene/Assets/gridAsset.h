@@ -6,8 +6,7 @@
 namespace Assets
 {
     /**
-     * @brief The GridAsset class implements the setup and rendering logic for the yellow grid that
-     * appears under the visualization.
+     * @brief The yellow grid that appears under the visualization.
      */
     class Grid final : public Line
     {

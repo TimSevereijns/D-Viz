@@ -6,7 +6,7 @@
 #include <QtGamepad/QGamepad>
 
 /**
- * @brief The CustomGamepad class
+ * @brief Expands on the Qt Gamepad class to better encapsulate trigger actuation.
  */
 class Gamepad final : public QGamepad
 {

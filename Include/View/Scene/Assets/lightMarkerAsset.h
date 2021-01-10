@@ -15,6 +15,7 @@ namespace Assets
          * @copydoc Asset::Base::Base()
          */
         LightMarker(const Controller& controller, QOpenGLExtraFunctions& openGL);
+
         /**
          * @copydoc Asset::Base::Render()
          */

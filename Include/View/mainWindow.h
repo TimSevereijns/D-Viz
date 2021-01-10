@@ -215,7 +215,7 @@ class MainWindow final : public QMainWindow, public BaseView
   private slots:
     void OnFileMenuNewScan();
 
-    void OnFPSReadoutToggled(bool isEnabled);
+    void OnFpsReadoutToggled(bool isEnabled);
 
     void OnDarkThemeToggled(bool isEnabled);
 

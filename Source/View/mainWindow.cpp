@@ -307,7 +307,7 @@ void MainWindow::SetupOptionsMenu()
 
     connect(
         &m_optionsMenuWrapper.toggleFrameTime, &QAction::toggled, this,
-        &MainWindow::OnFPSReadoutToggled);
+        &MainWindow::OnFpsReadoutToggled);
 
     m_optionsMenuWrapper.enableFileSystemMonitoring.setEnabled(false);
     m_optionsMenuWrapper.enableFileSystemMonitoring.setText("Monitor File System");
@@ -592,7 +592,7 @@ bool MainWindow::AskUserToConfirmDeletion(const std::filesystem::path& filePath)
     return false;
 }
 
-void MainWindow::OnFPSReadoutToggled(bool isEnabled)
+void MainWindow::OnFpsReadoutToggled(bool isEnabled)
 {
     if (!isEnabled) {
         setWindowTitle("D-Viz [*]");
