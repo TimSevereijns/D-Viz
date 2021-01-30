@@ -12,7 +12,13 @@ uniform mat4 lightProjectionViewMatrices[CASCADE_COUNT];
 in vec3 vertex;
 in vec3 normal;
 
-out vec3 vertexPosition;
+out vec3 fragTexcoord;
+out vec4 ws_fragmentPosition; //< World-space
+out vec4 es_fragmentPosition; //< Eye-space
+
+out vec4 ls_fragmentNormal; //< Light-space
+out vec4 es_fragmentNormal;
+
 out vec3 vertexColor;
 out vec3 vertexNormal;
 
@@ -22,7 +28,12 @@ out float clipSpaceZ;
 
 void main(void)
 {
-   vertexPosition = vec3(instanceMatrix * vec4(vertex, 1.0f));
+   ws_fragmentPosition = instanceMatrix * vec4(vertex, 1.0f);
+   es_fragmentPosition = cameraProjectionViewMatrix * ws_fragmentPosition;
+
+   es_fragmentNormal = inverse(transpose(cameraProjectionViewMatrix * instanceMatrix)) * vec4(normal, 0.0);
+   ls_fragmentNormal = (lightProjectionViewMatrix * instanceMatrix) * vec4(normal, 0.0);
+
    vertexColor = color;
    vertexNormal = normal;
 
