@@ -44,7 +44,7 @@ namespace
      * @returns The point of intersection if there is an intersection greater than the margin of
      * error, or boost::none if no such intersection exists.
      */
-    std::optional<QVector3D> DoesRayIntersectPlane(
+    std::optional<QVector3D> FindPlaneIntersection(
         const Ray& ray, const QVector3D& pointOnPlane, const QVector3D& planeNormal)
     {
         constexpr auto epsilon{ 0.0001f };
@@ -80,7 +80,7 @@ namespace
         const auto& closest = std::min_element(
             std::begin(allIntersections),
             std::end(allIntersections), [&ray](const auto& lhs, const auto& rhs) noexcept {
-                return (ray.Origin().distanceToPoint(lhs) < ray.Origin().distanceToPoint(rhs));
+                return ray.Origin().distanceToPoint(lhs) < ray.Origin().distanceToPoint(rhs);
             });
 
         if (closest == std::end(allIntersections)) {
@@ -98,7 +98,7 @@ namespace
      *
      * @returns The point of intersection should it exist; boost::none otherwise.
      */
-    std::optional<QVector3D> DoesRayIntersectBlock(const Ray& ray, const Block& block)
+    std::optional<QVector3D> FindBlockIntersection(const Ray& ray, const Block& block)
     {
         std::vector<QVector3D> allIntersections;
 
@@ -114,7 +114,7 @@ namespace
                                           static_cast<float>(randomPointOnTopFace.z()) };
 
             const std::optional<QVector3D> intersectionPoint =
-                DoesRayIntersectPlane(ray, pointOnPlane, Normals::PositiveY);
+                FindPlaneIntersection(ray, pointOnPlane, Normals::PositiveY);
 
             // clang-format off
             if (intersectionPoint && blockOrigin.xAsFloat()             < intersectionPoint->x() &&
@@ -133,7 +133,7 @@ namespace
                                           static_cast<float>(randomPointOnFrontFace.z()) };
 
             const std::optional<QVector3D> intersectionPoint =
-                DoesRayIntersectPlane(ray, pointOnPlane, Normals::PositiveZ);
+                FindPlaneIntersection(ray, pointOnPlane, Normals::PositiveZ);
 
             // clang-format off
             if (intersectionPoint && blockOrigin.xAsFloat()              < intersectionPoint->x() &&
@@ -152,7 +152,7 @@ namespace
                                           static_cast<float>(randomPointOnBackFace.z()) };
 
             const std::optional<QVector3D> intersectionPoint =
-                DoesRayIntersectPlane(ray, pointOnPlane, Normals::NegativeZ);
+                FindPlaneIntersection(ray, pointOnPlane, Normals::NegativeZ);
 
             // clang-format off
             if (intersectionPoint && blockOrigin.xAsFloat()              < intersectionPoint->x() &&
@@ -171,7 +171,7 @@ namespace
                                           static_cast<float>(randomPointOnLeftFace.z()) };
 
             const std::optional<QVector3D> intersectionPoint =
-                DoesRayIntersectPlane(ray, pointOnPlane, Normals::NegativeX);
+                FindPlaneIntersection(ray, pointOnPlane, Normals::NegativeX);
 
             // clang-format off
             if (intersectionPoint && blockOrigin.zAsFloat()              > intersectionPoint->z() &&
@@ -190,7 +190,7 @@ namespace
                                           static_cast<float>(randomPointOnRightFace.z()) };
 
             const std::optional<QVector3D> intersectionPoint =
-                DoesRayIntersectPlane(ray, pointOnPlane, Normals::PositiveX);
+                FindPlaneIntersection(ray, pointOnPlane, Normals::PositiveX);
 
             // clang-format off
             if (intersectionPoint && blockOrigin.zAsFloat()              > intersectionPoint->z() &&
@@ -231,7 +231,7 @@ namespace
     struct IntersectionInfo
     {
         QVector3D point;
-        Tree<VizBlock>::Node* node;
+        Tree<VizBlock>::Node* node = nullptr;
     };
 
     /**
@@ -256,11 +256,11 @@ namespace
                 continue;
             }
 
-            if (DoesRayIntersectBlock(ray, node->GetData().boundingBox)) {
-                const auto& blockIntersection = DoesRayIntersectBlock(ray, node->GetData().block);
-
-                if (blockIntersection && camera.IsPointInFrontOfCamera(*blockIntersection)) {
-                    allIntersections.emplace_back(IntersectionInfo{ *blockIntersection, node });
+            const auto foundIntersection = FindBlockIntersection(ray, node->GetData().boundingBox);
+            if (foundIntersection) {
+                const auto& intersection = FindBlockIntersection(ray, node->GetData().block);
+                if (intersection && camera.IsPointInFrontOfCamera(*intersection)) {
+                    allIntersections.emplace_back(IntersectionInfo{ *intersection, node });
                 }
 
                 if (node->HasChildren()) {
@@ -299,7 +299,7 @@ namespace
                     ->info(fmt::format("Renamed: {}", event.path.string()));
                 break;
             default:
-                GSL_ASSUME(false);
+                std::abort();
         }
     }
 } // namespace
@@ -324,13 +324,13 @@ void BaseModel::UpdateBoundingBoxes()
         return;
     }
 
-    std::for_each(std::begin(*m_fileTree), std::end(*m_fileTree), [](auto& node) noexcept {
+    for (auto& node : *m_fileTree) {
         if (!node.HasChildren()) {
             node->boundingBox = node->block;
-            return;
+            continue;
         }
 
-        double tallestDescendant = 0.0;
+        auto tallestDescendant = 0.0;
 
         auto* currentChild = node.GetFirstChild();
         while (currentChild) {
@@ -344,7 +344,7 @@ void BaseModel::UpdateBoundingBoxes()
         node->boundingBox =
             Block{ node->block.GetOrigin(), node->block.GetWidth(),
                    node->block.GetHeight() + tallestDescendant, node->block.GetDepth() };
-    });
+    }
 }
 
 Tree<VizBlock>::Node* BaseModel::FindNearestIntersection(
@@ -367,9 +367,8 @@ Tree<VizBlock>::Node* BaseModel::FindNearestIntersection(
         const auto closest = std::min_element(
             std::begin(intersections),
             std::end(intersections), [&ray](const auto& lhs, const auto& rhs) noexcept {
-                return (
-                    ray.Origin().distanceToPoint(lhs.point) <
-                    ray.Origin().distanceToPoint(rhs.point));
+                return ray.Origin().distanceToPoint(lhs.point) <
+                       ray.Origin().distanceToPoint(rhs.point);
             });
 
         nearestIntersection = closest->node;
@@ -409,7 +408,7 @@ std::vector<const Tree<VizBlock>::Node*>& BaseModel::GetHighlightedNodes()
 
 void BaseModel::ClearHighlightedNodes()
 {
-    if (m_highlightedNodes.size() == 0) {
+    if (m_highlightedNodes.empty()) {
         return;
     }
 
@@ -446,7 +445,6 @@ void BaseModel::HighlightAncestors(const Tree<VizBlock>::Node& node)
     auto* currentNode = node.GetParent();
     while (currentNode) {
         m_highlightedNodes.emplace_back(currentNode);
-
         currentNode = currentNode->GetParent();
     }
 }
@@ -593,12 +591,9 @@ void BaseModel::RefreshTreemap()
 
 void BaseModel::UpdateAffectedNodes(const FileEvent& event)
 {
-    const auto absolutePath = event.path;
+    const auto& absolutePath = event.path;
 
-    std::error_code errorCode;
-
-    if (event.eventType == FileEventType::Touched && !std::filesystem::exists(absolutePath) &&
-        !errorCode) {
+    if (event.eventType == FileEventType::Touched && !std::filesystem::exists(absolutePath)) {
         // @note The absence of a file may not necessarily indicate a bug, since there tend to be
         // a lot of transient files that may only exist for a fraction of a second. For example,
         // some applications tend to create temporary files when saving changes made to a file.
@@ -634,17 +629,17 @@ void BaseModel::UpdateAffectedNodes(const FileEvent& event)
 
 void BaseModel::OnFileCreation(const FileEvent& event)
 {
-    auto* node =
-        Utilities::FindNodeViaAbsolutePath(m_fileTree->GetRoot(), event.path.parent_path());
+    auto* const root = m_fileTree->GetRoot();
+    auto* const node = Utilities::FindNodeViaAbsolutePath(root, event.path.parent_path());
 
     if (!node) {
         return;
     }
 
-    FileInfo fileInfo{ /* name = */ event.path.stem().wstring(),
-                       /* extension = */ event.path.extension().wstring(),
-                       /* size = */ event.fileSize,
-                       /* type = */ FileType::Regular };
+    auto fileInfo = FileInfo{ /* name = */ event.path.stem().wstring(),
+                              /* extension = */ event.path.extension().wstring(),
+                              /* size = */ event.fileSize,
+                              /* type = */ FileType::Regular };
 
     node->AppendChild(VizBlock{ std::move(fileInfo) });
 }
@@ -662,7 +657,8 @@ void BaseModel::OnFileDeletion(const FileEvent& event)
 void BaseModel::OnFileModification(const FileEvent& event)
 {
     if (std::filesystem::is_regular_file(event.path)) {
-        auto* node = Utilities::FindNodeViaAbsolutePath(m_fileTree->GetRoot(), event.path);
+        auto* const root = m_fileTree->GetRoot();
+        auto* const node = Utilities::FindNodeViaAbsolutePath(root, event.path);
 
         if (node) {
             node->GetData().file.size = event.fileSize;
@@ -680,7 +676,7 @@ void BaseModel::OnFileNameChange(const FileEvent& /*event*/)
 void BaseModel::UpdateAncestorSizes(Tree<VizBlock>::Node* node)
 {
     while (node) {
-        auto* parent = node->GetParent();
+        auto* const parent = node->GetParent();
 
         if (parent) {
             const auto totalSize = std::accumulate(
