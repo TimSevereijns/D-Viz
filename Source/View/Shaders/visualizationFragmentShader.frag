@@ -27,7 +27,7 @@ uniform struct Light
 
 uniform float cascadeBounds[CASCADE_COUNT];
 
-const float constantBias = 0;
+const float constantBias = 0.0059;
 const float zBias = 0.00002;
 const float EPSILON = 0.0001;
 const float lightNearPlane = 0.1;
@@ -170,7 +170,7 @@ float ComputeShadowAttenuation2(
     vec2  nlsGridCenter = delta * (index + vec2(0.5)); // Normalized eye space grid center --- [0,1]
     // Unnormalized coordinate in [-lightLeft,lightLeft]
 
-    int viewBound = 1; //< @todo TS: Not sure what this does...
+    int viewBound = 2000; //< TS: I believe this refers to the width/height of the near view plane.
     vec2 lsGridCenter = viewBound * (2.0 * nlsGridCenter - vec2(1.0));
 
     /** Define light ray **/

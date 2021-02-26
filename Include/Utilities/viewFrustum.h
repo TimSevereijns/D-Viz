@@ -45,9 +45,10 @@ namespace FrustumUtilities
      * @brief Generates a frustum outline.
      *
      * @param[in] camera             Main scene camera.
-     * @param[in, out] frustumAsset  The main frustum scene asset.
+     *
+     * @returns Frustom vertices.
      */
-    template <typename T> inline std::vector<QVector3D> GenerateFrustumPoints(const T& view)
+    inline std::vector<QVector3D> GenerateFrustumPoints(const Camera& view)
     {
         const auto frustum = ComputeFrustumCorners(view);
 

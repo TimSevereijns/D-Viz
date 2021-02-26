@@ -542,9 +542,19 @@ namespace Assets
                 SnapToNearestTexel(boundingBox.bottom, worldUnitsPerTexel),
                 SnapToNearestTexel(boundingBox.top, worldUnitsPerTexel), nearPlane, farPlane);
 
-            const QMatrix4x4 model;
-            auto projectionViewMatrix = projection * view * model;
-            m_shadowMaps[index].projectionViewMatrix = projectionViewMatrix;
+            static const QMatrix4x4 model;
+            m_shadowMaps[index].projectionViewMatrix = projection * view * model;
+
+            // m_shadowMaps[index].nearPlane = boundingBox.near;
+            // m_shadowMaps[index].farPlane = boundingBox.far;
+
+            //            int fov = 2.0 * std::atan(1.0 /
+            //            m_shadowMaps[index].projectionViewMatrix.row(1)[1]) *
+            //                      Constants::Math::RadiansToDegrees;
+
+            //            int nearPlanHeight = 2 * std::tan(fov / 2) * nearPlane;
+
+            //            print(nearPlanHeight);
         }
     }
 
