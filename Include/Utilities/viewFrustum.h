@@ -13,7 +13,7 @@
 namespace FrustumUtilities
 {
     /**
-     * @brief ComputeFrustumCorners
+     * @brief Compute frustum corners
      *
      * @param worldToView
      */

@@ -44,7 +44,7 @@ class FileSystemObserver
     void StopMonitoring();
 
     /**
-     * @returns True if the file system observer is actively monitoring; false othwerise.
+     * @returns True if the file system observer is actively monitoring; false otherwise.
      */
     bool IsActive() const;
 

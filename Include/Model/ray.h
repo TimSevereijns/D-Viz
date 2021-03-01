@@ -14,7 +14,7 @@ class Ray
     const QVector3D& Origin() const noexcept;
 
     /**
-     * @returns The direction vector emitating from the origin.
+     * @returns The direction vector emanating from the origin.
      */
     const QVector3D& Direction() const noexcept;
 

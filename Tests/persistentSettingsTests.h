@@ -84,12 +84,12 @@ class PersistentSettingsTests : public QObject
     void ClampShadowMapCascadeCount() const;
 
     /**
-     * @brief Verifies that the shadow map qualtiy can be correctly modified.
+     * @brief Verifies that the shadow map quality can be correctly modified.
      */
     void ModifyShadowMapQuality() const;
 
     /**
-     * @brief Verifies that the shadow map qualtiy can be correctly modified, and that
+     * @brief Verifies that the shadow map quality can be correctly modified, and that
      * the value remains within a certain range.
      */
     void ClampShadowMapQuality() const;

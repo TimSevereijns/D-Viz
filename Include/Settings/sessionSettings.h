@@ -27,7 +27,7 @@ namespace Settings
         double GetMouseSensitivity() const;
 
         /**
-         * @return Gets the current light attentuation factor.
+         * @return Gets the current light attenuation factor.
          */
         double GetLightAttenuationFactor() const;
 
@@ -115,7 +115,7 @@ namespace Settings
         void SetAmbientLightCoefficient(double coefficient);
 
         /**
-         * @brief Should be called when the point light's attentuation changes.
+         * @brief Should be called when the point light's attenuation changes.
          *
          * @param[in] attenuation  The new attenuation factor.
          */

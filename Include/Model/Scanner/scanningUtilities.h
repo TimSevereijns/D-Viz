@@ -23,7 +23,7 @@ namespace Scanner
 #ifdef Q_OS_WIN
 
         /**
-         * @returns A handle representing the repartse point found at the given path. If the path is
+         * @returns A handle representing the reparse point found at the given path. If the path is
          * not a reparse point, then an invalid handle will be returned instead.
          */
         ScopedHandle OpenReparsePoint(const std::filesystem::path& path) noexcept;

@@ -28,42 +28,42 @@ class FileSizeLiteralTests : public QObject
     void init();
 
     /**
-     * @brief Verifes kilobytes are correctly computed.
+     * @brief Verifies kilobytes are correctly computed.
      */
     void KilobytesToBytes() const;
 
     /**
-     * @brief Verifes megabytes are correctly computed.
+     * @brief Verifies megabytes are correctly computed.
      */
     void MegabytesToBytes() const;
 
     /**
-     * @brief Verifes gigabytes are correctly computed.
+     * @brief Verifies gigabytes are correctly computed.
      */
     void GigabytesToBytes() const;
 
     /**
-     * @brief Verifes terabytes are correctly computed.
+     * @brief Verifies terabytes are correctly computed.
      */
     void TerabytesToBytes() const;
 
     /**
-     * @brief Verifes kibibytes are correctly computed.
+     * @brief Verifies kibibytes are correctly computed.
      */
     void KibibytesToBytes() const;
 
     /**
-     * @brief Verifes kibibytes are correctly computed.
+     * @brief Verifies kibibytes are correctly computed.
      */
     void MebibytesToBytes() const;
 
     /**
-     * @brief Verifes gibibytes are correctly computed.
+     * @brief Verifies gibibytes are correctly computed.
      */
     void GibibytesToBytes() const;
 
     /**
-     * @brief Verifes tebibytes are correctly computed.
+     * @brief Verifies tebibytes are correctly computed.
      */
     void TebibytesToBytes() const;
 };

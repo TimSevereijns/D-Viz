@@ -36,7 +36,7 @@ class FileMonitorBase
     virtual void Stop() = 0;
 
     /**
-     * @returns True if the file system observer is actively monitoring; false othwerise.
+     * @returns True if the file system observer is actively monitoring; false otherwise.
      */
     virtual bool IsActive() const = 0;
 };
