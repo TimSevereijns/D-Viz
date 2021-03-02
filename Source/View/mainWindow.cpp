@@ -544,20 +544,12 @@ bool MainWindow::AskUserToLimitFileSize(
     messageBox.move(position);
 
     const auto election = messageBox.exec();
-    switch (election) {
-        case QMessageBox::Yes: {
-            parameters.minimumFileSize = 1_MiB;
-            m_controller.GetSessionSettings().SetVisualizationParameters(std::move(parameters));
-            SetFilePruningComboBoxValue(1_MiB);
+    if (election == QMessageBox::Yes) {
+        parameters.minimumFileSize = 1_MiB;
+        m_controller.GetSessionSettings().SetVisualizationParameters(std::move(parameters));
+        SetFilePruningComboBoxValue(1_MiB);
 
-            return true;
-        }
-        case QMessageBox::No: {
-            return false;
-        }
-        default: {
-            GSL_ASSUME(false);
-        }
+        return true;
     }
 
     return false;
@@ -577,19 +569,7 @@ bool MainWindow::AskUserToConfirmDeletion(const std::filesystem::path& filePath)
     messageBox.move(position);
 
     const auto election = messageBox.exec();
-    switch (election) {
-        case QMessageBox::Yes: {
-            return true;
-        }
-        case QMessageBox::No: {
-            return false;
-        }
-        default: {
-            GSL_ASSUME(false);
-        }
-    }
-
-    return false;
+    return election == QMessageBox::Yes;
 }
 
 void MainWindow::OnFpsReadoutToggled(bool isEnabled)
@@ -911,7 +891,6 @@ void MainWindow::DisplayInfoDialog(std::string_view message)
 
     const auto position = ComputeMessageBoxPosition(messageBox, *this);
     messageBox.move(position);
-
     messageBox.exec();
 }
 
@@ -925,7 +904,6 @@ void MainWindow::DisplayErrorDialog(std::string_view message)
 
     const auto position = ComputeMessageBoxPosition(messageBox, *this);
     messageBox.move(position);
-
     messageBox.exec();
 }
 
