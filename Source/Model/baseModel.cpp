@@ -341,9 +341,10 @@ void BaseModel::UpdateBoundingBoxes()
             currentChild = currentChild->GetNextSibling();
         }
 
-        node->boundingBox =
-            Block{ node->block.GetOrigin(), node->block.GetWidth(),
-                   node->block.GetHeight() + tallestDescendant, node->block.GetDepth() };
+        node->boundingBox = Block{ /* origin = */ node->block.GetOrigin(),
+                                   /* width = */ node->block.GetWidth(),
+                                   /* height = */ node->block.GetHeight() + tallestDescendant,
+                                   /* depth = */ node->block.GetDepth() };
     }
 }
 
@@ -551,7 +552,7 @@ void BaseModel::StopMonitoringFileSystem() noexcept
 void BaseModel::ProcessChanges()
 {
     while (m_shouldKeepProcessingNotifications.load()) {
-        const auto event = m_fileEvents.WaitAndPop();
+        const std::shared_ptr<FileEvent> event = m_fileEvents.WaitAndPop();
         if (!event) {
             // @note If we got here, it may indicates that the wait operation has probably been
             // abandoned due to a DTOR invocation.
@@ -578,11 +579,10 @@ void BaseModel::WaitForNextModelChange()
 
 void BaseModel::RefreshTreemap()
 {
-    auto fileEvent = FetchNextModelChange();
-
-    while (fileEvent) {
-        UpdateAffectedNodes(*fileEvent);
-        fileEvent = FetchNextModelChange();
+    auto optionalFileEvent = FetchNextModelChange();
+    while (optionalFileEvent) {
+        UpdateAffectedNodes(*optionalFileEvent);
+        optionalFileEvent = FetchNextModelChange();
     }
 
     // @todo Sort the tree.
@@ -646,7 +646,8 @@ void BaseModel::OnFileCreation(const FileEvent& event)
 
 void BaseModel::OnFileDeletion(const FileEvent& event)
 {
-    auto* node = Utilities::FindNodeViaAbsolutePath(m_fileTree->GetRoot(), event.path);
+    auto* const root = m_fileTree->GetRoot();
+    auto* node = Utilities::FindNodeViaAbsolutePath(root, event.path);
 
     if (node) {
         node->DeleteFromTree();
@@ -704,8 +705,8 @@ std::optional<FileEvent> BaseModel::FetchNextVisualChange()
 {
     FileEvent notification;
 
-    const auto retrievedNotification = m_pendingVisualUpdates.TryPop(notification);
-    if (!retrievedNotification) {
+    const bool successfullyRetrievedNotification = m_pendingVisualUpdates.TryPop(notification);
+    if (!successfullyRetrievedNotification) {
         return std::nullopt;
     }
 
@@ -716,8 +717,8 @@ std::optional<FileEvent> BaseModel::FetchNextModelChange()
 {
     FileEvent notification;
 
-    const auto retrievedNotification = m_pendingModelUpdates.TryPop(notification);
-    if (!retrievedNotification) {
+    const bool successfullyRetrievedNotification = m_pendingModelUpdates.TryPop(notification);
+    if (!successfullyRetrievedNotification) {
         return std::nullopt;
     }
 

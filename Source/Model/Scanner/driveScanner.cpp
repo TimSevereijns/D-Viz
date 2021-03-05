@@ -15,6 +15,7 @@ void DriveScanner::HandleCompletion(const std::shared_ptr<Tree<VizBlock>>& fileT
 
     m_parameters.onScanCompletedCallback(m_progress, fileTree);
 
+    m_isActive = false;
     emit Finished();
 }
 
@@ -54,15 +55,24 @@ void DriveScanner::StartScanning(const ScanningParameters& parameters)
     connect(thread, &QThread::finished, thread, &QThread::deleteLater);
     connect(thread, &QThread::started, worker, &ScanningWorker::Start);
 
+    m_isActive = true;
     thread->start();
 }
 
 void DriveScanner::StopScanning()
 {
     m_cancellationToken.store(true);
+    m_isActive = false;
+}
+
+bool DriveScanner::IsActive() const
+{
+    return m_isActive;
 }
 
 void DriveScanner::StopProgressReporting()
 {
-    m_progressUpdateTimer->stop();
+    if (m_progressUpdateTimer && m_progressUpdateTimer->isActive()) {
+        m_progressUpdateTimer->stop();
+    }
 }

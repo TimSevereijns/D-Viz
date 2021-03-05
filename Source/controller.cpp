@@ -157,8 +157,10 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
 
 void Controller::StopScanning()
 {
-    m_scanner.StopProgressReporting();
-    m_scanner.StopScanning();
+    if (m_scanner.IsActive()) {
+        m_scanner.StopProgressReporting();
+        m_scanner.StopScanning();
+    }
 }
 
 bool Controller::IsFileSystemBeingMonitored() const
