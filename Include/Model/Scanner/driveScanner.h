@@ -40,6 +40,11 @@ class DriveScanner final : public QObject
      */
     void StopScanning();
 
+    /**
+     * @returns True if the scanner is running.
+     */
+    bool IsActive() const;
+
   public slots:
 
     /**
@@ -77,6 +82,8 @@ class DriveScanner final : public QObject
     ScanningProgress m_progress;
 
     std::atomic<bool> m_cancellationToken;
+
+    bool m_isActive{ false };
 
     std::unique_ptr<QTimer> m_progressUpdateTimer{ nullptr };
 };
