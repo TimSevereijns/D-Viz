@@ -489,7 +489,7 @@ void ModelTests::TrackMultipleDeletions()
     const auto totalNotifications = m_sampleNotifications.size();
     auto processedNotifications{ 0u };
 
-    const auto startTime = std::chrono::high_resolution_clock::now();
+    const auto startTime = std::chrono::steady_clock::now();
 
     while (processedNotifications != totalNotifications) {
         std::optional<FileEvent> notification = m_model->FetchNextModelChange();
@@ -502,7 +502,7 @@ void ModelTests::TrackMultipleDeletions()
         }
 
         const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::high_resolution_clock::now() - startTime);
+            std::chrono::steady_clock::now() - startTime);
 
         if (elapsedTime > std::chrono::milliseconds{ 500 }) {
             break;
