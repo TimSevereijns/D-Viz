@@ -1,10 +1,10 @@
 #ifndef BOOTSTRAPPER_HPP
 #define BOOTSTRAPPER_HPP
 
+#include "Utilities/logging.h"
 #include "constants.h"
 
 #include <filesystem>
-#include <type_traits>
 
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
@@ -17,39 +17,16 @@ class VizBlock;
 
 namespace Bootstrapper
 {
-    namespace Detail
-    {
-        /**
-         * @brief Returns a wide string if on Windows, and returns a narrow string on Unix.
-         */
-        inline auto ToFileNameString(const std::filesystem::path& path)
-        {
-            if constexpr (std::is_same_v<spdlog::filename_t, std::wstring>) {
-                return path.wstring();
-            }
-
-            if constexpr (std::is_same_v<spdlog::filename_t, std::string>) {
-                return path.string();
-            }
-        }
-    } // namespace Detail
-
     /**
      * @brief Performs all the steps necessary to initialize and start the log.
      */
     inline void InitializeLogs(const std::string& suffix = std::string{})
     {
-        const auto defaultLogName = "log" + suffix + ".txt";
-        const auto defaultLogPath = std::filesystem::current_path().append(defaultLogName);
-
         const auto& defaultLog = spdlog::basic_logger_mt(
-            Constants::Logging::DefaultLog, Detail::ToFileNameString(defaultLogPath));
-
-        const auto filesystemLogName = "filesystem" + suffix + ".txt";
-        const auto fileLogPath = std::filesystem::current_path().append(filesystemLogName);
+            Constants::Logging::DefaultLog, Logging::GetDefaultLogPath(suffix).string());
 
         const auto& filesystemLog = spdlog::basic_logger_mt(
-            Constants::Logging::FilesystemLog, Detail::ToFileNameString(fileLogPath));
+            Constants::Logging::FilesystemLog, Logging::GetFilesystemLogPath(suffix).string());
 
         defaultLog->info("--------------------------------");
         defaultLog->info("Starting D-Viz...");

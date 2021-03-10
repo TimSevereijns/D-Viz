@@ -249,6 +249,8 @@ class MainWindow final : public QMainWindow, public BaseView
 
     void OnFileMonitoringToggled(bool shouldEnable);
 
+    void OnOpenLogFile();
+
     void OnClose();
 
   private:
@@ -345,6 +347,8 @@ class MainWindow final : public QMainWindow, public BaseView
             QAction showCascadeSplits{ nullptr };
             QAction showShadows{ nullptr };
         } lightingMenuWrapper;
+
+        QAction openLogFile{ nullptr };
     } m_debuggingMenuWrapper;
 
     QMenu m_helpMenu{ nullptr };

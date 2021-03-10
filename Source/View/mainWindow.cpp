@@ -2,6 +2,7 @@
 #include "Model/Scanner/scanningProgress.h"
 #include "Settings/persistentSettings.h"
 #include "Settings/settings.h"
+#include "Utilities/logging.h"
 #include "Utilities/operatingSystem.h"
 #include "Utilities/scopeExit.h"
 #include "Utilities/scopedCursor.h"
@@ -442,6 +443,13 @@ void MainWindow::SetupDebuggingMenu()
     m_debuggingMenu.addMenu(&m_debuggingMenuWrapper.renderMenu);
     m_debuggingMenu.addMenu(&m_debuggingMenuWrapper.lightingMenu);
 
+    m_debuggingMenuWrapper.openLogFile.setText("Open Log File");
+
+    connect(
+        &m_debuggingMenuWrapper.openLogFile, &QAction::triggered, this, &MainWindow::OnOpenLogFile);
+
+    m_debuggingMenu.addAction(&m_debuggingMenuWrapper.openLogFile);
+
     menuBar()->addMenu(&m_debuggingMenu);
 }
 
@@ -776,6 +784,11 @@ void MainWindow::OnShowShadowsToggled(bool shouldShow)
 void MainWindow::OnShowCascadeSplitsToggled(bool shouldShow)
 {
     m_controller.GetPersistentSettings().RenderCascadeSplits(shouldShow);
+}
+
+void MainWindow::OnOpenLogFile()
+{
+    OS::OpenFile(Logging::GetDefaultLogPath());
 }
 
 bool MainWindow::ShouldShowFrameTime() const

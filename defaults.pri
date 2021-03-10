@@ -82,6 +82,7 @@ HEADERS += \
     $$PWD/Include/Settings/sessionSettings.h \
     $$PWD/Include/Settings/settings.h \
     $$PWD/Include/Utilities/ignoreUnused.h \
+    $$PWD/Include/Utilities/logging.h \
     $$PWD/Include/Utilities/operatingSystem.h \
     $$PWD/Include/Utilities/reparsePointDeclarations.h \
     $$PWD/Include/Utilities/scopedCursor.h \
