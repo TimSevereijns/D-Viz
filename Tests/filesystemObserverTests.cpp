@@ -45,7 +45,7 @@ void FilesystemObserverTests::MonitorDeletions()
 
     // @todo Deleting the path being monitored might be problematic. Verify fix, and add test case.
     std::filesystem::remove_all("../../Tests/Sandbox/asio");
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    std::this_thread::sleep_for(std::chrono::milliseconds{ 250 });
 
     observer.StopMonitoring();
     QVERIFY(observer.IsActive() == false);

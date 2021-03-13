@@ -148,8 +148,8 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
             m_taskbarProgress->ResetProgress();
         };
 
-    spdlog::get(Constants::Logging::DefaultLog)
-        ->info(fmt::format("Started a new scan at \"{}\".", m_model->GetRootPath().string()));
+    const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+    log->info(fmt::format("Started a new scan at \"{}\".", m_model->GetRootPath().string()));
 
     const auto scanningParameters = ScanningParameters{ root, progressHandler, completionHandler };
     m_scanner.StartScanning(scanningParameters);
@@ -476,10 +476,10 @@ void Controller::SearchTreeMap(
                 shouldSearchDirectories);
         });
 
-        spdlog::get(Constants::Logging::DefaultLog)
-            ->info(fmt::format(
-                "Search Completed in: {:n} {}.", stopwatch.GetElapsedTime().count(),
-                stopwatch.GetUnitsAsString()));
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+        log->info(fmt::format(
+            "Search Completed in: {:n} {}.", stopwatch.GetElapsedTime().count(),
+            stopwatch.GetUnitsAsString()));
     };
 
     ProcessHighlightedNodes(selector, selectionCallback);

@@ -56,7 +56,6 @@ class MockFileMonitor : public FileMonitorBase
     {
         while (m_isActive) {
             auto optionalNotification = m_notificationGenerator();
-
             if (optionalNotification) {
                 m_onNotificationCallback(std::move(*optionalNotification));
             }

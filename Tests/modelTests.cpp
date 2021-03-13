@@ -147,10 +147,10 @@ void ModelTests::GetRootPath()
 {
     const auto path = m_model->GetRootPath();
 
-    const auto expectation =
-        TestUtilities::SanitizePath(std::filesystem::absolute("../../Tests/Sandbox/asio"));
+    const auto testDirectory = std::filesystem::absolute("../../Tests/Sandbox/asio");
+    const auto expectedPath = TestUtilities::SanitizePath(testDirectory);
 
-    QCOMPARE(expectation.wstring(), path);
+    QCOMPARE(expectedPath.wstring(), path);
 }
 
 void ModelTests::GenerateReferenceBlock()

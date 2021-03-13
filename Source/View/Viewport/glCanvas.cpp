@@ -843,7 +843,7 @@ void GLCanvas::VisualizeFilesystemActivity()
         return;
     }
 
-    auto notification = m_controller.FetchNextFileModification();
+    std::optional<FileEvent> notification = m_controller.FetchNextFileModification();
     Assets::Treemap* const treemap = notification ? GetAsset<Assets::Tag::Treemap>() : nullptr;
 
     const auto startTime = std::chrono::steady_clock::now();
