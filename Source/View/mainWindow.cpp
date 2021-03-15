@@ -276,6 +276,12 @@ void MainWindow::SetupFileMenu()
 
     connect(&m_fileMenuWrapper.newScan, &QAction::triggered, this, &MainWindow::OnFileMenuNewScan);
 
+    m_fileMenuWrapper.cancelScan.setText("Cancel Scan");
+    m_fileMenuWrapper.cancelScan.setStatusTip("Cancel active scan.");
+    m_fileMenuWrapper.cancelScan.setEnabled(false);
+
+    connect(&m_fileMenuWrapper.cancelScan, &QAction::triggered, this, &MainWindow::OnCancelScan);
+
     m_fileMenuWrapper.exit.setText("Exit");
     m_fileMenuWrapper.exit.setStatusTip("Exit the program.");
     m_fileMenuWrapper.exit.setShortcuts(QKeySequence::Quit);
@@ -284,6 +290,7 @@ void MainWindow::SetupFileMenu()
 
     m_fileMenu.setTitle("File");
     m_fileMenu.addAction(&m_fileMenuWrapper.newScan);
+    m_fileMenu.addAction(&m_fileMenuWrapper.cancelScan);
     m_fileMenu.addAction(&m_fileMenuWrapper.exit);
 
     menuBar()->addMenu(&m_fileMenu);
@@ -791,6 +798,11 @@ void MainWindow::OnOpenLogFile()
     OS::OpenFile(Logging::GetDefaultLogPath());
 }
 
+void MainWindow::OnCancelScan()
+{
+    m_controller.StopScanning();
+}
+
 bool MainWindow::ShouldShowFrameTime() const
 {
     return m_optionsMenuWrapper.toggleFrameTime.isChecked();
@@ -821,6 +833,7 @@ Gamepad& MainWindow::GetGamepad()
 void MainWindow::OnScanStarted()
 {
     m_ui.showBreakdownButton->setEnabled(false);
+    m_fileMenuWrapper.cancelScan.setEnabled(true);
 }
 
 void MainWindow::OnScanCompleted()
@@ -828,6 +841,7 @@ void MainWindow::OnScanCompleted()
     ReloadVisualization();
 
     m_ui.showBreakdownButton->setEnabled(true);
+    m_fileMenuWrapper.cancelScan.setEnabled(false);
     m_optionsMenuWrapper.enableFileSystemMonitoring.setEnabled(true);
 }
 

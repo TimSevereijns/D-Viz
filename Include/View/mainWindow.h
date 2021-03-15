@@ -251,6 +251,8 @@ class MainWindow final : public QMainWindow, public BaseView
 
     void OnOpenLogFile();
 
+    void OnCancelScan();
+
     void OnClose();
 
   private:
@@ -306,6 +308,7 @@ class MainWindow final : public QMainWindow, public BaseView
     struct FileMenu
     {
         QAction newScan{ nullptr };
+        QAction cancelScan{ nullptr };
         QAction exit{ nullptr };
     } m_fileMenuWrapper;
 
