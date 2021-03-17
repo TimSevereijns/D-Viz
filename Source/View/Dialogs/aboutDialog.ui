@@ -73,7 +73,7 @@
     <item>
      <widget class="QLabel" name="copyright">
       <property name="text">
-       <string>Copyright 2020, Tim Severeijns.</string>
+       <string>Copyright 2021, Tim Severeijns.</string>
       </property>
      </widget>
     </item>
