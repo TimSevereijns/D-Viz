@@ -25,19 +25,16 @@ namespace
      */
     std::vector<Light> GetDefaultLights()
     {
-        constexpr auto rootWidth = Constants::Visualization::RootBlockWidth;
-        constexpr auto rootDepth = Constants::Visualization::RootBlockDepth;
+        constexpr auto rootWidth = Constants::Treemap::RootBlockWidth;
+        constexpr auto rootDepth = Constants::Treemap::RootBlockDepth;
 
         auto primaryLight =
             Light{ QVector3D{ 0, 400, 0 }, QVector3D{ 1.0f, 1.0f, 1.0f }, 0.75f, 0.01f };
 
-        std::vector<Light> lights = { std::move(primaryLight),
-                                      Light{ QVector3D{ -200.0f, 250.0f, 200.0f } },
-                                      Light{ QVector3D{ 0.0f, 80.0f, -rootDepth } },
-                                      Light{ QVector3D{ rootWidth, 80.0f, 0.0f } },
-                                      Light{ QVector3D{ rootWidth, 80.0f, -rootDepth } } };
-
-        return lights;
+        return { std::move(primaryLight), Light{ QVector3D{ -200.0f, 250.0f, 200.0f } },
+                 Light{ QVector3D{ 0.0f, 80.0f, -rootDepth } },
+                 Light{ QVector3D{ rootWidth, 80.0f, 0.0f } },
+                 Light{ QVector3D{ rootWidth, 80.0f, -rootDepth } } };
     }
 
     /**

@@ -107,7 +107,7 @@ namespace Constants
         [[maybe_unused]] inline constexpr auto& UseDarkMode = L"useDarkMode";
     } // namespace Preferences
 
-    namespace Visualization
+    namespace Treemap
     {
         [[maybe_unused]] inline constexpr auto PaddingRatio = 0.9;
         [[maybe_unused]] inline constexpr auto MaxPadding = 0.75;
@@ -115,7 +115,7 @@ namespace Constants
         [[maybe_unused]] inline constexpr auto BlockHeight = 2.0;
         [[maybe_unused]] inline constexpr auto RootBlockWidth = 1000.0;
         [[maybe_unused]] inline constexpr auto RootBlockDepth = 1000.0;
-    } // namespace Visualization
+    } // namespace Treemap
 
     const QVersionNumber Version{ 0, 3, 0 };
 } // namespace Constants

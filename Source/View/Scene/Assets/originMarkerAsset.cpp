@@ -11,7 +11,7 @@ namespace
      */
     auto CreateMarkerVertices()
     {
-        const float axisLength = Constants::Visualization::RootBlockWidth;
+        const float axisLength = Constants::Treemap::RootBlockWidth;
 
         QVector<QVector3D> vertices;
         vertices.reserve(6);

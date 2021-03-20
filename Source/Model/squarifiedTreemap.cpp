@@ -48,32 +48,35 @@ namespace
     {
         using namespace Constants;
 
-        const auto blockWidthPlusPadding = land.GetWidth() * percentageOfParent;
-        const auto ratioBasedPadding = ((land.GetWidth() * 0.1) / nodeCount) / 2.0;
+        const auto availableDepth = land.GetDepth();
+        const auto availableWidth = land.GetWidth();
 
-        auto widthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MaxPadding);
-        const auto finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPaddingPerSide);
+        const auto blockWidthPlusPadding = availableWidth * percentageOfParent;
+        const auto ratioBasedPadding = ((availableWidth * 0.1) / nodeCount) / 2.0;
+
+        const auto widthPadding = std::min(ratioBasedPadding, Treemap::MaxPadding);
+        const auto finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPadding);
 
         if (finalBlockWidth < 0.0) {
             assert(false);
         }
 
-        const auto ratioBasedBlockDepth = std::abs(land.GetDepth() * Visualization::PaddingRatio);
-        const auto depthPaddingPerSide =
-            std::min((land.GetDepth() - ratioBasedBlockDepth) / 2.0, Visualization::MaxPadding);
+        const auto blockDepth = std::abs(availableDepth * Treemap::PaddingRatio);
+        const auto depthPadding =
+            std::min((availableDepth - blockDepth) / 2.0, Treemap::MaxPadding);
 
-        const auto finalBlockDepth =
-            (depthPaddingPerSide == Visualization::MaxPadding)
-                ? std::abs(land.GetDepth()) - (2.0 * Visualization::MaxPadding)
-                : ratioBasedBlockDepth;
+        const auto finalBlockDepth = depthPadding == Treemap::MaxPadding
+                                         ? std::abs(availableDepth) - (2.0 * Treemap::MaxPadding)
+                                         : blockDepth;
 
-        const PrecisePoint offset{ (land.GetWidth() * land.GetCoverage()) + widthPaddingPerSide,
-                                   0.0, -depthPaddingPerSide };
+        const auto x = (availableWidth * land.GetCoverage()) + widthPadding;
+        const auto y = 0.0;
+        const auto z = -depthPadding;
 
-        node.block = Block{ land.GetOrigin() + offset, finalBlockWidth, Visualization::BlockHeight,
-                            finalBlockDepth };
+        const PrecisePoint blockOrigin = land.GetOrigin() + PrecisePoint{ x, y, z };
+        node.block = Block{ blockOrigin, finalBlockWidth, Treemap::BlockHeight, finalBlockDepth };
 
-        const auto additionalCoverage = blockWidthPlusPadding / land.GetWidth();
+        const auto additionalCoverage = blockWidthPlusPadding / availableWidth;
         Expects(additionalCoverage > 0.0);
 
         return additionalCoverage;
@@ -95,31 +98,35 @@ namespace
     {
         using namespace Constants;
 
-        const auto blockDepthPlusPadding = std::abs(land.GetDepth() * percentageOfParent);
-        const auto ratioBasedPadding = (land.GetDepth() * 0.1) / nodeCount / 2.0;
+        const auto availableDepth = land.GetDepth();
+        const auto availableWidth = land.GetWidth();
 
-        auto depthPaddingPerSide = std::min(ratioBasedPadding, Visualization::MaxPadding);
-        const auto finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPaddingPerSide);
+        const auto blockDepthPlusPadding = std::abs(availableDepth * percentageOfParent);
+        const auto ratioBasedPadding = (availableDepth * 0.1) / nodeCount / 2.0;
+
+        const auto depthPadding = std::min(ratioBasedPadding, Treemap::MaxPadding);
+        const auto finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPadding);
 
         if (finalBlockDepth < 0) {
             assert(false);
         }
 
-        const auto ratioBasedWidth = land.GetWidth() * Visualization::PaddingRatio;
-        const auto widthPaddingPerSide =
-            std::min((land.GetWidth() - ratioBasedWidth) / 2.0, Visualization::MaxPadding);
+        const auto blockWidth = availableWidth * Treemap::PaddingRatio;
+        const auto widthPadding =
+            std::min((availableWidth - blockWidth) / 2.0, Treemap::MaxPadding);
 
-        const auto finalBlockWidth = (widthPaddingPerSide == Visualization::MaxPadding)
-                                         ? land.GetWidth() - (2.0 * Visualization::MaxPadding)
-                                         : ratioBasedWidth;
+        const auto finalBlockWidth = widthPadding == Treemap::MaxPadding
+                                         ? availableWidth - (2.0 * Treemap::MaxPadding)
+                                         : blockWidth;
 
-        const PrecisePoint offset{ widthPaddingPerSide, 0.0,
-                                   -(land.GetDepth() * land.GetCoverage()) - depthPaddingPerSide };
+        const auto x = widthPadding;
+        const auto y = 0.0;
+        const auto z = -(availableDepth * land.GetCoverage()) - depthPadding;
 
-        node.block = Block{ land.GetOrigin() + offset, finalBlockWidth, Visualization::BlockHeight,
-                            std::abs(finalBlockDepth) };
+        const PrecisePoint blockOrigin = land.GetOrigin() + PrecisePoint{ x, y, z };
+        node.block = Block{ blockOrigin, finalBlockWidth, Treemap::BlockHeight, finalBlockDepth };
 
-        const auto additionalCoverage = blockDepthPlusPadding / land.GetDepth();
+        const auto additionalCoverage = blockDepthPlusPadding / availableDepth;
         Expects(additionalCoverage > 0.0);
 
         return additionalCoverage;
@@ -132,13 +139,12 @@ Block SquarifiedTreeMap::ComputeRemainingArea(const Block& block)
     const auto& originOfNextChild = block.ComputeNextChildOrigin();
 
     const PrecisePoint nearCorner{ originOfNextRow.x(), originOfNextRow.y(), originOfNextRow.z() };
-
     const PrecisePoint farCorner{ originOfNextChild.x() + block.GetWidth(), originOfNextChild.y(),
                                   originOfNextChild.z() - block.GetDepth() };
 
     const Block remainingArea{ /* origin = */ nearCorner,
                                /* width = */ farCorner.x() - nearCorner.x(),
-                               /* height = */ Constants::Visualization::BlockHeight,
+                               /* height = */ Constants::Treemap::BlockHeight,
                                /* depth = */ farCorner.z() - nearCorner.z() };
 
     Expects(remainingArea.HasVolume());
@@ -176,13 +182,12 @@ double SquarifiedTreeMap::ComputeWorstAspectRatio(
 
     Expects(largestNodeInBytes > 0);
 
-    const auto updateOffset = false;
+    constexpr auto updateOffset = false;
     const auto bytesInRow = ComputeBytesInRow(row, candidateSize);
     const auto rowBounds = CalculateRowBounds(bytesInRow, parentNode, updateOffset);
     const auto totalRowArea = std::abs(rowBounds.GetWidth() * rowBounds.GetDepth());
 
-    const auto largestArea =
-        (static_cast<double>(largestNodeInBytes) / static_cast<double>(bytesInRow)) * totalRowArea;
+    const auto largestArea = largestNodeInBytes / static_cast<double>(bytesInRow) * totalRowArea;
 
     // Find the smallest surface area if the row and candidate were laid out:
 
@@ -198,8 +203,7 @@ double SquarifiedTreeMap::ComputeWorstAspectRatio(
     Expects(smallestNodeInBytes > 0);
     Expects(totalRowArea > 0);
 
-    const double smallestArea =
-        (static_cast<double>(smallestNodeInBytes) / static_cast<double>(bytesInRow)) * totalRowArea;
+    const auto smallestArea = smallestNodeInBytes / static_cast<double>(bytesInRow) * totalRowArea;
 
     // Now compute the worst aspect ratio between the two choices above:
 
@@ -207,8 +211,7 @@ double SquarifiedTreeMap::ComputeWorstAspectRatio(
     const auto areaSquared = totalRowArea * totalRowArea;
 
     const auto worstRatio = std::max(
-        (lengthSquared * largestArea) / (areaSquared),
-        (areaSquared) / (lengthSquared * smallestArea));
+        (lengthSquared * largestArea) / areaSquared, areaSquared / (lengthSquared * smallestArea));
 
     Expects(worstRatio > 0);
     return worstRatio;
@@ -292,14 +295,14 @@ Block SquarifiedTreeMap::CalculateRowBounds(
     const Block& parentBlock = parentNode.block;
     Expects(parentBlock.HasVolume());
 
-    Block remainingLand = ComputeRemainingArea(parentBlock);
+    const Block remainingLand = ComputeRemainingArea(parentBlock);
 
     const double parentArea = parentBlock.GetWidth() * parentBlock.GetDepth();
     const double remainingArea = std::abs(remainingLand.GetWidth() * remainingLand.GetDepth());
     const double remainingBytes = (remainingArea / parentArea) * parentNode.file.size;
     const double rowToParentRatio = bytesInRow / remainingBytes;
 
-    const auto& originOfNextRow = parentBlock.GetNextRowOrigin();
+    const PrecisePoint& originOfNextRow = parentBlock.GetNextRowOrigin();
     const PrecisePoint nearCorner{ originOfNextRow.x(), originOfNextRow.y(), originOfNextRow.z() };
 
     Block rowRealEstate;
@@ -355,7 +358,7 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
             static_cast<double>(nodeFileSize) / static_cast<double>(bytesInRow);
 
         const auto additionalCoverage =
-            (land.GetWidth() > std::abs(land.GetDepth()))
+            land.GetWidth() > std::abs(land.GetDepth())
                 ? SlicePerpendicularToWidth(land, percentageOfParent, data, nodeCount)
                 : SlicePerpendicularToDepth(land, percentageOfParent, data, nodeCount);
 
@@ -384,22 +387,22 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
     const auto sortingStopwatch =
         Stopwatch<std::chrono::milliseconds>([&]() { BaseModel::SortNodes(*m_fileTree); });
 
-    spdlog::get(Constants::Logging::DefaultLog)
-        ->info(fmt::format(
-            "Sorted tree in: {:n} {}", sortingStopwatch.GetElapsedTime().count(),
-            sortingStopwatch.GetUnitsAsString()));
+    const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+
+    log->info(fmt::format(
+        "Sorted tree in: {:n} {}", sortingStopwatch.GetElapsedTime().count(),
+        sortingStopwatch.GetUnitsAsString()));
 
     m_fileTree->GetRoot()->GetData().block =
-        Block{ PrecisePoint{}, Constants::Visualization::RootBlockWidth,
-               Constants::Visualization::BlockHeight, Constants::Visualization::RootBlockDepth };
+        Block{ PrecisePoint{}, Constants::Treemap::RootBlockWidth, Constants::Treemap::BlockHeight,
+               Constants::Treemap::RootBlockDepth };
 
     const auto squarificationStopwatch = Stopwatch<std::chrono::milliseconds>(
         [&]() { SquarifyRecursively(*m_fileTree->GetRoot()); });
 
-    spdlog::get(Constants::Logging::DefaultLog)
-        ->info(fmt::format(
-            "Visualization Generated in: {:n} {}", squarificationStopwatch.GetElapsedTime().count(),
-            squarificationStopwatch.GetUnitsAsString()));
+    log->info(fmt::format(
+        "Visualization Generated in: {:n} {}", squarificationStopwatch.GetElapsedTime().count(),
+        squarificationStopwatch.GetUnitsAsString()));
 
     m_hasDataBeenParsed = true;
 }
