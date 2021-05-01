@@ -132,7 +132,7 @@ class MainWindow final : public QMainWindow, public BaseView
      * @param[in] message         The message to display.
      * @param[in] timeout         Duration of the message in milliseconds.
      */
-    void SetStatusBarMessage(const std::wstring& message, int timeout = 0) override;
+    void SetStatusBarMessage(const std::string& message, int timeout = 0) override;
 
     /**
      * @brief ReloadVisualization
@@ -147,7 +147,7 @@ class MainWindow final : public QMainWindow, public BaseView
     /**
      * @returns The current search query.
      */
-    std::wstring GetSearchQuery() const override;
+    std::string GetSearchQuery() const override;
 
     /**
      * @returns A reference to the model controller for the treemap visualization.
@@ -293,7 +293,7 @@ class MainWindow final : public QMainWindow, public BaseView
     std::unique_ptr<AboutDialog> m_aboutDialog{ nullptr };
     std::unique_ptr<BreakdownDialog> m_breakdownDialog{ nullptr };
 
-    std::wstring m_searchQuery;
+    std::string m_searchQuery;
 
     const std::vector<std::pair<std::uintmax_t, QString>>* m_fileSizeOptions{ nullptr };
 

@@ -11,7 +11,7 @@ namespace
 {
     std::filesystem::path PathToNode(const Tree<VizBlock>::Node& node)
     {
-        std::vector<std::reference_wrapper<const std::wstring>> reversePath;
+        std::vector<std::reference_wrapper<const std::string>> reversePath;
         reversePath.reserve(Tree<VizBlock>::Depth(node));
         reversePath.emplace_back(node->file.name);
 
@@ -22,9 +22,9 @@ namespace
         }
 
         const auto pathFromRoot = std::accumulate(
-            std::rbegin(reversePath), std::rend(reversePath), std::wstring{},
-            [](const std::wstring& path, const std::wstring& file) {
-                constexpr auto slash = L'/';
+            std::rbegin(reversePath), std::rend(reversePath), std::string{},
+            [](const std::string& path, const std::string& file) {
+                constexpr auto slash = '/';
 
                 if (!path.empty() && path.back() != slash) {
                     return path + slash + file;
@@ -40,7 +40,7 @@ namespace
     }
 
     std::vector<FileEvent> SelectAllFiles(
-        const typename Tree<VizBlock>::Node& rootNode, const std::wstring_view& fileExtension,
+        const typename Tree<VizBlock>::Node& rootNode, const std::string_view& fileExtension,
         FileEventType eventType)
     {
         std::vector<FileEvent> allEvents;
@@ -54,7 +54,7 @@ namespace
 
                 const auto path = PathToNode(node);
                 allEvents.emplace_back(
-                    FileEvent{ path.wstring() + node->file.extension, eventType });
+                    FileEvent{ path.string() + node->file.extension, eventType });
             });
 
         return allEvents;
@@ -150,7 +150,7 @@ void ModelTests::GetRootPath()
     const auto testDirectory = std::filesystem::absolute("../../Tests/Sandbox/asio");
     const auto expectedPath = TestUtilities::SanitizePath(testDirectory);
 
-    QCOMPARE(expectedPath.wstring(), path);
+    QCOMPARE(expectedPath.string(), path);
 }
 
 void ModelTests::GenerateReferenceBlock()
@@ -191,7 +191,7 @@ void ModelTests::HighlightDescendants()
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
     auto visualizationParameters = Settings::VisualizationParameters{};
-    visualizationParameters.rootDirectory = L"";
+    visualizationParameters.rootDirectory = "";
     visualizationParameters.minimumFileSize = 0u;
     visualizationParameters.onlyShowDirectories = false;
 
@@ -214,7 +214,7 @@ void ModelTests::HighlightAncestors()
     const auto target = std::find_if(
         Tree<VizBlock>::LeafIterator{ m_tree->GetRoot() }, Tree<VizBlock>::LeafIterator{},
         [](const auto& node) {
-            return (node->file.name + node->file.extension) == L"endpoint.ipp";
+            return (node->file.name + node->file.extension) == "endpoint.ipp";
         });
 
     QVERIFY(target != Tree<VizBlock>::SiblingIterator{});
@@ -231,7 +231,7 @@ void ModelTests::HighlightAllMatchingFileNames()
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
     auto visualizationParameters = Settings::VisualizationParameters{};
-    visualizationParameters.rootDirectory = L"";
+    visualizationParameters.rootDirectory = "";
     visualizationParameters.minimumFileSize = 0u;
     visualizationParameters.onlyShowDirectories = false;
 
@@ -239,11 +239,11 @@ void ModelTests::HighlightAllMatchingFileNames()
     constexpr auto shouldSearchDirectories{ false };
 
     m_model->HighlightMatchingFileNames(
-        L"socket", visualizationParameters, shouldSearchFiles, shouldSearchDirectories);
+        "socket", visualizationParameters, shouldSearchFiles, shouldSearchDirectories);
 
     const auto headerCount = std::count_if(
         Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() }, Tree<VizBlock>::PostOrderIterator{},
-        [](const auto& node) { return node->file.name.find(L"socket") != std::wstring::npos; });
+        [](const auto& node) { return node->file.name.find("socket") != std::string::npos; });
 
     QCOMPARE(
         static_cast<std::int32_t>(m_model->GetHighlightedNodes().size()),
@@ -255,15 +255,15 @@ void ModelTests::HighlightMatchingFileExtensions()
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
     auto visualizationParameters = Settings::VisualizationParameters{};
-    visualizationParameters.rootDirectory = L"";
+    visualizationParameters.rootDirectory = "";
     visualizationParameters.minimumFileSize = 0u;
     visualizationParameters.onlyShowDirectories = false;
 
-    m_model->HighlightMatchingFileExtensions(L".hpp", visualizationParameters);
+    m_model->HighlightMatchingFileExtensions(".hpp", visualizationParameters);
 
     const auto headerCount = std::count_if(
         Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() }, Tree<VizBlock>::PostOrderIterator{},
-        [](const auto& node) { return node->file.extension == L".hpp"; });
+        [](const auto& node) { return node->file.extension == ".hpp"; });
 
     QCOMPARE(
         static_cast<std::int32_t>(m_model->GetHighlightedNodes().size()),
@@ -275,11 +275,11 @@ void ModelTests::ClearHighlightedNodes()
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
     auto visualizationParameters = Settings::VisualizationParameters{};
-    visualizationParameters.rootDirectory = L"";
+    visualizationParameters.rootDirectory = "";
     visualizationParameters.minimumFileSize = 0u;
     visualizationParameters.onlyShowDirectories = false;
 
-    m_model->HighlightMatchingFileExtensions(L".hpp", visualizationParameters);
+    m_model->HighlightMatchingFileExtensions(".hpp", visualizationParameters);
     QCOMPARE(false, m_model->GetHighlightedNodes().empty());
 
     m_model->ClearHighlightedNodes();
@@ -322,7 +322,7 @@ void ModelTests::ComputeBoundingBoxes()
 
 void ModelTests::CopyPathToClipboard()
 {
-    const std::wstring targetName = L"socket_ops.ipp";
+    const std::string targetName = "socket_ops.ipp";
 
     const auto targetNode = std::find_if(
         Tree<VizBlock>::LeafIterator{ m_tree->GetRoot() }, Tree<VizBlock>::LeafIterator{},
@@ -339,7 +339,7 @@ void ModelTests::CopyPathToClipboard()
 
 void ModelTests::FindNearestNodeFromFront()
 {
-    const std::wstring targetName = L"socket_ops.ipp";
+    const std::string targetName = "socket_ops.ipp";
 
     const auto targetNode = std::find_if(
         Tree<VizBlock>::LeafIterator{ m_tree->GetRoot() }, Tree<VizBlock>::LeafIterator{},
@@ -370,7 +370,7 @@ void ModelTests::FindNearestNodeFromFront()
 
 void ModelTests::FindNearestNodeFromBack()
 {
-    const std::wstring targetName = L"socket_ops.ipp";
+    const std::string targetName = "socket_ops.ipp";
 
     const auto targetNode = std::find_if(
         Tree<VizBlock>::LeafIterator{ m_tree->GetRoot() }, Tree<VizBlock>::LeafIterator{},
@@ -401,7 +401,7 @@ void ModelTests::FindNearestNodeFromBack()
 
 void ModelTests::FindNearestNodeWithSizeLimitations()
 {
-    const std::wstring targetName = L"socket_ops.ipp";
+    const std::string targetName = "socket_ops.ipp";
 
     const auto targetNode = std::find_if(
         Tree<VizBlock>::LeafIterator{ m_tree->GetRoot() }, Tree<VizBlock>::LeafIterator{},
@@ -482,7 +482,7 @@ void ModelTests::TrackMultipleDeletions()
 {
     QVERIFY(m_tree != nullptr);
 
-    m_sampleNotifications = SelectAllFiles(*m_tree->GetRoot(), L".ipp", FileEventType::Deleted);
+    m_sampleNotifications = SelectAllFiles(*m_tree->GetRoot(), ".ipp", FileEventType::Deleted);
 
     m_model->StartMonitoringFileSystem();
 
@@ -498,7 +498,7 @@ void ModelTests::TrackMultipleDeletions()
             ++processedNotifications;
 
             QCOMPARE(notification->eventType, FileEventType::Deleted);
-            QCOMPARE(notification->path.extension(), L".ipp");
+            QCOMPARE(notification->path.extension(), ".ipp");
         }
 
         const auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -525,7 +525,7 @@ void ModelTests::ApplyFileDeletion()
     const auto foundTargetNode = std::any_of(
         Tree<VizBlock>::PostOrderIterator{ m_model->GetTree().GetRoot() },
         Tree<VizBlock>::PostOrderIterator{},
-        [&](const auto& node) { return node->file.name == L"basic_socket"; });
+        [&](const auto& node) { return node->file.name == "basic_socket"; });
 
     QVERIFY(foundTargetNode == true);
 
@@ -537,7 +537,7 @@ void ModelTests::ApplyFileDeletion()
     const auto wasTargetNodeRemoved = std::none_of(
         Tree<VizBlock>::PostOrderIterator{ m_model->GetTree().GetRoot() },
         Tree<VizBlock>::PostOrderIterator{},
-        [&](const auto& node) { return node->file.name == L"basic_socket"; });
+        [&](const auto& node) { return node->file.name == "basic_socket"; });
 
     QVERIFY(wasTargetNodeRemoved == true);
 }
@@ -552,7 +552,7 @@ void ModelTests::ApplyFileCreation()
     const auto nodeDoesNotExist = std::none_of(
         Tree<VizBlock>::PostOrderIterator{ m_model->GetTree().GetRoot() },
         Tree<VizBlock>::PostOrderIterator{},
-        [&](const auto& node) { return node->file.name == L"fake_file"; });
+        [&](const auto& node) { return node->file.name == "fake_file"; });
 
     QVERIFY(nodeDoesNotExist == true);
 
@@ -564,7 +564,7 @@ void ModelTests::ApplyFileCreation()
     const auto nodeWasAdded = std::any_of(
         Tree<VizBlock>::PostOrderIterator{ m_model->GetTree().GetRoot() },
         Tree<VizBlock>::PostOrderIterator{},
-        [&](const auto& node) { return node->file.name == L"fake_file"; });
+        [&](const auto& node) { return node->file.name == "fake_file"; });
 
     QVERIFY(nodeWasAdded == true);
 }

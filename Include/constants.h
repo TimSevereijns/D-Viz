@@ -60,7 +60,7 @@ namespace Constants
 
     namespace ColorScheme
     {
-        [[maybe_unused]] inline constexpr auto& Default = L"Default";
+        [[maybe_unused]] inline constexpr auto& Default = "Default";
     }
 
     namespace Graphics
@@ -94,17 +94,17 @@ namespace Constants
 
     namespace Preferences
     {
-        [[maybe_unused]] inline constexpr auto& ShowOrigin = L"showOrigin";
-        [[maybe_unused]] inline constexpr auto& ShowGrid = L"showGrid";
-        [[maybe_unused]] inline constexpr auto& ShowLightMarkers = L"showLights";
-        [[maybe_unused]] inline constexpr auto& ShowFrusta = L"showFrusta";
-        [[maybe_unused]] inline constexpr auto& ShowShadows = L"showShadows";
-        [[maybe_unused]] inline constexpr auto& ShowCascadeSplits = L"showCascadeSplits";
-        [[maybe_unused]] inline constexpr auto& ShadowMapCascadeCount = L"shadowMapCascadeCount";
-        [[maybe_unused]] inline constexpr auto& ShadowMapQuality = L"shadowMapQuality";
-        [[maybe_unused]] inline constexpr auto& ShowDebuggingMenu = L"showDebuggingMenu";
-        [[maybe_unused]] inline constexpr auto& MonitorFileSystem = L"monitorFileSystem";
-        [[maybe_unused]] inline constexpr auto& UseDarkMode = L"useDarkMode";
+        [[maybe_unused]] inline constexpr auto& ShowOrigin = "showOrigin";
+        [[maybe_unused]] inline constexpr auto& ShowGrid = "showGrid";
+        [[maybe_unused]] inline constexpr auto& ShowLightMarkers = "showLights";
+        [[maybe_unused]] inline constexpr auto& ShowFrusta = "showFrusta";
+        [[maybe_unused]] inline constexpr auto& ShowShadows = "showShadows";
+        [[maybe_unused]] inline constexpr auto& ShowCascadeSplits = "showCascadeSplits";
+        [[maybe_unused]] inline constexpr auto& ShadowMapCascadeCount = "shadowMapCascadeCount";
+        [[maybe_unused]] inline constexpr auto& ShadowMapQuality = "shadowMapQuality";
+        [[maybe_unused]] inline constexpr auto& ShowDebuggingMenu = "showDebuggingMenu";
+        [[maybe_unused]] inline constexpr auto& MonitorFileSystem = "monitorFileSystem";
+        [[maybe_unused]] inline constexpr auto& UseDarkMode = "useDarkMode";
     } // namespace Preferences
 
     namespace Treemap

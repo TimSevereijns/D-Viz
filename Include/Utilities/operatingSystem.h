@@ -78,7 +78,7 @@ namespace OS
     inline void CopyFileNameToClipboard(const std::filesystem::path& path)
     {
         const auto fileName =
-            QString::fromStdWString(path.filename().wstring() + path.extension().wstring());
+            QString::fromStdString(path.filename().string() + path.extension().string());
 
         QClipboard* clipboard = QApplication::clipboard();
         clipboard->setText(fileName);
@@ -86,7 +86,7 @@ namespace OS
 
     inline void CopyPathToClipboard(const std::filesystem::path& path)
     {
-        const auto fileName = QString::fromStdWString(path.wstring());
+        const auto fileName = QString::fromStdString(path.string());
 
         QClipboard* clipboard = QApplication::clipboard();
         clipboard->setText(fileName);

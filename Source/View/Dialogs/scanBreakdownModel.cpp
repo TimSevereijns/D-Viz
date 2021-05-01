@@ -42,12 +42,12 @@ QVariant ScanBreakdownModel::headerData(int section, Qt::Orientation orientation
 QString ScanBreakdownModel::FormatVisibleNodeSize(const RowModel& data) const
 {
     const auto [size, units] = Utilities::ToPrefixedSize(data.visibleSize, m_prefix);
-    return QString::fromStdWString(fmt::format(L"{:03.2f} {}", size, units));
+    return QString::fromStdString(fmt::format("{:03.2f} {}", size, units));
 }
 
 QString ScanBreakdownModel::FormatVisibleNodeCount(const RowModel& data) const
 {
-    return QString::fromStdWString(fmt::format(L"{:n}", data.visibleCount));
+    return QString::fromStdString(fmt::format("{:n}", data.visibleCount));
 }
 
 QVariant ScanBreakdownModel::data(const QModelIndex& index, int role) const
@@ -61,22 +61,22 @@ QVariant ScanBreakdownModel::data(const QModelIndex& index, int role) const
     if (role == Qt::DisplayRole) {
         switch (index.column()) {
             case 0:
-                return QString::fromStdWString(data.fileExtension);
+                return QString::fromStdString(data.fileExtension);
             case 1:
                 return FormatVisibleNodeSize(data);
             case 2:
-                return QString::fromStdWString(data.formattedTotalSize);
+                return QString::fromStdString(data.formattedTotalSize);
             case 3:
                 return FormatVisibleNodeCount(data);
             case 4:
-                return QString::fromStdWString(data.formattedTotalCount);
+                return QString::fromStdString(data.formattedTotalCount);
         }
     }
 
     if (role == Qt::UserRole) {
         switch (index.column()) {
             case 0:
-                return QString::fromStdWString(data.fileExtension);
+                return QString::fromStdString(data.fileExtension);
             case 1:
                 return static_cast<qulonglong>(data.visibleSize);
             case 2:
@@ -99,7 +99,7 @@ void ScanBreakdownModel::Insert(const Tree<VizBlock>::Node& node, bool isVisible
     }
 
     if (file.extension.empty()) {
-        auto& fileType = m_fileTypeMap[L"No Extension"];
+        auto& fileType = m_fileTypeMap["No Extension"];
         fileType.visibleSize += isVisible ? file.size : 0;
         fileType.visibleCount += isVisible ? 1 : 0;
         fileType.totalSize += file.size;

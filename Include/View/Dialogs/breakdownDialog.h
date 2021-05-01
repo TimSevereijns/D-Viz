@@ -99,7 +99,7 @@ class BreakdownDialog final : public QDialog
     std::unique_ptr<QtCharts::QAbstractAxis>
     SetupAxisY(const ExtensionDistribution& distribution, const QColor& color) const;
 
-    void GenerateGraph(const std::wstring& extension);
+    void GenerateGraph(const std::string& extension);
 
     MainWindow& m_mainWindow;
 

@@ -46,16 +46,16 @@ class ExtensionDistribution
 class DistributionGraphModel
 {
   public:
-    ExtensionDistribution& GetDistribution(const std::wstring& extension);
+    ExtensionDistribution& GetDistribution(const std::string& extension);
 
-    void AddDatapoint(const std::wstring& extension, std::uintmax_t fileSize);
+    void AddDatapoint(const std::string& extension, std::uintmax_t fileSize);
 
     void BuildModel();
 
     void ClearData();
 
   private:
-    std::unordered_map<std::wstring, ExtensionDistribution> m_map;
+    std::unordered_map<std::string, ExtensionDistribution> m_map;
 };
 
 #endif // DISTRIBUTIONGRAPHMODEL_H

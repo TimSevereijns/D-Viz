@@ -172,7 +172,7 @@ namespace Settings
          */
         static std::filesystem::path DefaultPreferencesFilePath()
         {
-            return std::filesystem::current_path().append(L"preferences.json");
+            return std::filesystem::current_path().append("preferences.json");
         }
 
       private:

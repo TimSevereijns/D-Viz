@@ -112,7 +112,7 @@ class BaseView
      * @param[in] message         The message to display.
      * @param[in] timeout         Duration of the message in milliseconds.
      */
-    virtual void SetStatusBarMessage(const std::wstring& message, int timeout = 0) = 0;
+    virtual void SetStatusBarMessage(const std::string& message, int timeout = 0) = 0;
 
     /**
      * @brief Reloads the visualization.
@@ -127,7 +127,7 @@ class BaseView
     /**
      * @returns The current search query.
      */
-    virtual std::wstring GetSearchQuery() const = 0;
+    virtual std::string GetSearchQuery() const = 0;
 
     /**
      * @returns A reference to the model controller for the treemap visualization.

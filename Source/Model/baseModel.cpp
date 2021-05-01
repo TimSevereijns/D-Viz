@@ -466,7 +466,7 @@ void BaseModel::HighlightDescendants(
 }
 
 void BaseModel::HighlightMatchingFileExtensions(
-    const std::wstring& extension, const Settings::VisualizationParameters& parameters)
+    const std::string& extension, const Settings::VisualizationParameters& parameters)
 {
     std::for_each(
         Tree<VizBlock>::LeafIterator{ GetTree().GetRoot() }, Tree<VizBlock>::LeafIterator{},
@@ -481,10 +481,10 @@ void BaseModel::HighlightMatchingFileExtensions(
 }
 
 void BaseModel::HighlightMatchingFileNames(
-    const std::wstring& searchQuery, const Settings::VisualizationParameters& parameters,
+    const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
     bool shouldSearchFiles, bool shouldSearchDirectories)
 {
-    std::wstring fileAndExtension;
+    std::string fileAndExtension;
     fileAndExtension.resize(260); ///< Resize to prevent reallocation with append operations.
 
     const auto lowercaseQuery = boost::algorithm::to_lower_copy(searchQuery);
@@ -636,8 +636,8 @@ void BaseModel::OnFileCreation(const FileEvent& event)
         return;
     }
 
-    auto fileInfo = FileInfo{ /* name = */ event.path.stem().wstring(),
-                              /* extension = */ event.path.extension().wstring(),
+    auto fileInfo = FileInfo{ /* name = */ event.path.stem().string(),
+                              /* extension = */ event.path.extension().string(),
                               /* size = */ event.fileSize,
                               /* type = */ FileType::Regular };
 

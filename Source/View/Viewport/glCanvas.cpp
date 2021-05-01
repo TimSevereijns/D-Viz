@@ -77,10 +77,10 @@ namespace
     QString GetHighlightExtensionLabel(const Tree<VizBlock>::Node& node)
     {
         const auto extension = node.GetData().file.extension.empty()
-                                   ? L"Extensionless"
-                                   : L"\"" + node.GetData().file.extension + L"\"";
+                                   ? "Extensionless"
+                                   : "\"" + node.GetData().file.extension + "\"";
 
-        return QString::fromStdWString(L"Highlight All " + extension + L" Files");
+        return QString::fromStdString("Highlight All " + extension + " Files");
     }
 
     /**
@@ -762,8 +762,8 @@ void GLCanvas::UpdateFrameTime(const std::chrono::milliseconds& elapsedTime)
     Expects(m_frameTimeDeque.empty() == false);
     const auto averageFrameTime = total / static_cast<int>(m_frameTimeDeque.size());
 
-    const auto label = L"D-Viz @ " + std::to_wstring(averageFrameTime) + L" ms / frame";
-    m_mainWindow.setWindowTitle(QString::fromStdWString(label));
+    const auto label = "D-Viz @ " + std::to_string(averageFrameTime) + " ms / frame";
+    m_mainWindow.setWindowTitle(QString::fromStdString(label));
 }
 
 void GLCanvas::PaintNode(

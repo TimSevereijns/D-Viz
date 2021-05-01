@@ -57,7 +57,7 @@ void BreakdownDialog::ReloadData()
     AdjustColumnWidthsToFitViewport();
 
     const auto extensionVariant = m_proxyModel.index(0, 0).data(Qt::UserRole);
-    const auto extension = extensionVariant.toString().toStdWString();
+    const auto extension = extensionVariant.toString().toStdString();
     GenerateGraph(extension);
 }
 
@@ -132,7 +132,7 @@ void BreakdownDialog::DisplayContextMenu(const QPoint& point)
         auto& controller = m_mainWindow.GetController();
 
         controller.ClearHighlightedNodes(unhighlightCallback);
-        controller.HighlightAllMatchingExtensions(extension.toStdWString(), highlightCallback);
+        controller.HighlightAllMatchingExtensions(extension.toStdString(), highlightCallback);
     });
 
     const QPoint globalPoint = m_ui.tableView->viewport()->mapToGlobal(point);
@@ -142,9 +142,9 @@ void BreakdownDialog::DisplayContextMenu(const QPoint& point)
 void BreakdownDialog::HandleDoubleClick(const QModelIndex& index)
 {
     const auto extensionVariant = m_proxyModel.index(index.row(), 0).data(Qt::UserRole);
-    const auto extension = extensionVariant.toString().toStdWString();
+    const auto extension = extensionVariant.toString().toStdString();
 
-    if (extension != L"No Extension") {
+    if (extension != "No Extension") {
         GenerateGraph(extension);
     }
 }
@@ -173,7 +173,7 @@ BreakdownDialog::SetupAxisX(const ExtensionDistribution& distribution, const QCo
     for (int index = 1; index < tickCount + 1; ++index) {
         const auto value = index / static_cast<double>(tickCount) * largestFile;
         const auto [size, units] = Utilities::ToPrefixedSize(value, prefix);
-        const auto label = QString::fromStdWString(fmt::format(L"{:.0f} {}", size, units));
+        const auto label = QString::fromStdString(fmt::format("{:.0f} {}", size, units));
 
         axisX->append(label, index * tickInterval);
     }
@@ -228,7 +228,7 @@ BreakdownDialog::SetupAxisY(const ExtensionDistribution& distribution, const QCo
     return SetupLinearAxisY(distribution, color);
 }
 
-void BreakdownDialog::GenerateGraph(const std::wstring& extension)
+void BreakdownDialog::GenerateGraph(const std::string& extension)
 {
     const auto& settings = m_mainWindow.GetController().GetPersistentSettings();
     const auto textColor = settings.ShouldUseDarkMode() ? Qt::white : Qt::black;

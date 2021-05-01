@@ -218,12 +218,12 @@ void MainWindow::SetupColorSchemeDropdown()
 {
     m_ui.colorSchemeComboBox->clear();
 
-    const auto& defaultScheme = QString::fromStdWString(Constants::ColorScheme::Default);
+    const auto& defaultScheme = QString::fromStdString(Constants::ColorScheme::Default);
     m_ui.colorSchemeComboBox->addItem(defaultScheme, defaultScheme);
 
     const auto& colorMap = m_controller.GetNodePainter().GetFileColorMap();
     for (const auto& extensionMap : colorMap) {
-        const auto& categoryName = QString::fromStdWString(extensionMap.first);
+        const auto& categoryName = QString::fromStdString(extensionMap.first);
         m_ui.colorSchemeComboBox->addItem(categoryName, categoryName);
     }
 }
@@ -527,7 +527,7 @@ void MainWindow::OnFileMenuNewScan()
     const auto fileSizeIndex = static_cast<std::size_t>(m_ui.minimumSizeComboBox->currentIndex());
 
     Settings::VisualizationParameters parameters;
-    parameters.rootDirectory = selectedDirectory.toStdWString();
+    parameters.rootDirectory = selectedDirectory.toStdString();
     parameters.onlyShowDirectories = m_showDirectoriesOnly;
     parameters.forceNewScan = true;
     parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
@@ -674,7 +674,7 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
 
 void MainWindow::OnNewSearchQuery()
 {
-    const auto searchQuery = m_ui.searchBox->text().toStdWString();
+    const auto searchQuery = m_ui.searchBox->text().toStdString();
 
     const auto deselectionCallback = [&](auto& nodes) {
         m_glCanvas->RestoreHighlightedNodes(nodes);
@@ -714,7 +714,7 @@ void MainWindow::PruneTree()
     const auto minimumSize = m_fileSizeOptions->at(pruneSizeIndex).first;
 
     Settings::VisualizationParameters parameters;
-    parameters.rootDirectory = m_controller.GetRootPath().wstring();
+    parameters.rootDirectory = m_controller.GetRootPath().string();
     parameters.onlyShowDirectories = m_showDirectoriesOnly;
     parameters.forceNewScan = false;
     parameters.minimumFileSize = minimumSize;
@@ -732,7 +732,7 @@ void MainWindow::PruneTree()
 
 void MainWindow::ApplyColorScheme()
 {
-    const auto colorScheme = m_ui.colorSchemeComboBox->currentText().toStdWString();
+    const auto colorScheme = m_ui.colorSchemeComboBox->currentText().toStdString();
     m_controller.GetNodePainter().SetColorScheme(colorScheme);
 
     m_glCanvas->ApplyColorScheme();
@@ -808,7 +808,7 @@ bool MainWindow::ShouldShowFrameTime() const
     return m_optionsMenuWrapper.toggleFrameTime.isChecked();
 }
 
-std::wstring MainWindow::GetSearchQuery() const
+std::string MainWindow::GetSearchQuery() const
 {
     return m_searchQuery;
 }
@@ -893,14 +893,14 @@ void MainWindow::SetFilePruningComboBoxValue(std::uintmax_t minimum)
     }
 }
 
-void MainWindow::SetStatusBarMessage(const std::wstring& message, int timeout /* = 0*/)
+void MainWindow::SetStatusBarMessage(const std::string& message, int timeout /* = 0*/)
 {
     auto* const statusBar = this->statusBar();
     if (!statusBar) {
         return;
     }
 
-    statusBar->showMessage(QString::fromStdWString(message), timeout);
+    statusBar->showMessage(QString::fromStdString(message), timeout);
 }
 
 void MainWindow::ReloadVisualization()

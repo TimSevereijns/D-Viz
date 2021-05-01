@@ -161,7 +161,7 @@ void Controller::StopScanning()
         m_scanner.StopProgressReporting();
         m_scanner.StopScanning();
 
-        m_view->SetStatusBarMessage(L"Successfully canceled scan.");
+        m_view->SetStatusBarMessage("Successfully canceled scan.");
     }
 }
 
@@ -221,7 +221,7 @@ void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
     if (doesPathRepresentEntireDrive) {
         const auto fraction = sizeInBytes / static_cast<double>(m_occupiedDiskSpace);
         const auto message = fmt::format(
-            L"Time Elapsed: {:02n}:{:02n}:{:02n}  |  Files Scanned: {:n}  |  {:03.2f}% Complete",
+            "Time Elapsed: {:02n}:{:02n}:{:02n}  |  Files Scanned: {:n}  |  {:03.2f}% Complete",
             hours, minutes, seconds, filesScanned, fraction * 100);
 
         m_view->SetStatusBarMessage(message);
@@ -230,8 +230,8 @@ void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
         const auto [size, units] = Utilities::ToPrefixedSize(sizeInBytes, prefix);
 
         const auto message = fmt::format(
-            L"Time Elapsed: {:02n}:{:02n}:{:02n}  |  Files Scanned: {:n}  |  {:03.2f} {} and "
-            L"counting...",
+            "Time Elapsed: {:02n}:{:02n}:{:02n}  |  Files Scanned: {:n}  |  {:03.2f} {} and "
+            "counting...",
             hours, minutes, seconds, filesScanned, size, units);
 
         m_view->SetStatusBarMessage(message);
@@ -302,9 +302,9 @@ void Controller::SelectNodeAndUpdateStatusBar(
     const auto [prefixedSize, units] = Utilities::ToPrefixedSize(fileSize, prefix);
     const auto isSmallFile = (units == Utilities::Detail::bytesLabel);
 
-    const auto path = Controller::NodeToFilePath(node).wstring();
-    const auto message = isSmallFile ? fmt::format(L"{}  |  {:.0f} {}", path, prefixedSize, units)
-                                     : fmt::format(L"{}  |  {:.2f} {}", path, prefixedSize, units);
+    const auto path = Controller::NodeToFilePath(node).string();
+    const auto message = isSmallFile ? fmt::format("{}  |  {:.0f} {}", path, prefixedSize, units)
+                                     : fmt::format("{}  |  {:.2f} {}", path, prefixedSize, units);
 
     m_view->SetStatusBarMessage(message);
 }
@@ -339,7 +339,7 @@ void Controller::PrintMetadataToStatusBar()
 {
     const auto metadata = m_model->GetTreemapMetadata();
     const auto message = fmt::format(
-        L"Scanned {:n} files and {:n} directories.", metadata.FileCount, metadata.DirectoryCount);
+        "Scanned {:n} files and {:n} directories.", metadata.FileCount, metadata.DirectoryCount);
 
     m_view->SetStatusBarMessage(message);
 }
@@ -357,15 +357,15 @@ void Controller::DisplayHighlightDetails()
     const auto [prefixedSize, units] = Utilities::ToPrefixedSize(totalBytes, prefix);
     const auto isSmallFile = (units == Utilities::Detail::bytesLabel);
 
-    const std::wstring nodes = highlightedNodes.size() == 1 ? L" node" : L" nodes";
+    const std::string nodes = highlightedNodes.size() == 1 ? " node" : " nodes";
 
     if (isSmallFile) {
         m_view->SetStatusBarMessage(fmt::format(
-            L"Highlighted {:n} " + nodes + L", presenting {:.0f} {}.", highlightedNodes.size(),
+            "Highlighted {:n} " + nodes + ", presenting {:.0f} {}.", highlightedNodes.size(),
             prefixedSize, units));
     } else {
         m_view->SetStatusBarMessage(fmt::format(
-            L"Highlighted {:n} " + nodes + L", presenting {:.2f} {}.", highlightedNodes.size(),
+            "Highlighted {:n} " + nodes + ", presenting {:.2f} {}.", highlightedNodes.size(),
             prefixedSize, units));
     }
 }
@@ -447,7 +447,7 @@ void Controller::HighlightDescendants(
 }
 
 void Controller::HighlightAllMatchingExtensions(
-    const std::wstring& extension,
+    const std::string& extension,
     const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& callback)
 {
     Expects(m_model);
@@ -459,7 +459,7 @@ void Controller::HighlightAllMatchingExtensions(
 }
 
 void Controller::SearchTreeMap(
-    const std::wstring& searchQuery,
+    const std::string& searchQuery,
     const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& deselectionCallback,
     const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& selectionCallback,
     bool shouldSearchFiles, bool shouldSearchDirectories)
@@ -489,7 +489,7 @@ void Controller::SearchTreeMap(
 
 std::filesystem::path Controller::NodeToFilePath(const Tree<VizBlock>::Node& node)
 {
-    std::vector<std::reference_wrapper<const std::wstring>> reversePath;
+    std::vector<std::reference_wrapper<const std::string>> reversePath;
     reversePath.reserve(Tree<VizBlock>::Depth(node));
     reversePath.emplace_back(node->file.name);
 
@@ -500,9 +500,9 @@ std::filesystem::path Controller::NodeToFilePath(const Tree<VizBlock>::Node& nod
     }
 
     const auto completePath = std::accumulate(
-        std::rbegin(reversePath), std::rend(reversePath), std::wstring{},
-        [](const std::wstring& path, const std::wstring& file) {
-            constexpr auto slash = L'/';
+        std::rbegin(reversePath), std::rend(reversePath), std::string{},
+        [](const std::string& path, const std::string& file) {
+            constexpr auto slash = '/';
 
             if (!path.empty() && path.back() != slash) {
                 return path + slash + file;

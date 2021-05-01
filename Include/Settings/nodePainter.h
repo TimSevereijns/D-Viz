@@ -18,7 +18,7 @@ class VizBlock;
 
 namespace Settings
 {
-    using ColorMap = std::unordered_map<std::wstring, std::unordered_map<std::wstring, QVector3D>>;
+    using ColorMap = std::unordered_map<std::string, std::unordered_map<std::string, QVector3D>>;
 
     class NodePainter : public QObject
     {
@@ -35,12 +35,12 @@ namespace Settings
         /**
          * @returns The currently active file extension coloring scheme.
          */
-        const std::wstring& GetActiveColorScheme() const;
+        const std::string& GetActiveColorScheme() const;
 
         /**
          * @brief Sets the current color scheme.
          */
-        void SetColorScheme(std::wstring_view scheme);
+        void SetColorScheme(std::string_view scheme);
 
         /**
          * @brief Determines the appropriate color for the file based on the user-configurable color
@@ -50,14 +50,14 @@ namespace Settings
          *
          * @returns The appropriate color found in the color map.
          */
-        std::optional<QVector3D> DetermineColorFromExtension(std::wstring_view extension) const;
+        std::optional<QVector3D> DetermineColorFromExtension(std::string_view extension) const;
 
         /**
          * @returns The full path to the JSON file that contains the color mapping.
          */
         static std::filesystem::path DefaultColoringFilePath()
         {
-            return std::filesystem::current_path().append(L"colors.json");
+            return std::filesystem::current_path().append("colors.json");
         }
 
       private:
@@ -67,7 +67,7 @@ namespace Settings
 
         JsonDocument m_fileColorMapDocument;
 
-        std::wstring m_colorScheme{ L"Default" };
+        std::string m_colorScheme{ "Default" };
 
         std::filesystem::path m_fileColorMapPath;
     };

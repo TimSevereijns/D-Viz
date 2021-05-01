@@ -12,7 +12,7 @@ namespace
 {
     template <typename DataType>
     auto GetValueOrDefault(
-        const Settings::JsonDocument& document, std::wstring_view preference, DataType defaultValue)
+        const Settings::JsonDocument& document, std::string_view preference, DataType defaultValue)
     {
         const auto itr = document.FindMember(preference.data());
 
@@ -30,13 +30,13 @@ namespace
     }
 
     template <typename DataType>
-    void SaveValue(Settings::JsonDocument& document, std::wstring_view preference, DataType value)
+    void SaveValue(Settings::JsonDocument& document, std::string_view preference, DataType value)
     {
         const auto itr = document.FindMember(preference.data());
 
         if (itr == document.MemberEnd()) {
             auto& allocator = document.GetAllocator();
-            rapidjson::GenericValue<rapidjson::UTF16<>> key{ preference.data(), allocator };
+            rapidjson::Value key{ preference.data(), allocator };
             document.AddMember(key.Move(), value, allocator);
 
             return;
@@ -67,7 +67,6 @@ namespace Settings
     bool PersistentSettings::ShouldRenderCascadeSplits() const
     {
         constexpr auto defaultValue = false;
-
         return GetValueOrDefault(
             m_preferencesDocument, Constants::Preferences::ShowCascadeSplits, defaultValue);
     }
@@ -80,7 +79,6 @@ namespace Settings
     bool PersistentSettings::ShouldRenderShadows() const
     {
         constexpr auto defaultValue = true;
-
         return GetValueOrDefault(
             m_preferencesDocument, Constants::Preferences::ShowShadows, defaultValue);
     }
@@ -93,7 +91,6 @@ namespace Settings
     bool PersistentSettings::ShouldMonitorFileSystem() const
     {
         constexpr auto defaultValue = false;
-
         return GetValueOrDefault(
             m_preferencesDocument, Constants::Preferences::MonitorFileSystem, defaultValue);
     }
@@ -106,7 +103,6 @@ namespace Settings
     bool PersistentSettings::ShouldRenderOrigin() const
     {
         constexpr auto defaultValue = true;
-
         return GetValueOrDefault(
             m_preferencesDocument, Constants::Preferences::ShowOrigin, defaultValue);
     }
@@ -119,7 +115,6 @@ namespace Settings
     bool PersistentSettings::ShouldRenderGrid() const
     {
         constexpr auto defaultValue = true;
-
         return GetValueOrDefault(
             m_preferencesDocument, Constants::Preferences::ShowGrid, defaultValue);
     }
@@ -132,7 +127,6 @@ namespace Settings
     bool PersistentSettings::ShouldRenderLightMarkers() const
     {
         constexpr auto defaultValue = false;
-
         return GetValueOrDefault(
             m_preferencesDocument, Constants::Preferences::ShowLightMarkers, defaultValue);
     }
@@ -145,7 +139,6 @@ namespace Settings
     bool PersistentSettings::ShouldRenderFrusta() const
     {
         constexpr auto defaultValue = false;
-
         return GetValueOrDefault(
             m_preferencesDocument, Constants::Preferences::ShowFrusta, defaultValue);
     }
@@ -158,7 +151,6 @@ namespace Settings
     int PersistentSettings::GetShadowMapCascadeCount() const
     {
         constexpr auto defaultValue = 4;
-
         const auto count = GetValueOrDefault(
             m_preferencesDocument, Constants::Preferences::ShadowMapCascadeCount, defaultValue);
 
@@ -175,7 +167,6 @@ namespace Settings
     int PersistentSettings::GetShadowMapQuality() const
     {
         constexpr auto defaultValue = 8;
-
         const auto quality = GetValueOrDefault(
             m_preferencesDocument, Constants::Preferences::ShadowMapQuality, defaultValue);
 
@@ -192,7 +183,6 @@ namespace Settings
     bool PersistentSettings::ShouldShowDebuggingMenu() const
     {
         constexpr auto defaultValue = false;
-
         return GetValueOrDefault(
             m_preferencesDocument, Constants::Preferences::ShowDebuggingMenu, defaultValue);
     }
@@ -205,7 +195,6 @@ namespace Settings
     bool PersistentSettings::ShouldUseDarkMode() const
     {
         constexpr auto defaultValue = false;
-
         return GetValueOrDefault(
             m_preferencesDocument, Constants::Preferences::UseDarkMode, defaultValue);
     }

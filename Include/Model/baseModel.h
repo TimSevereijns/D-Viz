@@ -159,7 +159,7 @@ class BaseModel
      * @param[in] parameters      Used to prune disqualified nodes. @see VisualizationParameters.
      */
     void HighlightMatchingFileExtensions(
-        const std::wstring& extension, const Settings::VisualizationParameters& parameters);
+        const std::string& extension, const Settings::VisualizationParameters& parameters);
 
     /**
      * @brief Highlights all nodes that match the search query, given the search parameters.
@@ -171,7 +171,7 @@ class BaseModel
      * @param[in] shouldSearchDirectories  Pass in true to search directories.
      */
     void HighlightMatchingFileNames(
-        const std::wstring& searchQuery, const Settings::VisualizationParameters& parameters,
+        const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
         bool shouldSearchFiles, bool shouldSearchDirectories);
 
     /**

@@ -65,14 +65,14 @@ void ControllerTests::ScanDrive() const
         .RETURN(true);
 
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_))
-        .WITH(_1.find(L"Files Scanned") != std::wstring::npos && _2 == 0)
+        .WITH(_1.find("Files Scanned") != std::string::npos && _2 == 0)
         .TIMES(AT_LEAST(1));
 
     FORBID_CALL(*m_view, DisplayErrorDialog(trompeloeil::_));
 
     Settings::VisualizationParameters parameters;
     parameters.forceNewScan = true;
-    parameters.rootDirectory = GetSampleDirectory().wstring();
+    parameters.rootDirectory = GetSampleDirectory().string();
     parameters.minimumFileSize = 0;
     parameters.onlyShowDirectories = false;
 
@@ -123,8 +123,8 @@ void ControllerTests::VerifyFilesOverLimitAreDisplayed() const
     parameters.onlyShowDirectories = false;
 
     VizBlock sample;
-    sample.file.name = L"Foo";
-    sample.file.extension = L".txt";
+    sample.file.name = "Foo";
+    sample.file.extension = ".txt";
     sample.file.size = 16_KiB;
     sample.file.type = FileType::Regular;
 
@@ -141,8 +141,8 @@ void ControllerTests::VerifyFilesUnderLimitAreNotDisplayed() const
     parameters.onlyShowDirectories = false;
 
     VizBlock sample;
-    sample.file.name = L"Foo";
-    sample.file.extension = L".txt";
+    sample.file.name = "Foo";
+    sample.file.extension = ".txt";
     sample.file.size = 16_KiB;
     sample.file.type = FileType::Regular;
 
@@ -159,8 +159,8 @@ void ControllerTests::VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed() con
     parameters.onlyShowDirectories = true;
 
     VizBlock sample;
-    sample.file.name = L"Bar";
-    sample.file.extension = L"";
+    sample.file.name = "Bar";
+    sample.file.extension = "";
     sample.file.size = 10_GiB;
     sample.file.type = FileType::Regular;
 
@@ -177,8 +177,8 @@ void ControllerTests::VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed() con
     parameters.onlyShowDirectories = true;
 
     VizBlock sample;
-    sample.file.name = L"Bar";
-    sample.file.extension = L"";
+    sample.file.name = "Bar";
+    sample.file.extension = "";
     sample.file.size = 10_MiB;
     sample.file.type = FileType::Directory;
 
@@ -195,8 +195,8 @@ void ControllerTests::VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed() cons
     parameters.onlyShowDirectories = true;
 
     VizBlock sample;
-    sample.file.name = L"Bar";
-    sample.file.extension = L"";
+    sample.file.name = "Bar";
+    sample.file.extension = "";
     sample.file.size = 1_MiB;
     sample.file.type = FileType::Directory;
 
@@ -207,7 +207,7 @@ void ControllerTests::SearchTreemapWithoutPriorSelection() const
 {
     QVERIFY(m_controller);
 
-    constexpr auto query = L".hpp";
+    constexpr auto query = ".hpp";
 
     const auto deselectionCallback = [](std::vector<const Tree<VizBlock>::Node*>& nodes) {
         QCOMPARE(nodes.empty(), true);
@@ -234,8 +234,8 @@ void ControllerTests::SearchTreemapWithPriorSelection() const
 {
     QVERIFY(m_controller);
 
-    constexpr auto query = L".hpp";
-    constexpr auto prior = L".ipp";
+    constexpr auto query = ".hpp";
+    constexpr auto prior = ".ipp";
 
     const auto deselectionCallback = [](std::vector<const Tree<VizBlock>::Node*>& nodes) {
         QCOMPARE(nodes.empty(), false);
@@ -317,7 +317,7 @@ void ControllerTests::SelectNodeViaRay() const
 {
     ScanDrive();
 
-    const std::wstring targetName = L"socket_ops.ipp";
+    const std::string targetName = "socket_ops.ipp";
 
     const auto* root = m_controller->GetTree().GetRoot();
 
@@ -341,8 +341,8 @@ void ControllerTests::SelectNodeViaRay() const
     const auto deselectionCallback = [](const Tree<VizBlock>::Node&) { QVERIFY(false); };
 
     const auto selectionCallback = [&](const Tree<VizBlock>::Node& node) {
-        QCOMPARE(node->file.name, L"socket_ops");
-        QCOMPARE(node->file.extension, L".ipp");
+        QCOMPARE(node->file.name, "socket_ops");
+        QCOMPARE(node->file.extension, ".ipp");
     };
 
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
@@ -354,7 +354,7 @@ void ControllerTests::DetermineDefaultLeafNodeColor() const
 {
     ScanDrive();
 
-    const std::wstring targetName = L"async_result.hpp";
+    const std::string targetName = "async_result.hpp";
 
     const auto* root = m_controller->GetTree().GetRoot();
 
@@ -370,7 +370,7 @@ void ControllerTests::DetermineDefaultColorOfHighlightedNode() const
 {
     SearchTreemapWithoutPriorSelection();
 
-    const std::wstring targetName = L"async_result.hpp";
+    const std::string targetName = "async_result.hpp";
 
     const auto* root = m_controller->GetTree().GetRoot();
 
@@ -386,7 +386,7 @@ void ControllerTests::DetermineCustomColorOfRegisteredNode() const
 {
     ScanDrive();
 
-    const std::wstring targetName = L"async_result.hpp";
+    const std::string targetName = "async_result.hpp";
 
     const auto* root = m_controller->GetTree().GetRoot();
 
@@ -404,7 +404,7 @@ void ControllerTests::DetermineCustomColorOfRegisteredNode() const
 void ControllerTests::PrintingMetadataToStatusBar() const
 {
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_))
-        .WITH(_1.find(L"Scanned 469 files and 21 directories.") != std::wstring::npos && _2 == 0)
+        .WITH(_1.find("Scanned 469 files and 21 directories.") != std::string::npos && _2 == 0)
         .TIMES(1);
 
     ScanDrive();

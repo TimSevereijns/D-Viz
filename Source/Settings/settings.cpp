@@ -21,7 +21,7 @@ namespace Settings
         rapidjson::IStreamWrapper streamWrapper{ fileStream };
 
         JsonDocument document;
-        document.ParseStream<rapidjson::kParseDefaultFlags, rapidjson::UTF8<char>>(streamWrapper);
+        document.ParseStream<rapidjson::kParseDefaultFlags>(streamWrapper);
 
         if (document.HasParseError()) {
             const auto* message = rapidjson::GetParseError_En(document.GetParseError());
@@ -37,9 +37,7 @@ namespace Settings
         std::ofstream fileStream{ path.string() };
         rapidjson::OStreamWrapper streamWrapper{ fileStream };
 
-        rapidjson::PrettyWriter<decltype(streamWrapper), rapidjson::UTF16<wchar_t>> writer{
-            streamWrapper
-        };
+        rapidjson::PrettyWriter<decltype(streamWrapper)> writer{ streamWrapper };
 
         const auto success = document.Accept(writer);
 

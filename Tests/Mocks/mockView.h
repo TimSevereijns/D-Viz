@@ -29,10 +29,10 @@ class MockView : public BaseView
     MAKE_MOCK0(GetWindowHandle, QWindow*(), override);
     MAKE_MOCK1(SetFieldOfViewSlider, void(int), override);
     MAKE_MOCK1(SetCameraSpeedSpinner, void(double), override);
-    MAKE_MOCK2(SetStatusBarMessage, void(const std::wstring&, int), override);
+    MAKE_MOCK2(SetStatusBarMessage, void(const std::string&, int), override);
     MAKE_MOCK0(ReloadVisualization, void(), override);
     MAKE_CONST_MOCK0(ShouldShowFrameTime, bool(), override);
-    MAKE_CONST_MOCK0(GetSearchQuery, std::wstring(), override);
+    MAKE_CONST_MOCK0(GetSearchQuery, std::string(), override);
     MAKE_MOCK0(GetController, Controller&(), override);
     MAKE_MOCK0(GetCanvas, GLCanvas&(), override);
     MAKE_MOCK0(GetGamepad, Gamepad&(), override);

@@ -16,7 +16,7 @@ namespace Utilities
 {
     namespace Detail
     {
-        constexpr const std::wstring_view bytesLabel = L" bytes";
+        constexpr const std::string_view bytesLabel = " bytes";
     }
 
     /**
@@ -39,7 +39,7 @@ namespace Utilities
             auto matchingNodeItr = std::find_if(
                 Tree<VizBlock>::SiblingIterator{ node->GetFirstChild() },
                 Tree<VizBlock>::SiblingIterator{}, [&](const auto& childNode) {
-                    const auto pathElement = filePathItr->wstring();
+                    const auto pathElement = filePathItr->string();
                     const auto fileName = childNode->file.name + childNode->file.extension;
 
                     return fileName == pathElement;
@@ -82,27 +82,27 @@ namespace Utilities
      *
      * @returns A pair containing the numeric file size, and the associated units.
      */
-    inline std::pair<double, std::wstring> ConvertToBinaryPrefix(double sizeInBytes)
+    inline std::pair<double, std::string> ConvertToBinaryPrefix(double sizeInBytes)
     {
         using namespace Literals::Numeric::Binary;
 
         if (sizeInBytes < 1_KiB) {
-            return std::make_pair(sizeInBytes, std::wstring{ Detail::bytesLabel });
+            return std::make_pair(sizeInBytes, std::string{ Detail::bytesLabel });
         }
 
         if (sizeInBytes < 1_MiB) {
-            return std::make_pair(sizeInBytes / 1_KiB, L" KiB");
+            return std::make_pair(sizeInBytes / 1_KiB, " KiB");
         }
 
         if (sizeInBytes < 1_GiB) {
-            return std::make_pair(sizeInBytes / 1_MiB, L" MiB");
+            return std::make_pair(sizeInBytes / 1_MiB, " MiB");
         }
 
         if (sizeInBytes < 1_TiB) {
-            return std::make_pair(sizeInBytes / 1_GiB, L" GiB");
+            return std::make_pair(sizeInBytes / 1_GiB, " GiB");
         }
 
-        return std::make_pair(sizeInBytes / 1_TiB, L" TiB");
+        return std::make_pair(sizeInBytes / 1_TiB, " TiB");
     }
 
     /**
@@ -112,27 +112,27 @@ namespace Utilities
      *
      * @returns A pair containing the numeric file size, and the associated units.
      */
-    inline std::pair<double, std::wstring> ConvertToDecimalPrefix(double sizeInBytes)
+    inline std::pair<double, std::string> ConvertToDecimalPrefix(double sizeInBytes)
     {
         using namespace Literals::Numeric::Decimal;
 
         if (sizeInBytes < 1_KB) {
-            return std::make_pair(sizeInBytes, std::wstring{ Detail::bytesLabel });
+            return std::make_pair(sizeInBytes, std::string{ Detail::bytesLabel });
         }
 
         if (sizeInBytes < 1_MB) {
-            return std::make_pair(sizeInBytes / 1_KB, L" KB");
+            return std::make_pair(sizeInBytes / 1_KB, " KB");
         }
 
         if (sizeInBytes < 1_GB) {
-            return std::make_pair(sizeInBytes / 1_MB, L" MB");
+            return std::make_pair(sizeInBytes / 1_MB, " MB");
         }
 
         if (sizeInBytes < 1_TB) {
-            return std::make_pair(sizeInBytes / 1_GB, L" GB");
+            return std::make_pair(sizeInBytes / 1_GB, " GB");
         }
 
-        return std::make_pair(sizeInBytes / 1_TB, L" TB");
+        return std::make_pair(sizeInBytes / 1_TB, " TB");
     }
 
     /**
@@ -144,7 +144,7 @@ namespace Utilities
      * @returns A std::pair encapsulating the converted file size, and corresponding unit readout
      * string.
      */
-    inline std::pair<double, std::wstring>
+    inline std::pair<double, std::string>
     ToPrefixedSize(std::uintmax_t sizeInBytes, Constants::SizePrefix prefix)
     {
         switch (prefix) {

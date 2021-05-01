@@ -19,25 +19,25 @@ void NodePainterTests::init()
 
     auto& allocator = document.GetAllocator();
 
-    rapidjson::GenericValue<rapidjson::UTF16<>> array{ rapidjson::kArrayType };
+    rapidjson::Value array{ rapidjson::kArrayType };
     array.PushBack(128, allocator);
     array.PushBack(128, allocator);
     array.PushBack(128, allocator);
 
-    rapidjson::GenericValue<rapidjson::UTF16<>> object{ rapidjson::kObjectType };
-    object.AddMember(L".jpg", array.Move(), allocator);
+    rapidjson::Value object{ rapidjson::kObjectType };
+    object.AddMember(".jpg", array.Move(), allocator);
 
-    document.AddMember(L"Default", object.Move(), allocator);
+    document.AddMember("Default", object.Move(), allocator);
 
-    Settings::SaveToDisk(document, std::filesystem::current_path() / L"colors.json");
+    Settings::SaveToDisk(document, std::filesystem::current_path() / "colors.json");
 }
 
 void NodePainterTests::DetermineColorsFromSettingsOnDisk() const
 {
     Settings::NodePainter painter;
-    painter.SetColorScheme(L"Default");
+    painter.SetColorScheme("Default");
 
-    const auto color = painter.DetermineColorFromExtension(L".jpg");
+    const auto color = painter.DetermineColorFromExtension(".jpg");
     QVERIFY(color.has_value());
 
     constexpr auto expectedColor = Detail::RGB(128, 128, 128);
@@ -47,20 +47,20 @@ void NodePainterTests::DetermineColorsFromSettingsOnDisk() const
 void NodePainterTests::GetBackEmptyOptionalOnEmptyMapping() const
 {
     Settings::NodePainter painter;
-    painter.SetColorScheme(L"Default");
+    painter.SetColorScheme("Default");
 
-    const auto validMapping = painter.DetermineColorFromExtension(L".foo");
+    const auto validMapping = painter.DetermineColorFromExtension(".foo");
     QCOMPARE(validMapping.has_value(), false);
 
-    painter.SetColorScheme(L"Nonexistent");
-    const auto absentMapping = painter.DetermineColorFromExtension(L".jpg");
+    painter.SetColorScheme("Nonexistent");
+    const auto absentMapping = painter.DetermineColorFromExtension(".jpg");
 
     QCOMPARE(absentMapping.has_value(), false);
 }
 
 void NodePainterTests::ModifyActiveColorScheme() const
 {
-    constexpr auto& scheme = L"Audio";
+    constexpr auto& scheme = "Audio";
 
     Settings::NodePainter painter;
     painter.SetColorScheme(scheme);
@@ -71,14 +71,14 @@ void NodePainterTests::ModifyActiveColorScheme() const
 
 void NodePainterTests::GenerateDefaultColorSchemeFile() const
 {
-    const auto path = std::filesystem::current_path() / L"colors.json";
+    const auto path = std::filesystem::current_path() / "colors.json";
     if (std::filesystem::exists(path)) {
         std::filesystem::remove(path);
     }
 
     Settings::NodePainter painter;
-    painter.SetColorScheme(L"Images");
-    const auto jpgMapping = painter.DetermineColorFromExtension(L".jpg");
+    painter.SetColorScheme("Images");
+    const auto jpgMapping = painter.DetermineColorFromExtension(".jpg");
     QCOMPARE(jpgMapping.has_value(), true);
 }
 

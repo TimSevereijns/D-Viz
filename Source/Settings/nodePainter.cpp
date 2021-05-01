@@ -32,7 +32,7 @@ namespace
                 continue;
             }
 
-            std::unordered_map<std::wstring, QVector3D> extensionMap;
+            std::unordered_map<std::string, QVector3D> extensionMap;
 
             for (const auto& extension : category.value.GetObject()) {
                 if (!extension.value.IsArray()) {
@@ -60,11 +60,10 @@ namespace
     void AddVideoColors(
         Settings::JsonDocument& document, Settings::JsonDocument::AllocatorType& allocator)
     {
-        using JsonValue = rapidjson::GenericValue<rapidjson::UTF16<>>;
-        constexpr std::array<std::wstring_view, 10> fileTypes = { L".mp4", L".avi", L".mkv",
-                                                                  L".mov", L".vob", L".gifv",
-                                                                  L".wmv", L".mpg", L".mpeg",
-                                                                  L".m4v" };
+        using JsonValue = rapidjson::Value;
+        constexpr std::array<std::string_view, 10> fileTypes = { ".mp4",  ".avi",  ".mkv", ".mov",
+                                                                 ".vob",  ".gifv", ".wmv", ".mpg",
+                                                                 ".mpeg", ".m4v" };
 
         constexpr auto color = Constants::Colors::SchemeHighlight;
 
@@ -80,18 +79,17 @@ namespace
                 allocator);
         }
 
-        document.AddMember(L"Videos", object.Move(), allocator);
+        document.AddMember("Videos", object.Move(), allocator);
     }
 
     void AddImageColors(
         Settings::JsonDocument& document, Settings::JsonDocument::AllocatorType& allocator)
     {
-        using JsonValue = rapidjson::GenericValue<rapidjson::UTF16<>>;
-        constexpr std::array<std::wstring_view, 28> fileTypes = {
-            L".jpg", L".jpeg", L".tiff", L".png", L".psd", L".gif", L".bmp",
-            L".svg", L".dng",  L".RAF",  L".crw", L".cr2", L".cr3", L".cap",
-            L".erf", L".fff",  L".gpr",  L".mef", L".mdc", L".mrw", L".nef",
-            L".nrw", L".orf",  L".orf",  L".pef", L".ptx", L".x3f", L".srw"
+        using JsonValue = rapidjson::Value;
+        constexpr std::array<std::string_view, 28> fileTypes = {
+            ".jpg", ".jpeg", ".tiff", ".png", ".psd", ".gif", ".bmp", ".svg", ".dng", ".RAF",
+            ".crw", ".cr2",  ".cr3",  ".cap", ".erf", ".fff", ".gpr", ".mef", ".mdc", ".mrw",
+            ".nef", ".nrw",  ".orf",  ".orf", ".pef", ".ptx", ".x3f", ".srw"
         };
 
         constexpr auto color = Constants::Colors::SchemeHighlight;
@@ -108,7 +106,7 @@ namespace
                 allocator);
         }
 
-        document.AddMember(L"Images", object.Move(), allocator);
+        document.AddMember("Images", object.Move(), allocator);
     }
 } // namespace
 
@@ -131,18 +129,18 @@ namespace Settings
         return m_colorMap;
     }
 
-    const std::wstring& NodePainter::GetActiveColorScheme() const
+    const std::string& NodePainter::GetActiveColorScheme() const
     {
         return m_colorScheme;
     }
 
-    void NodePainter::SetColorScheme(std::wstring_view scheme)
+    void NodePainter::SetColorScheme(std::string_view scheme)
     {
         m_colorScheme = scheme;
     }
 
     std::optional<QVector3D>
-    NodePainter::DetermineColorFromExtension(std::wstring_view extension) const
+    NodePainter::DetermineColorFromExtension(std::string_view extension) const
     {
         const auto categoryItr = m_colorMap.find(m_colorScheme);
         if (categoryItr == std::end(m_colorMap)) {

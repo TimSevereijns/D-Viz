@@ -1,11 +1,11 @@
 #include "View/Dialogs/distributionGraphModel.h"
 
-ExtensionDistribution& DistributionGraphModel::GetDistribution(const std::wstring& extension)
+ExtensionDistribution& DistributionGraphModel::GetDistribution(const std::string& extension)
 {
     return m_map[extension];
 }
 
-void DistributionGraphModel::AddDatapoint(const std::wstring& extension, std::uintmax_t fileSize)
+void DistributionGraphModel::AddDatapoint(const std::string& extension, std::uintmax_t fileSize)
 {
     m_map[extension].AddDatapoint(fileSize);
 }

@@ -11,7 +11,7 @@ class VizBlock;
 
 namespace Settings
 {
-    using JsonDocument = rapidjson::GenericDocument<rapidjson::UTF16<wchar_t>>;
+    using JsonDocument = rapidjson::Document;
 
     /**
      * @brief Helper function to parse a JSON file on disk.
@@ -48,7 +48,7 @@ namespace Settings
          */
         bool IsNodeVisible(const VizBlock& block) const noexcept;
 
-        std::wstring rootDirectory{ L"" }; ///< The path to the root directory
+        std::string rootDirectory; ///< The path to the root directory
 
         // The minimum size a file should be before it shows up.
         std::uint64_t minimumFileSize{ 0 };

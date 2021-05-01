@@ -60,8 +60,8 @@ namespace
             return nullptr;
         }
 
-        constexpr auto noExtension = L"";
-        FileInfo fileInfo{ path.wstring(), noExtension, ScanningWorker::UndefinedFileSize,
+        constexpr auto noExtension = "";
+        FileInfo fileInfo{ path.string(), noExtension, ScanningWorker::UndefinedFileSize,
                            FileType::Directory };
 
         return std::make_shared<Tree<VizBlock>>(VizBlock{ std::move(fileInfo) });
@@ -94,7 +94,6 @@ namespace
 
         return false;
     }
-
 } // namespace
 
 ScanningWorker::ScanningWorker(
@@ -127,7 +126,7 @@ void ScanningWorker::ProcessFile(
     m_progress.bytesProcessed.fetch_add(fileSize);
     m_progress.filesScanned.fetch_add(1);
 
-    FileInfo fileInfo{ path.filename().stem().wstring(), path.filename().extension().wstring(),
+    FileInfo fileInfo{ path.filename().stem().string(), path.filename().extension().string(),
                        fileSize, FileType::Regular };
 
     std::unique_lock<decltype(m_mutex)> lock{ m_mutex };
@@ -166,8 +165,8 @@ void ScanningWorker::ProcessPath(
             return;
         }
 
-        constexpr auto emptyExtension = L"";
-        FileInfo directoryInfo{ path.filename().wstring(), emptyExtension,
+        constexpr auto emptyExtension = "";
+        FileInfo directoryInfo{ path.filename().string(), emptyExtension,
                                 ScanningWorker::UndefinedFileSize, FileType::Directory };
 
         std::unique_lock<decltype(m_mutex)> lock{ m_mutex };

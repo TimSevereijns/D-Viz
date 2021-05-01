@@ -119,7 +119,7 @@ class Controller : public QObject
      * @param[in] shouldSearchDirectories  Pass in true to search directories.
      */
     void SearchTreeMap(
-        const std::wstring& searchQuery,
+        const std::string& searchQuery,
         const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& deselectionCallback,
         const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& selectionCallback,
         bool shouldSearchFiles, bool shouldSearchDirectories);
@@ -131,7 +131,7 @@ class Controller : public QObject
      * @param[in] callback        UI callback to highlight matching nodes on the canvas.
      */
     void HighlightAllMatchingExtensions(
-        const std::wstring& extension,
+        const std::string& extension,
         const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& callback);
 
     /**

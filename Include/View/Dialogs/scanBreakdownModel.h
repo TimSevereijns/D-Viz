@@ -3,8 +3,8 @@
 
 #include <QAbstractTableModel>
 
-#include "Utilities/utilities.h"
 #include "Model/vizBlock.h"
+#include "Utilities/utilities.h"
 #include "constants.h"
 
 #include <Tree/Tree.hpp>
@@ -31,7 +31,7 @@ class RowModel
   public:
     RowModel() = default;
 
-    RowModel(std::wstring extension, const ExtensionTally& tally, Constants::SizePrefix prefix)
+    RowModel(std::string extension, const ExtensionTally& tally, Constants::SizePrefix prefix)
         : fileExtension{ std::move(extension) },
           visibleSize{ tally.visibleSize },
           totalSize{ tally.totalSize },
@@ -41,13 +41,13 @@ class RowModel
         const auto [prefixedTotalSize, prefixTotalSizeUnits] =
             Utilities::ToPrefixedSize(totalSize, prefix);
 
-        formattedTotalSize = fmt::format(L"{:03.2f} {}", prefixedTotalSize, prefixTotalSizeUnits);
-        formattedTotalCount = fmt::format(L"{:n}", totalCount);
+        formattedTotalSize = fmt::format("{:03.2f} {}", prefixedTotalSize, prefixTotalSizeUnits);
+        formattedTotalCount = fmt::format("{:n}", totalCount);
     }
 
-    std::wstring fileExtension;
-    std::wstring formattedTotalSize;
-    std::wstring formattedTotalCount;
+    std::string fileExtension;
+    std::string formattedTotalSize;
+    std::string formattedTotalCount;
 
     std::uintmax_t visibleSize{ 0 };
     std::uintmax_t totalSize{ 0 };
@@ -83,7 +83,7 @@ class ScanBreakdownModel final : public QAbstractTableModel
 
     std::vector<RowModel> m_fileTypeVector;
 
-    std::unordered_map<std::wstring, ExtensionTally> m_fileTypeMap;
+    std::unordered_map<std::string, ExtensionTally> m_fileTypeMap;
 
     Constants::SizePrefix m_prefix;
 };
