@@ -38,9 +38,9 @@ namespace Scanner
 
         const auto highWord = static_cast<std::uintmax_t>(fileData.nFileSizeHigh);
         fileSize = (highWord << sizeof(fileData.nFileSizeLow) * 8) | fileData.nFileSizeLow;
+        FindClose(fileHandle);
 #endif // Q_OS_WIN
 
-        FindClose(fileHandle);
         return fileSize;
     }
 
