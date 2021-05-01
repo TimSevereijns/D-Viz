@@ -174,14 +174,13 @@ void LinuxFileMonitor::AwaitNotification()
         return;
     }
 
-    ssize_t bytesRead = 0;
-
     for (auto i = 0; i < eventsRead; ++i) {
         if (m_epollEvents[i].data.fd == m_stopEventFileDescriptor) {
             break;
         }
 
-        bytesRead = ::read(m_epollEvents[i].data.fd, m_eventBuffer.data(), m_eventBuffer.size());
+        const ssize_t bytesRead =
+            ::read(m_epollEvents[i].data.fd, m_eventBuffer.data(), m_eventBuffer.size());
 
         if (bytesRead == -1) {
             const auto lastError = errno;

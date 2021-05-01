@@ -19,23 +19,7 @@ namespace Scanner
 {
     namespace Detail
     {
-
 #ifdef Q_OS_WIN
-
-        /**
-         * @returns A handle representing the reparse point found at the given path. If the path is
-         * not a reparse point, then an invalid handle will be returned instead.
-         */
-        ScopedHandle OpenReparsePoint(const std::filesystem::path& path) noexcept;
-
-        /**
-         * @brief Reads the reparse point found at the given path into the output buffer.
-         *
-         * @returns True if the path could be read as a reparse point, and false otherwise.
-         */
-        bool
-        ReadReparsePoint(const std::wstring& path, std::vector<std::byte>& reparseBuffer) noexcept;
-
         /**
          * @brief Use the `FindFirstFileW(...)` function to retrieve the file size.
          *
@@ -49,10 +33,8 @@ namespace Scanner
          * @returns The size of the file if it's accessible, and zero otherwise.
          */
         std::uintmax_t GetFileSizeUsingWinAPI(const std::filesystem::path& path) noexcept;
-
 #endif // Q_OS_WIN
-
-    } // namespace Detail
+    }  // namespace Detail
 
     /**
      * @brief Helper function to safely wrap the computation of a file's size.
@@ -71,17 +53,10 @@ namespace Scanner
     void ComputeDirectorySizes(Tree<VizBlock>& tree) noexcept;
 
 #ifdef Q_OS_WIN
-
-    /**
-     * @returns True if the given file path matches the given reparse tag, and false otherwise.
-     */
-    bool IsReparseTag(const std::filesystem::path& path, DWORD targetTag) noexcept;
-
     /**
      * @returns True if the given path represents a reparse point, and false otherwise.
      */
     bool IsReparsePoint(const std::filesystem::path& path) noexcept;
-
 #endif // Q_OS_WIN
 
 } // namespace Scanner

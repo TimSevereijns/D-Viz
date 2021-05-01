@@ -1,6 +1,6 @@
 #include "Model/Scanner/scanningUtilities.h"
-#include "Utilities/ignoreUnused.h"
 #include "Model/vizBlock.h"
+#include "Utilities/ignoreUnused.h"
 
 #include <QtGlobal>
 
@@ -22,45 +22,6 @@
 
 namespace Scanner
 {
-#ifdef Q_OS_WIN
-    ScopedHandle OpenReparsePoint(const std::filesystem::path& path) noexcept
-    {
-        const auto handle = CreateFile(
-            /* lpFileName = */ path.wstring().c_str(),
-            /* dwDesiredAccess = */ GENERIC_READ,
-            /* dwShareMode = */ 0,
-            /* lpSecurityAttributes = */ nullptr,
-            /* dwCreationDisposition = */ OPEN_EXISTING,
-            /* dwFlagsAndAttributes = */ FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
-            /* hTemplateFile = */ nullptr);
-
-        return ScopedHandle{ handle };
-    }
-
-    bool ReadReparsePoint(const std::wstring& path, std::vector<std::byte>& reparseBuffer) noexcept
-    {
-        const auto handle = OpenReparsePoint(path);
-        if (!handle.IsValid()) {
-            return false;
-        }
-
-        DWORD bytesReturned{ 0 };
-
-        const auto successfullyRetrieved =
-            DeviceIoControl(
-                /* hDevice = */ static_cast<HANDLE>(handle),
-                /* dwIoControlCode = */ FSCTL_GET_REPARSE_POINT,
-                /* lpInBuffer = */ nullptr,
-                /* nInBufferSize = */ 0,
-                /* lpOutBuffer = */ static_cast<LPVOID>(reparseBuffer.data()),
-                /* nOutBufferSize = */ static_cast<DWORD>(reparseBuffer.size()),
-                /* lpBytesReturned = */ &bytesReturned,
-                /* lpOverlapped = */ nullptr) == TRUE;
-
-        return successfullyRetrieved && bytesReturned;
-    }
-#endif // Q_OS_WIN
-
     std::uintmax_t GetFileSizeUsingWinAPI(const std::filesystem::path& path) noexcept
     {
         std::uintmax_t fileSize{ 0 };
@@ -79,6 +40,7 @@ namespace Scanner
         fileSize = (highWord << sizeof(fileData.nFileSizeLow) * 8) | fileData.nFileSizeLow;
 #endif // Q_OS_WIN
 
+        FindClose(fileHandle);
         return fileSize;
     }
 
@@ -114,16 +76,6 @@ namespace Scanner
     }
 
 #ifdef Q_OS_WIN
-    bool IsReparseTag(const std::filesystem::path& path, DWORD targetTag) noexcept
-    {
-        static std::vector<std::byte> buffer{ MAXIMUM_REPARSE_DATA_BUFFER_SIZE };
-
-        const auto successfullyRead = ReadReparsePoint(path, buffer);
-        return successfullyRead
-                   ? reinterpret_cast<REPARSE_DATA_BUFFER*>(buffer.data())->ReparseTag == targetTag
-                   : false;
-    }
-
     bool IsReparsePoint(const std::filesystem::path& path) noexcept
     {
         WIN32_FIND_DATA findData;
