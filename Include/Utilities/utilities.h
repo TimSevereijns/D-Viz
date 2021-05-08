@@ -14,11 +14,6 @@
 
 namespace Utilities
 {
-    namespace Detail
-    {
-        constexpr const std::string_view bytesLabel = " bytes";
-    }
-
     /**
      * @brief Locates the matching tree node that matches the given a relative filesystem path.
      *
@@ -87,7 +82,7 @@ namespace Utilities
         using namespace Literals::Numeric::Binary;
 
         if (sizeInBytes < 1_KiB) {
-            return std::make_pair(sizeInBytes, std::string{ Detail::bytesLabel });
+            return std::make_pair(sizeInBytes, std::string{ " " } + Constants::Units::Bytes);
         }
 
         if (sizeInBytes < 1_MiB) {
@@ -117,7 +112,7 @@ namespace Utilities
         using namespace Literals::Numeric::Decimal;
 
         if (sizeInBytes < 1_KB) {
-            return std::make_pair(sizeInBytes, std::string{ Detail::bytesLabel });
+            return std::make_pair(sizeInBytes, std::string{ " " } + Constants::Units::Bytes);
         }
 
         if (sizeInBytes < 1_MB) {

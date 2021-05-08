@@ -40,7 +40,7 @@ void NodePainterTests::DetermineColorsFromSettingsOnDisk() const
     const auto color = painter.DetermineColorFromExtension(".jpg");
     QVERIFY(color.has_value());
 
-    constexpr auto expectedColor = Detail::RGB(128, 128, 128);
+    constexpr auto expectedColor = Color::FromRGB(128, 128, 128);
     QCOMPARE(*color, expectedColor);
 }
 

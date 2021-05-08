@@ -81,6 +81,7 @@ HEADERS += \
     $$PWD/Include/Settings/persistentSettings.h \
     $$PWD/Include/Settings/sessionSettings.h \
     $$PWD/Include/Settings/settings.h \
+    $$PWD/Include/Utilities/color.h \
     $$PWD/Include/Utilities/ignoreUnused.h \
     $$PWD/Include/Utilities/logging.h \
     $$PWD/Include/Utilities/operatingSystem.h \

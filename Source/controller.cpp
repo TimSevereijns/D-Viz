@@ -300,7 +300,7 @@ void Controller::SelectNodeAndUpdateStatusBar(
     const auto fileSize = node->file.size;
     const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
     const auto [prefixedSize, units] = Utilities::ToPrefixedSize(fileSize, prefix);
-    const auto isSmallFile = (units == Utilities::Detail::bytesLabel);
+    const auto isSmallFile = units.find(Constants::Units::Bytes) != std::string::npos;
 
     const auto path = Controller::NodeToFilePath(node).string();
     const auto message = isSmallFile ? fmt::format("{}  |  {:.0f} {}", path, prefixedSize, units)
@@ -355,7 +355,7 @@ void Controller::DisplayHighlightDetails()
 
     const auto prefix = m_sessionSettings.GetActiveNumericPrefix();
     const auto [prefixedSize, units] = Utilities::ToPrefixedSize(totalBytes, prefix);
-    const auto isSmallFile = (units == Utilities::Detail::bytesLabel);
+    const auto isSmallFile = units.find(Constants::Units::Bytes) != std::string::npos;
 
     const std::string nodes = highlightedNodes.size() == 1 ? " node" : " nodes";
 
