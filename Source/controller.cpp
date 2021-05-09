@@ -29,10 +29,10 @@ namespace
     {
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
 
-        log->info(fmt::format(
-            "Scanned: {:n} directories and {:n} files, representing {:n} bytes.",
+        log->info(
+            "Scanned {:n} directories and {:n} files, representing {:n} bytes.",
             progress.directoriesScanned.load(), progress.filesScanned.load(),
-            progress.bytesProcessed.load()));
+            progress.bytesProcessed.load());
 
         log->flush();
     }
@@ -45,8 +45,8 @@ namespace
     void LogDiskStatistics(const std::filesystem::space_info& spaceInfo)
     {
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
-        log->info(fmt::format("Disk Size:  {:n} bytes.", spaceInfo.capacity));
-        log->info(fmt::format("Free Space: {:n} bytes.", spaceInfo.free));
+        log->info("Disk Size:  {:n} bytes.", spaceInfo.capacity);
+        log->info("Free Space: {:n} bytes.", spaceInfo.free);
     }
 } // namespace
 
@@ -149,7 +149,7 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
         };
 
     const auto& log = spdlog::get(Constants::Logging::DefaultLog);
-    log->info(fmt::format("Started a new scan at \"{}\".", m_model->GetRootPath().string()));
+    log->info("Started a new scan at \"{}\".", m_model->GetRootPath().string());
 
     const auto scanningParameters = ScanningParameters{ root, progressHandler, completionHandler };
     m_scanner.StartScanning(scanningParameters);
@@ -479,9 +479,9 @@ void Controller::SearchTreeMap(
         });
 
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
-        log->info(fmt::format(
+        log->info(
             "Search Completed in: {:n} {}.", stopwatch.GetElapsedTime().count(),
-            stopwatch.GetUnitsAsString()));
+            stopwatch.GetUnitsAsString());
     };
 
     ProcessHighlightedNodes(selector, selectionCallback);

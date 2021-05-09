@@ -35,7 +35,7 @@ class FileEvent
             }
         } catch (const std::filesystem::filesystem_error& /*exception*/) {
             spdlog::get(Constants::Logging::FilesystemLog)
-                ->error(fmt::format("Failed to obtain size of \"{}\"", path.string()));
+                ->error("Failed to obtain size of \"{}\"", path.string());
         }
     }
 

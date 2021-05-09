@@ -39,9 +39,9 @@ void BreakdownDialog::ReloadData()
     const auto stopwatch = Stopwatch<std::chrono::milliseconds>([&] { BuildModel(); });
 
     spdlog::get(Constants::Logging::DefaultLog)
-        ->info(fmt::format(
+        ->info(
             "Built break-down model in: {:n} {}", stopwatch.GetElapsedTime().count(),
-            stopwatch.GetUnitsAsString()));
+            stopwatch.GetUnitsAsString());
 
     m_proxyModel.invalidate();
     m_proxyModel.setSourceModel(&m_tableModel);
@@ -78,12 +78,10 @@ void BreakdownDialog::BuildModel()
     std::for_each(
         Tree<VizBlock>::LeafIterator{ tree.GetRoot() }, Tree<VizBlock>::LeafIterator{},
         [&](const auto& node) {
-            if (node->file.type != FileType::Regular) {
-                return;
+            if (node->file.type == FileType::Regular) {
+                m_tableModel.Insert(node, parameters.IsNodeVisible(node.GetData()));
+                m_graphModel.AddDatapoint(node->file.extension, node->file.size);
             }
-
-            m_tableModel.Insert(node, parameters.IsNodeVisible(node.GetData()));
-            m_graphModel.AddDatapoint(node->file.extension, node->file.size);
         });
 
     m_tableModel.BuildModel(controller.GetSessionSettings().GetActiveNumericPrefix());
@@ -130,7 +128,6 @@ void BreakdownDialog::DisplayContextMenu(const QPoint& point)
 
     menu.addAction("Highlight All \"" + extension + "\" Files", [&] {
         auto& controller = m_mainWindow.GetController();
-
         controller.ClearHighlightedNodes(unhighlightCallback);
         controller.HighlightAllMatchingExtensions(extension.toStdString(), highlightCallback);
     });

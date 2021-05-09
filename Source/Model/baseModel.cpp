@@ -281,22 +281,20 @@ namespace
      */
     void LogFileSystemEvent(const FileEvent& event)
     {
+        const auto& log = spdlog::get(Constants::Logging::FilesystemLog);
+
         switch (event.eventType) {
             case FileEventType::Created:
-                spdlog::get(Constants::Logging::FilesystemLog)
-                    ->info(fmt::format("Created: {}", event.path.string()));
+                log->info("Created: {}", event.path.string());
                 break;
             case FileEventType::Deleted:
-                spdlog::get(Constants::Logging::FilesystemLog)
-                    ->info(fmt::format("Deleted: {}", event.path.string()));
+                log->info("Deleted: {}", event.path.string());
                 break;
             case FileEventType::Touched:
-                spdlog::get(Constants::Logging::FilesystemLog)
-                    ->info(fmt::format("Modified: {}", event.path.string()));
+                log->info("Modified: {}", event.path.string());
                 break;
             case FileEventType::Renamed:
-                spdlog::get(Constants::Logging::FilesystemLog)
-                    ->info(fmt::format("Renamed: {}", event.path.string()));
+                log->info("Renamed: {}", event.path.string());
                 break;
             default:
                 std::abort();
@@ -376,9 +374,9 @@ Tree<VizBlock>::Node* BaseModel::FindNearestIntersection(
     });
 
     spdlog::get(Constants::Logging::DefaultLog)
-        ->info(fmt::format(
+        ->info(
             "Selected node in: {:n} {}", stopwatch.GetElapsedTime().count(),
-            stopwatch.GetUnitsAsString()));
+            stopwatch.GetUnitsAsString());
 
     return nearestIntersection;
 }
@@ -599,7 +597,7 @@ void BaseModel::UpdateAffectedNodes(const FileEvent& event)
         // some applications tend to create temporary files when saving changes made to a file.
 
         spdlog::get(Constants::Logging::DefaultLog)
-            ->error(fmt::format("File no longer exists: {}", absolutePath.string()));
+            ->error("File no longer exists: {}", absolutePath.string());
 
         return;
     }

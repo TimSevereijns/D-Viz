@@ -44,7 +44,7 @@ namespace
         }
 
         spdlog::get(Constants::Logging::DefaultLog)
-            ->info(fmt::format("Number of Sizeless Files Removed: {:n}", nodesRemoved));
+            ->info("Number of Sizeless Files Removed: {:n}", nodesRemoved);
     }
 
     /**
@@ -140,7 +140,7 @@ void ScanningWorker::ProcessPath(
         return;
     }
 
-    auto isRegularFile{ false };
+    auto isRegularFile = false;
     try {
         // In certain cases, this function can, apparently, raise exceptions, although it isn't
         // entirely clear to me what circumstances need to exist for this to occur:
@@ -206,9 +206,9 @@ void ScanningWorker::Start()
     });
 
     spdlog::get(Constants::Logging::DefaultLog)
-        ->info(fmt::format(
+        ->info(
             "Scanned Drive in: {:n} {}", stopwatch.GetElapsedTime().count(),
-            stopwatch.GetUnitsAsString()));
+            stopwatch.GetUnitsAsString());
 
     Scanner::ComputeDirectorySizes(*m_fileTree);
     PruneEmptyFilesAndDirectories(*m_fileTree);
