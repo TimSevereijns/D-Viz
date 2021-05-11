@@ -34,7 +34,6 @@
 #include <QVector3D>
 
 class FileEvent;
-class GLCanvas;
 class ScanningProgress;
 
 class Controller : public QObject

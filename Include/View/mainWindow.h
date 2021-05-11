@@ -23,7 +23,6 @@
 #include "ui_mainWindow.h"
 
 class Controller;
-class ScanningProgress;
 
 #if defined(Q_OS_WIN)
 

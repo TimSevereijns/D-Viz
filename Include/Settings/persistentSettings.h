@@ -16,8 +16,6 @@
 #include <QObject>
 #include <QVector3D>
 
-class VizBlock;
-
 namespace Settings
 {
     /**

@@ -14,8 +14,6 @@
 #include <QObject>
 #include <QVector3D>
 
-class VizBlock;
-
 namespace Settings
 {
     using ColorMap = std::unordered_map<std::string, std::unordered_map<std::string, QVector3D>>;

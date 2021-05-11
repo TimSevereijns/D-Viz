@@ -13,11 +13,6 @@
 #include <unordered_map>
 #include <vector>
 
-namespace Settings
-{
-    class PersistentSettings;
-}
-
 struct ExtensionTally
 {
     std::uintmax_t visibleCount{ 0 };
