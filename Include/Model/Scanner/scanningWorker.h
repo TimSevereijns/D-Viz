@@ -32,6 +32,7 @@
 #include "Model/baseModel.h"
 #include "Model/block.h"
 #include "Model/vizBlock.h"
+#include "constants.h"
 
 /**
  * @brief The worker that actually performs the drive scanning.
@@ -41,7 +42,7 @@ class ScanningWorker final : public QObject
     Q_OBJECT
 
   public:
-    static constexpr std::uintmax_t UndefinedFileSize{ 0 };
+    static constexpr std::uintmax_t UndefinedFileSize = 0;
 
     ScanningWorker(
         const ScanningParameters& parameters, ScanningProgress& progress,
@@ -121,11 +122,11 @@ class ScanningWorker final : public QObject
     ScanningProgress& m_progress;
     std::atomic<bool>& m_cancellationToken;
 
-    std::shared_ptr<Tree<VizBlock>> m_fileTree{ nullptr };
+    std::shared_ptr<Tree<VizBlock>> m_fileTree;
 
     mutable std::mutex m_mutex;
 
-    boost::asio::thread_pool m_threadPool{ 4 };
+    boost::asio::thread_pool m_threadPool = Constants::Concurrency::ThreadLimit;
 };
 
 #endif // SCANNINGWORKER_H

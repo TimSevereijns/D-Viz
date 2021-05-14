@@ -266,14 +266,14 @@ class Camera
 
     QRect m_viewport;
 
-    double m_yaw{ 0.0 };
-    double m_pitch{ 0.0 };
+    double m_yaw = 0.0;
+    double m_pitch = 0.0;
 
-    int m_fieldOfView{ 45 };
+    int m_fieldOfView = 45;
 
-    float m_aspectRatio{ 1.0f };
-    float m_nearPlane{ 1.0f };
-    float m_farPlane{ 2000.0f };
+    float m_aspectRatio = 1.0f;
+    float m_nearPlane = 1.0f;
+    float m_farPlane = 2000.0f;
 };
 
 #endif // CAMERA_H

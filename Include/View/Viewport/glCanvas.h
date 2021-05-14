@@ -382,14 +382,14 @@ class GLCanvas final : public QOpenGLWidget
      */
     bool AlertIfMissing(const std::filesystem::path& path);
 
-    bool m_isPaintingSuspended{ false };
-    bool m_isVisualizationLoaded{ false };
-    bool m_isLeftTriggerDown{ false };
-    bool m_isRightTriggerDown{ false };
-    bool m_isLeftMouseButtonDown{ false };
-    bool m_isCursorHidden{ false };
+    bool m_isPaintingSuspended = false;
+    bool m_isVisualizationLoaded = false;
+    bool m_isLeftTriggerDown = false;
+    bool m_isRightTriggerDown = false;
+    bool m_isLeftMouseButtonDown = false;
+    bool m_isCursorHidden = false;
 
-    GamepadContextMenu* m_gamepadContextMenu{ nullptr };
+    GamepadContextMenu* m_gamepadContextMenu = nullptr;
 
     Controller& m_controller;
 
@@ -397,17 +397,15 @@ class GLCanvas final : public QOpenGLWidget
 
     QOpenGLExtraFunctions m_openGLContext;
 
-    QTimer m_frameRedrawTimer{ nullptr };
+    QTimer m_frameRedrawTimer;
 
-    std::chrono::steady_clock::time_point m_lastFrameDrawTime{ std::chrono::steady_clock::now() };
+    std::chrono::steady_clock::time_point m_lastFrameDrawTime = std::chrono::steady_clock::now();
 
-    std::chrono::steady_clock::time_point m_lastFrameUpdateTimestamp{
-        std::chrono::steady_clock::now()
-    };
+    std::chrono::steady_clock::time_point m_lastFrameUpdateTimestamp =
+        std::chrono::steady_clock::now();
 
-    std::chrono::steady_clock::time_point m_startOfMouseLookEvent{
-        std::chrono::steady_clock::now()
-    };
+    std::chrono::steady_clock::time_point m_startOfMouseLookEvent =
+        std::chrono::steady_clock::now();
 
     std::vector<Light> m_lights;
 

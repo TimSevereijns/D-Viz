@@ -190,13 +190,13 @@ void ModelTests::HighlightDescendants()
 {
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
-    auto visualizationParameters = Settings::VisualizationParameters{};
-    visualizationParameters.rootDirectory = "";
-    visualizationParameters.minimumFileSize = 0u;
-    visualizationParameters.onlyShowDirectories = false;
+    Settings::VisualizationParameters parameters;
+    parameters.rootDirectory = "";
+    parameters.minimumFileSize = 0u;
+    parameters.onlyShowDirectories = false;
 
     const Tree<VizBlock>::Node* rootNode = m_tree->GetRoot();
-    m_model->HighlightDescendants(*rootNode, visualizationParameters);
+    m_model->HighlightDescendants(*rootNode, parameters);
 
     const auto leafCount = std::count_if(
         Tree<VizBlock>::LeafIterator{ rootNode }, Tree<VizBlock>::LeafIterator{},
@@ -230,16 +230,16 @@ void ModelTests::HighlightAllMatchingFileNames()
 {
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
-    auto visualizationParameters = Settings::VisualizationParameters{};
-    visualizationParameters.rootDirectory = "";
-    visualizationParameters.minimumFileSize = 0u;
-    visualizationParameters.onlyShowDirectories = false;
+    Settings::VisualizationParameters parameters;
+    parameters.rootDirectory = "";
+    parameters.minimumFileSize = 0u;
+    parameters.onlyShowDirectories = false;
 
     constexpr auto shouldSearchFiles{ true };
     constexpr auto shouldSearchDirectories{ false };
 
     m_model->HighlightMatchingFileNames(
-        "socket", visualizationParameters, shouldSearchFiles, shouldSearchDirectories);
+        "socket", parameters, shouldSearchFiles, shouldSearchDirectories);
 
     const auto headerCount = std::count_if(
         Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() }, Tree<VizBlock>::PostOrderIterator{},
@@ -254,12 +254,12 @@ void ModelTests::HighlightMatchingFileExtensions()
 {
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
-    auto visualizationParameters = Settings::VisualizationParameters{};
-    visualizationParameters.rootDirectory = "";
-    visualizationParameters.minimumFileSize = 0u;
-    visualizationParameters.onlyShowDirectories = false;
+    Settings::VisualizationParameters parameters;
+    parameters.rootDirectory = "";
+    parameters.minimumFileSize = 0u;
+    parameters.onlyShowDirectories = false;
 
-    m_model->HighlightMatchingFileExtensions(".hpp", visualizationParameters);
+    m_model->HighlightMatchingFileExtensions(".hpp", parameters);
 
     const auto headerCount = std::count_if(
         Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() }, Tree<VizBlock>::PostOrderIterator{},
@@ -274,12 +274,12 @@ void ModelTests::ClearHighlightedNodes()
 {
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
-    auto visualizationParameters = Settings::VisualizationParameters{};
-    visualizationParameters.rootDirectory = "";
-    visualizationParameters.minimumFileSize = 0u;
-    visualizationParameters.onlyShowDirectories = false;
+    Settings::VisualizationParameters parameters;
+    parameters.rootDirectory = "";
+    parameters.minimumFileSize = 0u;
+    parameters.onlyShowDirectories = false;
 
-    m_model->HighlightMatchingFileExtensions(".hpp", visualizationParameters);
+    m_model->HighlightMatchingFileExtensions(".hpp", parameters);
     QCOMPARE(false, m_model->GetHighlightedNodes().empty());
 
     m_model->ClearHighlightedNodes();

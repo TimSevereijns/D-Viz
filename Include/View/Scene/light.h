@@ -19,10 +19,10 @@ class Light
     explicit Light(const QVector3D& lightPosition) noexcept;
 
     QVector3D position{ 0.0f, 0.0f, 0.0f };
-    QVector3D intensity{ 1.0f, 1.0f, 1.0f }; //< Think color
+    QVector3D intensity{ 1.0f, 1.0f, 1.0f }; //< Equivalent to color.
 
-    float attenuation{ 0.75f };
-    float ambientCoefficient{ 0.01f }; //< The light's contribution to ambient.
+    float attenuation = 0.75f;
+    float ambientCoefficient = 0.01f; //< The light's contribution to ambient.
 };
 
 #endif // LIGHT_H

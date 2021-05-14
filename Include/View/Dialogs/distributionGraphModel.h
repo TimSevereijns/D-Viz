@@ -37,8 +37,8 @@ class ExtensionDistribution
   private:
     static constexpr std::size_t defaultBucketCount = 128;
 
-    std::uintmax_t m_minimumX{ 0 };
-    std::uintmax_t m_maximumX{ 0 };
+    std::uintmax_t m_minimumX = 0;
+    std::uintmax_t m_maximumX = 0;
     std::vector<std::uintmax_t> m_datapoints;
     std::vector<std::uint32_t> m_buckets;
 };

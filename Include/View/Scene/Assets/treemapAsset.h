@@ -128,14 +128,14 @@ namespace Assets
         bool LoadTexturePreviewShaders();
         bool InitializeTexturePreviewer();
 
-        int m_cascadeCount{ 4 };
-        int m_shadowMapResolution{ 4 * 1024 };
+        int m_cascadeCount = 4;
+        int m_shadowMapResolution = 4 * 1024;
 
-        std::uint32_t m_blockCount{ 0 };
+        std::uint32_t m_blockCount = 0;
 
-        std::uintmax_t m_largestDirectorySize{ 0 };
+        std::uintmax_t m_largestDirectorySize = 0;
 
-        double m_maxBoundingBoxDiagonal{ 0.0 };
+        double m_maxBoundingBoxDiagonal = 0.0;
 
         QOpenGLBuffer m_referenceBlockBuffer;
         QOpenGLBuffer m_blockTransformationBuffer;

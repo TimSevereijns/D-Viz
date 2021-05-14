@@ -280,21 +280,21 @@ class MainWindow final : public QMainWindow, public BaseView
 
     Controller& m_controller;
 
-    bool m_showDirectoriesOnly{ false };
+    bool m_showDirectoriesOnly = false;
 
-    int m_sizePruningComboBoxIndex{ 0 };
+    int m_sizePruningComboBoxIndex = 0;
 
-    std::unique_ptr<Gamepad> m_gamepad{ std::make_unique<Gamepad>(0, this) };
+    std::unique_ptr<Gamepad> m_gamepad = std::make_unique<Gamepad>(0, this);
 
     Ui::MainWindow m_ui;
 
-    std::unique_ptr<GLCanvas> m_glCanvas{ nullptr };
-    std::unique_ptr<AboutDialog> m_aboutDialog{ nullptr };
-    std::unique_ptr<BreakdownDialog> m_breakdownDialog{ nullptr };
+    std::unique_ptr<GLCanvas> m_glCanvas;
+    std::unique_ptr<AboutDialog> m_aboutDialog;
+    std::unique_ptr<BreakdownDialog> m_breakdownDialog;
 
     std::string m_searchQuery;
 
-    const std::vector<std::pair<std::uintmax_t, QString>>* m_fileSizeOptions{ nullptr };
+    const std::vector<std::pair<std::uintmax_t, QString>>* m_fileSizeOptions = nullptr;
 
     // @note The remainder of this header is dedicated to the various menus that exist within
     // the main window. Since some of these menus are submenus of other menus, the variable
@@ -302,62 +302,62 @@ class MainWindow final : public QMainWindow, public BaseView
     // be careful in modifying this section; any errors likely won't show up until the program
     // exits.
 
-    QMenu m_fileMenu{ nullptr };
+    QMenu m_fileMenu;
 
     struct FileMenu
     {
-        QAction newScan{ nullptr };
-        QAction cancelScan{ nullptr };
-        QAction exit{ nullptr };
+        QAction newScan;
+        QAction cancelScan;
+        QAction exit;
     } m_fileMenuWrapper;
 
-    QMenu m_optionsMenu{ nullptr };
+    QMenu m_optionsMenu;
 
     struct OptionsMenu
     {
-        QAction useDarkTheme{ nullptr };
-        QAction enableFileSystemMonitoring{ nullptr };
-        QAction toggleFrameTime{ nullptr };
+        QAction useDarkTheme;
+        QAction enableFileSystemMonitoring;
+        QAction toggleFrameTime;
 
-        QMenu fileSizeMenu{ nullptr };
+        QMenu fileSizeMenu;
 
         struct FileSizeMenu
         {
-            QAction binaryPrefix{ nullptr };
-            QAction decimalPrefix{ nullptr };
+            QAction binaryPrefix;
+            QAction decimalPrefix;
         } fileSizeMenuWrapper;
     } m_optionsMenuWrapper;
 
-    QMenu m_debuggingMenu{ nullptr };
+    QMenu m_debuggingMenu;
 
     struct DebuggingMenu
     {
-        QMenu renderMenu{ nullptr };
+        QMenu renderMenu;
 
         struct RenderMenuWrapper
         {
-            QAction origin{ nullptr };
-            QAction grid{ nullptr };
-            QAction lightMarkers{ nullptr };
-            QAction frustum{ nullptr };
+            QAction origin;
+            QAction grid;
+            QAction lightMarkers;
+            QAction frustum;
         } renderMenuWrapper;
 
-        QMenu lightingMenu{ nullptr };
+        QMenu lightingMenu;
 
         struct LightingMenuWrapper
         {
-            QAction showCascadeSplits{ nullptr };
-            QAction showShadows{ nullptr };
+            QAction showCascadeSplits;
+            QAction showShadows;
         } lightingMenuWrapper;
 
-        QAction openLogFile{ nullptr };
+        QAction openLogFile;
     } m_debuggingMenuWrapper;
 
-    QMenu m_helpMenu{ nullptr };
+    QMenu m_helpMenu;
 
     struct HelpMenu
     {
-        QAction aboutDialog{ nullptr };
+        QAction aboutDialog;
     } m_helpMenuWrapper;
 };
 

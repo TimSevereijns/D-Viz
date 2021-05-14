@@ -119,10 +119,10 @@ class WindowsFileMonitor : public FileMonitorBase
     void RetrieveNotification();
     void ProcessNotification();
 
-    std::atomic_bool m_isActive{ false };
-    std::atomic_bool m_keepMonitoring{ true };
+    std::atomic_bool m_isActive = false;
+    std::atomic_bool m_keepMonitoring = true;
 
-    HANDLE m_fileHandle{ INVALID_HANDLE_VALUE };
+    HANDLE m_fileHandle = INVALID_HANDLE_VALUE;
 
     Detail::FileMonitorEventHandles m_events;
 

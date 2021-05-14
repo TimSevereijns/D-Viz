@@ -28,7 +28,7 @@ namespace
         const auto x = origin.x();
         const auto y = origin.y();
 
-        for (auto index{ 0u }; index < entryCount; ++index) {
+        for (auto index = 0u; index < entryCount; ++index) {
             const auto angle = slice * index - startingAngle;
 
             entries[index].Position = QPoint{ static_cast<int>(x + radius * std::cos(angle)),
@@ -112,7 +112,7 @@ GamepadContextMenu::GamepadContextMenu(const Gamepad& gamepad, QWidget* parent)
 
 void GamepadContextMenu::ProcessInput()
 {
-    constexpr auto radius{ 100 };
+    constexpr auto radius = 100;
 
     const auto x = m_gamepad.axisLeftX();
     const auto y = m_gamepad.axisLeftY();
@@ -122,7 +122,7 @@ void GamepadContextMenu::ProcessInput()
 
     const auto selection =
         std::find_if(std::begin(m_entries), std::end(m_entries), [&](const auto& entry) noexcept {
-            constexpr auto reasonableDistanceToLabel{ 64 };
+            constexpr auto reasonableDistanceToLabel = 64;
             return Distance(m_selectorDot, entry.Position) < reasonableDistanceToLabel;
         });
 
@@ -150,7 +150,7 @@ void GamepadContextMenu::ComputeLayout()
 {
     const QPoint center{ width() / 2, height() / 2 };
 
-    constexpr auto radius{ 100 };
+    constexpr auto radius = 100;
     ComputeLabelAttachmentPoints(center, static_cast<int>(1.25 * radius), m_entries);
 }
 
@@ -202,7 +202,7 @@ void GamepadContextMenu::RenderGeometry(const QPoint& center)
     m_pen.setColor(Qt::green);
     m_painter.setPen(m_pen);
 
-    constexpr auto radius{ 100 };
+    constexpr auto radius = 100;
     m_painter.drawEllipse(center, radius, radius);
 
     m_pen.setColor(Qt::green);

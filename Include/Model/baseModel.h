@@ -22,9 +22,9 @@
 
 struct TreemapMetadata
 {
-    std::uintmax_t FileCount{ 0 };
-    std::uintmax_t DirectoryCount{ 0 };
-    std::uintmax_t TotalBytes{ 0 };
+    std::uintmax_t FileCount = 0;
+    std::uintmax_t DirectoryCount = 0;
+    std::uintmax_t TotalBytes = 0;
 };
 
 /**
@@ -251,18 +251,18 @@ class BaseModel
 
     // The tree is stored in a shared pointer so that it can be passed through the Qt
     // signaling framework; any type passed through it needs to be copy-constructible.
-    std::shared_ptr<Tree<VizBlock>> m_fileTree{ nullptr }; ///< @todo Does this need a mutex?
+    std::shared_ptr<Tree<VizBlock>> m_fileTree; ///< @todo Does this need a mutex?
 
     // While only a single node can be "selected" at any given time, multiple nodes can be
     // "highlighted." This vector tracks those highlighted nodes.
     std::vector<const Tree<VizBlock>::Node*> m_highlightedNodes;
 
     // The one and only "selected" node, should one exist.
-    const Tree<VizBlock>::Node* m_selectedNode{ nullptr };
+    const Tree<VizBlock>::Node* m_selectedNode = nullptr;
 
     TreemapMetadata m_metadata{ 0, 0, 0 };
 
-    bool m_hasDataBeenParsed{ false };
+    bool m_hasDataBeenParsed = false;
 
     FileSystemObserver m_fileSystemObserver;
 
@@ -285,7 +285,7 @@ class BaseModel
     std::condition_variable m_eventNotificationReady;
     std::mutex m_eventNotificationMutex;
 
-    std::atomic_bool m_shouldKeepProcessingNotifications{ true };
+    std::atomic_bool m_shouldKeepProcessingNotifications = true;
 };
 
 #endif // VISUALIZATIONMODEL_H

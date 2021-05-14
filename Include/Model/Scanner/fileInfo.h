@@ -30,10 +30,10 @@ struct FileInfo
     std::string name;
     std::string extension;
 
-    std::uint32_t identifier{ 0 };
-    std::uintmax_t size{ 0 };
+    std::uint32_t identifier = 0;
+    std::uintmax_t size = 0;
 
-    FileType type{ FileType::Regular };
+    FileType type = FileType::Regular;
 };
 
 #endif // FILEINFO_H

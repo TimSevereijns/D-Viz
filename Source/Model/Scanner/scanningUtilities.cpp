@@ -24,9 +24,9 @@ namespace Scanner
 {
     std::uintmax_t GetFileSizeUsingWinAPI(const std::filesystem::path& path) noexcept
     {
-        std::uintmax_t fileSize{ 0 };
-
         IgnoreUnused(path);
+
+        std::uintmax_t fileSize = 0;
 
 #ifdef Q_OS_WIN
         WIN32_FIND_DATA fileData;
@@ -48,7 +48,6 @@ namespace Scanner
     {
         try {
             Expects(std::filesystem::is_directory(path) == false);
-
             return std::filesystem::file_size(path);
         } catch (...) {
             const auto& log = spdlog::get(Constants::Logging::DefaultLog);

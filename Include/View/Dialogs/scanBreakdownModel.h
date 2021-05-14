@@ -44,10 +44,10 @@ class RowModel
     std::string formattedTotalSize;
     std::string formattedTotalCount;
 
-    std::uintmax_t visibleSize{ 0 };
-    std::uintmax_t totalSize{ 0 };
-    std::uintmax_t visibleCount{ 0 };
-    std::uintmax_t totalCount{ 0 };
+    std::uintmax_t visibleSize = 0;
+    std::uintmax_t totalSize = 0;
+    std::uintmax_t visibleCount = 0;
+    std::uintmax_t totalCount = 0;
 };
 
 Q_DECLARE_METATYPE(RowModel)

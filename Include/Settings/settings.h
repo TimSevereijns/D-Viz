@@ -51,10 +51,10 @@ namespace Settings
         std::string rootDirectory; ///< The path to the root directory
 
         // The minimum size a file should be before it shows up.
-        std::uint64_t minimumFileSize{ 0 };
+        std::uint64_t minimumFileSize = 0;
 
-        bool forceNewScan{ true };         ///< Whether a new scan should take place.
-        bool onlyShowDirectories{ false }; ///< Whether only directories should be shown.
+        bool forceNewScan = true;         ///< Whether a new scan should take place.
+        bool onlyShowDirectories = false; ///< Whether only directories should be shown.
     };
 } // namespace Settings
 

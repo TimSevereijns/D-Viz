@@ -77,8 +77,8 @@ class Block
      */
     const QVector<QVector3D>& GetVerticesAndNormals() const noexcept;
 
-    constexpr static auto FacesPerBlock{ 5 };
-    constexpr static auto VerticesPerBlock{ 30 };
+    constexpr static auto FacesPerBlock = 5;
+    constexpr static auto VerticesPerBlock = 30;
 
   private:
     /**
@@ -113,10 +113,10 @@ class Block
     PrecisePoint m_origin;
     PrecisePoint m_nextRowOrigin; ///< Specific to the Squarified Treemap.
 
-    double m_percentCovered{ 0.0 };
-    double m_width{ 0.0 };
-    double m_height{ 0.0 };
-    double m_depth{ 0.0 };
+    double m_percentCovered = 0.0;
+    double m_width = 0.0;
+    double m_height = 0.0;
+    double m_depth = 0.0;
 };
 
 #endif // BLOCK_H

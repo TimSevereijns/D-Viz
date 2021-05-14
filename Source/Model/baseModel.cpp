@@ -34,8 +34,7 @@ namespace
 
     /**
      * @brief Calculates whether the specified ray hits the specified plane, given a margin of
-     * error,
-     * epsilon.
+     * error, epsilon.
      *
      * @param[in] ray                The ray to be fired at the plane.
      * @param[in] pointOnPlane       Any point on the plane.
@@ -47,7 +46,7 @@ namespace
     std::optional<QVector3D> FindPlaneIntersection(
         const Ray& ray, const QVector3D& pointOnPlane, const QVector3D& planeNormal)
     {
-        constexpr auto epsilon{ 0.0001f };
+        constexpr auto epsilon = 0.0001f;
 
         const auto denominator = QVector3D::dotProduct(ray.Direction(), planeNormal);
         if (std::abs(denominator) < epsilon) {

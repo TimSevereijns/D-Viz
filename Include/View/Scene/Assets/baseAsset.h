@@ -175,7 +175,7 @@ namespace Assets
         const Settings::PersistentSettings& m_persistentSettings;
         const Settings::SessionSettings& m_sessionSettings;
 
-        bool m_shouldRender{ true };
+        bool m_shouldRender = true;
     };
 } // namespace Assets
 

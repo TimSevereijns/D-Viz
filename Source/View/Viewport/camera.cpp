@@ -176,7 +176,7 @@ Ray Camera::ShootRayIntoScene(const QPoint& widgetCoordinates) const noexcept
 
     const auto direction = QVector3D(farPlanePoint - nearPlanePoint).normalized();
 
-    return Ray{ nearPlanePoint, direction };
+    return { nearPlanePoint, direction };
 }
 
 bool Camera::IsPointInFrontOfCamera(const QVector3D& point) const noexcept

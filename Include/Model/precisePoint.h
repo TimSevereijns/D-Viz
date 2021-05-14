@@ -26,9 +26,9 @@ class PrecisePoint
     }
 
   private:
-    double m_x{ 0.0 };
-    double m_y{ 0.0 };
-    double m_z{ 0.0 };
+    double m_x = 0.0;
+    double m_y = 0.0;
+    double m_z = 0.0;
 };
 
 #endif // PRECISEPOINT_H

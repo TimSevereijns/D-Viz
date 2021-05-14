@@ -3,8 +3,8 @@
 
 #include <string_view>
 
-#include "Settings/settings.h"
 #include "Model/vizBlock.h"
+#include "Settings/settings.h"
 #include "constants.h"
 
 #include <QObject>
@@ -144,19 +144,19 @@ namespace Settings
         void SearchDirectories(bool state);
 
       private:
-        double m_cameraSpeed{ 0.25 };
-        double m_mouseSensitivity{ 0.20 };
-        double m_ambientLightCoefficient{ 0.2 };
-        double m_lightAttenuationFactor{ 0.000 };
-        double m_materialShininess{ 80.0 };
+        double m_cameraSpeed = 0.25;
+        double m_mouseSensitivity = 0.20;
+        double m_ambientLightCoefficient = 0.2;
+        double m_lightAttenuationFactor = 0.0;
+        double m_materialShininess = 80.0;
 
-        bool m_isLightAttachedToCamera{ false };
-        bool m_shouldSearchDirectories{ false };
-        bool m_shouldSearchFiles{ true };
+        bool m_isLightAttachedToCamera = false;
+        bool m_shouldSearchDirectories = false;
+        bool m_shouldSearchFiles = false;
 
         Settings::VisualizationParameters m_visualizationParameters;
 
-        Constants::SizePrefix m_activeNumericPrefix{ Constants::SizePrefix::Binary };
+        Constants::SizePrefix m_activeNumericPrefix = Constants::SizePrefix::Binary;
     };
 } // namespace Settings
 

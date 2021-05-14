@@ -250,7 +250,7 @@ void WindowsFileMonitor::AwaitNotification()
 
 void WindowsFileMonitor::RetrieveNotification()
 {
-    DWORD bytesTransferred{ 0 };
+    DWORD bytesTransferred = 0;
 
     const bool successfullyRead = ::GetOverlappedResult(
         /* hFile = */ m_fileHandle,

@@ -65,7 +65,7 @@ namespace Settings
 
         JsonDocument m_fileColorMapDocument;
 
-        std::string m_colorScheme{ "Default" };
+        std::string m_colorScheme = "Default";
 
         std::filesystem::path m_fileColorMapPath;
     };

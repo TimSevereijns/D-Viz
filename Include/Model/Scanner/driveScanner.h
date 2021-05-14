@@ -83,9 +83,9 @@ class DriveScanner final : public QObject
 
     std::atomic<bool> m_cancellationToken;
 
-    bool m_isActive{ false };
+    bool m_isActive = false;
 
-    std::unique_ptr<QTimer> m_progressUpdateTimer{ nullptr };
+    std::unique_ptr<QTimer> m_progressUpdateTimer;
 };
 
 #endif // DRIVESCANNER_H

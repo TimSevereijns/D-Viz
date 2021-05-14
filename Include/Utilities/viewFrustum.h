@@ -19,9 +19,9 @@ namespace FrustumUtilities
      */
     inline std::vector<QVector3D> ComputeFrustumCorners(const QMatrix4x4& worldToView)
     {
-        std::vector<QVector3D> unitCube{ { -1, -1, -1 }, { +1, -1, -1 }, { +1, +1, -1 },
-                                         { -1, +1, -1 }, { -1, -1, +1 }, { +1, -1, +1 },
-                                         { +1, +1, +1 }, { -1, +1, +1 } };
+        std::vector<QVector3D> unitCube = { { -1, -1, -1 }, { +1, -1, -1 }, { +1, +1, -1 },
+                                            { -1, +1, -1 }, { -1, -1, +1 }, { +1, -1, +1 },
+                                            { +1, +1, +1 }, { -1, +1, +1 } };
 
         for (auto& corner : unitCube) {
             corner = worldToView.map(corner);
@@ -51,15 +51,15 @@ namespace FrustumUtilities
     {
         const auto frustum = ComputeFrustumCorners(view);
 
-        const std::vector<QVector3D> vertices{ // Near plane outline:
-                                               frustum[0], frustum[1], frustum[1], frustum[2],
-                                               frustum[2], frustum[3], frustum[3], frustum[0],
-                                               // Far plane outline:
-                                               frustum[4], frustum[5], frustum[5], frustum[6],
-                                               frustum[6], frustum[7], frustum[7], frustum[4],
-                                               // Side plane outline:
-                                               frustum[0], frustum[4], frustum[1], frustum[5],
-                                               frustum[2], frustum[6], frustum[3], frustum[7]
+        const std::vector<QVector3D> vertices = { // Near plane outline:
+                                                  frustum[0], frustum[1], frustum[1], frustum[2],
+                                                  frustum[2], frustum[3], frustum[3], frustum[0],
+                                                  // Far plane outline:
+                                                  frustum[4], frustum[5], frustum[5], frustum[6],
+                                                  frustum[6], frustum[7], frustum[7], frustum[4],
+                                                  // Side plane outline:
+                                                  frustum[0], frustum[4], frustum[1], frustum[5],
+                                                  frustum[2], frustum[6], frustum[3], frustum[7]
         };
 
         return vertices;
@@ -76,10 +76,10 @@ namespace FrustumUtilities
     {
         const auto planeRatio = farPlane / nearPlane;
 
-        auto previousCascadeStart{ nearPlane };
+        auto previousCascadeStart = nearPlane;
 
         std::vector<std::pair<float, float>> cascadeDistances;
-        for (auto index{ 1.0 }; index < cascadeCount; ++index) {
+        for (auto index = 1.0; index < cascadeCount; ++index) {
             const auto cascade =
                 nearPlane *
                 std::pow(static_cast<float>(planeRatio), static_cast<float>(index / cascadeCount));
@@ -110,7 +110,7 @@ namespace FrustumUtilities
      */
     inline std::vector<std::pair<float, float>> GetCascadeDistances()
     {
-        static const std::vector<std::pair<float, float>> cascadeDistances{
+        static const std::vector<std::pair<float, float>> cascadeDistances = {
             std::make_pair(1.0f, 25.0f), std::make_pair(25.0f, 100.0f),
             std::make_pair(100.0f, 500.0f), std::make_pair(500.0f, 1500.0f)
         };
