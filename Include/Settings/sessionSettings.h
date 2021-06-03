@@ -152,7 +152,7 @@ namespace Settings
 
         bool m_isLightAttachedToCamera = false;
         bool m_shouldSearchDirectories = false;
-        bool m_shouldSearchFiles = false;
+        bool m_shouldSearchFiles = true;
 
         Settings::VisualizationParameters m_visualizationParameters;
 
