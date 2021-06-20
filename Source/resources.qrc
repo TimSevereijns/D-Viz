@@ -8,5 +8,6 @@
         <file>View/Shaders/shadowMapping.vert</file>
         <file>View/Shaders/texturePreview.frag</file>
         <file>View/Shaders/texturePreview.vert</file>
+        <file>View/Dialogs/icon.png</file>
     </qresource>
 </RCC>
