@@ -77,8 +77,8 @@ void Camera::LookAt(const QVector3D& target) noexcept
     const auto pitchInRadians = static_cast<double>(std::asin(-direction.y()));
     m_pitch = pitchInRadians * Constants::Math::RadiansToDegrees;
 
-    const auto yaInRadians = static_cast<double>(std::atan2(direction.x(), -direction.z()));
-    m_yaw = yaInRadians * Constants::Math::RadiansToDegrees;
+    const auto yawInRadians = static_cast<double>(std::atan2(direction.x(), -direction.z()));
+    m_yaw = yawInRadians * Constants::Math::RadiansToDegrees;
 
     NormalizeAngles(m_yaw, m_pitch);
 }
