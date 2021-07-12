@@ -121,12 +121,25 @@ namespace
             qApp->setStyleSheet(stream.readAll());
         }
     }
+
+    void DisplayMessageDialog(
+        const MainWindow& mainWindow, QMessageBox::Icon severity, std::string_view message)
+    {
+        QMessageBox messageBox;
+        messageBox.setIcon(severity);
+        messageBox.setStandardButtons(QMessageBox::Ok);
+        messageBox.setDefaultButton(QMessageBox::Ok);
+        messageBox.setText(message.data());
+
+        const auto position = ComputeMessageBoxPosition(messageBox, mainWindow);
+        messageBox.move(position);
+        messageBox.exec();
+    }
 } // namespace
 
 MainWindow::MainWindow(Controller& controller, QWidget* parent /* = nullptr */)
     : QMainWindow{ parent },
       m_controller{ controller },
-      m_ui{},
       m_fileSizeOptions{ GeneratePruningMenuEntries(Constants::SizePrefix::Binary) }
 {
     m_ui.setupUi(this);
@@ -910,28 +923,12 @@ void MainWindow::ReloadVisualization()
 
 void MainWindow::DisplayInfoDialog(std::string_view message)
 {
-    QMessageBox messageBox;
-    messageBox.setIcon(QMessageBox::Information);
-    messageBox.setStandardButtons(QMessageBox::Ok);
-    messageBox.setDefaultButton(QMessageBox::Ok);
-    messageBox.setText(message.data());
-
-    const auto position = ComputeMessageBoxPosition(messageBox, *this);
-    messageBox.move(position);
-    messageBox.exec();
+    DisplayMessageDialog(*this, QMessageBox::Information, message);
 }
 
 void MainWindow::DisplayErrorDialog(std::string_view message)
 {
-    QMessageBox messageBox;
-    messageBox.setIcon(QMessageBox::Warning);
-    messageBox.setStandardButtons(QMessageBox::Ok);
-    messageBox.setDefaultButton(QMessageBox::Ok);
-    messageBox.setText(message.data());
-
-    const auto position = ComputeMessageBoxPosition(messageBox, *this);
-    messageBox.move(position);
-    messageBox.exec();
+    DisplayMessageDialog(*this, QMessageBox::Warning, message);
 }
 
 void MainWindow::SetWaitCursor()
