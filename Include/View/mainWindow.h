@@ -216,6 +216,8 @@ class MainWindow final : public QMainWindow, public BaseView
 
     void OnFpsReadoutToggled(bool isEnabled);
 
+    void OnShowLightingOptionsToggled(bool isEnabled);
+
     void OnDarkThemeToggled(bool isEnabled);
 
     void SwitchToBinaryPrefix(bool useBinary);
@@ -256,6 +258,9 @@ class MainWindow final : public QMainWindow, public BaseView
 
   private:
     void SetFilePruningComboBoxValue(std::uintmax_t minimum);
+
+    void ShowLightingOptions();
+    void HideLightingOptions();
 
     void PruneTree();
 
@@ -345,6 +350,7 @@ class MainWindow final : public QMainWindow, public BaseView
 
         struct LightingMenuWrapper
         {
+            QAction showLightingOptions;
             QAction showCascadeSplits;
             QAction showShadows;
         } lightingMenuWrapper;

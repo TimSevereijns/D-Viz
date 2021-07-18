@@ -417,6 +417,14 @@ void MainWindow::SetupLightingSubMenu()
 {
     auto& lightingMenuWrapper = m_debuggingMenuWrapper.lightingMenuWrapper;
 
+    lightingMenuWrapper.showLightingOptions.setText("Show Lighting Options");
+    lightingMenuWrapper.showLightingOptions.setStatusTip("Show additional lighting options.");
+    lightingMenuWrapper.showLightingOptions.setCheckable(true);
+
+    connect(
+        &lightingMenuWrapper.showLightingOptions, &QAction::toggled, this,
+        &MainWindow::OnShowLightingOptionsToggled);
+
     const auto shouldShowCascadeSplits =
         m_controller.GetPersistentSettings().ShouldRenderCascadeSplits();
 
@@ -441,6 +449,7 @@ void MainWindow::SetupLightingSubMenu()
     auto& lightingMenu = m_debuggingMenuWrapper.lightingMenu;
     lightingMenu.setTitle("Lighting");
     lightingMenu.setStatusTip("Toggle visualization aids");
+    lightingMenu.addAction(&lightingMenuWrapper.showLightingOptions);
     lightingMenu.addAction(&lightingMenuWrapper.showCascadeSplits);
     lightingMenu.addAction(&lightingMenuWrapper.showShadows);
 }
@@ -510,6 +519,32 @@ void MainWindow::SetDebuggingMenuState()
     renderMenuWrapper.frustum.blockSignals(true);
     renderMenuWrapper.frustum.setChecked(preferences.ShouldRenderFrusta());
     renderMenuWrapper.frustum.blockSignals(false);
+
+    HideLightingOptions();
+}
+
+void MainWindow::ShowLightingOptions()
+{
+    m_ui.ambientCoefficientSpinnerLabel->show();
+    m_ui.ambientCoefficientSpinner->show();
+
+    m_ui.attentuationMultiplierSpinnerLabel->show();
+    m_ui.attenuationSpinner->show();
+
+    m_ui.attachLightToCameraCheckBox->show();
+    m_ui.lightingDivider->show();
+}
+
+void MainWindow::HideLightingOptions()
+{
+    m_ui.ambientCoefficientSpinnerLabel->hide();
+    m_ui.ambientCoefficientSpinner->hide();
+
+    m_ui.attentuationMultiplierSpinnerLabel->hide();
+    m_ui.attenuationSpinner->hide();
+
+    m_ui.attachLightToCameraCheckBox->hide();
+    m_ui.lightingDivider->hide();
 }
 
 void MainWindow::OnFileMonitoringToggled(bool shouldEnable)
@@ -605,6 +640,15 @@ void MainWindow::OnFpsReadoutToggled(bool isEnabled)
 {
     if (!isEnabled) {
         setWindowTitle("D-Viz [*]");
+    }
+}
+
+void MainWindow::OnShowLightingOptionsToggled(bool isEnabled)
+{
+    if (isEnabled) {
+        ShowLightingOptions();
+    } else {
+        HideLightingOptions();
     }
 }
 

@@ -63,7 +63,7 @@
    <property name="minimumSize">
     <size>
      <width>228</width>
-     <height>500</height>
+     <height>613</height>
     </size>
    </property>
    <property name="features">
@@ -208,7 +208,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="ambientCoefficientSpinnerLabel">
        <property name="text">
         <string>Ambient Coefficient:</string>
        </property>
@@ -234,7 +234,10 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="attentuationMultiplierSpinnerLabel">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="text">
         <string>Attenuation Multiplier:</string>
        </property>
@@ -270,7 +273,7 @@
       </widget>
      </item>
      <item>
-      <widget class="Line" name="line_3">
+      <widget class="Line" name="lightingDivider">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -345,6 +348,12 @@
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
        </property>
       </spacer>
      </item>
