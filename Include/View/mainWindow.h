@@ -317,7 +317,6 @@ class MainWindow final : public QMainWindow, public BaseView
     {
         QAction useDarkTheme;
         QAction enableFileSystemMonitoring;
-        QAction toggleFrameTime;
 
         QMenu fileSizeMenu;
 
@@ -351,6 +350,7 @@ class MainWindow final : public QMainWindow, public BaseView
         } lightingMenuWrapper;
 
         QAction openLogFile;
+        QAction toggleFrameTime;
     } m_debuggingMenuWrapper;
 
     QMenu m_helpMenu;

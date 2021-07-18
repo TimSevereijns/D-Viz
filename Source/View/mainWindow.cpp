@@ -322,14 +322,6 @@ void MainWindow::SetupOptionsMenu()
         &m_optionsMenuWrapper.useDarkTheme, &QAction::toggled, this,
         &MainWindow::OnDarkThemeToggled);
 
-    m_optionsMenuWrapper.toggleFrameTime.setText("Show Frame Time");
-    m_optionsMenuWrapper.toggleFrameTime.setStatusTip("Toggle frame-time readout in titlebar.");
-    m_optionsMenuWrapper.toggleFrameTime.setCheckable(true);
-
-    connect(
-        &m_optionsMenuWrapper.toggleFrameTime, &QAction::toggled, this,
-        &MainWindow::OnFpsReadoutToggled);
-
     m_optionsMenuWrapper.enableFileSystemMonitoring.setEnabled(false);
     m_optionsMenuWrapper.enableFileSystemMonitoring.setText("Monitor File System");
     m_optionsMenuWrapper.enableFileSystemMonitoring.setStatusTip(
@@ -345,7 +337,6 @@ void MainWindow::SetupOptionsMenu()
 
     m_optionsMenu.setTitle("Options");
     m_optionsMenu.addAction(&m_optionsMenuWrapper.useDarkTheme);
-    m_optionsMenu.addAction(&m_optionsMenuWrapper.toggleFrameTime);
     m_optionsMenu.addAction(&m_optionsMenuWrapper.enableFileSystemMonitoring);
 
     SetupFileSizeSubMenu();
@@ -469,6 +460,16 @@ void MainWindow::SetupDebuggingMenu()
         &m_debuggingMenuWrapper.openLogFile, &QAction::triggered, this, &MainWindow::OnOpenLogFile);
 
     m_debuggingMenu.addAction(&m_debuggingMenuWrapper.openLogFile);
+
+    m_debuggingMenuWrapper.toggleFrameTime.setText("Show Frame Time");
+    m_debuggingMenuWrapper.toggleFrameTime.setStatusTip("Toggle frame-time readout in titlebar.");
+    m_debuggingMenuWrapper.toggleFrameTime.setCheckable(true);
+
+    connect(
+        &m_debuggingMenuWrapper.toggleFrameTime, &QAction::toggled, this,
+        &MainWindow::OnFpsReadoutToggled);
+
+    m_debuggingMenu.addAction(&m_debuggingMenuWrapper.toggleFrameTime);
 
     menuBar()->addMenu(&m_debuggingMenu);
 }
@@ -818,7 +819,7 @@ void MainWindow::OnCancelScan()
 
 bool MainWindow::ShouldShowFrameTime() const
 {
-    return m_optionsMenuWrapper.toggleFrameTime.isChecked();
+    return m_debuggingMenuWrapper.toggleFrameTime.isChecked();
 }
 
 std::string MainWindow::GetSearchQuery() const
