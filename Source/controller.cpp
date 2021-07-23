@@ -64,15 +64,14 @@ void Controller::LaunchUI()
 }
 
 void Controller::OnScanComplete(
-    const Settings::VisualizationParameters& parameters, const ScanningProgress& progress,
-    const std::shared_ptr<Tree<VizBlock>>& scanningResults)
+    const ScanningProgress& progress, const std::shared_ptr<Tree<VizBlock>>& scanningResults)
 {
     LogScanCompletion(progress);
     ReportProgressToStatusBar(progress);
 
     m_nodeColorMap.clear();
 
-    m_view->AskUserToLimitFileSize(progress.filesScanned.load(), parameters);
+    m_view->AskUserToLimitFileSize(progress.filesScanned.load());
     m_view->SetWaitCursor();
 
     const ScopeExit restoreCursor = [&]() noexcept
@@ -142,7 +141,7 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
     const auto completionHandler =
         [&](const ScanningProgress& progress,
             const std::shared_ptr<Tree<VizBlock>>& scanningResults) mutable {
-            OnScanComplete(parameters, progress, scanningResults);
+            OnScanComplete(progress, scanningResults);
 
             m_taskbarProgress->HideProgress();
             m_taskbarProgress->ResetProgress();

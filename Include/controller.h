@@ -332,8 +332,7 @@ class Controller : public QObject
     void ReportProgressToTaskbar(ButtonType& button, const ScanningProgress& progress);
 
     void OnScanComplete(
-        const Settings::VisualizationParameters& parameters, const ScanningProgress& progress,
-        const std::shared_ptr<Tree<VizBlock>>& scanningResults);
+        const ScanningProgress& progress, const std::shared_ptr<Tree<VizBlock>>& scanningResults);
 
     ViewFactoryInterface& m_viewFactory;
     ModelFactoryInterface& m_modelFactory;

@@ -166,8 +166,7 @@ class MainWindow final : public QMainWindow, public BaseView
     /**
      * @copydoc BaseView::AskUserToLimitFileSize
      */
-    bool AskUserToLimitFileSize(
-        std::uintmax_t numberOfFilesScanned, Settings::VisualizationParameters parameters) override;
+    bool AskUserToLimitFileSize(std::uintmax_t numberOfFilesScanned) override;
 
     /**
      * @brief Ask the user to confirm file deletion.

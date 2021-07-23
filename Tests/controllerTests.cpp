@@ -59,10 +59,7 @@ void ControllerTests::ScanDrive() const
     REQUIRE_CALL(*m_view, OnScanStarted()).TIMES(1);
     REQUIRE_CALL(*m_view, OnScanCompleted()).TIMES(1);
     REQUIRE_CALL(*m_view, GetTaskbarButton()).TIMES(1).RETURN(GetFakeTaskbarButton());
-
-    REQUIRE_CALL(*m_view, AskUserToLimitFileSize(trompeloeil::_, trompeloeil::_))
-        .TIMES(1)
-        .RETURN(true);
+    REQUIRE_CALL(*m_view, AskUserToLimitFileSize(trompeloeil::_)).TIMES(1).RETURN(true);
 
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_))
         .WITH(_1.find("Files Scanned") != std::string::npos && _2 == 0)

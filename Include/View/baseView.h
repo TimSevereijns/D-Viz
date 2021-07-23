@@ -149,12 +149,10 @@ class BaseView
      * response to the relevant setting.
      *
      * @param[in] numberOfFilesScanned  The number of files scanned.
-     * @param[in] parameters            The parameters to modify.
      *
      * @returns True if the user opted to change the parameters.
      */
-    virtual bool AskUserToLimitFileSize(
-        std::uintmax_t numberOfFilesScanned, Settings::VisualizationParameters parameters) = 0;
+    virtual bool AskUserToLimitFileSize(std::uintmax_t numberOfFilesScanned) = 0;
 
     /**
      * @brief Displays an info dialog.

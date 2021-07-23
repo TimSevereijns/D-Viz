@@ -587,11 +587,11 @@ void MainWindow::OnFileMenuNewScan()
     m_controller.ScanDrive(savedParameters);
 }
 
-bool MainWindow::AskUserToLimitFileSize(
-    std::uintmax_t numberOfFilesScanned, Settings::VisualizationParameters parameters)
+bool MainWindow::AskUserToLimitFileSize(std::uintmax_t numberOfFilesScanned)
 {
     using namespace Literals::Numeric::Binary;
 
+    auto& parameters = m_controller.GetSessionSettings().GetVisualizationParameters();
     if (numberOfFilesScanned < 250'000 || parameters.minimumFileSize >= 1_MiB) {
         return false;
     }
@@ -610,8 +610,7 @@ bool MainWindow::AskUserToLimitFileSize(
     const auto election = messageBox.exec();
     if (election == QMessageBox::Yes) {
         parameters.minimumFileSize = 1_MiB;
-        m_controller.GetSessionSettings().SetVisualizationParameters(std::move(parameters));
-        SetFilePruningComboBoxValue(1_MiB);
+        SetFilePruningComboBoxValue(parameters.minimumFileSize);
 
         return true;
     }
