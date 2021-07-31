@@ -72,6 +72,11 @@ namespace Settings
         m_shouldSearchDirectories = state;
     }
 
+    void SessionSettings::UseRegexSearch(bool state)
+    {
+        m_shouldUseRegex = state;
+    }
+
     bool SessionSettings::ShouldSearchFiles() const
     {
         return m_shouldSearchFiles;
@@ -80,6 +85,11 @@ namespace Settings
     bool SessionSettings::ShouldSearchDirectories() const
     {
         return m_shouldSearchDirectories;
+    }
+
+    bool SessionSettings::ShouldUseRegex() const
+    {
+        return m_shouldUseRegex;
     }
 
     const Settings::VisualizationParameters& SessionSettings::GetVisualizationParameters() const

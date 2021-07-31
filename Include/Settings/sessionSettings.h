@@ -62,6 +62,11 @@ namespace Settings
         bool ShouldSearchDirectories() const;
 
         /**
+         * @returns True if regular expresson analysis should be used when performing searches.
+         */
+        bool ShouldUseRegex() const;
+
+        /**
          * @returns The current visualization parameters.
          */
         const Settings::VisualizationParameters& GetVisualizationParameters() const;
@@ -129,19 +134,26 @@ namespace Settings
         void AttachLightToCamera(bool attached);
 
         /**
-         * @brief Handles toggling of whether regular files should be searched.
+         * @brief Specify whether regular files should be searched.
          *
          * @param[in] state           Pass in true if files should be searched for query matches.
          */
         void SearchFiles(bool state);
 
         /**
-         * @brief Handles toggling of whether directories should be searched.
+         * @brief Specify whether directories should be searched.
          *
          * @param[in] state           Pass in true if directories should be searched for query
          *                            matches.
          */
         void SearchDirectories(bool state);
+
+        /**
+         * @brief Specify whether to use regular expressions when searching.
+         *
+         * @param[in] state           Pass in true if regular expressions should be used.
+         */
+        void UseRegexSearch(bool state);
 
       private:
         double m_cameraSpeed = 0.25;
@@ -153,6 +165,7 @@ namespace Settings
         bool m_isLightAttachedToCamera = false;
         bool m_shouldSearchDirectories = false;
         bool m_shouldSearchFiles = true;
+        bool m_shouldUseRegex = false;
 
         Settings::VisualizationParameters m_visualizationParameters;
 

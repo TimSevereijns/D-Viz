@@ -116,12 +116,13 @@ class Controller : public QObject
      * @param[in] selectionCallback        UI callback to highlight matching nodes on the canvas.
      * @param[in] shouldSearchFiles        Pass in true to search files.
      * @param[in] shouldSearchDirectories  Pass in true to search directories.
+     * @param[in] shouldUseRegex           Pass in true to use regular expressions when searching.
      */
     void SearchTreeMap(
         const std::string& searchQuery,
         const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& deselectionCallback,
         const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& selectionCallback,
-        bool shouldSearchFiles, bool shouldSearchDirectories);
+        bool shouldSearchFiles, bool shouldSearchDirectories, bool shouldUseRegex);
 
     /**
      * @brief Highlights all nodes in the tree whose extension matches that of the passed in node.

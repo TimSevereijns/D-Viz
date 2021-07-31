@@ -169,10 +169,11 @@ class BaseModel
      *                                     VisualizationParameters.
      * @param[in] shouldSearchFiles        Pass in true to search files.
      * @param[in] shouldSearchDirectories  Pass in true to search directories.
+     * @param[in] useRegex                 Pass in true to use regular expressions.
      */
     void HighlightMatchingFileNames(
         const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
-        bool shouldSearchFiles, bool shouldSearchDirectories);
+        bool shouldSearchFiles, bool shouldSearchDirectories, bool useRegex);
 
     /**
      * @brief Starts monitoring the file system for changes.
@@ -286,6 +287,15 @@ class BaseModel
     std::mutex m_eventNotificationMutex;
 
     std::atomic_bool m_shouldKeepProcessingNotifications = true;
+
+  private:
+    void PerformRegexSearch(
+        const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
+        bool shouldSearchFiles, bool shouldSearchDirectories);
+
+    void PerformNormalSearch(
+        const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
+        bool shouldSearchFiles, bool shouldSearchDirectories);
 };
 
 #endif // VISUALIZATIONMODEL_H

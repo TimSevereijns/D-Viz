@@ -63,7 +63,7 @@
    <property name="minimumSize">
     <size>
      <width>228</width>
-     <height>613</height>
+     <height>638</height>
     </size>
    </property>
    <property name="features">
@@ -314,6 +314,13 @@
        </property>
        <property name="checked">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="useRegex">
+       <property name="text">
+        <string>Use Regex</string>
        </property>
       </widget>
      </item>

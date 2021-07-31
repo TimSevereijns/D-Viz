@@ -202,6 +202,10 @@ void MainWindow::SetupSidebar()
         &Settings::SessionSettings::SearchFiles);
 
     connect(
+        m_ui.useRegex, &QCheckBox::stateChanged, &sessionSettings,
+        &Settings::SessionSettings::UseRegexSearch);
+
+    connect(
         m_ui.cameraSpeedSpinner,
         static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
         &sessionSettings, &Settings::SessionSettings::SetCameraSpeed);
@@ -739,15 +743,16 @@ void MainWindow::OnNewSearchQuery()
 
     const auto selectionCallback = [&](auto& nodes) { m_glCanvas->HighlightNodes(nodes); };
 
-    const auto shouldSearchFiles = m_controller.GetSessionSettings().ShouldSearchFiles();
-    const auto shouldSearchDirectories =
-        m_controller.GetSessionSettings().ShouldSearchDirectories();
+    const auto& settings = m_controller.GetSessionSettings();
+    const auto shouldSearchFiles = settings.ShouldSearchFiles();
+    const auto shouldSearchDirectories = settings.ShouldSearchDirectories();
+    const auto shouldUseRegex = settings.ShouldUseRegex();
 
     const ScopedCursor waitCursor{ Qt::WaitCursor };
 
     m_controller.SearchTreeMap(
         searchQuery, deselectionCallback, selectionCallback, shouldSearchFiles,
-        shouldSearchDirectories);
+        shouldSearchDirectories, shouldUseRegex);
 }
 
 void MainWindow::OnSearchQueryTextChanged(const QString& text)

@@ -235,11 +235,12 @@ void ModelTests::HighlightAllMatchingFileNames()
     parameters.minimumFileSize = 0u;
     parameters.onlyShowDirectories = false;
 
-    constexpr auto shouldSearchFiles{ true };
-    constexpr auto shouldSearchDirectories{ false };
+    constexpr auto shouldSearchFiles = true;
+    constexpr auto shouldSearchDirectories = false;
+    constexpr auto shouldUseRegex = false;
 
     m_model->HighlightMatchingFileNames(
-        "socket", parameters, shouldSearchFiles, shouldSearchDirectories);
+        "socket", parameters, shouldSearchFiles, shouldSearchDirectories, shouldUseRegex);
 
     const auto headerCount = std::count_if(
         Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() }, Tree<VizBlock>::PostOrderIterator{},
@@ -248,6 +249,59 @@ void ModelTests::HighlightAllMatchingFileNames()
     QCOMPARE(
         static_cast<std::int32_t>(m_model->GetHighlightedNodes().size()),
         static_cast<std::int32_t>(headerCount));
+}
+
+void ModelTests::HighlightAllMatchingFileNamesUsingRegex()
+{
+    QVERIFY(m_model->GetHighlightedNodes().size() == 0);
+
+    Settings::VisualizationParameters parameters;
+    parameters.rootDirectory = "";
+    parameters.minimumFileSize = 0u;
+    parameters.onlyShowDirectories = false;
+
+    constexpr auto shouldSearchFiles = true;
+    constexpr auto shouldSearchDirectories = false;
+    constexpr auto shouldUseRegex = true;
+
+    constexpr auto query = ".*_.*\\.hpp"; //< Look for headers with at least one underscore.
+
+    m_model->HighlightMatchingFileNames(
+        query, parameters, shouldSearchFiles, shouldSearchDirectories, shouldUseRegex);
+
+    const auto headerCount = std::count_if(
+        Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() }, Tree<VizBlock>::PostOrderIterator{},
+        [](const auto& node) {
+            return node->file.extension.find("hpp") != std::string::npos &&
+                   node->file.name.find("_") != std::string::npos;
+        });
+
+    QCOMPARE(
+        static_cast<std::int32_t>(m_model->GetHighlightedNodes().size()),
+        static_cast<std::int32_t>(headerCount));
+}
+
+void ModelTests::HandleInvalidRegex()
+{
+    QVERIFY(m_model->GetHighlightedNodes().size() == 0);
+
+    Settings::VisualizationParameters parameters;
+    parameters.rootDirectory = "";
+    parameters.minimumFileSize = 0u;
+    parameters.onlyShowDirectories = false;
+
+    constexpr auto shouldSearchFiles = true;
+    constexpr auto shouldSearchDirectories = false;
+    constexpr auto shouldUseRegex = true;
+
+    constexpr auto query = ".*_.*\\"; //< Ends with an escape and should lead to an exception.
+
+    m_model->HighlightMatchingFileNames(
+        query, parameters, shouldSearchFiles, shouldSearchDirectories, shouldUseRegex);
+
+    QCOMPARE(
+        static_cast<std::int32_t>(m_model->GetHighlightedNodes().size()),
+        static_cast<std::int32_t>(0));
 }
 
 void ModelTests::HighlightMatchingFileExtensions()

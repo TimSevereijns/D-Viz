@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <chrono>
 #include <optional>
+#include <regex>
 #include <string>
 
 #include <QColor>
@@ -477,39 +478,79 @@ void BaseModel::HighlightMatchingFileExtensions(
         });
 }
 
-void BaseModel::HighlightMatchingFileNames(
+void BaseModel::PerformRegexSearch(
     const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
     bool shouldSearchFiles, bool shouldSearchDirectories)
 {
     std::string fileAndExtension;
-    fileAndExtension.resize(260); ///< Resize to prevent reallocation with append operations.
+    fileAndExtension.resize(512); //< Resize to prevent reallocation with append operations.
+
+    const std::regex expression{ searchQuery };
+
+    for (const auto& node : GetTree()) {
+        const auto& file = node->file;
+
+        if (file.size < parameters.minimumFileSize ||
+            (!shouldSearchDirectories && file.type == FileType::Directory) ||
+            (!shouldSearchFiles && file.type == FileType::Regular)) {
+            continue;
+        }
+
+        fileAndExtension = file.name;
+        fileAndExtension.append(file.extension);
+
+        if (std::regex_match(fileAndExtension, expression)) {
+            HighlightNode(&node);
+        }
+    }
+}
+
+void BaseModel::PerformNormalSearch(
+    const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
+    bool shouldSearchFiles, bool shouldSearchDirectories)
+{
+    std::string fileAndExtension;
+    fileAndExtension.resize(512); //< Resize to prevent reallocation with append operations.
 
     const auto lowercaseQuery = boost::algorithm::to_lower_copy(searchQuery);
 
-    std::for_each(
-        Tree<VizBlock>::PostOrderIterator{ GetTree().GetRoot() },
-        Tree<VizBlock>::PostOrderIterator{}, [&](const auto& node) {
-            const auto& file = node->file;
+    for (const auto& node : GetTree()) {
+        const auto& file = node->file;
 
-            if (file.size < parameters.minimumFileSize ||
-                (!shouldSearchDirectories && file.type == FileType::Directory) ||
-                (!shouldSearchFiles && file.type == FileType::Regular)) {
-                return;
-            }
+        if (file.size < parameters.minimumFileSize ||
+            (!shouldSearchDirectories && file.type == FileType::Directory) ||
+            (!shouldSearchFiles && file.type == FileType::Regular)) {
+            continue;
+        }
 
-            fileAndExtension = file.name;
-            fileAndExtension.append(file.extension);
+        fileAndExtension = file.name;
+        fileAndExtension.append(file.extension);
 
-            boost::algorithm::to_lower(fileAndExtension);
+        // We're converting everything to lowercase beforehand (instead of using
+        // `boost::icontains(...)`), since doing so is significantly faster.
+        boost::algorithm::to_lower(fileAndExtension);
 
-            // @note We're converting everything to lowercase beforehand
-            // (instead of using `boost::icontains(...)`), since doing so is significantly faster.
-            if (!boost::contains(fileAndExtension, lowercaseQuery)) {
-                return;
-            }
-
+        if (boost::contains(fileAndExtension, lowercaseQuery)) {
             HighlightNode(&node);
-        });
+        }
+    }
+}
+
+void BaseModel::HighlightMatchingFileNames(
+    const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
+    bool shouldSearchFiles, bool shouldSearchDirectories, bool useRegex)
+{
+    if (!useRegex) {
+        PerformNormalSearch(searchQuery, parameters, shouldSearchFiles, shouldSearchDirectories);
+        return;
+    }
+
+    try {
+        PerformRegexSearch(searchQuery, parameters, shouldSearchFiles, shouldSearchDirectories);
+    } catch (const std::regex_error& exception) {
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+        log->error("Caught regex exception. Details: {}", exception.what());
+    }
 }
 
 void BaseModel::HighlightNode(const Tree<VizBlock>::Node* const node)
@@ -595,8 +636,8 @@ void BaseModel::UpdateAffectedNodes(const FileEvent& event)
         // a lot of transient files that may only exist for a fraction of a second. For example,
         // some applications tend to create temporary files when saving changes made to a file.
 
-        spdlog::get(Constants::Logging::DefaultLog)
-            ->error("File no longer exists: {}", absolutePath.string());
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+        log->error("File no longer exists: {}", absolutePath.string());
 
         return;
     }

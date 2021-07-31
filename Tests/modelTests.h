@@ -84,6 +84,16 @@ class ModelTests : public QObject
     void HighlightAllMatchingFileNames();
 
     /**
+     * @brief Verifies that regular expression searches work.
+     */
+    void HighlightAllMatchingFileNamesUsingRegex();
+
+    /**
+     * @brief Verifies that an invalid regular expression will not lead to a crash.
+     */
+    void HandleInvalidRegex();
+
+    /**
      * @brief Verifies that matching extensions are correctly highlighted.
      */
     void HighlightMatchingFileExtensions();
