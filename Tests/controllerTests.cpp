@@ -219,15 +219,10 @@ void ControllerTests::SearchTreemapWithoutPriorSelection() const
 
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
 
-    constexpr auto shouldSearchFiles = true;
-    constexpr auto shouldSearchDirectories = false;
-    constexpr auto shouldUseRegex = false;
-
     ScanDrive();
 
     m_controller->SearchTreeMap(
-        query, deselectionCallback, selectionCallback, shouldSearchFiles, shouldSearchDirectories,
-        shouldUseRegex);
+        query, deselectionCallback, selectionCallback, SearchFlags::SearchFiles);
 }
 
 void ControllerTests::SearchTreemapWithPriorSelection() const
@@ -261,13 +256,8 @@ void ControllerTests::SearchTreemapWithPriorSelection() const
 
     m_controller->HighlightAllMatchingExtensions(prior, highlightCallback);
 
-    constexpr auto shouldSearchFiles = true;
-    constexpr auto shouldSearchDirectories = false;
-    constexpr auto shouldUseRegex = false;
-
     m_controller->SearchTreeMap(
-        query, deselectionCallback, selectionCallback, shouldSearchFiles, shouldSearchDirectories,
-        shouldUseRegex);
+        query, deselectionCallback, selectionCallback, SearchFlags::SearchFiles);
 }
 
 void ControllerTests::HighlightAncestors() const

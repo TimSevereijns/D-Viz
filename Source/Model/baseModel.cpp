@@ -480,12 +480,15 @@ void BaseModel::HighlightMatchingFileExtensions(
 
 void BaseModel::PerformRegexSearch(
     const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
-    bool shouldSearchFiles, bool shouldSearchDirectories)
+    SearchFlags flags)
 {
     std::string fileAndExtension;
     fileAndExtension.resize(512); //< Resize to prevent reallocation with append operations.
 
     const std::regex expression{ searchQuery };
+
+    const auto shouldSearchFiles = flags & SearchFlags::SearchFiles;
+    const auto shouldSearchDirectories = flags & SearchFlags::SearchDirectories;
 
     for (const auto& node : GetTree()) {
         const auto& file = node->file;
@@ -507,12 +510,15 @@ void BaseModel::PerformRegexSearch(
 
 void BaseModel::PerformNormalSearch(
     const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
-    bool shouldSearchFiles, bool shouldSearchDirectories)
+    SearchFlags flags)
 {
     std::string fileAndExtension;
     fileAndExtension.resize(512); //< Resize to prevent reallocation with append operations.
 
     const auto lowercaseQuery = boost::algorithm::to_lower_copy(searchQuery);
+
+    const auto shouldSearchFiles = flags & SearchFlags::SearchFiles;
+    const auto shouldSearchDirectories = flags & SearchFlags::SearchDirectories;
 
     for (const auto& node : GetTree()) {
         const auto& file = node->file;
@@ -538,15 +544,17 @@ void BaseModel::PerformNormalSearch(
 
 void BaseModel::HighlightMatchingFileNames(
     const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
-    bool shouldSearchFiles, bool shouldSearchDirectories, bool useRegex)
+    SearchFlags flags)
 {
+    const auto useRegex = flags & SearchFlags::UseRegex;
+
     if (!useRegex) {
-        PerformNormalSearch(searchQuery, parameters, shouldSearchFiles, shouldSearchDirectories);
+        PerformNormalSearch(searchQuery, parameters, flags);
         return;
     }
 
     try {
-        PerformRegexSearch(searchQuery, parameters, shouldSearchFiles, shouldSearchDirectories);
+        PerformRegexSearch(searchQuery, parameters, flags);
     } catch (const std::regex_error& exception) {
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->error("Caught regex exception. Details: {}", exception.what());

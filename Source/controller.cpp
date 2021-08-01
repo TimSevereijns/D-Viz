@@ -461,8 +461,11 @@ void Controller::SearchTreeMap(
     const std::string& searchQuery,
     const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& deselectionCallback,
     const std::function<void(std::vector<const Tree<VizBlock>::Node*>&)>& selectionCallback,
-    bool shouldSearchFiles, bool shouldSearchDirectories, bool shouldUseRegex)
+    SearchFlags flags)
 {
+    const auto shouldSearchFiles = flags & SearchFlags::SearchFiles;
+    const auto shouldSearchDirectories = flags & SearchFlags::SearchDirectories;
+
     if (searchQuery.empty() || !HasModelBeenLoaded() ||
         (!shouldSearchFiles && !shouldSearchDirectories)) {
         return;
@@ -473,8 +476,7 @@ void Controller::SearchTreeMap(
     const auto selector = [&] {
         const auto stopwatch = Stopwatch<std::chrono::milliseconds>([&]() noexcept {
             m_model->HighlightMatchingFileNames(
-                searchQuery, m_sessionSettings.GetVisualizationParameters(), shouldSearchFiles,
-                shouldSearchDirectories, shouldUseRegex);
+                searchQuery, m_sessionSettings.GetVisualizationParameters(), flags);
         });
 
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);

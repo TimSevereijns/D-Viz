@@ -27,6 +27,23 @@ struct TreemapMetadata
     std::uintmax_t TotalBytes = 0;
 };
 
+enum SearchFlags : int
+{
+    SearchFiles = 1,
+    SearchDirectories = 2,
+    UseRegex = 4
+};
+
+constexpr inline SearchFlags operator|(SearchFlags lhs, SearchFlags rhs)
+{
+    return static_cast<SearchFlags>(static_cast<int>(lhs) | static_cast<int>(rhs));
+}
+
+constexpr inline SearchFlags& operator|=(SearchFlags& lhs, SearchFlags rhs)
+{
+    return lhs = lhs | rhs;
+}
+
 /**
  * @brief Base class for the visualization model.
  */
@@ -167,13 +184,11 @@ class BaseModel
      * @param[in] searchQuery              The raw search query.
      * @param[in] parameters               Used to prune disqualified nodes. @see
      *                                     VisualizationParameters.
-     * @param[in] shouldSearchFiles        Pass in true to search files.
-     * @param[in] shouldSearchDirectories  Pass in true to search directories.
-     * @param[in] useRegex                 Pass in true to use regular expressions.
+     * @param[in] flags                    Encoded search options.
      */
     void HighlightMatchingFileNames(
         const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
-        bool shouldSearchFiles, bool shouldSearchDirectories, bool useRegex);
+        SearchFlags flags);
 
     /**
      * @brief Starts monitoring the file system for changes.
@@ -291,11 +306,11 @@ class BaseModel
   private:
     void PerformRegexSearch(
         const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
-        bool shouldSearchFiles, bool shouldSearchDirectories);
+        SearchFlags flags);
 
     void PerformNormalSearch(
         const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
-        bool shouldSearchFiles, bool shouldSearchDirectories);
+        SearchFlags flags);
 };
 
 #endif // VISUALIZATIONMODEL_H

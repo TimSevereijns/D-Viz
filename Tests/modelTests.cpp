@@ -235,12 +235,7 @@ void ModelTests::HighlightAllMatchingFileNames()
     parameters.minimumFileSize = 0u;
     parameters.onlyShowDirectories = false;
 
-    constexpr auto shouldSearchFiles = true;
-    constexpr auto shouldSearchDirectories = false;
-    constexpr auto shouldUseRegex = false;
-
-    m_model->HighlightMatchingFileNames(
-        "socket", parameters, shouldSearchFiles, shouldSearchDirectories, shouldUseRegex);
+    m_model->HighlightMatchingFileNames("socket", parameters, SearchFlags::SearchFiles);
 
     const auto headerCount = std::count_if(
         Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() }, Tree<VizBlock>::PostOrderIterator{},
@@ -260,14 +255,10 @@ void ModelTests::HighlightAllMatchingFileNamesUsingRegex()
     parameters.minimumFileSize = 0u;
     parameters.onlyShowDirectories = false;
 
-    constexpr auto shouldSearchFiles = true;
-    constexpr auto shouldSearchDirectories = false;
-    constexpr auto shouldUseRegex = true;
-
     constexpr auto query = ".*_.*\\.hpp"; //< Look for headers with at least one underscore.
 
     m_model->HighlightMatchingFileNames(
-        query, parameters, shouldSearchFiles, shouldSearchDirectories, shouldUseRegex);
+        query, parameters, SearchFlags::SearchFiles | SearchFlags::UseRegex);
 
     const auto headerCount = std::count_if(
         Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() }, Tree<VizBlock>::PostOrderIterator{},
@@ -290,14 +281,10 @@ void ModelTests::HandleInvalidRegex()
     parameters.minimumFileSize = 0u;
     parameters.onlyShowDirectories = false;
 
-    constexpr auto shouldSearchFiles = true;
-    constexpr auto shouldSearchDirectories = false;
-    constexpr auto shouldUseRegex = true;
-
     constexpr auto query = ".*_.*\\"; //< Ends with an escape and should lead to an exception.
 
     m_model->HighlightMatchingFileNames(
-        query, parameters, shouldSearchFiles, shouldSearchDirectories, shouldUseRegex);
+        query, parameters, SearchFlags::SearchFiles | SearchFlags::UseRegex);
 
     QCOMPARE(
         static_cast<std::int32_t>(m_model->GetHighlightedNodes().size()),

@@ -135,6 +135,25 @@ namespace
         messageBox.move(position);
         messageBox.exec();
     }
+
+    SearchFlags BuildSearchFlags(Settings::SessionSettings& settings)
+    {
+        SearchFlags flags{ 0 };
+
+        if (settings.ShouldSearchFiles()) {
+            flags |= SearchFlags::SearchFiles;
+        }
+
+        if (settings.ShouldSearchDirectories()) {
+            flags |= SearchFlags::SearchDirectories;
+        }
+
+        if (settings.ShouldUseRegex()) {
+            flags |= SearchFlags::UseRegex;
+        }
+
+        return flags;
+    }
 } // namespace
 
 MainWindow::MainWindow(Controller& controller, QWidget* parent /* = nullptr */)
@@ -743,16 +762,10 @@ void MainWindow::OnNewSearchQuery()
 
     const auto selectionCallback = [&](auto& nodes) { m_glCanvas->HighlightNodes(nodes); };
 
-    const auto& settings = m_controller.GetSessionSettings();
-    const auto shouldSearchFiles = settings.ShouldSearchFiles();
-    const auto shouldSearchDirectories = settings.ShouldSearchDirectories();
-    const auto shouldUseRegex = settings.ShouldUseRegex();
-
     const ScopedCursor waitCursor{ Qt::WaitCursor };
 
-    m_controller.SearchTreeMap(
-        searchQuery, deselectionCallback, selectionCallback, shouldSearchFiles,
-        shouldSearchDirectories, shouldUseRegex);
+    const auto flags = BuildSearchFlags(m_controller.GetSessionSettings());
+    m_controller.SearchTreeMap(searchQuery, deselectionCallback, selectionCallback, flags);
 }
 
 void MainWindow::OnSearchQueryTextChanged(const QString& text)
