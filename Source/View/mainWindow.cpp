@@ -136,7 +136,7 @@ namespace
         messageBox.exec();
     }
 
-    SearchFlags BuildSearchFlags(Settings::SessionSettings& settings)
+    SearchFlags BuildSearchFlags(const Settings::SessionSettings& settings)
     {
         SearchFlags flags{ 0 };
 

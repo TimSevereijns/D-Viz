@@ -46,8 +46,6 @@ namespace
     void
     InitializeLightMarkers(const std::vector<Light>& lights, Assets::LightMarker& lightMarkerAsset)
     {
-        constexpr auto verticesPerMarker{ 6 };
-
         QVector<QVector3D> vertices;
         for (const auto& light : lights) {
             vertices << light.position + QVector3D{ 5.0f, 0.0f, 0.0f }
@@ -59,7 +57,9 @@ namespace
         }
 
         QVector<QVector3D> colors;
-        for (std::size_t index{ 0 }; index < lights.size() * verticesPerMarker; ++index) {
+
+        constexpr auto verticesPerMarker = 6;
+        for (std::size_t index = 0u; index < lights.size() * verticesPerMarker; ++index) {
             colors << Constants::Colors::White;
         }
 

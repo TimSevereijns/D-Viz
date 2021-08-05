@@ -17,7 +17,7 @@
 #include <vector>
 
 BreakdownDialog::BreakdownDialog(QWidget* parent)
-    : QDialog{ parent }, m_mainWindow{ *(dynamic_cast<MainWindow*>(parent)) }, m_ui{}
+    : QDialog{ parent }, m_mainWindow{ *(dynamic_cast<MainWindow*>(parent)) }
 {
     m_ui.setupUi(this);
 
