@@ -2,6 +2,7 @@
 #define FILEINFO_H
 
 #include <cstdint>
+#include <filesystem>
 #include <string>
 
 /**
@@ -21,6 +22,14 @@ enum class FileType
 struct FileInfo
 {
     FileInfo() = default;
+
+    FileInfo(const std::filesystem::path& path, std::uintmax_t size, FileType type) noexcept
+        : name{ path.filename().stem().string() },
+          extension{ path.extension().string() },
+          size{ size },
+          type{ type }
+    {
+    }
 
     FileInfo(std::string name, std::string extension, std::uintmax_t size, FileType type) noexcept
         : name{ std::move(name) }, extension{ std::move(extension) }, size{ size }, type{ type }

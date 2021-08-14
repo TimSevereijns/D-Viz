@@ -682,11 +682,7 @@ void BaseModel::OnFileCreation(const FileEvent& event)
         return;
     }
 
-    auto fileInfo = FileInfo{ /* name = */ event.path.stem().string(),
-                              /* extension = */ event.path.extension().string(),
-                              /* size = */ event.fileSize,
-                              /* type = */ FileType::Regular };
-
+    auto fileInfo = FileInfo{ event.path, event.fileSize, FileType::Regular };
     node->AppendChild(VizBlock{ std::move(fileInfo) });
 }
 

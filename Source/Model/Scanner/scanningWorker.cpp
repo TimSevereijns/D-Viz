@@ -126,8 +126,7 @@ void ScanningWorker::ProcessFile(
     m_progress.bytesProcessed.fetch_add(fileSize);
     m_progress.filesScanned.fetch_add(1);
 
-    FileInfo fileInfo{ path.filename().stem().string(), path.filename().extension().string(),
-                       fileSize, FileType::Regular };
+    FileInfo fileInfo{ path, fileSize, FileType::Regular };
 
     std::unique_lock<decltype(m_mutex)> lock{ m_mutex };
     treeNode.AppendChild(VizBlock{ std::move(fileInfo) });
