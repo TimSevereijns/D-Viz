@@ -6,6 +6,7 @@
 #include <spdlog/spdlog.h>
 
 #ifdef Q_OS_WIN
+// Conflicts with Rapid JSON API.
 #undef GetObject
 #endif // Q_OS_WIN
 
@@ -57,14 +58,11 @@ namespace
         }
     }
 
-    void AddVideoColors(
-        Settings::JsonDocument& document, Settings::JsonDocument::AllocatorType& allocator)
+    template <typename Container>
+    rapidjson::Value
+    ConstructColorMap(const Container& fileTypes, Settings::JsonDocument::AllocatorType& allocator)
     {
         using JsonValue = rapidjson::Value;
-        constexpr std::array<std::string_view, 10> fileTypes = { ".mp4",  ".avi",  ".mkv", ".mov",
-                                                                 ".vob",  ".gifv", ".wmv", ".mpg",
-                                                                 ".mpeg", ".m4v" };
-
         constexpr auto color = Constants::Colors::SchemeHighlight;
 
         JsonValue array{ rapidjson::kArrayType };
@@ -79,34 +77,32 @@ namespace
                 allocator);
         }
 
-        document.AddMember("Videos", object.Move(), allocator);
+        return object;
+    }
+
+    void AddVideoColors(
+        Settings::JsonDocument& document, Settings::JsonDocument::AllocatorType& allocator)
+    {
+        constexpr std::array<std::string_view, 18> fileTypes = {
+            ".mp2",  ".mp4", ".avi", ".mkv", ".mov", ".vob", ".gifv", ".wmv",  ".mpg",
+            ".mpeg", ".m4v", ".flv", ".mpv", ".ogv", ".ogg", ".mts",  ".m2ts", ".ts"
+        };
+
+        auto colorMap = ConstructColorMap(fileTypes, allocator);
+        document.AddMember("Videos", colorMap.Move(), allocator);
     }
 
     void AddImageColors(
         Settings::JsonDocument& document, Settings::JsonDocument::AllocatorType& allocator)
     {
-        using JsonValue = rapidjson::Value;
         constexpr std::array<std::string_view, 28> fileTypes = {
             ".jpg", ".jpeg", ".tiff", ".png", ".psd", ".gif", ".bmp", ".svg", ".dng", ".RAF",
             ".crw", ".cr2",  ".cr3",  ".cap", ".erf", ".fff", ".gpr", ".mef", ".mdc", ".mrw",
             ".nef", ".nrw",  ".orf",  ".orf", ".pef", ".ptx", ".x3f", ".srw"
         };
 
-        constexpr auto color = Constants::Colors::SchemeHighlight;
-
-        JsonValue array{ rapidjson::kArrayType };
-        array.PushBack(static_cast<int>(color[0] * 255), allocator);
-        array.PushBack(static_cast<int>(color[1] * 255), allocator);
-        array.PushBack(static_cast<int>(color[2] * 255), allocator);
-
-        JsonValue object{ rapidjson::kObjectType };
-        for (const auto& type : fileTypes) {
-            object.AddMember(
-                JsonValue{ type.data(), allocator }, JsonValue{}.CopyFrom(array, allocator),
-                allocator);
-        }
-
-        document.AddMember("Images", object.Move(), allocator);
+        auto colorMap = ConstructColorMap(fileTypes, allocator);
+        document.AddMember("Images", colorMap.Move(), allocator);
     }
 } // namespace
 
