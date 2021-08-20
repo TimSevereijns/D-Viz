@@ -22,6 +22,35 @@ namespace
     {
         return TestUtilities::SanitizePath(std::filesystem::absolute("../../Tests/Sandbox"));
     }
+
+    std::string GetLargeDirectoryToScan()
+    {
+#if defined(Q_OS_WIN)
+        std::string path;
+        path.reserve(512);
+
+        std::size_t requiredBufferSize = 0;
+        getenv_s(&requiredBufferSize, &path[0], path.capacity(), "GITHUB_WORKSPACE");
+        path.resize(requiredBufferSize);
+
+        const auto variableNotFound = requiredBufferSize == 0;
+        if (variableNotFound) {
+            return std::filesystem::current_path().root_name().string();
+        }
+
+        return path;
+
+#elif defined(Q_OS_LINUX)
+
+        const auto* env = std::getenv("GITHUB_WORKSPACE");
+        const std::string path =
+            env ? std::string{ env }
+                : std::string{ std::filesystem::current_path().root_name().string() };
+
+        return path;
+
+#endif
+    }
 } // namespace
 
 void ControllerTests::initTestCase()
@@ -76,6 +105,60 @@ void ControllerTests::ScanDrive() const
     QSignalSpy completionSpy{ m_controller.get(), &Controller::FinishedScanning };
     m_controller->ScanDrive(parameters);
     completionSpy.wait(10'000);
+}
+
+void ControllerTests::CancelScan() const
+{
+    QVERIFY(m_controller);
+
+    // We need a larger directory so that we have a bit more time to cancel the scan.
+    const auto path = GetLargeDirectoryToScan();
+
+    Settings::VisualizationParameters parameters;
+    parameters.forceNewScan = true;
+    parameters.rootDirectory = path;
+    parameters.minimumFileSize = 0;
+    parameters.onlyShowDirectories = false;
+
+    REQUIRE_CALL(*m_view, SetWaitCursor()).TIMES(1);
+    REQUIRE_CALL(*m_view, RestoreDefaultCursor()).TIMES(1);
+    REQUIRE_CALL(*m_view, GetWindowHandle()).RETURN(nullptr);
+    REQUIRE_CALL(*m_view, OnScanStarted()).TIMES(1);
+    REQUIRE_CALL(*m_view, OnScanCompleted()).TIMES(1);
+    REQUIRE_CALL(*m_view, GetTaskbarButton()).TIMES(1).RETURN(GetFakeTaskbarButton());
+    REQUIRE_CALL(*m_view, AskUserToLimitFileSize(trompeloeil::_)).TIMES(1).RETURN(true);
+
+    std::vector<std::string> messages;
+
+    REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_))
+        .WITH(_1.find("Files Scanned") != std::string::npos && _2 == 0)
+        .LR_SIDE_EFFECT(messages.emplace_back(std::move(_1)))
+        .TIMES(AT_LEAST(1));
+
+    QSignalSpy completionSpy{ m_controller.get(), &Controller::FinishedScanning };
+    m_controller->ScanDrive(parameters);
+
+    // Brief pause to make sure the scanning thread gets instantiated.
+    std::this_thread::sleep_for(std::chrono::milliseconds{ 10 });
+
+    m_controller->StopScanning();
+    completionSpy.wait(10'000);
+
+    QVERIFY(messages.size() > 0);
+
+    const auto& message = messages.front();
+    constexpr auto& prefix = "Files Scanned: ";
+    const auto lhs = message.find(prefix);
+    const auto rhs = message.find(" ", lhs + std::size(prefix));
+
+    const auto filesScanned =
+        message.substr(lhs + std::size(prefix) - 1, rhs - (lhs + std::size(prefix)) + 1);
+
+    const int count = std::count_if(
+        std::filesystem::recursive_directory_iterator{ path },
+        std::filesystem::recursive_directory_iterator{}, [](const auto&) { return true; });
+
+    QVERIFY(std::stoi(filesScanned) < count);
 }
 
 void ControllerTests::HasModelBeenLoaded() const
@@ -297,7 +380,7 @@ void ControllerTests::HighlightDescendants() const
     ScanDrive();
 
     const auto selectionCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
-        QCOMPARE(nodes.size(), 469ul); //< As seeen in File Explorer
+        QCOMPARE(nodes.size(), 469ul); //< As seen in File Explorer
     };
 
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
@@ -339,6 +422,22 @@ void ControllerTests::SelectNodeViaRay() const
     };
 
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
+
+    m_controller->SelectNodeViaRay(camera, ray, deselectionCallback, selectionCallback);
+}
+
+void ControllerTests::SelectNodeViaRayBeforeModelLoads() const
+{
+    FORBID_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_));
+
+    Camera camera;
+    camera.SetPosition({ 300, 300, -300 });
+    camera.LookAt({ 1.0f, 1.0f, 1.0f });
+
+    const Ray ray{ camera.GetPosition(), camera.Forward() };
+
+    const auto deselectionCallback = [](const Tree<VizBlock>::Node&) { QVERIFY(false); };
+    const auto selectionCallback = [](const Tree<VizBlock>::Node&) { QVERIFY(false); };
 
     m_controller->SelectNodeViaRay(camera, ray, deselectionCallback, selectionCallback);
 }

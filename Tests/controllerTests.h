@@ -77,6 +77,11 @@ class ControllerTests : public QObject
     void ScanDrive() const;
 
     /**
+     * @brief Verify that scans can be cancelled.
+     */
+    void CancelScan() const;
+
+    /**
      * @brief Verify that the model is correctly reported as having been loaded.
      */
     void HasModelBeenLoaded() const;
@@ -150,6 +155,12 @@ class ControllerTests : public QObject
      * @brief Verifies that a node can be selected via a picking ray.
      */
     void SelectNodeViaRay() const;
+
+    /**
+     * @brief Verifies that nothing adverse happens when attempting to select a node before a tree
+     * has been loaded.
+     */
+    void SelectNodeViaRayBeforeModelLoads() const;
 
     /**
      * @brief Verifies that the default color of an unhighlighted/unselected node is what we expect.
