@@ -78,6 +78,44 @@ void ControllerTests::ScanDrive() const
     completionSpy.wait(10'000);
 }
 
+void ControllerTests::CancelScan() const
+{
+    QVERIFY(m_controller);
+
+    Settings::VisualizationParameters parameters;
+    parameters.forceNewScan = true;
+    parameters.rootDirectory = GetSampleDirectory().string();
+    parameters.minimumFileSize = 0;
+    parameters.onlyShowDirectories = false;
+
+    REQUIRE_CALL(*m_view, SetWaitCursor()).TIMES(1);
+    REQUIRE_CALL(*m_view, RestoreDefaultCursor()).TIMES(1);
+    REQUIRE_CALL(*m_view, GetWindowHandle()).RETURN(nullptr);
+    REQUIRE_CALL(*m_view, OnScanStarted()).TIMES(1);
+    REQUIRE_CALL(*m_view, OnScanCompleted()).TIMES(1);
+    REQUIRE_CALL(*m_view, GetTaskbarButton()).TIMES(1).RETURN(GetFakeTaskbarButton());
+    REQUIRE_CALL(*m_view, AskUserToLimitFileSize(trompeloeil::_)).TIMES(1).RETURN(true);
+
+    REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_))
+        .WITH(_1.find("Successfully canceled scan.") != std::string::npos && _2 == 0)
+        .TIMES(AT_LEAST(1));
+
+    REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_))
+        .WITH(_1.find("Files Scanned") != std::string::npos && _2 == 0)
+        .TIMES(AT_LEAST(1));
+
+    QSignalSpy completionSpy{ m_controller.get(), &Controller::FinishedScanning };
+    m_controller->ScanDrive(parameters);
+
+    // Brief pause to make sure the scanning thread gets instantiated.
+    std::this_thread::sleep_for(std::chrono::milliseconds{ 10 });
+
+    m_controller->StopScanning();
+    completionSpy.wait(10'000);
+
+    QVERIFY(m_controller->GetTree().Size() < 469ul);
+}
+
 void ControllerTests::HasModelBeenLoaded() const
 {
     ScanDrive();
@@ -297,7 +335,7 @@ void ControllerTests::HighlightDescendants() const
     ScanDrive();
 
     const auto selectionCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
-        QCOMPARE(nodes.size(), 469ul); //< As seeen in File Explorer
+        QCOMPARE(nodes.size(), 469ul); //< As seen in File Explorer
     };
 
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
@@ -339,6 +377,22 @@ void ControllerTests::SelectNodeViaRay() const
     };
 
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
+
+    m_controller->SelectNodeViaRay(camera, ray, deselectionCallback, selectionCallback);
+}
+
+void ControllerTests::SelectNodeViaRayBeforeModelLoads() const
+{
+    FORBID_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_));
+
+    Camera camera;
+    camera.SetPosition({ 300, 300, -300 });
+    camera.LookAt({ 1.0f, 1.0f, 1.0f });
+
+    const Ray ray{ camera.GetPosition(), camera.Forward() };
+
+    const auto deselectionCallback = [](const Tree<VizBlock>::Node&) { QVERIFY(false); };
+    const auto selectionCallback = [](const Tree<VizBlock>::Node&) { QVERIFY(false); };
 
     m_controller->SelectNodeViaRay(camera, ray, deselectionCallback, selectionCallback);
 }

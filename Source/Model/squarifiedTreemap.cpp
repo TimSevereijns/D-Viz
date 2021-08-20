@@ -377,7 +377,7 @@ SquarifiedTreeMap::SquarifiedTreeMap(
 
 void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
 {
-    if (!theTree) {
+    if (!theTree || !theTree->GetRoot()) {
         Expects(!"Whoops, no tree in sight!");
         return;
     }
