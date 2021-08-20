@@ -22,6 +22,34 @@ namespace
     {
         return TestUtilities::SanitizePath(std::filesystem::absolute("../../Tests/Sandbox"));
     }
+
+    std::string GetLargeDirectoryToScan()
+    {
+#if defined(Q_OS_WIN)
+        std::string path;
+        path.reserve(512);
+
+        std::size_t requiredBufferSize = 0;
+        getenv_s(&requiredBufferSize, &path[0], path.capacity(), "GITHUB_WORKSPACE");
+        path.resize(requiredBufferSize);
+
+        if (requiredBufferSize == 0) {
+            return std::filesystem::current_path().root_name().string();
+        }
+
+        return path;
+
+#elif defined(Q_OS_LINUX)
+
+        const auto* env = std::getenv("GITHUB_WORKSPACE");
+        const std::string path =
+            env ? std::string{ env }
+                : std::string{ std::filesystem::current_path().root_name().string() };
+
+        return path;
+
+#endif
+    }
 } // namespace
 
 void ControllerTests::initTestCase()
@@ -82,10 +110,7 @@ void ControllerTests::CancelScan() const
 {
     QVERIFY(m_controller);
 
-    const auto* env = std::getenv("GITHUB_WORKSPACE");
-    const std::string path =
-        env ? std::string{ env }
-            : std::string{ std::filesystem::current_path().root_name().string() };
+    const auto path = GetLargeDirectoryToScan();
 
     Settings::VisualizationParameters parameters;
     parameters.forceNewScan = true;
@@ -127,7 +152,11 @@ void ControllerTests::CancelScan() const
     const auto filesScanned =
         message.substr(lhs + std::size(prefix) - 1, rhs - (lhs + std::size(prefix)) + 1);
 
-    QVERIFY(std::stoi(filesScanned) < 5'000);
+    const int count = std::count_if(
+        std::filesystem::recursive_directory_iterator{ path },
+        std::filesystem::recursive_directory_iterator{}, [](const auto&) { return true; });
+
+    QVERIFY(std::stoi(filesScanned) < count);
 }
 
 void ControllerTests::HasModelBeenLoaded() const
