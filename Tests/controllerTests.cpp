@@ -33,7 +33,8 @@ namespace
         getenv_s(&requiredBufferSize, &path[0], path.capacity(), "GITHUB_WORKSPACE");
         path.resize(requiredBufferSize);
 
-        if (requiredBufferSize == 0) {
+        const auto variableNotFound = requiredBufferSize == 0;
+        if (variableNotFound) {
             return std::filesystem::current_path().root_name().string();
         }
 
@@ -110,6 +111,7 @@ void ControllerTests::CancelScan() const
 {
     QVERIFY(m_controller);
 
+    // We need a larger directory so that we have a bit more time to cancel the scan.
     const auto path = GetLargeDirectoryToScan();
 
     Settings::VisualizationParameters parameters;
