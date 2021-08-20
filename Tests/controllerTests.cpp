@@ -82,9 +82,11 @@ void ControllerTests::CancelScan() const
 {
     QVERIFY(m_controller);
 
+    const auto currentPath = std::filesystem::current_path();
+
     Settings::VisualizationParameters parameters;
     parameters.forceNewScan = true;
-    parameters.rootDirectory = GetSampleDirectory().string();
+    parameters.rootDirectory = currentPath.root_name().string();
     parameters.minimumFileSize = 0;
     parameters.onlyShowDirectories = false;
 
@@ -107,7 +109,7 @@ void ControllerTests::CancelScan() const
     m_controller->ScanDrive(parameters);
 
     // Brief pause to make sure the scanning thread gets instantiated.
-    std::this_thread::sleep_for(std::chrono::milliseconds{ 5 });
+    std::this_thread::sleep_for(std::chrono::milliseconds{ 50 });
 
     m_controller->StopScanning();
     completionSpy.wait(10'000);
@@ -117,12 +119,12 @@ void ControllerTests::CancelScan() const
     const auto& message = messages.front();
     constexpr auto& prefix = "Files Scanned: ";
     const auto lhs = message.find(prefix);
-    const auto rhs = message.find(" ", lhs);
+    const auto rhs = message.find(" ", lhs + std::size(prefix));
 
     const auto filesScanned =
         message.substr(lhs + std::size(prefix) - 1, rhs - (lhs + std::size(prefix)) + 1);
 
-    QVERIFY(std::stoi(filesScanned) < 469);
+    QVERIFY(std::stoi(filesScanned) < 5'000);
 }
 
 void ControllerTests::HasModelBeenLoaded() const
