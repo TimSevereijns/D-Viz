@@ -159,8 +159,6 @@ void Controller::StopScanning()
     if (m_scanner.IsActive()) {
         m_scanner.StopProgressReporting();
         m_scanner.StopScanning();
-
-        m_view->SetStatusBarMessage("Successfully canceled scan.");
     }
 }
 

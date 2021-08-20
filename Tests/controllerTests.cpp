@@ -96,24 +96,33 @@ void ControllerTests::CancelScan() const
     REQUIRE_CALL(*m_view, GetTaskbarButton()).TIMES(1).RETURN(GetFakeTaskbarButton());
     REQUIRE_CALL(*m_view, AskUserToLimitFileSize(trompeloeil::_)).TIMES(1).RETURN(true);
 
-    REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_))
-        .WITH(_1.find("Successfully canceled scan.") != std::string::npos && _2 == 0)
-        .TIMES(AT_LEAST(1));
+    std::vector<std::string> messages;
 
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_))
         .WITH(_1.find("Files Scanned") != std::string::npos && _2 == 0)
+        .LR_SIDE_EFFECT(messages.emplace_back(std::move(_1)))
         .TIMES(AT_LEAST(1));
 
     QSignalSpy completionSpy{ m_controller.get(), &Controller::FinishedScanning };
     m_controller->ScanDrive(parameters);
 
     // Brief pause to make sure the scanning thread gets instantiated.
-    std::this_thread::sleep_for(std::chrono::milliseconds{ 10 });
+    std::this_thread::sleep_for(std::chrono::milliseconds{ 5 });
 
     m_controller->StopScanning();
     completionSpy.wait(10'000);
 
-    QVERIFY(m_controller->GetTree().Size() < 469ul);
+    QVERIFY(messages.size() > 0);
+
+    const auto& message = messages.front();
+    constexpr auto& prefix = "Files Scanned: ";
+    const auto lhs = message.find(prefix);
+    const auto rhs = message.find(" ", lhs);
+
+    const auto filesScanned =
+        message.substr(lhs + std::size(prefix) - 1, rhs - (lhs + std::size(prefix)) + 1);
+
+    QVERIFY(std::stoi(filesScanned) < 469);
 }
 
 void ControllerTests::HasModelBeenLoaded() const
