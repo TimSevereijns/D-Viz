@@ -84,6 +84,16 @@ void SessionSettingsTests::ModifyDirectorySearchingPreference() const
     QCOMPARE(manager.ShouldSearchDirectories(), searchDirectories);
 }
 
+void SessionSettingsTests::ModifyRegexSearchingPreference() const
+{
+    constexpr auto useRegex = true;
+
+    Settings::SessionSettings manager;
+    manager.UseRegexSearch(useRegex);
+
+    QCOMPARE(manager.ShouldUseRegex(), useRegex);
+}
+
 void SessionSettingsTests::ModifyNumericPrefix() const
 {
     constexpr auto numericPrefix = Constants::SizePrefix::Binary;

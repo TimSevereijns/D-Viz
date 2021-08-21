@@ -66,6 +66,12 @@ class SessionSettingsTests : public QObject
     void ModifyDirectorySearchingPreference() const;
 
     /**
+     * @brief Verify that the setting governing whether to use regex can be set and retrieved
+     * successfully.
+     */
+    void ModifyRegexSearchingPreference() const;
+
+    /**
      * @brief Verify that the active numeric prefix can be set and retrieved correctly.
      */
     void ModifyNumericPrefix() const;

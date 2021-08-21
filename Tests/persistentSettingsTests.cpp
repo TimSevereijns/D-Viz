@@ -128,6 +128,13 @@ void PersistentSettingsTests::ToggleFrustaRendering() const
         &Settings::PersistentSettings::ShouldRenderFrusta);
 }
 
+void PersistentSettingsTests::ToggleDarkThemeUse() const
+{
+    ToggleBooleanSetting(
+        &Settings::PersistentSettings::UseDarkMode,
+        &Settings::PersistentSettings::ShouldUseDarkMode);
+}
+
 void PersistentSettingsTests::ModifyShadowMapCascadeCount() const
 {
     constexpr auto desired = 2;

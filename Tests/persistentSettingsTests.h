@@ -73,6 +73,11 @@ class PersistentSettingsTests : public QObject
     void ToggleFrustaRendering() const;
 
     /**
+     * @brief Verifies that the use of the dark theme can be correctly toggled.
+     */
+    void ToggleDarkThemeUse() const;
+
+    /**
      * @brief Verifies that the shadow map cascade counts can be correctly modified.
      */
     void ModifyShadowMapCascadeCount() const;
