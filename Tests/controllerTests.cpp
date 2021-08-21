@@ -151,8 +151,10 @@ void ControllerTests::CancelScan() const
 
     std::vector<std::string> messages;
 
+    constexpr auto& messageFragment = "Files Scanned: ";
+
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_))
-        .WITH(_1.find("Files Scanned") != std::string::npos && _2 == 0)
+        .WITH(_1.find(messageFragment) != std::string::npos && _2 == 0)
         .LR_SIDE_EFFECT(messages.emplace_back(std::move(_1)))
         .TIMES(AT_LEAST(1));
 
@@ -168,12 +170,12 @@ void ControllerTests::CancelScan() const
     QVERIFY(messages.size() > 0);
 
     const auto& message = messages.front();
-    constexpr auto& prefix = "Files Scanned: ";
-    const auto lhs = message.find(prefix);
-    const auto rhs = message.find(" ", lhs + std::size(prefix));
 
-    const auto filesScanned =
-        message.substr(lhs + std::size(prefix) - 1, rhs - (lhs + std::size(prefix)) + 1);
+    const auto lhs = message.find(messageFragment);
+    const auto rhs = message.find(" ", lhs + std::size(messageFragment));
+
+    const auto filesScanned = message.substr(
+        lhs + std::size(messageFragment) - 1, rhs - (lhs + std::size(messageFragment) - 1));
 
     const int count = std::count_if(
         std::filesystem::recursive_directory_iterator{ path },
@@ -310,11 +312,11 @@ void ControllerTests::SearchTreemapWithoutPriorSelection() const
 
     constexpr auto query = ".hpp";
 
-    const auto deselectionCallback = [](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+    const auto deselectionCallback = [](const std::vector<const Tree<VizBlock>::Node*>& nodes) {
         QCOMPARE(nodes.empty(), true);
     };
 
-    const auto selectionCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+    const auto selectionCallback = [&](const std::vector<const Tree<VizBlock>::Node*>& nodes) {
         QCOMPARE(nodes.empty(), false);
         QVERIFY(std::all_of(std::begin(nodes), std::end(nodes), [&](const auto* node) {
             return node->GetData().file.extension == query;
@@ -336,18 +338,18 @@ void ControllerTests::SearchTreemapWithPriorSelection() const
     constexpr auto query = ".hpp";
     constexpr auto prior = ".ipp";
 
-    const auto deselectionCallback = [](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+    const auto deselectionCallback = [](const std::vector<const Tree<VizBlock>::Node*>& nodes) {
         QCOMPARE(nodes.empty(), false);
     };
 
-    const auto selectionCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+    const auto selectionCallback = [&](const std::vector<const Tree<VizBlock>::Node*>& nodes) {
         QCOMPARE(nodes.empty(), false);
         QVERIFY(std::all_of(std::begin(nodes), std::end(nodes), [&](const auto* node) {
             return node->GetData().file.extension == query;
         }));
     };
 
-    const auto highlightCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+    const auto highlightCallback = [&](const std::vector<const Tree<VizBlock>::Node*>& nodes) {
         QCOMPARE(nodes.empty(), false);
         QVERIFY(std::all_of(std::begin(nodes), std::end(nodes), [&](const auto* node) {
             return node->GetData().file.extension == prior;
@@ -368,25 +370,18 @@ void ControllerTests::SearchTreemapWithIncorrectFlags() const
 {
     ScanDrive();
 
-    const auto deselectionCallback = [](std::vector<const Tree<VizBlock>::Node*>&) {
-        QVERIFY(false);
-    };
-
-    const auto selectionCallback = [](std::vector<const Tree<VizBlock>::Node*>&) {
-        QVERIFY(false);
-    };
+    const auto callback = [](const std::vector<const Tree<VizBlock>::Node*>&) { QVERIFY(false); };
 
     // Since we're not passing either the SearchFiles or SearchDirectory flags, the search function
     // should hit an early return and no callbacks should be invoked.
-    m_controller->SearchTreeMap(
-        "socket", deselectionCallback, selectionCallback, static_cast<SearchFlags>(0));
+    m_controller->SearchTreeMap("socket", callback, callback, static_cast<SearchFlags>(0));
 }
 
 void ControllerTests::HighlightAncestors() const
 {
     ScanDrive();
 
-    const auto selectionCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+    const auto selectionCallback = [&](const std::vector<const Tree<VizBlock>::Node*>& nodes) {
         QCOMPARE(nodes.size(), 3ul);
     };
 
@@ -402,7 +397,7 @@ void ControllerTests::IsNodeHighlighted() const
 {
     ScanDrive();
 
-    const auto selectionCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+    const auto selectionCallback = [&](const std::vector<const Tree<VizBlock>::Node*>& nodes) {
         QCOMPARE(nodes.size(), m_controller->GetHighlightedNodes().size());
     };
 
@@ -418,7 +413,7 @@ void ControllerTests::HighlightDescendants() const
 {
     ScanDrive();
 
-    const auto selectionCallback = [&](std::vector<const Tree<VizBlock>::Node*>& nodes) {
+    const auto selectionCallback = [&](const std::vector<const Tree<VizBlock>::Node*>& nodes) {
         QCOMPARE(nodes.size(), 469ul); //< As seen in File Explorer
     };
 
@@ -516,10 +511,8 @@ void ControllerTests::SelectEmptyAir() const
 
     const Ray ray{ camera.GetPosition(), camera.Forward() };
 
-    const auto deselectionCallback = [](const Tree<VizBlock>::Node&) { QVERIFY(false); };
-    const auto selectionCallback = [](const Tree<VizBlock>::Node&) { QVERIFY(false); };
-
-    m_controller->SelectNodeViaRay(camera, ray, deselectionCallback, selectionCallback);
+    const auto callback = [](const Tree<VizBlock>::Node&) { QVERIFY(false); };
+    m_controller->SelectNodeViaRay(camera, ray, callback, callback);
 }
 
 void ControllerTests::SelectNodeViaRayBeforeModelLoads() const
@@ -532,10 +525,8 @@ void ControllerTests::SelectNodeViaRayBeforeModelLoads() const
 
     const Ray ray{ camera.GetPosition(), camera.Forward() };
 
-    const auto deselectionCallback = [](const Tree<VizBlock>::Node&) { QVERIFY(false); };
-    const auto selectionCallback = [](const Tree<VizBlock>::Node&) { QVERIFY(false); };
-
-    m_controller->SelectNodeViaRay(camera, ray, deselectionCallback, selectionCallback);
+    const auto callback = [](const Tree<VizBlock>::Node&) { QVERIFY(false); };
+    m_controller->SelectNodeViaRay(camera, ray, callback, callback);
 }
 
 void ControllerTests::DetermineDefaultLeafNodeColor() const
@@ -606,7 +597,5 @@ void ControllerTests::GetRootPath() const
 
     QCOMPARE(rootPath, rootFileName);
 }
-
-// @todo Select a very small file, and validate correct status bar message.
 
 REGISTER_TEST(ControllerTests)
