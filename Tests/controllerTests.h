@@ -77,7 +77,7 @@ class ControllerTests : public QObject
     void ScanDrive() const;
 
     /**
-     * @brief ScanDriveWithEmptyPath
+     * @brief Verify that requesting a scan of an empty directory is harmless.
      */
     void ScanDriveWithEmptyPath() const;
 
