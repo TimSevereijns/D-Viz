@@ -77,6 +77,11 @@ class ControllerTests : public QObject
     void ScanDrive() const;
 
     /**
+     * @brief ScanDriveWithEmptyPath
+     */
+    void ScanDriveWithEmptyPath() const;
+
+    /**
      * @brief Verify that scans can be cancelled.
      */
     void CancelScan() const;
@@ -137,6 +142,11 @@ class ControllerTests : public QObject
     void SearchTreemapWithPriorSelection() const;
 
     /**
+     * @brief Verifies that a search with incorrect flags is harmless.
+     */
+    void SearchTreemapWithIncorrectFlags() const;
+
+    /**
      * @brief Verifies that ancestor nodes are correctly highlighted.
      */
     void HighlightAncestors() const;
@@ -161,6 +171,17 @@ class ControllerTests : public QObject
      * has been loaded.
      */
     void SelectNodeViaRayBeforeModelLoads() const;
+
+    /**
+     * @brief Verifies that the deselection callback is invoked with the second selection in order
+     * to deselect the first selection.
+     */
+    void ConsecutiveNodeSelection() const;
+
+    /**
+     * @brief Verifies that selecting empty air is harmless and prints metadata to the status bar.
+     */
+    void SelectEmptyAir() const;
 
     /**
      * @brief Verifies that the default color of an unhighlighted/unselected node is what we expect.
