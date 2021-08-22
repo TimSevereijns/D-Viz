@@ -15,11 +15,9 @@ namespace MultiTest
 {
     namespace Detail
     {
-        using TestMap = std::unordered_map<std::string, std::unique_ptr<QObject>>;
-
-        inline TestMap& GetTestMap()
+        inline std::unordered_map<std::string, std::unique_ptr<QObject>>& GetTestMap()
         {
-            static TestMap instance;
+            static std::unordered_map<std::string, std::unique_ptr<QObject>> instance;
             return instance;
         }
     }
@@ -42,7 +40,7 @@ namespace MultiTest
 
     inline int RunAllTests(int /*argc*/, char** /*argv*/)
     {
-        auto failures{ 0 };
+        auto failures = 0;
 
         for (const auto& [name, test] : Detail::GetTestMap()) {
             IgnoreUnused(name);

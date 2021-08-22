@@ -11,7 +11,7 @@ namespace TestUtilities
 {
     /**
      * @brief Decompressing a ZIP archive is such a pain in C++, that I'd rather make a call to a
-     * Python script than try to integrate ZLib. This is just test code, after all.
+     * Python script to do it than to attempt integrating ZLib. This is just test code, after all.
      *
      * @param[in] zipFile           The path to the ZIP archive.
      * @param[in] outputDirectory   The location we'd at which we'd like to store the decompressed

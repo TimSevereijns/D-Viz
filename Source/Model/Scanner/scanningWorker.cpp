@@ -43,8 +43,8 @@ namespace
             node->DeleteFromTree();
         }
 
-        spdlog::get(Constants::Logging::DefaultLog)
-            ->info("Number of Sizeless Files Removed: {:n}", nodesRemoved);
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+        log->info("Number of Sizeless Files Removed: {:n}", nodesRemoved);
     }
 
     /**
@@ -204,10 +204,10 @@ void ScanningWorker::Start()
         m_threadPool.join();
     });
 
-    spdlog::get(Constants::Logging::DefaultLog)
-        ->info(
-            "Scanned Drive in: {:n} {}", stopwatch.GetElapsedTime().count(),
-            stopwatch.GetUnitsAsString());
+    const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+    log->info(
+        "Scanned Drive in: {:n} {}", stopwatch.GetElapsedTime().count(),
+        stopwatch.GetUnitsAsString());
 
     Scanner::ComputeDirectorySizes(*m_fileTree);
     PruneEmptyFilesAndDirectories(*m_fileTree);

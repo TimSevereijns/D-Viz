@@ -280,9 +280,8 @@ void BreakdownDialog::GenerateGraph(const std::string& extension)
 
     // Another quirk in the API stems from the fact that while the documentation claims "the
     // ownership of the new chart is passed to the chart view," one apparently still has to clean
-    // up the previous chart.
-    [[maybe_unused]] const auto previousChart =
-        std::unique_ptr<QtCharts::QChart>(m_ui.graphView->chart());
+    // up the previous chart (which we'll do at the end of the current function using RAII).
+    const auto previousChart = std::unique_ptr<QtCharts::QChart>(m_ui.graphView->chart());
 
     m_ui.graphView->setChart(chart.release());
     m_ui.graphView->setBackgroundBrush(backgroundBrush);

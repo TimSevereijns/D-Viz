@@ -200,6 +200,8 @@ void ControllerTests::SelectNode()
     QCOMPARE(m_controller->GetSelectedNode(), nullptr);
 
     const auto* targetNode = m_controller->GetTree().GetRoot()->GetFirstChild();
+    QVERIFY(targetNode);
+
     const auto callback = [&](const Tree<VizBlock>::Node& selectedNode) {
         QCOMPARE(&selectedNode, targetNode);
     };
@@ -338,8 +340,14 @@ void ControllerTests::SearchTreemapWithPriorSelection() const
     constexpr auto query = ".hpp";
     constexpr auto prior = ".ipp";
 
-    const auto deselectionCallback = [](const std::vector<const Tree<VizBlock>::Node*>& nodes) {
+    const auto deselectionCallback = [&](const std::vector<const Tree<VizBlock>::Node*>& nodes) {
+        // We'll expect the previous highlighted nodes to be deselected prior to the highlighting
+        // of the search results.
+
         QCOMPARE(nodes.empty(), false);
+        QVERIFY(std::all_of(std::begin(nodes), std::end(nodes), [&](const auto* node) {
+            return node->GetData().file.extension == prior;
+        }));
     };
 
     const auto selectionCallback = [&](const std::vector<const Tree<VizBlock>::Node*>& nodes) {
@@ -388,8 +396,14 @@ void ControllerTests::HighlightAncestors() const
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
 
     const auto* firstChild = m_controller->GetTree().GetRoot()->GetFirstChild();
+    QVERIFY(firstChild != nullptr);
+
     const auto* firstGrandchild = firstChild->GetFirstChild();
+    QVERIFY(firstGrandchild != nullptr);
+
     const auto* firstGreatGrandchild = firstGrandchild->GetFirstChild();
+    QVERIFY(firstGreatGrandchild != nullptr);
+
     m_controller->HighlightAncestors(*firstGreatGrandchild, selectionCallback);
 }
 
@@ -404,8 +418,9 @@ void ControllerTests::IsNodeHighlighted() const
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
 
     const auto* firstChild = m_controller->GetTree().GetRoot()->GetFirstChild();
-    m_controller->HighlightAncestors(*firstChild, selectionCallback);
+    QVERIFY(firstChild != nullptr);
 
+    m_controller->HighlightAncestors(*firstChild, selectionCallback);
     m_controller->IsNodeHighlighted(*firstChild);
 }
 
@@ -420,6 +435,8 @@ void ControllerTests::HighlightDescendants() const
     REQUIRE_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_)).TIMES(1);
 
     const auto* rootNode = m_controller->GetTree().GetRoot();
+    QVERIFY(rootNode != nullptr);
+
     m_controller->HighlightDescendants(*rootNode, selectionCallback);
 }
 
