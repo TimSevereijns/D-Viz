@@ -92,6 +92,11 @@ class ControllerTests : public QObject
     void HasModelBeenLoaded() const;
 
     /**
+     * @brief Verify that monitoring state is being accurately reported.
+     */
+    void IsFilesystemBeingMonitored() const;
+
+    /**
      * @brief Verify that single node can be selected and retrieved.
      */
     void SelectNode();
@@ -184,14 +189,27 @@ class ControllerTests : public QObject
     void SelectEmptyAir() const;
 
     /**
-     * @brief Verifies that the default color of an unhighlighted/unselected node is what we expect.
+     * @brief Verifies that the default color of an unhighlighted/unselected leaf node is what we
+     * expect.
      */
     void DetermineDefaultLeafNodeColor() const;
+
+    /**
+     * @brief Verifies that the default color of an unhighlighted/unselected directory node is what
+     * we expect.
+     */
+    void DetermineDefaultDirectoryNodeColor() const;
 
     /**
      * @brief Verifies that the default color of highlighted node is what we expect it to be.
      */
     void DetermineDefaultColorOfHighlightedNode() const;
+
+    /**
+     * @brief Verifies that the color of highlighted node is what we expect it to be, based on the
+     * selected theme.
+     */
+    void DetermineNodeColorFromTheme() const;
 
     /**
      * @brief Verifies a non-default node color is properly tracked.

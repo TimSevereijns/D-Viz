@@ -130,9 +130,15 @@ namespace Settings
         return m_colorScheme;
     }
 
-    void NodePainter::SetColorScheme(std::string_view scheme)
+    void NodePainter::SetActiveColorScheme(std::string_view scheme)
     {
         m_colorScheme = scheme;
+    }
+
+    void NodePainter::RegisterColorScheme(
+        const std::string& name, const std::unordered_map<std::string, QVector3D>& map)
+    {
+        m_colorMap.insert_or_assign(name, map);
     }
 
     std::optional<QVector3D>

@@ -38,7 +38,16 @@ namespace Settings
         /**
          * @brief Sets the current color scheme.
          */
-        void SetColorScheme(std::string_view scheme);
+        void SetActiveColorScheme(std::string_view scheme);
+
+        /**
+         * @brief Set a custom color scheme.
+         *
+         * @param[in] name          The name of the scheme.
+         * @param[in] map           The file extensions to add as part of the mapping.
+         */
+        void RegisterColorScheme(
+            const std::string& name, const std::unordered_map<std::string, QVector3D>& map);
 
         /**
          * @brief Determines the appropriate color for the file based on the user-configurable color

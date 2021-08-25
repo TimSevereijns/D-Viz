@@ -191,6 +191,14 @@ void ControllerTests::HasModelBeenLoaded() const
     QCOMPARE(m_controller->HasModelBeenLoaded(), true);
 }
 
+void ControllerTests::IsFilesystemBeingMonitored() const
+{
+    ScanDrive();
+
+    m_controller->MonitorFileSystem(false);
+    QCOMPARE(m_controller->IsFileSystemBeingMonitored(), false);
+}
+
 void ControllerTests::SelectNode()
 {
     QVERIFY(m_controller);
@@ -345,21 +353,21 @@ void ControllerTests::SearchTreemapWithPriorSelection() const
         // of the search results.
 
         QCOMPARE(nodes.empty(), false);
-        QVERIFY(std::all_of(std::begin(nodes), std::end(nodes), [&](const auto* node) {
+        QVERIFY(std::all_of(std::begin(nodes), std::end(nodes), [&](const auto* const node) {
             return node->GetData().file.extension == prior;
         }));
     };
 
     const auto selectionCallback = [&](const std::vector<const Tree<VizBlock>::Node*>& nodes) {
         QCOMPARE(nodes.empty(), false);
-        QVERIFY(std::all_of(std::begin(nodes), std::end(nodes), [&](const auto* node) {
+        QVERIFY(std::all_of(std::begin(nodes), std::end(nodes), [&](const auto* const node) {
             return node->GetData().file.extension == query;
         }));
     };
 
     const auto highlightCallback = [&](const std::vector<const Tree<VizBlock>::Node*>& nodes) {
         QCOMPARE(nodes.empty(), false);
-        QVERIFY(std::all_of(std::begin(nodes), std::end(nodes), [&](const auto* node) {
+        QVERIFY(std::all_of(std::begin(nodes), std::end(nodes), [&](const auto* const node) {
             return node->GetData().file.extension == prior;
         }));
     };
@@ -559,6 +567,43 @@ void ControllerTests::DetermineDefaultLeafNodeColor() const
 
     const auto& nodeColor = m_controller->DetermineNodeColor(*targetNode);
     QCOMPARE(nodeColor, Constants::Colors::File);
+}
+
+void ControllerTests::DetermineDefaultDirectoryNodeColor() const
+{
+    ScanDrive();
+
+    const std::string targetName = "ssl";
+
+    const auto targetNode = std::find_if(
+        Tree<VizBlock>::PostOrderIterator{ m_controller->GetTree().GetRoot() },
+        Tree<VizBlock>::PostOrderIterator{},
+        [&](const auto& node) { return (node->file.name + node->file.extension) == targetName; });
+
+    const auto& nodeColor = m_controller->DetermineNodeColor(*targetNode);
+    QCOMPARE(nodeColor, Constants::Colors::Directory);
+}
+
+void ControllerTests::DetermineNodeColorFromTheme() const
+{
+    ScanDrive();
+
+    const std::string targetName = "async_result.hpp";
+
+    const auto targetNode = std::find_if(
+        Tree<VizBlock>::LeafIterator{ m_controller->GetTree().GetRoot() },
+        Tree<VizBlock>::LeafIterator{},
+        [&](const auto& node) { return (node->file.name + node->file.extension) == targetName; });
+
+    const std::unordered_map<std::string, QVector3D> mapping = {
+        { ".hpp", Constants::Colors::White }, { ".cpp", Constants::Colors::White }
+    };
+
+    m_controller->GetNodePainter().RegisterColorScheme("C++", mapping);
+    m_controller->GetNodePainter().SetActiveColorScheme("C++");
+
+    const auto& nodeColor = m_controller->DetermineNodeColor(*targetNode);
+    QCOMPARE(nodeColor, Constants::Colors::White);
 }
 
 void ControllerTests::DetermineDefaultColorOfHighlightedNode() const
