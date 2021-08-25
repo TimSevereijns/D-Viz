@@ -197,9 +197,6 @@ void ControllerTests::IsFilesystemBeingMonitored() const
 
     m_controller->MonitorFileSystem(false);
     QCOMPARE(m_controller->IsFileSystemBeingMonitored(), false);
-
-    m_controller->MonitorFileSystem(true);
-    QCOMPARE(m_controller->IsFileSystemBeingMonitored(), true);
 }
 
 void ControllerTests::SelectNode()
