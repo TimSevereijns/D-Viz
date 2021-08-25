@@ -35,7 +35,7 @@ void NodePainterTests::init()
 void NodePainterTests::DetermineColorsFromSettingsOnDisk() const
 {
     Settings::NodePainter painter;
-    painter.SetColorScheme("Default");
+    painter.SetActiveColorScheme("Default");
 
     const auto color = painter.DetermineColorFromExtension(".jpg");
     QVERIFY(color.has_value());
@@ -47,12 +47,12 @@ void NodePainterTests::DetermineColorsFromSettingsOnDisk() const
 void NodePainterTests::GetBackEmptyOptionalOnEmptyMapping() const
 {
     Settings::NodePainter painter;
-    painter.SetColorScheme("Default");
+    painter.SetActiveColorScheme("Default");
 
     const auto validMapping = painter.DetermineColorFromExtension(".foo");
     QCOMPARE(validMapping.has_value(), false);
 
-    painter.SetColorScheme("Nonexistent");
+    painter.SetActiveColorScheme("Nonexistent");
     const auto absentMapping = painter.DetermineColorFromExtension(".jpg");
 
     QCOMPARE(absentMapping.has_value(), false);
@@ -63,7 +63,7 @@ void NodePainterTests::ModifyActiveColorScheme() const
     constexpr auto& scheme = "Audio";
 
     Settings::NodePainter painter;
-    painter.SetColorScheme(scheme);
+    painter.SetActiveColorScheme(scheme);
 
     const auto retrievedScheme = painter.GetActiveColorScheme();
     QCOMPARE(retrievedScheme, scheme);
@@ -77,7 +77,7 @@ void NodePainterTests::GenerateDefaultColorSchemeFile() const
     }
 
     Settings::NodePainter painter;
-    painter.SetColorScheme("Images");
+    painter.SetActiveColorScheme("Images");
     const auto jpgMapping = painter.DetermineColorFromExtension(".jpg");
     QCOMPARE(jpgMapping.has_value(), true);
 }

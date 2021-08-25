@@ -808,7 +808,7 @@ void MainWindow::PruneTree()
 void MainWindow::ApplyColorScheme()
 {
     const auto colorScheme = m_ui.colorSchemeComboBox->currentText().toStdString();
-    m_controller.GetNodePainter().SetColorScheme(colorScheme);
+    m_controller.GetNodePainter().SetActiveColorScheme(colorScheme);
 
     m_glCanvas->ApplyColorScheme();
 }
