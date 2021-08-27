@@ -22,7 +22,7 @@ class TestViewFactory final : public ViewFactoryInterface
     {
     }
 
-    auto CreateView(Controller& controller) const -> std::shared_ptr<BaseView> override
+    std::shared_ptr<BaseView> CreateView(Controller& controller) const override
     {
         m_view = std::make_shared<MockView>(controller);
         return m_view;
@@ -35,9 +35,9 @@ class TestViewFactory final : public ViewFactoryInterface
 class TestModelFactory final : public ModelFactoryInterface
 {
   public:
-    auto CreateModel(
-        std::unique_ptr<FileMonitorBase> fileMonitor, const std::filesystem::path& path) const
-        -> std::shared_ptr<BaseModel> override
+    std::shared_ptr<BaseModel> CreateModel(
+        std::unique_ptr<FileMonitorBase> fileMonitor,
+        const std::filesystem::path& path) const override
     {
         return std::make_shared<SquarifiedTreeMap>(std::move(fileMonitor), path);
     }

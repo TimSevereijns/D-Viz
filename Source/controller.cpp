@@ -20,11 +20,6 @@
 
 namespace
 {
-    /**
-     * @brief Helper function to be called once scanning completes.
-     *
-     * @param[in] progress           The final results from the scan.
-     */
     void LogScanCompletion(const ScanningProgress& progress)
     {
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
@@ -37,16 +32,15 @@ namespace
         log->flush();
     }
 
-    /**
-     * @brief Helper function to log basic disk statistics.
-     *
-     * @param[in] spaceInfo         Disk information.
-     */
-    void LogDiskStatistics(const std::filesystem::space_info& spaceInfo)
+    std::uintmax_t ComputeOccupiedDiskSpace(const std::filesystem::path& path)
     {
+        const auto spaceInfo = std::filesystem::space(path);
+
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->info("Disk Size:  {:n} bytes.", spaceInfo.capacity);
         log->info("Free Space: {:n} bytes.", spaceInfo.free);
+
+        return spaceInfo.capacity - spaceInfo.free;
     }
 } // namespace
 
@@ -93,6 +87,9 @@ void Controller::OnScanComplete(
         m_view->DisplayErrorDialog(exception.what());
     }
 
+    m_taskbarProgress->HideProgress();
+    m_taskbarProgress->ResetProgress();
+
     AllowUserInteractionWithModel(true);
 
     emit FinishedScanning();
@@ -124,28 +121,19 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
     m_model = m_modelFactory.CreateModel(std::make_unique<FileSystemMonitor>(), root);
     m_view->OnScanStarted();
 
-    const auto spaceInfo = std::filesystem::space(root);
-    LogDiskStatistics(spaceInfo);
-
-    m_occupiedDiskSpace = spaceInfo.capacity - spaceInfo.free;
-    Expects(m_occupiedDiskSpace > 0u);
+    m_occupiedDiskSpace = ComputeOccupiedDiskSpace(root);
 
     m_taskbarProgress = m_view->GetTaskbarButton();
     m_taskbarProgress->SetWindow(m_view->GetWindowHandle());
 
-    const auto progressHandler = [&](const ScanningProgress& progress) {
+    const auto progressHandler = [this](const auto& progress) {
         ReportProgressToStatusBar(progress);
-        ReportProgressToTaskbar(*m_taskbarProgress, progress);
+        ReportProgressToTaskbar(progress, *m_taskbarProgress);
     };
 
-    const auto completionHandler =
-        [&](const ScanningProgress& progress,
-            const std::shared_ptr<Tree<VizBlock>>& scanningResults) mutable {
-            OnScanComplete(progress, scanningResults);
-
-            m_taskbarProgress->HideProgress();
-            m_taskbarProgress->ResetProgress();
-        };
+    const auto completionHandler = [this](const auto& progress, const auto& scanningResults) {
+        OnScanComplete(progress, scanningResults);
+    };
 
     const auto& log = spdlog::get(Constants::Logging::DefaultLog);
     log->info("Started a new scan at \"{}\".", m_model->GetRootPath().string());
@@ -561,7 +549,7 @@ void Controller::RegisterNodeColor(const Tree<VizBlock>::Node& node, const QVect
 }
 
 template <typename ButtonType>
-void Controller::ReportProgressToTaskbar(ButtonType& button, const ScanningProgress& progress)
+void Controller::ReportProgressToTaskbar(const ScanningProgress& progress, ButtonType& button)
 {
     IgnoreUnused(button, progress);
 

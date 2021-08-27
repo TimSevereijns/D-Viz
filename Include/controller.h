@@ -328,7 +328,7 @@ class Controller : public QObject
     void ReportProgressToStatusBar(const ScanningProgress& progress);
 
     template <typename ButtonType>
-    void ReportProgressToTaskbar(ButtonType& button, const ScanningProgress& progress);
+    void ReportProgressToTaskbar(const ScanningProgress& progress, ButtonType& button);
 
     void OnScanComplete(
         const ScanningProgress& progress, const std::shared_ptr<Tree<VizBlock>>& scanningResults);

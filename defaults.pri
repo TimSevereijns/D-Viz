@@ -28,7 +28,6 @@ SOURCES += \
     $$PWD/Source/Settings/persistentSettings.cpp \
     $$PWD/Source/Settings/sessionSettings.cpp \
     $$PWD/Source/Settings/settings.cpp \
-    $$PWD/Source/Utilities/scopedHandle.cpp \
     $$PWD/Source/View/Dialogs/aboutDialog.cpp \
     $$PWD/Source/View/Dialogs/breakdownDialog.cpp \
     $$PWD/Source/View/Dialogs/distributionGraphModel.cpp \

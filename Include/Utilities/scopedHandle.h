@@ -5,27 +5,97 @@
 
 #ifdef Q_OS_WIN
 
+#include <Windows.h>
+
 using HANDLE = void*;
 
 class ScopedHandle
 {
   public:
-    explicit ScopedHandle(HANDLE handle);
-    ~ScopedHandle() noexcept;
+    explicit ScopedHandle(HANDLE handle) : m_handle{ handle }
+    {
+    }
 
-    ScopedHandle(const ScopedHandle& other);
-    ScopedHandle& operator=(const ScopedHandle& other);
+    ~ScopedHandle() noexcept
+    {
+        Close();
+    }
 
-    ScopedHandle(ScopedHandle&& other) noexcept;
-    ScopedHandle& operator=(ScopedHandle&& other) noexcept;
+    ScopedHandle(const ScopedHandle& other)
+    {
+        m_handle = ScopedHandle::Duplicate(other.m_handle);
+    }
 
-    void Close();
+    ScopedHandle& operator=(const ScopedHandle& other)
+    {
+        if (this != &other) {
+            m_handle = ScopedHandle::Duplicate(other.m_handle);
+        }
 
-    void Reset(HANDLE handle);
+        return *this;
+    }
 
-    bool IsValid() const;
+    ScopedHandle(ScopedHandle&& other) noexcept
+    {
+        m_handle = other.m_handle;
+        other.m_handle = nullptr;
+    }
 
-    explicit operator HANDLE() const;
+    ScopedHandle& operator=(ScopedHandle&& other) noexcept
+    {
+        if (this != &other) {
+            m_handle = other.m_handle;
+            other.m_handle = nullptr;
+        }
+
+        return *this;
+    }
+
+    void Close()
+    {
+        if (IsValid()) {
+            CloseHandle(m_handle);
+            m_handle = nullptr;
+        }
+    }
+
+    void Reset(HANDLE handle)
+    {
+        Close();
+
+        m_handle = handle;
+    }
+
+    bool IsValid() const
+    {
+        return (m_handle != nullptr) && (m_handle != INVALID_HANDLE_VALUE); // NOLINT
+    }
+
+    explicit operator HANDLE() const
+    {
+        return m_handle;
+    }
+
+    static HANDLE Duplicate(HANDLE handle)
+    {
+        if (handle == INVALID_HANDLE_VALUE) // NOLINT
+        {
+            return nullptr;
+        }
+
+        HANDLE duplicate;
+
+        const auto successfullyDuplicated = !DuplicateHandle(
+            /* hSourceProcessHandle = */ GetCurrentProcess(),
+            /* hSourceHandle = */ handle,
+            /* hTargetProcessHandle = */ GetCurrentProcess(),
+            /* lpTargetHandle = */ &duplicate,
+            /* dwDesiredAccess = */ 0,
+            /* bInheritHandle = */ FALSE,
+            /* dwOptions = */ DUPLICATE_SAME_ACCESS);
+
+        return successfullyDuplicated ? duplicate : nullptr;
+    }
 
   private:
     HANDLE m_handle;
