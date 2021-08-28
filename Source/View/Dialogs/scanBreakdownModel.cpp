@@ -98,19 +98,13 @@ void ScanBreakdownModel::Insert(const Tree<VizBlock>::Node& node, bool isVisible
         return;
     }
 
-    if (file.extension.empty()) {
-        auto& fileType = m_fileTypeMap["No Extension"];
-        fileType.visibleSize += isVisible ? file.size : 0;
-        fileType.visibleCount += isVisible ? 1 : 0;
-        fileType.totalSize += file.size;
-        fileType.totalCount += 1;
-    } else {
-        auto& fileType = m_fileTypeMap[file.extension];
-        fileType.visibleSize += isVisible ? file.size : 0;
-        fileType.visibleCount += isVisible ? 1 : 0;
-        fileType.totalSize += file.size;
-        fileType.totalCount += 1;
-    }
+    const auto key = file.extension.empty() ? std::string{ "No Extension" } : file.extension;
+    auto& entry = m_fileTypeMap[key];
+
+    entry.visibleSize += isVisible ? file.size : 0;
+    entry.visibleCount += isVisible ? 1 : 0;
+    entry.totalSize += file.size;
+    entry.totalCount += 1;
 }
 
 void ScanBreakdownModel::ClearData()
