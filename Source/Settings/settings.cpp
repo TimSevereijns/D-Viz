@@ -48,17 +48,4 @@ namespace Settings
 
         return success;
     }
-
-    bool VisualizationParameters::IsNodeVisible(const VizBlock& block) const noexcept
-    {
-        if (block.file.size < minimumFileSize) {
-            return false;
-        }
-
-        if (block.file.type != FileType::Directory && onlyShowDirectories) {
-            return false;
-        }
-
-        return true;
-    }
 } // namespace Settings

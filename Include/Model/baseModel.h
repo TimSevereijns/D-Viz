@@ -17,6 +17,7 @@
 #include "Model/Monitor/fileSystemObserver.h"
 #include "Model/vizBlock.h"
 #include "Settings/settings.h"
+#include "Settings/visualizationParameters.h"
 #include "Utilities/threadSafeQueue.h"
 #include "View/Viewport/camera.h"
 

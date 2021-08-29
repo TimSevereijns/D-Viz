@@ -2,6 +2,7 @@
 
 #include "Utilities/testUtilities.h"
 
+#include <Settings/visualizationParameters.h>
 #include <controller.h>
 
 #include <filesystem>

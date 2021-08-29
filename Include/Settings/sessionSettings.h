@@ -5,6 +5,7 @@
 
 #include "Model/vizBlock.h"
 #include "Settings/settings.h"
+#include "Settings/visualizationParameters.h"
 #include "constants.h"
 
 #include <QObject>

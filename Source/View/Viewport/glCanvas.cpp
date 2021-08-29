@@ -1,6 +1,7 @@
 #include "View/Viewport/glCanvas.h"
 
 #include "Model/squarifiedTreemap.h"
+#include "Settings/visualizationParameters.h"
 #include "Utilities/operatingSystem.h"
 #include "Utilities/scopeExit.h"
 #include "View/Viewport/gamepadContextMenu.h"

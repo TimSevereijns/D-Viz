@@ -28,6 +28,7 @@ SOURCES += \
     $$PWD/Source/Settings/persistentSettings.cpp \
     $$PWD/Source/Settings/sessionSettings.cpp \
     $$PWD/Source/Settings/settings.cpp \
+    $$PWD/Source/Settings/visualizationParameters.cpp \
     $$PWD/Source/View/Dialogs/aboutDialog.cpp \
     $$PWD/Source/View/Dialogs/breakdownDialog.cpp \
     $$PWD/Source/View/Dialogs/distributionGraphModel.cpp \
@@ -80,6 +81,7 @@ HEADERS += \
     $$PWD/Include/Settings/persistentSettings.h \
     $$PWD/Include/Settings/sessionSettings.h \
     $$PWD/Include/Settings/settings.h \
+    $$PWD/Include/Settings/visualizationParameters.h \
     $$PWD/Include/Utilities/color.h \
     $$PWD/Include/Utilities/ignoreUnused.h \
     $$PWD/Include/Utilities/logging.h \
