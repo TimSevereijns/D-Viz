@@ -75,7 +75,7 @@ jobs:
 
       - name: Build D-Viz
         run: |
-          ${RUNNER_WORKSPACE}/Qt/5.15.1/gcc_64/bin/qmake \
+          ${RUNNER_WORKSPACE}/Qt/6.1.3/gcc_64/bin/qmake \
             D-Viz.pro \
             CONFIG+=debug \
             QMAKE_CXXFLAGS+=-fno-inline \
