@@ -64,7 +64,7 @@ jobs:
         with:
           version: 6.1.0
           target: desktop
-          modules: qtcharts
+          modules: addons.qtcharts
 
       - name: Download Conan Packages
         run: |
