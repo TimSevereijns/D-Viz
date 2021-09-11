@@ -87,16 +87,16 @@ class BreakdownDialog final : public QDialog
 
     void AdjustColumnWidthsToFitViewport();
 
-    std::unique_ptr<QtCharts::QCategoryAxis>
+    std::unique_ptr<QCategoryAxis>
     SetupAxisX(const ExtensionDistribution& distribution, const QColor& color) const;
 
-    std::unique_ptr<QtCharts::QValueAxis>
+    std::unique_ptr<QValueAxis>
     SetupLinearAxisY(const ExtensionDistribution& distribution, const QColor& color) const;
 
-    std::unique_ptr<QtCharts::QLogValueAxis>
+    std::unique_ptr<QLogValueAxis>
     SetupLogarithmAxisY(const ExtensionDistribution& distribution, const QColor& color) const;
 
-    std::unique_ptr<QtCharts::QAbstractAxis>
+    std::unique_ptr<QAbstractAxis>
     SetupAxisY(const ExtensionDistribution& distribution, const QColor& color) const;
 
     void GenerateGraph(const std::string& extension);

@@ -283,13 +283,13 @@ void MainWindow::SetupFileSizePruningDropdown()
 
 void MainWindow::SetupGamepad()
 {
-    const auto gamepads = QGamepadManager::instance()->connectedGamepads();
-    if (gamepads.isEmpty()) {
-        return;
-    }
+    //    const auto gamepads = QGamepadManager::instance()->connectedGamepads();
+    //    if (gamepads.isEmpty()) {
+    //        return;
+    //    }
 
-    m_gamepad = std::make_unique<Gamepad>(*std::begin(gamepads), this);
-    QGamepadManager::instance()->resetConfiguration(m_gamepad->deviceId());
+    //    m_gamepad = std::make_unique<Gamepad>(*std::begin(gamepads), this);
+    //    QGamepadManager::instance()->resetConfiguration(m_gamepad->deviceId());
 }
 
 void MainWindow::SetupMenus()
@@ -922,8 +922,9 @@ void MainWindow::OnScanCompleted()
 
 std::shared_ptr<BaseTaskbarButton> MainWindow::GetTaskbarButton()
 {
+    return std::make_shared<BaseTaskbarButton>();
 #if defined(Q_OS_WIN)
-    return std::make_shared<WinTaskbarButton>(this);
+    // return std::make_shared<WinTaskbarButton>(this);
 #elif defined(Q_OS_LINUX)
     return std::make_shared<UnixTaskbarButton>(this);
 #endif // Q_OS_LINUX

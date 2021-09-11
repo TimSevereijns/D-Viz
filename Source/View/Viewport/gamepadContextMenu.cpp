@@ -114,8 +114,8 @@ void GamepadContextMenu::ProcessInput()
 {
     constexpr auto radius = 100;
 
-    const auto x = m_gamepad.axisLeftX();
-    const auto y = m_gamepad.axisLeftY();
+    const auto x = 0; // m_gamepad.axisLeftX();
+    const auto y = 0; // m_gamepad.axisLeftY();
 
     m_selectorDot = QPoint{ static_cast<int>(x * radius) + width() / 2,
                             static_cast<int>(y * radius) + height() / 2 };

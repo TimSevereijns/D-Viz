@@ -7,10 +7,10 @@
 #include <QMenu>
 #include <QWindow>
 
-#if defined(Q_OS_WIN)
-#include <QWinTaskbarButton>
-#include <QWinTaskbarProgress>
-#endif
+//#if defined(Q_OS_WIN)
+//#include <QWinTaskbarButton>
+//#include <QWinTaskbarProgress>
+//#endif
 
 #include <string_view>
 
@@ -26,51 +26,51 @@ class Controller;
 
 #if defined(Q_OS_WIN)
 
-class WinTaskbarButton : public BaseTaskbarButton
-{
-  public:
-    explicit WinTaskbarButton(QObject* parent) : m_button{ parent }
-    {
-    }
+// class WinTaskbarButton : public BaseTaskbarButton
+//{
+//  public:
+//    explicit WinTaskbarButton(QObject* parent) : m_button{ parent }
+//    {
+//    }
 
-    void SetWindow(QObject* window) override
-    {
-        m_button.setWindow(static_cast<QWindow*>(window));
-    }
+//    void SetWindow(QObject* window) override
+//    {
+//        m_button.setWindow(static_cast<QWindow*>(window));
+//    }
 
-    void HideProgress() override
-    {
-        m_button.progress()->hide();
-    };
+//    void HideProgress() override
+//    {
+//        m_button.progress()->hide();
+//    };
 
-    void ResetProgress() override
-    {
-        m_button.progress()->reset();
-    }
+//    void ResetProgress() override
+//    {
+//        m_button.progress()->reset();
+//    }
 
-    void SetValue(int value) override
-    {
-        m_button.progress()->setValue(value);
-    }
+//    void SetValue(int value) override
+//    {
+//        m_button.progress()->setValue(value);
+//    }
 
-    void SetMaximum(int value) override
-    {
-        m_button.progress()->setMaximum(value);
-    }
+//    void SetMaximum(int value) override
+//    {
+//        m_button.progress()->setMaximum(value);
+//    }
 
-    void SetMinimum(int value) override
-    {
-        m_button.progress()->setMinimum(value);
-    }
+//    void SetMinimum(int value) override
+//    {
+//        m_button.progress()->setMinimum(value);
+//    }
 
-    void SetVisible(bool value) override
-    {
-        m_button.progress()->setVisible(value);
-    }
+//    void SetVisible(bool value) override
+//    {
+//        m_button.progress()->setVisible(value);
+//    }
 
-  private:
-    QWinTaskbarButton m_button;
-};
+//  private:
+//    QWinTaskbarButton m_button;
+//};
 
 #elif defined(Q_OS_LINUX)
 
