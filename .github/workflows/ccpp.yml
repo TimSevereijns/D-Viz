@@ -60,11 +60,11 @@ jobs:
           cd ~
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2.9.0
+        uses: jurplel/install-qt-action@v2.14.0
         with:
-          version: 5.15.1
+          version: 6.1.0
           target: desktop
-          modules: qtcharts
+          modules: addons.qtcharts
 
       - name: Download Conan Packages
         run: |
@@ -75,7 +75,7 @@ jobs:
 
       - name: Build D-Viz
         run: |
-          ${RUNNER_WORKSPACE}/Qt/5.15.1/gcc_64/bin/qmake \
+          ${RUNNER_WORKSPACE}/Qt/6.1.0/gcc_64/bin/qmake \
             D-Viz.pro \
             CONFIG+=debug \
             QMAKE_CXXFLAGS+=-fno-inline \
