@@ -4,8 +4,7 @@ CONFIG += \
 
 include(Conan/conanbuildinfo.pri)
 
-QT += opengl charts #gamepad
-#win32: QT += winextras
+QT += opengl charts
 
 INCLUDEPATH += $$PWD/Include
 
@@ -33,8 +32,8 @@ SOURCES += \
     $$PWD/Source/View/Dialogs/breakdownDialog.cpp \
     $$PWD/Source/View/Dialogs/distributionGraphModel.cpp \
     $$PWD/Source/View/Dialogs/scanBreakdownModel.cpp \
-    $$PWD/Source/View/HID/gamepad.cpp \
     $$PWD/Source/View/HID/keyboardManager.cpp \
+    $$PWD/Source/View/HID/xboxGamepad.cpp \
     $$PWD/Source/View/mainWindow.cpp \
     $$PWD/Source/View/Scene/Assets/baseAsset.cpp \
     $$PWD/Source/View/Scene/Assets/crosshairAsset.cpp \
@@ -98,8 +97,8 @@ HEADERS += \
     $$PWD/Include/View/Dialogs/breakdownDialog.h \
     $$PWD/Include/View/Dialogs/distributionGraphModel.h \
     $$PWD/Include/View/Dialogs/scanBreakdownModel.h \
-    $$PWD/Include/View/HID/gamepad.h \
     $$PWD/Include/View/HID/keyboardManager.h \
+    $$PWD/Include/View/HID/xboxGamepad.h \
     $$PWD/Include/View/mainWindow.h \
     $$PWD/Include/View/Scene/Assets/baseAsset.h \
     $$PWD/Include/View/Scene/Assets/crosshairAsset.h \

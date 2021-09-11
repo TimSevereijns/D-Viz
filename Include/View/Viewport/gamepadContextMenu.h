@@ -10,7 +10,7 @@
 #include <QTimer>
 #include <QWidget>
 
-class Gamepad;
+class XboxGamepad;
 
 class GamepadContextMenu : public QWidget
 {
@@ -25,7 +25,7 @@ class GamepadContextMenu : public QWidget
         std::function<void()> Action;
     };
 
-    GamepadContextMenu(const Gamepad& gamepad, QWidget* parent = nullptr);
+    GamepadContextMenu(const XboxGamepad& gamepad, QWidget* parent = nullptr);
 
     void addAction(const QString& label, const std::function<void()>& action);
 
@@ -48,7 +48,7 @@ class GamepadContextMenu : public QWidget
     void RenderLabels(const QPoint& center);
     void RenderGeometry(const QPoint& center);
 
-    const Gamepad& m_gamepad;
+    const XboxGamepad& m_gamepad;
 
     std::size_t m_indexOfSelection{ std::numeric_limits<std::size_t>::max() };
 

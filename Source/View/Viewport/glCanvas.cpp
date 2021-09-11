@@ -4,6 +4,7 @@
 #include "Settings/visualizationParameters.h"
 #include "Utilities/operatingSystem.h"
 #include "Utilities/scopeExit.h"
+#include "View/HID/xboxGamepad.h"
 #include "View/Viewport/gamepadContextMenu.h"
 #include "View/Viewport/mouseContextMenu.h"
 #include "View/mainWindow.h"
@@ -625,93 +626,93 @@ void GLCanvas::HandleKeyboardInput(const std::chrono::milliseconds& elapsedTime)
     }
 }
 
-void GLCanvas::HandleGamepadInput(const std::chrono::milliseconds& /*elapsedTime*/)
+void GLCanvas::HandleGamepadInput(const std::chrono::milliseconds& elapsedTime)
 {
-    // const auto& gamepad = m_mainWindow.GetGamepad();
+    const auto& gamepad = m_mainWindow.GetGamepad();
 
-    //    if (!gamepad.isConnected()) {
-    //        return;
-    //    }
+    if (!gamepad.IsConnected()) {
+        return;
+    }
 
-    //    HandleGamepadButtonInput(gamepad, elapsedTime);
-    //    HandleGamepadThumbstickInput(gamepad);
-    //    HandleGamepadTriggerInput(gamepad);
+    HandleGamepadButtonInput(gamepad, elapsedTime);
+    HandleGamepadThumbstickInput(gamepad);
+    HandleGamepadTriggerInput(gamepad);
 }
 
 void GLCanvas::HandleGamepadButtonInput(
-    const Gamepad& /*gamepad*/, const std::chrono::milliseconds& /*elapsedTime*/)
+    const XboxGamepad& gamepad, const std::chrono::milliseconds& elapsedTime)
 {
-    //    const auto millisecondsElapsed = elapsedTime.count();
-    //    const auto cameraSpeed = m_controller.GetSessionSettings().GetCameraSpeed() /
-    //                             Constants::Input::MovementAmplification;
+    const auto millisecondsElapsed = elapsedTime.count();
+    const auto cameraSpeed = m_controller.GetSessionSettings().GetCameraSpeed() /
+                             Constants::Input::MovementAmplification;
 
-    //    const auto distance = static_cast<float>(millisecondsElapsed * cameraSpeed);
+    const auto distance = static_cast<float>(millisecondsElapsed * cameraSpeed);
 
-    //    if (gamepad.buttonUp()) {
-    //        m_camera.OffsetPosition(distance * m_camera.Forward());
-    //    }
+    if (gamepad.buttonUp()) {
+        m_camera.OffsetPosition(distance * m_camera.Forward());
+    }
 
-    //    if (gamepad.buttonLeft()) {
-    //        m_camera.OffsetPosition(distance * m_camera.Left());
-    //    }
+    if (gamepad.buttonLeft()) {
+        m_camera.OffsetPosition(distance * m_camera.Left());
+    }
 
-    //    if (gamepad.buttonDown()) {
-    //        m_camera.OffsetPosition(distance * m_camera.Backward());
-    //    }
+    if (gamepad.buttonDown()) {
+        m_camera.OffsetPosition(distance * m_camera.Backward());
+    }
 
-    //    if (gamepad.buttonRight()) {
-    //        m_camera.OffsetPosition(distance * m_camera.Right());
-    //    }
+    if (gamepad.buttonRight()) {
+        m_camera.OffsetPosition(distance * m_camera.Right());
+    }
 
-    //    if (gamepad.buttonL1()) {
-    //        m_camera.OffsetPosition(distance * m_camera.Down());
-    //    }
+    if (gamepad.buttonL1()) {
+        m_camera.OffsetPosition(distance * m_camera.Down());
+    }
 
-    //    if (gamepad.buttonR1()) {
-    //        m_camera.OffsetPosition(distance * m_camera.Up());
-    //    }
+    if (gamepad.buttonR1()) {
+        m_camera.OffsetPosition(distance * m_camera.Up());
+    }
 
-    //    if (!m_gamepadContextMenu && gamepad.buttonA()) {
-    //        ShowGamepadContextMenu();
-    //    } else if (m_gamepadContextMenu && !gamepad.buttonA()) {
-    //        m_gamepadContextMenu->ExecuteSelection();
+    if (!m_gamepadContextMenu && gamepad.buttonA()) {
+        ShowGamepadContextMenu();
+    } else if (m_gamepadContextMenu && !gamepad.buttonA()) {
+        m_gamepadContextMenu->ExecuteSelection();
 
-    //        m_gamepadContextMenu->close();
-    //        m_gamepadContextMenu = nullptr;
-    //    }
+        m_gamepadContextMenu->close();
+        m_gamepadContextMenu = nullptr;
+    }
 }
 
-void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& /*gamepad*/)
+void GLCanvas::HandleGamepadThumbstickInput(const XboxGamepad& gamepad)
 {
-    //    if (m_gamepadContextMenu) {
-    //        return;
-    //    }
+    if (m_gamepadContextMenu) {
+        return;
+    }
 
-    //    if (gamepad.axisRightX() != 0.0 || gamepad.axisRightY() != 0.0) {
-    //        const auto sensitivity = Constants::Input::MovementAmplification *
-    //                                 m_controller.GetSessionSettings().GetMouseSensitivity();
+    if (gamepad.axisRightX() != 0.0 || gamepad.axisRightY() != 0.0) {
+        const auto sensitivity = Constants::Input::MovementAmplification *
+                                 m_controller.GetSessionSettings().GetMouseSensitivity();
 
-    //        const auto pitch = sensitivity * gamepad.axisRightY();
-    //        const auto yaw = sensitivity * gamepad.axisRightX();
+        const auto pitch = sensitivity * gamepad.axisRightY();
+        const auto yaw = sensitivity * gamepad.axisRightX();
 
-    //        m_camera.OffsetOrientation(pitch, yaw);
-    //    }
+        m_camera.OffsetOrientation(pitch, yaw);
+    }
 
-    //    const auto cameraSpeed = Constants::Input::MovementAmplification *
-    //                             m_controller.GetSessionSettings().GetCameraSpeed();
+    const auto cameraSpeed = Constants::Input::MovementAmplification *
+                             m_controller.GetSessionSettings().GetCameraSpeed();
 
-    //    if (gamepad.axisLeftY() != 0.0) {
-    //        const auto distance = static_cast<float>(cameraSpeed * -gamepad.axisLeftY());
-    //        m_camera.OffsetPosition(distance * m_camera.Forward());
-    //    }
+    if (gamepad.axisLeftY() != 0.0) {
+        const auto distance = static_cast<float>(cameraSpeed * -gamepad.axisLeftY());
+        m_camera.OffsetPosition(distance * m_camera.Forward());
+    }
 
-    //    if (gamepad.axisLeftX() != 0.0) {
-    //        const auto distance = static_cast<float>(cameraSpeed * gamepad.axisLeftX());
-    //        m_camera.OffsetPosition(distance * m_camera.Right());
-    //    }
+    if (gamepad.axisLeftX() != 0.0) {
+        const auto distance = static_cast<float>(cameraSpeed * gamepad.axisLeftX());
+        m_camera.OffsetPosition(distance * m_camera.Right());
+    }
 }
 
-void GLCanvas::HandleGamepadTriggerInput(const Gamepad& gamepad)
+void GLCanvas::HandleGamepadTriggerInput(const XboxGamepad& gamepad)
 {
     if (!m_isLeftTriggerDown && gamepad.IsLeftTriggerDown()) {
         m_isLeftTriggerDown = true;

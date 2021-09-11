@@ -28,7 +28,7 @@
 #include <QVector3D>
 
 class Controller;
-class Gamepad;
+class XboxGamepad;
 class MainWindow;
 
 namespace Assets
@@ -245,22 +245,22 @@ class GLCanvas final : public QOpenGLWidget
      * @param[in] elapsedTime     The time that has elapsed since the last processing of gamepad
      *                            state.
      */
-    void
-    HandleGamepadButtonInput(const Gamepad& gamepad, const std::chrono::milliseconds& elapsedTime);
+    void HandleGamepadButtonInput(
+        const XboxGamepad& gamepad, const std::chrono::milliseconds& elapsedTime);
 
     /**
      * @brief Handles left and right trigger input.
      *
      * @param[in] gamepad         The gamepad controller.
      */
-    void HandleGamepadTriggerInput(const Gamepad& gamepad);
+    void HandleGamepadTriggerInput(const XboxGamepad& gamepad);
 
     /**
      * @brief Handles thumb stick inputs.
      *
      * @param[in] gamepad         The gamepad controller.
      */
-    void HandleGamepadThumbstickInput(const Gamepad& gamepad);
+    void HandleGamepadThumbstickInput(const XboxGamepad& gamepad);
 
     /**
      * @brief Compiles and loads the OpenGL shader program for the visualization.

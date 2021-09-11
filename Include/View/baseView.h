@@ -8,7 +8,7 @@
 #include "Settings/settings.h"
 
 class Controller;
-class Gamepad;
+class XboxGamepad;
 class GLCanvas;
 class QWidget;
 class QWindow;
@@ -142,7 +142,7 @@ class BaseView
     /**
      * @returns A reference to the gamepad instance.
      */
-    virtual Gamepad& GetGamepad() = 0;
+    virtual XboxGamepad& GetGamepad() = 0;
 
     /**
      * @brief Asks the user to consider limiting the number of files to display, and then saves the

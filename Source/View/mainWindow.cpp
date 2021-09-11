@@ -899,7 +899,7 @@ GLCanvas& MainWindow::GetCanvas()
     return *m_glCanvas;
 }
 
-Gamepad& MainWindow::GetGamepad()
+XboxGamepad& MainWindow::GetGamepad()
 {
     Expects(m_gamepad);
     return *m_gamepad;

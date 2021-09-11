@@ -9,7 +9,7 @@
 
 class BaseTaskbarButton;
 class Controller;
-class Gamepad;
+class XboxGamepad;
 class GLCanvas;
 class QWidget;
 
@@ -35,7 +35,7 @@ class MockView : public BaseView
     MAKE_CONST_MOCK0(GetSearchQuery, std::string(), override);
     MAKE_MOCK0(GetController, Controller&(), override);
     MAKE_MOCK0(GetCanvas, GLCanvas&(), override);
-    MAKE_MOCK0(GetGamepad, Gamepad&(), override);
+    MAKE_MOCK0(GetGamepad, XboxGamepad&(), override);
     MAKE_MOCK1(AskUserToLimitFileSize, bool(std::uintmax_t), override);
     MAKE_MOCK1(DisplayInfoDialog, void(std::string_view), override);
     MAKE_MOCK1(DisplayErrorDialog, void(std::string_view), override);

@@ -1,5 +1,5 @@
 #include "View/Viewport/gamepadContextMenu.h"
-#include "View/HID/gamepad.h"
+#include "View/HID/xboxGamepad.h"
 #include "constants.h"
 
 #include <cmath>
@@ -89,7 +89,7 @@ namespace
     }
 } // namespace
 
-GamepadContextMenu::GamepadContextMenu(const Gamepad& gamepad, QWidget* parent)
+GamepadContextMenu::GamepadContextMenu(const XboxGamepad& gamepad, QWidget* parent)
     : QWidget{ parent }, m_gamepad{ gamepad }
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
@@ -114,8 +114,8 @@ void GamepadContextMenu::ProcessInput()
 {
     constexpr auto radius = 100;
 
-    const auto x = 0; // m_gamepad.axisLeftX();
-    const auto y = 0; // m_gamepad.axisLeftY();
+    const auto x = m_gamepad.axisLeftX();
+    const auto y = m_gamepad.axisLeftY();
 
     m_selectorDot = QPoint{ static_cast<int>(x * radius) + width() / 2,
                             static_cast<int>(y * radius) + height() / 2 };
