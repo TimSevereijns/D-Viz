@@ -8,6 +8,8 @@
 #include <numeric>
 #include <unordered_map>
 
+//#include <QtGamepad/QGamepad>
+
 #include <QObject>
 #include <QTimer>
 
@@ -23,6 +25,11 @@
 
 #include <Windows.h>
 #include <Xinput.h>
+
+// class Gamepad : public QGamepad
+//{
+//    Q_OBJECT
+//};
 
 /**
  * @brief The XboxController class tracks and manages the state of the attached Xbox controller(s).

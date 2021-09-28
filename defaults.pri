@@ -3,6 +3,7 @@ CONFIG += \
     force_debug_info
 
 include(Conan/conanbuildinfo.pri)
+include(ThirdParty/QGamepad/include/QtGamepad/headers.pri)
 
 QT += opengl charts
 
@@ -125,7 +126,8 @@ INCLUDEPATH += \
     $$PWD/ThirdParty/Spdlog/include \
     $$PWD/ThirdParty/Stopwatch/source \
     $$PWD/ThirdParty/Tree/source \
-    $$PWD/ThirdParty/GSL/include
+    $$PWD/ThirdParty/GSL/include \
+    $$PWD/ThirdParty/QGamepad/include
 
 DISTFILES += \
     $$PWD/Source/View/Shaders/visualizationFragmentShader.frag \
@@ -149,6 +151,7 @@ win32: CONFIG(release, debug|release) {
         _WIN32_WINNT=0x0601 \
         NOMINMAX
     LIBS += \
+        -lQt6Gamepad \
         -lXInput9_1_0 \
         -lShell32 \
         -lOle32
@@ -159,6 +162,7 @@ win32: CONFIG(debug, debug|release) {
         _WIN32_WINNT=0x0601 \
         NOMINMAX
     LIBS += \
+        -lQt6Gamepad \
         -lXInput9_1_0 \
         -lShell32 \
         -lOle32
