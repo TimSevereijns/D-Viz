@@ -115,12 +115,12 @@ void SessionSettingsTests::ModifyVisualizationParameters() const
     Settings::SessionSettings manager;
     manager.SetVisualizationParameters(parameters);
 
-    const auto& retreivedManager = manager.GetVisualizationParameters();
+    const auto& retrievedManager = manager.GetVisualizationParameters();
 
-    QCOMPARE(retreivedManager.forceNewScan, parameters.forceNewScan);
-    QCOMPARE(retreivedManager.rootDirectory, parameters.rootDirectory);
-    QCOMPARE(retreivedManager.minimumFileSize, parameters.minimumFileSize);
-    QCOMPARE(retreivedManager.onlyShowDirectories, parameters.onlyShowDirectories);
+    QCOMPARE(retrievedManager.forceNewScan, parameters.forceNewScan);
+    QCOMPARE(retrievedManager.rootDirectory, parameters.rootDirectory);
+    QCOMPARE(retrievedManager.minimumFileSize, parameters.minimumFileSize);
+    QCOMPARE(retrievedManager.onlyShowDirectories, parameters.onlyShowDirectories);
 }
 
 REGISTER_TEST(SessionSettingsTests)
