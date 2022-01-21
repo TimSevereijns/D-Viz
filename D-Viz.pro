@@ -1,6 +1,6 @@
 QT += gui opengl #gamepad
 
-greaterThan(QT_MAJOR_VERSION, 5): QT += widgets 3dcore
+greaterThan(QT_MAJOR_VERSION, 6): QT += widgets 3dcore
 
 TARGET = D-Viz
 TEMPLATE = subdirs

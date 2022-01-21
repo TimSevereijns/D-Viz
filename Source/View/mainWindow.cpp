@@ -23,6 +23,8 @@
 #include <QMessageBox>
 #include <QStandardPaths>
 
+#include <QtGamepad/QtGamepad>
+
 namespace
 {
     /**
@@ -283,13 +285,13 @@ void MainWindow::SetupFileSizePruningDropdown()
 
 void MainWindow::SetupGamepad()
 {
-    //    const auto gamepads = QGamepadManager::instance()->connectedGamepads();
-    //    if (gamepads.isEmpty()) {
-    //        return;
-    //    }
+    const auto gamepads = QGamepadManager::instance()->connectedGamepads();
+    if (gamepads.isEmpty()) {
+        return;
+    }
 
-    //    m_gamepad = std::make_unique<Gamepad>(*std::begin(gamepads), this);
-    //    QGamepadManager::instance()->resetConfiguration(m_gamepad->deviceId());
+    m_gamepad = std::make_unique<Gamepad>(*std::begin(gamepads), this);
+    QGamepadManager::instance()->resetConfiguration(m_gamepad->deviceId());
 }
 
 void MainWindow::SetupMenus()
@@ -899,7 +901,7 @@ GLCanvas& MainWindow::GetCanvas()
     return *m_glCanvas;
 }
 
-XboxGamepad& MainWindow::GetGamepad()
+Gamepad& MainWindow::GetGamepad()
 {
     Expects(m_gamepad);
     return *m_gamepad;

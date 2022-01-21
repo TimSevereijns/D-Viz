@@ -3,13 +3,13 @@ CONFIG += \
     force_debug_info
 
 include(Conan/conanbuildinfo.pri)
-include(ThirdParty/QGamepad/include/QtGamepad/headers.pri)
 
 QT += opengl charts
 
 INCLUDEPATH += $$PWD/Include
 
 SOURCES += \
+    $$PWD/Source/View/HID/gamepad.cpp \
     $$PWD/Source/controller.cpp \
     $$PWD/Source/Model/baseModel.cpp \
     $$PWD/Source/Model/block.cpp \
@@ -34,7 +34,6 @@ SOURCES += \
     $$PWD/Source/View/Dialogs/distributionGraphModel.cpp \
     $$PWD/Source/View/Dialogs/scanBreakdownModel.cpp \
     $$PWD/Source/View/HID/keyboardManager.cpp \
-    $$PWD/Source/View/HID/xboxGamepad.cpp \
     $$PWD/Source/View/mainWindow.cpp \
     $$PWD/Source/View/Scene/Assets/baseAsset.cpp \
     $$PWD/Source/View/Scene/Assets/crosshairAsset.cpp \
@@ -52,6 +51,7 @@ SOURCES += \
     $$PWD/Source/View/Viewport/mouseContextMenu.cpp
 
 HEADERS += \
+    $$PWD/Include/View/HID/gamepad.h \
     $$PWD/Include/bootstrapper.h \
     $$PWD/Include/constants.h \
     $$PWD/Include/controller.h \
@@ -99,7 +99,6 @@ HEADERS += \
     $$PWD/Include/View/Dialogs/distributionGraphModel.h \
     $$PWD/Include/View/Dialogs/scanBreakdownModel.h \
     $$PWD/Include/View/HID/keyboardManager.h \
-    $$PWD/Include/View/HID/xboxGamepad.h \
     $$PWD/Include/View/mainWindow.h \
     $$PWD/Include/View/Scene/Assets/baseAsset.h \
     $$PWD/Include/View/Scene/Assets/crosshairAsset.h \
@@ -127,7 +126,7 @@ INCLUDEPATH += \
     $$PWD/ThirdParty/Stopwatch/source \
     $$PWD/ThirdParty/Tree/source \
     $$PWD/ThirdParty/GSL/include \
-    $$PWD/ThirdParty/QGamepad/include
+    $$PWD/ThirdParty/QtGamepad/build/include
 
 DISTFILES += \
     $$PWD/Source/View/Shaders/visualizationFragmentShader.frag \
@@ -151,7 +150,7 @@ win32: CONFIG(release, debug|release) {
         _WIN32_WINNT=0x0601 \
         NOMINMAX
     LIBS += \
-        -lQt6Gamepad \
+        -l$$PWD/ThirdParty/QtGamepad/build/lib/Qt6Gamepad \
         -lXInput9_1_0 \
         -lShell32 \
         -lOle32
@@ -162,7 +161,7 @@ win32: CONFIG(debug, debug|release) {
         _WIN32_WINNT=0x0601 \
         NOMINMAX
     LIBS += \
-        -lQt6Gamepad \
+        -l$$PWD/ThirdParty/QtGamepad/build/lib/Qt6Gamepad \
         -lXInput9_1_0 \
         -lShell32 \
         -lOle32

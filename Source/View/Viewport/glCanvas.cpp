@@ -630,7 +630,7 @@ void GLCanvas::HandleGamepadInput(const std::chrono::milliseconds& elapsedTime)
 {
     const auto& gamepad = m_mainWindow.GetGamepad();
 
-    if (!gamepad.IsConnected()) {
+    if (!gamepad.isConnected()) {
         return;
     }
 
@@ -640,7 +640,7 @@ void GLCanvas::HandleGamepadInput(const std::chrono::milliseconds& elapsedTime)
 }
 
 void GLCanvas::HandleGamepadButtonInput(
-    const XboxGamepad& gamepad, const std::chrono::milliseconds& elapsedTime)
+    const Gamepad& gamepad, const std::chrono::milliseconds& elapsedTime)
 {
     const auto millisecondsElapsed = elapsedTime.count();
     const auto cameraSpeed = m_controller.GetSessionSettings().GetCameraSpeed() /
@@ -682,7 +682,7 @@ void GLCanvas::HandleGamepadButtonInput(
     }
 }
 
-void GLCanvas::HandleGamepadThumbstickInput(const XboxGamepad& gamepad)
+void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
 {
     if (m_gamepadContextMenu) {
         return;
@@ -712,7 +712,7 @@ void GLCanvas::HandleGamepadThumbstickInput(const XboxGamepad& gamepad)
     }
 }
 
-void GLCanvas::HandleGamepadTriggerInput(const XboxGamepad& gamepad)
+void GLCanvas::HandleGamepadTriggerInput(const Gamepad& gamepad)
 {
     if (!m_isLeftTriggerDown && gamepad.IsLeftTriggerDown()) {
         m_isLeftTriggerDown = true;

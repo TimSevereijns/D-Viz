@@ -2,7 +2,7 @@ include(../defaults.pri)
 
 QT += core gui
 
-greaterThan(QT_MAJOR_VERSION, 5): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 6): QT += widgets
 
 TARGET = D-Viz
 TEMPLATE = app

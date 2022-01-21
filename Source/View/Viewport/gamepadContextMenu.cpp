@@ -1,5 +1,5 @@
 #include "View/Viewport/gamepadContextMenu.h"
-#include "View/HID/xboxGamepad.h"
+#include "View/HID/gamepad.h"
 #include "constants.h"
 
 #include <cmath>
@@ -89,7 +89,7 @@ namespace
     }
 } // namespace
 
-GamepadContextMenu::GamepadContextMenu(const XboxGamepad& gamepad, QWidget* parent)
+GamepadContextMenu::GamepadContextMenu(const Gamepad& gamepad, QWidget* parent)
     : QWidget{ parent }, m_gamepad{ gamepad }
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);

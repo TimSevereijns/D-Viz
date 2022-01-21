@@ -16,7 +16,7 @@
 
 #include "Dialogs/aboutDialog.h"
 #include "Dialogs/breakdownDialog.h"
-#include "View/HID/xboxGamepad.h"
+#include "View/HID/gamepad.h"
 #include "Viewport/glCanvas.h"
 #include "baseView.h"
 #include "constants.h"
@@ -164,7 +164,7 @@ class MainWindow final : public QMainWindow, public BaseView
     /**
      * @returns A reference to the gamepad instance.
      */
-    XboxGamepad& GetGamepad() override;
+    Gamepad& GetGamepad() override;
 
     /**
      * @copydoc BaseView::AskUserToLimitFileSize
@@ -291,7 +291,7 @@ class MainWindow final : public QMainWindow, public BaseView
 
     int m_sizePruningComboBoxIndex = 0;
 
-    std::unique_ptr<XboxGamepad> m_gamepad = std::make_unique<XboxGamepad>(0, nullptr);
+    std::unique_ptr<Gamepad> m_gamepad = std::make_unique<Gamepad>(0, nullptr);
 
     Ui::MainWindow m_ui;
 
