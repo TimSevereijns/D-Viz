@@ -40,16 +40,13 @@ namespace
         }
 
         return path;
-
 #elif defined(Q_OS_LINUX)
-
         const auto* env = std::getenv("GITHUB_WORKSPACE");
         const std::string path =
             env ? std::string{ env }
-                : std::string{ std::filesystem::current_path().root_name().string() };
+                : std::string{ std::filesystem::current_path().parent_path().string() };
 
         return path;
-
 #endif
     }
 } // namespace
