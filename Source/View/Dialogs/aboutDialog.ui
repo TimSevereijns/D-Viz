@@ -37,7 +37,7 @@
      <x>10</x>
      <y>10</y>
      <width>400</width>
-     <height>200</height>
+     <height>222</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -89,7 +89,6 @@
             <property name="font">
              <font>
               <pointsize>11</pointsize>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -111,7 +110,7 @@
           <item>
            <widget class="QLabel" name="copyright">
             <property name="text">
-             <string>Copyright 2021, Tim Severeijns</string>
+             <string>Copyright 2022, Tim Severeijns</string>
             </property>
            </widget>
           </item>
