@@ -17,7 +17,7 @@
 #include "Model/Monitor/fileSystemObserver.h"
 #include "Model/vizBlock.h"
 #include "Settings/settings.h"
-#include "Settings/visualizationParameters.h"
+#include "Settings/visualizationOptions.h"
 #include "Utilities/threadSafeQueue.h"
 #include "View/Viewport/camera.h"
 
@@ -87,14 +87,13 @@ class BaseModel
      *
      * @param[in] camera          The camera from which the ray originated.
      * @param[in] ray             The picking ray.
-     * @param[in] parameters      Used to prune disqualified nodes. @see VisualizationParameters.
+     * @param[in] options         Used to prune disqualified nodes. @see VisualizationOptions.
      *
      * @returns A pointer to the TreeNode that was clicked on, and nullptr if no intersection
      * exists.
      */
     Tree<VizBlock>::Node* FindNearestIntersection(
-        const Camera& camera, const Ray& ray,
-        const Settings::VisualizationParameters& parameters) const;
+        const Camera& camera, const Ray& ray, const Settings::VisualizationOptions& options) const;
 
     /**
      * @returns A reference to the directory tree.
@@ -165,30 +164,29 @@ class BaseModel
      * @brief Highlights all descendents of the given node.
      *
      * @param[in] root            The starting node.
-     * @param parameters          Used to prune disqualified nodes. @see VisualizationParameters.
+     * @param options             Used to prune disqualified nodes. @see VisualizationOptions.
      */
     void HighlightDescendants(
-        const Tree<VizBlock>::Node& root, const Settings::VisualizationParameters& parameters);
+        const Tree<VizBlock>::Node& root, const Settings::VisualizationOptions& options);
 
     /**
      * @brief Highlights all nodes that match the sample node's extension.
      *
      * @param[in] extension       The extension that should be highlighted.
-     * @param[in] parameters      Used to prune disqualified nodes. @see VisualizationParameters.
+     * @param[in] options         Used to prune disqualified nodes. @see VisualizationOptions.
      */
     void HighlightMatchingFileExtensions(
-        const std::string& extension, const Settings::VisualizationParameters& parameters);
+        const std::string& extension, const Settings::VisualizationOptions& options);
 
     /**
-     * @brief Highlights all nodes that match the search query, given the search parameters.
+     * @brief Highlights all nodes that match the search query, given the search options.
      *
-     * @param[in] searchQuery              The raw search query.
-     * @param[in] parameters               Used to prune disqualified nodes. @see
-     *                                     VisualizationParameters.
-     * @param[in] flags                    Encoded search options.
+     * @param[in] searchQuery     The raw search query.
+     * @param[in] options         Used to prune disqualified nodes. @see VisualizationOptions.
+     * @param[in] flags           Encoded search options.
      */
     void HighlightMatchingFileNames(
-        const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
+        const std::string& searchQuery, const Settings::VisualizationOptions& options,
         SearchFlags flags);
 
     /**
@@ -306,11 +304,11 @@ class BaseModel
 
   private:
     void PerformRegexSearch(
-        const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
+        const std::string& searchQuery, const Settings::VisualizationOptions& options,
         SearchFlags flags);
 
     void PerformNormalSearch(
-        const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
+        const std::string& searchQuery, const Settings::VisualizationOptions& options,
         SearchFlags flags);
 };
 

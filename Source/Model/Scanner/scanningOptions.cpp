@@ -1,8 +1,8 @@
-#include "Model/Scanner/scanningParameters.h"
+#include "Model/Scanner/scanningOptions.h"
 
 #include <utility>
 
-ScanningParameters::ScanningParameters(
+ScanningOptions::ScanningOptions(
     std::filesystem::path startingPath, ProgressCallback progressCallback,
     ScanCompleteCallback completionCallback)
     : path{ std::move(startingPath) },

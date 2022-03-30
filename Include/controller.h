@@ -64,9 +64,9 @@ class Controller : public QObject
     /**
      * @brief Scans the drive.
      *
-     * @param[in] parameters      Drive scanning parameters; where to start, et cetera.
+     * @param[in] options         Drive scanning options; where to start, et cetera.
      */
-    void ScanDrive(const Settings::VisualizationParameters& parameters);
+    void ScanDrive(const Settings::VisualizationOptions& options);
 
     /**
      * @brief Stops any active drive scanner.

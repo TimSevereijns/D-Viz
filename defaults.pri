@@ -19,7 +19,7 @@ SOURCES += \
     $$PWD/Source/Model/precisePoint.cpp \
     $$PWD/Source/Model/ray.cpp \
     $$PWD/Source/Model/Scanner/driveScanner.cpp \
-    $$PWD/Source/Model/Scanner/scanningParameters.cpp \
+    $$PWD/Source/Model/Scanner/scanningOptions.cpp \
     $$PWD/Source/Model/Scanner/scanningUtilities.cpp \
     $$PWD/Source/Model/Scanner/scanningWorker.cpp \
     $$PWD/Source/Model/squarifiedTreemap.cpp \
@@ -28,7 +28,7 @@ SOURCES += \
     $$PWD/Source/Settings/persistentSettings.cpp \
     $$PWD/Source/Settings/sessionSettings.cpp \
     $$PWD/Source/Settings/settings.cpp \
-    $$PWD/Source/Settings/visualizationParameters.cpp \
+    $$PWD/Source/Settings/visualizationOptions.cpp \
     $$PWD/Source/View/Dialogs/aboutDialog.cpp \
     $$PWD/Source/View/Dialogs/breakdownDialog.cpp \
     $$PWD/Source/View/Dialogs/distributionGraphModel.cpp \
@@ -71,7 +71,7 @@ HEADERS += \
     $$PWD/Include/Model/ray.h \
     $$PWD/Include/Model/Scanner/driveScanner.h \
     $$PWD/Include/Model/Scanner/fileInfo.h \
-    $$PWD/Include/Model/Scanner/scanningParameters.h \
+    $$PWD/Include/Model/Scanner/scanningOptions.h \
     $$PWD/Include/Model/Scanner/scanningProgress.h \
     $$PWD/Include/Model/Scanner/scanningUtilities.h \
     $$PWD/Include/Model/Scanner/scanningWorker.h \
@@ -81,7 +81,7 @@ HEADERS += \
     $$PWD/Include/Settings/persistentSettings.h \
     $$PWD/Include/Settings/sessionSettings.h \
     $$PWD/Include/Settings/settings.h \
-    $$PWD/Include/Settings/visualizationParameters.h \
+    $$PWD/Include/Settings/visualizationOptions.h \
     $$PWD/Include/Utilities/color.h \
     $$PWD/Include/Utilities/ignoreUnused.h \
     $$PWD/Include/Utilities/logging.h \

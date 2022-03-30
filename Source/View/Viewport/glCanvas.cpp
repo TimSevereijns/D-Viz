@@ -1,7 +1,7 @@
 #include "View/Viewport/glCanvas.h"
 
 #include "Model/squarifiedTreemap.h"
-#include "Settings/visualizationParameters.h"
+#include "Settings/visualizationOptions.h"
 #include "Utilities/operatingSystem.h"
 #include "Utilities/scopeExit.h"
 #include "View/Viewport/gamepadContextMenu.h"
@@ -405,8 +405,8 @@ void GLCanvas::SelectNode(const Tree<VizBlock>::Node& node)
 
 void GLCanvas::RestoreSelectedNode(const Tree<VizBlock>::Node& node)
 {
-    const auto& parameters = m_controller.GetSessionSettings().GetVisualizationParameters();
-    if (!parameters.IsNodeVisible(node.GetData())) {
+    const auto& options = m_controller.GetSessionSettings().GetVisualizationOptions();
+    if (!options.IsNodeVisible(node.GetData())) {
         return;
     }
 
@@ -426,10 +426,10 @@ void GLCanvas::HighlightNodes(std::vector<const Tree<VizBlock>::Node*>& nodes)
 void GLCanvas::RestoreHighlightedNodes(std::vector<const Tree<VizBlock>::Node*>& nodes)
 {
     auto* const treemap = GetAsset<Assets::Tag::Treemap>();
-    const auto& parameters = m_controller.GetSessionSettings().GetVisualizationParameters();
+    const auto& options = m_controller.GetSessionSettings().GetVisualizationOptions();
 
     for (const auto* const node : nodes) {
-        if (!parameters.IsNodeVisible(node->GetData())) {
+        if (!options.IsNodeVisible(node->GetData())) {
             continue;
         }
 
@@ -779,8 +779,8 @@ void GLCanvas::PaintNode(
         m_controller.RegisterNodeColor(node, directoryColor);
     }
 
-    const auto& parameters = m_controller.GetSessionSettings().GetVisualizationParameters();
-    if (!parameters.IsNodeVisible(node.GetData())) {
+    const auto& options = m_controller.GetSessionSettings().GetVisualizationOptions();
+    if (!options.IsNodeVisible(node.GetData())) {
         return;
     }
 

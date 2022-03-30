@@ -1,5 +1,5 @@
-#ifndef SCANNINGPARAMETERS_H
-#define SCANNINGPARAMETERS_H
+#ifndef SCANNINGOPTIONS_H
+#define SCANNINGOPTIONS_H
 
 #include <cstdint>
 #include <filesystem>
@@ -12,10 +12,10 @@ template <typename T> class Tree;
 class VizBlock;
 
 /**
- * @brief Wrapper around all of the parameters needed to scan a directories, as well as to track
+ * @brief Wrapper around all of the options needed to scan a directories, as well as to track
  * progress.
  */
-class ScanningParameters
+class ScanningOptions
 {
   public:
     using ProgressCallback = std::function<void(const ScanningProgress&)>;
@@ -23,9 +23,9 @@ class ScanningParameters
     using ScanCompleteCallback =
         std::function<void(const ScanningProgress&, std::shared_ptr<Tree<VizBlock>> fileTree)>;
 
-    ScanningParameters() = default;
+    ScanningOptions() = default;
 
-    ScanningParameters(
+    ScanningOptions(
         std::filesystem::path startingPath, ProgressCallback progressCallback,
         ScanCompleteCallback completionCallback);
 
@@ -35,4 +35,4 @@ class ScanningParameters
     ScanCompleteCallback onScanCompletedCallback;
 };
 
-#endif // SCANNINGPARAMETERS_H
+#endif // SCANNINGOPTIONS_H

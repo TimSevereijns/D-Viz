@@ -1,5 +1,5 @@
 #include "Settings/sessionSettings.h"
-#include "Settings/visualizationParameters.h"
+#include "Settings/visualizationOptions.h"
 
 namespace Settings
 {
@@ -93,21 +93,21 @@ namespace Settings
         return m_shouldUseRegex;
     }
 
-    const Settings::VisualizationParameters& SessionSettings::GetVisualizationParameters() const
+    const Settings::VisualizationOptions& SessionSettings::GetVisualizationOptions() const
     {
-        return m_visualizationParameters;
+        return m_visualizationOptions;
     }
 
-    Settings::VisualizationParameters& SessionSettings::GetVisualizationParameters()
+    Settings::VisualizationOptions& SessionSettings::GetVisualizationOptions()
     {
-        return m_visualizationParameters;
+        return m_visualizationOptions;
     }
 
-    Settings::VisualizationParameters&
-    SessionSettings::SetVisualizationParameters(const Settings::VisualizationParameters& parameters)
+    Settings::VisualizationOptions&
+    SessionSettings::SetVisualizationOptions(const Settings::VisualizationOptions& options)
     {
-        m_visualizationParameters = parameters;
-        return m_visualizationParameters;
+        m_visualizationOptions = options;
+        return m_visualizationOptions;
     }
 
     void SessionSettings::SetActiveNumericPrefix(Constants::SizePrefix prefix)

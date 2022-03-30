@@ -108,9 +108,9 @@ void Controller::MonitorFileSystem(bool shouldEnable)
     }
 }
 
-void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
+void Controller::ScanDrive(const Settings::VisualizationOptions& options)
 {
-    const auto& root = parameters.rootDirectory;
+    const auto& root = options.rootDirectory;
 
     if (root.empty() || !ScanningWorker::IsScannable(root)) {
         return;
@@ -138,8 +138,7 @@ void Controller::ScanDrive(const Settings::VisualizationParameters& parameters)
     const auto& log = spdlog::get(Constants::Logging::DefaultLog);
     log->info("Started a new scan at \"{}\".", m_model->GetRootPath().string());
 
-    const auto scanningParameters = ScanningParameters{ root, progressHandler, completionHandler };
-    m_scanner.StartScanning(scanningParameters);
+    m_scanner.StartScanning(ScanningOptions{ root, progressHandler, completionHandler });
 }
 
 void Controller::StopScanning()
@@ -310,8 +309,8 @@ void Controller::SelectNodeViaRay(
         m_model->ClearSelectedNode();
     }
 
-    const auto& parameters = m_sessionSettings.GetVisualizationParameters();
-    const auto* node = m_model->FindNearestIntersection(camera, ray, parameters);
+    const auto& options = m_sessionSettings.GetVisualizationOptions();
+    const auto* node = m_model->FindNearestIntersection(camera, ray, options);
 
     if (node) {
         SelectNodeAndUpdateStatusBar(*node, selectionCallback);
@@ -425,7 +424,7 @@ void Controller::HighlightDescendants(
     Expects(m_model);
 
     const auto selector = [&] {
-        m_model->HighlightDescendants(node, m_sessionSettings.GetVisualizationParameters());
+        m_model->HighlightDescendants(node, m_sessionSettings.GetVisualizationOptions());
     };
 
     ProcessHighlightedNodes(selector, callback);
@@ -437,8 +436,8 @@ void Controller::HighlightAllMatchingExtensions(
 {
     Expects(m_model);
 
-    const auto& parameters = m_sessionSettings.GetVisualizationParameters();
-    const auto selector = [&] { m_model->HighlightMatchingFileExtensions(extension, parameters); };
+    const auto& options = m_sessionSettings.GetVisualizationOptions();
+    const auto selector = [&] { m_model->HighlightMatchingFileExtensions(extension, options); };
 
     ProcessHighlightedNodes(selector, callback);
 }
@@ -462,7 +461,7 @@ void Controller::SearchTreeMap(
     const auto selector = [&] {
         const auto stopwatch = Stopwatch<std::chrono::milliseconds>([&]() noexcept {
             m_model->HighlightMatchingFileNames(
-                searchQuery, m_sessionSettings.GetVisualizationParameters(), flags);
+                searchQuery, m_sessionSettings.GetVisualizationOptions(), flags);
         });
 
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);

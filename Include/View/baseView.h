@@ -150,7 +150,7 @@ class BaseView
      *
      * @param[in] numberOfFilesScanned  The number of files scanned.
      *
-     * @returns True if the user opted to change the parameters.
+     * @returns True if the user opted to change the options.
      */
     virtual bool AskUserToLimitFileSize(std::uintmax_t numberOfFilesScanned) = 0;
 

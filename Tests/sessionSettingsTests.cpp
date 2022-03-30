@@ -104,23 +104,23 @@ void SessionSettingsTests::ModifyNumericPrefix() const
     QCOMPARE(manager.GetActiveNumericPrefix(), numericPrefix);
 }
 
-void SessionSettingsTests::ModifyVisualizationParameters() const
+void SessionSettingsTests::ModifyVisualizationOptions() const
 {
     using namespace Literals::Numeric::Binary;
 
-    Settings::VisualizationParameters parameters;
-    parameters.minimumFileSize = 1_MiB;
-    parameters.onlyShowDirectories = true;
+    Settings::VisualizationOptions options;
+    options.minimumFileSize = 1_MiB;
+    options.onlyShowDirectories = true;
 
     Settings::SessionSettings manager;
-    manager.SetVisualizationParameters(parameters);
+    manager.SetVisualizationOptions(options);
 
-    const auto& retrievedManager = manager.GetVisualizationParameters();
+    const auto& retrievedOptions = manager.GetVisualizationOptions();
 
-    QCOMPARE(retrievedManager.forceNewScan, parameters.forceNewScan);
-    QCOMPARE(retrievedManager.rootDirectory, parameters.rootDirectory);
-    QCOMPARE(retrievedManager.minimumFileSize, parameters.minimumFileSize);
-    QCOMPARE(retrievedManager.onlyShowDirectories, parameters.onlyShowDirectories);
+    QCOMPARE(retrievedOptions.forceNewScan, options.forceNewScan);
+    QCOMPARE(retrievedOptions.rootDirectory, options.rootDirectory);
+    QCOMPARE(retrievedOptions.minimumFileSize, options.minimumFileSize);
+    QCOMPARE(retrievedOptions.onlyShowDirectories, options.onlyShowDirectories);
 }
 
 REGISTER_TEST(SessionSettingsTests)

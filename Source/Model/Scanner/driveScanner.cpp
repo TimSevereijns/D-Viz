@@ -6,14 +6,14 @@
 
 void DriveScanner::HandleProgressUpdates()
 {
-    m_parameters.onProgressUpdateCallback(m_progress);
+    m_options.onProgressUpdateCallback(m_progress);
 }
 
 void DriveScanner::HandleCompletion(const std::shared_ptr<Tree<VizBlock>>& fileTree)
 {
     m_progressUpdateTimer->stop();
 
-    m_parameters.onScanCompletedCallback(m_progress, fileTree);
+    m_options.onScanCompletedCallback(m_progress, fileTree);
 
     m_isActive = false;
     emit Finished();
@@ -28,7 +28,7 @@ void DriveScanner::HandleMessageBox(const QString& message)
     messageBox.exec();
 }
 
-void DriveScanner::StartScanning(const ScanningParameters& parameters)
+void DriveScanner::StartScanning(const ScanningOptions& options)
 {
     m_progress.Reset();
 
@@ -36,11 +36,11 @@ void DriveScanner::StartScanning(const ScanningParameters& parameters)
     connect(
         m_progressUpdateTimer.get(), &QTimer::timeout, this, &DriveScanner::HandleProgressUpdates);
 
-    m_parameters = parameters;
+    m_options = options;
     m_cancellationToken.store(false);
 
     auto* thread = new QThread;
-    auto* worker = new ScanningWorker{ m_parameters, m_progress, m_cancellationToken };
+    auto* worker = new ScanningWorker{ m_options, m_progress, m_cancellationToken };
     worker->moveToThread(thread);
 
     m_progressUpdateTimer->start(250);

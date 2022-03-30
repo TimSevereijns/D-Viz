@@ -132,7 +132,7 @@ class GLCanvas final : public QOpenGLWidget
     /**
      * @brief Reloads the current visualization.
      *
-     * @param[in] parameters      @see VisualizationParameters
+     * @param[in] options         @see VisualizationOptions
      */
     void ReloadVisualization();
 

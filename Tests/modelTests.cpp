@@ -1,6 +1,6 @@
 #include "modelTests.h"
 
-#include <Model/Scanner/scanningParameters.h>
+#include <Model/Scanner/scanningOptions.h>
 #include <Model/Scanner/scanningProgress.h>
 #include <Utilities/operatingSystem.h>
 #include <constants.h>
@@ -90,8 +90,8 @@ void ModelTests::initTestCase()
 
     QSignalSpy completionSpy{ &m_scanner, &DriveScanner::Finished };
 
-    const ScanningParameters parameters{ m_sampleDirectory, progressCallback, completionCallback };
-    m_scanner.StartScanning(parameters);
+    const ScanningOptions options{ m_sampleDirectory, progressCallback, completionCallback };
+    m_scanner.StartScanning(options);
 
     completionSpy.wait(10'000);
 }
@@ -190,13 +190,13 @@ void ModelTests::HighlightDescendants()
 {
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
-    Settings::VisualizationParameters parameters;
-    parameters.rootDirectory = "";
-    parameters.minimumFileSize = 0u;
-    parameters.onlyShowDirectories = false;
+    Settings::VisualizationOptions options;
+    options.rootDirectory = "";
+    options.minimumFileSize = 0u;
+    options.onlyShowDirectories = false;
 
     const Tree<VizBlock>::Node* rootNode = m_tree->GetRoot();
-    m_model->HighlightDescendants(*rootNode, parameters);
+    m_model->HighlightDescendants(*rootNode, options);
 
     const auto leafCount = std::count_if(
         Tree<VizBlock>::LeafIterator{ rootNode }, Tree<VizBlock>::LeafIterator{},
@@ -230,12 +230,12 @@ void ModelTests::HighlightAllMatchingFileNames()
 {
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
-    Settings::VisualizationParameters parameters;
-    parameters.rootDirectory = "";
-    parameters.minimumFileSize = 0u;
-    parameters.onlyShowDirectories = false;
+    Settings::VisualizationOptions options;
+    options.rootDirectory = "";
+    options.minimumFileSize = 0u;
+    options.onlyShowDirectories = false;
 
-    m_model->HighlightMatchingFileNames("socket", parameters, SearchFlags::SearchFiles);
+    m_model->HighlightMatchingFileNames("socket", options, SearchFlags::SearchFiles);
 
     const auto headerCount = std::count_if(
         Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() }, Tree<VizBlock>::PostOrderIterator{},
@@ -250,15 +250,15 @@ void ModelTests::HighlightAllMatchingFileNamesUsingRegex()
 {
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
-    Settings::VisualizationParameters parameters;
-    parameters.rootDirectory = "";
-    parameters.minimumFileSize = 0u;
-    parameters.onlyShowDirectories = false;
+    Settings::VisualizationOptions options;
+    options.rootDirectory = "";
+    options.minimumFileSize = 0u;
+    options.onlyShowDirectories = false;
 
     constexpr auto query = ".*_.*\\.hpp"; //< Look for headers with at least one underscore.
 
     m_model->HighlightMatchingFileNames(
-        query, parameters, SearchFlags::SearchFiles | SearchFlags::UseRegex);
+        query, options, SearchFlags::SearchFiles | SearchFlags::UseRegex);
 
     const auto headerCount = std::count_if(
         Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() }, Tree<VizBlock>::PostOrderIterator{},
@@ -276,15 +276,15 @@ void ModelTests::HandleInvalidRegex()
 {
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
-    Settings::VisualizationParameters parameters;
-    parameters.rootDirectory = "";
-    parameters.minimumFileSize = 0u;
-    parameters.onlyShowDirectories = false;
+    Settings::VisualizationOptions options;
+    options.rootDirectory = "";
+    options.minimumFileSize = 0u;
+    options.onlyShowDirectories = false;
 
     constexpr auto query = ".*_.*\\"; //< Ends with an escape and should lead to an exception.
 
     m_model->HighlightMatchingFileNames(
-        query, parameters, SearchFlags::SearchFiles | SearchFlags::UseRegex);
+        query, options, SearchFlags::SearchFiles | SearchFlags::UseRegex);
 
     QCOMPARE(
         static_cast<std::int32_t>(m_model->GetHighlightedNodes().size()),
@@ -295,12 +295,12 @@ void ModelTests::HighlightMatchingFileExtensions()
 {
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
-    Settings::VisualizationParameters parameters;
-    parameters.rootDirectory = "";
-    parameters.minimumFileSize = 0u;
-    parameters.onlyShowDirectories = false;
+    Settings::VisualizationOptions options;
+    options.rootDirectory = "";
+    options.minimumFileSize = 0u;
+    options.onlyShowDirectories = false;
 
-    m_model->HighlightMatchingFileExtensions(".hpp", parameters);
+    m_model->HighlightMatchingFileExtensions(".hpp", options);
 
     const auto headerCount = std::count_if(
         Tree<VizBlock>::PostOrderIterator{ m_tree->GetRoot() }, Tree<VizBlock>::PostOrderIterator{},
@@ -315,12 +315,12 @@ void ModelTests::ClearHighlightedNodes()
 {
     QVERIFY(m_model->GetHighlightedNodes().size() == 0);
 
-    Settings::VisualizationParameters parameters;
-    parameters.rootDirectory = "";
-    parameters.minimumFileSize = 0u;
-    parameters.onlyShowDirectories = false;
+    Settings::VisualizationOptions options;
+    options.rootDirectory = "";
+    options.minimumFileSize = 0u;
+    options.onlyShowDirectories = false;
 
-    m_model->HighlightMatchingFileExtensions(".hpp", parameters);
+    m_model->HighlightMatchingFileExtensions(".hpp", options);
     QCOMPARE(false, m_model->GetHighlightedNodes().empty());
 
     m_model->ClearHighlightedNodes();
@@ -399,10 +399,10 @@ void ModelTests::FindNearestNodeFromFront()
 
     const Ray ray{ camera.GetPosition(), camera.Forward() };
 
-    Settings::VisualizationParameters parameters;
-    parameters.minimumFileSize = 0;
+    Settings::VisualizationOptions options;
+    options.minimumFileSize = 0;
 
-    const auto* node = m_model->FindNearestIntersection(camera, ray, parameters);
+    const auto* node = m_model->FindNearestIntersection(camera, ray, options);
     QVERIFY(node != nullptr);
 
     const auto fileName = node->GetData().file.name + node->GetData().file.extension;
@@ -430,10 +430,10 @@ void ModelTests::FindNearestNodeFromBack()
 
     const Ray ray{ camera.GetPosition(), camera.Forward() };
 
-    Settings::VisualizationParameters parameters;
-    parameters.minimumFileSize = 0;
+    Settings::VisualizationOptions options;
+    options.minimumFileSize = 0;
 
-    const auto* node = m_model->FindNearestIntersection(camera, ray, parameters);
+    const auto* node = m_model->FindNearestIntersection(camera, ray, options);
     QVERIFY(node != nullptr);
 
     const auto fileName = node->GetData().file.name + node->GetData().file.extension;
@@ -463,10 +463,10 @@ void ModelTests::FindNearestNodeWithSizeLimitations()
 
     using namespace Literals::Numeric::Binary;
 
-    Settings::VisualizationParameters parameters;
-    parameters.minimumFileSize = 128_KiB;
+    Settings::VisualizationOptions options;
+    options.minimumFileSize = 128_KiB;
 
-    const auto* node = m_model->FindNearestIntersection(camera, ray, parameters);
+    const auto* node = m_model->FindNearestIntersection(camera, ray, options);
     QVERIFY(node != nullptr);
 
     const auto fileName = node->GetData().file.name + node->GetData().file.extension;

@@ -27,7 +27,7 @@
 #include <Tree/Tree.hpp>
 
 #include "Model/Scanner/fileInfo.h"
-#include "Model/Scanner/scanningParameters.h"
+#include "Model/Scanner/scanningOptions.h"
 #include "Model/Scanner/scanningProgress.h"
 #include "Model/baseModel.h"
 #include "Model/block.h"
@@ -45,7 +45,7 @@ class ScanningWorker final : public QObject
     static constexpr std::uintmax_t UndefinedFileSize = 0;
 
     ScanningWorker(
-        const ScanningParameters& parameters, ScanningProgress& progress,
+        const ScanningOptions& options, ScanningProgress& progress,
         std::atomic<bool>& cancellationToken);
 
     /**
@@ -117,7 +117,7 @@ class ScanningWorker final : public QObject
     void AddSubDirectoriesToQueue(
         const std::filesystem::path& path, Tree<VizBlock>::Node& node) noexcept;
 
-    ScanningParameters m_parameters;
+    ScanningOptions m_options;
 
     ScanningProgress& m_progress;
     std::atomic<bool>& m_cancellationToken;

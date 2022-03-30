@@ -2,7 +2,7 @@
 
 #include "Utilities/testUtilities.h"
 
-#include <Settings/visualizationParameters.h>
+#include <Settings/visualizationOptions.h>
 #include <controller.h>
 
 #include <filesystem>
@@ -94,14 +94,14 @@ void ControllerTests::ScanDrive() const
 
     FORBID_CALL(*m_view, DisplayErrorDialog(trompeloeil::_));
 
-    Settings::VisualizationParameters parameters;
-    parameters.forceNewScan = true;
-    parameters.rootDirectory = GetSampleDirectory().string();
-    parameters.minimumFileSize = 0;
-    parameters.onlyShowDirectories = false;
+    Settings::VisualizationOptions options;
+    options.forceNewScan = true;
+    options.rootDirectory = GetSampleDirectory().string();
+    options.minimumFileSize = 0;
+    options.onlyShowDirectories = false;
 
     QSignalSpy completionSpy{ m_controller.get(), &Controller::FinishedScanning };
-    m_controller->ScanDrive(parameters);
+    m_controller->ScanDrive(options);
     completionSpy.wait(10'000);
 }
 
@@ -117,13 +117,13 @@ void ControllerTests::ScanDriveWithEmptyPath() const
     FORBID_CALL(*m_view, SetStatusBarMessage(trompeloeil::_, trompeloeil::_));
     FORBID_CALL(*m_view, DisplayErrorDialog(trompeloeil::_));
 
-    Settings::VisualizationParameters parameters;
-    parameters.forceNewScan = true;
-    parameters.rootDirectory = "";
-    parameters.minimumFileSize = 0;
-    parameters.onlyShowDirectories = false;
+    Settings::VisualizationOptions options;
+    options.forceNewScan = true;
+    options.rootDirectory = "";
+    options.minimumFileSize = 0;
+    options.onlyShowDirectories = false;
 
-    m_controller->ScanDrive(parameters); //< Should return immediately.
+    m_controller->ScanDrive(options); //< Should return immediately.
 }
 
 void ControllerTests::CancelScan() const
@@ -133,11 +133,11 @@ void ControllerTests::CancelScan() const
     // We need a larger directory so that we have a bit more time to cancel the scan.
     const auto path = GetLargeDirectoryToScan();
 
-    Settings::VisualizationParameters parameters;
-    parameters.forceNewScan = true;
-    parameters.rootDirectory = path;
-    parameters.minimumFileSize = 0;
-    parameters.onlyShowDirectories = false;
+    Settings::VisualizationOptions options;
+    options.forceNewScan = true;
+    options.rootDirectory = path;
+    options.minimumFileSize = 0;
+    options.onlyShowDirectories = false;
 
     REQUIRE_CALL(*m_view, SetWaitCursor()).TIMES(1);
     REQUIRE_CALL(*m_view, RestoreDefaultCursor()).TIMES(1);
@@ -157,7 +157,7 @@ void ControllerTests::CancelScan() const
         .TIMES(AT_LEAST(1));
 
     QSignalSpy completionSpy{ m_controller.get(), &Controller::FinishedScanning };
-    m_controller->ScanDrive(parameters);
+    m_controller->ScanDrive(options);
 
     // Brief pause to make sure the scanning thread gets instantiated.
     std::this_thread::sleep_for(std::chrono::milliseconds{ 10 });
@@ -229,9 +229,9 @@ void ControllerTests::VerifyFilesOverLimitAreDisplayed() const
     QVERIFY(m_controller);
     using namespace Literals::Numeric::Binary;
 
-    Settings::VisualizationParameters parameters;
-    parameters.minimumFileSize = 1_KiB;
-    parameters.onlyShowDirectories = false;
+    Settings::VisualizationOptions options;
+    options.minimumFileSize = 1_KiB;
+    options.onlyShowDirectories = false;
 
     VizBlock sample;
     sample.file.name = "Foo";
@@ -239,7 +239,7 @@ void ControllerTests::VerifyFilesOverLimitAreDisplayed() const
     sample.file.size = 16_KiB;
     sample.file.type = FileType::Regular;
 
-    QCOMPARE(parameters.IsNodeVisible(sample), true);
+    QCOMPARE(options.IsNodeVisible(sample), true);
 }
 
 void ControllerTests::VerifyFilesUnderLimitAreNotDisplayed() const
@@ -247,9 +247,9 @@ void ControllerTests::VerifyFilesUnderLimitAreNotDisplayed() const
     QVERIFY(m_controller);
     using namespace Literals::Numeric::Binary;
 
-    Settings::VisualizationParameters parameters;
-    parameters.minimumFileSize = 32_KiB;
-    parameters.onlyShowDirectories = false;
+    Settings::VisualizationOptions options;
+    options.minimumFileSize = 32_KiB;
+    options.onlyShowDirectories = false;
 
     VizBlock sample;
     sample.file.name = "Foo";
@@ -257,7 +257,7 @@ void ControllerTests::VerifyFilesUnderLimitAreNotDisplayed() const
     sample.file.size = 16_KiB;
     sample.file.type = FileType::Regular;
 
-    QCOMPARE(parameters.IsNodeVisible(sample), false);
+    QCOMPARE(options.IsNodeVisible(sample), false);
 }
 
 void ControllerTests::VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed() const
@@ -265,9 +265,9 @@ void ControllerTests::VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed() con
     QVERIFY(m_controller);
     using namespace Literals::Numeric::Binary;
 
-    Settings::VisualizationParameters parameters;
-    parameters.minimumFileSize = 10_MiB;
-    parameters.onlyShowDirectories = true;
+    Settings::VisualizationOptions options;
+    options.minimumFileSize = 10_MiB;
+    options.onlyShowDirectories = true;
 
     VizBlock sample;
     sample.file.name = "Bar";
@@ -275,7 +275,7 @@ void ControllerTests::VerifyFilesAreNotDisplayedWhenOnlyDirectoriesAllowed() con
     sample.file.size = 10_GiB;
     sample.file.type = FileType::Regular;
 
-    QCOMPARE(parameters.IsNodeVisible(sample), false);
+    QCOMPARE(options.IsNodeVisible(sample), false);
 }
 
 void ControllerTests::VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed() const
@@ -283,9 +283,9 @@ void ControllerTests::VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed() con
     QVERIFY(m_controller);
     using namespace Literals::Numeric::Binary;
 
-    Settings::VisualizationParameters parameters;
-    parameters.minimumFileSize = 1_MiB;
-    parameters.onlyShowDirectories = true;
+    Settings::VisualizationOptions options;
+    options.minimumFileSize = 1_MiB;
+    options.onlyShowDirectories = true;
 
     VizBlock sample;
     sample.file.name = "Bar";
@@ -293,7 +293,7 @@ void ControllerTests::VerifyDirectoriesUnderLimitAreNotShownWhenNotAllowed() con
     sample.file.size = 10_MiB;
     sample.file.type = FileType::Directory;
 
-    QCOMPARE(parameters.IsNodeVisible(sample), true);
+    QCOMPARE(options.IsNodeVisible(sample), true);
 }
 
 void ControllerTests::VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed() const
@@ -301,9 +301,9 @@ void ControllerTests::VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed() cons
     QVERIFY(m_controller);
     using namespace Literals::Numeric::Binary;
 
-    Settings::VisualizationParameters parameters;
-    parameters.minimumFileSize = 10_MiB;
-    parameters.onlyShowDirectories = true;
+    Settings::VisualizationOptions options;
+    options.minimumFileSize = 10_MiB;
+    options.onlyShowDirectories = true;
 
     VizBlock sample;
     sample.file.name = "Bar";
@@ -311,7 +311,7 @@ void ControllerTests::VerifyDirectoriesOverLimitAreNotShownWhenNotAllowed() cons
     sample.file.size = 1_MiB;
     sample.file.type = FileType::Directory;
 
-    QCOMPARE(parameters.IsNodeVisible(sample), false);
+    QCOMPARE(options.IsNodeVisible(sample), false);
 }
 
 void ControllerTests::SearchTreemapWithoutPriorSelection() const

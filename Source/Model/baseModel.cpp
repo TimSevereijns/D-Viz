@@ -239,11 +239,11 @@ namespace
      *
      * @param[in] ray                The ray to be shot into the scene.
      * @param[in] camera             The camera from which the ray is shot.
-     * @param[in] parameters         Additional visualization parameters.
+     * @param[in] options            Additional visualization options.
      * @param[in] node               The current node being hit-tested.
      */
     std::vector<IntersectionInfo> FindAllIntersections(
-        const Ray& ray, const Camera& camera, const Settings::VisualizationParameters& parameters,
+        const Ray& ray, const Camera& camera, const Settings::VisualizationOptions& options,
         Tree<VizBlock>::Node* node)
     {
         Expects(node != nullptr);
@@ -251,7 +251,7 @@ namespace
         std::vector<IntersectionInfo> allIntersections;
 
         while (node) {
-            if (!parameters.IsNodeVisible(node->GetData())) {
+            if (!options.IsNodeVisible(node->GetData())) {
                 AdvanceToNextNonDescendant(node);
                 continue;
             }
@@ -347,7 +347,7 @@ void BaseModel::UpdateBoundingBoxes()
 }
 
 Tree<VizBlock>::Node* BaseModel::FindNearestIntersection(
-    const Camera& camera, const Ray& ray, const Settings::VisualizationParameters& parameters) const
+    const Camera& camera, const Ray& ray, const Settings::VisualizationOptions& options) const
 {
     if (!m_hasDataBeenParsed) {
         return nullptr;
@@ -357,7 +357,7 @@ Tree<VizBlock>::Node* BaseModel::FindNearestIntersection(
 
     const auto stopwatch = Stopwatch<std::chrono::microseconds>([&]() noexcept {
         const auto root = m_fileTree->GetRoot();
-        const auto intersections = FindAllIntersections(ray, camera, parameters, root);
+        const auto intersections = FindAllIntersections(ray, camera, options, root);
 
         if (intersections.empty()) {
             return;
@@ -449,13 +449,13 @@ void BaseModel::HighlightAncestors(const Tree<VizBlock>::Node& node)
 }
 
 void BaseModel::HighlightDescendants(
-    const Tree<VizBlock>::Node& root, const Settings::VisualizationParameters& parameters)
+    const Tree<VizBlock>::Node& root, const Settings::VisualizationOptions& options)
 {
     std::for_each(
         Tree<VizBlock>::LeafIterator{ &root }, Tree<VizBlock>::LeafIterator{},
         [&](const auto& node) {
-            if ((parameters.onlyShowDirectories && node->file.type != FileType::Directory) ||
-                node->file.size < parameters.minimumFileSize) {
+            if ((options.onlyShowDirectories && node->file.type != FileType::Directory) ||
+                node->file.size < options.minimumFileSize) {
                 return;
             }
 
@@ -464,13 +464,13 @@ void BaseModel::HighlightDescendants(
 }
 
 void BaseModel::HighlightMatchingFileExtensions(
-    const std::string& extension, const Settings::VisualizationParameters& parameters)
+    const std::string& extension, const Settings::VisualizationOptions& options)
 {
     std::for_each(
         Tree<VizBlock>::LeafIterator{ GetTree().GetRoot() }, Tree<VizBlock>::LeafIterator{},
         [&](const auto& node) {
-            if ((parameters.onlyShowDirectories && node->file.type != FileType::Directory) ||
-                node->file.size < parameters.minimumFileSize || node->file.extension != extension) {
+            if ((options.onlyShowDirectories && node->file.type != FileType::Directory) ||
+                node->file.size < options.minimumFileSize || node->file.extension != extension) {
                 return;
             }
 
@@ -479,7 +479,7 @@ void BaseModel::HighlightMatchingFileExtensions(
 }
 
 void BaseModel::PerformRegexSearch(
-    const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
+    const std::string& searchQuery, const Settings::VisualizationOptions& options,
     SearchFlags flags)
 {
     std::string fileAndExtension;
@@ -493,7 +493,7 @@ void BaseModel::PerformRegexSearch(
     for (const auto& node : GetTree()) {
         const auto& file = node->file;
 
-        if (file.size < parameters.minimumFileSize ||
+        if (file.size < options.minimumFileSize ||
             (!shouldSearchDirectories && file.type == FileType::Directory) ||
             (!shouldSearchFiles && file.type == FileType::Regular)) {
             continue;
@@ -509,7 +509,7 @@ void BaseModel::PerformRegexSearch(
 }
 
 void BaseModel::PerformNormalSearch(
-    const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
+    const std::string& searchQuery, const Settings::VisualizationOptions& options,
     SearchFlags flags)
 {
     std::string fileAndExtension;
@@ -523,7 +523,7 @@ void BaseModel::PerformNormalSearch(
     for (const auto& node : GetTree()) {
         const auto& file = node->file;
 
-        if (file.size < parameters.minimumFileSize ||
+        if (file.size < options.minimumFileSize ||
             (!shouldSearchDirectories && file.type == FileType::Directory) ||
             (!shouldSearchFiles && file.type == FileType::Regular)) {
             continue;
@@ -543,18 +543,18 @@ void BaseModel::PerformNormalSearch(
 }
 
 void BaseModel::HighlightMatchingFileNames(
-    const std::string& searchQuery, const Settings::VisualizationParameters& parameters,
+    const std::string& searchQuery, const Settings::VisualizationOptions& options,
     SearchFlags flags)
 {
     const auto useRegex = flags & SearchFlags::UseRegex;
 
     if (!useRegex) {
-        PerformNormalSearch(searchQuery, parameters, flags);
+        PerformNormalSearch(searchQuery, options, flags);
         return;
     }
 
     try {
-        PerformRegexSearch(searchQuery, parameters, flags);
+        PerformRegexSearch(searchQuery, options, flags);
     } catch (const std::regex_error& exception) {
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
         log->error("Caught regex exception. Details: {}", exception.what());

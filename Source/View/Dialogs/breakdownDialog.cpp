@@ -73,13 +73,13 @@ void BreakdownDialog::BuildModel()
         return;
     }
 
-    const auto& parameters = controller.GetSessionSettings().GetVisualizationParameters();
+    const auto& options = controller.GetSessionSettings().GetVisualizationOptions();
 
     std::for_each(
         Tree<VizBlock>::LeafIterator{ tree.GetRoot() }, Tree<VizBlock>::LeafIterator{},
         [&](const auto& node) {
             if (node->file.type == FileType::Regular) {
-                m_tableModel.Insert(node, parameters.IsNodeVisible(node.GetData()));
+                m_tableModel.Insert(node, options.IsNodeVisible(node.GetData()));
 
                 if (node->file.extension.empty()) {
                     m_graphModel.AddDatapoint("No Extension", node->file.size);

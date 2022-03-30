@@ -1,10 +1,10 @@
-#include "Settings/visualizationParameters.h"
+#include "Settings/visualizationOptions.h"
 
 #include "Model/vizBlock.h"
 
 namespace Settings
 {
-    bool VisualizationParameters::IsNodeVisible(const VizBlock& block) const noexcept
+    bool VisualizationOptions::IsNodeVisible(const VizBlock& block) const noexcept
     {
         if (block.file.size < minimumFileSize) {
             return false;

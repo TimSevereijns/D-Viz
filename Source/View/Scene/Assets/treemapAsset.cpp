@@ -428,10 +428,10 @@ namespace Assets
 
         m_blockCount = 0;
 
-        const auto& parameters = m_controller.GetSessionSettings().GetVisualizationParameters();
+        const auto& options = m_controller.GetSessionSettings().GetVisualizationOptions();
 
         for (auto& node : tree) {
-            if (!parameters.IsNodeVisible(node.GetData())) {
+            if (!options.IsNodeVisible(node.GetData())) {
                 node->offsetIntoVBO = VizBlock::NotInVBO;
                 continue;
             }
@@ -466,10 +466,10 @@ namespace Assets
     {
         m_blockColors.clear();
 
-        const auto& parameters = m_controller.GetSessionSettings().GetVisualizationParameters();
+        const auto& options = m_controller.GetSessionSettings().GetVisualizationOptions();
 
         for (const auto& node : tree) {
-            if (parameters.IsNodeVisible(node.GetData())) {
+            if (options.IsNodeVisible(node.GetData())) {
                 ComputeAppropriateBlockColor(node);
             }
         }

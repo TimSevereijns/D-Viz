@@ -1,5 +1,5 @@
-#ifndef VISUALIZATIONPARAMETERS_H
-#define VISUALIZATIONPARAMETERS_H
+#ifndef VISUALIZATIONOPTIONS_H
+#define VISUALIZATIONOPTIONS_H
 
 #include <string>
 
@@ -8,10 +8,10 @@ class VizBlock;
 namespace Settings
 {
     /**
-     * @brief Visualization parameters that can be set to control which nodes are to be included
+     * @brief Visualization options that can be set to control which nodes are to be included
      * in the visualization.
      */
-    class VisualizationParameters
+    class VisualizationOptions
     {
       public:
         /**
@@ -20,7 +20,7 @@ namespace Settings
          * @param[in] block             The node whose visibility is to be checked.
          *
          * @returns True if the node in question is visible to the end-user, given the current state
-         * of the visualization parameters.
+         * of the visualization options.
          */
         bool IsNodeVisible(const VizBlock& block) const noexcept;
 
@@ -33,4 +33,4 @@ namespace Settings
     };
 } // namespace Settings
 
-#endif // VISUALIZATIONPARAMETERS_H
+#endif // VISUALIZATIONOPTIONS_H

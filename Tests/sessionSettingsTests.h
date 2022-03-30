@@ -77,9 +77,9 @@ class SessionSettingsTests : public QObject
     void ModifyNumericPrefix() const;
 
     /**
-     * @brief Verify visualization parameters can correctly set and retrieved.
+     * @brief Verify visualization options can correctly set and retrieved.
      */
-    void ModifyVisualizationParameters() const;
+    void ModifyVisualizationOptions() const;
 };
 
 #endif // SESSIONSETTINGSTESTS_H

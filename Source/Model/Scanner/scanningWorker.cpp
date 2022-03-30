@@ -97,12 +97,12 @@ namespace
 } // namespace
 
 ScanningWorker::ScanningWorker(
-    const ScanningParameters& parameters, ScanningProgress& progress,
+    const ScanningOptions& options, ScanningProgress& progress,
     std::atomic<bool>& cancellationToken)
-    : m_parameters{ parameters },
+    : m_options{ options },
       m_progress{ progress },
       m_cancellationToken{ cancellationToken },
-      m_fileTree{ CreateTreeAndRootNode(parameters.path) }
+      m_fileTree{ CreateTreeAndRootNode(options.path) }
 {
 }
 
@@ -198,7 +198,7 @@ void ScanningWorker::Start()
 
     const auto stopwatch = Stopwatch<std::chrono::seconds>([&]() noexcept {
         boost::asio::post(m_threadPool, [&]() noexcept {
-            AddSubDirectoriesToQueue(m_parameters.path, *m_fileTree->GetRoot());
+            AddSubDirectoriesToQueue(m_options.path, *m_fileTree->GetRoot());
         });
 
         m_threadPool.join();

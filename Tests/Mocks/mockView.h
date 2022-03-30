@@ -15,7 +15,7 @@ class QWidget;
 
 namespace Settings
 {
-    class VisualizationParameters;
+    class VisualizationOptions;
 }
 
 class MockView : public BaseView

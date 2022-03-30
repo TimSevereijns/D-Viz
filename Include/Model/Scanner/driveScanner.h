@@ -9,7 +9,7 @@
 #include <memory>
 #include <string>
 
-#include "Model/Scanner/scanningParameters.h"
+#include "Model/Scanner/scanningOptions.h"
 #include "Model/Scanner/scanningProgress.h"
 #include "Model/Scanner/scanningWorker.h"
 
@@ -24,11 +24,11 @@ class DriveScanner final : public QObject
   public:
     /**
      * @brief Kicks off the drive scanning process in a separate thread using the specified
-     * parameters.
+     * options.
      *
-     * @param[in] parameters      @see DriveScanningParameters
+     * @param[in] options      @see ScanningOptions
      */
-    void StartScanning(const ScanningParameters& parameters);
+    void StartScanning(const ScanningOptions& options);
 
     /**
      * @brief Halts progress reporting for an active scan.
@@ -77,7 +77,7 @@ class DriveScanner final : public QObject
     void Finished();
 
   private:
-    ScanningParameters m_parameters;
+    ScanningOptions m_options;
 
     ScanningProgress m_progress;
 

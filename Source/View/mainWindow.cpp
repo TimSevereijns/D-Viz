@@ -598,24 +598,24 @@ void MainWindow::OnFileMenuNewScan()
 
     const auto fileSizeIndex = static_cast<std::size_t>(m_ui.minimumSizeComboBox->currentIndex());
 
-    Settings::VisualizationParameters parameters;
-    parameters.rootDirectory = selectedDirectory.toStdString();
-    parameters.onlyShowDirectories = m_showDirectoriesOnly;
-    parameters.forceNewScan = true;
-    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
+    Settings::VisualizationOptions options;
+    options.rootDirectory = selectedDirectory.toStdString();
+    options.onlyShowDirectories = m_showDirectoriesOnly;
+    options.forceNewScan = true;
+    options.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
-    const auto& savedParameters =
-        m_controller.GetSessionSettings().SetVisualizationParameters(std::move(parameters));
+    const auto& savedOptions =
+        m_controller.GetSessionSettings().SetVisualizationOptions(std::move(options));
 
-    m_controller.ScanDrive(savedParameters);
+    m_controller.ScanDrive(savedOptions);
 }
 
 bool MainWindow::AskUserToLimitFileSize(std::uintmax_t numberOfFilesScanned)
 {
     using namespace Literals::Numeric::Binary;
 
-    auto& parameters = m_controller.GetSessionSettings().GetVisualizationParameters();
-    if (numberOfFilesScanned < 250'000 || parameters.minimumFileSize >= 1_MiB) {
+    auto& options = m_controller.GetSessionSettings().GetVisualizationOptions();
+    if (numberOfFilesScanned < 250'000 || options.minimumFileSize >= 1_MiB) {
         return false;
     }
 
@@ -632,8 +632,8 @@ bool MainWindow::AskUserToLimitFileSize(std::uintmax_t numberOfFilesScanned)
 
     const auto election = messageBox.exec();
     if (election == QMessageBox::Yes) {
-        parameters.minimumFileSize = 1_MiB;
-        SetFilePruningComboBoxValue(parameters.minimumFileSize);
+        options.minimumFileSize = 1_MiB;
+        SetFilePruningComboBoxValue(options.minimumFileSize);
 
         return true;
     }
@@ -712,8 +712,8 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
         return;
     }
 
-    auto& parameters = m_controller.GetSessionSettings().GetVisualizationParameters();
-    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
+    auto& options = m_controller.GetSessionSettings().GetVisualizationOptions();
+    options.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
     m_glCanvas->ReloadVisualization();
 }
@@ -746,8 +746,8 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
         return;
     }
 
-    auto& parameters = m_controller.GetSessionSettings().GetVisualizationParameters();
-    parameters.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
+    auto& options = m_controller.GetSessionSettings().GetVisualizationOptions();
+    options.minimumFileSize = m_fileSizeOptions->at(fileSizeIndex).first;
 
     m_glCanvas->ReloadVisualization();
 }
@@ -788,13 +788,13 @@ void MainWindow::PruneTree()
     const auto pruneSizeIndex = static_cast<std::size_t>(m_ui.minimumSizeComboBox->currentIndex());
     const auto minimumSize = m_fileSizeOptions->at(pruneSizeIndex).first;
 
-    Settings::VisualizationParameters parameters;
-    parameters.rootDirectory = m_controller.GetRootPath().string();
-    parameters.onlyShowDirectories = m_showDirectoriesOnly;
-    parameters.forceNewScan = false;
-    parameters.minimumFileSize = minimumSize;
+    Settings::VisualizationOptions options;
+    options.rootDirectory = m_controller.GetRootPath().string();
+    options.onlyShowDirectories = m_showDirectoriesOnly;
+    options.forceNewScan = false;
+    options.minimumFileSize = minimumSize;
 
-    m_controller.GetSessionSettings().SetVisualizationParameters(parameters);
+    m_controller.GetSessionSettings().SetVisualizationOptions(options);
 
     if (!m_controller.GetRootPath().empty()) {
         m_glCanvas->ReloadVisualization();

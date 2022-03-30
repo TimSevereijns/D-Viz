@@ -5,7 +5,7 @@
 
 #include "Model/vizBlock.h"
 #include "Settings/settings.h"
-#include "Settings/visualizationParameters.h"
+#include "Settings/visualizationOptions.h"
 #include "constants.h"
 
 #include <QObject>
@@ -68,22 +68,22 @@ namespace Settings
         bool ShouldUseRegex() const;
 
         /**
-         * @returns The current visualization parameters.
+         * @returns The current visualization options.
          */
-        const Settings::VisualizationParameters& GetVisualizationParameters() const;
+        const Settings::VisualizationOptions& GetVisualizationOptions() const;
 
         /**
          * @overload
          */
-        Settings::VisualizationParameters& GetVisualizationParameters();
+        Settings::VisualizationOptions& GetVisualizationOptions();
 
         /**
-         * @brief Sets the current visualization parameters.
+         * @brief Sets the current visualization options.
          *
-         * @param[in] parameters      The new visualization parameters.
+         * @param[in] options     The new visualization options.
          */
-        Settings::VisualizationParameters&
-        SetVisualizationParameters(const Settings::VisualizationParameters& parameters);
+        Settings::VisualizationOptions&
+        SetVisualizationOptions(const Settings::VisualizationOptions& options);
 
         /**
          * @brief Sets the currently active prefix to be used for file sizes; e.g., MB vs MiB.
@@ -168,7 +168,7 @@ namespace Settings
         bool m_shouldSearchFiles = true;
         bool m_shouldUseRegex = false;
 
-        Settings::VisualizationParameters m_visualizationParameters;
+        Settings::VisualizationOptions m_visualizationOptions;
 
         Constants::SizePrefix m_activeNumericPrefix = Constants::SizePrefix::Binary;
     };
