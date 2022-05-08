@@ -455,22 +455,16 @@ void GLCanvas::AddOperatingSystemOptionsToContextMenu(
 {
     Expects(selection);
 
-    menu.addSeparator();
-
-    menu.addAction("Copy File Name", [selection] {
-        const auto path = Controller::NodeToFilePath(*selection);
-        OS::CopyFileNameToClipboard(path);
-    });
-
-    menu.addAction("Copy File Path", [selection] {
-        const auto path = Controller::NodeToFilePath(*selection);
-        OS::CopyPathToClipboard(path);
-    });
+    const auto path = Controller::NodeToFilePath(*selection);
 
     menu.addSeparator();
 
-    menu.addAction("Show in Explorer", [&, selection] {
-        const auto path = Controller::NodeToFilePath(*selection);
+    menu.addAction("Copy File Name", [path] { OS::CopyFileNameToClipboard(path); });
+    menu.addAction("Copy File Path", [path] { OS::CopyPathToClipboard(path); });
+
+    menu.addSeparator();
+
+    menu.addAction("Show in Explorer", [&, path] {
         if (AlertIfMissing(path)) {
             return;
         }
@@ -479,8 +473,7 @@ void GLCanvas::AddOperatingSystemOptionsToContextMenu(
     });
 
     if (fileType == FileType::Regular) {
-        menu.addAction("Open File", [&, selection] {
-            const auto path = Controller::NodeToFilePath(*selection);
+        menu.addAction("Open File", [&, path] {
             if (AlertIfMissing(path)) {
                 return;
             }
@@ -488,8 +481,7 @@ void GLCanvas::AddOperatingSystemOptionsToContextMenu(
             OS::OpenFile(path);
         });
 
-        menu.addAction("Move to Trash", [&, selection] {
-            const auto path = Controller::NodeToFilePath(*selection);
+        menu.addAction("Move to Trash", [&, path] {
             if (AlertIfMissing(path)) {
                 return;
             }
