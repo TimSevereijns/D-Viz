@@ -10,7 +10,7 @@
 template <typename LambdaType> class ScopeExit
 {
   public:
-    ScopeExit(LambdaType&& lambda) noexcept : m_lambda{ std::move(lambda) }
+    ScopeExit(LambdaType&& lambda) noexcept : m_lambda{ std::forward<LambdaType>(lambda) }
     {
         static_assert(
             std::is_nothrow_invocable<LambdaType>::value,
