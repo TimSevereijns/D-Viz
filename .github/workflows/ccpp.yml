@@ -26,13 +26,13 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
 
-      - name: Install GCC 12
+      - name: Install GCC 11
         run: |
-          sudo apt-get install -qq g++-12
-          sudo apt-get install -qq gcc-12
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 20
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 20
-          sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-12 20
+          sudo apt-get install -qq g++-11
+          sudo apt-get install -qq gcc-11
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 20
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 20
+          sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-11 20
           sudo update-alternatives --config gcc
           sudo update-alternatives --config g++
           sudo update-alternatives --config gcov
