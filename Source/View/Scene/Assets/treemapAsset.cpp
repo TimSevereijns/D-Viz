@@ -7,7 +7,7 @@
 #include "controller.h"
 
 #include <Tree/Tree.hpp>
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include <spdlog/spdlog.h>
 
 #include <cmath>

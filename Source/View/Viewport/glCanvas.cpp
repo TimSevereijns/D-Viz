@@ -14,7 +14,7 @@
 #include <QMenu>
 #include <QMessageBox>
 
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include <stopwatch.h>
 
 namespace

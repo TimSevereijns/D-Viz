@@ -10,7 +10,7 @@
 #include "literals.h"
 
 #include <Tree/Tree.hpp>
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 
 namespace Utilities
 {

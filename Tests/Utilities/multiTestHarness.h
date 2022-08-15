@@ -9,7 +9,7 @@
 #include <memory>
 #include <unordered_map>
 
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 
 namespace MultiTest
 {

@@ -4,7 +4,7 @@
 
 #include <cmath>
 
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 
 namespace
 {

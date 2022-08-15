@@ -11,7 +11,7 @@
 #include <filesystem>
 #include <string>
 
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include <spdlog/spdlog.h>
 
 #ifdef Q_OS_WIN

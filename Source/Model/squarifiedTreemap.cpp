@@ -5,7 +5,7 @@
 #include <limits>
 #include <numeric>
 
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include <spdlog/spdlog.h>
 #include <stopwatch.h>
 

@@ -12,7 +12,7 @@
 #include "View/Dialogs/scanBreakdownModel.h"
 #include "ui_breakdownDialog.h"
 
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 
 class MainWindow;
 

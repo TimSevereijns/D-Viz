@@ -1,7 +1,7 @@
 #include "View/Dialogs/scanBreakdownModel.h"
 #include "Settings/persistentSettings.h"
 
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 
 #include <iterator>
 

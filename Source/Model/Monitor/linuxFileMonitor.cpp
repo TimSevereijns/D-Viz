@@ -8,7 +8,7 @@
 
 #include <unistd.h>
 
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include <spdlog/spdlog.h>
 
 LinuxFileMonitor::~LinuxFileMonitor() noexcept

@@ -7,7 +7,7 @@
 #include <exception>
 #include <string_view>
 
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include <spdlog/spdlog.h>
 
 #include "Utilities/scopedHandle.h"

@@ -2,7 +2,7 @@
 #include "Utilities/utilities.h"
 #include "constants.h"
 
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include <spdlog/spdlog.h>
 
 FileSystemObserver::FileSystemObserver(
