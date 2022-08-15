@@ -47,7 +47,7 @@ QString ScanBreakdownModel::FormatVisibleNodeSize(const RowModel& data) const
 
 QString ScanBreakdownModel::FormatVisibleNodeCount(const RowModel& data) const
 {
-    return QString::fromStdString(fmt::format("{:n}", data.visibleCount));
+    return QString::fromStdString(fmt::format("{:d}", data.visibleCount));
 }
 
 QVariant ScanBreakdownModel::data(const QModelIndex& index, int role) const

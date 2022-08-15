@@ -390,7 +390,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
     const auto& log = spdlog::get(Constants::Logging::DefaultLog);
 
     log->info(
-        "Sorted tree in: {:n} {}", sortingStopwatch.GetElapsedTime().count(),
+        "Sorted tree in: {:d} {}", sortingStopwatch.GetElapsedTime().count(),
         sortingStopwatch.GetUnitsAsString());
 
     m_fileTree->GetRoot()->GetData().block =
@@ -401,7 +401,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
         [&]() { SquarifyRecursively(*m_fileTree->GetRoot()); });
 
     log->info(
-        "Visualization Generated in: {:n} {}", squarificationStopwatch.GetElapsedTime().count(),
+        "Visualization Generated in: {:d} {}", squarificationStopwatch.GetElapsedTime().count(),
         squarificationStopwatch.GetUnitsAsString());
 
     m_hasDataBeenParsed = true;

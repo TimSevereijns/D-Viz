@@ -37,7 +37,7 @@ class RowModel
             Utilities::ToPrefixedSize(totalSize, prefix);
 
         formattedTotalSize = fmt::format("{:03.2f} {}", prefixedTotalSize, prefixTotalSizeUnits);
-        formattedTotalCount = fmt::format("{:n}", totalCount);
+        formattedTotalCount = fmt::format("{:d}", totalCount);
     }
 
     std::string fileExtension;
