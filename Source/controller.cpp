@@ -25,7 +25,7 @@ namespace
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
 
         log->info(
-            "Scanned {:d} directories and {:d} files, representing {:d} bytes.",
+            "Scanned {:L} directories and {:L} files, representing {:L} bytes.",
             progress.directoriesScanned.load(), progress.filesScanned.load(),
             progress.bytesProcessed.load());
 
@@ -37,8 +37,8 @@ namespace
         const auto spaceInfo = std::filesystem::space(path);
 
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
-        log->info("Disk Size:  {:d} bytes.", spaceInfo.capacity);
-        log->info("Free Space: {:d} bytes.", spaceInfo.free);
+        log->info("Disk Size:  {:L} bytes.", spaceInfo.capacity);
+        log->info("Free Space: {:L} bytes.", spaceInfo.free);
 
         return spaceInfo.capacity - spaceInfo.free;
     }
@@ -205,7 +205,7 @@ void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
     if (doesPathRepresentEntireDrive) {
         const auto fraction = sizeInBytes / static_cast<double>(m_occupiedDiskSpace);
         const auto message = fmt::format(
-            "Time Elapsed: {:02d}:{:02d}:{:02d}  |  Files Scanned: {:d}  |  {:03.2f}% Complete",
+            "Time Elapsed: {:02d}:{:02d}:{:02d}  |  Files Scanned: {:L}  |  {:03.2f}% Complete",
             hours, minutes, seconds, filesScanned, fraction * 100);
 
         m_view->SetStatusBarMessage(message);
@@ -214,7 +214,7 @@ void Controller::ReportProgressToStatusBar(const ScanningProgress& progress)
         const auto [size, units] = Utilities::ToPrefixedSize(sizeInBytes, prefix);
 
         const auto message = fmt::format(
-            "Time Elapsed: {:02d}:{:02d}:{:02d}  |  Files Scanned: {:d}  |  {:03.2f} {} and "
+            "Time Elapsed: {:02d}:{:02d}:{:02d}  |  Files Scanned: {:L}  |  {:03.2f} {} and "
             "counting...",
             hours, minutes, seconds, filesScanned, size, units);
 
@@ -323,7 +323,7 @@ void Controller::PrintMetadataToStatusBar()
 {
     const auto metadata = m_model->GetTreemapMetadata();
     const auto message = fmt::format(
-        "Scanned {:d} files and {:d} directories.", metadata.FileCount, metadata.DirectoryCount);
+        "Scanned {:L} files and {:L} directories.", metadata.FileCount, metadata.DirectoryCount);
 
     m_view->SetStatusBarMessage(message);
 }
@@ -345,11 +345,11 @@ void Controller::DisplayHighlightDetails()
 
     if (isSmallFile) {
         m_view->SetStatusBarMessage(fmt::format(
-            "Highlighted {:d} " + nodes + ", presenting {:.0f} {}.", highlightedNodes.size(),
+            "Highlighted {:L} " + nodes + ", presenting {:.0f} {}.", highlightedNodes.size(),
             prefixedSize, units));
     } else {
         m_view->SetStatusBarMessage(fmt::format(
-            "Highlighted {:d} " + nodes + ", presenting {:.2f} {}.", highlightedNodes.size(),
+            "Highlighted {:L} " + nodes + ", presenting {:.2f} {}.", highlightedNodes.size(),
             prefixedSize, units));
     }
 }

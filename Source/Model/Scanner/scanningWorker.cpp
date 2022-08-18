@@ -44,7 +44,7 @@ namespace
         }
 
         const auto& log = spdlog::get(Constants::Logging::DefaultLog);
-        log->info("Number of Sizeless Files Removed: {:d}", nodesRemoved);
+        log->info("Number of Sizeless Files Removed: {:L}", nodesRemoved);
     }
 
     /**
@@ -206,7 +206,7 @@ void ScanningWorker::Start()
 
     const auto& log = spdlog::get(Constants::Logging::DefaultLog);
     log->info(
-        "Scanned Drive in: {:d} {}", stopwatch.GetElapsedTime().count(),
+        "Scanned Drive in: {:L} {}", stopwatch.GetElapsedTime().count(),
         stopwatch.GetUnitsAsString());
 
     Scanner::ComputeDirectorySizes(*m_fileTree);

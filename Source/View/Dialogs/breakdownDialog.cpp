@@ -40,7 +40,7 @@ void BreakdownDialog::ReloadData()
 
     const auto& log = spdlog::get(Constants::Logging::DefaultLog);
     log->info(
-        "Built break-down model in: {:d} {}", stopwatch.GetElapsedTime().count(),
+        "Built break-down model in: {:L} {}", stopwatch.GetElapsedTime().count(),
         stopwatch.GetUnitsAsString());
 
     m_proxyModel.invalidate();
