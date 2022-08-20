@@ -191,7 +191,7 @@ namespace Assets
 
         m_shadowMaps.reserve(static_cast<std::size_t>(m_cascadeCount));
 
-        for (auto index{ 0u }; index < static_cast<std::size_t>(m_cascadeCount); ++index) {
+        for (int index = 0; index < m_cascadeCount; ++index) {
             auto frameBuffer = std::make_unique<QOpenGLFramebufferObject>(
                 m_shadowMapResolution, m_shadowMapResolution,
                 QOpenGLFramebufferObject::Attachment::Depth, GL_TEXTURE_2D, GL_R32F);

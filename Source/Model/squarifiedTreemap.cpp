@@ -57,10 +57,6 @@ namespace
         const auto widthPadding = std::min(ratioBasedPadding, Treemap::MaxPadding);
         const auto width = blockWidthPlusPadding - (2.0 * widthPadding);
 
-        if (finalBlockWidth < 0.0) {
-            assert(false);
-        }
-
         const auto blockDepth = std::abs(availableDepth * Treemap::PaddingRatio);
         const auto depthPadding =
             std::min((availableDepth - blockDepth) / 2.0, Treemap::MaxPadding);
@@ -112,10 +108,6 @@ namespace
         const auto depthPadding = std::min(ratioBasedPadding, Treemap::MaxPadding);
         const auto depth = blockDepthPlusPadding - (2.0 * depthPadding);
 
-        if (finalBlockDepth < 0) {
-            assert(false);
-        }
-
         const auto blockWidth = availableWidth * Treemap::PaddingRatio;
         const auto widthPadding =
             std::min((availableWidth - blockWidth) / 2.0, Treemap::MaxPadding);
@@ -145,8 +137,8 @@ namespace
 
 Block SquarifiedTreeMap::ComputeRemainingArea(const Block& block)
 {
-    const auto& originOfNextRow = block.GetNextRowOrigin();
-    const auto& originOfNextChild = block.ComputeNextChildOrigin();
+    const auto originOfNextRow = block.GetNextRowOrigin();
+    const auto originOfNextChild = block.ComputeNextChildOrigin();
 
     const PrecisePoint nearCorner{ originOfNextRow.x(), originOfNextRow.y(), originOfNextRow.z() };
     const PrecisePoint farCorner{ originOfNextChild.x() + block.GetWidth(), originOfNextChild.y(),
@@ -164,6 +156,7 @@ Block SquarifiedTreeMap::ComputeRemainingArea(const Block& block)
 double SquarifiedTreeMap::ComputeShortestEdgeOfRemainingBounds(const VizBlock& node)
 {
     const auto remainingRealEstate = ComputeRemainingArea(node.block);
+
     const auto shortestEdge = std::min(
         std::abs(remainingRealEstate.GetDepth()), std::abs(remainingRealEstate.GetWidth()));
 
@@ -181,7 +174,8 @@ double SquarifiedTreeMap::ComputeWorstAspectRatio(
 
     // Find the largest surface area if the row and candidate were laid out:
 
-    std::uintmax_t largestNodeInBytes;
+    std::uintmax_t largestNodeInBytes = 0;
+
     if (!row.empty()) {
         largestNodeInBytes = std::max(row.front()->GetData().file.size, candidateSize);
     } else if (candidateSize > 0) {
@@ -201,7 +195,8 @@ double SquarifiedTreeMap::ComputeWorstAspectRatio(
 
     // Find the smallest surface area if the row and candidate were laid out:
 
-    std::uintmax_t smallestNodeInBytes;
+    std::uintmax_t smallestNodeInBytes = 0;
+
     if (candidateSize > 0 && !row.empty()) {
         smallestNodeInBytes = std::min(row.back()->GetData().file.size, candidateSize);
     } else if (candidateSize > 0) {
@@ -245,7 +240,7 @@ void SquarifiedTreeMap::SquarifyAndLayoutRows(const std::vector<Tree<VizBlock>::
     double shortestEdgeOfBounds = ComputeShortestEdgeOfRemainingBounds(parentVizNode);
     Expects(shortestEdgeOfBounds > 0.0);
 
-    for (Tree<VizBlock>::Node* const node : nodes) {
+    for (auto* const node : nodes) {
         const double worstRatioWithNodeAddedToCurrentRow = ComputeWorstAspectRatio(
             row, node->GetData().file.size, parentVizNode, shortestEdgeOfBounds);
 
@@ -303,22 +298,24 @@ Block SquarifiedTreeMap::CalculateRowBounds(
     std::uintmax_t bytesInRow, VizBlock& parentNode, const bool updateOffset)
 {
     const Block& parentBlock = parentNode.block;
+
     Expects(parentBlock.HasVolume());
 
-    const Block remainingLand = ComputeRemainingArea(parentBlock);
+    const Block remainingBounds = ComputeRemainingArea(parentBlock);
 
     const double parentArea = parentBlock.GetWidth() * parentBlock.GetDepth();
-    const double remainingArea = std::abs(remainingLand.GetWidth() * remainingLand.GetDepth());
+    const double remainingArea = std::abs(remainingBounds.GetWidth() * remainingBounds.GetDepth());
     const double remainingBytes = (remainingArea / parentArea) * parentNode.file.size;
     const double rowToParentRatio = bytesInRow / remainingBytes;
 
-    const PrecisePoint& originOfNextRow = parentBlock.GetNextRowOrigin();
+    const PrecisePoint originOfNextRow = parentBlock.GetNextRowOrigin();
     const PrecisePoint nearCorner{ originOfNextRow.x(), originOfNextRow.y(), originOfNextRow.z() };
 
     Block rowRealEstate;
-    if (remainingLand.GetWidth() > std::abs(remainingLand.GetDepth())) {
-        rowRealEstate = Block{ nearCorner, remainingLand.GetWidth() * rowToParentRatio,
-                               remainingLand.GetHeight(), -remainingLand.GetDepth() };
+
+    if (remainingBounds.GetWidth() > std::abs(remainingBounds.GetDepth())) {
+        rowRealEstate = Block{ nearCorner, remainingBounds.GetWidth() * rowToParentRatio,
+                               remainingBounds.GetHeight(), -remainingBounds.GetDepth() };
 
         if (updateOffset) {
             const PrecisePoint nextRowOffset{ rowRealEstate.GetWidth(), 0.0, 0.0 };
@@ -326,8 +323,8 @@ Block SquarifiedTreeMap::CalculateRowBounds(
         }
     } else {
         rowRealEstate =
-            Block{ PrecisePoint(nearCorner), remainingLand.GetWidth(), remainingLand.GetHeight(),
-                   -remainingLand.GetDepth() * rowToParentRatio };
+            Block{ PrecisePoint(nearCorner), remainingBounds.GetWidth(),
+                   remainingBounds.GetHeight(), -remainingBounds.GetDepth() * rowToParentRatio };
 
         if (updateOffset) {
             const PrecisePoint nextRowOffset{ 0.0, 0.0, -rowRealEstate.GetDepth() };
@@ -350,15 +347,18 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
     const std::uintmax_t bytesInRow = ComputeBytesInRow(row, /*candidateSize =*/0);
 
     constexpr auto updateOffset = true;
-    Block land = CalculateRowBounds(bytesInRow, row.front()->GetParent()->GetData(), updateOffset);
-    Expects(land.HasVolume());
+    Block bounds =
+        CalculateRowBounds(bytesInRow, row.front()->GetParent()->GetData(), updateOffset);
+
+    Expects(bounds.HasVolume());
 
     const auto nodeCount = row.size();
 
     for (auto* const node : row) {
         VizBlock& data = node->GetData();
 
-        const std::uintmax_t nodeFileSize = data.file.size;
+        const auto nodeFileSize = data.file.size;
+
         if (nodeFileSize == 0) {
             Expects(!"Found a node without a file size!");
             return;
@@ -368,14 +368,14 @@ void SquarifiedTreeMap::LayoutRow(std::vector<Tree<VizBlock>::Node*>& row)
             static_cast<double>(nodeFileSize) / static_cast<double>(bytesInRow);
 
         const auto additionalCoverage =
-            land.GetWidth() > std::abs(land.GetDepth())
-                ? SlicePerpendicularToWidth(land, percentageOfParent, data, nodeCount)
-                : SlicePerpendicularToDepth(land, percentageOfParent, data, nodeCount);
+            bounds.GetWidth() > std::abs(bounds.GetDepth())
+                ? SlicePerpendicularToWidth(bounds, percentageOfParent, data, nodeCount)
+                : SlicePerpendicularToDepth(bounds, percentageOfParent, data, nodeCount);
 
         Expects(additionalCoverage > 0);
         Expects(data.block.HasVolume());
 
-        land.IncreaseCoverageBy(additionalCoverage);
+        bounds.IncreaseCoverageBy(additionalCoverage);
     }
 }
 
@@ -395,7 +395,7 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
     m_fileTree = theTree;
 
     const auto sortingStopwatch =
-        Stopwatch<std::chrono::milliseconds>([&]() { BaseModel::SortNodes(*m_fileTree); });
+        Stopwatch<std::chrono::milliseconds>([&] { BaseModel::SortNodes(*m_fileTree); });
 
     const auto& log = spdlog::get(Constants::Logging::DefaultLog);
 
@@ -407,8 +407,8 @@ void SquarifiedTreeMap::Parse(const std::shared_ptr<Tree<VizBlock>>& theTree)
         Block{ PrecisePoint{}, Constants::Treemap::RootBlockWidth, Constants::Treemap::BlockHeight,
                Constants::Treemap::RootBlockDepth };
 
-    const auto squarificationStopwatch = Stopwatch<std::chrono::milliseconds>(
-        [&]() { SquarifyRecursively(*m_fileTree->GetRoot()); });
+    const auto squarificationStopwatch =
+        Stopwatch<std::chrono::milliseconds>([&] { SquarifyRecursively(*m_fileTree->GetRoot()); });
 
     log->info(
         "Visualization Generated in: {:L} {}", squarificationStopwatch.GetElapsedTime().count(),
