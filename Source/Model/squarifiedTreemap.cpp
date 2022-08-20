@@ -55,7 +55,7 @@ namespace
         const auto ratioBasedPadding = ((availableWidth * 0.1) / nodeCount) / 2.0;
 
         const auto widthPadding = std::min(ratioBasedPadding, Treemap::MaxPadding);
-        const auto finalBlockWidth = blockWidthPlusPadding - (2.0 * widthPadding);
+        const auto width = blockWidthPlusPadding - (2.0 * widthPadding);
 
         if (finalBlockWidth < 0.0) {
             assert(false);
@@ -65,16 +65,21 @@ namespace
         const auto depthPadding =
             std::min((availableDepth - blockDepth) / 2.0, Treemap::MaxPadding);
 
-        const auto finalBlockDepth = depthPadding == Treemap::MaxPadding
-                                         ? std::abs(availableDepth) - (2.0 * Treemap::MaxPadding)
-                                         : blockDepth;
+        const auto depth = depthPadding == Treemap::MaxPadding
+                               ? std::abs(availableDepth) - (2.0 * Treemap::MaxPadding)
+                               : blockDepth;
+
+        const auto height = std::min(Treemap::BlockHeight, 0.2 * std::max(width, depth));
+
+        Expects(width > 0.0 && height > 0.0 && depth > 0.0);
 
         const auto x = (availableWidth * land.GetCoverage()) + widthPadding;
         const auto y = 0.0;
         const auto z = -depthPadding;
 
-        const PrecisePoint blockOrigin = land.GetOrigin() + PrecisePoint{ x, y, z };
-        node.block = Block{ blockOrigin, finalBlockWidth, Treemap::BlockHeight, finalBlockDepth };
+        const auto origin = land.GetOrigin() + PrecisePoint{ x, y, z };
+
+        node.block = Block{ origin, width, height, depth };
 
         const auto additionalCoverage = blockWidthPlusPadding / availableWidth;
         Expects(additionalCoverage > 0.0);
@@ -105,7 +110,7 @@ namespace
         const auto ratioBasedPadding = (availableDepth * 0.1) / nodeCount / 2.0;
 
         const auto depthPadding = std::min(ratioBasedPadding, Treemap::MaxPadding);
-        const auto finalBlockDepth = blockDepthPlusPadding - (2.0 * depthPadding);
+        const auto depth = blockDepthPlusPadding - (2.0 * depthPadding);
 
         if (finalBlockDepth < 0) {
             assert(false);
@@ -115,16 +120,21 @@ namespace
         const auto widthPadding =
             std::min((availableWidth - blockWidth) / 2.0, Treemap::MaxPadding);
 
-        const auto finalBlockWidth = widthPadding == Treemap::MaxPadding
-                                         ? availableWidth - (2.0 * Treemap::MaxPadding)
-                                         : blockWidth;
+        const auto width = widthPadding == Treemap::MaxPadding
+                               ? availableWidth - (2.0 * Treemap::MaxPadding)
+                               : blockWidth;
+
+        const auto height = std::min(Treemap::BlockHeight, 0.2 * std::max(width, depth));
+
+        Expects(width > 0.0 && height > 0.0 && depth > 0.0);
 
         const auto x = widthPadding;
         const auto y = 0.0;
         const auto z = -(availableDepth * land.GetCoverage()) - depthPadding;
 
-        const PrecisePoint blockOrigin = land.GetOrigin() + PrecisePoint{ x, y, z };
-        node.block = Block{ blockOrigin, finalBlockWidth, Treemap::BlockHeight, finalBlockDepth };
+        const auto origin = land.GetOrigin() + PrecisePoint{ x, y, z };
+
+        node.block = Block{ origin, width, height, depth };
 
         const auto additionalCoverage = blockDepthPlusPadding / availableDepth;
         Expects(additionalCoverage > 0.0);
