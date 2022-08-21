@@ -19,7 +19,6 @@
 #include "View/HID/gamepad.h"
 #include "Viewport/glCanvas.h"
 #include "baseView.h"
-#include "constants.h"
 #include "ui_mainWindow.h"
 
 class Controller;

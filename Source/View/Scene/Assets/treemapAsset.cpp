@@ -1,7 +1,5 @@
 #include "View/Scene/Assets/treemapAsset.h"
-#include "Model/baseModel.h"
 #include "Model/vizBlock.h"
-#include "Settings/settings.h"
 #include "Utilities/viewFrustum.h"
 #include "constants.h"
 #include "controller.h"
@@ -22,12 +20,12 @@
 // @todo Consider hoisting this out to another file.
 struct BoundingBox
 {
-    float left;
-    float right;
-    float bottom;
-    float top;
-    float near;
-    float far;
+    float left = 0.0f;
+    float right = 0.0f;
+    float bottom = 0.0f;
+    float top = 0.0f;
+    float near = 0.0f;
+    float far = 0.0f;
 };
 
 namespace

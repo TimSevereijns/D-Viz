@@ -1,5 +1,4 @@
 #include "View/Dialogs/scanBreakdownModel.h"
-#include "Settings/persistentSettings.h"
 
 #include <gsl/assert>
 

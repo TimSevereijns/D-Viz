@@ -1,4 +1,5 @@
 #include "Settings/sessionSettings.h"
+
 #include "Settings/visualizationOptions.h"
 
 namespace Settings

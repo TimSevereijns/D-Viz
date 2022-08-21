@@ -1,13 +1,12 @@
 #include "controller.h"
 
-#include "Model/squarifiedTreemap.h"
+#include "Factories/modelFactory.h"
+#include "Factories/viewFactory.h"
 #include "Settings/persistentSettings.h"
 #include "Utilities/ignoreUnused.h"
 #include "Utilities/operatingSystem.h"
 #include "Utilities/scopeExit.h"
-#include "View/mainWindow.h"
 #include "constants.h"
-#include "literals.h"
 
 #include <gsl/assert>
 #include <spdlog/spdlog.h>

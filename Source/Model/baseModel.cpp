@@ -1,4 +1,5 @@
 #include "Model/baseModel.h"
+
 #include "Model/Monitor/fileChangeNotification.h"
 #include "Model/Scanner/scanningUtilities.h"
 #include "Model/ray.h"

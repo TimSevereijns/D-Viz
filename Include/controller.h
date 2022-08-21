@@ -9,9 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Factories/modelFactory.h"
 #include "Factories/modelFactoryInterface.h"
-#include "Factories/viewFactory.h"
 #include "Factories/viewFactoryInterface.h"
 #include "Model/Monitor/fileChangeNotification.h"
 #include "Model/Scanner/driveScanner.h"
@@ -19,9 +17,6 @@
 #include "Settings/nodePainter.h"
 #include "Settings/persistentSettings.h"
 #include "Settings/sessionSettings.h"
-#include "View/Scene/light.h"
-#include "View/mainWindow.h"
-#include "constants.h"
 
 #if defined(Q_OS_WIN)
 #include "Model/Monitor/windowsFileMonitor.h"
@@ -336,20 +331,20 @@ class Controller : public QObject
     ViewFactoryInterface& m_viewFactory;
     ModelFactoryInterface& m_modelFactory;
 
-    bool m_allowInteractionWithModel{ false };
-
     Settings::PersistentSettings m_persistentSettings;
     Settings::SessionSettings m_sessionSettings;
     Settings::NodePainter m_nodePainter;
 
-    std::shared_ptr<BaseView> m_view{ nullptr };
-    std::shared_ptr<BaseModel> m_model{ nullptr };
-
-    DriveScanner m_scanner;
+    std::shared_ptr<BaseView> m_view;
+    std::shared_ptr<BaseModel> m_model;
 
     std::shared_ptr<BaseTaskbarButton> m_taskbarProgress;
 
-    std::uint64_t m_occupiedDiskSpace{ 0u };
+    DriveScanner m_scanner;
+
+    std::uint64_t m_occupiedDiskSpace = 0u;
+
+    bool m_allowInteractionWithModel = false;
 
     // @todo Move this onto the model.
     std::unordered_map<std::uintptr_t, QVector3D> m_nodeColorMap;

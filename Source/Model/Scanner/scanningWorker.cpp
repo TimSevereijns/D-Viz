@@ -1,5 +1,5 @@
 #include "Model/Scanner/scanningWorker.h"
-#include "Model/Scanner/driveScanner.h"
+
 #include "Model/Scanner/scanningUtilities.h"
 #include "constants.h"
 

@@ -6,7 +6,6 @@
 #include "Utilities/operatingSystem.h"
 #include "Utilities/scopeExit.h"
 #include "Utilities/scopedCursor.h"
-#include "Utilities/utilities.h"
 #include "View/Viewport/glCanvas.h"
 #include "constants.h"
 #include "controller.h"

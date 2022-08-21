@@ -1,7 +1,5 @@
 #include "Model/Scanner/driveScanner.h"
 
-#include "Model/precisePoint.h"
-
 #include <QMessageBox>
 
 void DriveScanner::HandleProgressUpdates()

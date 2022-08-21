@@ -1,12 +1,13 @@
 #ifndef OPERATINGSYSTEMSPECIFIC_HPP
 #define OPERATINGSYSTEMSPECIFIC_HPP
 
+#include <QApplication>
 #include <QClipboard>
 #include <QDesktopServices>
 #include <QFile>
+#include <QUrl>
 
 #include "Utilities/scopeExit.h"
-#include "controller.h"
 
 #include <filesystem>
 #include <string>

@@ -4,6 +4,7 @@
 #include <Model/Scanner/scanningProgress.h>
 #include <Utilities/operatingSystem.h>
 #include <constants.h>
+#include <controller.h>
 
 #include "Utilities/testUtilities.h"
 

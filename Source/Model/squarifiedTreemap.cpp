@@ -1,4 +1,5 @@
 #include "Model/squarifiedTreemap.h"
+
 #include "constants.h"
 
 #include <algorithm>
