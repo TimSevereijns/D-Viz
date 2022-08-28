@@ -1,7 +1,5 @@
 #include "View/mainWindow.h"
-#include "Model/Scanner/scanningProgress.h"
 #include "Settings/persistentSettings.h"
-#include "Settings/settings.h"
 #include "Utilities/logging.h"
 #include "Utilities/operatingSystem.h"
 #include "Utilities/scopeExit.h"
@@ -305,28 +303,28 @@ void MainWindow::SetupMenus()
 
 void MainWindow::SetupFileMenu()
 {
-    m_fileMenuWrapper.newScan.setText("New Scan...");
-    m_fileMenuWrapper.newScan.setStatusTip("Start a new visualization.");
-    m_fileMenuWrapper.newScan.setShortcuts(QKeySequence::New);
+    m_fileMenu.newScan.setText("New Scan...");
+    m_fileMenu.newScan.setStatusTip("Start a new visualization.");
+    m_fileMenu.newScan.setShortcuts(QKeySequence::New);
 
-    connect(&m_fileMenuWrapper.newScan, &QAction::triggered, this, &MainWindow::OnFileMenuNewScan);
+    connect(&m_fileMenu.newScan, &QAction::triggered, this, &MainWindow::OnFileMenuNewScan);
 
-    m_fileMenuWrapper.cancelScan.setText("Cancel Scan");
-    m_fileMenuWrapper.cancelScan.setStatusTip("Cancel active scan.");
-    m_fileMenuWrapper.cancelScan.setEnabled(false);
+    m_fileMenu.cancelScan.setText("Cancel Scan");
+    m_fileMenu.cancelScan.setStatusTip("Cancel active scan.");
+    m_fileMenu.cancelScan.setEnabled(false);
 
-    connect(&m_fileMenuWrapper.cancelScan, &QAction::triggered, this, &MainWindow::OnCancelScan);
+    connect(&m_fileMenu.cancelScan, &QAction::triggered, this, &MainWindow::OnCancelScan);
 
-    m_fileMenuWrapper.exit.setText("Exit");
-    m_fileMenuWrapper.exit.setStatusTip("Exit the program.");
-    m_fileMenuWrapper.exit.setShortcuts(QKeySequence::Quit);
+    m_fileMenu.exit.setText("Exit");
+    m_fileMenu.exit.setStatusTip("Exit the program.");
+    m_fileMenu.exit.setShortcuts(QKeySequence::Quit);
 
-    connect(&m_fileMenuWrapper.exit, &QAction::triggered, this, &MainWindow::OnClose);
+    connect(&m_fileMenu.exit, &QAction::triggered, this, &MainWindow::OnClose);
 
     m_fileMenu.setTitle("File");
-    m_fileMenu.addAction(&m_fileMenuWrapper.newScan);
-    m_fileMenu.addAction(&m_fileMenuWrapper.cancelScan);
-    m_fileMenu.addAction(&m_fileMenuWrapper.exit);
+    m_fileMenu.addAction(&m_fileMenu.newScan);
+    m_fileMenu.addAction(&m_fileMenu.cancelScan);
+    m_fileMenu.addAction(&m_fileMenu.exit);
 
     menuBar()->addMenu(&m_fileMenu);
 }
@@ -335,31 +333,29 @@ void MainWindow::SetupOptionsMenu()
 {
     const auto& preferences = m_controller.GetPersistentSettings();
 
-    m_optionsMenuWrapper.useDarkTheme.setText("Use Dark Theme");
-    m_optionsMenuWrapper.useDarkTheme.setStatusTip("Toggles the use of a dark theme.");
-    m_optionsMenuWrapper.useDarkTheme.setCheckable(true);
-    m_optionsMenuWrapper.useDarkTheme.setChecked(preferences.ShouldUseDarkMode());
+    m_optionsMenu.useDarkTheme.setText("Use Dark Theme");
+    m_optionsMenu.useDarkTheme.setStatusTip("Toggles the use of a dark theme.");
+    m_optionsMenu.useDarkTheme.setCheckable(true);
+    m_optionsMenu.useDarkTheme.setChecked(preferences.ShouldUseDarkMode());
 
-    connect(
-        &m_optionsMenuWrapper.useDarkTheme, &QAction::toggled, this,
-        &MainWindow::OnDarkThemeToggled);
+    connect(&m_optionsMenu.useDarkTheme, &QAction::toggled, this, &MainWindow::OnDarkThemeToggled);
 
-    m_optionsMenuWrapper.enableFileSystemMonitoring.setEnabled(false);
-    m_optionsMenuWrapper.enableFileSystemMonitoring.setText("Monitor File System");
-    m_optionsMenuWrapper.enableFileSystemMonitoring.setStatusTip(
+    m_optionsMenu.enableFileSystemMonitoring.setEnabled(false);
+    m_optionsMenu.enableFileSystemMonitoring.setText("Monitor File System");
+    m_optionsMenu.enableFileSystemMonitoring.setStatusTip(
         "Monitors the file system for any changes");
-    m_optionsMenuWrapper.enableFileSystemMonitoring.setCheckable(true);
+    m_optionsMenu.enableFileSystemMonitoring.setCheckable(true);
 
     const auto isMonitoringEnabled = m_controller.GetPersistentSettings().ShouldMonitorFileSystem();
-    m_optionsMenuWrapper.enableFileSystemMonitoring.setChecked(isMonitoringEnabled);
+    m_optionsMenu.enableFileSystemMonitoring.setChecked(isMonitoringEnabled);
 
     connect(
-        &m_optionsMenuWrapper.enableFileSystemMonitoring, &QAction::toggled, this,
+        &m_optionsMenu.enableFileSystemMonitoring, &QAction::toggled, this,
         &MainWindow::OnFileMonitoringToggled);
 
     m_optionsMenu.setTitle("Options");
-    m_optionsMenu.addAction(&m_optionsMenuWrapper.useDarkTheme);
-    m_optionsMenu.addAction(&m_optionsMenuWrapper.enableFileSystemMonitoring);
+    m_optionsMenu.addAction(&m_optionsMenu.useDarkTheme);
+    m_optionsMenu.addAction(&m_optionsMenu.enableFileSystemMonitoring);
 
     SetupFileSizeSubMenu();
 
@@ -368,112 +364,104 @@ void MainWindow::SetupOptionsMenu()
 
 void MainWindow::SetupFileSizeSubMenu()
 {
-    auto& subMenuWrapper = m_optionsMenuWrapper.fileSizeMenuWrapper;
+    auto& sizeMenu = m_optionsMenu.fileSizeMenu;
 
-    subMenuWrapper.binaryPrefix.setText("Binary Prefix");
-    subMenuWrapper.binaryPrefix.setStatusTip(
+    sizeMenu.binaryPrefix.setText("Binary Prefix");
+    sizeMenu.binaryPrefix.setStatusTip(
         "Use base-two units, such as kibibytes and mebibytes. This is the default on Windows.");
-    subMenuWrapper.binaryPrefix.setCheckable(true);
-    subMenuWrapper.binaryPrefix.setChecked(true);
+    sizeMenu.binaryPrefix.setCheckable(true);
+    sizeMenu.binaryPrefix.setChecked(true);
 
-    connect(
-        &subMenuWrapper.binaryPrefix, &QAction::toggled, this, &MainWindow::SwitchToBinaryPrefix);
+    connect(&sizeMenu.binaryPrefix, &QAction::toggled, this, &MainWindow::SwitchToBinaryPrefix);
 
-    subMenuWrapper.decimalPrefix.setText("Decimal Prefix");
-    subMenuWrapper.decimalPrefix.setStatusTip(
-        "Use base-ten units, such as kilobytes and megabytes.");
-    subMenuWrapper.decimalPrefix.setCheckable(true);
-    subMenuWrapper.decimalPrefix.setChecked(false);
+    sizeMenu.decimalPrefix.setText("Decimal Prefix");
+    sizeMenu.decimalPrefix.setStatusTip("Use base-ten units, such as kilobytes and megabytes.");
+    sizeMenu.decimalPrefix.setCheckable(true);
+    sizeMenu.decimalPrefix.setChecked(false);
 
-    connect(
-        &subMenuWrapper.decimalPrefix, &QAction::toggled, this, &MainWindow::SwitchToDecimalPrefix);
+    connect(&sizeMenu.decimalPrefix, &QAction::toggled, this, &MainWindow::SwitchToDecimalPrefix);
 
-    m_optionsMenuWrapper.fileSizeMenu.setTitle("File Size Units");
-    m_optionsMenuWrapper.fileSizeMenu.addAction(&subMenuWrapper.binaryPrefix);
-    m_optionsMenuWrapper.fileSizeMenu.addAction(&subMenuWrapper.decimalPrefix);
+    sizeMenu.setTitle("File Size Units");
+    sizeMenu.addAction(&sizeMenu.binaryPrefix);
+    sizeMenu.addAction(&sizeMenu.decimalPrefix);
 
-    m_optionsMenu.addMenu(&m_optionsMenuWrapper.fileSizeMenu);
+    m_optionsMenu.addMenu(&m_optionsMenu.fileSizeMenu);
 }
 
 void MainWindow::SetupRenderSubMenu()
 {
-    auto& renderMenuWrapper = m_debuggingMenuWrapper.renderMenuWrapper;
+    auto& renderMenu = m_debuggingMenu.renderMenu;
 
-    renderMenuWrapper.origin.setText("Origin");
-    renderMenuWrapper.origin.setCheckable(true);
-    renderMenuWrapper.origin.setChecked(false);
+    renderMenu.origin.setText("Origin");
+    renderMenu.origin.setCheckable(true);
+    renderMenu.origin.setChecked(false);
 
-    connect(&renderMenuWrapper.origin, &QAction::toggled, this, &MainWindow::OnRenderOriginToggled);
+    connect(&renderMenu.origin, &QAction::toggled, this, &MainWindow::OnRenderOriginToggled);
 
-    renderMenuWrapper.grid.setText("Grid");
-    renderMenuWrapper.grid.setCheckable(true);
-    renderMenuWrapper.grid.setChecked(false);
+    renderMenu.grid.setText("Grid");
+    renderMenu.grid.setCheckable(true);
+    renderMenu.grid.setChecked(false);
 
-    connect(&renderMenuWrapper.grid, &QAction::toggled, this, &MainWindow::OnRenderGridToggled);
+    connect(&renderMenu.grid, &QAction::toggled, this, &MainWindow::OnRenderGridToggled);
 
-    renderMenuWrapper.lightMarkers.setText("Light Markers");
-    renderMenuWrapper.lightMarkers.setCheckable(true);
-    renderMenuWrapper.lightMarkers.setChecked(false);
+    renderMenu.lightMarkers.setText("Light Markers");
+    renderMenu.lightMarkers.setCheckable(true);
+    renderMenu.lightMarkers.setChecked(false);
 
     connect(
-        &renderMenuWrapper.lightMarkers, &QAction::toggled, this,
+        &renderMenu.lightMarkers, &QAction::toggled, this,
         &MainWindow::OnRenderLightMarkersToggled);
 
-    renderMenuWrapper.frustum.setText("Frustum");
-    renderMenuWrapper.frustum.setCheckable(true);
-    renderMenuWrapper.frustum.setChecked(false);
+    renderMenu.frustum.setText("Frustum");
+    renderMenu.frustum.setCheckable(true);
+    renderMenu.frustum.setChecked(false);
 
-    connect(
-        &renderMenuWrapper.frustum, &QAction::toggled, this, &MainWindow::OnRenderFrustaToggled);
+    connect(&renderMenu.frustum, &QAction::toggled, this, &MainWindow::OnRenderFrustaToggled);
 
-    auto& renderMenu = m_debuggingMenuWrapper.renderMenu;
     renderMenu.setTitle("Render Asset");
     renderMenu.setStatusTip("Toggle scene assets on or off");
-    renderMenu.addAction(&renderMenuWrapper.origin);
-    renderMenu.addAction(&renderMenuWrapper.grid);
-    renderMenu.addAction(&renderMenuWrapper.lightMarkers);
-    renderMenu.addAction(&renderMenuWrapper.frustum);
+    renderMenu.addAction(&renderMenu.origin);
+    renderMenu.addAction(&renderMenu.grid);
+    renderMenu.addAction(&renderMenu.lightMarkers);
+    renderMenu.addAction(&renderMenu.frustum);
 }
 
 void MainWindow::SetupLightingSubMenu()
 {
-    auto& lightingMenuWrapper = m_debuggingMenuWrapper.lightingMenuWrapper;
+    auto& lightingMenu = m_debuggingMenu.lightingMenu;
 
-    lightingMenuWrapper.showLightingOptions.setText("Show Lighting Options");
-    lightingMenuWrapper.showLightingOptions.setStatusTip("Show additional lighting options.");
-    lightingMenuWrapper.showLightingOptions.setCheckable(true);
+    lightingMenu.showLightingOptions.setText("Show Lighting Options");
+    lightingMenu.showLightingOptions.setStatusTip("Show additional lighting options.");
+    lightingMenu.showLightingOptions.setCheckable(true);
 
     connect(
-        &lightingMenuWrapper.showLightingOptions, &QAction::toggled, this,
+        &lightingMenu.showLightingOptions, &QAction::toggled, this,
         &MainWindow::OnShowLightingOptionsToggled);
 
     const auto shouldShowCascadeSplits =
         m_controller.GetPersistentSettings().ShouldRenderCascadeSplits();
 
-    lightingMenuWrapper.showCascadeSplits.setText("Show Cascade Splits");
-    lightingMenuWrapper.showCascadeSplits.setCheckable(true);
-    lightingMenuWrapper.showCascadeSplits.setChecked(shouldShowCascadeSplits);
+    lightingMenu.showCascadeSplits.setText("Show Cascade Splits");
+    lightingMenu.showCascadeSplits.setCheckable(true);
+    lightingMenu.showCascadeSplits.setChecked(shouldShowCascadeSplits);
 
     connect(
-        &lightingMenuWrapper.showCascadeSplits, &QAction::toggled, this,
+        &lightingMenu.showCascadeSplits, &QAction::toggled, this,
         &MainWindow::OnShowCascadeSplitsToggled);
 
     const auto shouldShowShadows = m_controller.GetPersistentSettings().ShouldRenderShadows();
 
-    lightingMenuWrapper.showShadows.setText("Show Shadows");
-    lightingMenuWrapper.showShadows.setCheckable(true);
-    lightingMenuWrapper.showShadows.setChecked(shouldShowShadows);
+    lightingMenu.showShadows.setText("Show Shadows");
+    lightingMenu.showShadows.setCheckable(true);
+    lightingMenu.showShadows.setChecked(shouldShowShadows);
 
-    connect(
-        &lightingMenuWrapper.showShadows, &QAction::toggled, this,
-        &MainWindow::OnShowShadowsToggled);
+    connect(&lightingMenu.showShadows, &QAction::toggled, this, &MainWindow::OnShowShadowsToggled);
 
-    auto& lightingMenu = m_debuggingMenuWrapper.lightingMenu;
     lightingMenu.setTitle("Lighting");
     lightingMenu.setStatusTip("Toggle visualization aids");
-    lightingMenu.addAction(&lightingMenuWrapper.showLightingOptions);
-    lightingMenu.addAction(&lightingMenuWrapper.showCascadeSplits);
-    lightingMenu.addAction(&lightingMenuWrapper.showShadows);
+    lightingMenu.addAction(&lightingMenu.showLightingOptions);
+    lightingMenu.addAction(&lightingMenu.showCascadeSplits);
+    lightingMenu.addAction(&lightingMenu.showShadows);
 }
 
 void MainWindow::SetupDebuggingMenu()
@@ -482,65 +470,63 @@ void MainWindow::SetupDebuggingMenu()
     SetupLightingSubMenu();
 
     m_debuggingMenu.setTitle("Debugging");
-    m_debuggingMenu.addMenu(&m_debuggingMenuWrapper.renderMenu);
-    m_debuggingMenu.addMenu(&m_debuggingMenuWrapper.lightingMenu);
+    m_debuggingMenu.addMenu(&m_debuggingMenu.renderMenu);
+    m_debuggingMenu.addMenu(&m_debuggingMenu.lightingMenu);
 
-    m_debuggingMenuWrapper.openLogFile.setText("Open Log File");
+    m_debuggingMenu.openLogFile.setText("Open Log File");
+
+    connect(&m_debuggingMenu.openLogFile, &QAction::triggered, this, &MainWindow::OnOpenLogFile);
+
+    m_debuggingMenu.addAction(&m_debuggingMenu.openLogFile);
+
+    m_debuggingMenu.toggleFrameTime.setText("Show Frame Time");
+    m_debuggingMenu.toggleFrameTime.setStatusTip("Toggle frame-time readout in titlebar.");
+    m_debuggingMenu.toggleFrameTime.setCheckable(true);
 
     connect(
-        &m_debuggingMenuWrapper.openLogFile, &QAction::triggered, this, &MainWindow::OnOpenLogFile);
-
-    m_debuggingMenu.addAction(&m_debuggingMenuWrapper.openLogFile);
-
-    m_debuggingMenuWrapper.toggleFrameTime.setText("Show Frame Time");
-    m_debuggingMenuWrapper.toggleFrameTime.setStatusTip("Toggle frame-time readout in titlebar.");
-    m_debuggingMenuWrapper.toggleFrameTime.setCheckable(true);
-
-    connect(
-        &m_debuggingMenuWrapper.toggleFrameTime, &QAction::toggled, this,
+        &m_debuggingMenu.toggleFrameTime, &QAction::toggled, this,
         &MainWindow::OnFpsReadoutToggled);
 
-    m_debuggingMenu.addAction(&m_debuggingMenuWrapper.toggleFrameTime);
+    m_debuggingMenu.addAction(&m_debuggingMenu.toggleFrameTime);
 
     menuBar()->addMenu(&m_debuggingMenu);
 }
 
 void MainWindow::SetupHelpMenu()
 {
-    m_helpMenuWrapper.aboutDialog.setParent(this);
-    m_helpMenuWrapper.aboutDialog.setText("About...");
-    m_helpMenuWrapper.aboutDialog.setStatusTip("About D-Viz");
+    m_helpMenu.aboutDialog.setParent(this);
+    m_helpMenu.aboutDialog.setText("About...");
+    m_helpMenu.aboutDialog.setStatusTip("About D-Viz");
 
-    connect(
-        &m_helpMenuWrapper.aboutDialog, &QAction::triggered, this, &MainWindow::LaunchAboutDialog);
+    connect(&m_helpMenu.aboutDialog, &QAction::triggered, this, &MainWindow::LaunchAboutDialog);
 
     m_helpMenu.setTitle("Help");
-    m_helpMenu.addAction(&m_helpMenuWrapper.aboutDialog);
+    m_helpMenu.addAction(&m_helpMenu.aboutDialog);
 
     menuBar()->addMenu(&m_helpMenu);
 }
 
 void MainWindow::SetDebuggingMenuState()
 {
-    auto& renderMenuWrapper = m_debuggingMenuWrapper.renderMenuWrapper;
+    auto& renderMenu = m_debuggingMenu.renderMenu;
 
     const auto& preferences = m_controller.GetPersistentSettings();
 
-    renderMenuWrapper.origin.blockSignals(true);
-    renderMenuWrapper.origin.setChecked(preferences.ShouldRenderOrigin());
-    renderMenuWrapper.origin.blockSignals(false);
+    renderMenu.origin.blockSignals(true);
+    renderMenu.origin.setChecked(preferences.ShouldRenderOrigin());
+    renderMenu.origin.blockSignals(false);
 
-    renderMenuWrapper.grid.blockSignals(true);
-    renderMenuWrapper.grid.setChecked(preferences.ShouldRenderGrid());
-    renderMenuWrapper.grid.blockSignals(false);
+    renderMenu.grid.blockSignals(true);
+    renderMenu.grid.setChecked(preferences.ShouldRenderGrid());
+    renderMenu.grid.blockSignals(false);
 
-    renderMenuWrapper.lightMarkers.blockSignals(true);
-    renderMenuWrapper.lightMarkers.setChecked(preferences.ShouldRenderLightMarkers());
-    renderMenuWrapper.lightMarkers.blockSignals(false);
+    renderMenu.lightMarkers.blockSignals(true);
+    renderMenu.lightMarkers.setChecked(preferences.ShouldRenderLightMarkers());
+    renderMenu.lightMarkers.blockSignals(false);
 
-    renderMenuWrapper.frustum.blockSignals(true);
-    renderMenuWrapper.frustum.setChecked(preferences.ShouldRenderFrusta());
-    renderMenuWrapper.frustum.blockSignals(false);
+    renderMenu.frustum.blockSignals(true);
+    renderMenu.frustum.setChecked(preferences.ShouldRenderFrusta());
+    renderMenu.frustum.blockSignals(false);
 
     HideLightingOptions();
 }
@@ -687,15 +673,15 @@ void MainWindow::SwitchToBinaryPrefix(bool /*useBinary*/)
 {
     // @todo Emit a signal that the breakdown dialog can hook up to.
 
-    auto& menuWrapper = m_optionsMenuWrapper.fileSizeMenuWrapper;
+    auto& menuWrapper = m_optionsMenu.fileSizeMenu;
 
     menuWrapper.binaryPrefix.blockSignals(true);
     menuWrapper.decimalPrefix.blockSignals(true);
 
     const ScopeExit unblockSignals = [&]() noexcept
     {
-        m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.blockSignals(false);
-        m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(false);
+        m_optionsMenu.fileSizeMenu.decimalPrefix.blockSignals(false);
+        m_optionsMenu.fileSizeMenu.binaryPrefix.blockSignals(false);
     };
 
     menuWrapper.binaryPrefix.setChecked(true);
@@ -721,15 +707,15 @@ void MainWindow::SwitchToDecimalPrefix(bool /*useDecimal*/)
 {
     // @todo Emit a signal that the breakdown dialog can hook up to.
 
-    auto& menuWrapper = m_optionsMenuWrapper.fileSizeMenuWrapper;
+    auto& menuWrapper = m_optionsMenu.fileSizeMenu;
 
     menuWrapper.binaryPrefix.blockSignals(true);
     menuWrapper.decimalPrefix.blockSignals(true);
 
     const ScopeExit unblockSignals = [&]() noexcept
     {
-        m_optionsMenuWrapper.fileSizeMenuWrapper.decimalPrefix.blockSignals(false);
-        m_optionsMenuWrapper.fileSizeMenuWrapper.binaryPrefix.blockSignals(false);
+        m_optionsMenu.fileSizeMenu.decimalPrefix.blockSignals(false);
+        m_optionsMenu.fileSizeMenu.binaryPrefix.blockSignals(false);
     };
 
     menuWrapper.binaryPrefix.setChecked(false);
@@ -879,7 +865,7 @@ void MainWindow::OnCancelScan()
 
 bool MainWindow::ShouldShowFrameTime() const
 {
-    return m_debuggingMenuWrapper.toggleFrameTime.isChecked();
+    return m_debuggingMenu.toggleFrameTime.isChecked();
 }
 
 std::string MainWindow::GetSearchQuery() const
@@ -907,7 +893,7 @@ Gamepad& MainWindow::GetGamepad()
 void MainWindow::OnScanStarted()
 {
     m_ui.showBreakdownButton->setEnabled(false);
-    m_fileMenuWrapper.cancelScan.setEnabled(true);
+    m_fileMenu.cancelScan.setEnabled(true);
 }
 
 void MainWindow::OnScanCompleted()
@@ -915,8 +901,8 @@ void MainWindow::OnScanCompleted()
     ReloadVisualization();
 
     m_ui.showBreakdownButton->setEnabled(true);
-    m_fileMenuWrapper.cancelScan.setEnabled(false);
-    m_optionsMenuWrapper.enableFileSystemMonitoring.setEnabled(true);
+    m_fileMenu.cancelScan.setEnabled(false);
+    m_optionsMenu.enableFileSystemMonitoring.setEnabled(true);
 }
 
 std::shared_ptr<BaseTaskbarButton> MainWindow::GetTaskbarButton()

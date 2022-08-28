@@ -83,6 +83,58 @@ class UnixTaskbarButton : public BaseTaskbarButton
 
 #endif // Q_OS_LINUX
 
+class FileMenu : public QMenu
+{
+  public:
+    QAction newScan;
+    QAction cancelScan;
+    QAction exit;
+};
+
+class OptionsMenu : public QMenu
+{
+  public:
+    QAction useDarkTheme;
+    QAction enableFileSystemMonitoring;
+
+    class FileSizeMenu : public QMenu
+    {
+      public:
+        QAction binaryPrefix;
+        QAction decimalPrefix;
+    } fileSizeMenu;
+};
+
+class DebuggingMenu : public QMenu
+{
+  public:
+    class RenderMenu : public QMenu
+    {
+      public:
+        QAction origin;
+        QAction grid;
+        QAction lightMarkers;
+        QAction frustum;
+    } renderMenu;
+
+    class LightingMenu : public QMenu
+    {
+      public:
+        QAction showLightingOptions;
+        QAction showCascadeSplits;
+        QAction showShadows;
+    } lightingMenu;
+
+    QAction openLogFile;
+    QAction toggleFrameTime;
+};
+
+class HelpMenu : public QMenu
+{
+  public:
+    QAction aboutDialog;
+};
+
 class MainWindow final : public QMainWindow, public BaseView
 {
     Q_OBJECT
@@ -299,70 +351,10 @@ class MainWindow final : public QMainWindow, public BaseView
 
     const std::vector<std::pair<std::uintmax_t, QString>>* m_fileSizeOptions = nullptr;
 
-    // @note The remainder of this header is dedicated to the various menus that exist within
-    // the main window. Since some of these menus are submenus of other menus, the variable
-    // declaration order is critical to ensuring proper lifetime management. In other words,
-    // be careful in modifying this section; any errors likely won't show up until the program
-    // exits.
-
-    QMenu m_fileMenu;
-
-    struct FileMenu
-    {
-        QAction newScan;
-        QAction cancelScan;
-        QAction exit;
-    } m_fileMenuWrapper;
-
-    QMenu m_optionsMenu;
-
-    struct OptionsMenu
-    {
-        QAction useDarkTheme;
-        QAction enableFileSystemMonitoring;
-
-        QMenu fileSizeMenu;
-
-        struct FileSizeMenu
-        {
-            QAction binaryPrefix;
-            QAction decimalPrefix;
-        } fileSizeMenuWrapper;
-    } m_optionsMenuWrapper;
-
-    QMenu m_debuggingMenu;
-
-    struct DebuggingMenu
-    {
-        QMenu renderMenu;
-
-        struct RenderMenuWrapper
-        {
-            QAction origin;
-            QAction grid;
-            QAction lightMarkers;
-            QAction frustum;
-        } renderMenuWrapper;
-
-        QMenu lightingMenu;
-
-        struct LightingMenuWrapper
-        {
-            QAction showLightingOptions;
-            QAction showCascadeSplits;
-            QAction showShadows;
-        } lightingMenuWrapper;
-
-        QAction openLogFile;
-        QAction toggleFrameTime;
-    } m_debuggingMenuWrapper;
-
-    QMenu m_helpMenu;
-
-    struct HelpMenu
-    {
-        QAction aboutDialog;
-    } m_helpMenuWrapper;
+    FileMenu m_fileMenu;
+    OptionsMenu m_optionsMenu;
+    DebuggingMenu m_debuggingMenu;
+    HelpMenu m_helpMenu;
 };
 
 #endif // MAINWINDOW_H
