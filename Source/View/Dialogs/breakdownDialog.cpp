@@ -149,11 +149,11 @@ void BreakdownDialog::HandleDoubleClick(const QModelIndex& index)
     GenerateGraph(extension);
 }
 
-std::unique_ptr<QtCharts::QCategoryAxis>
+std::unique_ptr<QCategoryAxis>
 BreakdownDialog::SetupAxisX(const ExtensionDistribution& distribution, const QColor& color) const
 {
-    auto axisX = std::make_unique<QtCharts::QCategoryAxis>();
-    axisX->setLabelsPosition(QtCharts::QCategoryAxis::AxisLabelsPositionOnValue);
+    auto axisX = std::make_unique<QCategoryAxis>();
+    axisX->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
     axisX->setTitleText("Size");
     axisX->setTitleBrush(color);
     axisX->setLinePenColor(color);
@@ -181,7 +181,7 @@ BreakdownDialog::SetupAxisX(const ExtensionDistribution& distribution, const QCo
     return axisX;
 }
 
-std::unique_ptr<QtCharts::QValueAxis> BreakdownDialog::SetupLinearAxisY(
+std::unique_ptr<QValueAxis> BreakdownDialog::SetupLinearAxisY(
     const ExtensionDistribution& distribution, const QColor& color) const
 {
     const auto tallestBarHeight = distribution.GetMaximumValueY();
@@ -190,7 +190,7 @@ std::unique_ptr<QtCharts::QValueAxis> BreakdownDialog::SetupLinearAxisY(
     const auto tickCount =
         tallestBarHeight <= 2 ? minimumTickCount : std::min(static_cast<int>(tallestBarHeight), 4);
 
-    auto axisY = std::make_unique<QtCharts::QValueAxis>();
+    auto axisY = std::make_unique<QValueAxis>();
     axisY->setRange(0, tallestBarHeight);
     axisY->setLabelFormat("%.1f");
     axisY->setTitleText("Count");
@@ -202,12 +202,12 @@ std::unique_ptr<QtCharts::QValueAxis> BreakdownDialog::SetupLinearAxisY(
     return axisY;
 }
 
-std::unique_ptr<QtCharts::QLogValueAxis> BreakdownDialog::SetupLogarithmAxisY(
+std::unique_ptr<QLogValueAxis> BreakdownDialog::SetupLogarithmAxisY(
     const ExtensionDistribution& distribution, const QColor& color) const
 {
     const auto tallestBarHeight = distribution.GetMaximumValueY();
 
-    auto axisY = std::make_unique<QtCharts::QLogValueAxis>();
+    auto axisY = std::make_unique<QLogValueAxis>();
     axisY->setRange(0.5, tallestBarHeight);
     axisY->setLabelFormat("%d");
     axisY->setTitleText("Count");
@@ -218,7 +218,7 @@ std::unique_ptr<QtCharts::QLogValueAxis> BreakdownDialog::SetupLogarithmAxisY(
     return axisY;
 }
 
-std::unique_ptr<QtCharts::QAbstractAxis>
+std::unique_ptr<QAbstractAxis>
 BreakdownDialog::SetupAxisY(const ExtensionDistribution& distribution, const QColor& color) const
 {
     if (distribution.GetMaximumValueY() > 32) {
@@ -237,7 +237,7 @@ void BreakdownDialog::GenerateGraph(const std::string& extension)
     const auto& distribution = m_graphModel.GetDistribution(extension);
     const auto& buckets = distribution.GetBuckets();
 
-    auto set = std::make_unique<QtCharts::QBarSet>("Distribution");
+    auto set = std::make_unique<QBarSet>("Distribution");
 
     QColor barColor{ 20, 100, 160 };
     set->setColor(barColor);
@@ -246,12 +246,12 @@ void BreakdownDialog::GenerateGraph(const std::string& extension)
         set->append(count);
     }
 
-    auto series = std::make_unique<QtCharts::QBarSeries>();
+    auto series = std::make_unique<QBarSeries>();
     series->append(set.release());
     series->setBarWidth(series->barWidth() * 2);
 
-    auto chart = std::make_unique<QtCharts::QChart>();
-    chart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
+    auto chart = std::make_unique<QChart>();
+    chart->setAnimationOptions(QChart::SeriesAnimations);
     chart->layout()->setContentsMargins(0, 0, 16, 0); //< Add space on the right for the last label.
     chart->legend()->hide();
     chart->setBackgroundRoundness(0);
@@ -284,7 +284,7 @@ void BreakdownDialog::GenerateGraph(const std::string& extension)
     // Another quirk in the API stems from the fact that while the documentation claims "the
     // ownership of the new chart is passed to the chart view," one apparently still has to clean
     // up the previous chart (which we'll do at the end of the current function using RAII).
-    const auto previousChart = std::unique_ptr<QtCharts::QChart>(m_ui.graphView->chart());
+    const auto previousChart = std::unique_ptr<QChart>(m_ui.graphView->chart());
 
     m_ui.graphView->setChart(chart.release());
     m_ui.graphView->setBackgroundBrush(backgroundBrush);

@@ -24,13 +24,13 @@
     <widget class="QTableView" name="tableView"/>
    </item>
    <item>
-    <widget class="QtCharts::QChartView" name="graphView"/>
+    <widget class="QChartView" name="graphView"/>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QtCharts::QChartView</class>
+   <class>QChartView</class>
    <extends>QGraphicsView</extends>
    <header>QtCharts/QChartView</header>
   </customwidget>

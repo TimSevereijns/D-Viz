@@ -280,6 +280,7 @@ void MainWindow::SetupFileSizePruningDropdown()
 
 void MainWindow::SetupGamepad()
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     const auto gamepads = QGamepadManager::instance()->connectedGamepads();
     if (gamepads.isEmpty()) {
         return;
@@ -287,6 +288,7 @@ void MainWindow::SetupGamepad()
 
     m_gamepad = std::make_unique<Gamepad>(*std::begin(gamepads), this);
     QGamepadManager::instance()->resetConfiguration(m_gamepad->deviceId());
+#endif
 }
 
 void MainWindow::SetupMenus()

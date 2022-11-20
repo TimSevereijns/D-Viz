@@ -3,12 +3,12 @@
 
 #include "constants.h"
 
-#include <QtGamepad/QGamepad>
+//#include <QtGamepad/QGamepad>
 
 /**
  * @brief Expands on the Qt Gamepad class to better encapsulate trigger actuation.
  */
-class Gamepad final : public QGamepad
+class Gamepad final //: public QGamepad
 {
   public:
     Gamepad(int deviceId = 0, QObject* parent = nullptr);

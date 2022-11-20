@@ -329,8 +329,8 @@ void GLCanvas::mouseMoveEvent(QMouseEvent* const event)
 {
     Expects(event);
 
-    const auto deltaX = event->x() - m_lastMousePosition.x();
-    const auto deltaY = event->y() - m_lastMousePosition.y();
+    const auto deltaX = event->position().x() - m_lastMousePosition.x();
+    const auto deltaY = event->position().y() - m_lastMousePosition.y();
 
     if (!m_isCursorHidden) {
         m_lastMousePosition = event->pos();
@@ -617,8 +617,9 @@ void GLCanvas::HandleKeyboardInput(const std::chrono::milliseconds& elapsedTime)
     }
 }
 
-void GLCanvas::HandleGamepadInput(const std::chrono::milliseconds& elapsedTime)
+void GLCanvas::HandleGamepadInput(const std::chrono::milliseconds& /*elapsedTime*/)
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     const auto& gamepad = m_mainWindow.GetGamepad();
 
     if (!gamepad.isConnected()) {
@@ -628,11 +629,13 @@ void GLCanvas::HandleGamepadInput(const std::chrono::milliseconds& elapsedTime)
     HandleGamepadButtonInput(gamepad, elapsedTime);
     HandleGamepadThumbstickInput(gamepad);
     HandleGamepadTriggerInput(gamepad);
+#endif
 }
 
 void GLCanvas::HandleGamepadButtonInput(
-    const Gamepad& gamepad, const std::chrono::milliseconds& elapsedTime)
+    const Gamepad& /*gamepad*/, const std::chrono::milliseconds& /*elapsedTime*/)
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     const auto millisecondsElapsed = elapsedTime.count();
     const auto cameraSpeed = m_controller.GetSessionSettings().GetCameraSpeed() /
                              Constants::Input::MovementAmplification;
@@ -671,10 +674,12 @@ void GLCanvas::HandleGamepadButtonInput(
         m_gamepadContextMenu->close();
         m_gamepadContextMenu = nullptr;
     }
+#endif
 }
 
-void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
+void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& /*gamepad*/)
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     if (m_gamepadContextMenu) {
         return;
     }
@@ -701,10 +706,12 @@ void GLCanvas::HandleGamepadThumbstickInput(const Gamepad& gamepad)
         const auto distance = static_cast<float>(cameraSpeed * gamepad.axisLeftX());
         m_camera.OffsetPosition(distance * m_camera.Right());
     }
+#endif
 }
 
-void GLCanvas::HandleGamepadTriggerInput(const Gamepad& gamepad)
+void GLCanvas::HandleGamepadTriggerInput(const Gamepad& /*gamepad*/)
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     if (!m_isLeftTriggerDown && gamepad.IsLeftTriggerDown()) {
         m_isLeftTriggerDown = true;
 
@@ -725,6 +732,7 @@ void GLCanvas::HandleGamepadTriggerInput(const Gamepad& gamepad)
     } else if (m_isRightTriggerDown && !gamepad.IsRightTriggerDown()) {
         m_isRightTriggerDown = false;
     }
+#endif
 }
 
 void GLCanvas::SelectNodeViaRay(const QPoint& rayOrigin)
