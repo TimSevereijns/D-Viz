@@ -109,7 +109,7 @@ class Controller : public QObject
      * @param[in] searchQuery              String to search against.
      * @param[in] deselectionCallback      UI callback to clear selection highlights.
      * @param[in] selectionCallback        UI callback to highlight matching nodes on the canvas.
-     * @param[in] flags                    Encoded search options.
+     * @param[in] flags                    Bitmask of search options.
      */
     void SearchTreeMap(
         const std::string& searchQuery,

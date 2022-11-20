@@ -374,10 +374,10 @@ Tree<VizBlock>::Node* BaseModel::FindNearestIntersection(
         nearestIntersection = closest->node;
     });
 
-    spdlog::get(Constants::Logging::DefaultLog)
-        ->info(
-            "Selected node in: {:L} {}", stopwatch.GetElapsedTime().count(),
-            stopwatch.GetUnitsAsString());
+    const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+    log->info(
+        "Selected node in: {:L} {}", stopwatch.GetElapsedTime().count(),
+        stopwatch.GetUnitsAsString());
 
     return nearestIntersection;
 }
@@ -577,14 +577,13 @@ void BaseModel::StartMonitoringFileSystem()
     };
 
     m_fileEvents.ResetWaitingPrivileges();
-    m_shouldKeepProcessingNotifications.store(true, std::memory_order::memory_order_relaxed);
+    m_shouldKeepProcessingNotifications.store(true);
 
     m_fileSystemObserver.StartMonitoring(callback);
     m_fileSystemNotificationProcessor = std::thread{ [&] { ProcessChanges(); } };
 }
 
 void BaseModel::StopMonitoringFileSystem() noexcept
-
 {
     m_fileSystemObserver.StopMonitoring();
 
@@ -638,19 +637,6 @@ void BaseModel::RefreshTreemap()
 
 void BaseModel::UpdateAffectedNodes(const FileEvent& event)
 {
-    const auto& absolutePath = event.path;
-
-    if (event.eventType == FileEventType::Touched && !std::filesystem::exists(absolutePath)) {
-        // @note The absence of a file may not necessarily indicate a bug, since there tend to be
-        // a lot of transient files that may only exist for a fraction of a second. For example,
-        // some applications tend to create temporary files when saving changes made to a file.
-
-        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
-        log->error("File no longer exists: {}", absolutePath.string());
-
-        return;
-    }
-
     switch (event.eventType) {
         case FileEventType::Created: {
             OnFileCreation(event);
@@ -700,6 +686,17 @@ void BaseModel::OnFileDeletion(const FileEvent& event)
 
 void BaseModel::OnFileModification(const FileEvent& event)
 {
+    if (!std::filesystem::exists(event.path)) {
+        // @note The absence of a file may not necessarily indicate a bug, since there tend to be
+        // a lot of transient files that may only exist for a fraction of a second. For example,
+        // some applications tend to create temporary files when saving changes made to a file.
+
+        const auto& log = spdlog::get(Constants::Logging::DefaultLog);
+        log->error("File no longer exists: {}", event.path.string());
+
+        return;
+    }
+
     if (std::filesystem::is_regular_file(event.path)) {
         auto* const root = m_fileTree->GetRoot();
         auto* const node = Utilities::FindNodeViaAbsolutePath(root, event.path);

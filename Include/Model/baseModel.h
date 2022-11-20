@@ -183,7 +183,7 @@ class BaseModel
      *
      * @param[in] searchQuery     The raw search query.
      * @param[in] options         Used to prune disqualified nodes. @see VisualizationOptions.
-     * @param[in] flags           Encoded search options.
+     * @param[in] flags           Bitmask of search options.
      */
     void HighlightMatchingFileNames(
         const std::string& searchQuery, const Settings::VisualizationOptions& options,

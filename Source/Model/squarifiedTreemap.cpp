@@ -45,7 +45,7 @@ namespace
      * @returns The additional coverage, as a percentage, of total parent area.
      */
     double SlicePerpendicularToWidth(
-        const Block& land, const double percentageOfParent, VizBlock& node, const size_t nodeCount)
+        const Block& land, double percentageOfParent, VizBlock& node, const size_t nodeCount)
     {
         using namespace Constants;
 

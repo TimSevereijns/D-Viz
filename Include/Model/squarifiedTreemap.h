@@ -30,6 +30,8 @@ class SquarifiedTreeMap final : public BaseModel
      * @brief Computes the area of the specified block that remains available to be built upon.
      *
      * @param[in] block              The block to build upon.
+     *
+     * @returns A block that represents available space.
      */
     Block ComputeRemainingArea(const Block& block);
 
@@ -56,8 +58,8 @@ class SquarifiedTreeMap final : public BaseModel
      * @returns A double representing the least square aspect ratio.
      */
     double ComputeWorstAspectRatio(
-        const std::vector<Tree<VizBlock>::Node*>& row, const std::uintmax_t candidateSize,
-        VizBlock& parentNode, const double shortestEdgeOfBounds);
+        const std::vector<Tree<VizBlock>::Node*>& row, std::uintmax_t candidateSize,
+        VizBlock& parentNode, double shortestEdgeOfBounds);
 
     /**
      * @brief Represents the heart of the algorithm and decides which nodes ought to be added to
@@ -89,8 +91,7 @@ class SquarifiedTreeMap final : public BaseModel
      *
      * @returns A block representing the outer dimensions of the row boundary.
      */
-    Block
-    CalculateRowBounds(std::uintmax_t bytesInRow, VizBlock& parentNode, const bool updateOffset);
+    Block CalculateRowBounds(std::uintmax_t bytesInRow, VizBlock& parentNode, bool updateOffset);
 
     /**
      * @brief Takes all the nodes that are to be included in a single row and then constructs the

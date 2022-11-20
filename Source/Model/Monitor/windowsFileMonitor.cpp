@@ -141,7 +141,7 @@ void WindowsFileMonitor::Start(
         /* lpEventAttributes = */ nullptr,
         /* bManualReset = */ true,
         /* bInitialState = */ false,
-        /* lpName = */ L"D-VIZ_FILE_MONITOR_TERMINATE_THREAD");
+        /* lpName = */ nullptr);
 
     m_events.SetExitHandle(exitThreadHandle);
 
@@ -149,7 +149,7 @@ void WindowsFileMonitor::Start(
         /* lpEventAttributes = */ nullptr,
         /* bManualReset = */ false,
         /* bInitialState = */ false,
-        /* lpName = */ L"D-VIZ_FILE_MONITOR_NOTIFICATION");
+        /* lpName = */ nullptr);
 
     m_events.SetNotificationHandle(notificationHandle);
 

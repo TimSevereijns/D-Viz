@@ -78,7 +78,7 @@ class Camera
     QVector3D Forward() const noexcept;
 
     /**
-     * @brief Retrieves a vector pointing backswards from the camera.
+     * @brief Retrieves a vector pointing backwards from the camera.
      *
      * @returns A vector that points backwards relative to the current camera's position and
      * orientation.

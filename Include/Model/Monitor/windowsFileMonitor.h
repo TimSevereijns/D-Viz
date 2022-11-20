@@ -34,7 +34,7 @@ namespace Detail
         {
             for (auto& handle : m_handles) {
                 if (handle != nullptr && handle != INVALID_HANDLE_VALUE) {
-                    CloseHandle(handle);
+                    ::CloseHandle(handle);
                     handle = nullptr;
                 }
             }
