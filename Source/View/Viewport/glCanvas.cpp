@@ -13,9 +13,12 @@
 #include <QApplication>
 #include <QMenu>
 #include <QMessageBox>
+#include <QOpenGLDebugLogger>
 
 #include <gsl/assert>
 #include <stopwatch.h>
+
+#include <iostream>
 
 namespace
 {
@@ -113,11 +116,23 @@ GLCanvas::GLCanvas(Controller& controller, QWidget* parent)
 
     setFocusPolicy(Qt::StrongFocus);
 
-    QSurfaceFormat format;
-    format.setDepthBufferSize(32);
-    format.setSamples(8);
-    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-    setFormat(format);
+    QSurfaceFormat fmt = format();
+    bool hasDebug = fmt.testOption(QSurfaceFormat::DebugContext);
+    std::cout << "STILL DEBUG? " << hasDebug << std::endl;
+
+    //    QSurfaceFormat format;
+    //    format.setDepthBufferSize(32);
+    //    format.setSwapInterval(0); //< Disable v-sync
+    //    format.setSamples(8);
+    //    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    //    format.setMajorVersion(4);
+    //    format.setMinorVersion(1);
+    //    format.setProfile(QSurfaceFormat::CoreProfile);
+    //    format.setOption(QSurfaceFormat::DebugContext);
+    //    QSurfaceFormat::setDefaultFormat(format);
+    //    setFormat(format);
+
+    m_openGLContext = std::make_unique<QOpenGLExtraFunctions>();
 
     connect(&m_frameRedrawTimer, &QTimer::timeout, this, &GLCanvas::RunMainLoop);
     m_frameRedrawTimer.start(Constants::Graphics::DesiredTimeBetweenFrames);
@@ -131,12 +146,28 @@ void GLCanvas::RunMainLoop()
 
 void GLCanvas::initializeGL()
 {
-    m_openGLContext.initializeOpenGLFunctions();
+    m_openGLContext->initializeOpenGLFunctions();
 
-    m_openGLContext.glEnable(GL_DEPTH_TEST);
-    m_openGLContext.glEnable(GL_CULL_FACE);
-    m_openGLContext.glEnable(GL_MULTISAMPLE);
-    m_openGLContext.glEnable(GL_LINE_SMOOTH);
+    QOpenGLContext* ctx = QOpenGLContext::currentContext();
+    const auto can_debug = ctx->format().options().testFlag(QSurfaceFormat::DebugContext);
+
+    QOpenGLDebugLogger* logger = new QOpenGLDebugLogger(this);
+
+    if (!logger->initialize()) {
+        std::cout << "Failed to initialize!" << std::endl;
+    }
+
+    connect(logger, &QOpenGLDebugLogger::messageLogged, [](const QOpenGLDebugMessage& msg) {
+        std::cout << msg.message().data() << std::endl;
+    });
+
+    logger->startLogging(QOpenGLDebugLogger::SynchronousLogging);
+    logger->enableMessages();
+
+    m_openGLContext->glEnable(GL_DEPTH_TEST);
+    m_openGLContext->glEnable(GL_CULL_FACE);
+    m_openGLContext->glEnable(GL_MULTISAMPLE);
+    m_openGLContext->glEnable(GL_LINE_SMOOTH);
 
     RegisterAsset<Assets::Tag::Grid>();
     RegisterAsset<Assets::Tag::OriginMarker>();
@@ -158,7 +189,7 @@ template <typename AssetTag> void GLCanvas::RegisterAsset()
 {
     m_sceneAssets.emplace_back(TagAndAsset{
         std::make_unique<AssetTag>(),
-        std::make_unique<typename AssetTag::AssetType>(m_controller, m_openGLContext) });
+        std::make_unique<typename AssetTag::AssetType>(m_controller, *m_openGLContext) });
 }
 
 template <typename RequestedAsset>
@@ -207,7 +238,7 @@ void GLCanvas::resizeGL(int width, int height)
         height = 1;
     }
 
-    m_openGLContext.glViewport(0, 0, width, height);
+    m_openGLContext->glViewport(0, 0, width, height);
     m_camera.SetViewport(QRect{ QPoint{ 0, 0 }, QPoint{ width, height } });
 
     auto* const frusta = GetAsset<Assets::Tag::Frustum>();
@@ -465,20 +496,16 @@ void GLCanvas::AddOperatingSystemOptionsToContextMenu(
     menu.addSeparator();
 
     menu.addAction("Show in Explorer", [&, path] {
-        if (AlertIfMissing(path)) {
-            return;
+        if (!AlertIfMissing(path)) {
+            OS::LaunchFileExplorer(path);
         }
-
-        OS::LaunchFileExplorer(path);
     });
 
     if (fileType == FileType::Regular) {
         menu.addAction("Open File", [&, path] {
-            if (AlertIfMissing(path)) {
-                return;
+            if (!AlertIfMissing(path)) {
+                OS::OpenFile(path);
             }
-
-            OS::OpenFile(path);
         });
 
         menu.addAction("Move to Trash", [&, path] {
@@ -748,9 +775,6 @@ void GLCanvas::UpdateFrameTime(const std::chrono::milliseconds& elapsedTime)
 {
     constexpr auto movingAverageWindowSize = 64;
 
-    Expects(m_frameTimeDeque.empty() == false);
-    Expects(m_frameTimeDeque.size() <= movingAverageWindowSize);
-
     if (m_frameTimeDeque.size() > movingAverageWindowSize) {
         m_frameTimeDeque.pop_front();
     }
@@ -878,7 +902,7 @@ void GLCanvas::paintGL()
 
     VisualizeFilesystemActivity();
 
-    m_openGLContext.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    m_openGLContext->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     if (m_controller.GetSessionSettings().IsPrimaryLightAttachedToCamera()) {
         Expects(m_lights.empty() == false);

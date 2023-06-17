@@ -59,16 +59,16 @@ namespace std
         }
     };
 
-    template <> struct hash<std::filesystem::path>
-    {
-        /**
-         * @returns A hash based on the path of the changed file.
-         */
-        std::size_t operator()(const std::filesystem::path& path) const
-        {
-            return std::hash<std::filesystem::path::string_type>{}(path.native());
-        }
-    };
+    //    template <> struct hash<std::filesystem::path>
+    //    {
+    //        /**
+    //         * @returns A hash based on the path of the changed file.
+    //         */
+    //        std::size_t operator()(const std::filesystem::path& path) const
+    //        {
+    //            return std::hash<std::filesystem::path::string_type>{}(path.native());
+    //        }
+    //    };
 } // namespace std
 
 #endif // FILESTATUSCHANGE_HPP

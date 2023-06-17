@@ -395,7 +395,7 @@ class GLCanvas final : public QOpenGLWidget
 
     MainWindow& m_mainWindow;
 
-    QOpenGLExtraFunctions m_openGLContext;
+    std::unique_ptr<QOpenGLExtraFunctions> m_openGLContext;
 
     QTimer m_frameRedrawTimer;
 

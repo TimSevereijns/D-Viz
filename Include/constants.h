@@ -115,7 +115,7 @@ namespace Constants
         [[maybe_unused]] inline constexpr auto& Bytes = "bytes";
     }
 
-    const QVersionNumber Version{ 0, 4, 0 };
+    const QVersionNumber Version{ 0, 5, 0 };
 } // namespace Constants
 
 #endif // CONSTANTS

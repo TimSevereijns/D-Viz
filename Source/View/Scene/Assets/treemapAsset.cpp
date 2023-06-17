@@ -220,8 +220,8 @@ namespace Assets
         InitializeReferenceBlock();
         InitializeBlockTransformations();
         InitializeColors();
-        InitializeShadowMachinery();
-        InitializeTexturePreviewer();
+        // InitializeShadowMachinery();
+        // InitializeTexturePreviewer();
     }
 
     void Treemap::InitializeReferenceBlock()
@@ -641,7 +641,7 @@ namespace Assets
         }
 
         if (m_persistentSettings.ShouldRenderShadows()) {
-            RenderShadowPass(camera);
+            // RenderShadowPass(camera);
         }
 
         RenderMainPass(camera, lights);

@@ -9,11 +9,23 @@
 
 int main(int argc, char* argv[])
 {
-    [[maybe_unused]] const auto locale = std::locale::global(std::locale{ "en_US.UTF-8" });
+    std::ignore = std::locale::global(std::locale{ "en_US.UTF-8" });
 
     Bootstrapper::RegisterMetaTypes();
     Bootstrapper::InitializeLogs();
 
+    QSurfaceFormat format;
+    format.setDepthBufferSize(32);
+    format.setSwapInterval(0); //< Disable v-sync
+    format.setSamples(8);
+    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    format.setMajorVersion(4);
+    format.setMinorVersion(1);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setOption(QSurfaceFormat::DebugContext);
+    QSurfaceFormat::setDefaultFormat(format);
+
+    QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
     QApplication application{ argc, argv };
 
 #if defined(Q_OS_WIN)
